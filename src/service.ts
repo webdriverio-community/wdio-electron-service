@@ -22,16 +22,6 @@ function getBinaryPath(distPath: string, appName: string) {
   return `${distPath}/${electronPath}`;
 }
 
-export type ChromeOptions = {
-  binary: string;
-  args: string[];
-  windowTypes: ['app', 'webview'];
-};
-
-export type Config = {
-  outputDir: string;
-};
-
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     this.options = options;
