@@ -1,0 +1,71 @@
+{
+  "name": "wdio-electron-service",
+  "version": "1.0.0",
+  "description": "WebdriverIO service to enable Electron testing",
+  "author": "Sam Maister <goosewobbler@pm.me>",
+  "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "init": "npm install -g pnpm && pnpm i",
+    "preinstall": "npx only-allow pnpm",
+    "ci": "pnpm run build && pnpm run test && pnpm run lint",
+    "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml && pnpm run clean:dist",
+    "clean:dist": "cross-env rm -rf ./dist",
+    "build": "tsc -b .",
+    "lint": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" && prettier --check \"**/*.{j,t}s\"",
+    "format": "prettier --write \"**/*.{j,t}s\"",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:watch-coverage": "jest --watch --coverage",
+    "test": "pnpm run test:coverage"
+  },
+  "keywords": [
+    "webdriverio",
+    "wdio",
+    "wdio-service",
+    "electron",
+    "chromedriver",
+    "tests"
+  ],
+  "peerDependencies": {
+    "@wdio/cli": "^7.12.4",
+    "chromedriver": "*"
+  },
+  "dependencies": {
+    "@wdio/logger": "^7.7.0",
+    "wdio-chromedriver-service": "^7.2.2",
+    "webdriverio": "^7.16.10",
+    "@wdio/types": "^7.16.3"
+  },
+  "devDependencies": {
+    "chromedriver": "^96.0.0",
+    "@types/chromedriver": "^81.0.0",
+    "@types/fs-extra": "^9.0.12",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^16.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "@wdio/cli": "^7.16.10",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.4.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-base-typescript": "^1.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.3.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "eslint-plugin-wdio": "^7.4.2",
+    "fs-extra": "^10.0.0",
+    "husky": "^7.0.4",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.2"
+  }
+}
