@@ -28,7 +28,7 @@
   },
   "include": ["src/**/*"],
   "ignore": ["node_modules", "dist"],
-  "typeRoots": ["./node_modules/@types"],
+  "typeRoots": ["./node_modules/@types", "./src/@types"],
   "ts-node": {
     "transpileOnly": true,
     "files": true,
