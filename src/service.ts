@@ -1,10 +1,5 @@
-import { remote } from 'webdriverio';
 import { Capabilities, Options, Services } from '@wdio/types';
-import { SpectronClient } from './@types/spectron';
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { Browser } from 'webdriverio';
 
 function getBinaryPath(distPath: string, appName: string) {
   const SupportedPlatform = {
@@ -50,7 +45,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   public wdOpts;
 
-  public browser?: SpectronClient;
+  public browser?: Browser<'async'>;
 
   beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
@@ -79,11 +74,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       args: chromeArgs,
       windowTypes: ['app', 'webview'],
     };
+    console.log('beforeSession caps', capabilities);
+    this.browser = browser;
   }
 
   async afterTest(): Promise<void> {
-    await (browser as SpectronClient)?.exitElectronApp();
-    await delay(1000);
-    await remote(this.wdOpts);
+    await this.browser?.reloadSession();
   }
 }
