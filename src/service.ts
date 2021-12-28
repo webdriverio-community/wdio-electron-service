@@ -1,5 +1,4 @@
 import { Capabilities, Options, Services } from '@wdio/types';
-import { Browser } from 'webdriverio';
 
 function getBinaryPath(distPath: string, appName: string) {
   const SupportedPlatform = {
@@ -34,18 +33,11 @@ export type Config = {
 };
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  constructor(options: Services.ServiceOption, capabilities: Capabilities.Capabilities) {
+  constructor(options: Services.ServiceOption) {
     this.options = options;
-    this.wdOpts = {
-      capabilities,
-    };
   }
 
   public options;
-
-  public wdOpts;
-
-  public browser?: Browser<'async'>;
 
   beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
@@ -74,11 +66,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       args: chromeArgs,
       windowTypes: ['app', 'webview'],
     };
-    console.log('beforeSession caps', capabilities);
-    this.browser = browser;
   }
 
   async afterTest(): Promise<void> {
-    await this.browser?.reloadSession();
+    await browser?.reloadSession();
   }
 }
