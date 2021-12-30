@@ -1,9 +1,12 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
+// https://github.com/mysticatea/eslint-plugin-node/issues/250
+
 import ciInfo from 'ci-info';
 import ElectronWorkerService from '../src/service';
 
 const originalPlatform = process.platform;
-let WorkerService;
-let instance;
+let WorkerService: typeof ElectronWorkerService;
+let instance: ElectronWorkerService | undefined;
 
 function mockProcessProperty(name: string, value: string) {
   Object.defineProperty(process, name, {
@@ -216,8 +219,8 @@ describe('beforeSession', () => {
         appName: 'my-test-app',
       });
       expect(() => {
-        instance.beforeSession({}, {});
-      }).toThrowError('Unsupported platform: unsupported');
+        (instance as ElectronWorkerService).beforeSession({}, {});
+      }).toThrow('Unsupported platform: unsupported');
     });
   });
 });
@@ -229,6 +232,12 @@ describe('afterTest', () => {
     global.browser = {
       reloadSession: reloadSessionMock.mockResolvedValue('reloaded'),
     };
+    // Object.defineProperty(global, 'browser', {
+    //   value: {},
+    //   configurable: true,
+    //   writable: true,
+    // });
+    // browser.reloadSession = reloadSessionMock.mockResolvedValue('reloaded');
     mockProcessProperty('platform', 'darwin');
     WorkerService = (await import('../src/service')).default;
   });
@@ -238,7 +247,6 @@ describe('afterTest', () => {
       appPath: 'workspace/my-test-app/dist',
       appName: 'my-test-app',
     });
-    expect(instance.afterTest().resolves).toBeUndefined();
     expect(reloadSessionMock).toHaveBeenCalled();
   });
 });
