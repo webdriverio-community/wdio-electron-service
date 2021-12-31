@@ -1,4 +1,5 @@
 import { Capabilities, Options, Services } from '@wdio/types';
+import { isCI } from 'ci-info';
 
 function getBinaryPath(distPath: string, appName: string) {
   const SupportedPlatform = {
@@ -6,9 +7,10 @@ function getBinaryPath(distPath: string, appName: string) {
     linux: 'linux',
     win32: 'win32',
   };
+  const { platform } = process;
 
-  if (!Object.values(SupportedPlatform).includes(process.platform)) {
-    throw new Error(`Unsupported platform: ${process.platform}`);
+  if (!Object.values(SupportedPlatform).includes(platform)) {
+    throw new Error(`Unsupported platform: ${platform}`);
   }
 
   const pathMap = {
@@ -17,7 +19,7 @@ function getBinaryPath(distPath: string, appName: string) {
     win32: `win-unpacked/${appName}.exe`,
   };
 
-  const electronPath = pathMap[process.platform as keyof typeof SupportedPlatform];
+  const electronPath = pathMap[platform as keyof typeof SupportedPlatform];
 
   return `${distPath}/${electronPath}`;
 }
@@ -32,7 +34,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
 
-    if (process.env.CI) {
+    if (isCI) {
       chromeArgs.push('window-size=1280,800');
       chromeArgs.push('blink-settings=imagesEnabled=false');
       chromeArgs.push('enable-automation');

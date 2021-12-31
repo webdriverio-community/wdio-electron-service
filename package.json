@@ -34,16 +34,17 @@
   ],
   "peerDependencies": {
     "@wdio/cli": "^7.12.4",
-    "chromedriver": "*"
+    "chromedriver": "*",
+    "wdio-chromedriver-service": "^7.2.2"
   },
   "dependencies": {
     "@wdio/logger": "^7.7.0",
+    "ci-info": "^3.3.0",
     "wdio-chromedriver-service": "^7.2.2",
-    "webdriverio": "^7.16.10",
-    "@wdio/types": "^7.16.3"
+    "webdriverio": "^7.16.10"
   },
   "devDependencies": {
-    "chromedriver": "^96.0.0",
+    "@wdio/types": "^7.16.3",
     "@types/chromedriver": "^81.0.0",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
@@ -51,6 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
     "@wdio/cli": "^7.16.10",
+    "chromedriver": "^96.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.4.1",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -65,7 +67,12 @@
     "eslint-plugin-wdio": "^7.4.2",
     "fs-extra": "^10.0.0",
     "husky": "^7.0.4",
+    "jest": "^27.4.5",
     "prettier": "^2.5.1",
+    "ts-jest": "^27.1.2",
     "typescript": "^4.5.2"
-  }
+  },
+  "files": [
+    "./dist/*"
+  ]
 }
