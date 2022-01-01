@@ -1,5 +1,5 @@
-import { launcher as chromedriverLauncher } from 'wdio-chromedriver-service';
+import ChromedriverLauncher from './launcher';
 import ElectronWorkerService from './service';
 
 export default ElectronWorkerService;
-export const launcher = chromedriverLauncher;
+export const launcher = ChromedriverLauncher;
