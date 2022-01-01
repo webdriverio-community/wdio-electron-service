@@ -24,6 +24,13 @@ function getBinaryPath(distPath: string, appName: string) {
   return `${distPath}/${electronPath}`;
 }
 
+type ElectronWorkerOptions = {
+  appPath?: string;
+  appName?: string;
+  binaryPath?: string;
+  appArgs?: string[];
+};
+
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     this.options = options;
@@ -50,11 +57,15 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       }
     }
 
-    const { appPath, appName } = this.options;
+    const { appPath, appName, appArgs, binaryPath } = this.options as ElectronWorkerOptions;
+
+    if (appArgs) {
+      chromeArgs.push(...appArgs);
+    }
 
     capabilities.browserName = 'chrome';
     capabilities['goog:chromeOptions'] = {
-      binary: getBinaryPath(appPath as string, appName as string),
+      binary: binaryPath || getBinaryPath(appPath as string, appName as string),
       args: chromeArgs,
       windowTypes: ['app', 'webview'],
     };
