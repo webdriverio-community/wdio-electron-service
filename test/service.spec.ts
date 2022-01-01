@@ -3,18 +3,10 @@
 
 import ciInfo from 'ci-info';
 import ElectronWorkerService from '../src/service';
+import { mockProcessProperty, revertProcessProperty } from './helpers';
 
-const originalPlatform = process.platform;
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
-
-function mockProcessProperty(name: string, value: string) {
-  Object.defineProperty(process, name, {
-    value,
-    configurable: true,
-    writable: true,
-  });
-}
 
 function mockIsCI(isCI: boolean) {
   Object.defineProperty(ciInfo, 'isCI', { get: () => isCI });
@@ -23,15 +15,10 @@ function mockIsCI(isCI: boolean) {
 jest.mock('ci-info', () => ({ isCI: false }));
 
 describe('beforeSession', () => {
-  afterAll(() => {
-    Object.defineProperty(process, 'platform', {
-      value: originalPlatform,
-    });
-  });
-
   afterEach(() => {
     instance = undefined;
     mockIsCI(false);
+    revertProcessProperty('platform');
   });
 
   describe('providing appBinary', () => {

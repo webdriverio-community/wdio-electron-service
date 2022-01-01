@@ -7,14 +7,19 @@ type WdioConfig = {
 };
 
 export default class ChromeDriverLauncher extends launcher {
-  constructor(options: Services.ServiceOption, capabilities: Capabilities.Capabilities, config: WdioConfig) {
+  constructor(
+    options: Services.ServiceOption,
+    capabilities: Capabilities.Capabilities,
+    config: WdioConfig,
+    resolver = require.resolve,
+  ) {
     if (!options.chromedriverCustomPath) {
       const isWin = process.platform === 'win32';
-      let chromedriverCustomPath = require.resolve('electron-chromedriver/chromedriver');
+      let chromedriverCustomPath = resolver('electron-chromedriver/chromedriver');
 
       if (isWin) {
         process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
-        process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = require.resolve('electron-chromedriver/chromedriver');
+        process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = resolver('electron-chromedriver/chromedriver');
         chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
       }
       options.chromedriverCustomPath = chromedriverCustomPath;
