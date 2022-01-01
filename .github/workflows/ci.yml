@@ -17,10 +17,8 @@ jobs:
         node-version: [14.x]
 
     steps:
-      - name: Fix git checkout line endings
-        run: git config --global core.autocrlf input
       - uses: actions/checkout@v2
-      - name: Setup Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
@@ -37,6 +35,5 @@ jobs:
         with:
           version: 6.24.4
           run_install: true
-      - name: Run tests
-       run: pnpm test
-       run: pnpm lint
+      - run: pnpm test
+      - run: pnpm lint
