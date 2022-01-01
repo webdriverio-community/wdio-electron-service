@@ -10,10 +10,9 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: ubuntu-latest
         node-version: [14.x]
 
     steps:
