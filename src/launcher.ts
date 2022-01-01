@@ -25,6 +25,7 @@ export default class ChromeDriverLauncher extends launcher {
       options.chromedriverCustomPath = chromedriverCustomPath;
     }
 
-    super(options, capabilities, config);
+    /* TODO: re-enable linting on this once the CDS typedefs are released */
+    super(options, capabilities, config); // eslint-disable-line
   }
 }
