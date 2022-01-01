@@ -72,7 +72,7 @@ describe('on windows platforms', () => {
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(requireResolveMock).toHaveBeenCalledWith('electron-chromedriver/chromedriver');
-    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain('/bin/node'); // TODO: check on windows
+    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain('/bin/node');
     expect(process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH).toBe('mock-chromedriver-path');
   });
 });
