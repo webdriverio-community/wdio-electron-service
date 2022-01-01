@@ -5,5 +5,5 @@
     "baseUrl": ".",
     "outDir": "../dist"
   },
-  "include": ["./*.spec.ts"]
+  "include": ["./*.spec.ts", "../wdio-chromedriver-service.d.ts"]
 }
