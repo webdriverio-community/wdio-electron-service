@@ -14,7 +14,7 @@
     "init": "npm install -g pnpm && pnpm i",
     "preinstall": "npx only-allow pnpm",
     "ci": "pnpm run build && pnpm run test && pnpm run lint",
-    "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml && pnpm run clean:dist",
+    "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "cross-env rm -rf ./dist",
     "build": "tsc -b .",
     "lint": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" && prettier --check \"**/*.{j,t}s\"",
@@ -33,9 +33,7 @@
     "tests"
   ],
   "peerDependencies": {
-    "@wdio/cli": "^7.12.4",
-    "chromedriver": "*",
-    "wdio-chromedriver-service": "^7.2.2"
+    "chromedriver": "*"
   },
   "dependencies": {
     "@wdio/logger": "^7.7.0",
