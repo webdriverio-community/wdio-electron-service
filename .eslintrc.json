@@ -23,7 +23,7 @@
     "node/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
     "import/no-extraneous-dependencies": "off",
     "node/no-extraneous-import": "off",
-    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities"] }],
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities", "options"] }],
     "class-methods-use-this": ["error", { "exceptMethods": ["afterTest"] }]
   },
   "parserOptions": {
