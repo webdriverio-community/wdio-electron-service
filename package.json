@@ -13,6 +13,7 @@
   "scripts": {
     "init": "npm install -g pnpm && pnpm i",
     "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
     "ci": "pnpm run build && pnpm run test && pnpm run lint",
     "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "cross-env rm -rf ./dist",
@@ -65,11 +66,20 @@
     "eslint-plugin-wdio": "^7.4.2",
     "husky": "^7.0.4",
     "jest": "^27.4.5",
+    "lint-staged": "^12.1.4",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.2",
     "typescript": "^4.5.2"
   },
   "files": [
     "./dist/*"
-  ]
+  ],
+  "lint-staged": {
+    "**/*.{js,ts}": [
+      "eslint --fix"
+    ],
+    "**/*.{yml,json,md,ts,js}": [
+      "prettier --write"
+    ]
+  }
 }
