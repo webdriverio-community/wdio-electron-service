@@ -9,7 +9,11 @@ interface RequireResolveMock extends jest.Mock {
 }
 
 it('should create a new CDS instance with the expected parameters', () => {
-  const launcherInstance = new Launcher({ mock: 'options' }, { browserName: 'mockBrowser' }, { mock: 'config' });
+  const launcherInstance = new Launcher(
+    { chromedriver: { mock: 'options' } },
+    { browserName: 'mockBrowser' },
+    { mock: 'config' },
+  );
   expect(launcherInstance).toBeInstanceOf(launcher);
   expect(launcher).toHaveBeenCalledWith(
     {
@@ -25,7 +29,7 @@ it('should call require.resolve with the expected parameters', () => {
   const requireResolveMock = jest.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('mock-chromedriver-path');
   const launcherInstance = new Launcher(
-    { mock: 'options' },
+    { chromedriver: { mock: 'options' } },
     { browserName: 'mockBrowser' },
     { mock: 'config' },
     requireResolveMock,
@@ -49,7 +53,11 @@ describe('on windows platforms', () => {
   });
 
   it('should create a new CDS instance with the expected parameters', () => {
-    const launcherInstance = new Launcher({ mock: 'options' }, { browserName: 'mockBrowser' }, { mock: 'config' });
+    const launcherInstance = new Launcher(
+      { chromedriver: { mock: 'options' } },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(launcher).toHaveBeenCalledWith(
       {
@@ -65,7 +73,7 @@ describe('on windows platforms', () => {
     const requireResolveMock = jest.fn() as RequireResolveMock;
     requireResolveMock.mockReturnValue('mock-chromedriver-path');
     const launcherInstance = new Launcher(
-      { mock: 'options' },
+      { chromedriver: { mock: 'options' } },
       { browserName: 'mockBrowser' },
       { mock: 'config' },
       requireResolveMock,
