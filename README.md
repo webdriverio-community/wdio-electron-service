@@ -69,7 +69,7 @@ The path to the built app for testing. In a typical electron project this will b
 
 The name of the built app for testing. Required to be used with `appPath` as both are needed in order to generate a path to the Electron binary.
 
-It needs to be the same as the install directory used by `electron-builder`, which is derived from your `package.json` configuration and `electron-builder` configuration - it is either the `name` property (from `package.json`) or the `productName` property (from `electron-builder` config). You can find more information regarding this in the `electron-builder` [documentation](https://www.electron.build/configuration/configuration#configuration).
+It needs to match the name of the install directory used by `electron-builder`; this value is derived from your `electron-builder` configuration and will be either the `name` property (from `package.json`) or the `productName` property (from `electron-builder` config). You can find more information regarding this in the `electron-builder` [documentation](https://www.electron.build/configuration/configuration#configuration).
 
 ### `binaryPath`: _`string`_
 
