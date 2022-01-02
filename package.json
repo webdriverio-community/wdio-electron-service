@@ -2,7 +2,7 @@
   "name": "wdio-electron-service",
   "version": "1.0.0",
   "description": "WebdriverIO service to enable Electron testing",
-  "author": "Sam Maister <goosewobbler@pm.me>",
+  "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -13,6 +13,7 @@
   "scripts": {
     "init": "npm install -g pnpm && pnpm i",
     "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
     "ci": "pnpm run build && pnpm run test && pnpm run lint",
     "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "cross-env rm -rf ./dist",
@@ -44,7 +45,6 @@
   },
   "devDependencies": {
     "@types/chromedriver": "^81.0.0",
-    "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.12",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
@@ -64,14 +64,22 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.2.0",
     "eslint-plugin-wdio": "^7.4.2",
-    "fs-extra": "^10.0.0",
     "husky": "^7.0.4",
     "jest": "^27.4.5",
+    "lint-staged": "^12.1.4",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.2",
     "typescript": "^4.5.2"
   },
   "files": [
     "./dist/*"
-  ]
+  ],
+  "lint-staged": {
+    "**/*.{js,ts}": [
+      "eslint --fix"
+    ],
+    "**/*.{yml,json,md,ts,js}": [
+      "prettier --write"
+    ]
+  }
 }
