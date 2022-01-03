@@ -1,14 +1,18 @@
 import { join } from 'path';
-import { Services, Capabilities } from '@wdio/types';
-import { launcher } from 'wdio-chromedriver-service';
+import { Capabilities } from '@wdio/types';
+import { launcher as ChromedriverServiceLauncher, ChromedriverServiceOptions } from 'wdio-chromedriver-service';
 
 type WdioConfig = {
   [key: string]: unknown;
 };
 
-export default class ChromeDriverLauncher extends launcher {
+type ElectronLauncherServiceOpts = {
+  chromedriver?: Omit<ChromedriverServiceOptions, 'chromedriverCustomPath'>;
+};
+
+export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   constructor(
-    options: Services.ServiceOption,
+    options: ElectronLauncherServiceOpts,
     capabilities: Capabilities.Capabilities,
     config: WdioConfig,
     resolver = require.resolve,
@@ -23,7 +27,6 @@ export default class ChromeDriverLauncher extends launcher {
       chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
     }
 
-    /* TODO: re-enable linting on this once the CDS typedefs are released */
-    super({ chromedriverCustomPath, ...chromedriver }, capabilities, config); // eslint-disable-line
+    super({ chromedriverCustomPath, ...chromedriver }, capabilities, config);
   }
 }
