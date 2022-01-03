@@ -81,7 +81,7 @@ An array of string arguments to be passed through to the app on execution of the
 
 ## Chromedriver configuration
 
-This service wraps the [`wdio-chromedriver-service`](https://github.com/webdriverio-community/wdio-chromedriver-service), you can configure the following options which will be applied to that service:
+This service wraps the [`wdio-chromedriver-service`](https://github.com/webdriverio-community/wdio-chromedriver-service), you can configure the following options which will be passed through to that service:
 
 ### `chromedriver.port`: _`number`_
 
