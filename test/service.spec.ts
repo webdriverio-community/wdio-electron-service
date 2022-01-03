@@ -14,6 +14,35 @@ function mockIsCI(isCI: boolean) {
 
 jest.mock('ci-info', () => ({ isCI: false }));
 
+describe('options validation', () => {
+  beforeEach(async () => {
+    mockProcessProperty('platform', 'darwin');
+    WorkerService = (await import('../src/service')).default;
+  });
+
+  it('should throw an error when no path options are specified', () => {
+    expect(() => {
+      instance = new WorkerService({});
+    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
+  });
+
+  it('should throw an error when appName is specified without appPath', () => {
+    expect(() => {
+      instance = new WorkerService({
+        appName: 'mock-app',
+      });
+    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
+  });
+
+  it('should throw an error when appPath is specified without appName', () => {
+    expect(() => {
+      instance = new WorkerService({
+        appPath: '/mock/dist',
+      });
+    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
+  });
+});
+
 describe('beforeSession', () => {
   afterEach(() => {
     instance = undefined;

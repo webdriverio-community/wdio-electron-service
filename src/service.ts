@@ -33,6 +33,13 @@ type ElectronWorkerOptions = {
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
+    const { appPath, appName, binaryPath } = options;
+    const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+
+    if (!validPathOpts) {
+      throw new Error('You must provide appPath and appName values, or a binaryPath value');
+    }
+
     this.options = options;
   }
 
