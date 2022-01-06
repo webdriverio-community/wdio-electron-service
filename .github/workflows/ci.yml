@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v2.0.1
         with:
-          version: 6.24.4
+          version: 6.25.0
           run_install: true
       - run: pnpm test
       - run: pnpm lint

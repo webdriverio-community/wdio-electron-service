@@ -59,6 +59,8 @@ const config = {
 module.exports = { config };
 ```
 
+See [wdio-electron-service-example](https://github.com/goosewobbler/wdio-electron-service-example) for an example of "real-world" usage in testing a minimal electron app.
+
 ## Configuration
 
 ### `appPath`: _`string`_
