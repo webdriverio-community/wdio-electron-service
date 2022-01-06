@@ -26,6 +26,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14.x
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.25.0
+          run_install: true
       - name: NPM Setup
         run: |
           pnpm set registry "https://registry.npmjs.org/"
