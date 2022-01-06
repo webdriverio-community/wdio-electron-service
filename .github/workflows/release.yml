@@ -41,6 +41,8 @@ jobs:
           git config --global user.name "WebdriverIO Release Bot"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
       - name: Release
         run: pnpm run release:ci -- ${{github.event.inputs.releaseType}}
         env:
