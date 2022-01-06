@@ -38,14 +38,11 @@
     "chromedriver",
     "tests"
   ],
-  "peerDependencies": {
-    "chromedriver": "*"
-  },
   "dependencies": {
     "@wdio/logger": "^7.7.0",
     "ci-info": "^3.3.0",
     "electron-chromedriver": "^16.0.0",
-    "wdio-chromedriver-service": "^7.2.4",
+    "wdio-chromedriver-service": "^7.2.5",
     "webdriverio": "^7.16.10"
   },
   "devDependencies": {
