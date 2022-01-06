@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -33,15 +33,11 @@
     "chromedriver",
     "tests"
   ],
-  "peerDependencies": {
-    "chromedriver": "*"
-  },
   "dependencies": {
     "@wdio/logger": "^7.7.0",
     "ci-info": "^3.3.0",
     "electron-chromedriver": "^16.0.0",
-    "wdio-chromedriver-service": "^7.2.4",
-    "wdio-wiremock-service": "^6.0.7",
+    "wdio-chromedriver-service": "^7.2.5",
     "webdriverio": "^7.16.10"
   },
   "devDependencies": {
