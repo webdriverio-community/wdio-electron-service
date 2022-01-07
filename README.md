@@ -1,4 +1,4 @@
-# wdio-electron-service
+# WDIO Electron Service
 
 ## WebdriverIO service for testing Electron applications
 
