@@ -159,6 +159,23 @@ describe('beforeSession', () => {
           },
         });
       });
+
+      it('should set the expected capabilities when the appName ends with "Helper"', () => {
+        instance = new WorkerService({
+          appPath: 'workspace/my-test-app/dist',
+          appName: 'My Test Helper',
+        });
+        const capabilities = {};
+        instance.beforeSession({}, capabilities);
+        expect(capabilities).toEqual({
+          'browserName': 'chrome',
+          'goog:chromeOptions': {
+            args: [],
+            binary: 'workspace/my-test-app/dist/mac/My Test Helper.app/Contents/MacOS/My Test',
+            windowTypes: ['app', 'webview'],
+          },
+        });
+      });
     });
 
     describe('on MacOS platforms running on CI', () => {
