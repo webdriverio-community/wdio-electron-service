@@ -1,6 +1,11 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 import { isCI } from 'ci-info';
 
+function getMacExecutableName(appName: string) {
+  // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
+  return appName.endsWith(' Helper') ? appName.replace(' Helper', '') : appName;
+}
+
 function getBinaryPath(distPath: string, appName: string) {
   const SupportedPlatform = {
     darwin: 'darwin',
@@ -14,7 +19,7 @@ function getBinaryPath(distPath: string, appName: string) {
   }
 
   const pathMap = {
-    darwin: `mac/${appName}.app/Contents/MacOS/${appName}`,
+    darwin: `mac/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
     linux: `linux-unpacked/${appName}`,
     win32: `win-unpacked/${appName}.exe`,
   };
