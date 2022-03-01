@@ -25,7 +25,7 @@
     "import/no-extraneous-dependencies": "off",
     "node/no-extraneous-import": "off",
     "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities"] }],
-    "class-methods-use-this": ["error", { "exceptMethods": ["afterTest"] }]
+    "class-methods-use-this": ["error", { "exceptMethods": ["before", "afterTest"] }]
   },
   "parserOptions": {
     "ecmaVersion": 2020,
