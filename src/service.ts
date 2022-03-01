@@ -1,4 +1,5 @@
 import { Capabilities, Options, Services } from '@wdio/types';
+import { Browser } from 'webdriverio';
 import { isCI } from 'ci-info';
 
 function getMacExecutableName(appName: string) {
@@ -29,12 +30,34 @@ function getBinaryPath(distPath: string, appName: string) {
   return `${distPath}/${electronPath}`;
 }
 
+type WdioElectronWindowObj = {
+  [Key: string]: {
+    invoke: (...args: unknown[]) => Promise<unknown>;
+  };
+};
+
+declare global {
+  interface Window {
+    wdioElectron?: WdioElectronWindowObj;
+  }
+}
+
+async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
+  if (window.wdioElectron === undefined) {
+    throw new Error(`ContextBridge not available for invocation of ${bridgePropName} API`);
+  }
+  done(await window.wdioElectron[bridgePropName].invoke(...args));
+}
+
 type ElectronWorkerOptions = {
   appPath?: string;
   appName?: string;
   binaryPath?: string;
   appArgs?: string[];
 };
+
+type WebDriverClient = Browser<'async'>;
+type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
@@ -59,13 +82,12 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       chromeArgs.push('enable-automation');
       chromeArgs.push('disable-infobars');
       chromeArgs.push('disable-extensions');
+
       if (process.platform !== 'win32') {
-        // chromeArgs.push('headless'); - crashes on linux with xvfb
         chromeArgs.push('no-sandbox');
         chromeArgs.push('disable-gpu');
         chromeArgs.push('disable-dev-shm-usage');
         chromeArgs.push('disable-setuid-sandbox');
-        // chromeArgs.push('remote-debugging-port=9222');
       }
     }
 
@@ -81,6 +103,31 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       args: chromeArgs,
       windowTypes: ['app', 'webview'],
     };
+  }
+
+  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
+    // TODO: customise api custom command - default to 'electronAPI'
+    browser.addCommand('electronAPI', async (...args: unknown[]) => {
+      try {
+        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'custom', args);
+      } catch (e) {
+        throw new Error(`electronAPI error: ${(e as Error).message}`);
+      }
+    });
+    browser.addCommand('electronApp', async (...args: unknown[]) => {
+      try {
+        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'app', args);
+      } catch (e) {
+        throw new Error(`electronApp error: ${(e as Error).message}`);
+      }
+    });
+    browser.addCommand('electronMainProcess', async (...args: unknown[]) => {
+      try {
+        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'mainProcess', args);
+      } catch (e) {
+        throw new Error(`electronMainProcess error: ${(e as Error).message}`);
+      }
+    });
   }
 
   async afterTest(): Promise<void> {
