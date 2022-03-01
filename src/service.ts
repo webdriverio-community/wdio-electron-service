@@ -53,25 +53,45 @@ type ElectronWorkerOptions = {
   appPath?: string;
   appName?: string;
   binaryPath?: string;
+  customApiBrowserCommand?: string;
   appArgs?: string[];
 };
-
+type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser<'async'>;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  constructor(options: Services.ServiceOption) {
-    const { appPath, appName, binaryPath } = options;
+  constructor(options: ElectronWorkerOptions) {
+    const apiCommands = [
+      { name: '', bridgeProp: 'custom' },
+      { name: 'electronApp', bridgeProp: 'app' },
+      { name: 'electronMainProcess', bridgeProp: 'mainProcess' },
+      { name: 'electronBrowserWindow', bridgeProp: 'browserWindow' },
+    ];
+    const { appPath, appName, binaryPath, customApiBrowserCommand = 'electronAPI' } = options;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+    const validCustomApiBrowserCommand = apiCommands.some((command) => command.name !== customApiBrowserCommand);
 
     if (!validPathOpts) {
       throw new Error('You must provide appPath and appName values, or a binaryPath value');
     }
 
+    if (!validCustomApiBrowserCommand) {
+      const commandCollision = apiCommands.find((command) => command.name === customApiBrowserCommand) as ApiCommand;
+      throw new Error(
+        `The command ${commandCollision.name} is reserved, please provide a different value for customApiBrowserCommand`,
+      );
+    } else {
+      apiCommands[0].name = customApiBrowserCommand;
+    }
+
     this.options = options;
+    this.apiCommands = apiCommands;
   }
 
   public options;
+
+  public apiCommands;
 
   beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
@@ -91,7 +111,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       }
     }
 
-    const { appPath, appName, appArgs, binaryPath } = this.options as ElectronWorkerOptions;
+    const { appPath, appName, appArgs, binaryPath } = this.options;
 
     if (appArgs) {
       chromeArgs.push(...appArgs);
@@ -106,34 +126,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
-    // TODO: customise api custom command - default to 'electronAPI'
-    browser.addCommand('electronAPI', async (...args: unknown[]) => {
-      try {
-        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'custom', args);
-      } catch (e) {
-        throw new Error(`electronAPI error: ${(e as Error).message}`);
-      }
-    });
-    browser.addCommand('electronApp', async (...args: unknown[]) => {
-      try {
-        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'app', args);
-      } catch (e) {
-        throw new Error(`electronApp error: ${(e as Error).message}`);
-      }
-    });
-    browser.addCommand('electronMainProcess', async (...args: unknown[]) => {
-      try {
-        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'mainProcess', args);
-      } catch (e) {
-        throw new Error(`electronMainProcess error: ${(e as Error).message}`);
-      }
-    });
-    browser.addCommand('electronBrowserWindow', async (...args: unknown[]) => {
-      try {
-        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'browserWindow', args);
-      } catch (e) {
-        throw new Error(`electronMainProcess error: ${(e as Error).message}`);
-      }
+    this.apiCommands.forEach(({ name, bridgeProp }) => {
+      browser.addCommand(name, async (...args: unknown[]) => {
+        try {
+          return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
+        } catch (e) {
+          throw new Error(`${name} error: ${(e as Error).message}`);
+        }
+      });
     });
   }
 
