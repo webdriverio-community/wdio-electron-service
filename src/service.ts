@@ -93,7 +93,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   public apiCommands;
 
-  beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
+  beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
 
     if (isCI) {
