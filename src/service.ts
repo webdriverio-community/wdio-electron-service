@@ -128,6 +128,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         throw new Error(`electronMainProcess error: ${(e as Error).message}`);
       }
     });
+    browser.addCommand('electronBrowserWindow', async (...args: unknown[]) => {
+      try {
+        return await (browser.executeAsync as WebdriverClientFunc)(callApi, 'browserWindow', args);
+      } catch (e) {
+        throw new Error(`electronMainProcess error: ${(e as Error).message}`);
+      }
+    });
   }
 
   async afterTest(): Promise<void> {

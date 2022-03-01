@@ -15,4 +15,7 @@ contextBridge.exposeInMainWorld('wdioElectron', {
   app: {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.app', funcName, ...args),
   },
+  browserWindow: {
+    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.browserWindow', funcName, ...args),
+  },
 });
