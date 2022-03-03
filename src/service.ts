@@ -34,18 +34,25 @@ type ElectronWorkerOptions = {
   appName?: string;
   binaryPath?: string;
   appArgs?: string[];
+  newSessionPerTest?: boolean;
 };
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
-    const { appPath, appName, binaryPath } = options;
+    const { appPath, appName, appArgs, binaryPath, newSessionPerTest = true } = options as ElectronWorkerOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
       throw new Error('You must provide appPath and appName values, or a binaryPath value');
     }
 
-    this.options = options;
+    this.options = {
+      appPath,
+      appName,
+      appArgs,
+      binaryPath,
+      newSessionPerTest,
+    };
   }
 
   public options;
@@ -84,6 +91,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 
   async afterTest(): Promise<void> {
-    await browser?.reloadSession();
+    if (this.options.newSessionPerTest) {
+      await browser?.reloadSession();
+    }
   }
 }
