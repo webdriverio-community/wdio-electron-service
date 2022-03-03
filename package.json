@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "2.0.4",
+  "version": "2.0.6",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -12,7 +12,6 @@
   },
   "scripts": {
     "init": "npm install -g pnpm && pnpm i",
-    "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
     "ci": "pnpm run build && pnpm run test && pnpm run lint",
     "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml ./dist",
@@ -79,7 +78,7 @@
     "prettier": "^2.5.1",
     "release-it": "^14.12.5",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.5.5"
+    "typescript": "^4.6.2"
   },
   "files": [
     "dist/*"
