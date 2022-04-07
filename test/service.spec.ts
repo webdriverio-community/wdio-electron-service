@@ -41,6 +41,15 @@ describe('options validation', () => {
       });
     }).toThrow('You must provide appPath and appName values, or a binaryPath value');
   });
+
+  it('should throw an error when there is a custom API command collision', () => {
+    expect(() => {
+      instance = new WorkerService({
+        binaryPath: '/mock/dist',
+        customApiBrowserCommand: 'electronApp',
+      });
+    }).toThrow('The command "electronApp" is reserved, please provide a different value for customApiBrowserCommand');
+  });
 });
 
 describe('beforeSession', () => {

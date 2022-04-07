@@ -70,16 +70,17 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     ];
     const { appPath, appName, binaryPath, customApiBrowserCommand = 'electronAPI' } = options;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
-    const validCustomApiBrowserCommand = apiCommands.some((command) => command.name !== customApiBrowserCommand);
 
     if (!validPathOpts) {
       throw new Error('You must provide appPath and appName values, or a binaryPath value');
     }
 
-    if (!validCustomApiBrowserCommand) {
-      const commandCollision = apiCommands.find((command) => command.name === customApiBrowserCommand) as ApiCommand;
+    const customCommandCollision = apiCommands.find(
+      (command) => command.name === customApiBrowserCommand,
+    ) as ApiCommand;
+    if (customCommandCollision) {
       throw new Error(
-        `The command ${commandCollision.name} is reserved, please provide a different value for customApiBrowserCommand`,
+        `The command "${customCommandCollision.name}" is reserved, please provide a different value for customApiBrowserCommand`,
       );
     } else {
       apiCommands[0].name = customApiBrowserCommand;
