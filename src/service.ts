@@ -46,6 +46,7 @@ type ElectronWorkerOptions = {
   binaryPath?: string;
   customApiBrowserCommand?: string;
   appArgs?: string[];
+  newSessionPerTest?: boolean;
 };
 type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser<'async'>;
@@ -130,6 +131,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 
   async afterTest(): Promise<void> {
-    await browser?.reloadSession();
+    if (this.options.newSessionPerTest) {
+      await browser?.reloadSession();
+    }
   }
 }
