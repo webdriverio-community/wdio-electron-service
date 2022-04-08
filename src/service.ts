@@ -30,21 +30,12 @@ function getBinaryPath(distPath: string, appName: string) {
   return `${distPath}/${electronPath}`;
 }
 
-type WdioElectronWindowObj = {
-  [Key: string]: {
-    invoke: (...args: unknown[]) => Promise<unknown>;
-  };
-};
-
-declare global {
-  interface Window {
-    wdioElectron?: WdioElectronWindowObj;
-  }
-}
-
 async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
   if (window.wdioElectron === undefined) {
-    throw new Error(`ContextBridge not available for invocation of ${bridgePropName} API`);
+    throw new Error(`ContextBridge not available for invocation of "${bridgePropName}" API`);
+  }
+  if (window.wdioElectron[bridgePropName] === undefined) {
+    throw new Error(`"${bridgePropName}" API not found on ContextBridge`);
   }
   done(await window.wdioElectron[bridgePropName].invoke(...args));
 }

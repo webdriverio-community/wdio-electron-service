@@ -2,6 +2,7 @@
 // https://github.com/mysticatea/eslint-plugin-node/issues/250
 
 import ciInfo from 'ci-info';
+import { Browser } from 'webdriverio';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
@@ -352,6 +353,32 @@ describe('beforeSession', () => {
         }).toThrow('Unsupported platform: unsupported');
       });
     });
+  });
+});
+
+describe('before', () => {
+  const addCommandMock = jest.fn();
+
+  beforeEach(async () => {
+    mockProcessProperty('platform', 'darwin');
+    WorkerService = (await import('../src/service')).default;
+  });
+
+  it('should add API commands to the browser object', () => {
+    instance = new WorkerService({
+      appPath: 'workspace/my-test-app/dist',
+      appName: 'my-test-app',
+      customApiBrowserCommand: 'customApi',
+    });
+    instance.before({}, [], {
+      addCommand: addCommandMock,
+    } as unknown as Browser<'async'>);
+    expect(addCommandMock.mock.calls).toEqual([
+      ['customApi', expect.any(Function)],
+      ['electronApp', expect.any(Function)],
+      ['electronMainProcess', expect.any(Function)],
+      ['electronBrowserWindow', expect.any(Function)],
+    ]);
   });
 });
 
