@@ -8,22 +8,22 @@
     "plugin:import/errors",
     "plugin:import/typescript",
     "plugin:import/warnings",
-    "plugin:node/recommended",
+    "plugin:n/recommended",
     "plugin:wdio/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "import", "node", "wdio"],
+  "plugins": ["@typescript-eslint", "import", "n", "wdio"],
   "env": {
     "node": true
   },
   "rules": {
     "no-unused-vars": "off",
     "import/prefer-default-export": "off",
-    "node/no-unpublished-import": "error",
-    "node/no-missing-import": "off", // duped by import
-    "node/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
+    "n/no-unpublished-import": "error",
+    "n/no-missing-import": "off", // duped by import
+    "n/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
     "import/no-extraneous-dependencies": "off",
-    "node/no-extraneous-import": "off",
+    "n/no-extraneous-import": "off",
     "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities"] }],
     "class-methods-use-this": ["error", { "exceptMethods": ["afterTest"] }]
   },
