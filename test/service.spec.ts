@@ -381,21 +381,31 @@ describe('before', () => {
 
 describe('afterTest', () => {
   const reloadSessionMock = jest.fn();
+  Object.defineProperty(global, 'browser', {
+    value: { reloadSession: reloadSessionMock.mockResolvedValue('reloaded') },
+  });
 
   beforeEach(async () => {
-    Object.defineProperty(global, 'browser', {
-      value: { reloadSession: reloadSessionMock.mockResolvedValue('reloaded') },
-    });
     mockProcessProperty('platform', 'darwin');
     WorkerService = (await import('../src/service')).default;
   });
 
-  it('should reload the browser session', async () => {
+  it('should reload the browser session by default', async () => {
     instance = new WorkerService({
       appPath: 'workspace/my-test-app/dist',
       appName: 'my-test-app',
     });
     await instance.afterTest();
     expect(reloadSessionMock).toHaveBeenCalled();
+  });
+
+  it('should not reload the browser session when the newSessionPerTest option is false', async () => {
+    instance = new WorkerService({
+      appPath: 'workspace/my-test-app/dist',
+      appName: 'my-test-app',
+      newSessionPerTest: false,
+    });
+    await instance.afterTest();
+    expect(reloadSessionMock).not.toHaveBeenCalled();
   });
 });

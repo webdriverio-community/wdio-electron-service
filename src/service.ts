@@ -53,14 +53,21 @@ type WebDriverClient = Browser<'async'>;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  constructor(options: ElectronWorkerOptions) {
+  constructor(options: Services.ServiceOption) {
     const apiCommands = [
       { name: '', bridgeProp: 'custom' },
       { name: 'electronApp', bridgeProp: 'app' },
       { name: 'electronMainProcess', bridgeProp: 'mainProcess' },
       { name: 'electronBrowserWindow', bridgeProp: 'browserWindow' },
     ];
-    const { appPath, appName, binaryPath, customApiBrowserCommand = 'electronAPI' } = options;
+    const {
+      appPath,
+      appName,
+      appArgs,
+      binaryPath,
+      newSessionPerTest = true,
+      customApiBrowserCommand = 'electronAPI',
+    } = options as ElectronWorkerOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
@@ -78,7 +85,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       apiCommands[0].name = customApiBrowserCommand;
     }
 
-    this.options = options;
+    this.options = {
+      appPath,
+      appName,
+      appArgs,
+      binaryPath,
+      newSessionPerTest,
+    };
     this.apiCommands = apiCommands;
   }
 
