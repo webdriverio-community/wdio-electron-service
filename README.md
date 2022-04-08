@@ -84,6 +84,8 @@ const appName = await browser.electronApp('getName');
 You can also implement a custom API if you wish. To do this you will need to define a handler in your main process:
 
 ```ts
+import { ipcMain } from 'electron';
+
 ipcMain.handle('wdio-electron', () => {
   // access some Electron or Node things on the main process
   return 'such api';
