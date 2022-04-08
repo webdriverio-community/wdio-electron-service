@@ -19,7 +19,7 @@ specifiers:
   eslint-config-prettier: ^8.4.0
   eslint-import-resolver-typescript: ^2.7.1
   eslint-plugin-import: ^2.26.0
-  eslint-plugin-jest: ^26.1.3
+  eslint-plugin-jest: ^26.1.4
   eslint-plugin-n: ^15.1.0
   eslint-plugin-promise: ^6.0.0
   eslint-plugin-wdio: ^7.19.0
@@ -56,7 +56,7 @@ devDependencies:
   eslint-config-prettier: 8.5.0_eslint@8.12.0
   eslint-import-resolver-typescript: 2.7.1_6727bad621c6c338589cdfead936b843
   eslint-plugin-import: 2.26.0_eslint@8.12.0
-  eslint-plugin-jest: 26.1.3_71e92d3245f17c343e06baf3e5a2c467
+  eslint-plugin-jest: 26.1.4_71e92d3245f17c343e06baf3e5a2c467
   eslint-plugin-n: 15.1.0_eslint@8.12.0
   eslint-plugin-promise: 6.0.0_eslint@8.12.0
   eslint-plugin-wdio: 7.19.0
@@ -2628,8 +2628,8 @@ packages:
       tsconfig-paths: 3.14.1
     dev: true
 
-  /eslint-plugin-jest/26.1.3_71e92d3245f17c343e06baf3e5a2c467:
-    resolution: {integrity: sha512-Pju+T7MFpo5VFhFlwrkK/9jRUu18r2iugvgyrWOnnGRaVTFFmFXp+xFJpHyqmjjLmGJPKLeEFLVTAxezkApcpQ==}
+  /eslint-plugin-jest/26.1.4_71e92d3245f17c343e06baf3e5a2c467:
+    resolution: {integrity: sha512-wgqxujmqc2qpvZqMFWCh6Cniqc8lWpapvXt9j/19DmBDqeDaYhJrSRezYR1SKyemvjx+9e9kny/dgRahraHImA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': ^5.0.0
