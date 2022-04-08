@@ -1,6 +1,3 @@
-/* eslint-disable node/no-unsupported-features/es-syntax */
-// https://github.com/mysticatea/eslint-plugin-node/issues/250
-
 import ciInfo from 'ci-info';
 import { Browser } from 'webdriverio';
 import ElectronWorkerService from '../src/service';
