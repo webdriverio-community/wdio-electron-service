@@ -18,6 +18,7 @@
     "clean:dist": "cross-env rm -rf ./dist",
     "build": "tsc -b .",
     "lint": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" && prettier --check \"**/*.{j,t}s\"",
+    "lint:fix": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\"",
     "release": "release-it --github.release",
     "release:ci": "pnpm release -- --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
