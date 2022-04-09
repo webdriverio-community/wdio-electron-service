@@ -117,6 +117,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       }
     }
 
+    this.mapCapabilities(capabilities);
+
     const { appPath, appName, appArgs, binaryPath } = this.options;
 
     if (appArgs) {
@@ -146,6 +148,20 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   async afterTest(): Promise<void> {
     if (this.options.newSessionPerTest) {
       await browser?.reloadSession();
+    }
+  }
+
+  private mapCapabilities(capabilities: Capabilities.Capabilities) {
+    const isMultiremote = !capabilities.browserName;
+    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
+    if (isMultiremote) {
+      Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
+        if (isElectron(cap.capabilities)) {
+          Object.assign(cap, this.options);
+        }
+      });
+    } else if (isElectron(capabilities)) {
+      Object.assign(capabilities, this.options);
     }
   }
 }
