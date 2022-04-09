@@ -152,7 +152,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 
   private mapCapabilities(capabilities: Capabilities.Capabilities) {
-    const isMultiremote = !capabilities.browserName;
+    const isMultiremote = typeof capabilities === 'object' && !Array.isArray(capabilities);
     const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
     if (isMultiremote) {
       Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
