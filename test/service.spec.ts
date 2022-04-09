@@ -1,7 +1,5 @@
-/* eslint-disable node/no-unsupported-features/es-syntax */
-// https://github.com/mysticatea/eslint-plugin-node/issues/250
-
 import ciInfo from 'ci-info';
+import { Browser } from 'webdriverio';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
@@ -40,6 +38,15 @@ describe('options validation', () => {
         appPath: '/mock/dist',
       });
     }).toThrow('You must provide appPath and appName values, or a binaryPath value');
+  });
+
+  it('should throw an error when there is a custom API command collision', () => {
+    expect(() => {
+      instance = new WorkerService({
+        binaryPath: '/mock/dist',
+        customApiBrowserCommand: 'electronApp',
+      });
+    }).toThrow('The command "electronApp" is reserved, please provide a different value for customApiBrowserCommand');
   });
 });
 
@@ -346,23 +353,59 @@ describe('beforeSession', () => {
   });
 });
 
-describe('afterTest', () => {
-  const reloadSessionMock = jest.fn();
+describe('before', () => {
+  const addCommandMock = jest.fn();
 
   beforeEach(async () => {
-    Object.defineProperty(global, 'browser', {
-      value: { reloadSession: reloadSessionMock.mockResolvedValue('reloaded') },
-    });
     mockProcessProperty('platform', 'darwin');
     WorkerService = (await import('../src/service')).default;
   });
 
-  it('should reload the browser session', async () => {
+  it('should add API commands to the browser object', () => {
+    instance = new WorkerService({
+      appPath: 'workspace/my-test-app/dist',
+      appName: 'my-test-app',
+      customApiBrowserCommand: 'customApi',
+    });
+    instance.before({}, [], {
+      addCommand: addCommandMock,
+    } as unknown as Browser<'async'>);
+    expect(addCommandMock.mock.calls).toEqual([
+      ['customApi', expect.any(Function)],
+      ['electronApp', expect.any(Function)],
+      ['electronMainProcess', expect.any(Function)],
+      ['electronBrowserWindow', expect.any(Function)],
+    ]);
+  });
+});
+
+describe('afterTest', () => {
+  const reloadSessionMock = jest.fn();
+  Object.defineProperty(global, 'browser', {
+    value: { reloadSession: reloadSessionMock.mockResolvedValue('reloaded') },
+  });
+
+  beforeEach(async () => {
+    mockProcessProperty('platform', 'darwin');
+    WorkerService = (await import('../src/service')).default;
+  });
+
+  it('should reload the browser session by default', async () => {
     instance = new WorkerService({
       appPath: 'workspace/my-test-app/dist',
       appName: 'my-test-app',
     });
     await instance.afterTest();
     expect(reloadSessionMock).toHaveBeenCalled();
+  });
+
+  it('should not reload the browser session when the newSessionPerTest option is false', async () => {
+    instance = new WorkerService({
+      appPath: 'workspace/my-test-app/dist',
+      appName: 'my-test-app',
+      newSessionPerTest: false,
+    });
+    await instance.afterTest();
+    expect(reloadSessionMock).not.toHaveBeenCalled();
   });
 });
