@@ -129,8 +129,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       windowTypes: ['app', 'webview'],
     };
 
-    const isMultiremote = typeof capabilities === 'object' && !Array.isArray(capabilities);
+    const isMultiremote =
+      typeof capabilities === 'object' &&
+      !Array.isArray(capabilities) &&
+      Object.keys(capabilities).length > 0 &&
+      Object.values(capabilities).every((cap) => typeof cap === 'object');
     const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
+
+    console.log('start caps', capabilities);
 
     if (isMultiremote) {
       Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
@@ -139,10 +145,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           cap.capabilities['goog:chromeOptions'] = chromeOptions;
         }
       });
-    } else if (isElectron(capabilities)) {
+      console.log('is mm');
+    } else {
       capabilities.browserName = 'chrome';
       capabilities['goog:chromeOptions'] = chromeOptions;
     }
+
+    console.log('end caps', capabilities);
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
