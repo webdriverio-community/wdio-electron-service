@@ -24,7 +24,7 @@
     "n/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
     "import/no-extraneous-dependencies": "off",
     "n/no-extraneous-import": "off",
-    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities"] }],
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["capabilities", "cap"] }],
     "class-methods-use-this": ["error", { "exceptMethods": ["afterTest"] }]
   },
   "parserOptions": {
