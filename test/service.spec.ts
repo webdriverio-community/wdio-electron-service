@@ -1,3 +1,4 @@
+import { Capabilities } from '@wdio/types';
 import ciInfo from 'ci-info';
 import { Browser } from 'webdriverio';
 import ElectronWorkerService from '../src/service';
@@ -78,6 +79,52 @@ describe('beforeSession', () => {
         },
       });
     });
+
+    it('should set the expected capabilities when multiremote', () => {
+      instance = new WorkerService({
+        binaryPath: 'workspace/my-test-app/dist/my-test-app',
+      });
+      const capabilities = {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            browserName: 'electron',
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+      };
+      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+      expect(capabilities).toEqual({
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            'browserName': 'chrome',
+            'goog:chromeOptions': {
+              args: [],
+              binary: 'workspace/my-test-app/dist/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+      });
+    });
   });
 
   describe('providing appArgs', () => {
@@ -99,6 +146,53 @@ describe('beforeSession', () => {
           args: ['look', 'some', 'args'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
+        },
+      });
+    });
+
+    it('should set the expected capabilities when multiremote', () => {
+      instance = new WorkerService({
+        binaryPath: 'workspace/my-test-app/dist/my-test-app',
+        appArgs: ['look', 'some', 'args'],
+      });
+      const capabilities = {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            browserName: 'electron',
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+      };
+      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+      expect(capabilities).toEqual({
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            'browserName': 'chrome',
+            'goog:chromeOptions': {
+              args: ['look', 'some', 'args'],
+              binary: 'workspace/my-test-app/dist/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
         },
       });
     });
@@ -141,6 +235,67 @@ describe('beforeSession', () => {
         },
       });
     });
+
+    it('should set the expected capabilities when multiremote', () => {
+      instance = new WorkerService({
+        appPath: 'workspace/my-test-app/dist',
+        appName: 'my-test-app',
+        appArgs: ['look', 'some', 'args'],
+      });
+      const capabilities = {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            browserName: 'electron',
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+      };
+      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+      expect(capabilities).toEqual({
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            'browserName': 'chrome',
+            'goog:chromeOptions': {
+              args: [
+                'window-size=1280,800',
+                'blink-settings=imagesEnabled=false',
+                'enable-automation',
+                'disable-infobars',
+                'disable-extensions',
+                'no-sandbox',
+                'disable-gpu',
+                'disable-dev-shm-usage',
+                'disable-setuid-sandbox',
+                'look',
+                'some',
+                'args',
+              ],
+              binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+          },
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+      });
+    });
   });
 
   describe('providing appPath & appName', () => {
@@ -180,6 +335,53 @@ describe('beforeSession', () => {
             args: [],
             binary: 'workspace/my-test-app/dist/mac/My Test Helper.app/Contents/MacOS/My Test',
             windowTypes: ['app', 'webview'],
+          },
+        });
+      });
+
+      it('should set the expected capabilities when multiremote', () => {
+        instance = new WorkerService({
+          appPath: 'workspace/my-test-app/dist',
+          appName: 'my-test-app',
+        });
+        const capabilities = {
+          firefox: {
+            capabilities: {
+              browserName: 'firefox',
+            },
+          },
+          myElectronProject: {
+            capabilities: {
+              browserName: 'electron',
+            },
+          },
+          chrome: {
+            capabilities: {
+              browserName: 'chrome',
+            },
+          },
+        };
+        instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+        expect(capabilities).toEqual({
+          firefox: {
+            capabilities: {
+              browserName: 'firefox',
+            },
+          },
+          myElectronProject: {
+            capabilities: {
+              'browserName': 'chrome',
+              'goog:chromeOptions': {
+                args: [],
+                binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+                windowTypes: ['app', 'webview'],
+              },
+            },
+          },
+          chrome: {
+            capabilities: {
+              browserName: 'chrome',
+            },
           },
         });
       });
