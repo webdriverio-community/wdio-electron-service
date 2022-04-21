@@ -117,20 +117,32 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       }
     }
 
-    this.mapCapabilities(capabilities);
-
     const { appPath, appName, appArgs, binaryPath } = this.options;
 
     if (appArgs) {
       chromeArgs.push(...appArgs);
     }
 
-    capabilities.browserName = 'chrome';
-    capabilities['goog:chromeOptions'] = {
+    const chromeOptions = {
       binary: binaryPath || getBinaryPath(appPath as string, appName as string),
       args: chromeArgs,
       windowTypes: ['app', 'webview'],
     };
+
+    const isMultiremote = typeof capabilities === 'object' && !Array.isArray(capabilities);
+    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
+
+    if (isMultiremote) {
+      Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
+        if (isElectron(cap.capabilities)) {
+          cap.capabilities.browserName = 'chrome';
+          cap.capabilities['goog:chromeOptions'] = chromeOptions;
+        }
+      });
+    } else if (isElectron(capabilities)) {
+      capabilities.browserName = 'chrome';
+      capabilities['goog:chromeOptions'] = chromeOptions;
+    }
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
@@ -148,20 +160,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   async afterTest(): Promise<void> {
     if (this.options.newSessionPerTest) {
       await browser?.reloadSession();
-    }
-  }
-
-  private mapCapabilities(capabilities: Capabilities.Capabilities) {
-    const isMultiremote = typeof capabilities === 'object' && !Array.isArray(capabilities);
-    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
-    if (isMultiremote) {
-      Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
-        if (isElectron(cap.capabilities)) {
-          Object.assign(cap, this.options);
-        }
-      });
-    } else if (isElectron(capabilities)) {
-      Object.assign(capabilities, this.options);
     }
   }
 }
