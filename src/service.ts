@@ -156,10 +156,4 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       });
     });
   }
-
-  async afterTest(): Promise<void> {
-    if (this.options.newSessionPerTest) {
-      await browser?.reloadSession();
-    }
-  }
 }
