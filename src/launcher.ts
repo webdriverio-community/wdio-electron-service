@@ -19,14 +19,17 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   ) {
     const { chromedriver = {} } = options;
     const isWin = process.platform === 'win32';
-    let chromedriverCustomPath = resolver('electron-chromedriver/chromedriver');
+    const chromedriverServiceOptions = {
+      chromedriverCustomPath: resolver('electron-chromedriver/chromedriver'),
+      ...chromedriver,
+    };
 
     if (isWin) {
       process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
-      process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = resolver('electron-chromedriver/chromedriver');
-      chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
+      process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
+      chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
     }
 
-    super({ chromedriverCustomPath, ...chromedriver }, capabilities, config);
+    super(chromedriverServiceOptions, capabilities, config);
   }
 }
