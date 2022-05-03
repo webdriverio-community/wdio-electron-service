@@ -67,7 +67,7 @@ devDependencies:
   lint-staged: 12.4.1
   prettier: 2.6.2
   release-it: 15.0.0
-  ts-jest: 28.0.0_4db907953e67367985ae85b48dfb7df7
+  ts-jest: 28.0.1_4db907953e67367985ae85b48dfb7df7
   typescript: 4.6.4
 
 packages:
@@ -6395,9 +6395,9 @@ packages:
       punycode: 2.1.1
     dev: true
 
-  /ts-jest/28.0.0_4db907953e67367985ae85b48dfb7df7:
-    resolution: {integrity: sha512-JOUGExRO4vNaQdc920/sJjFZxe9lBGa6WIuNWkvtZoORGI9dyHTBqhuaJUdBVWIfqj+vaK3TRt/B1T0hQ0ROaA==}
-    engines: {node: ^12.13.0 || ^14.15.0 || ^16.13.0 || >=17.0.0}
+  /ts-jest/28.0.1_4db907953e67367985ae85b48dfb7df7:
+    resolution: {integrity: sha512-PbkbitaT/9ZYAqqzk3UYTvCq080Seo46T3m/AdwcZ0D8WH2uBhG6PvA8oOAWsZIknzPQU66fYobvFCL8IqIhmg==}
+    engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
     hasBin: true
     peerDependencies:
       '@babel/core': '>=7.0.0-beta.0 <8'
