@@ -39,17 +39,20 @@
     "tests"
   ],
   "peerDependencies": {
-    "electron": "*"
+    "electron": "*",
+    "electron-chromedriver": "*"
   },
   "peerDependenciesMeta": {
     "electron": {
+      "optional": true
+    },
+    "electron-chromedriver": {
       "optional": true
     }
   },
   "dependencies": {
     "@wdio/logger": "^7.19.0",
     "ci-info": "^3.3.0",
-    "electron-chromedriver": "^18.0.0",
     "wdio-chromedriver-service": "^7.3.2",
     "webdriverio": "^7.19.5"
   },
@@ -63,6 +66,7 @@
     "@wdio/types": "^7.19.5",
     "cross-env": "^7.0.3",
     "electron": "^18.2.0",
+    "electron-chromedriver": "^18.0.0",
     "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
@@ -74,7 +78,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-wdio": "^7.19.4",
     "husky": "^7.0.4",
-    "jest": "^27.0.3",
+    "jest": "^28.0.3",
     "jest-environment-jsdom": "^28.0.2",
     "lint-staged": "^12.4.1",
     "prettier": "^2.6.2",
