@@ -25,7 +25,7 @@ it('should create a new CDS instance with the expected parameters', () => {
   );
 });
 
-it('should call require.resolve with the expected parameters', () => {
+it('should get the chromedriver path from electron-chromedriver', () => {
   const requireResolveMock = jest.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('mock-chromedriver-path');
   const launcherInstance = new ChromeDriverLauncher(
@@ -40,6 +40,42 @@ it('should call require.resolve with the expected parameters', () => {
     { chromedriverCustomPath: 'mock-chromedriver-path', logFileName: 'mock-log.txt' },
     { browserName: 'mockBrowser' },
     { mock: 'config' },
+  );
+});
+
+it('should not look for electron-chromedriver when chromedriverCustomPath is specified', () => {
+  const requireResolveMock = jest.fn() as RequireResolveMock;
+  requireResolveMock.mockReturnValue('mock-chromedriver-path');
+  const launcherInstance = new ChromeDriverLauncher(
+    { chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver-path-custom' } },
+    { browserName: 'mockBrowser' },
+    { mock: 'config' },
+    requireResolveMock,
+  );
+  expect(launcherInstance).toBeInstanceOf(launcher);
+  expect(requireResolveMock).not.toHaveBeenCalled();
+  expect(launcher).toHaveBeenCalledWith(
+    { chromedriverCustomPath: 'mock-chromedriver-path-custom', logFileName: 'mock-log.txt' },
+    { browserName: 'mockBrowser' },
+    { mock: 'config' },
+  );
+});
+
+it('should throw an error when chromedriverCustomPath is not specified and electron-chromedriver is not found', () => {
+  const requireResolveMock = jest.fn() as RequireResolveMock;
+  requireResolveMock.mockImplementation(() => {
+    throw new Error('module not found');
+  });
+  expect(
+    () =>
+      new ChromeDriverLauncher(
+        { chromedriver: { logFileName: 'mock-log.txt' } },
+        { browserName: 'mockBrowser' },
+        { mock: 'config' },
+        requireResolveMock,
+      ),
+  ).toThrow(
+    'electron-chromedriver was not found. You need to install it or provide a binary via the chromedriver.chromedriverCustomPath option.',
   );
 });
 
