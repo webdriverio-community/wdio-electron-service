@@ -129,12 +129,6 @@ An array of string arguments to be passed through to the app on execution of the
 
 The browser command used to access the custom Electron API.
 
-### `newSessionPerTest`: _`boolean`_
-
-#### default `true`
-
-By default the browser session is reloaded after each test to avoid state bleed. If you wish to manage the state of your app across tests manually then you can set this to false.
-
 ## Chromedriver configuration
 
 This service wraps the [`wdio-chromedriver-service`](https://github.com/webdriverio-community/wdio-chromedriver-service), you can configure the following options which will be passed through to that service:
