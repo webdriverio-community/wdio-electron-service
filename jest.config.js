@@ -1,10 +1,7 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   coverageReporters: ['html', 'lcov', 'text'],
   coverageDirectory: '<rootDir>/coverage',
-  transform: {
-    '^.+\\.ts': 'ts-jest',
-  },
   testPathIgnorePatterns: ['<rootDir>/node_modules/'],
   collectCoverage: true,
   collectCoverageFrom: ['<rootDir>/src/*.ts'],
@@ -17,16 +14,24 @@ module.exports = {
     },
   },
   clearMocks: true,
+  extensionsToTreatAsEsm: ['.ts'],
   rootDir: '.',
   roots: ['<rootDir>'],
   modulePaths: ['<rootDir>'],
   modulePathIgnorePatterns: ['dist', '.node_modules_production'],
   testMatch: ['<rootDir>/test/*.spec.ts'],
-  testURL: 'https://github.com/goosewobbler/',
   testEnvironment: 'jsdom',
+  testEnvironmentOptions: {
+    url: 'https://github.com/webdriverio-community/wdio-electron-service',
+  },
+  moduleNameMapper: {
+    '^uuid$': require.resolve('uuid'), // https://github.com/uuidjs/uuid/pull/616#issuecomment-1111006686
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   globals: {
     'ts-jest': {
       isolatedModules: true,
+      useESM: true,
       tsconfig: './tsconfig.json',
       packageJson: './package.json',
     },
