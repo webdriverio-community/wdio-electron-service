@@ -1,6 +1,6 @@
 # WDIO Electron Service
 
-**WebdriverIO service for testing electron applications**
+**WebdriverIO service for testing Electron applications**
 
 Enables cross-platform E2E testing of electron apps via the extensive WebdriverIO ecosystem. Adds electron-specific browser capabilities and handles chromedriver execution.
 
@@ -26,11 +26,19 @@ npm i -D electron-chromedriver@18
 
 The above command installs `electron-chromedriver` v18 which installs the chromedriver version that will work with an app built using electron 18.
 
-Alternatively you can install chromedriver directly, in this case you will need to specify the `chromedriverCustomPath` property.
+Alternatively you can install chromedriver directly or via some other means, in this case you will need to specify the `chromedriverCustomPath` property.
 
 ```bash
 npm i -D chromedriver@100  # for Electron 18 apps
 npm i -D chromedriver@96  # for Electron 16 apps
+```
+
+```js
+        chromedriver: {
+          port: 9519,
+          logFileName: 'wdio-chromedriver.log',
+          chromedriverCustomPath: require.resolve('chromedriver/bin/chromedriver') // resolves to chromedriver binary
+        },
 ```
 
 ## Example Configuration
