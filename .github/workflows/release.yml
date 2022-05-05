@@ -28,7 +28,7 @@ jobs:
           node-version: 14.x
       - uses: pnpm/action-setup@v2.0.1
         with:
-          version: 6.25.0
+          version: 7.0.0
           run_install: true
       - name: NPM Setup
         run: |
