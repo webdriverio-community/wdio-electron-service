@@ -7,8 +7,29 @@ type WdioConfig = {
 };
 
 type ElectronLauncherServiceOpts = {
-  chromedriver?: Omit<ChromedriverServiceOptions, 'chromedriverCustomPath'>;
+  chromedriver?: ChromedriverServiceOptions;
 };
+
+function createChromedriverServiceOptions(
+  options: ElectronLauncherServiceOpts,
+  resolver: NodeJS.RequireResolve,
+): ChromedriverServiceOptions {
+  const { chromedriver = {} } = options;
+  const chromedriverServiceOptions = { ...chromedriver };
+
+  if (!chromedriverServiceOptions.chromedriverCustomPath) {
+    try {
+      const electronChromeDriverPath = resolver('electron-chromedriver/chromedriver');
+      chromedriverServiceOptions.chromedriverCustomPath = electronChromeDriverPath;
+    } catch (e) {
+      throw new Error(
+        'electron-chromedriver was not found. You need to install it or provide a binary via the chromedriver.chromedriverCustomPath option.',
+      );
+    }
+  }
+
+  return chromedriverServiceOptions;
+}
 
 export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   constructor(
@@ -17,16 +38,15 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     config: WdioConfig,
     resolver = require.resolve,
   ) {
-    const { chromedriver = {} } = options;
     const isWin = process.platform === 'win32';
-    let chromedriverCustomPath = resolver('electron-chromedriver/chromedriver');
+    const chromedriverServiceOptions = createChromedriverServiceOptions(options, resolver);
 
     if (isWin) {
       process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
-      process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = resolver('electron-chromedriver/chromedriver');
-      chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
+      process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
+      chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
     }
 
-    super({ chromedriverCustomPath, ...chromedriver }, capabilities, config);
+    super(chromedriverServiceOptions, capabilities, config);
   }
 }
