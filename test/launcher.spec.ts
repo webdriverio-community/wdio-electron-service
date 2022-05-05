@@ -8,11 +8,33 @@ interface RequireResolveMock extends jest.Mock {
   paths(request: string): string[] | null;
 }
 
+it('should handle no chromedriver configuration', () => {
+  const requireResolveMock = jest.fn() as RequireResolveMock;
+  requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
+  const launcherInstance = new ChromeDriverLauncher(
+    {},
+    { browserName: 'mockBrowser' },
+    { mock: 'config' },
+    requireResolveMock,
+  );
+  expect(launcherInstance).toBeInstanceOf(launcher);
+  expect(launcher).toHaveBeenCalledWith(
+    {
+      chromedriverCustomPath: expect.stringContaining('/electron-chromedriver/chromedriver.js') as string,
+    },
+    { browserName: 'mockBrowser' },
+    { mock: 'config' },
+  );
+});
+
 it('should create a new CDS instance with the expected parameters', () => {
+  const requireResolveMock = jest.fn() as RequireResolveMock;
+  requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
   const launcherInstance = new ChromeDriverLauncher(
     { chromedriver: { logFileName: 'mock-log.txt' } },
     { browserName: 'mockBrowser' },
     { mock: 'config' },
+    requireResolveMock,
   );
   expect(launcherInstance).toBeInstanceOf(launcher);
   expect(launcher).toHaveBeenCalledWith(
@@ -89,10 +111,13 @@ describe('on windows platforms', () => {
   });
 
   it('should create a new CDS instance with the expected parameters', () => {
+    const requireResolveMock = jest.fn() as RequireResolveMock;
+    requireResolveMock.mockReturnValue('mock-chromedriver');
     const launcherInstance = new ChromeDriverLauncher(
       { chromedriver: { logFileName: 'mock-log.txt' } },
       { browserName: 'mockBrowser' },
       { mock: 'config' },
+      requireResolveMock,
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(launcher).toHaveBeenCalledWith(
