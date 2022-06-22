@@ -13,7 +13,7 @@
   "scripts": {
     "init": "npm install -g pnpm && pnpm i",
     "prepare": "husky install",
-    "ci": "pnpm run build && pnpm run test && pnpm run lint",
+    "ci": "pnpm build && pnpm test && pnpm lint",
     "clean": "cross-env rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "cross-env rm -rf ./dist",
     "build": "tsc -b .",
@@ -28,7 +28,7 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "test:watch-coverage": "jest --watch --coverage",
-    "test": "pnpm run test:coverage"
+    "test": "pnpm test:coverage"
   },
   "keywords": [
     "webdriverio",
