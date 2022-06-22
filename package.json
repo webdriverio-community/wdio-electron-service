@@ -21,7 +21,7 @@
     "lint:fix": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\"",
     "release": "release-it --github.release",
-    "release:ci": "pnpm release -- --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "release:ci": "pnpm release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "release:patch": "pnpm release -- patch",
     "release:minor": "pnpm release -- minor",
     "release:major": "pnpm release -- major",
