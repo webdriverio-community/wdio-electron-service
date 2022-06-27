@@ -134,7 +134,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       !Array.isArray(capabilities) &&
       Object.keys(capabilities).length > 0 &&
       Object.values(capabilities).every((cap) => typeof cap === 'object');
-    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
+    const isElectron = (cap: Capabilities.Capabilities) => cap && cap.browserName && cap.browserName.toLowerCase() === 'electron';
 
     if (isMultiremote) {
       Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
