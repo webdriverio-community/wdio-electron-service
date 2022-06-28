@@ -80,19 +80,25 @@ module.exports = { config };
 
 ### API Configuration
 
-If you wish to use the electron APIs then you will need to import the preload and main scripts. At the top of your preload:
+If you wish to use the electron APIs then you will need to import the preload and main scripts. Somewhere near the top of your preload:
 
 ```ts
-import 'wdio-electron-service/preload';
+if (isTest) {
+  import('wdio-electron-service/preload');
+}
 ```
 
-And at the top of your main index file (app entry point):
+And somewhere near the top of your main index file (app entry point):
 
 ```ts
-import 'wdio-electron-service/main';
+if (isTest) {
+  import('wdio-electron-service/main');
+}
 ```
 
-The APIs should now be available in tests. Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+The APIs should not work outside of WDIO but for security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure the APIs are only exposed when the app is being tested.
+
+After importing the scripts the APIs should now be available in tests. Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
 
 ```ts
 const appName = await browser.electronApp('getName');
