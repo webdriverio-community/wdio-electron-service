@@ -7,10 +7,15 @@ const validChannels = [
   'wdio-electron.browserWindow',
 ];
 
-const invoke = (channel: string, ...data: unknown[]): Promise<unknown> =>
-  validChannels.includes(channel)
-    ? ipcRenderer.invoke(channel, data)
-    : Promise.reject(new Error(`Channel "${channel}" is invalid`));
+const invoke = async (channel: string, ...data: unknown[]) => {
+  if (!validChannels.includes(channel)) {
+    throw new Error(`Channel "${channel}" is invalid`);
+  }
+  if (!process.env.WDIO_ELECTRON) {
+    throw new Error('Electron APIs can not be invoked outside of WDIO');
+  }
+  return ipcRenderer.invoke(channel, data);
+};
 
 contextBridge.exposeInMainWorld('wdioElectron', {
   custom: {

@@ -17,6 +17,8 @@ function createChromedriverServiceOptions(
   const { chromedriver = {} } = options;
   const chromedriverServiceOptions = { ...chromedriver };
 
+  process.env.WDIO_ELECTRON = 'true';
+
   if (!chromedriverServiceOptions.chromedriverCustomPath) {
     try {
       const electronChromeDriverPath = resolver('electron-chromedriver/chromedriver');
