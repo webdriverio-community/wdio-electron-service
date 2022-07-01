@@ -11,7 +11,7 @@ const invoke = async (channel: string, ...data: unknown[]) => {
   if (!validChannels.includes(channel)) {
     throw new Error(`Channel "${channel}" is invalid`);
   }
-  if (!process.env.WDIO_ELECTRON) {
+  if (!process.env.WDIO_ELECTRON && !process.env.WDIO_WORKER) {
     throw new Error('Electron APIs can not be invoked outside of WDIO');
   }
   return ipcRenderer.invoke(channel, data);
