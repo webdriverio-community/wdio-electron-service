@@ -1,10 +1,15 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 import { Browser } from 'webdriverio';
 import { isCI } from 'ci-info';
+import { log } from './utils';
 
 function getMacExecutableName(appName: string) {
   // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
-  return appName.endsWith(' Helper') ? appName.replace(' Helper', '') : appName;
+  if (appName.endsWith(' Helper')) {
+    return appName.replace(' Helper', '');
+  }
+
+  return appName;
 }
 
 function getBinaryPath(distPath: string, appName: string) {
@@ -46,7 +51,6 @@ type ElectronWorkerOptions = {
   binaryPath?: string;
   customApiBrowserCommand?: string;
   appArgs?: string[];
-  newSessionPerTest?: boolean;
 };
 type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser<'async'>;
@@ -65,22 +69,25 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       appName,
       appArgs,
       binaryPath,
-      newSessionPerTest = true,
       customApiBrowserCommand = 'electronAPI',
     } = options as ElectronWorkerOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
-      throw new Error('You must provide appPath and appName values, or a binaryPath value');
+      const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
+      log.error(invalidPathOptsError);
+      throw invalidPathOptsError;
     }
 
     const customCommandCollision = apiCommands.find(
       (command) => command.name === customApiBrowserCommand,
     ) as ApiCommand;
     if (customCommandCollision) {
-      throw new Error(
+      const customCommandCollisionError = new Error(
         `The command "${customCommandCollision.name}" is reserved, please provide a different value for customApiBrowserCommand`,
       );
+      log.error(customCommandCollisionError);
+      throw customCommandCollisionError;
     } else {
       apiCommands[0].name = customApiBrowserCommand;
     }
@@ -90,7 +97,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       appName,
       appArgs,
       binaryPath,
-      newSessionPerTest,
     };
     this.apiCommands = apiCommands;
   }
@@ -137,6 +143,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
 
     if (isMultiremote) {
+      log.debug('setting up multiremote');
       Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
         if (isElectron(cap.capabilities)) {
           cap.capabilities.browserName = 'chrome';
@@ -147,10 +154,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       capabilities.browserName = 'chrome';
       capabilities['goog:chromeOptions'] = chromeOptions;
     }
+
+    log.debug('setting browser capabilities', capabilities);
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
     this.apiCommands.forEach(({ name, bridgeProp }) => {
+      log.debug('adding api command for ', name);
       browser.addCommand(name, async (...args: unknown[]) => {
         try {
           return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);

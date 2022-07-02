@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { Capabilities } from '@wdio/types';
 import { launcher as ChromedriverServiceLauncher, ChromedriverServiceOptions } from 'wdio-chromedriver-service';
+import { log } from './utils';
 
 type WdioConfig = {
   [key: string]: unknown;
@@ -20,13 +21,17 @@ function createChromedriverServiceOptions(
   process.env.WDIO_ELECTRON = 'true';
 
   if (!chromedriverServiceOptions.chromedriverCustomPath) {
+    log.debug('chromedriverCustomPath not set - looking for electron-chromedriver');
     try {
-      const electronChromeDriverPath = resolver('electron-chromedriver/chromedriver');
-      chromedriverServiceOptions.chromedriverCustomPath = electronChromeDriverPath;
+      const electronChromedriverPath = resolver('electron-chromedriver/chromedriver');
+      log.debug('electron-chromedriver path found:', electronChromedriverPath);
+      chromedriverServiceOptions.chromedriverCustomPath = electronChromedriverPath;
     } catch (e) {
-      throw new Error(
+      const electronChromedriverNotFoundError = new Error(
         'electron-chromedriver was not found. You need to install it or provide a binary via the chromedriver.chromedriverCustomPath option.',
       );
+      log.error(electronChromedriverNotFoundError);
+      throw electronChromedriverNotFoundError;
     }
   }
 
@@ -40,6 +45,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     config: WdioConfig,
     resolver = require.resolve,
   ) {
+    log.debug('launcher received options:', options);
     const isWin = process.platform === 'win32';
     const chromedriverServiceOptions = createChromedriverServiceOptions(options, resolver);
 
@@ -49,6 +55,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
       chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
     }
 
+    log.debug('setting chromedriver service options:', chromedriverServiceOptions);
     super(chromedriverServiceOptions, capabilities, config);
   }
 }
