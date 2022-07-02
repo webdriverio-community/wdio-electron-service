@@ -1,9 +1,7 @@
 import { join } from 'path';
 import { Capabilities } from '@wdio/types';
 import { launcher as ChromedriverServiceLauncher, ChromedriverServiceOptions } from 'wdio-chromedriver-service';
-import logger from '@wdio/logger';
-
-const log = logger('electron');
+import { log } from './utils';
 
 type WdioConfig = {
   [key: string]: unknown;
@@ -26,7 +24,7 @@ function createChromedriverServiceOptions(
     log.debug('chromedriverCustomPath not set - looking for electron-chromedriver');
     try {
       const electronChromedriverPath = resolver('electron-chromedriver/chromedriver');
-      log.debug(`electron-chromedriver path found: ${electronChromedriverPath}`);
+      log.debug('electron-chromedriver path found:', electronChromedriverPath);
       chromedriverServiceOptions.chromedriverCustomPath = electronChromedriverPath;
     } catch (e) {
       const electronChromedriverNotFoundError = new Error(
@@ -47,7 +45,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     config: WdioConfig,
     resolver = require.resolve,
   ) {
-    log.debug(`Electron service launcher received options: ${JSON.stringify(options)}`);
+    log.debug('launcher received options:', options);
     const isWin = process.platform === 'win32';
     const chromedriverServiceOptions = createChromedriverServiceOptions(options, resolver);
 
@@ -57,7 +55,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
       chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
     }
 
-    log.debug(`setting chromedriver service options: ${JSON.stringify(chromedriverServiceOptions)}`);
+    log.debug('setting chromedriver service options:', chromedriverServiceOptions);
     super(chromedriverServiceOptions, capabilities, config);
   }
 }
