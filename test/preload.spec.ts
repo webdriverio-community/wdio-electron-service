@@ -1,4 +1,4 @@
-import type { WdioElectronWindowObj } from '../src/@types/wdio-electron';
+import type { WdioElectronWindowObj } from '../@types/wdio-electron-service';
 
 const ipcRendererInvokeMock = jest.fn();
 
