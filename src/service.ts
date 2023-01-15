@@ -18,14 +18,14 @@ function getBinaryPath(distPath: string, appName: string) {
     linux: 'linux',
     win32: 'win32',
   };
-  const { platform } = process;
+  const { platform, arch } = process;
 
   if (!Object.values(SupportedPlatform).includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`);
   }
 
   const pathMap = {
-    darwin: `mac/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
+    darwin: `mac-${arch}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
     linux: `linux-unpacked/${appName}`,
     win32: `win-unpacked/${appName}.exe`,
   };
