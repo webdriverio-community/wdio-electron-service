@@ -54,7 +54,8 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "test:watch-coverage": "jest --watch --coverage",
-    "test": "pnpm test:coverage"
+    "test": "pnpm test:coverage",
+    "test:integration": "pnpm build && cd example && pnpm clean && pnpm i && pnpm build && pnpm t"
   },
   "keywords": [
     "webdriverio",
