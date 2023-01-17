@@ -122,9 +122,6 @@
     "preload.js"
   ],
   "lint-staged": {
-    "**/*.{js,ts}": [
-      "eslint --fix"
-    ],
     "**/*.{yml,json,md,ts,js}": [
       "prettier --write"
     ]
