@@ -1,7 +1,7 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 import { Browser } from 'webdriverio';
 import { isCI } from 'ci-info';
-import { log } from './utils';
+import { log } from './utils.js';
 
 function getMacExecutableName(appName: string) {
   // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
@@ -18,14 +18,14 @@ function getBinaryPath(distPath: string, appName: string) {
     linux: 'linux',
     win32: 'win32',
   };
-  const { platform } = process;
+  const { platform, arch } = process;
 
   if (!Object.values(SupportedPlatform).includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`);
   }
 
   const pathMap = {
-    darwin: `mac/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
+    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
     linux: `linux-unpacked/${appName}`,
     win32: `win-unpacked/${appName}.exe`,
   };
