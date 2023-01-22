@@ -25,7 +25,7 @@ function getBinaryPath(distPath: string, appName: string) {
   }
 
   const pathMap = {
-    darwin: `mac-${arch}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
+    darwin: `mac${arch === 'arm64' ? '-arm64' : ''}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
     linux: `linux-unpacked/${appName}`,
     win32: `win-unpacked/${appName}.exe`,
   };
