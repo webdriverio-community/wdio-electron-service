@@ -25,7 +25,6 @@ module.exports = {
     url: 'https://github.com/webdriverio-community/wdio-electron-service',
   },
   moduleNameMapper: {
-    '^uuid$': require.resolve('uuid'), // https://github.com/uuidjs/uuid/pull/616#issuecomment-1111006686
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   globals: {
