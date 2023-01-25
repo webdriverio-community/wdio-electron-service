@@ -1,6 +1,5 @@
 import path, { join } from 'path';
 import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
 import { Capabilities, Options } from '@wdio/types';
 import extractZip from 'extract-zip';
 import { downloadArtifact } from '@electron/get';
@@ -8,10 +7,11 @@ import {
   launcher as ChromedriverServiceLauncher,
   ServiceOptions as ChromedriverServiceOptions,
 } from 'wdio-chromedriver-service';
+import { getDirname } from 'cross-dirname';
+
 import { log } from './utils.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const dirname = getDirname();
 
 type ElectronLauncherServiceOpts = {
   chromedriver?: ChromedriverServiceOptions;
@@ -34,7 +34,7 @@ function download(version: string) {
 async function attemptDownload(version = '') {
   log.debug(`Downloading Chromedriver v${version}`);
   try {
-    const targetFolder = path.join(__dirname, '..', 'bin');
+    const targetFolder = path.join(dirname, '..', 'bin');
     const zipPath = await download(version);
     await extractZip(zipPath, { dir: targetFolder });
     const platform = process.env.npm_config_platform || process.platform;
@@ -80,9 +80,9 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     if (isWin) {
       process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
       process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
-      chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chrome-driver.bat');
+      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chrome-driver.bat');
     } else {
-      chromedriverServiceOptions.chromedriverCustomPath = join(__dirname, '..', 'bin', 'chromedriver');
+      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver');
     }
 
     log.debug('setting chromedriver service options:', chromedriverServiceOptions);
