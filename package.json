@@ -5,31 +5,21 @@
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
-  "main": "./dist/cjs/index.js",
-  "type": "module",
-  "module": "./dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
   "exports": {
-    "./preload": [
-      {
-        "import": "./dist/preload.js",
-        "require": "./dist/cjs/preload.js"
-      },
-      "./dist/cjs/preload.js"
-    ],
-    "./main": [
-      {
-        "import": "./dist/main.js",
-        "require": "./dist/cjs/main.js"
-      },
-      "./dist/cjs/main.js"
-    ],
-    ".": [
-      {
-        "import": "./dist/index.js",
-        "require": "./dist/cjs/index.js"
-      },
-      "./dist/cjs/index.js"
-    ]
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./main": {
+      "import": "./dist/main.js",
+      "require": "./dist/cjs/main.js"
+    },
+    "./preload": {
+      "import": "./dist/preload.js",
+      "require": "./dist/cjs/preload.js"
+    }
   },
   "typeScriptVersion": "4.9.4",
   "types": "./dist/index.d.ts",
@@ -42,7 +32,7 @@
     "ci": "pnpm build && pnpm test && pnpm lint",
     "clean": "rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "rm -rf ./dist",
-    "build": "tsc -b .",
+    "build": "./scripts/build.sh",
     "lint": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" && prettier --check \"**/*.{j,t}s\"",
     "lint:fix": "eslint --ignore-path .eslintignore \"**/*.{j,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\"",
@@ -55,7 +45,8 @@
     "test:watch": "jest --watch",
     "test:watch-coverage": "jest --watch --coverage",
     "test": "pnpm test:coverage",
-    "test:integration": "pnpm build && cd example && pnpm clean && pnpm i && pnpm build && pnpm t"
+    "test:integration": "pnpm build && pnpm test:build-app && cd example/e2e && pnpm clean && pnpm i && pnpm t",
+    "test:build-app": "cd example/app && pnpm clean && pnpm i && pnpm build"
   },
   "keywords": [
     "webdriverio",
@@ -66,14 +57,10 @@
     "tests"
   ],
   "peerDependencies": {
-    "electron": "*",
-    "electron-chromedriver": "*"
+    "electron": "*"
   },
   "peerDependenciesMeta": {
     "electron": {
-      "optional": true
-    },
-    "electron-chromedriver": {
       "optional": true
     }
   },
@@ -81,6 +68,7 @@
     "@electron/get": "^2.0.2",
     "@wdio/logger": "^8.1.0",
     "ci-info": "^3.7.1",
+    "cross-dirname": "^0.1.0",
     "extract-zip": "^2.0.1",
     "import-meta-resolve": "^2.2.1",
     "wdio-chromedriver-service": "^8.0.1",
@@ -94,7 +82,7 @@
     "@typescript-eslint/parser": "^5.48.2",
     "@wdio/cli": "^8.1.3",
     "@wdio/types": "^8.1.2",
-    "electron": "^22.0.2",
+    "electron": "^22.0.3",
     "eslint": "^8.32.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
@@ -112,14 +100,11 @@
     "prettier": "^2.8.3",
     "release-it": "^15.6.0",
     "ts-jest": "^29.0.5",
-    "typescript": "^4.9.4",
-    "uuid": "^9.0.0"
+    "typescript": "^4.9.4"
   },
   "files": [
     "bin/*",
-    "dist/*",
-    "main.js",
-    "preload.js"
+    "dist/*"
   ],
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
