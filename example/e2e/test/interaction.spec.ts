@@ -1,8 +1,9 @@
-import { setupBrowser, WebdriverIOBoundFunctions } from '@testing-library/webdriverio';
-import { queries } from '@testing-library/dom';
+import { browser } from '@wdio/globals';
+import { setupBrowser, WebdriverIOQueries } from '@testing-library/webdriverio';
+import type { electronService } from 'wdio-electron-service';
 
 describe('application loading', () => {
-  let screen: WebdriverIOBoundFunctions<typeof queries>;
+  let screen: WebdriverIOQueries;
 
   before(() => {
     screen = setupBrowser(browser);
@@ -18,7 +19,10 @@ describe('application loading', () => {
   describe('click events', () => {
     describe('when the make larger button is clicked', () => {
       it('increases the window height and width by 10 pixels', async () => {
-        let bounds = (await browser.electronBrowserWindow('getBounds')) as { width: number; height: number };
+        let bounds = (await (browser as electronService).browserWindow('getBounds')) as {
+          width: number;
+          height: number;
+        };
         expect(bounds.width).toEqual(200);
         expect(bounds.height).toEqual(300);
         let biggerClickCount = await browser.$('.click-count .bigger').getText();
@@ -27,19 +31,22 @@ describe('application loading', () => {
         await elem.click();
         biggerClickCount = await browser.$('.click-count .bigger').getText();
         expect(biggerClickCount).toEqual('1');
-        bounds = (await browser.electronBrowserWindow('getBounds')) as { width: number; height: number };
+        bounds = (await (browser as electronService).browserWindow('getBounds')) as { width: number; height: number };
         expect(bounds.width).toEqual(210);
         expect(bounds.height).toEqual(310);
       });
     });
     describe('when the make smaller button is clicked', () => {
       it('decreases the window height and width by 10 pixels', async () => {
-        let bounds = (await browser.electronBrowserWindow('getBounds')) as { width: number; height: number };
+        let bounds = (await (browser as electronService).browserWindow('getBounds')) as {
+          width: number;
+          height: number;
+        };
         expect(bounds.width).toEqual(210);
         expect(bounds.height).toEqual(310);
         const elem = await browser.$('.make-smaller');
         await elem.click();
-        bounds = (await browser.electronBrowserWindow('getBounds')) as { width: number; height: number };
+        bounds = (await (browser as electronService).browserWindow('getBounds')) as { width: number; height: number };
         expect(bounds.width).toEqual(200);
         expect(bounds.height).toEqual(300);
       });

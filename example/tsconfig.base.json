@@ -1,13 +1,5 @@
 {
-  "ts-node": {
-    "esm": true,
-    "compilerOptions": {
-      "module": "ESNext"
-    }
-  },
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
     "baseUrl": "./",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -27,9 +19,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "types": ["node", "mocha", "@wdio/globals/types", "@wdio/mocha-framework", "expect-webdriverio"],
-    "typeRoots": ["./node_modules/@types"]
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+    "types": ["node", "mocha", "@wdio/globals/types", "@wdio/mocha-framework", "expect"],
+    "typeRoots": ["./node_modules/@types", "./@types"]
+  }
 }

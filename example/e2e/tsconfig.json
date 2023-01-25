@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext"
+  },
+  "include": ["test/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,6 +1,11 @@
 /* eslint no-console: off, global-require: off */
-const { app, BrowserWindow, ipcMain } = require('electron');
-const { isTest } = require('./util');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import { isTest } from './util';
+
+declare global {
+  var mainProcessGlobal: string;
+  var ipcEventCount: number;
+}
 
 if (isTest) {
   require('wdio-electron-service/main');
@@ -9,7 +14,7 @@ if (isTest) {
 const appPath = app.getAppPath();
 
 const appRootPath = `${appPath}/dist`;
-let mainWindow = null;
+let mainWindow: BrowserWindow;
 
 app.on('ready', () => {
   console.log('main log');
@@ -26,14 +31,13 @@ app.on('ready', () => {
     height: 300,
     webPreferences: {
       preload: `${appRootPath}/preload.js`,
-      enableRemoteModule: false,
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;
+    mainWindow.destroy();
   });
   mainWindow.loadFile(`${appRootPath}/index.html`);
 

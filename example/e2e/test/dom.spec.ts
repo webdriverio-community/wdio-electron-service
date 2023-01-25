@@ -1,9 +1,9 @@
 /* eslint-disable wdio/await-expect */
-import { setupBrowser, WebdriverIOBoundFunctions } from '@testing-library/webdriverio';
-import { queries } from '@testing-library/dom';
+import { browser } from '@wdio/globals';
+import { setupBrowser, WebdriverIOQueries } from '@testing-library/webdriverio';
 
 describe('application loading', () => {
-  let screen: WebdriverIOBoundFunctions<typeof queries>;
+  let screen: WebdriverIOQueries;
 
   before(() => {
     screen = setupBrowser(browser);

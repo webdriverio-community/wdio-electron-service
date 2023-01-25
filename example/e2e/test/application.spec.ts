@@ -1,3 +1,5 @@
+import type { electronService } from 'wdio-electron-service';
+
 describe('application loading', () => {
   describe('App', () => {
     it('should launch the application', async () => {
@@ -8,7 +10,7 @@ describe('application loading', () => {
 
     it('should pass args through to the launched application', async () => {
       // custom args are set in the wdio.conf.js file as they need to be set before WDIO starts
-      const argv = await browser.electronMainProcess('argv');
+      const argv = await (browser as electronService).mainProcess('argv');
       expect(argv).toContain('--foo');
       expect(argv).toContain('--bar=baz');
     });

@@ -1,26 +1,28 @@
-const { join } = require('path');
-const fs = require('fs');
+import { join } from 'path';
+import fs from 'fs';
+import { getDirname } from 'cross-dirname';
 
-const packageJson = JSON.parse(fs.readFileSync('./package.json'));
+const dirname = getDirname();
+const packageJson = JSON.parse(fs.readFileSync('../app/package.json'));
 const {
   build: { productName },
 } = packageJson;
 
 process.env.TEST = true;
 
-const config = {
+export const config = {
   services: [
     [
       'electron',
       {
-        appPath: join(__dirname, 'dist'),
+        appPath: join(dirname, '..', 'app', 'dist'),
         appName: productName,
         appArgs: ['foo', 'bar=baz'],
         chromedriver: {
           port: 9519,
           logFileName: 'wdio-chromedriver.log',
         },
-        electronVersion: '22.0.0'
+        electronVersion: '22.0.0',
       },
     ],
   ],
@@ -39,7 +41,7 @@ const config = {
       esm: true,
       transpileOnly: true,
       files: true,
-      project: join(__dirname, 'tsconfig.json'),
+      project: join(dirname, 'tsconfig.test.json'),
     },
   },
   framework: 'mocha',
@@ -48,5 +50,3 @@ const config = {
     timeout: 30000,
   },
 };
-
-module.exports = { config };
