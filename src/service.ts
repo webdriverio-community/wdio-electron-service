@@ -53,7 +53,7 @@ type ElectronWorkerOptions = {
   appArgs?: string[];
 };
 type ApiCommand = { name: string; bridgeProp: string };
-type WebDriverClient = Browser<'async'>;
+type WebDriverClient = Browser;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
