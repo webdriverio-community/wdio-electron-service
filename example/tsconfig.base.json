@@ -2,6 +2,6 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node", "mocha", "@wdio/globals/types", "@wdio/mocha-framework", "expect"]
+    "types": ["node", "mocha", "@wdio/globals/types", "expect"]
   }
 }
