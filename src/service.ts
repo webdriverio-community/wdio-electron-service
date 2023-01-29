@@ -55,7 +55,7 @@ type ElectronWorkerOptions = {
 type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
-
+type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     const apiCommands = [
@@ -98,6 +98,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   public options;
 
   public apiCommands;
+
+  private _browser?: WebdriverIO.Browser;
 
   beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
@@ -152,16 +154,21 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     log.debug('setting browser capabilities', capabilities);
   }
 
-  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
+  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
+    const api: ElectronServiceApi = {};
+    this._browser = browser;
     this.apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
-      browser.addCommand(name, async (...args: unknown[]) => {
-        try {
-          return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
-        } catch (e) {
-          throw new Error(`${name} error: ${(e as Error).message}`);
-        }
-      });
+      api[name] = {
+        value: async (...args: unknown[]) => {
+          try {
+            return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
+          } catch (e) {
+            throw new Error(`${name} error: ${(e as Error).message}`);
+          }
+        },
+      };
     });
+    this._browser.electron = Object.create({}, api);
   }
 }
