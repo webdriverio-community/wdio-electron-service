@@ -10,14 +10,9 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:import/warnings',
     'plugin:n/recommended',
-    'plugin:jest/recommended',
-    'plugin:jest/style',
     'plugin:wdio/recommended',
   ],
-  plugins: ['@typescript-eslint', 'import', 'n', 'jest', 'wdio'],
-  env: {
-    jest: true,
-  },
+  plugins: ['@typescript-eslint', 'import', 'n', 'vitest', 'wdio'],
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
@@ -44,6 +39,5 @@ module.exports = {
     'n/no-extraneous-require': 'off',
     'n/no-unpublished-require': 'off',
     '@typescript-eslint/unbound-method': 'off',
-    'jest/unbound-method': 'error',
   },
 };

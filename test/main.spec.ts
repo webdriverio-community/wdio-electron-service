@@ -1,13 +1,14 @@
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { IpcMainInvokeEvent } from 'electron';
 
 type MockObj = { [Key: string]: unknown };
 
-const ipcMainHandleMock = jest.fn();
+const ipcMainHandleMock = vi.fn();
 const browserWindowMock: MockObj = {};
-const fromWebContentsMock = jest.fn().mockReturnValue(browserWindowMock);
+const fromWebContentsMock = vi.fn().mockReturnValue(browserWindowMock);
 const electronAppMock: MockObj = {};
 
-jest.mock('electron', () => ({
+vi.mock('electron', () => ({
   ipcMain: { handle: ipcMainHandleMock },
   app: electronAppMock,
   BrowserWindow: { fromWebContents: fromWebContentsMock },
@@ -24,7 +25,7 @@ describe('main', () => {
   });
 
   afterEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     listeners = {};
   });
 
@@ -44,7 +45,7 @@ describe('main', () => {
     });
 
     it('should call process functions with the expected parameters and return the result', () => {
-      const mockProcessFunction = jest.fn().mockReturnValue('test result');
+      const mockProcessFunction = vi.fn().mockReturnValue('test result');
       (process as Partial<{ test: () => void }>).test = mockProcessFunction;
       const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
       expect(mockProcessFunction).toHaveBeenCalledWith('some', 'args');
@@ -60,7 +61,7 @@ describe('main', () => {
     });
 
     it('should call app functions with the expected parameters and return the result', () => {
-      const mockAppFunction = jest.fn().mockReturnValue('test result');
+      const mockAppFunction = vi.fn().mockReturnValue('test result');
       electronAppMock.test = mockAppFunction;
       const result = listeners['wdio-electron.app']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
       expect(mockAppFunction).toHaveBeenCalledWith('some', 'args');
@@ -80,7 +81,7 @@ describe('main', () => {
     });
 
     it('should call app functions with the expected parameters and return the result', () => {
-      const mockBrowserWindowFunction = jest.fn().mockReturnValue('test result');
+      const mockBrowserWindowFunction = vi.fn().mockReturnValue('test result');
       browserWindowMock.test = mockBrowserWindowFunction;
       const result = listeners['wdio-electron.browserWindow']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
       expect(mockBrowserWindowFunction).toHaveBeenCalledWith('some', 'args');

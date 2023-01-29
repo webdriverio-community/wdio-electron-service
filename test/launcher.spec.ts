@@ -1,15 +1,16 @@
+import { vi, Mock, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
-jest.mock('wdio-chromedriver-service');
+vi.mock('wdio-chromedriver-service');
 
-interface RequireResolveMock extends jest.Mock {
+interface RequireResolveMock extends Mock {
   paths(request: string): string[] | null;
 }
 
 it('should handle no chromedriver configuration', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
+  const requireResolveMock = vi.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
   const launcherInstance = new ChromeDriverLauncher(
     {},
@@ -28,7 +29,7 @@ it('should handle no chromedriver configuration', () => {
 });
 
 it('should create a new CDS instance with the expected parameters', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
+  const requireResolveMock = vi.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
   const launcherInstance = new ChromeDriverLauncher(
     { chromedriver: { logFileName: 'mock-log.txt' } },
@@ -48,7 +49,7 @@ it('should create a new CDS instance with the expected parameters', () => {
 });
 
 it('should get the chromedriver path from electron-chromedriver', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
+  const requireResolveMock = vi.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('mock-chromedriver-path');
   const launcherInstance = new ChromeDriverLauncher(
     { chromedriver: { logFileName: 'mock-log.txt' } },
@@ -66,7 +67,7 @@ it('should get the chromedriver path from electron-chromedriver', () => {
 });
 
 it('should not look for electron-chromedriver when chromedriverCustomPath is specified', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
+  const requireResolveMock = vi.fn() as RequireResolveMock;
   requireResolveMock.mockReturnValue('mock-chromedriver-path');
   const launcherInstance = new ChromeDriverLauncher(
     { chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver-path-custom' } },
@@ -84,7 +85,7 @@ it('should not look for electron-chromedriver when chromedriverCustomPath is spe
 });
 
 it('should throw an error when chromedriverCustomPath is not specified and electron-chromedriver is not found', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
+  const requireResolveMock = vi.fn() as RequireResolveMock;
   requireResolveMock.mockImplementation(() => {
     throw new Error('module not found');
   });
@@ -111,7 +112,7 @@ describe('on windows platforms', () => {
   });
 
   it('should create a new CDS instance with the expected parameters', () => {
-    const requireResolveMock = jest.fn() as RequireResolveMock;
+    const requireResolveMock = vi.fn() as RequireResolveMock;
     requireResolveMock.mockReturnValue('mock-chromedriver');
     const launcherInstance = new ChromeDriverLauncher(
       { chromedriver: { logFileName: 'mock-log.txt' } },
@@ -131,7 +132,7 @@ describe('on windows platforms', () => {
   });
 
   it('should create the expected environment variables', () => {
-    const requireResolveMock = jest.fn() as RequireResolveMock;
+    const requireResolveMock = vi.fn() as RequireResolveMock;
     requireResolveMock.mockReturnValue('mock-chromedriver-path');
     const launcherInstance = new ChromeDriverLauncher(
       { chromedriver: { logFileName: 'mock-log.txt' } },
