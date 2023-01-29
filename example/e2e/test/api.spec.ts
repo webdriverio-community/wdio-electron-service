@@ -1,5 +1,5 @@
-import type { electronService } from 'wdio-electron-service';
 import fs from 'fs';
+import { browser } from 'wdio-electron-service';
 
 const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding: 'utf-8' })) as Partial<{
   name: string;
@@ -15,27 +15,27 @@ const waitFor = (ms: number) =>
 describe('electron APIs', () => {
   describe('custom', () => {
     it('should return the expected response', async () => {
-      const result = await (browser as electronService).api();
+      const result = await browser.electron.api();
       expect(result).toEqual('test');
     });
   });
   describe('app', () => {
     it('should retrieve app metadata through the electron API', async () => {
-      const appName = await (browser as electronService).app('getName');
+      const appName = await browser.electron.app('getName');
       expect(appName).toEqual(name);
-      const appVersion = await (browser as electronService).app('getVersion');
+      const appVersion = await browser.electron.app('getVersion');
       expect(appVersion).toEqual(version);
     });
   });
   describe('mainProcess', () => {
     it('should retrieve the process type through the electron API', async () => {
-      const processType = await (browser as electronService).mainProcess('type');
+      const processType = await browser.electron.mainProcess('type');
       expect(processType).toEqual('browser');
     });
   });
   describe('browserWindow', () => {
     it('should retrieve the window title through the electron API', async () => {
-      const windowTitle = await (browser as electronService).browserWindow('title');
+      const windowTitle = await browser.electron.browserWindow('title');
       // TODO: flaky - might need window load timeout
       await waitFor(100);
       expect(windowTitle).toEqual('this is the title of the main window');

@@ -1,5 +1,4 @@
-/* eslint-disable wdio/await-expect */
-import { browser } from '@wdio/globals';
+import { browser } from 'wdio-electron-service';
 import { setupBrowser, WebdriverIOQueries } from '@testing-library/webdriverio';
 
 describe('application loading', () => {
