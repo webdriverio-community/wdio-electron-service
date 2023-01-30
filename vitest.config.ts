@@ -1,16 +1,13 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['test/**/*.test.ts'],
-    /**
-     * not to ESM ported packages
-     */
-    exclude: ['dist', '.idea', '.git', '.cache', '**/node_modules/**'],
+    include: ['test/*.spec.ts'],
+    exclude: [...configDefaults.exclude, 'example/**/*'],
+    environment: 'jsdom',
     coverage: {
       enabled: true,
-      exclude: ['**/build/**', '**/__fixtures__/**', '**/*.test.ts'],
+      exclude: ['test/**/*'],
       lines: 100,
       functions: 100,
       branches: 100,
