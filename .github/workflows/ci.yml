@@ -34,5 +34,4 @@ jobs:
         with:
           version: 7.3.0
           run_install: true
-      - run: pnpm test
-      - run: pnpm lint
+      - run: pnpm ci
