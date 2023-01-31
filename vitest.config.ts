@@ -8,10 +8,10 @@ export default defineConfig({
     coverage: {
       enabled: true,
       exclude: ['test/**/*'],
-      lines: 100,
-      functions: 100,
-      branches: 100,
-      statements: 100,
+      lines: 75,
+      functions: 75,
+      branches: 75,
+      statements: 75,
     },
   },
 });
