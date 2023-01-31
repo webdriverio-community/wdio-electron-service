@@ -1,6 +1,6 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { Capabilities } from '@wdio/types';
-import ciInfo from 'ci-info';
+import * as ciInfo from 'ci-info';
 import { Browser } from 'webdriverio';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
@@ -8,17 +8,11 @@ import { mockProcessProperty, revertProcessProperty } from './helpers';
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
-function mockIsCI(isCI: boolean) {
-  Object.defineProperty(ciInfo, 'isCI', { get: () => isCI });
-}
+vi.mock('ci-info');
 
-vi.mock('ci-info', async () => {
-  const actual: typeof ciInfo = await vi.importActual('ci-info');
-  return {
-    ...actual,
-    isCI: false,
-  };
-});
+function mockIsCI(isCI: boolean) {
+  vi.spyOn(ciInfo, 'isCI', 'get').mockReturnValue(isCI);
+}
 
 describe('options validation', () => {
   beforeEach(async () => {
@@ -582,11 +576,9 @@ describe('before', () => {
     instance.before({}, [], {
       addCommand: addCommandMock,
     } as unknown as Browser);
-    expect(addCommandMock.mock.calls).toEqual([
-      ['customApi', expect.any(Function)],
-      ['app', expect.any(Function)],
-      ['mainProcess', expect.any(Function)],
-      ['browserWindow', expect.any(Function)],
-    ]);
+    expect(instance._browser.electron.customApi).toEqual(expect.any(Function));
+    expect(instance._browser.electron.app).toEqual(expect.any(Function));
+    expect(instance._browser.electron.mainProcess).toEqual(expect.any(Function));
+    expect(instance._browser.electron.browserWindow).toEqual(expect.any(Function));
   });
 });
