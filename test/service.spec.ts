@@ -53,9 +53,12 @@ describe('options validation', () => {
 });
 
 describe('beforeSession', () => {
+  beforeEach(() => {
+    mockIsCI(false);
+  });
+
   afterEach(() => {
     instance = undefined;
-    mockIsCI(false);
     revertProcessProperty('platform');
   });
 
