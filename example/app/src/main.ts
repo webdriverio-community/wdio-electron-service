@@ -1,4 +1,3 @@
-/* eslint no-console: off, global-require: off */
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util';
 

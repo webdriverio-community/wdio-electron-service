@@ -1,4 +1,3 @@
-/* eslint global-require: off */
 import { contextBridge, ipcRenderer } from 'electron';
 import { isTest } from './util';
 

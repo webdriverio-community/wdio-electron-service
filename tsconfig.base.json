@@ -23,7 +23,7 @@
     "noEmit": false,
     "typeRoots": ["./node_modules/@types", "./@types"]
   },
-  "include": ["src/**/*"],
+  "include": ["**/*"],
   "ignore": ["node_modules", "dist"],
   "ts-node": {
     "transpileOnly": true,
