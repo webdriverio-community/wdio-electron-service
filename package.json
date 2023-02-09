@@ -42,7 +42,8 @@
     "release:patch": "pnpm release patch",
     "release:minor": "pnpm release minor",
     "release:major": "pnpm release major",
-    "test:unit": "vitest --coverage",
+    "test:unit": "vitest --coverage --watch=false",
+    "test:dev": "vitest --coverage",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:integration": "pnpm test:build-app && cd example/e2e && pnpm clean && pnpm i && pnpm test",
     "test:build-app": "cd example/app && pnpm clean && pnpm i && pnpm build"
