@@ -27,9 +27,8 @@
     "node": "^16.13 || >=18"
   },
   "scripts": {
-    "init": "npm install -g pnpm && pnpm i",
-    "prepare": "husky install",
-    "ci": "pnpm build && pnpm test && pnpm lint && pnpm format:check",
+    "init-dev": "pnpm i -r && husky install",
+    "ci": "pwd && ls -la ./node_modules && pnpm build && pnpm test && pnpm lint && pnpm format:check",
     "clean": "rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "rm -rf ./dist",
     "build": "./scripts/build.sh",
