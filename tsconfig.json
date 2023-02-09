@@ -1,5 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
+  "ignore": ["node_modules", "dist", "example"],
   "compilerOptions": {
     "module": "ESNext",
     "outDir": "dist",
