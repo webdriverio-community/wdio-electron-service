@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "ci": "pnpm test && pnpm lint",
-    "clean": "rm -rf ./node_modules ./wdio-logs",
+    "clean": "pnpx rimraf ./node_modules ./wdio-logs",
     "format": "prettier --write \"**/*.{j,t}s\"",
     "lint": "eslint \"**/*.{j,t}s\"",
     "test": "wdio run ./wdio.conf.js || (cat ./wdio-logs/wdio-0-0.log && cat ./wdio-logs/wdio-chromedriver.log && exit 1)"
@@ -45,7 +45,7 @@
     "webdriverio": "^8.3.5"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.15.0"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [

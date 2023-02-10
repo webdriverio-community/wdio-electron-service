@@ -6,7 +6,7 @@
     "build": "webpack && cp ./src/index.html ./dist && electron-builder -p never",
     "ci": "pnpm build && pnpm lint",
     "clean": "pnpm clean:dist && rm -rf ./node_modules ./all-logs",
-    "clean:dist": "rm -rf ./dist && mkdir -p ./dist",
+    "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
     "format": "prettier --write \"**/*.{j,t}s\"",
     "lint": "eslint \"**/*.{j,t}s\""
   },
