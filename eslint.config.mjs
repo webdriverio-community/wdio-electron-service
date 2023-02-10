@@ -66,6 +66,18 @@ export default [
       ...ts.configs['eslint-recommended'].rules,
       ...ts.configs.recommended.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
+      '@typescript-eslint/no-empty-interface': [
+        'error',
+        {
+          allowSingleExtends: true,
+        },
+      ],
+      '@typescript-eslint/no-namespace': [
+        'error',
+        {
+          allowDeclarations: true,
+        },
+      ],
     },
   },
   // Example app TS files
