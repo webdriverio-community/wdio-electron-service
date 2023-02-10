@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
-  "exclude": ["node_modules", "dist", "example", "test"],
+  "exclude": ["node_modules", "coverage", "dist", "example", "test", "*.config.*"],
   "compilerOptions": {
     "module": "CommonJS",
     "outDir": "dist/cjs",
