@@ -28,7 +28,7 @@
   },
   "scripts": {
     "init-dev": "pnpm i -r && husky install",
-    "ci": "pwd && ls -la ./node_modules && pnpm build && pnpm test && pnpm lint && pnpm format:check",
+    "ci": "pnpm build && pnpm test && pnpm lint && pnpm format:check",
     "clean": "rm -rf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "rm -rf ./dist",
     "build": "./scripts/build.sh",
@@ -45,7 +45,7 @@
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:integration": "pnpm test:build-app && cd example/e2e && pnpm test",
-    "test:build-app": "cd example/app && pwd && ls -la ./node_modules && pnpm build"
+    "test:build-app": "cd example/app && pnpm build"
   },
   "keywords": [
     "webdriverio",
