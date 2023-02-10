@@ -22,7 +22,7 @@ export const config = {
           port: 9519,
           logFileName: 'wdio-chromedriver.log',
         },
-        electronVersion: '22.0.0',
+        electronVersion: '23.0.0',
       },
     ],
   ],
