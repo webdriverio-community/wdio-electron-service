@@ -56,6 +56,7 @@ type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
 type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
+
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     const apiCommands = [

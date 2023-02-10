@@ -7,19 +7,29 @@
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/index.js",
+  "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/cjs/index.js"
-    },
-    "./main": {
-      "import": "./dist/main.js",
-      "require": "./dist/cjs/main.js"
-    },
-    "./preload": {
-      "import": "./dist/preload.js",
-      "require": "./dist/cjs/preload.js"
-    }
+    ".": [
+      {
+        "import": "./dist/index.js",
+        "require": "./dist/cjs/index.js"
+      },
+      "./dist/cjs/index.js"
+    ],
+    "./main": [
+      {
+        "import": "./dist/main.js",
+        "require": "./dist/cjs/main.js"
+      },
+      "./dist/cjs/main.js"
+    ],
+    "./preload": [
+      {
+        "import": "./dist/preload.js",
+        "require": "./dist/cjs/preload.js"
+      },
+      "./dist/cjs/preload.js"
+    ]
   },
   "typeScriptVersion": "4.9.4",
   "types": "./dist/index.d.ts",
@@ -29,9 +39,10 @@
   "scripts": {
     "init-dev": "pnpm i -r && husky install",
     "ci": "pnpm build && pnpm test && pnpm lint && pnpm format:check",
-    "clean": "rm -rf ./node_modules pnpm-lock.yaml ./dist",
-    "clean:dist": "rm -rf ./dist",
-    "build": "./scripts/build.sh",
+    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
+    "clean:dist": "pnpx rimraf ./dist",
+    "clean:all": "pnpm -r --reverse clean",
+    "build": "tsc && pnpx shx cp src/cjs/package.json dist/cjs",
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint -c eslint.config.mjs \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=true eslint -c eslint.config.mjs \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\"",
@@ -44,8 +55,8 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit && pnpm test:integration",
-    "test:integration": "pnpm test:build-app && cd example/e2e && pnpm test",
-    "test:build-app": "cd example/app && pnpm build"
+    "test:integration": "pnpm test:build-app && cd example/e2e && pnpm i && pnpm test",
+    "test:build-app": "cd example/app && pnpm i && pnpm build"
   },
   "keywords": [
     "webdriverio",
@@ -96,6 +107,8 @@
     "lint-staged": "^13.1.1",
     "prettier": "^2.8.4",
     "release-it": "^15.6.0",
+    "rimraf": "^4.1.2",
+    "shx": "^0.3.4",
     "typescript": "^4.9.5",
     "vite": "^4.1.1",
     "vitest": "^0.28.4"

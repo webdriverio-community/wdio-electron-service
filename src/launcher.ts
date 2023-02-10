@@ -13,7 +13,7 @@ import { log } from './utils.js';
 
 const dirname = getDirname();
 
-type ElectronLauncherServiceOpts = {
+export type ElectronLauncherServiceOpts = {
   chromedriver?: ChromedriverServiceOptions;
   electronVersion?: string;
 };
