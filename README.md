@@ -182,6 +182,12 @@ The protocol chromedriver should use.
 
 The hostname chromedriver should use.
 
+### `chromedriver.pollTimeOut`: _`string`_
+
+#### default `10000`
+
+The startup timeout of ChromeDriver in ms, it checks if the port is open before starting ChromeDriver and then checks again if it is closed after starting.
+
 ### `chromedriver.outputDir`: _`string`_
 
 #### default defined by [`config.outputDir`](https://webdriver.io/docs/options/#outputdir)
