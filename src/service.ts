@@ -100,7 +100,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   public apiCommands;
 
-  private _browser?: WebdriverIO.Browser;
+  public _browser?: WebdriverIO.Browser;
 
   beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
