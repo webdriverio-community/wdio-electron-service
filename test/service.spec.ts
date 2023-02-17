@@ -1,9 +1,15 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { Capabilities } from '@wdio/types';
 import * as ciInfo from 'ci-info';
-import { Browser } from 'webdriverio';
+import { BrowserExtension } from '../src/index';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
+
+interface CustomBrowserExtension extends BrowserExtension {
+  electron: BrowserExtension['electron'] & {
+    customApi?: (...arg: unknown[]) => Promise<unknown>;
+  };
+}
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
@@ -578,10 +584,11 @@ describe('before', () => {
     });
     instance.before({}, [], {
       addCommand: addCommandMock,
-    } as unknown as Browser);
-    expect(instance._browser.electron.customApi).toEqual(expect.any(Function));
-    expect(instance._browser.electron.app).toEqual(expect.any(Function));
-    expect(instance._browser.electron.mainProcess).toEqual(expect.any(Function));
-    expect(instance._browser.electron.browserWindow).toEqual(expect.any(Function));
+    } as unknown as WebdriverIO.Browser);
+    const electronApi = instance._browser?.electron as CustomBrowserExtension['electron'];
+    expect(electronApi.customApi).toEqual(expect.any(Function));
+    expect(electronApi.app).toEqual(expect.any(Function));
+    expect(electronApi.mainProcess).toEqual(expect.any(Function));
+    expect(electronApi.browserWindow).toEqual(expect.any(Function));
   });
 });
