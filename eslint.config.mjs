@@ -2,13 +2,11 @@ import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import vitest from 'eslint-plugin-vitest';
+import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
 // TODO:
-// enable eslint-plugin-n
-// enable eslint-plugin-promise
-// enable eslint-plugin-vitest (recommended preset)
-// enable eslint-plugin-wdio
+// enable eslint-plugin-vitest (awaiting recommended ruleset)
 
 export default [
   'eslint:recommended',
@@ -82,7 +80,7 @@ export default [
   },
   // Example app TS files
   {
-    files: ['example/app/*.ts'],
+    files: ['example/app/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'example/app/tsconfig.json',
@@ -91,11 +89,20 @@ export default [
   },
   // Example e2e TS files
   {
-    files: ['example/e2e/*.ts'],
+    files: ['example/e2e/test/*.spec.ts'],
     languageOptions: {
       parserOptions: {
         project: 'example/e2e/tsconfig.json',
       },
+      globals: {
+        ...wdio.configs.recommended.globals,
+      },
+    },
+    plugins: {
+      wdio,
+    },
+    rules: {
+      ...wdio.configs.recommended.rules,
     },
   },
   // Test files
@@ -104,13 +111,8 @@ export default [
     plugins: {
       vitest,
     },
-    languageOptions: {
-      globals: {
-        // ...globals.jest,
-      },
-    },
     rules: {
-      // ...vitest.rules,
+      // ...vitest.configs.recommended,
     },
   },
 ];
