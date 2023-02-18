@@ -15,6 +15,7 @@ it('should handle no chromedriver configuration', () => {
     mock: 'config',
   } as unknown as Testrunner);
   expect(launcherInstance).toBeInstanceOf(launcher);
+  console.log(launcher.mock.calls);
   expect(launcher).toHaveBeenCalledWith(
     {
       chromedriverCustomPath: expect.stringContaining(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
@@ -31,6 +32,7 @@ it('should set chromedriverCustomPath correctly when not provided', () => {
     { mock: 'config' } as unknown as Testrunner,
   );
   expect(launcherInstance).toBeInstanceOf(launcher);
+  console.log(launcher.mock.calls);
   expect(launcher).toHaveBeenCalledWith(
     {
       chromedriverCustomPath: expect.stringContaining(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
@@ -74,7 +76,6 @@ describe('on windows platforms', () => {
       { mock: 'config' } as unknown as Testrunner,
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
-    console.log(launcher);
     expect(launcher).toHaveBeenCalledWith(
       {
         chromedriverCustomPath: expect.stringContaining(
