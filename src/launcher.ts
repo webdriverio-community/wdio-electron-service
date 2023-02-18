@@ -1,4 +1,4 @@
-import path, { join } from 'path';
+import { join, extname } from 'path';
 import { promises as fs } from 'fs';
 import { Capabilities, Options } from '@wdio/types';
 import extractZip from 'extract-zip';
@@ -34,12 +34,12 @@ function download(version: string) {
 async function attemptDownload(version = '') {
   log.debug(`Downloading Chromedriver v${version}`);
   try {
-    const targetFolder = path.join(dirname, '..', 'bin');
+    const targetFolder = join(dirname, '..', 'bin');
     const zipPath = await download(version);
     await extractZip(zipPath, { dir: targetFolder });
     const platform = process.env.npm_config_platform || process.platform;
     if (platform !== 'win32') {
-      await fs.chmod(path.join(targetFolder, 'chromedriver'), 0o755);
+      await fs.chmod(join(targetFolder, 'chromedriver'), 0o755);
     }
   } catch (err) {
     // attempt to fall back to semver minor
@@ -55,15 +55,6 @@ async function attemptDownload(version = '') {
   }
 }
 
-function createChromedriverServiceOptions(options: ElectronLauncherServiceOpts): ChromedriverServiceOptions {
-  const { chromedriver = {} } = options;
-  const chromedriverServiceOptions = { ...chromedriver };
-
-  process.env.WDIO_ELECTRON = 'true';
-
-  return chromedriverServiceOptions;
-}
-
 export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   private electronVersion;
 
@@ -75,13 +66,16 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     log.debug('launcher received options:', options);
     process.env.WDIO_ELECTRON = 'true';
     const isWin = process.platform === 'win32';
-    const chromedriverServiceOptions = createChromedriverServiceOptions(options);
+    const chromedriverServiceOptions = options.chromedriver || {};
 
     if (isWin) {
-      process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
-      process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
-      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver.bat');
-    } else {
+      const shouldRunInNode = extname(chromedriverServiceOptions.chromedriverCustomPath || '') === '.js';
+      if (shouldRunInNode) {
+        process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
+        process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
+        chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver.bat');
+      }
+    } else if (!chromedriverServiceOptions.chromedriverCustomPath) {
       chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver');
     }
 
