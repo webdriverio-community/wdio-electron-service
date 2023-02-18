@@ -5,9 +5,6 @@ import vitest from 'eslint-plugin-vitest';
 import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
-// TODO:
-// enable eslint-plugin-vitest (awaiting recommended ruleset)
-
 export default [
   'eslint:recommended',
   // Ignored dirs
@@ -112,7 +109,7 @@ export default [
       vitest,
     },
     rules: {
-      // ...vitest.configs.recommended,
+      ...vitest.configs.recommended.rules,
     },
   },
 ];
