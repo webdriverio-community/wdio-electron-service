@@ -32,7 +32,7 @@ function download(version: string) {
 }
 
 async function attemptDownload(version = '') {
-  log.debug(`Downloading Chromedriver v${version}`);
+  log.debug(`downloading Chromedriver for Electron v${version}`);
   try {
     const targetFolder = join(dirname, '..', 'bin');
     const zipPath = await download(version);
@@ -42,16 +42,19 @@ async function attemptDownload(version = '') {
       await fs.chmod(join(targetFolder, 'chromedriver'), 0o755);
     }
   } catch (err) {
-    // attempt to fall back to semver minor
+    // check if there is a semver minor version for fallback
     const parts = version.split('.');
     const baseVersion = `${parts[0]}.${parts[1]}.0`;
 
-    // don't recurse infinitely
     if (baseVersion === version) {
+      log.error(`error downloading Chromedriver for Electron v${version}`);
+      log.error(err);
       throw err;
-    } else {
-      await attemptDownload(baseVersion);
     }
+
+    log.warn(`error downloading Chromedriver for Electron v${version}`);
+    log.debug('falling back to minor version...');
+    await attemptDownload(baseVersion);
   }
 }
 
