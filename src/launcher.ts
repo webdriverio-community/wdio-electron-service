@@ -73,7 +73,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     process.env.WDIO_ELECTRON = 'true';
 
     const validChromedriverPath =
-      chromedriverServiceOptions.chromedriverCustomPath !== undefined && options.electronVersion !== undefined;
+      chromedriverServiceOptions.chromedriverCustomPath !== undefined || options.electronVersion !== undefined;
     if (!validChromedriverPath) {
       const invalidChromedriverOptsError = new Error(
         'you must specify the electronVersion, or provide a chromedriverCustomPath value',

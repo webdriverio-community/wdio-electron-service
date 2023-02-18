@@ -20,9 +20,15 @@ describe('on non-Windows platforms', () => {
   });
 
   it('should handle no chromedriver configuration', () => {
-    const launcherInstance = new ChromeDriverLauncher({}, { browserName: 'mockBrowser' }, {
-      mock: 'config',
-    } as unknown as Testrunner);
+    const launcherInstance = new ChromeDriverLauncher(
+      {
+        electronVersion: '23.1.0',
+      },
+      { browserName: 'mockBrowser' },
+      {
+        mock: 'config',
+      } as unknown as Testrunner,
+    );
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(launcher).toHaveBeenCalledWith(
       {
@@ -35,7 +41,7 @@ describe('on non-Windows platforms', () => {
 
   it('should set chromedriverCustomPath correctly when not provided', () => {
     const launcherInstance = new ChromeDriverLauncher(
-      { chromedriver: { logFileName: 'mock-log.txt' } },
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.1.0' },
       { browserName: 'mockBrowser' },
       { mock: 'config' } as unknown as Testrunner,
     );
@@ -78,7 +84,7 @@ describe('on windows platforms', () => {
   });
 
   it('should handle no chromedriver configuration', () => {
-    const launcherInstance = new ChromeDriverLauncher({}, { browserName: 'mockBrowser' }, {
+    const launcherInstance = new ChromeDriverLauncher({ electronVersion: '23.1.0' }, { browserName: 'mockBrowser' }, {
       mock: 'config',
     } as unknown as Testrunner);
     expect(launcherInstance).toBeInstanceOf(launcher);
@@ -95,7 +101,7 @@ describe('on windows platforms', () => {
 
   it('should set chromedriverCustomPath correctly when not provided', () => {
     const launcherInstance = new ChromeDriverLauncher(
-      { chromedriver: { logFileName: 'mock-log.txt' } },
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.1.0' },
       { browserName: 'mockBrowser' },
       { mock: 'config' } as unknown as Testrunner,
     );
