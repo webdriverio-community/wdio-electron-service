@@ -11,48 +11,25 @@
     "test": "wdio run ./wdio.conf.js || (cat ./wdio-logs/wdio-0-0.log && cat ./wdio-logs/wdio-chromedriver.log && exit 1)"
   },
   "devDependencies": {
-    "@testing-library/dom": "^8.20.0",
+    "@testing-library/dom": "^9.0.0",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.13.0",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
     "@wdio/cli": "^8.3.5",
     "@wdio/globals": "^8.3.5",
     "@wdio/local-runner": "^8.3.5",
     "@wdio/mocha-framework": "^8.3.0",
-    "debug": "^4.3.4",
-    "eslint": "^8.33.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-import-resolver-typescript": "^3.5.3",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jest": "^27.2.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-wdio": "^8.0.14",
-    "expect": "^29.4.2",
-    "expect-webdriverio": "^4.1.1",
+    "expect": "^29.4.3",
+    "expect-webdriverio": "^4.1.2",
     "global-jsdom": "^8.7.0",
-    "husky": "^8.0.3",
     "jsdom": "^21.1.0",
-    "lint-staged": "^13.1.1",
-    "prettier": "^2.8.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "wdio-electron-service": "file:../..",
-    "webdriverio": "^8.3.5"
+    "webdriverio": "^8.3.9"
   },
+  "dependencies": {},
   "engines": {
     "node": ">=16.15.0"
-  },
-  "lint-staged": {
-    "**/*.{yml,json,md,ts,js}": [
-      "prettier --write"
-    ]
-  },
-  "dependencies": {
-    "cross-dirname": "^0.1.0"
   }
 }
