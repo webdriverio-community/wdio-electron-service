@@ -1,6 +1,8 @@
+import { join } from 'path';
 import { Testrunner } from '@wdio/types/build/Options';
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
+
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
@@ -13,7 +15,7 @@ it('should handle no chromedriver configuration', () => {
   expect(launcherInstance).toBeInstanceOf(launcher);
   expect(launcher).toHaveBeenCalledWith(
     {
-      chromedriverCustomPath: expect.stringContaining('/wdio-electron-service/bin/chromedriver') as string,
+      chromedriverCustomPath: expect.stringMatching(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
     },
     { browserName: 'mockBrowser' },
     { mock: 'config' },
@@ -29,7 +31,7 @@ it('should create a new CDS instance with the expected parameters', () => {
   expect(launcherInstance).toBeInstanceOf(launcher);
   expect(launcher).toHaveBeenCalledWith(
     {
-      chromedriverCustomPath: expect.stringContaining('/wdio-electron-service/bin/chromedriver') as string,
+      chromedriverCustomPath: expect.stringContaining(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
       logFileName: 'mock-log.txt',
     },
     { browserName: 'mockBrowser' },
@@ -55,7 +57,9 @@ describe('on windows platforms', () => {
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(launcher).toHaveBeenCalledWith(
       {
-        chromedriverCustomPath: expect.stringContaining('/wdio-electron-service/bin/chrome-driver.bat') as string,
+        chromedriverCustomPath: expect.stringContaining(
+          join('wdio-electron-service', 'bin', 'chromedriver.bat'),
+        ) as string,
         logFileName: 'mock-log.txt',
       },
       { browserName: 'mockBrowser' },
@@ -70,7 +74,7 @@ describe('on windows platforms', () => {
       { mock: 'config' } as unknown as Testrunner,
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
-    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain('/bin/node');
+    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain(join('bin', 'node'));
     expect(process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH).toBe('mock-chromedriver-path');
   });
 });
