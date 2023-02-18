@@ -18,9 +18,11 @@ You will need to install `WebdriverIO`, instructions can be found [here.](https:
 
 ### Chromedriver
 
-`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, so you can specify the Electron version that you are using and the service will download and use the appropriate version of chromedriver for your app.
+`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, as of v4 you can specify the electron version that you are using and the service will download and use the appropriate version of chromedriver for your app.
 
-Alternatively you can install chromedriver directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to specify the `chromedriverCustomPath` property.
+#### Custom Configuration
+
+If you prefer to manage chromedriver yourself you can install it directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to tell the service where your chromedriver binary is. You can do this by specifying the `chromedriverCustomPath` property.
 
 ```bash
 npm i -D chromedriver@100  # for Electron 18 apps
