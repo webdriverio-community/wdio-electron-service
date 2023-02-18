@@ -230,7 +230,6 @@ describe('beforeSession', () => {
         'goog:chromeOptions': {
           args: [
             'window-size=1280,800',
-            'blink-settings=imagesEnabled=false',
             'enable-automation',
             'disable-infobars',
             'disable-extensions',
@@ -284,7 +283,6 @@ describe('beforeSession', () => {
             'goog:chromeOptions': {
               args: [
                 'window-size=1280,800',
-                'blink-settings=imagesEnabled=false',
                 'enable-automation',
                 'disable-infobars',
                 'disable-extensions',
@@ -420,7 +418,6 @@ describe('beforeSession', () => {
           'goog:chromeOptions': {
             args: [
               'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
               'enable-automation',
               'disable-infobars',
               'disable-extensions',
@@ -479,7 +476,6 @@ describe('beforeSession', () => {
           'goog:chromeOptions': {
             args: [
               'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
               'enable-automation',
               'disable-infobars',
               'disable-extensions',
@@ -536,13 +532,7 @@ describe('beforeSession', () => {
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
-            args: [
-              'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
-              'enable-automation',
-              'disable-infobars',
-              'disable-extensions',
-            ],
+            args: ['window-size=1280,800', 'enable-automation', 'disable-infobars', 'disable-extensions'],
             binary: 'workspace/my-test-app/dist/win-unpacked/my-test-app.exe',
             windowTypes: ['app', 'webview'],
           },
