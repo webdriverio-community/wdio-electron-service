@@ -2,21 +2,27 @@ import { join } from 'path';
 import { Testrunner } from '@wdio/types/build/Options';
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
-import { downloadArtifact } from '@electron/get';
+// import { downloadArtifact } from '@electron/get';
 
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
 const isWin = process.platform === 'win32';
+let downloadArtifactMock = vi.fn();
 
 vi.mock('wdio-chromedriver-service');
-vi.mock('@electron/get', () => {
-  const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
-
-  return { downloadArtifact };
-});
 vi.mock('extract-zip', () => ({ default: vi.fn().mockImplementation(() => Promise.resolve()) }));
 vi.mock('fs', () => ({ promises: { chmod: vi.fn().mockImplementation(() => Promise.resolve()) } }));
+
+beforeEach(() => {
+  downloadArtifactMock = vi.fn();
+  vi.doUnmock('@electron/get');
+  vi.doMock('@electron/get', () => {
+    const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
+
+    return { downloadArtifact };
+  });
+});
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -180,8 +186,10 @@ describe('on windows platforms', () => {
 });
 
 describe('onPrepare', () => {
-  it('should download chromedriver when no chromedriverCustomPath is specified', () => {
-    const launcherInstance = new ChromeDriverLauncher(
+  it('should download chromedriver when no chromedriverCustomPath is specified', async () => {
+    const { default: ChromeDriverLauncher2 } = await import('../src/launcher');
+    const { downloadArtifact } = await import('@electron/get');
+    const launcherInstance = new ChromeDriverLauncher2(
       { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.0.0' },
       { browserName: 'mockBrowser' },
       { mock: 'config' } as unknown as Testrunner,
@@ -198,7 +206,8 @@ describe('onPrepare', () => {
     });
   });
 
-  it('should not download chromedriver when a chromedriverCustomPath is specified', () => {
+  it('should not download chromedriver when a chromedriverCustomPath is specified', async () => {
+    const { downloadArtifact } = await import('@electron/get');
     const launcherInstance = new ChromeDriverLauncher(
       {
         chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
@@ -210,5 +219,63 @@ describe('onPrepare', () => {
     launcherInstance.onPrepare();
 
     expect(downloadArtifact).not.toHaveBeenCalled();
+  });
+
+  describe('when the first download fails', () => {
+    it('should attempt a single additional fallback download according to semver', async () => {
+      const { downloadArtifact } = await import('@electron/get');
+      const launcherInstance = new ChromeDriverLauncher(
+        {
+          chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+          electronVersion: '23.1.69',
+        },
+        { browserName: 'mockBrowser' },
+        { mock: 'config' } as unknown as Testrunner,
+      );
+      launcherInstance.onPrepare();
+
+      expect(downloadArtifact).toHaveBeenCalledTimes(2);
+      expect(downloadArtifact).toHaveBeenCalledWith([
+        {
+          arch: undefined,
+          artifactName: 'chromedriver',
+          cacheRoot: undefined,
+          force: false,
+          platform: undefined,
+          version: '23.1.69',
+        },
+        {
+          arch: undefined,
+          artifactName: 'chromedriver',
+          cacheRoot: undefined,
+          force: false,
+          platform: undefined,
+          version: '23.1.0',
+        },
+      ]);
+    });
+
+    it('should throw an error if there is no semver fallback to try', async () => {
+      const { downloadArtifact } = await import('@electron/get');
+      const launcherInstance = new ChromeDriverLauncher(
+        {
+          chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+          electronVersion: '23.1.0',
+        },
+        { browserName: 'mockBrowser' },
+        { mock: 'config' } as unknown as Testrunner,
+      );
+      launcherInstance.onPrepare();
+
+      expect(downloadArtifact).toHaveBeenCalledTimes(1);
+      expect(downloadArtifact).toHaveBeenCalledWith({
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.0',
+      });
+    });
   });
 });
