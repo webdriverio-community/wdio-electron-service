@@ -12,10 +12,10 @@ const isWin = process.platform === 'win32';
 vi.mock('wdio-chromedriver-service');
 vi.mock('extract-zip', () => ({ default: vi.fn().mockImplementation(() => Promise.resolve()) }));
 vi.mock('fs', () => ({ promises: { chmod: vi.fn().mockImplementation(() => Promise.resolve()) } }));
-vi.mock('@electron/get', () => {
-  const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
+vi.mock('@electron/get');
 
-  return { downloadArtifact };
+beforeEach(() => {
+  (downloadArtifact as Mock).mockImplementation(() => Promise.resolve('mock-zip-path'));
 });
 
 afterEach(() => {
@@ -213,19 +213,23 @@ describe('onPrepare', () => {
   });
 
   describe('when the first download fails', () => {
-    it('should attempt a single additional fallback download according to semver', () => {
-      const downloadArtifactMock = downloadArtifact as Mock;
-      downloadArtifactMock.mockImplementation(() => {
-        console.log('call one', downloadArtifactMock.mock.calls.length);
-        if (downloadArtifactMock.mock.calls.length === 1) {
-          return Promise.reject();
+    beforeEach(() => {
+      let downloadMockCalls = 0;
+      (downloadArtifact as Mock).mockImplementation(() => {
+        downloadMockCalls++;
+        console.log('called', downloadMockCalls);
+        if (downloadMockCalls === 1) {
+          throw new Error('download error');
         }
 
         return Promise.resolve('mock-zip-path');
       });
+    });
+
+    it('should attempt a single additional fallback download according to semver', () => {
       const launcherInstance = new ChromeDriverLauncher(
         {
-          chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+          chromedriver: { logFileName: 'mock-log.txt' },
           electronVersion: '23.1.69',
         },
         { browserName: 'mockBrowser' },
@@ -234,38 +238,35 @@ describe('onPrepare', () => {
       launcherInstance.onPrepare();
 
       expect(downloadArtifact).toHaveBeenCalledTimes(2);
-      expect(downloadArtifact).toHaveBeenCalledWith([
-        {
-          arch: undefined,
-          artifactName: 'chromedriver',
-          cacheRoot: undefined,
-          force: false,
-          platform: undefined,
-          version: '23.1.69',
-        },
-        {
-          arch: undefined,
-          artifactName: 'chromedriver',
-          cacheRoot: undefined,
-          force: false,
-          platform: undefined,
-          version: '23.1.0',
-        },
-      ]);
+      expect(downloadArtifact).toHaveBeenNthCalledWith(1, {
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.69',
+      });
+      expect(downloadArtifact).toHaveBeenNthCalledWith(2, {
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.0',
+      });
     });
 
     it('should throw an error if there is no semver fallback to try', async () => {
       const { downloadArtifact } = await import('@electron/get');
       const launcherInstance = new ChromeDriverLauncher(
         {
-          chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+          chromedriver: { logFileName: 'mock-log.txt' },
           electronVersion: '23.1.0',
         },
         { browserName: 'mockBrowser' },
         { mock: 'config' } as unknown as Testrunner,
       );
-      launcherInstance.onPrepare();
-
+      expect(() => launcherInstance.onPrepare()).rejects.toThrowError('download error');
       expect(downloadArtifact).toHaveBeenCalledTimes(1);
       expect(downloadArtifact).toHaveBeenCalledWith({
         arch: undefined,
