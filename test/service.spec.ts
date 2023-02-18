@@ -1,6 +1,7 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { Capabilities } from '@wdio/types';
 import * as ciInfo from 'ci-info';
+
 import { BrowserExtension } from '../src/index';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';

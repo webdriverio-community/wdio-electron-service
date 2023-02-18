@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+
 import type { WdioElectronWindowObj } from '../@types/wdio-electron-service';
 
 const ipcRendererInvokeMock = vi.fn();
