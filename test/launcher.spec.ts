@@ -1,27 +1,21 @@
 import { join } from 'path';
 import { Testrunner } from '@wdio/types/build/Options';
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, afterEach, it, expect, Mock } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
-// import { downloadArtifact } from '@electron/get';
+import { downloadArtifact } from '@electron/get';
 
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
 const isWin = process.platform === 'win32';
-let downloadArtifactMock = vi.fn();
 
 vi.mock('wdio-chromedriver-service');
 vi.mock('extract-zip', () => ({ default: vi.fn().mockImplementation(() => Promise.resolve()) }));
 vi.mock('fs', () => ({ promises: { chmod: vi.fn().mockImplementation(() => Promise.resolve()) } }));
+vi.mock('@electron/get', () => {
+  const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
 
-beforeEach(() => {
-  downloadArtifactMock = vi.fn();
-  vi.doUnmock('@electron/get');
-  vi.doMock('@electron/get', () => {
-    const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
-
-    return { downloadArtifact };
-  });
+  return { downloadArtifact };
 });
 
 afterEach(() => {
@@ -186,10 +180,8 @@ describe('on windows platforms', () => {
 });
 
 describe('onPrepare', () => {
-  it('should download chromedriver when no chromedriverCustomPath is specified', async () => {
-    const { default: ChromeDriverLauncher2 } = await import('../src/launcher');
-    const { downloadArtifact } = await import('@electron/get');
-    const launcherInstance = new ChromeDriverLauncher2(
+  it('should download chromedriver when no chromedriverCustomPath is specified', () => {
+    const launcherInstance = new ChromeDriverLauncher(
       { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.0.0' },
       { browserName: 'mockBrowser' },
       { mock: 'config' } as unknown as Testrunner,
@@ -206,8 +198,7 @@ describe('onPrepare', () => {
     });
   });
 
-  it('should not download chromedriver when a chromedriverCustomPath is specified', async () => {
-    const { downloadArtifact } = await import('@electron/get');
+  it('should not download chromedriver when a chromedriverCustomPath is specified', () => {
     const launcherInstance = new ChromeDriverLauncher(
       {
         chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
@@ -222,8 +213,16 @@ describe('onPrepare', () => {
   });
 
   describe('when the first download fails', () => {
-    it('should attempt a single additional fallback download according to semver', async () => {
-      const { downloadArtifact } = await import('@electron/get');
+    it('should attempt a single additional fallback download according to semver', () => {
+      const downloadArtifactMock = downloadArtifact as Mock;
+      downloadArtifactMock.mockImplementation(() => {
+        console.log('call one', downloadArtifactMock.mock.calls.length);
+        if (downloadArtifactMock.mock.calls.length === 1) {
+          return Promise.reject();
+        }
+
+        return Promise.resolve('mock-zip-path');
+      });
       const launcherInstance = new ChromeDriverLauncher(
         {
           chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
