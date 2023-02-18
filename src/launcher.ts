@@ -2,7 +2,7 @@ import { join, extname } from 'path';
 import { promises as fs } from 'fs';
 import { Capabilities, Options } from '@wdio/types';
 import extractZip from 'extract-zip';
-import { downloadArtifact } from '@electron/get';
+import { downloadArtifact as downloadElectronAssets } from '@electron/get';
 import {
   launcher as ChromedriverServiceLauncher,
   ServiceOptions as ChromedriverServiceOptions,
@@ -18,7 +18,7 @@ export type ElectronLauncherServiceOpts = {
   electronVersion?: string;
 };
 
-function download(version: string) {
+function downloadAssets(version: string) {
   const conf = {
     version,
     artifactName: 'chromedriver',
@@ -30,14 +30,14 @@ function download(version: string) {
     // quiet: ['info', 'verbose', 'silly', 'http'].indexOf(process.env.npm_config_loglevel) === -1
   };
   log.debug('chromedriver download config: ', conf);
-  return downloadArtifact(conf);
+  return downloadElectronAssets(conf);
 }
 
-async function attemptDownload(version = '') {
+async function attemptAssetsDownload(version = '') {
   log.debug(`downloading Chromedriver for Electron v${version}...`);
   try {
     const targetFolder = join(dirname, '..', 'bin');
-    const zipPath = await download(version);
+    const zipPath = await downloadAssets(version);
     log.debug('assets downloaded to ', zipPath);
     await extractZip(zipPath, { dir: targetFolder });
     log.debug('assets extracted');
@@ -60,7 +60,7 @@ async function attemptDownload(version = '') {
 
     log.warn(`error downloading Chromedriver for Electron v${version}`);
     log.debug('falling back to minor version...');
-    await attemptDownload(baseVersion);
+    await attemptAssetsDownload(baseVersion);
   }
 }
 
@@ -115,7 +115,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   async onPrepare() {
     if (this.shouldDownloadChromedriver) {
       const { electronVersion } = this.electronServiceLauncherOptions;
-      await attemptDownload(electronVersion);
+      await attemptAssetsDownload(electronVersion);
     }
 
     return super.onPrepare();
