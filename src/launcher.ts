@@ -19,7 +19,7 @@ export type ElectronLauncherServiceOpts = {
 };
 
 function download(version: string) {
-  return downloadArtifact({
+  const conf = {
     version,
     artifactName: 'chromedriver',
     force: process.env.force_no_cache === 'true',
@@ -28,18 +28,24 @@ function download(version: string) {
     arch: process.env.npm_config_arch,
     // rejectUnauthorized: process.env.npm_config_strict_ssl === 'true',
     // quiet: ['info', 'verbose', 'silly', 'http'].indexOf(process.env.npm_config_loglevel) === -1
-  });
+  };
+  log.debug('chromedriver download config: ', conf);
+  return downloadArtifact(conf);
 }
 
 async function attemptDownload(version = '') {
-  log.debug(`downloading Chromedriver for Electron v${version}`);
+  log.debug(`downloading Chromedriver for Electron v${version}...`);
   try {
     const targetFolder = join(dirname, '..', 'bin');
     const zipPath = await download(version);
+    log.debug('assets downloaded to ', zipPath);
     await extractZip(zipPath, { dir: targetFolder });
+    log.debug('assets extracted');
     const platform = process.env.npm_config_platform || process.platform;
     if (platform !== 'win32') {
+      log.debug('setting file permissions...');
       await fs.chmod(join(targetFolder, 'chromedriver'), 0o755);
+      log.debug('permissions set');
     }
   } catch (err) {
     // check if there is a semver minor version for fallback
@@ -59,7 +65,8 @@ async function attemptDownload(version = '') {
 }
 
 export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
-  private electronVersion;
+  private electronServiceLauncherOptions;
+  private shouldDownloadChromedriver;
 
   constructor(
     options: ElectronLauncherServiceOpts,
@@ -82,6 +89,9 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
       throw invalidChromedriverOptsError;
     }
 
+    const shouldDownloadChromedriver =
+      options.electronVersion && (!options.chromedriver || !options.chromedriver.chromedriverCustomPath);
+
     if (isWin) {
       const shouldRunInNode = extname(chromedriverServiceOptions.chromedriverCustomPath || '') === '.js';
       if (shouldRunInNode) {
@@ -98,12 +108,14 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
 
     log.debug('setting chromedriver service options:', chromedriverServiceOptions);
     super(chromedriverServiceOptions, capabilities, config);
-    this.electronVersion = options.electronVersion;
+    this.electronServiceLauncherOptions = options;
+    this.shouldDownloadChromedriver = shouldDownloadChromedriver;
   }
 
   async onPrepare() {
-    if (this.electronVersion) {
-      await attemptDownload(this.electronVersion);
+    if (this.shouldDownloadChromedriver) {
+      const { electronVersion } = this.electronServiceLauncherOptions;
+      await attemptDownload(electronVersion);
     }
 
     return super.onPrepare();
