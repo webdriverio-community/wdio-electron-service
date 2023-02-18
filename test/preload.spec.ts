@@ -1,8 +1,10 @@
+import { vi, describe, beforeEach, it, expect } from 'vitest';
+
 import type { WdioElectronWindowObj } from '../@types/wdio-electron-service';
 
-const ipcRendererInvokeMock = jest.fn();
+const ipcRendererInvokeMock = vi.fn();
 
-jest.mock('electron', () => ({
+vi.mock('electron', () => ({
   contextBridge: {
     exposeInMainWorld: (apiKey: string, api: unknown) => {
       Object.defineProperty(global, apiKey, {

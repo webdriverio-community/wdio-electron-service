@@ -1,7 +1,7 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 import { Browser } from 'webdriverio';
 import { isCI } from 'ci-info';
-import { log } from './utils';
+import { log } from './utils.js';
 
 function getMacExecutableName(appName: string) {
   // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
@@ -25,7 +25,7 @@ function getBinaryPath(distPath: string, appName: string) {
   }
 
   const pathMap = {
-    darwin: `mac${arch === 'arm64' ? '-arm64' : ''}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
+    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
     linux: `linux-unpacked/${appName}`,
     win32: `win-unpacked/${appName}.exe`,
   };
@@ -53,24 +53,19 @@ type ElectronWorkerOptions = {
   appArgs?: string[];
 };
 type ApiCommand = { name: string; bridgeProp: string };
-type WebDriverClient = Browser<'async'>;
+type WebDriverClient = Browser;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
+type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     const apiCommands = [
       { name: '', bridgeProp: 'custom' },
-      { name: 'electronApp', bridgeProp: 'app' },
-      { name: 'electronMainProcess', bridgeProp: 'mainProcess' },
-      { name: 'electronBrowserWindow', bridgeProp: 'browserWindow' },
+      { name: 'app', bridgeProp: 'app' },
+      { name: 'mainProcess', bridgeProp: 'mainProcess' },
+      { name: 'browserWindow', bridgeProp: 'browserWindow' },
     ];
-    const {
-      appPath,
-      appName,
-      appArgs,
-      binaryPath,
-      customApiBrowserCommand = 'electronAPI',
-    } = options as ElectronWorkerOptions;
+    const { appPath, appName, appArgs, binaryPath, customApiBrowserCommand = 'api' } = options as ElectronWorkerOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
@@ -105,12 +100,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   public apiCommands;
 
+  public _browser?: WebdriverIO.Browser;
+
   beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
     const chromeArgs = [];
 
     if (isCI) {
       chromeArgs.push('window-size=1280,800');
-      chromeArgs.push('blink-settings=imagesEnabled=false');
       chromeArgs.push('enable-automation');
       chromeArgs.push('disable-infobars');
       chromeArgs.push('disable-extensions');
@@ -158,16 +154,21 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     log.debug('setting browser capabilities', capabilities);
   }
 
-  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebDriverClient): void {
+  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
+    const api: ElectronServiceApi = {};
+    this._browser = browser;
     this.apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
-      browser.addCommand(name, async (...args: unknown[]) => {
-        try {
-          return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
-        } catch (e) {
-          throw new Error(`${name} error: ${(e as Error).message}`);
-        }
-      });
+      api[name] = {
+        value: async (...args: unknown[]) => {
+          try {
+            return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
+          } catch (e) {
+            throw new Error(`${name} error: ${(e as Error).message}`);
+          }
+        },
+      };
     });
+    this._browser.electron = Object.create({}, api);
   }
 }

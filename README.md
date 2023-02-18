@@ -12,25 +12,20 @@ Spiritual successor to [Spectron](https://github.com/electron-userland/spectron)
 npm i -D wdio-electron-service
 ```
 
-Or use your package manager of choice - yarn, pnpm, etc.
+Or use your package manager of choice - pnpm, yarn, etc.
 
 You will need to install `WebdriverIO`, instructions can be found [here.](https://webdriver.io/docs/gettingstarted)
 
 ### Chromedriver
 
-`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, so it is recommended to install it via [`electron-chromedriver`](https://github.com/electron/chromedriver) as their versioning directly tracks electron releases. For example:
+`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, as of v4 you can specify the electron version that you are using and the service will download and use the appropriate version of chromedriver for your app.
 
-```bash
-npm i -D electron-chromedriver@18
-```
+#### Custom Configuration
 
-The above command installs `electron-chromedriver` v18 which installs the chromedriver version that will work with an app built using electron 18.
-
-Alternatively you can install chromedriver directly or via some other means, in this case you will need to specify the `chromedriverCustomPath` property.
+If you prefer to manage chromedriver yourself you can install it directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to tell the service where your chromedriver binary is. You can do this by specifying the `chromedriverCustomPath` property.
 
 ```bash
 npm i -D chromedriver@100  # for Electron 18 apps
-npm i -D chromedriver@96  # for Electron 16 apps
 ```
 
 ```js
@@ -47,40 +42,41 @@ To use the service you need to add `electron` to your services array, followed b
 
 ```js
 // wdio.conf.js
-const { join } = require('path');
-const fs = require('fs');
+import { join } from 'path';
+import fs from 'fs';
+import { getDirname } from 'cross-dirname';
 
+const dirname = getDirname();
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 const {
   build: { productName },
 } = packageJson;
 
-const config = {
+export const config = {
   outputDir: 'all-logs',
   // ...
   services: [
     [
       'electron',
       {
-        appPath: join(__dirname, 'dist'),
+        appPath: join(dirname, 'dist'),
         appName: productName,
         appArgs: ['foo', 'bar=baz'],
         chromedriver: {
           port: 9519,
           logFileName: 'wdio-chromedriver.log',
         },
+        electronVersion: '23.1.0',
       },
     ],
   ],
   // ...
 };
-
-module.exports = { config };
 ```
 
 ### API Configuration
 
-If you wish to use the electron APIs then you will need to import the preload and main scripts. Somewhere near the top of your preload:
+If you wish to use the electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload:
 
 ```ts
 if (isTest) {
@@ -98,10 +94,17 @@ if (isTest) {
 
 The APIs should not work outside of WDIO but for security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure the APIs are only exposed when the app is being tested.
 
-After importing the scripts the APIs should now be available in tests. Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+After importing the scripts the APIs should now be available in tests.
+
+Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+
+The service re-exports the WDIO browser object with the `.electron` namespace for API usage in your tests:
 
 ```ts
-const appName = await browser.electronApp('getName');
+import { browser } from 'wdio-electron-service';
+
+// in a test
+const appName = await browser.electron.app('getName');
 ```
 
 ### Custom Electron API
@@ -120,13 +123,13 @@ ipcMain.handle('wdio-electron', () => {
 The custom API can then be called in a spec file:
 
 ```ts
-const someValue = await browser.electronAPI('wow'); // default
-const someValue = await browser.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
+const someValue = await browser.electron.api('wow'); // default
+const someValue = await browser.electron.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
 ```
 
 ### Example
 
-See [wdio-electron-service-example](https://github.com/goosewobbler/wdio-electron-service-example) for an example of "real-world" usage in testing a minimal electron app.
+See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example of "real-world" usage in testing a minimal electron app.
 
 ## Configuration
 
@@ -144,13 +147,17 @@ It needs to match the name of the install directory used by `electron-builder`; 
 
 The path to the electron binary of the app for testing. The path generated by using `appPath` and `appName` is tied to `electron-builder` output, if you are implementing something custom then you can use this.
 
+### `electronVersion`: _`string`_
+
+The version of electron that the app to be tested was built with. The service uses this value to download the appropriate version of chromedriver. It is not required if you are specifying a [`chromedriverCustomPath`](#chromedriverchromedrivercustompath-string).
+
 ### `appArgs`: _`string[]`_
 
 An array of string arguments to be passed through to the app on execution of the test run.
 
 ### `customApiBrowserCommand`: _`string`_
 
-#### default `electronAPI`
+#### default `api`
 
 The browser command used to access the custom electron API.
 
@@ -182,6 +189,12 @@ The protocol chromedriver should use.
 
 The hostname chromedriver should use.
 
+### `chromedriver.pollTimeOut`: _`string`_
+
+#### default `10000`
+
+The startup timeout of ChromeDriver in ms, it checks if the port is open before starting ChromeDriver and then checks again if it is closed after starting.
+
 ### `chromedriver.outputDir`: _`string`_
 
 #### default defined by [`config.outputDir`](https://webdriver.io/docs/options/#outputdir)
@@ -196,6 +209,4 @@ The name of the output log file to be written in the `outputDir`.
 
 ### `chromedriver.chromedriverCustomPath`: _`string`_
 
-#### default `require.resolve('electron-chromedriver')`
-
-The path of the chromedriver binary to be executed. If not specified, the service will look for the `electron-chromedriver` module.
+The path of the chromedriver binary to be executed. If not specified, the service will install the appropriate version of Chromedriver for the specified [`electronVersion`](#electronversion-string).

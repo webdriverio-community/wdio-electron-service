@@ -1,104 +1,99 @@
+import { join } from 'path';
+import { Testrunner } from '@wdio/types/build/Options';
+import { vi, describe, beforeEach, afterEach, it, expect, Mock } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
+import { downloadArtifact } from '@electron/get';
+
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 
-jest.mock('wdio-chromedriver-service');
+const isWin = process.platform === 'win32';
 
-interface RequireResolveMock extends jest.Mock {
-  paths(request: string): string[] | null;
-}
+vi.mock('wdio-chromedriver-service');
+vi.mock('extract-zip', () => ({ default: vi.fn().mockImplementation(() => Promise.resolve()) }));
+vi.mock('fs', () => ({ promises: { chmod: vi.fn().mockImplementation(() => Promise.resolve()) } }));
+vi.mock('@electron/get');
 
-it('should handle no chromedriver configuration', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
-  requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
-  const launcherInstance = new ChromeDriverLauncher(
-    {},
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-    requireResolveMock,
-  );
-  expect(launcherInstance).toBeInstanceOf(launcher);
-  expect(launcher).toHaveBeenCalledWith(
-    {
-      chromedriverCustomPath: expect.stringContaining('/electron-chromedriver/chromedriver.js') as string,
-    },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-  );
+beforeEach(() => {
+  (downloadArtifact as Mock).mockImplementation(() => Promise.resolve('mock-zip-path'));
 });
 
-it('should create a new CDS instance with the expected parameters', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
-  requireResolveMock.mockReturnValue('/electron-chromedriver/chromedriver.js');
-  const launcherInstance = new ChromeDriverLauncher(
-    { chromedriver: { logFileName: 'mock-log.txt' } },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-    requireResolveMock,
-  );
-  expect(launcherInstance).toBeInstanceOf(launcher);
-  expect(launcher).toHaveBeenCalledWith(
-    {
-      chromedriverCustomPath: expect.stringContaining('/electron-chromedriver/chromedriver.js') as string,
-      logFileName: 'mock-log.txt',
-    },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-  );
+afterEach(() => {
+  vi.clearAllMocks();
 });
 
-it('should get the chromedriver path from electron-chromedriver', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
-  requireResolveMock.mockReturnValue('mock-chromedriver-path');
-  const launcherInstance = new ChromeDriverLauncher(
-    { chromedriver: { logFileName: 'mock-log.txt' } },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-    requireResolveMock,
-  );
-  expect(launcherInstance).toBeInstanceOf(launcher);
-  expect(requireResolveMock).toHaveBeenCalledWith('electron-chromedriver/chromedriver');
-  expect(launcher).toHaveBeenCalledWith(
-    { chromedriverCustomPath: 'mock-chromedriver-path', logFileName: 'mock-log.txt' },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-  );
-});
-
-it('should not look for electron-chromedriver when chromedriverCustomPath is specified', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
-  requireResolveMock.mockReturnValue('mock-chromedriver-path');
-  const launcherInstance = new ChromeDriverLauncher(
-    { chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver-path-custom' } },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-    requireResolveMock,
-  );
-  expect(launcherInstance).toBeInstanceOf(launcher);
-  expect(requireResolveMock).not.toHaveBeenCalled();
-  expect(launcher).toHaveBeenCalledWith(
-    { chromedriverCustomPath: 'mock-chromedriver-path-custom', logFileName: 'mock-log.txt' },
-    { browserName: 'mockBrowser' },
-    { mock: 'config' },
-  );
-});
-
-it('should throw an error when chromedriverCustomPath is not specified and electron-chromedriver is not found', () => {
-  const requireResolveMock = jest.fn() as RequireResolveMock;
-  requireResolveMock.mockImplementation(() => {
-    throw new Error('module not found');
+describe('options validation', () => {
+  it('should throw an error when no chromedriverCustomPath or electronVersion are specified', () => {
+    expect(() => {
+      new ChromeDriverLauncher({}, { browserName: 'mockBrowser' }, {
+        mock: 'config',
+      } as unknown as Testrunner);
+    }).toThrow('You must specify the electronVersion, or provide a chromedriverCustomPath value');
   });
-  expect(
-    () =>
-      new ChromeDriverLauncher(
-        { chromedriver: { logFileName: 'mock-log.txt' } },
-        { browserName: 'mockBrowser' },
-        { mock: 'config' },
-        requireResolveMock,
-      ),
-  ).toThrow(
-    'electron-chromedriver was not found. You need to install it or provide a binary via the chromedriver.chromedriverCustomPath option.',
-  );
+});
+
+describe('on non-Windows platforms', () => {
+  beforeEach(() => {
+    mockProcessProperty('platform', 'linux');
+  });
+
+  afterEach(() => {
+    revertProcessProperty('platform');
+  });
+
+  it('should handle no chromedriver configuration', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      {
+        electronVersion: '23.1.0',
+      },
+      { browserName: 'mockBrowser' },
+      {
+        mock: 'config',
+      } as unknown as Testrunner,
+    );
+    expect(launcherInstance).toBeInstanceOf(launcher);
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: expect.stringContaining(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
+  });
+
+  it('should set chromedriverCustomPath correctly when not provided', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.1.0' },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    expect(launcherInstance).toBeInstanceOf(launcher);
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: expect.stringContaining(join('wdio-electron-service', 'bin', 'chromedriver')) as string,
+        logFileName: 'mock-log.txt',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
+  });
+
+  it('should pass through chromeDriverCustomPath', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { chromedriverCustomPath: 'mock-chromedriver', logFileName: 'mock-log.txt' } },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    expect(launcherInstance).toBeInstanceOf(launcher);
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: 'mock-chromedriver',
+        logFileName: 'mock-log.txt',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
+  });
 });
 
 describe('on windows platforms', () => {
@@ -110,19 +105,34 @@ describe('on windows platforms', () => {
     revertProcessProperty('platform');
   });
 
-  it('should create a new CDS instance with the expected parameters', () => {
-    const requireResolveMock = jest.fn() as RequireResolveMock;
-    requireResolveMock.mockReturnValue('mock-chromedriver');
-    const launcherInstance = new ChromeDriverLauncher(
-      { chromedriver: { logFileName: 'mock-log.txt' } },
+  it('should handle no chromedriver configuration', () => {
+    const launcherInstance = new ChromeDriverLauncher({ electronVersion: '23.1.0' }, { browserName: 'mockBrowser' }, {
+      mock: 'config',
+    } as unknown as Testrunner);
+    expect(launcherInstance).toBeInstanceOf(launcher);
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: expect.stringContaining(
+          join('wdio-electron-service', 'bin', 'chromedriver.exe'),
+        ) as string,
+      },
       { browserName: 'mockBrowser' },
       { mock: 'config' },
-      requireResolveMock,
+    );
+  });
+
+  it('should set chromedriverCustomPath correctly when not provided', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.1.0' },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
     expect(launcher).toHaveBeenCalledWith(
       {
-        chromedriverCustomPath: expect.stringContaining('/wdio-electron-service/bin/chrome-driver.bat') as string,
+        chromedriverCustomPath: expect.stringContaining(
+          join('wdio-electron-service', 'bin', 'chromedriver.exe'),
+        ) as string,
         logFileName: 'mock-log.txt',
       },
       { browserName: 'mockBrowser' },
@@ -130,18 +140,142 @@ describe('on windows platforms', () => {
     );
   });
 
-  it('should create the expected environment variables', () => {
-    const requireResolveMock = jest.fn() as RequireResolveMock;
-    requireResolveMock.mockReturnValue('mock-chromedriver-path');
+  it('should execute a JS chromedriverCustomPath via the .bat file', () => {
     const launcherInstance = new ChromeDriverLauncher(
-      { chromedriver: { logFileName: 'mock-log.txt' } },
+      { chromedriver: { chromedriverCustomPath: 'mock-chromedriver.js', logFileName: 'mock-log.txt' } },
       { browserName: 'mockBrowser' },
-      { mock: 'config' },
-      requireResolveMock,
+      { mock: 'config' } as unknown as Testrunner,
     );
     expect(launcherInstance).toBeInstanceOf(launcher);
-    expect(requireResolveMock).toHaveBeenCalledWith('electron-chromedriver/chromedriver');
-    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain('/bin/node');
-    expect(process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH).toBe('mock-chromedriver-path');
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: expect.stringContaining(
+          join('wdio-electron-service', 'bin', 'chromedriver.bat'),
+        ) as string,
+        logFileName: 'mock-log.txt',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
+    expect(process.env.WDIO_ELECTRON_NODE_PATH).toContain(isWin ? 'windows\\node' : 'bin/node');
+    expect(process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH).toBe('mock-chromedriver.js');
+  });
+
+  it('should pass through a non-JS chromeDriverCustomPath', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { chromedriverCustomPath: 'mock-chromedriver.exe', logFileName: 'mock-log.txt' } },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    expect(launcherInstance).toBeInstanceOf(launcher);
+    expect(launcher).toHaveBeenCalledWith(
+      {
+        chromedriverCustomPath: 'mock-chromedriver.exe',
+        logFileName: 'mock-log.txt',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' },
+    );
+  });
+});
+
+describe('onPrepare', () => {
+  it('should download chromedriver when no chromedriverCustomPath is specified', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.0.0' },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    launcherInstance.onPrepare();
+
+    expect(downloadArtifact).toHaveBeenCalledWith({
+      arch: undefined,
+      artifactName: 'chromedriver',
+      cacheRoot: undefined,
+      force: false,
+      platform: undefined,
+      version: '23.0.0',
+    });
+  });
+
+  it('should not download chromedriver when a chromedriverCustomPath is specified', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      {
+        chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+        electronVersion: '23.0.0',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    launcherInstance.onPrepare();
+
+    expect(downloadArtifact).not.toHaveBeenCalled();
+  });
+
+  describe('when the first download fails', () => {
+    beforeEach(() => {
+      let downloadMockCalls = 0;
+      (downloadArtifact as Mock).mockImplementation(() => {
+        downloadMockCalls++;
+        console.log('called', downloadMockCalls);
+        if (downloadMockCalls === 1) {
+          throw new Error('download error');
+        }
+
+        return Promise.resolve('mock-zip-path');
+      });
+    });
+
+    it('should attempt a single additional fallback download according to semver', () => {
+      const launcherInstance = new ChromeDriverLauncher(
+        {
+          chromedriver: { logFileName: 'mock-log.txt' },
+          electronVersion: '23.1.69',
+        },
+        { browserName: 'mockBrowser' },
+        { mock: 'config' } as unknown as Testrunner,
+      );
+      launcherInstance.onPrepare();
+
+      expect(downloadArtifact).toHaveBeenCalledTimes(2);
+      expect(downloadArtifact).toHaveBeenNthCalledWith(1, {
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.69',
+      });
+      expect(downloadArtifact).toHaveBeenNthCalledWith(2, {
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.0',
+      });
+    });
+
+    it('should throw an error if there is no semver fallback to try', async () => {
+      const { downloadArtifact } = await import('@electron/get');
+      const launcherInstance = new ChromeDriverLauncher(
+        {
+          chromedriver: { logFileName: 'mock-log.txt' },
+          electronVersion: '23.1.0',
+        },
+        { browserName: 'mockBrowser' },
+        { mock: 'config' } as unknown as Testrunner,
+      );
+      expect(() => launcherInstance.onPrepare()).rejects.toThrowError('download error');
+      expect(downloadArtifact).toHaveBeenCalledTimes(1);
+      expect(downloadArtifact).toHaveBeenCalledWith({
+        arch: undefined,
+        artifactName: 'chromedriver',
+        cacheRoot: undefined,
+        force: false,
+        platform: undefined,
+        version: '23.1.0',
+      });
+    });
   });
 });

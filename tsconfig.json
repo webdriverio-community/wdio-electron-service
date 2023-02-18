@@ -1,36 +1,9 @@
 {
+  "extends": "./tsconfig.base.json",
+  "exclude": ["node_modules", "coverage", "dist", "example", "test", "*.config.*"],
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "baseUrl": ".",
-    "outDir": "./dist",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noUnusedLocals": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "inlineSources": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "newLine": "lf",
-    "noEmitOnError": true,
-    "lib": ["DOM", "ES2020"],
-    "noImplicitAny": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": false,
-    "typeRoots": ["./node_modules/@types", "./@types"]
-  },
-  "include": ["src/**/*"],
-  "ignore": ["node_modules", "dist"],
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true,
-    "require": ["tsconfig-paths/register"]
+    "module": "ESNext",
+    "outDir": "dist",
+    "target": "ESNext"
   }
 }

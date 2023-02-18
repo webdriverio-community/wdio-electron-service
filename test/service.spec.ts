@@ -1,17 +1,25 @@
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { Capabilities } from '@wdio/types';
-import ciInfo from 'ci-info';
-import { Browser } from 'webdriverio';
+import * as ciInfo from 'ci-info';
+
+import { BrowserExtension } from '../src/index';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
+
+interface CustomBrowserExtension extends BrowserExtension {
+  electron: BrowserExtension['electron'] & {
+    customApi?: (...arg: unknown[]) => Promise<unknown>;
+  };
+}
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
-function mockIsCI(isCI: boolean) {
-  Object.defineProperty(ciInfo, 'isCI', { get: () => isCI });
-}
+vi.mock('ci-info');
 
-jest.mock('ci-info', () => ({ isCI: false }));
+function mockIsCI(isCI: boolean) {
+  vi.spyOn(ciInfo, 'isCI', 'get').mockReturnValue(isCI);
+}
 
 describe('options validation', () => {
   beforeEach(async () => {
@@ -45,16 +53,19 @@ describe('options validation', () => {
     expect(() => {
       instance = new WorkerService({
         binaryPath: '/mock/dist',
-        customApiBrowserCommand: 'electronApp',
+        customApiBrowserCommand: 'app',
       });
-    }).toThrow('The command "electronApp" is reserved, please provide a different value for customApiBrowserCommand');
+    }).toThrow('The command "app" is reserved, please provide a different value for customApiBrowserCommand');
   });
 });
 
 describe('beforeSession', () => {
+  beforeEach(() => {
+    mockIsCI(false);
+  });
+
   afterEach(() => {
     instance = undefined;
-    mockIsCI(false);
     revertProcessProperty('platform');
   });
 
@@ -201,6 +212,7 @@ describe('beforeSession', () => {
   describe('providing appArgs running on CI', () => {
     beforeEach(async () => {
       mockProcessProperty('platform', 'darwin');
+      mockProcessProperty('arch', 'arm64');
       mockIsCI(true);
       WorkerService = (await import('../src/service')).default;
     });
@@ -218,7 +230,6 @@ describe('beforeSession', () => {
         'goog:chromeOptions': {
           args: [
             'window-size=1280,800',
-            'blink-settings=imagesEnabled=false',
             'enable-automation',
             'disable-infobars',
             'disable-extensions',
@@ -230,7 +241,7 @@ describe('beforeSession', () => {
             'some',
             'args',
           ],
-          binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+          binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
           windowTypes: ['app', 'webview'],
         },
       });
@@ -272,7 +283,6 @@ describe('beforeSession', () => {
             'goog:chromeOptions': {
               args: [
                 'window-size=1280,800',
-                'blink-settings=imagesEnabled=false',
                 'enable-automation',
                 'disable-infobars',
                 'disable-extensions',
@@ -284,7 +294,7 @@ describe('beforeSession', () => {
                 'some',
                 'args',
               ],
-              binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+              binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
               windowTypes: ['app', 'webview'],
             },
           },
@@ -302,6 +312,7 @@ describe('beforeSession', () => {
     describe('on MacOS platforms', () => {
       beforeEach(async () => {
         mockProcessProperty('platform', 'darwin');
+        mockProcessProperty('arch', 'arm64');
         WorkerService = (await import('../src/service')).default;
       });
 
@@ -316,7 +327,7 @@ describe('beforeSession', () => {
           'browserName': 'chrome',
           'goog:chromeOptions': {
             args: [],
-            binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+            binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
             windowTypes: ['app', 'webview'],
           },
         });
@@ -333,7 +344,7 @@ describe('beforeSession', () => {
           'browserName': 'chrome',
           'goog:chromeOptions': {
             args: [],
-            binary: 'workspace/my-test-app/dist/mac/My Test Helper.app/Contents/MacOS/My Test',
+            binary: 'workspace/my-test-app/dist/mac-arm64/My Test Helper.app/Contents/MacOS/My Test',
             windowTypes: ['app', 'webview'],
           },
         });
@@ -373,7 +384,7 @@ describe('beforeSession', () => {
               'browserName': 'chrome',
               'goog:chromeOptions': {
                 args: [],
-                binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+                binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
             },
@@ -390,6 +401,7 @@ describe('beforeSession', () => {
     describe('on MacOS platforms running on CI', () => {
       beforeEach(async () => {
         mockProcessProperty('platform', 'darwin');
+        mockProcessProperty('arch', 'arm64');
         mockIsCI(true);
         WorkerService = (await import('../src/service')).default;
       });
@@ -406,7 +418,6 @@ describe('beforeSession', () => {
           'goog:chromeOptions': {
             args: [
               'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
               'enable-automation',
               'disable-infobars',
               'disable-extensions',
@@ -415,7 +426,7 @@ describe('beforeSession', () => {
               'disable-dev-shm-usage',
               'disable-setuid-sandbox',
             ],
-            binary: 'workspace/my-test-app/dist/mac/my-test-app.app/Contents/MacOS/my-test-app',
+            binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
             windowTypes: ['app', 'webview'],
           },
         });
@@ -465,7 +476,6 @@ describe('beforeSession', () => {
           'goog:chromeOptions': {
             args: [
               'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
               'enable-automation',
               'disable-infobars',
               'disable-extensions',
@@ -522,13 +532,7 @@ describe('beforeSession', () => {
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
-            args: [
-              'window-size=1280,800',
-              'blink-settings=imagesEnabled=false',
-              'enable-automation',
-              'disable-infobars',
-              'disable-extensions',
-            ],
+            args: ['window-size=1280,800', 'enable-automation', 'disable-infobars', 'disable-extensions'],
             binary: 'workspace/my-test-app/dist/win-unpacked/my-test-app.exe',
             windowTypes: ['app', 'webview'],
           },
@@ -556,7 +560,7 @@ describe('beforeSession', () => {
 });
 
 describe('before', () => {
-  const addCommandMock = jest.fn();
+  const addCommandMock = vi.fn();
 
   beforeEach(async () => {
     mockProcessProperty('platform', 'darwin');
@@ -571,12 +575,11 @@ describe('before', () => {
     });
     instance.before({}, [], {
       addCommand: addCommandMock,
-    } as unknown as Browser<'async'>);
-    expect(addCommandMock.mock.calls).toEqual([
-      ['customApi', expect.any(Function)],
-      ['electronApp', expect.any(Function)],
-      ['electronMainProcess', expect.any(Function)],
-      ['electronBrowserWindow', expect.any(Function)],
-    ]);
+    } as unknown as WebdriverIO.Browser);
+    const electronApi = instance._browser?.electron as CustomBrowserExtension['electron'];
+    expect(electronApi.customApi).toEqual(expect.any(Function));
+    expect(electronApi.app).toEqual(expect.any(Function));
+    expect(electronApi.mainProcess).toEqual(expect.any(Function));
+    expect(electronApi.browserWindow).toEqual(expect.any(Function));
   });
 });
