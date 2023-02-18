@@ -75,8 +75,11 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
         process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
         chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver.bat');
       }
-    } else if (!chromedriverServiceOptions.chromedriverCustomPath) {
-      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver');
+    }
+
+    if (!chromedriverServiceOptions.chromedriverCustomPath) {
+      const chromedriverExecutable = isWin ? 'chromedriver.exe' : 'chromedriver';
+      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', chromedriverExecutable);
     }
 
     log.debug('setting chromedriver service options:', chromedriverServiceOptions);
