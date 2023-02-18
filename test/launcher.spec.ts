@@ -2,6 +2,7 @@ import { join } from 'path';
 import { Testrunner } from '@wdio/types/build/Options';
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { launcher } from 'wdio-chromedriver-service';
+import { downloadArtifact } from '@electron/get';
 
 import ChromeDriverLauncher from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
@@ -9,6 +10,17 @@ import { mockProcessProperty, revertProcessProperty } from './helpers';
 const isWin = process.platform === 'win32';
 
 vi.mock('wdio-chromedriver-service');
+vi.mock('@electron/get', () => {
+  const downloadArtifact = vi.fn().mockImplementation(() => Promise.resolve('mock-zip-path'));
+
+  return { downloadArtifact };
+});
+vi.mock('extract-zip', () => ({ default: vi.fn().mockImplementation(() => Promise.resolve()) }));
+vi.mock('fs', () => ({ promises: { chmod: vi.fn().mockImplementation(() => Promise.resolve()) } }));
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('options validation', () => {
   it('should throw an error when no chromedriverCustomPath or electronVersion are specified', () => {
@@ -164,5 +176,39 @@ describe('on windows platforms', () => {
       { browserName: 'mockBrowser' },
       { mock: 'config' },
     );
+  });
+});
+
+describe('onPrepare', () => {
+  it('should download chromedriver when no chromedriverCustomPath is specified', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      { chromedriver: { logFileName: 'mock-log.txt' }, electronVersion: '23.0.0' },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    launcherInstance.onPrepare();
+
+    expect(downloadArtifact).toHaveBeenCalledWith({
+      arch: undefined,
+      artifactName: 'chromedriver',
+      cacheRoot: undefined,
+      force: false,
+      platform: undefined,
+      version: '23.0.0',
+    });
+  });
+
+  it('should not download chromedriver when a chromedriverCustomPath is specified', () => {
+    const launcherInstance = new ChromeDriverLauncher(
+      {
+        chromedriver: { logFileName: 'mock-log.txt', chromedriverCustomPath: 'mock-chromedriver' },
+        electronVersion: '23.0.0',
+      },
+      { browserName: 'mockBrowser' },
+      { mock: 'config' } as unknown as Testrunner,
+    );
+    launcherInstance.onPrepare();
+
+    expect(downloadArtifact).not.toHaveBeenCalled();
   });
 });
