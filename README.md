@@ -12,21 +12,15 @@ Spiritual successor to [Spectron](https://github.com/electron-userland/spectron)
 npm i -D wdio-electron-service
 ```
 
-Or use your package manager of choice - yarn, pnpm, etc.
+Or use your package manager of choice - pnpm, yarn, etc.
 
 You will need to install `WebdriverIO`, instructions can be found [here.](https://webdriver.io/docs/gettingstarted)
 
 ### Chromedriver
 
-`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, so it is recommended to install it via [`electron-chromedriver`](https://github.com/electron/chromedriver) as their versioning directly tracks electron releases. For example:
+`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, so you can specify the Electron version that you are using and the service will download and use the appropriate version of chromedriver for your app.
 
-```bash
-npm i -D electron-chromedriver@18
-```
-
-The above command installs `electron-chromedriver` v18 which installs the chromedriver version that will work with an app built using electron 18.
-
-Alternatively you can install chromedriver directly or via some other means, in this case you will need to specify the `chromedriverCustomPath` property.
+Alternatively you can install chromedriver directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to specify the `chromedriverCustomPath` property.
 
 ```bash
 npm i -D chromedriver@100  # for Electron 18 apps
@@ -47,40 +41,41 @@ To use the service you need to add `electron` to your services array, followed b
 
 ```js
 // wdio.conf.js
-const { join } = require('path');
-const fs = require('fs');
+import { join } from 'path';
+import fs from 'fs';
+import { getDirname } from 'cross-dirname';
 
+const dirname = getDirname();
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 const {
   build: { productName },
 } = packageJson;
 
-const config = {
+export const config = {
   outputDir: 'all-logs',
   // ...
   services: [
     [
       'electron',
       {
-        appPath: join(__dirname, 'dist'),
+        appPath: join(dirname, 'dist'),
         appName: productName,
         appArgs: ['foo', 'bar=baz'],
         chromedriver: {
           port: 9519,
           logFileName: 'wdio-chromedriver.log',
         },
+        electronVersion: '23.1.0',
       },
     ],
   ],
   // ...
 };
-
-module.exports = { config };
 ```
 
 ### API Configuration
 
-If you wish to use the electron APIs then you will need to import the preload and main scripts. Somewhere near the top of your preload:
+If you wish to use the electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload:
 
 ```ts
 if (isTest) {
@@ -126,7 +121,7 @@ const someValue = await browser.myCustomAPI('wow'); // configured using `customA
 
 ### Example
 
-See [wdio-electron-service-example](https://github.com/goosewobbler/wdio-electron-service-example) for an example of "real-world" usage in testing a minimal electron app.
+See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example of "real-world" usage in testing a minimal electron app.
 
 ## Configuration
 
@@ -181,6 +176,12 @@ The protocol chromedriver should use.
 #### default `localhost`
 
 The hostname chromedriver should use.
+
+### `chromedriver.pollTimeOut`: _`string`_
+
+#### default `10000`
+
+The startup timeout of ChromeDriver in ms, it checks if the port is open before starting ChromeDriver and then checks again if it is closed after starting.
 
 ### `chromedriver.outputDir`: _`string`_
 
