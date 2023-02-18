@@ -26,7 +26,6 @@ If you prefer to manage chromedriver yourself you can install it directly or via
 
 ```bash
 npm i -D chromedriver@100  # for Electron 18 apps
-npm i -D chromedriver@96  # for Electron 16 apps
 ```
 
 ```js
@@ -98,7 +97,7 @@ The APIs should not work outside of WDIO but for security reasons it is encourag
 After importing the scripts the APIs should now be available in tests. Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
 
 ```ts
-const appName = await browser.electronApp('getName');
+const appName = await browser.electron.app('getName');
 ```
 
 ### Custom Electron API
@@ -117,8 +116,8 @@ ipcMain.handle('wdio-electron', () => {
 The custom API can then be called in a spec file:
 
 ```ts
-const someValue = await browser.electronAPI('wow'); // default
-const someValue = await browser.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
+const someValue = await browser.electron.api('wow'); // default
+const someValue = await browser.electron.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
 ```
 
 ### Example
@@ -151,7 +150,7 @@ An array of string arguments to be passed through to the app on execution of the
 
 ### `customApiBrowserCommand`: _`string`_
 
-#### default `electronAPI`
+#### default `api`
 
 The browser command used to access the custom electron API.
 
