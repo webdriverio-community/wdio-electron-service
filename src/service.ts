@@ -107,7 +107,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
     if (isCI) {
       chromeArgs.push('window-size=1280,800');
-      // chromeArgs.push('blink-settings=imagesEnabled=false');
       chromeArgs.push('enable-automation');
       chromeArgs.push('disable-infobars');
       chromeArgs.push('disable-extensions');
