@@ -66,10 +66,21 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
     capabilities: Capabilities.Capabilities,
     config: Options.Testrunner,
   ) {
-    log.debug('launcher received options:', options);
-    process.env.WDIO_ELECTRON = 'true';
     const isWin = process.platform === 'win32';
     const chromedriverServiceOptions = options.chromedriver || {};
+
+    log.debug('launcher received options:', options);
+    process.env.WDIO_ELECTRON = 'true';
+
+    const validChromedriverPath =
+      chromedriverServiceOptions.chromedriverCustomPath !== undefined && options.electronVersion !== undefined;
+    if (!validChromedriverPath) {
+      const invalidChromedriverOptsError = new Error(
+        'you must specify the electronVersion, or provide a chromedriverCustomPath value',
+      );
+      log.error(invalidChromedriverOptsError);
+      throw invalidChromedriverOptsError;
+    }
 
     if (isWin) {
       const shouldRunInNode = extname(chromedriverServiceOptions.chromedriverCustomPath || '') === '.js';
@@ -91,7 +102,9 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
   }
 
   async onPrepare() {
-    await attemptDownload(this.electronVersion);
+    if (this.electronVersion) {
+      await attemptDownload(this.electronVersion);
+    }
 
     return super.onPrepare();
   }
