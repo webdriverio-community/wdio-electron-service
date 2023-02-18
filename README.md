@@ -94,9 +94,16 @@ if (isTest) {
 
 The APIs should not work outside of WDIO but for security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure the APIs are only exposed when the app is being tested.
 
-After importing the scripts the APIs should now be available in tests. Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+After importing the scripts the APIs should now be available in tests.
+
+Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+
+The service re-exports the WDIO browser object with the `.electron` namespace for API usage in your tests:
 
 ```ts
+import { browser } from 'wdio-electron-service';
+
+// in a test
 const appName = await browser.electron.app('getName');
 ```
 
