@@ -10,6 +10,16 @@ const isWin = process.platform === 'win32';
 
 vi.mock('wdio-chromedriver-service');
 
+describe('options validation', () => {
+  it('should throw an error when no chromedriverCustomPath or electronVersion are specified', () => {
+    expect(() => {
+      new ChromeDriverLauncher({}, { browserName: 'mockBrowser' }, {
+        mock: 'config',
+      } as unknown as Testrunner);
+    }).toThrow('You must specify the electronVersion, or provide a chromedriverCustomPath value');
+  });
+});
+
 describe('on non-Windows platforms', () => {
   beforeEach(() => {
     mockProcessProperty('platform', 'linux');

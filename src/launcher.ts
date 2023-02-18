@@ -76,7 +76,7 @@ export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
       chromedriverServiceOptions.chromedriverCustomPath !== undefined || options.electronVersion !== undefined;
     if (!validChromedriverPath) {
       const invalidChromedriverOptsError = new Error(
-        'you must specify the electronVersion, or provide a chromedriverCustomPath value',
+        'You must specify the electronVersion, or provide a chromedriverCustomPath value',
       );
       log.error(invalidChromedriverOptsError);
       throw invalidChromedriverOptsError;
