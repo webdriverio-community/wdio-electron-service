@@ -189,7 +189,7 @@ The protocol chromedriver should use.
 
 The hostname chromedriver should use.
 
-### `chromedriver.pollTimeOut`: _`string`_
+### `chromedriver.pollTimeOut`: _`number`_
 
 #### default `10000`
 
