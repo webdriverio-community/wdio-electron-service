@@ -2,7 +2,6 @@
   "name": "wdio-electron-service-example-e2e",
   "version": "1.0.0",
   "main": "./wdio.conf.js",
-  "type": "module",
   "scripts": {
     "ci": "pnpm test && pnpm lint",
     "clean": "pnpx rimraf ./node_modules ./wdio-logs",
@@ -25,7 +24,7 @@
     "jsdom": "^21.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
-    "wdio-electron-service": "file:../../dist",
+    "wdio-electron-service": "file:../..",
     "webdriverio": "^8.3.9"
   },
   "dependencies": {}
