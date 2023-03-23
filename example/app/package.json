@@ -14,7 +14,7 @@
     "electron": "^23.1.0",
     "electron-builder": "^23.6.0",
     "ts-loader": "^9.4.2",
-    "wdio-electron-service": "file:../..",
+    "wdio-electron-service": "file:../../dist",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"
   },
