@@ -1,3 +1,4 @@
+import eslint from '@eslint/js';
 import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
@@ -6,7 +7,6 @@ import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
 export default [
-  'eslint:recommended',
   // Ignored dirs
   {
     ignores: ['**/dist/**/*'],
@@ -21,7 +21,7 @@ export default [
       },
     },
     rules: {
-      ...prettier.rules,
+      ...eslint.configs.recommended.rules,
     },
   },
   // Node & Electron main process files and scripts
@@ -112,4 +112,6 @@ export default [
       ...vitest.configs.recommended.rules,
     },
   },
+  // ensure all rules work with prettier
+  prettier,
 ];

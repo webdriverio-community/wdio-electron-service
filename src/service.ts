@@ -182,6 +182,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       };
     });
 
+    //eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this._browser.electron = Object.create({}, api);
   }

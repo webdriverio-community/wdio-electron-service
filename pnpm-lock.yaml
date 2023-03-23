@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@electron/get': ^2.0.2
+  '@eslint/js': ^8.36.0
   '@types/chromedriver': ^81.0.1
   '@types/eslint-config-prettier': ^6.11.0
   '@types/node': ^18.15.6
@@ -47,6 +48,7 @@ dependencies:
   webdriverio: 8.6.7_typescript@5.0.2
 
 devDependencies:
+  '@eslint/js': 8.36.0
   '@types/chromedriver': 81.0.1
   '@types/eslint-config-prettier': 6.11.0
   '@types/node': 18.15.6
