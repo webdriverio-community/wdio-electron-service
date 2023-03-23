@@ -3,6 +3,18 @@ import { Browser } from 'webdriverio';
 import { isCI } from 'ci-info';
 import { log } from './utils.js';
 
+type WdioElectronWindowObj = {
+  [Key: string]: {
+    invoke: (...args: unknown[]) => Promise<unknown>;
+  };
+};
+
+declare global {
+  interface Window {
+    wdioElectron?: WdioElectronWindowObj;
+  }
+}
+
 function getMacExecutableName(appName: string) {
   // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
   if (appName.endsWith(' Helper')) {
@@ -103,7 +115,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   public _browser?: WebdriverIO.Browser;
 
   beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
-    const chromeArgs = [];
+    const chromeArgs: string[] = [];
 
     if (isCI) {
       chromeArgs.push('window-size=1280,800');
@@ -169,6 +181,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         },
       };
     });
+
+    //@ts-ignore
     this._browser.electron = Object.create({}, api);
   }
 }
