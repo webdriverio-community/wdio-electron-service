@@ -1,10 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
+  "include": ["src/cjs/*.ts"],
   "exclude": ["node_modules", "coverage", "dist", "example", "test", "*.config.*"],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "CommonJS",
     "outDir": "dist",
     "target": "ES2020",
-    "types": ["node", "@wdio/globals"]
+    "types": ["node", "@wdio/globals/types"],
+    "typeRoots": ["./node_modules/@types", "./@types"]
   }
 }
