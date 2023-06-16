@@ -73,6 +73,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   constructor(options: Services.ServiceOption) {
     const apiCommands = [
       { name: '', bridgeProp: 'custom' },
+      { name: 'mock', bridgeProp: 'mock' },
       { name: 'app', bridgeProp: 'app' },
       { name: 'mainProcess', bridgeProp: 'mainProcess' },
       { name: 'browserWindow', bridgeProp: 'browserWindow' },

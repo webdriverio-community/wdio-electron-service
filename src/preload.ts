@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 const validChannels = [
   'wdio-electron',
+  'wdio-electron.mock',
   'wdio-electron.app',
   'wdio-electron.mainProcess',
   'wdio-electron.browserWindow',
@@ -20,6 +21,10 @@ const invoke = async (channel: string, ...data: unknown[]) => {
 contextBridge.exposeInMainWorld('wdioElectron', {
   custom: {
     invoke: (...args: unknown[]) => invoke('wdio-electron', ...args),
+  },
+  mock: {
+    invoke: (apiName: string, funcName: string, value: unknown) =>
+      invoke('wdio-electron.mock', apiName, funcName, value),
   },
   mainProcess: {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),

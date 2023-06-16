@@ -1,8 +1,34 @@
-import { App, app, BrowserWindow, ipcMain } from 'electron';
+import electron, { App, app, BrowserWindow, ipcMain } from 'electron';
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;
 type MainProcessFunction = (this: NodeJS.Process, ...args: unknown[]) => unknown;
 type BrowserWindowFunction = (this: BrowserWindow, ...args: unknown[]) => unknown;
+
+ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string, value: unknown) => {
+  const electronApi = electron[apiName as keyof typeof electron];
+  const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
+  if (!electronApiFunc) {
+    throw new Error(`Can't find ${funcName} on ${apiName} module.`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  electron[apiName][funcName] = funcName.endsWith('Sync') ? () => value : () => Promise.resolve(value);
+
+  return true;
+});
+
+// ipcMain.handle('wdio-electron.mockDialog', (_event, funcName: string, value: DialogFunctionReturnValue) => {
+//   const dialogProp = dialog[funcName as keyof Electron.Dialog];
+//   if (!dialogProp) {
+//     throw new Error(`Can't find ${funcName} on dialog module.`);
+//   }
+//   (dialog[funcName as keyof typeof dialog] as typeof dialogProp) = funcName.endsWith('Sync')
+//     ? () => value
+//     : () => Promise.resolve(value);
+
+//   return true;
+// });
 
 ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: unknown[]) => {
   const processProp = process[funcName as keyof NodeJS.Process];
