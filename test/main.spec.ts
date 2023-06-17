@@ -31,9 +31,11 @@ describe('main', () => {
 
   it('should call ipcMain.handle with the expected parameters', () => {
     expect(ipcMainHandleMock.mock.calls).toEqual([
-      ['wdio-electron.mainProcess', expect.any(Function)],
       ['wdio-electron.app', expect.any(Function)],
       ['wdio-electron.browserWindow', expect.any(Function)],
+      ['wdio-electron.dialog', expect.any(Function)],
+      ['wdio-electron.mainProcess', expect.any(Function)],
+      ['wdio-electron.mock', expect.any(Function)],
     ]);
   });
 

@@ -4,29 +4,6 @@ type AppFunction = (this: App, ...args: unknown[]) => unknown;
 type MainProcessFunction = (this: NodeJS.Process, ...args: unknown[]) => unknown;
 type BrowserWindowFunction = (this: BrowserWindow, ...args: unknown[]) => unknown;
 
-ipcMain.handle('wdio-electron.mock', (_event, args: unknown[]) => {
-  const [apiName, funcName, value] = args;
-  const electronApi = electron[apiName as keyof typeof electron];
-  const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
-  if (typeof electronApiFunc !== 'function') {
-    throw new Error(`Unable to find ${funcName} on ${apiName} module.`);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  electron[apiName][funcName] = funcName.endsWith('Sync') ? () => value : () => Promise.resolve(value);
-
-  return true;
-});
-
-ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: unknown[]) => {
-  const processProp = process[funcName as keyof NodeJS.Process];
-  if (typeof processProp === 'function') {
-    return (processProp as MainProcessFunction).apply(process, args);
-  }
-  return processProp;
-});
-
 ipcMain.handle('wdio-electron.app', (_event, funcName: string, ...args: unknown[]) => {
   const appProp = app[funcName as keyof App];
   if (typeof appProp === 'function') {
@@ -50,4 +27,27 @@ ipcMain.handle('wdio-electron.dialog', (_event, funcName: string, ...args: unkno
     return (dialogProp as AppFunction).apply(app, args);
   }
   return dialogProp;
+});
+
+ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: unknown[]) => {
+  const processProp = process[funcName as keyof NodeJS.Process];
+  if (typeof processProp === 'function') {
+    return (processProp as MainProcessFunction).apply(process, args);
+  }
+  return processProp;
+});
+
+ipcMain.handle('wdio-electron.mock', (_event, args: unknown[]) => {
+  const [apiName, funcName, value] = args;
+  const electronApi = electron[apiName as keyof typeof electron];
+  const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
+  if (typeof electronApiFunc !== 'function') {
+    throw new Error(`Unable to find ${funcName} on ${apiName} module.`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  electron[apiName][funcName] = funcName.endsWith('Sync') ? () => value : () => Promise.resolve(value);
+
+  return true;
 });
