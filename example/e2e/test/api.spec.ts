@@ -19,6 +19,19 @@ describe('electron APIs', () => {
       expect(result).toEqual('test');
     });
   });
+  describe('mock', () => {
+    it('should mock the expected electron API function', async () => {
+      await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
+      const result = await browser.electron.dialog('showOpenDialog');
+      expect(result).toEqual('I opened a dialog!');
+    });
+
+    it('should mock the expected synchronous electron API function', async () => {
+      await browser.electron.mock('dialog', 'showOpenDialogSync', 'I opened a dialog!');
+      const result = await browser.electron.dialog('showOpenDialogSync');
+      expect(result).toEqual('I opened a dialog!');
+    });
+  });
   describe('app', () => {
     it('should retrieve app metadata through the electron API', async () => {
       const appName = await browser.electron.app('getName');
