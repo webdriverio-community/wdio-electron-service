@@ -8,7 +8,9 @@ export interface BrowserExtension {
   electron: {
     api: (...arg: unknown[]) => Promise<unknown>;
     app: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    dialog: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
     mainProcess: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    mock: (...arg: unknown[]) => Promise<unknown>;
     browserWindow: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
   };
 }

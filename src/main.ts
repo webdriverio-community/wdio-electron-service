@@ -1,14 +1,15 @@
-import electron, { App, app, BrowserWindow, ipcMain } from 'electron';
+import electron, { App, app, BrowserWindow, dialog, Dialog, ipcMain } from 'electron';
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;
 type MainProcessFunction = (this: NodeJS.Process, ...args: unknown[]) => unknown;
 type BrowserWindowFunction = (this: BrowserWindow, ...args: unknown[]) => unknown;
 
-ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string, value: unknown) => {
+ipcMain.handle('wdio-electron.mock', (_event, args: unknown[]) => {
+  const [apiName, funcName, value] = args;
   const electronApi = electron[apiName as keyof typeof electron];
   const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
-  if (!electronApiFunc) {
-    throw new Error(`Can't find ${funcName} on ${apiName} module.`);
+  if (typeof electronApiFunc !== 'function') {
+    throw new Error(`Unable to find ${funcName} on ${apiName} module.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -17,18 +18,6 @@ ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string,
 
   return true;
 });
-
-// ipcMain.handle('wdio-electron.mockDialog', (_event, funcName: string, value: DialogFunctionReturnValue) => {
-//   const dialogProp = dialog[funcName as keyof Electron.Dialog];
-//   if (!dialogProp) {
-//     throw new Error(`Can't find ${funcName} on dialog module.`);
-//   }
-//   (dialog[funcName as keyof typeof dialog] as typeof dialogProp) = funcName.endsWith('Sync')
-//     ? () => value
-//     : () => Promise.resolve(value);
-
-//   return true;
-// });
 
 ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: unknown[]) => {
   const processProp = process[funcName as keyof NodeJS.Process];
@@ -53,4 +42,12 @@ ipcMain.handle('wdio-electron.browserWindow', (event, funcName: string, ...args:
     return (browserWindowProp as BrowserWindowFunction).apply(browserWindow, args);
   }
   return browserWindowProp;
+});
+
+ipcMain.handle('wdio-electron.dialog', (_event, funcName: string, ...args: unknown[]) => {
+  const dialogProp = dialog[funcName as keyof Dialog];
+  if (typeof dialogProp === 'function') {
+    return (dialogProp as AppFunction).apply(app, args);
+  }
+  return dialogProp;
 });
