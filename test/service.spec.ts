@@ -577,9 +577,11 @@ describe('before', () => {
       addCommand: addCommandMock,
     } as unknown as WebdriverIO.Browser);
     const electronApi = instance._browser?.electron as CustomBrowserExtension['electron'];
-    expect(electronApi.customApi).toEqual(expect.any(Function));
     expect(electronApi.app).toEqual(expect.any(Function));
-    expect(electronApi.mainProcess).toEqual(expect.any(Function));
     expect(electronApi.browserWindow).toEqual(expect.any(Function));
+    expect(electronApi.customApi).toEqual(expect.any(Function));
+    expect(electronApi.dialog).toEqual(expect.any(Function));
+    expect(electronApi.mainProcess).toEqual(expect.any(Function));
+    expect(electronApi.mock).toEqual(expect.any(Function));
   });
 });
