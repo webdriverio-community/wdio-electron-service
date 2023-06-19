@@ -3,15 +3,17 @@ import { IpcMainInvokeEvent } from 'electron';
 
 type MockObj = { [Key: string]: unknown };
 
-const ipcMainHandleMock = vi.fn();
-const browserWindowMock: MockObj = {};
-const fromWebContentsMock = vi.fn().mockReturnValue(browserWindowMock);
 const electronAppMock: MockObj = {};
+const electronBrowserWindowMock: MockObj = {};
+const electronDialogMock: MockObj = {};
+const fromWebContentsMock = vi.fn().mockReturnValue(electronBrowserWindowMock);
+const ipcMainHandleMock = vi.fn();
 
 vi.mock('electron', () => ({
-  ipcMain: { handle: ipcMainHandleMock },
   app: electronAppMock,
   BrowserWindow: { fromWebContents: fromWebContentsMock },
+  dialog: electronDialogMock,
+  ipcMain: { handle: ipcMainHandleMock },
 }));
 
 describe('main', () => {
@@ -39,22 +41,6 @@ describe('main', () => {
     ]);
   });
 
-  describe('mainProcess', () => {
-    it('should return process properties', () => {
-      (process as Partial<{ test: string }>).test = 'test result';
-      const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test');
-      expect(result).toBe('test result');
-    });
-
-    it('should call process functions with the expected parameters and return the result', () => {
-      const mockProcessFunction = vi.fn().mockReturnValue('test result');
-      (process as Partial<{ test: () => void }>).test = mockProcessFunction;
-      const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
-      expect(mockProcessFunction).toHaveBeenCalledWith('some', 'args');
-      expect(result).toBe('test result');
-    });
-  });
-
   describe('app', () => {
     it('should return app properties', () => {
       electronAppMock.test = 'test result';
@@ -70,6 +56,7 @@ describe('main', () => {
       expect(result).toBe('test result');
     });
   });
+
   describe('browserWindow', () => {
     it('should get the browserWindow object from the event sender webContents', () => {
       listeners['wdio-electron.browserWindow']({ sender: 'test-sender' } as unknown as IpcMainInvokeEvent, 'test');
@@ -77,16 +64,48 @@ describe('main', () => {
     });
 
     it('should return browserWindow properties', () => {
-      browserWindowMock.test = 'test result';
+      electronBrowserWindowMock.test = 'test result';
       const result = listeners['wdio-electron.browserWindow']({} as IpcMainInvokeEvent, 'test');
       expect(result).toBe('test result');
     });
 
     it('should call app functions with the expected parameters and return the result', () => {
       const mockBrowserWindowFunction = vi.fn().mockReturnValue('test result');
-      browserWindowMock.test = mockBrowserWindowFunction;
+      electronBrowserWindowMock.test = mockBrowserWindowFunction;
       const result = listeners['wdio-electron.browserWindow']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
       expect(mockBrowserWindowFunction).toHaveBeenCalledWith('some', 'args');
+      expect(result).toBe('test result');
+    });
+  });
+
+  describe('dialog', () => {
+    it('should return dialog properties', () => {
+      electronDialogMock.test = 'test result';
+      const result = listeners['wdio-electron.dialog']({} as IpcMainInvokeEvent, 'test');
+      expect(result).toBe('test result');
+    });
+
+    it('should call dialog functions with the expected parameters and return the result', () => {
+      const mockDialogFunction = vi.fn().mockReturnValue('test result');
+      electronDialogMock.test = mockDialogFunction;
+      const result = listeners['wdio-electron.dialog']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
+      expect(mockDialogFunction).toHaveBeenCalledWith('some', 'args');
+      expect(result).toBe('test result');
+    });
+  });
+
+  describe('mainProcess', () => {
+    it('should return process properties', () => {
+      (process as Partial<{ test: string }>).test = 'test result';
+      const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test');
+      expect(result).toBe('test result');
+    });
+
+    it('should call process functions with the expected parameters and return the result', () => {
+      const mockProcessFunction = vi.fn().mockReturnValue('test result');
+      (process as Partial<{ test: () => void }>).test = mockProcessFunction;
+      const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
+      expect(mockProcessFunction).toHaveBeenCalledWith('some', 'args');
       expect(result).toBe('test result');
     });
   });
