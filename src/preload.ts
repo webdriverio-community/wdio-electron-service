@@ -3,8 +3,10 @@ import { contextBridge, ipcRenderer } from 'electron';
 const validChannels = [
   'wdio-electron',
   'wdio-electron.app',
-  'wdio-electron.mainProcess',
   'wdio-electron.browserWindow',
+  'wdio-electron.dialog',
+  'wdio-electron.mainProcess',
+  'wdio-electron.mock',
 ];
 
 const invoke = async (channel: string, ...data: unknown[]) => {
@@ -14,20 +16,27 @@ const invoke = async (channel: string, ...data: unknown[]) => {
   if (!process.env.WDIO_ELECTRON) {
     throw new Error('Electron APIs can not be invoked outside of WDIO');
   }
-  return ipcRenderer.invoke(channel, data);
+  return ipcRenderer.invoke(channel, ...data);
 };
 
 contextBridge.exposeInMainWorld('wdioElectron', {
-  custom: {
-    invoke: (...args: unknown[]) => invoke('wdio-electron', ...args),
-  },
-  mainProcess: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),
-  },
   app: {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.app', funcName, ...args),
   },
   browserWindow: {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.browserWindow', funcName, ...args),
+  },
+  custom: {
+    invoke: (...args: unknown[]) => invoke('wdio-electron', ...args),
+  },
+  dialog: {
+    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.dialog', funcName, ...args),
+  },
+  mainProcess: {
+    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),
+  },
+  mock: {
+    invoke: (apiName: string, funcName: string, value: unknown) =>
+      invoke('wdio-electron.mock', apiName, funcName, value),
   },
 });

@@ -96,7 +96,7 @@ The APIs should not work outside of WDIO but for security reasons it is encourag
 
 After importing the scripts the APIs should now be available in tests.
 
-Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window).
+Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window), [`dialog`](https://www.electronjs.org/docs/latest/api/dialog), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process).
 
 The service re-exports the WDIO browser object with the `.electron` namespace for API usage in your tests:
 
@@ -105,6 +105,16 @@ import { browser } from 'wdio-electron-service';
 
 // in a test
 const appName = await browser.electron.app('getName');
+```
+
+### Mocking Electron APIs
+
+You can mock electron API functionality by calling the mock function with the API name, function name and mock return value. e.g. in a spec file:
+
+```ts
+await browser.electron.mock('dialog', 'showOpenDialog', 'dialog opened!');
+const result = await browser.electron.dialog('showOpenDialog');
+console.log(result); // 'dialog opened!'
 ```
 
 ### Custom Electron API

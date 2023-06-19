@@ -33,9 +33,9 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v2
         with:
-          version: 7.26.2
+          version: 8.6.2
           run_install: false
       - name: Run headless test
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1.0.1
         with:
-          run: pnpm ci
+          run: pnpm run ci

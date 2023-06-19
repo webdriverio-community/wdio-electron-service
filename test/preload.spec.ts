@@ -29,7 +29,7 @@ describe('preload', () => {
     expect(ipcRendererInvokeMock).not.toHaveBeenCalled();
   });
 
-  const apis = ['custom', 'mainProcess', 'app', 'browserWindow'];
+  const apis = ['custom', 'mock', 'mainProcess', 'app', 'browserWindow', 'dialog'];
 
   apis.forEach((apiName) => {
     describe(`${apiName} api`, () => {
@@ -40,7 +40,7 @@ describe('preload', () => {
           'args',
         );
         const ipcChannelName = apiName === 'custom' ? 'wdio-electron' : `wdio-electron.${apiName}`;
-        expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, ['look', 'some', 'args']);
+        expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, 'look', 'some', 'args');
       });
     });
   });

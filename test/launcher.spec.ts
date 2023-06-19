@@ -266,7 +266,7 @@ describe('onPrepare', () => {
         { browserName: 'mockBrowser' },
         { mock: 'config' } as unknown as Testrunner,
       );
-      expect(() => launcherInstance.onPrepare()).rejects.toThrowError('download error');
+      await expect(() => launcherInstance.onPrepare()).rejects.toThrowError('download error');
       expect(downloadArtifact).toHaveBeenCalledTimes(1);
       expect(downloadArtifact).toHaveBeenCalledWith({
         arch: undefined,
