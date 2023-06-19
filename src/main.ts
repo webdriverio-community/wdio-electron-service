@@ -37,12 +37,12 @@ ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: 
   return processProp;
 });
 
-ipcMain.handle('wdio-electron.mock', (_event, args: unknown[]) => {
+ipcMain.handle('wdio-electron.mock', (_event, ...args: unknown[]) => {
   const [apiName, funcName, value] = args;
   const electronApi = electron[apiName as keyof typeof electron];
   const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
   if (typeof electronApiFunc !== 'function') {
-    throw new Error(`Unable to find ${funcName} on ${apiName} module.`);
+    throw new Error(`Unable to find function ${funcName} on ${apiName} module.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
