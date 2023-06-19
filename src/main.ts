@@ -37,7 +37,7 @@ ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: 
   return processProp;
 });
 
-ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string, value: unknown) => {
+ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string, mockReturnValue: unknown) => {
   const electronApi = electron[apiName as keyof typeof electron];
   const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
   if (typeof electronApiFunc !== 'function') {
@@ -46,7 +46,13 @@ ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string,
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  electron[apiName][funcName] = funcName.endsWith('Sync') ? () => value : () => Promise.resolve(value);
+  electron[apiName][funcName] = funcName.endsWith('Sync')
+    ? () => mockReturnValue
+    : () => Promise.resolve(mockReturnValue);
 
-  return true;
+  return {
+    apiName,
+    funcName,
+    mockReturnValue,
+  };
 });

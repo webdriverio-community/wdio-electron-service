@@ -16,7 +16,7 @@ const invoke = async (channel: string, ...data: unknown[]) => {
   if (!process.env.WDIO_ELECTRON) {
     throw new Error('Electron APIs can not be invoked outside of WDIO');
   }
-  return ipcRenderer.invoke(channel, data);
+  return ipcRenderer.invoke(channel, ...data);
 };
 
 contextBridge.exposeInMainWorld('wdioElectron', {

@@ -40,7 +40,7 @@ describe('preload', () => {
           'args',
         );
         const ipcChannelName = apiName === 'custom' ? 'wdio-electron' : `wdio-electron.${apiName}`;
-        expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, ['look', 'some', 'args']);
+        expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, 'look', 'some', 'args');
       });
     });
   });
