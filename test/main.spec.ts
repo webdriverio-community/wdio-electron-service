@@ -14,6 +14,12 @@ vi.mock('electron', () => ({
   BrowserWindow: { fromWebContents: fromWebContentsMock },
   dialog: electronDialogMock,
   ipcMain: { handle: ipcMainHandleMock },
+  default: {
+    app: electronAppMock,
+    BrowserWindow: { fromWebContents: fromWebContentsMock },
+    dialog: electronDialogMock,
+    ipcMain: { handle: ipcMainHandleMock },
+  },
 }));
 
 describe('main', () => {
@@ -106,6 +112,28 @@ describe('main', () => {
       (process as Partial<{ test: () => void }>).test = mockProcessFunction;
       const result = listeners['wdio-electron.mainProcess']({} as IpcMainInvokeEvent, 'test', 'some', 'args');
       expect(mockProcessFunction).toHaveBeenCalledWith('some', 'args');
+      expect(result).toBe('test result');
+    });
+  });
+
+  describe('mock', () => {
+    it('should throw an error when the function to mock does not exist', () => {
+      expect(() => {
+        listeners['wdio-electron.mock']({} as IpcMainInvokeEvent, 'dialog', 'testFn', 'test result');
+      }).toThrow('Unable to find function testFn on dialog module.');
+    });
+
+    it('should mock the value of a synchronous function', () => {
+      electronDialogMock.testFnSync = () => 'unmocked result';
+      listeners['wdio-electron.mock']({} as IpcMainInvokeEvent, 'dialog', 'testFnSync', 'test result');
+      const result = listeners['wdio-electron.dialog']({} as IpcMainInvokeEvent, 'testFnSync', 'some', 'args');
+      expect(result).toBe('test result');
+    });
+
+    it('should mock the value of an asynchronous function', async () => {
+      electronDialogMock.testFn = () => 'unmocked result';
+      listeners['wdio-electron.mock']({} as IpcMainInvokeEvent, 'dialog', 'testFn', 'test result');
+      const result = await listeners['wdio-electron.dialog']({} as IpcMainInvokeEvent, 'testFn', 'some', 'args');
       expect(result).toBe('test result');
     });
   });
