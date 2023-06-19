@@ -5,6 +5,6 @@
     "module": "ESNext",
     "outDir": "dist",
     "target": "ES2020",
-    "types": ["node", "@wdio/globals"]
+    "types": ["node", "@wdio/globals/types"]
   }
 }
