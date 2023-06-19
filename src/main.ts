@@ -37,8 +37,7 @@ ipcMain.handle('wdio-electron.mainProcess', (_event, funcName: string, ...args: 
   return processProp;
 });
 
-ipcMain.handle('wdio-electron.mock', (_event, ...args: unknown[]) => {
-  const [apiName, funcName, value] = args;
+ipcMain.handle('wdio-electron.mock', (_event, apiName: string, funcName: string, value: unknown) => {
   const electronApi = electron[apiName as keyof typeof electron];
   const electronApiFunc = electronApi[funcName as keyof typeof electronApi];
   if (typeof electronApiFunc !== 'function') {

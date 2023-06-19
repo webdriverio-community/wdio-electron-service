@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('wdioElectron', {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),
   },
   mock: {
-    invoke: (...args: unknown[]) => invoke('wdio-electron.mock', ...args),
+    invoke: (apiName: string, funcName: string, value: unknown) =>
+      invoke('wdio-electron.mock', apiName, funcName, value),
   },
 });
