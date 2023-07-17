@@ -13,10 +13,32 @@ const waitFor = (ms: number) =>
   });
 
 describe('electron APIs', () => {
+  describe('app', () => {
+    it('should retrieve app metadata through the electron API', async () => {
+      const appName = await browser.electron.app('getName');
+      expect(appName).toEqual(name);
+      const appVersion = await browser.electron.app('getVersion');
+      expect(appVersion).toEqual(version);
+    });
+  });
+  describe('browserWindow', () => {
+    it('should retrieve the window title through the electron API', async () => {
+      const windowTitle = await browser.electron.browserWindow('title');
+      // TODO: flaky - might need window load timeout
+      await waitFor(20000);
+      expect(windowTitle).toEqual('this is the title of the main window');
+    });
+  });
   describe('custom', () => {
     it('should return the expected response', async () => {
       const result = await browser.electron.api();
       expect(result).toEqual('test');
+    });
+  });
+  describe('mainProcess', () => {
+    it('should retrieve the process type through the electron API', async () => {
+      const processType = await browser.electron.mainProcess('type');
+      expect(processType).toEqual('browser');
     });
   });
   describe('mock', () => {
@@ -30,28 +52,6 @@ describe('electron APIs', () => {
       await browser.electron.mock('dialog', 'showOpenDialogSync', 'I opened a dialog!');
       const result = await browser.electron.dialog('showOpenDialogSync');
       expect(result).toEqual('I opened a dialog!');
-    });
-  });
-  describe('app', () => {
-    it('should retrieve app metadata through the electron API', async () => {
-      const appName = await browser.electron.app('getName');
-      expect(appName).toEqual(name);
-      const appVersion = await browser.electron.app('getVersion');
-      expect(appVersion).toEqual(version);
-    });
-  });
-  describe('mainProcess', () => {
-    it('should retrieve the process type through the electron API', async () => {
-      const processType = await browser.electron.mainProcess('type');
-      expect(processType).toEqual('browser');
-    });
-  });
-  describe('browserWindow', () => {
-    it('should retrieve the window title through the electron API', async () => {
-      const windowTitle = await browser.electron.browserWindow('title');
-      // TODO: flaky - might need window load timeout
-      await waitFor(20000);
-      expect(windowTitle).toEqual('this is the title of the main window');
     });
   });
 });
