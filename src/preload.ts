@@ -1,13 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-const validChannels = [
-  'wdio-electron',
-  'wdio-electron.app',
-  'wdio-electron.browserWindow',
-  'wdio-electron.dialog',
-  'wdio-electron.mainProcess',
-  'wdio-electron.mock',
-];
+const validChannels = ['wdio-electron', 'wdio-electron.app', 'wdio-electron.browserWindow'];
 
 const invoke = async (channel: string, ...data: unknown[]) => {
   if (!validChannels.includes(channel)) {
@@ -25,18 +18,5 @@ contextBridge.exposeInMainWorld('wdioElectron', {
   },
   browserWindow: {
     invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.browserWindow', funcName, ...args),
-  },
-  custom: {
-    invoke: (...args: unknown[]) => invoke('wdio-electron', ...args),
-  },
-  dialog: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.dialog', funcName, ...args),
-  },
-  mainProcess: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),
-  },
-  mock: {
-    invoke: (apiName: string, funcName: string, value: unknown) =>
-      invoke('wdio-electron.mock', apiName, funcName, value),
   },
 });

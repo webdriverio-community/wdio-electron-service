@@ -59,7 +59,7 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit && pnpm test:integration",
-    "test:integration": "pnpm test:build-app && cd example/e2e && pnpm i && pnpm test",
+    "test:integration": "pnpm test:build-app && cd example/e2e-cjs && pnpm i && pnpm test",
     "test:build-app": "cd example/app && pnpm i && pnpm build"
   },
   "keywords": [

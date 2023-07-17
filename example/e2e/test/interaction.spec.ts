@@ -17,7 +17,7 @@ describe('application loading', () => {
 
   describe('click events', () => {
     describe('when the make larger button is clicked', () => {
-      it('increases the window height and width by 10 pixels', async () => {
+      it('should increase the window height and width by 10 pixels', async () => {
         let bounds = (await browser.electron.browserWindow('getBounds')) as {
           width: number;
           height: number;
@@ -35,8 +35,9 @@ describe('application loading', () => {
         expect(bounds.height).toEqual(310);
       });
     });
+
     describe('when the make smaller button is clicked', () => {
-      it('decreases the window height and width by 10 pixels', async () => {
+      it('should decrease the window height and width by 10 pixels', async () => {
         let bounds = (await browser.electron.browserWindow('getBounds')) as {
           width: number;
           height: number;
@@ -48,6 +49,15 @@ describe('application loading', () => {
         bounds = (await browser.electron.browserWindow('getBounds')) as { width: number; height: number };
         expect(bounds.width).toEqual(200);
         expect(bounds.height).toEqual(300);
+      });
+    });
+
+    describe('dialog', () => {
+      it('should do summat', async () => {
+        await browser.electron.dialog();
+        const elem = await browser.$('.show-message-box');
+        await elem.click();
+        // expect(await (await screen.getByTestId('keypress-count')).getText()).toEqual('YO');
       });
     });
   });

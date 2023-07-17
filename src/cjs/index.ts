@@ -1,3 +1,4 @@
+import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Options, Services } from '@wdio/types';
 import type { default as LauncherInstance, ElectronLauncherServiceOpts } from '../launcher.js';
 import type { default as ServiceInstance } from '../service.js';
@@ -47,3 +48,22 @@ exports.launcher = class CJSElectronServiceLauncher {
     return instance?.onComplete();
   }
 };
+
+export interface BrowserExtension {
+  electron: {
+    api: (...arg: unknown[]) => Promise<unknown>;
+    app: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    mainProcess: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    browserWindow: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    dialog: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+  };
+}
+
+declare global {
+  namespace WebdriverIO {
+    interface Browser extends BrowserExtension {}
+    interface MultiRemoteBrowser extends BrowserExtension {}
+  }
+}
+
+exports.browser = wdioBrowser;

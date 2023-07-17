@@ -12,6 +12,7 @@ export interface BrowserExtension {
     mainProcess: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
     mock: (apiName: string, funcName: string, mockReturnValue: unknown) => Promise<unknown> | unknown;
     browserWindow: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
+    dialog: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
   };
 }
 
