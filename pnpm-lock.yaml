@@ -11,9 +11,6 @@ dependencies:
   '@wdio/logger':
     specifier: ^8.11.0
     version: 8.11.0
-  ci-info:
-    specifier: ^3.8.0
-    version: 3.8.0
   cross-dirname:
     specifier: ^0.1.0
     version: 0.1.0
@@ -1702,6 +1699,7 @@ packages:
   /ci-info@3.8.0:
     resolution: {integrity: sha512-eXTggHWSooYhq49F2opQhuHWgzucfF2YgODK4e1566GQs5BIfP30B0oenwBJHfWxAs2fyPB1s7Mg949zLf61Yw==}
     engines: {node: '>=8'}
+    dev: true
 
   /clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}

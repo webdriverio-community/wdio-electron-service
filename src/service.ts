@@ -1,6 +1,5 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 import { Browser } from 'webdriverio';
-import { isCI } from 'ci-info';
 import { log } from './utils.js';
 
 type WdioElectronWindowObj = {
@@ -117,31 +116,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   public _browser?: WebdriverIO.Browser;
 
   beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
-    const chromeArgs: string[] = [];
-
-    if (isCI) {
-      chromeArgs.push('window-size=1280,800');
-      chromeArgs.push('enable-automation');
-      chromeArgs.push('disable-infobars');
-      chromeArgs.push('disable-extensions');
-
-      if (process.platform !== 'win32') {
-        chromeArgs.push('no-sandbox');
-        chromeArgs.push('disable-gpu');
-        chromeArgs.push('disable-dev-shm-usage');
-        chromeArgs.push('disable-setuid-sandbox');
-      }
-    }
-
     const { appPath, appName, appArgs, binaryPath } = this.options;
-
-    if (appArgs) {
-      chromeArgs.push(...appArgs);
-    }
-
     const chromeOptions = {
       binary: binaryPath || getBinaryPath(appPath as string, appName as string),
-      args: chromeArgs,
+      args: appArgs,
       windowTypes: ['app', 'webview'],
     };
 
