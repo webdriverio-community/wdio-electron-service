@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util';
 
 declare global {
@@ -53,11 +53,6 @@ app.on('ready', () => {
   ipcMain.handle('decrease-window-size', () => {
     const bounds = mainWindow.getBounds();
     mainWindow.setBounds({ ...bounds, height: bounds.height - 10, width: bounds.width - 10 });
-  });
-
-  ipcMain.handle('show-message-box', async () => {
-    const bleh = await dialog.showMessageBox(mainWindow, { message: 'hdfjgj' });
-    console.log('ZOMG bleh', bleh);
   });
 
   // custom main process API

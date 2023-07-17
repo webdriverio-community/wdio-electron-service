@@ -51,14 +51,5 @@ describe('application loading', () => {
         expect(bounds.height).toEqual(300);
       });
     });
-
-    describe('dialog', () => {
-      it('should do summat', async () => {
-        await browser.electron.dialog();
-        const elem = await browser.$('.show-message-box');
-        await elem.click();
-        // expect(await (await screen.getByTestId('keypress-count')).getText()).toEqual('YO');
-      });
-    });
   });
 });
