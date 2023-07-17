@@ -7,11 +7,6 @@ const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding
 }>;
 const { name, version } = packageJson;
 
-const waitFor = (ms: number) =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 describe('electron APIs', () => {
   describe('app', () => {
     it('should retrieve app metadata through the electron API', async () => {
@@ -23,9 +18,20 @@ describe('electron APIs', () => {
   });
   describe('browserWindow', () => {
     it('should retrieve the window title through the electron API', async () => {
-      const windowTitle = await browser.electron.browserWindow('title');
-      // TODO: flaky - might need window load timeout
-      await waitFor(20000);
+      let windowTitle;
+      await browser.waitUntil(
+        async () => {
+          windowTitle = await browser.electron.browserWindow('title');
+          if (windowTitle !== 'this is the title of the main window') {
+            return false;
+          }
+
+          return windowTitle;
+        },
+        {
+          timeoutMsg: 'Window title not updated',
+        },
+      );
       expect(windowTitle).toEqual('this is the title of the main window');
     });
   });
