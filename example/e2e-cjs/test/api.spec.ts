@@ -1,5 +1,5 @@
-import fs from 'fs';
-import { browser } from 'wdio-electron-service';
+const fs = require('fs');
+const { browser } = require('wdio-electron-service');
 
 const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding: 'utf-8' })) as Partial<{
   name: string;
