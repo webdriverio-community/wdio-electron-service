@@ -20,7 +20,7 @@ devDependencies:
     specifier: ^9.4.4
     version: 9.4.4(typescript@5.0.4)(webpack@5.88.1)
   wdio-electron-service:
-    specifier: file:../..
+    specifier: file:../../
     version: file:../..(electron@25.3.0)(typescript@5.0.4)
   webpack:
     specifier: ^5.88.1
