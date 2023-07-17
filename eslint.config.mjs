@@ -73,6 +73,15 @@ export default [
           allowDeclarations: true,
         },
       ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_'
+        }
+      ],
     },
   },
   // Example app TS files
@@ -86,10 +95,10 @@ export default [
   },
   // Example e2e TS files
   {
-    files: ['example/e2e/test/*.spec.ts'],
+    files: ['example/e2e/test/*.spec.ts', 'example/e2e-cjs/test/*.spec.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example/e2e/tsconfig.json',
+        project: 'example/e2e-cjs/tsconfig.json',
       },
       globals: {
         ...wdio.configs.recommended.globals,
@@ -100,6 +109,26 @@ export default [
     },
     rules: {
       ...wdio.configs.recommended.rules,
+      '@typescript-eslint/no-var-requires': 'off'
+    },
+  },
+  {
+    files: ['example/e2e/test/*.spec.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'example/e2e/tsconfig.json',
+      },
+    },
+  },
+  {
+    files: ['example/e2e-cjs/test/*.spec.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'example/e2e-cjs/tsconfig.json',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-var-requires': 'off'
     },
   },
   // Test files

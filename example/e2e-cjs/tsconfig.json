@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "ts-node": {
-    "esm": true,
+    "esm": false,
     "compilerOptions": {
       "module": "ESNext"
     }
@@ -11,6 +11,5 @@
     "module": "ESNext",
     "types": ["node", "mocha", "@wdio/globals/types", "expect"]
   },
-  "include": ["test/*.ts"],
   "exclude": ["node_modules"]
 }
