@@ -1,6 +1,5 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { Capabilities } from '@wdio/types';
-import * as ciInfo from 'ci-info';
 
 import { BrowserExtension } from '../src/index';
 import ElectronWorkerService from '../src/service';
@@ -14,12 +13,6 @@ interface CustomBrowserExtension extends BrowserExtension {
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
-
-vi.mock('ci-info');
-
-function mockIsCI(isCI: boolean) {
-  vi.spyOn(ciInfo, 'isCI', 'get').mockReturnValue(isCI);
-}
 
 describe('options validation', () => {
   beforeEach(async () => {
@@ -60,10 +53,6 @@ describe('options validation', () => {
 });
 
 describe('beforeSession', () => {
-  beforeEach(() => {
-    mockIsCI(false);
-  });
-
   afterEach(() => {
     instance = undefined;
     revertProcessProperty('platform');
@@ -209,105 +198,6 @@ describe('beforeSession', () => {
     });
   });
 
-  describe('providing appArgs running on CI', () => {
-    beforeEach(async () => {
-      mockProcessProperty('platform', 'darwin');
-      mockProcessProperty('arch', 'arm64');
-      mockIsCI(true);
-      WorkerService = (await import('../src/service')).default;
-    });
-
-    it('should set the expected capabilities', () => {
-      instance = new WorkerService({
-        appPath: 'workspace/my-test-app/dist',
-        appName: 'my-test-app',
-        appArgs: ['look', 'some', 'args'],
-      });
-      const capabilities = {};
-      instance.beforeSession({}, capabilities);
-      expect(capabilities).toEqual({
-        'browserName': 'chrome',
-        'goog:chromeOptions': {
-          args: [
-            'window-size=1280,800',
-            'enable-automation',
-            'disable-infobars',
-            'disable-extensions',
-            'no-sandbox',
-            'disable-gpu',
-            'disable-dev-shm-usage',
-            'disable-setuid-sandbox',
-            'look',
-            'some',
-            'args',
-          ],
-          binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
-          windowTypes: ['app', 'webview'],
-        },
-      });
-    });
-
-    it('should set the expected capabilities when multiremote', () => {
-      instance = new WorkerService({
-        appPath: 'workspace/my-test-app/dist',
-        appName: 'my-test-app',
-        appArgs: ['look', 'some', 'args'],
-      });
-      const capabilities = {
-        firefox: {
-          capabilities: {
-            browserName: 'firefox',
-          },
-        },
-        myElectronProject: {
-          capabilities: {
-            browserName: 'electron',
-          },
-        },
-        chrome: {
-          capabilities: {
-            browserName: 'chrome',
-          },
-        },
-      };
-      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
-      expect(capabilities).toEqual({
-        firefox: {
-          capabilities: {
-            browserName: 'firefox',
-          },
-        },
-        myElectronProject: {
-          capabilities: {
-            'browserName': 'chrome',
-            'goog:chromeOptions': {
-              args: [
-                'window-size=1280,800',
-                'enable-automation',
-                'disable-infobars',
-                'disable-extensions',
-                'no-sandbox',
-                'disable-gpu',
-                'disable-dev-shm-usage',
-                'disable-setuid-sandbox',
-                'look',
-                'some',
-                'args',
-              ],
-              binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
-              windowTypes: ['app', 'webview'],
-            },
-          },
-        },
-        chrome: {
-          capabilities: {
-            browserName: 'chrome',
-          },
-        },
-      });
-    });
-  });
-
   describe('providing appPath & appName', () => {
     describe('on MacOS platforms', () => {
       beforeEach(async () => {
@@ -398,41 +288,6 @@ describe('beforeSession', () => {
       });
     });
 
-    describe('on MacOS platforms running on CI', () => {
-      beforeEach(async () => {
-        mockProcessProperty('platform', 'darwin');
-        mockProcessProperty('arch', 'arm64');
-        mockIsCI(true);
-        WorkerService = (await import('../src/service')).default;
-      });
-
-      it('should set the expected capabilities', () => {
-        instance = new WorkerService({
-          appPath: 'workspace/my-test-app/dist',
-          appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
-        expect(capabilities).toEqual({
-          'browserName': 'chrome',
-          'goog:chromeOptions': {
-            args: [
-              'window-size=1280,800',
-              'enable-automation',
-              'disable-infobars',
-              'disable-extensions',
-              'no-sandbox',
-              'disable-gpu',
-              'disable-dev-shm-usage',
-              'disable-setuid-sandbox',
-            ],
-            binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
-            windowTypes: ['app', 'webview'],
-          },
-        });
-      });
-    });
-
     describe('on Linux platforms', () => {
       beforeEach(async () => {
         mockProcessProperty('platform', 'linux');
@@ -457,40 +312,6 @@ describe('beforeSession', () => {
       });
     });
 
-    describe('on Linux platforms running on CI', () => {
-      beforeEach(async () => {
-        mockProcessProperty('platform', 'linux');
-        mockIsCI(true);
-        WorkerService = (await import('../src/service')).default;
-      });
-
-      it('should set the expected capabilities', () => {
-        instance = new WorkerService({
-          appPath: 'workspace/my-test-app/dist',
-          appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
-        expect(capabilities).toEqual({
-          'browserName': 'chrome',
-          'goog:chromeOptions': {
-            args: [
-              'window-size=1280,800',
-              'enable-automation',
-              'disable-infobars',
-              'disable-extensions',
-              'no-sandbox',
-              'disable-gpu',
-              'disable-dev-shm-usage',
-              'disable-setuid-sandbox',
-            ],
-            binary: 'workspace/my-test-app/dist/linux-unpacked/my-test-app',
-            windowTypes: ['app', 'webview'],
-          },
-        });
-      });
-    });
-
     describe('on Windows platforms', () => {
       beforeEach(async () => {
         mockProcessProperty('platform', 'win32');
@@ -508,31 +329,6 @@ describe('beforeSession', () => {
           'browserName': 'chrome',
           'goog:chromeOptions': {
             args: [],
-            binary: 'workspace/my-test-app/dist/win-unpacked/my-test-app.exe',
-            windowTypes: ['app', 'webview'],
-          },
-        });
-      });
-    });
-
-    describe('on Windows platforms running on CI', () => {
-      beforeEach(async () => {
-        mockProcessProperty('platform', 'win32');
-        mockIsCI(true);
-        WorkerService = (await import('../src/service')).default;
-      });
-
-      it('should set the expected capabilities', () => {
-        instance = new WorkerService({
-          appPath: 'workspace/my-test-app/dist',
-          appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
-        expect(capabilities).toEqual({
-          'browserName': 'chrome',
-          'goog:chromeOptions': {
-            args: ['window-size=1280,800', 'enable-automation', 'disable-infobars', 'disable-extensions'],
             binary: 'workspace/my-test-app/dist/win-unpacked/my-test-app.exe',
             windowTypes: ['app', 'webview'],
           },
