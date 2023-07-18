@@ -163,7 +163,7 @@ The version of electron that the app to be tested was built with. The service us
 
 ### `appArgs`: _`string[]`_
 
-An array of string arguments to be passed through to the app on execution of the test run.
+An array of string arguments to be passed through to the app on execution of the test run. Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches) and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be used here.
 
 ### `customApiBrowserCommand`: _`string`_
 
