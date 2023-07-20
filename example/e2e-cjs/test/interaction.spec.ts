@@ -1,7 +1,7 @@
-const { browser } = require('wdio-electron-service');
-const { setupBrowser, WebdriverIOQueries } = require('@testing-library/webdriverio');
-
 describe('application loading', () => {
+  const { browser } = require('wdio-electron-service');
+  const { setupBrowser, WebdriverIOQueries } = require('@testing-library/webdriverio');
+
   let screen: typeof WebdriverIOQueries;
 
   before(() => {
@@ -53,5 +53,3 @@ describe('application loading', () => {
     });
   });
 });
-
-export {};

@@ -1,6 +1,6 @@
-const { browser } = require('wdio-electron-service');
-
 describe('application loading', () => {
+  const { browser } = require('wdio-electron-service');
+
   describe('App', () => {
     it('should launch the application', async () => {
       // await browser.waitUntilTextExists('html', 'Hello');
@@ -16,5 +16,3 @@ describe('application loading', () => {
     });
   });
 });
-
-export {};

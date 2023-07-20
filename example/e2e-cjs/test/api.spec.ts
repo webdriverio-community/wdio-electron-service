@@ -1,13 +1,13 @@
-const fs = require('fs');
-const { browser } = require('wdio-electron-service');
-
-const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding: 'utf-8' })) as Partial<{
-  name: string;
-  version: string;
-}>;
-const { name, version } = packageJson;
-
 describe('electron APIs', () => {
+  const fs = require('fs');
+  const { browser } = require('wdio-electron-service');
+
+  const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding: 'utf-8' })) as Partial<{
+    name: string;
+    version: string;
+  }>;
+  const { name, version } = packageJson;
+
   describe('app', () => {
     it('should retrieve app metadata through the electron API', async () => {
       const appName = await browser.electron.app('getName');
@@ -65,5 +65,3 @@ describe('electron APIs', () => {
     });
   });
 });
-
-export {};
