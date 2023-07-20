@@ -11,15 +11,15 @@
     "lint": "eslint \"**/*.{j,t}s\""
   },
   "devDependencies": {
-    "electron": "^25.3.0",
+    "electron": "^25.3.1",
     "electron-builder": "^24.4.0",
     "ts-loader": "^9.4.4",
     "wdio-electron-service": "file:../../",
-    "webpack": "^5.88.1",
+    "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
-    "typescript": "5.0.4"
+    "typescript": "5.1.6"
   },
   "build": {
     "asar": true,
