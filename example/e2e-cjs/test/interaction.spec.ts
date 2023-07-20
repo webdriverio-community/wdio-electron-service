@@ -53,3 +53,5 @@ describe('application loading', () => {
     });
   });
 });
+
+export {};

@@ -16,6 +16,7 @@ describe('electron APIs', () => {
       expect(appVersion).toEqual(version);
     });
   });
+
   describe('browserWindow', () => {
     it('should retrieve the window title through the electron API', async () => {
       let windowTitle;
@@ -35,18 +36,21 @@ describe('electron APIs', () => {
       expect(windowTitle).toEqual('this is the title of the main window');
     });
   });
+
   describe('custom', () => {
     it('should return the expected response', async () => {
       const result = await browser.electron.api();
       expect(result).toEqual('test');
     });
   });
+
   describe('mainProcess', () => {
     it('should retrieve the process type through the electron API', async () => {
       const processType = await browser.electron.mainProcess('type');
       expect(processType).toEqual('browser');
     });
   });
+
   describe('mock', () => {
     it('should mock the expected electron API function', async () => {
       await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
@@ -61,3 +65,5 @@ describe('electron APIs', () => {
     });
   });
 });
+
+export {};
