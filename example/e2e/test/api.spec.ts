@@ -65,5 +65,3 @@ describe('electron APIs', () => {
     });
   });
 });
-
-export {};

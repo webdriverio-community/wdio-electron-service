@@ -28,5 +28,3 @@ describe('application loading', () => {
     });
   });
 });
-
-export {};
