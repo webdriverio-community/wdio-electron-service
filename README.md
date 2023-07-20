@@ -220,3 +220,17 @@ The name of the output log file to be written in the `outputDir`.
 ### `chromedriver.chromedriverCustomPath`: _`string`_
 
 The path of the chromedriver binary to be executed. If not specified, the service will install the appropriate version of Chromedriver for the specified [`electronVersion`](#electronversion-string).
+
+## Support
+
+If you are having issues running WDIO you should open a discussion in the [main WDIO forum](https://github.com/webdriverio/webdriverio/discussions) in the first instance.
+
+The electron service discussion forum is much less active than the WDIO one, but if the issue you are experiencing is specific to electron or using the service then you can open a discussion [here](https://github.com/webdriverio-community/wdio-electron-service/discussions).
+
+## Common Issues
+
+### DevToolsActivePort file doesn't exist
+
+This is a Chromium error which may appear when using Docker or CI. Most of the "fixes" discussed online are based around passing different combinations of args to Chromium - you can set these via [`appArgs`](#appargs-string), though in most cases using xvfb has proven to be more effective; the service itself uses a [github action](https://github.com/coactions/setup-xvfb) to achieve this when running E2Es on CI.
+
+See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/60) for more details.
