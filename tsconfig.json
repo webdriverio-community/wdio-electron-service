@@ -4,7 +4,6 @@
   "compilerOptions": {
     "module": "ESNext",
     "outDir": "dist",
-    "target": "ES2020",
-    "types": ["node", "@wdio/globals/types"]
+    "target": "ES2020"
   }
 }

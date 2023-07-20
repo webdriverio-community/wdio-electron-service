@@ -23,7 +23,7 @@ module.exports = {
             port: 9519,
             logFileName: 'wdio-chromedriver.log',
           },
-          electronVersion: '25.3.0',
+          electronVersion: '25.3.1',
         },
       ],
     ],
