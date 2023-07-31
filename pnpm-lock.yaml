@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -30,7 +30,7 @@ dependencies:
 devDependencies:
   '@eslint/js':
     specifier: ^8.45.0
-    version: 8.45.0
+    version: 8.46.0
   '@types/chromedriver':
     specifier: ^81.0.1
     version: 81.0.1
@@ -398,8 +398,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@eslint/js@8.45.0:
-    resolution: {integrity: sha512-p/4a2uaWVHCbAPLxPcv9rkhooU1FVfUUiLoZq09v1dOgtLym/Qlsyw2L3JWr9inVRt1XaLKPP5PBcDtTxRUJPg==}
+  /@eslint/js@8.46.0:
+    resolution: {integrity: sha512-a8TLtmPi8xzPkCbp/OGFUo5yhRkHM2Ko9kOWP4znJr0WAhWyThaw3PnwX4vOTWOAMsV2uRt32PPDcEz63esSaA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
