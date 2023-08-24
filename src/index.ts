@@ -1,9 +1,7 @@
 import { browser as wdioBrowser } from '@wdio/globals';
-import ChromedriverLauncher from './launcher.js';
 import ElectronWorkerService from './service.js';
 
 export default ElectronWorkerService;
-export const launcher = ChromedriverLauncher;
 export interface BrowserExtension {
   electron: {
     api: (...arg: unknown[]) => Promise<unknown>;
