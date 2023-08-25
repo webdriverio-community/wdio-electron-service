@@ -23,10 +23,14 @@ module.exports = {
         },
       ],
     ],
-    browserName: 'chrome',
-    browserVersion: 'stable',
-    capabilities: [{}],
-    port: 9519,
+    capabilities: [
+      {
+        'browserName': 'chrome',
+        'goog:chromeOptions': {
+          args: ['headless', 'disable-gpu'],
+        },
+      },
+    ],
     waitforTimeout: 5000,
     connectionRetryCount: 10,
     connectionRetryTimeout: 30000,
