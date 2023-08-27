@@ -3294,7 +3294,7 @@ packages:
       '@types/normalize-package-data': 2.4.1
       normalize-package-data: 6.0.0
       parse-json: 7.0.0
-      type-fest: 4.2.0
+      type-fest: 4.3.0
     dev: true
 
   /readable-stream@2.3.8:
@@ -3890,8 +3890,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /type-fest@4.2.0:
-    resolution: {integrity: sha512-5zknd7Dss75pMSED270A1RQS3KloqRJA9XbXLe0eCxyw7xXFb3rd+9B0UQ/0E+LQT6lnrLviEolYORlRWamn4w==}
+  /type-fest@4.3.0:
+    resolution: {integrity: sha512-XbMcLhoaaX/vw1S8jTKysTlznqSPxDXj1Jf56neDMksT1xoKr02pFAhHhDbW9bFejktlwKto18/UsdXlnUCBMg==}
     engines: {node: '>=16'}
     dev: true
 
@@ -4321,6 +4321,7 @@ packages:
       '@electron/get': 2.0.2
       '@wdio/logger': 8.11.0
       cross-dirname: 0.1.0
+      extract-zip: 2.0.1
       import-meta-resolve: 3.0.0
       webdriverio: 8.15.6(typescript@5.2.2)
     transitivePeerDependencies:
