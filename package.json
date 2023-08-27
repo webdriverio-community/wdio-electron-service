@@ -59,8 +59,8 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit && pnpm test:integration",
-    "test:local-integration": "pnpm i && pnpm build && pnpm test:integration",
     "test:integration": "pnpm test:build-app && pnpm test:integration:cjs && pnpm test:integration:esm",
+    "test:integration-local": "pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:cjs": "cd example/e2e-cjs && pnpm i && pnpm test",
     "test:integration:esm": "cd example/e2e && pnpm i && pnpm test",
     "test:build-app": "cd example/app && pnpm i && pnpm build"
