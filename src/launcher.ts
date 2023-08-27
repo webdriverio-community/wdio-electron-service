@@ -7,6 +7,9 @@ import { getDirname } from 'cross-dirname';
 
 import { log } from './utils.js';
 
+const isMultiremote = (obj: Capabilities.Capabilities) => typeof obj === 'object' && !Array.isArray(obj);
+const isChrome = (cap: Capabilities.Capabilities) => cap.browserName && cap.browserName.toLowerCase() === 'chrome';
+
 const dirname = getDirname();
 
 export type ElectronLauncherServiceOpts = {
@@ -61,6 +64,8 @@ async function attemptAssetsDownload(version = '') {
 export default class ChromeDriverLauncher {
   private electronServiceLauncherOptions;
   private shouldDownloadChromedriver;
+  protected capabilities: Capabilities.Capabilities;
+  protected chromedriverOptions: WebdriverIO.ChromedriverOptions = {};
 
   constructor(
     options: ElectronLauncherServiceOpts,
@@ -97,13 +102,35 @@ export default class ChromeDriverLauncher {
       options.chromedriverCustomPath = join(dirname, '..', 'bin', chromedriverExecutable);
     }
 
-    log.debug('setting chromedriver custom path:', options.chromedriverCustomPath);
     this.electronServiceLauncherOptions = options;
     this.shouldDownloadChromedriver = shouldDownloadChromedriver;
+    this.capabilities = capabilities;
 
-    capabilities['wdio:chromedriverOptions'] = {
+    this.chromedriverOptions['wdio:chromedriverOptions' as keyof typeof this.chromedriverOptions] = {
       binary: options.chromedriverCustomPath,
-    } as WebdriverIO.ChromedriverOptions;
+    } as any;
+    log.debug('setting chromedriver options:', this.chromedriverOptions);
+  }
+
+  _mapCapabilities() {
+    // TODO: check mapping works with parallel multiremote
+    if (isMultiremote(this.capabilities)) {
+      for (const cap in this.capabilities) {
+        if (
+          isChrome(
+            (this.capabilities as Capabilities.MultiRemoteCapabilities)[cap].capabilities as Capabilities.Capabilities,
+          )
+        ) {
+          Object.assign((this.capabilities as Capabilities.MultiRemoteCapabilities)[cap], this.chromedriverOptions);
+        }
+      }
+    } else {
+      for (const cap of this.capabilities as Capabilities.DesiredCapabilities[]) {
+        if (isChrome(cap)) {
+          Object.assign(cap, this.chromedriverOptions);
+        }
+      }
+    }
   }
 
   async onPrepare() {
@@ -111,5 +138,8 @@ export default class ChromeDriverLauncher {
       const { electronVersion } = this.electronServiceLauncherOptions;
       await attemptAssetsDownload(electronVersion);
     }
+
+    this._mapCapabilities();
+    log.debug('setting capabilities:', this.capabilities);
   }
 }
