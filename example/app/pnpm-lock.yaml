@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   typescript:
-    specifier: 5.1.6
-    version: 5.1.6
+    specifier: 5.2.2
+    version: 5.2.2
 
 devDependencies:
   electron:
@@ -18,10 +18,10 @@ devDependencies:
     version: 24.6.3
   ts-loader:
     specifier: ^9.4.4
-    version: 9.4.4(typescript@5.1.6)(webpack@5.88.2)
+    version: 9.4.4(typescript@5.2.2)(webpack@5.88.2)
   wdio-electron-service:
     specifier: file:../../
-    version: file:../..(electron@26.1.0)(typescript@5.1.6)
+    version: file:../..(electron@26.1.0)(typescript@5.2.2)
   webpack:
     specifier: ^5.88.2
     version: 5.88.2(webpack-cli@5.1.4)
@@ -213,7 +213,7 @@ packages:
     dev: true
     optional: true
 
-  /@puppeteer/browsers@1.4.6(typescript@5.1.6):
+  /@puppeteer/browsers@1.4.6(typescript@5.2.2):
     resolution: {integrity: sha512-x4BEjr2SjOPowNeiguzjozQbsc6h437ovD/wu+JpaenxVLm3jkgzHY2xOslMTp50HoTvQreMjiexiGQw1sqZlQ==}
     engines: {node: '>=16.3.0'}
     hasBin: true
@@ -228,7 +228,7 @@ packages:
       progress: 2.0.3
       proxy-agent: 6.3.0
       tar-fs: 3.0.4
-      typescript: 5.1.6
+      typescript: 5.2.2
       unbzip2-stream: 1.4.3
       yargs: 17.7.1
     transitivePeerDependencies:
@@ -2738,7 +2738,7 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /puppeteer-core@20.9.0(typescript@5.1.6):
+  /puppeteer-core@20.9.0(typescript@5.2.2):
     resolution: {integrity: sha512-H9fYZQzMTRrkboEfPmf7m3CLDN6JvbxXA3qTtS+dFt27tR+CsFHzPsT6pzp6lYL6bJbAPaR0HaPO6uSi+F94Pg==}
     engines: {node: '>=16.3.0'}
     peerDependencies:
@@ -2747,12 +2747,12 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@puppeteer/browsers': 1.4.6(typescript@5.1.6)
+      '@puppeteer/browsers': 1.4.6(typescript@5.2.2)
       chromium-bidi: 0.4.16(devtools-protocol@0.0.1147663)
       cross-fetch: 4.0.0
       debug: 4.3.4
       devtools-protocol: 0.0.1147663
-      typescript: 5.1.6
+      typescript: 5.2.2
       ws: 8.13.0
     transitivePeerDependencies:
       - bufferutil
@@ -3322,7 +3322,7 @@ packages:
       utf8-byte-length: 1.0.4
     dev: true
 
-  /ts-loader@9.4.4(typescript@5.1.6)(webpack@5.88.2):
+  /ts-loader@9.4.4(typescript@5.2.2)(webpack@5.88.2):
     resolution: {integrity: sha512-MLukxDHBl8OJ5Dk3y69IsKVFRA/6MwzEqBgh+OXMPB/OD01KQuWPFd1WAQP8a5PeSCAxfnkhiuWqfmFJzJQt9w==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -3333,7 +3333,7 @@ packages:
       enhanced-resolve: 5.15.0
       micromatch: 4.0.5
       semver: 7.5.4
-      typescript: 5.1.6
+      typescript: 5.2.2
       webpack: 5.88.2(webpack-cli@5.1.4)
     dev: true
 
@@ -3373,8 +3373,8 @@ packages:
     hasBin: true
     dev: true
 
-  /typescript@5.1.6:
-    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+  /typescript@5.2.2:
+    resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3503,7 +3503,7 @@ packages:
       - utf-8-validate
     dev: true
 
-  /webdriverio@8.15.9(typescript@5.1.6):
+  /webdriverio@8.15.9(typescript@5.2.2):
     resolution: {integrity: sha512-ni3Mpfje0JKkuWUxKD3+VDkN0/c4DxvuPezk6zJNFGqRmk8LT7BSx0Tz5t64WFb8r0icZ2OS+H1JUoUbxg+swA==}
     engines: {node: ^16.13 || >=18}
     peerDependencies:
@@ -3530,7 +3530,7 @@ packages:
       lodash.clonedeep: 4.5.0
       lodash.zip: 4.2.0
       minimatch: 9.0.3
-      puppeteer-core: 20.9.0(typescript@5.1.6)
+      puppeteer-core: 20.9.0(typescript@5.2.2)
       query-selector-shadow-dom: 1.0.1
       resq: 1.11.0
       rgb2hex: 0.2.5
@@ -3763,7 +3763,7 @@ packages:
       readable-stream: 3.6.2
     dev: true
 
-  file:../..(electron@26.1.0)(typescript@5.1.6):
+  file:../..(electron@26.1.0)(typescript@5.2.2):
     resolution: {directory: ../.., type: directory}
     id: file:../..
     name: wdio-electron-service
@@ -3781,7 +3781,7 @@ packages:
       electron: 26.1.0
       extract-zip: 2.0.1
       import-meta-resolve: 3.0.0
-      webdriverio: 8.15.9(typescript@5.1.6)
+      webdriverio: 8.15.9(typescript@5.2.2)
     transitivePeerDependencies:
       - bufferutil
       - devtools
