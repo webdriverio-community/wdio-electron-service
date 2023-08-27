@@ -17,7 +17,16 @@ vi.mock('electron', () => ({
 
 describe('preload', () => {
   beforeEach(async () => {
+    process.env.WDIO_ELECTRON = 'true';
     await import('../src/preload');
+  });
+
+  it('should throw an error when the WDIO_ELECTRON environment variable does not exist', async () => {
+    delete process.env.WDIO_ELECTRON;
+    await expect(
+      (window.wdioElectron as WdioElectronWindowObj).mainProcess.invoke('look', 'some', 'args'),
+    ).rejects.toThrow('Electron APIs can not be invoked outside of WDIO');
+    expect(ipcRendererInvokeMock).not.toHaveBeenCalled();
   });
 
   const apis = ['custom', 'mock', 'mainProcess', 'app', 'browserWindow', 'dialog'];
