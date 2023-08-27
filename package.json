@@ -58,7 +58,7 @@
     "release:major": "pnpm release major",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
-    "test": "pnpm test:unit && pnpm test:integration",
+    "test": "pnpm test:integration && pnpm test:unit",
     "test:integration": "pnpm test:build-app && pnpm test:integration:cjs && pnpm test:integration:esm",
     "test:integration-local": "pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:cjs": "cd example/e2e-cjs && pnpm i && pnpm test",
