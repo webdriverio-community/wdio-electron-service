@@ -1,5 +1,6 @@
 import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Options, Services } from '@wdio/types';
+import type { default as LauncherInstance, ElectronLauncherServiceOpts } from '../launcher.js';
 import type { default as ServiceInstance } from '../service.js';
 
 exports.default = class CJSElectronService {
@@ -20,6 +21,26 @@ exports.default = class CJSElectronService {
   async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
     const instance = await this.instance;
     return instance?.before(capabilities, specs, browser);
+  }
+};
+
+exports.launcher = class CJSElectronServiceLauncher {
+  private instance?: LauncherInstance;
+
+  constructor(
+    options: ElectronLauncherServiceOpts,
+    capabilities: Capabilities.Capabilities,
+    config: Options.Testrunner,
+  ) {
+    (async () => {
+      const { default: ElectronServiceLauncher } = await import('../launcher.js');
+      this.instance = new ElectronServiceLauncher(options, capabilities, config);
+    })();
+  }
+
+  async onPrepare() {
+    const instance = await this.instance;
+    return instance?.onPrepare();
   }
 };
 
