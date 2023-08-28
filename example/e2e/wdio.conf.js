@@ -24,13 +24,12 @@ export const config = {
   ],
   capabilities: [
     {
-      browserName: 'chrome',
-      // 'goog:chromeOptions': {
-      //   args: ['headless', 'disable-gpu'],
-      // },
+      'browserName': 'chrome',
+      'goog:chromeOptions': {
+        args: ['headless', 'disable-gpu'],
+      },
     },
   ],
-  hostname: 'localhost',
   waitforTimeout: 5000,
   connectionRetryCount: 10,
   connectionRetryTimeout: 30000,
