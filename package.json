@@ -59,8 +59,8 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:integration && pnpm test:unit",
-    "test:integration": "pnpm test:build-app && pnpm test:integration:cjs && pnpm test:integration:esm",
-    "test:integration-local": "pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
+    "test:integration": "DEBUG=wdio-electron-service pnpm test:build-app && pnpm test:integration:cjs && pnpm test:integration:esm",
+    "test:integration-local": "DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:cjs": "cd example/e2e-cjs && pnpm i && pnpm test",
     "test:integration:esm": "cd example/e2e && pnpm i && pnpm test",
     "test:build-app": "cd example/app && pnpm i && pnpm build"
@@ -85,6 +85,7 @@
     "@electron/get": "^2.0.2",
     "@wdio/logger": "^8.11.0",
     "cross-dirname": "^0.1.0",
+    "debug": "^4.3.4",
     "extract-zip": "^2.0.1",
     "import-meta-resolve": "^3.0.0",
     "webdriverio": "^8.15.9"
@@ -92,6 +93,7 @@
   "devDependencies": {
     "@eslint/js": "^8.48.0",
     "@types/chromedriver": "^81.0.1",
+    "@types/debug": "^4.1.8",
     "@types/eslint-config-prettier": "^6.11.0",
     "@types/node": "^20.5.6",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
