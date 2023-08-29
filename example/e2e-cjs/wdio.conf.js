@@ -25,10 +25,7 @@ module.exports = {
     ],
     capabilities: [
       {
-        'browserName': 'electron',
-        'goog:chromeOptions': {
-          args: ['headless', 'disable-gpu'],
-        },
+        browserName: 'electron',
       },
     ],
     waitforTimeout: 5000,
