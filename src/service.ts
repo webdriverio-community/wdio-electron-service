@@ -1,6 +1,8 @@
-import { Capabilities, Options, Services } from '@wdio/types';
+import { Capabilities, Services } from '@wdio/types';
 import { Browser } from 'webdriverio';
+
 import { log } from './utils.js';
+import type { ElectronServiceOptions } from './types.js';
 
 type WdioElectronWindowObj = {
   [Key: string]: {
@@ -14,38 +16,6 @@ declare global {
   }
 }
 
-function getMacExecutableName(appName: string) {
-  // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
-  if (appName.endsWith(' Helper')) {
-    return appName.replace(' Helper', '');
-  }
-
-  return appName;
-}
-
-function getBinaryPath(distPath: string, appName: string) {
-  const SupportedPlatform = {
-    darwin: 'darwin',
-    linux: 'linux',
-    win32: 'win32',
-  };
-  const { platform, arch } = process;
-
-  if (!Object.values(SupportedPlatform).includes(platform)) {
-    throw new Error(`Unsupported platform: ${platform}`);
-  }
-
-  const pathMap = {
-    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
-    linux: `linux-unpacked/${appName}`,
-    win32: `win-unpacked/${appName}.exe`,
-  };
-
-  const electronPath = pathMap[platform as keyof typeof SupportedPlatform];
-
-  return `${distPath}/${electronPath}`;
-}
-
 async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
   if (window.wdioElectron === undefined) {
     throw new Error(`ContextBridge not available for invocation of "${bridgePropName}" API`);
@@ -56,13 +26,6 @@ async function callApi(bridgePropName: string, args: unknown[], done: (result: u
   done(await window.wdioElectron[bridgePropName].invoke(...args));
 }
 
-type ElectronWorkerOptions = {
-  appPath?: string;
-  appName?: string;
-  binaryPath?: string;
-  customApiBrowserCommand?: string;
-  appArgs?: string[];
-};
 type ApiCommand = { name: string; bridgeProp: string };
 type WebDriverClient = Browser;
 type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
@@ -84,7 +47,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       appArgs = [],
       binaryPath,
       customApiBrowserCommand = 'api',
-    } = options as ElectronWorkerOptions;
+    } = options as ElectronServiceOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
@@ -121,36 +84,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   public _browser?: WebdriverIO.Browser;
 
-  beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
-    const { appPath, appName, appArgs, binaryPath } = this.options;
-    const chromeOptions = {
-      binary: binaryPath || getBinaryPath(appPath as string, appName as string),
-      args: appArgs,
-      windowTypes: ['app', 'webview'],
-    };
+  // beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
+  //   capabilities = mapCapabilities(capabilities, this.options);
 
-    const isMultiremote =
-      typeof capabilities === 'object' &&
-      !Array.isArray(capabilities) &&
-      Object.keys(capabilities).length > 0 &&
-      Object.values(capabilities).every((cap) => typeof cap === 'object');
-    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
-
-    if (isMultiremote) {
-      log.debug('setting up multiremote');
-      Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
-        if (isElectron(cap.capabilities)) {
-          cap.capabilities.browserName = 'chrome';
-          cap.capabilities['goog:chromeOptions'] = chromeOptions;
-        }
-      });
-    } else {
-      capabilities.browserName = 'chrome';
-      capabilities['goog:chromeOptions'] = chromeOptions;
-    }
-
-    log.debug('setting browser capabilities', capabilities);
-  }
+  //   log.debug('beforeSession setting capabilities', capabilities, this.options);
+  // }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
     const api: ElectronServiceApi = {};
