@@ -27,8 +27,6 @@ export const config = {
       browserVersion: '26.0.0',
     },
   ],
-  hostname: 'localhost',
-  port: 4444,
   waitforTimeout: 5000,
   connectionRetryCount: 10,
   connectionRetryTimeout: 30000,
