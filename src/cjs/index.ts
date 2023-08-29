@@ -1,7 +1,9 @@
 import { browser as wdioBrowser } from '@wdio/globals';
+
 import type { Capabilities, Options, Services } from '@wdio/types';
-import type { default as LauncherInstance, ElectronLauncherServiceOpts } from '../launcher.js';
+import type { default as LauncherInstance } from '../launcher.js';
 import type { default as ServiceInstance } from '../service.js';
+import type { ElectronServiceOptions } from '../types.js';
 
 exports.default = class CJSElectronService {
   private instance?: ServiceInstance;
@@ -13,10 +15,10 @@ exports.default = class CJSElectronService {
     })();
   }
 
-  async beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities) {
-    const instance = await this.instance;
-    return instance?.beforeSession(config, capabilities);
-  }
+  // async beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities) {
+  //   const instance = await this.instance;
+  //   return instance?.beforeSession(config, capabilities);
+  // }
 
   async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
     const instance = await this.instance;
@@ -28,8 +30,8 @@ exports.launcher = class CJSElectronServiceLauncher {
   private instance?: LauncherInstance;
 
   constructor(
-    options: ElectronLauncherServiceOpts,
-    capabilities: Capabilities.Capabilities,
+    options: ElectronServiceOptions,
+    capabilities: Capabilities.RemoteCapabilities,
     config: Options.Testrunner,
   ) {
     (async () => {
@@ -41,6 +43,11 @@ exports.launcher = class CJSElectronServiceLauncher {
   async onPrepare() {
     const instance = await this.instance;
     return instance?.onPrepare();
+  }
+
+  async onComplete() {
+    const instance = await this.instance;
+    return instance?.onComplete();
   }
 };
 
