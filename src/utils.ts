@@ -56,7 +56,6 @@ function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Cap
   const existingOptions = cap['goog:chromeOptions'] || {};
   return {
     binary: options.binaryPath || getBinaryPath(options.appPath as string, options.appName as string),
-    args: options.appArgs,
     windowTypes: ['app', 'webview'],
     ...existingOptions,
   };

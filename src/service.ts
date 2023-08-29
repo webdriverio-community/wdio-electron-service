@@ -41,13 +41,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       { name: 'mainProcess', bridgeProp: 'mainProcess' },
       { name: 'mock', bridgeProp: 'mock' },
     ];
-    const {
-      appPath,
-      appName,
-      appArgs = [],
-      binaryPath,
-      customApiBrowserCommand = 'api',
-    } = options as ElectronServiceOptions;
+    const { appPath, appName, binaryPath, customApiBrowserCommand = 'api' } = options as ElectronServiceOptions;
     const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
 
     if (!validPathOpts) {
@@ -72,7 +66,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.options = {
       appPath,
       appName,
-      appArgs,
       binaryPath,
     };
     this.apiCommands = apiCommands;
