@@ -1,9 +1,13 @@
+import fs from 'fs';
+import { join } from 'path';
 import logger, { Logger } from '@wdio/logger';
 import debug from 'debug';
-import { Capabilities } from '@wdio/types';
+import findVersions from 'find-versions';
+import { getDirname } from 'cross-dirname';
+import { fullVersions as chromiumVersions } from 'electron-to-chromium';
+import type { Capabilities } from '@wdio/types';
 
 import type { ElectronServiceOptions } from './types';
-import { DesiredCapabilities } from '@wdio/types/build/Capabilities';
 
 const d = debug('wdio-electron-service');
 const l = logger('electron-service');
@@ -60,29 +64,33 @@ function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Cap
 
 function getChromedriverOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
   const existingOptions = cap['wdio:chromedriverOptions'] || {};
+
   return {
     binary: options.chromedriverCustomPath,
     ...existingOptions,
   };
 }
 
-export const mapCapabilities = (capabilities: Capabilities.RemoteCapabilities, options: ElectronServiceOptions) => {
-  const isMultiremote = (cap: unknown) =>
-    cap &&
-    typeof cap === 'object' &&
-    !Array.isArray(cap) &&
-    Object.keys(cap).length > 0 &&
-    Object.values(cap).every((cap) => typeof cap === 'object');
-  const isElectron = (cap: unknown) => (cap as DesiredCapabilities)?.browserName?.toLowerCase() === 'electron';
-  // const chromeOptions = {
-  //     binary: options.binaryPath || getBinaryPath(options.appPath as string, options.appName as string),
-  //     args: options.appArgs,
-  //     windowTypes: ['app', 'webview'],
-  //   };
-  // const chromedriverOptions = {
-  //     binary: options.chromedriverCustomPath
-  //   }
+const isMultiremote = (cap: unknown) =>
+  cap &&
+  typeof cap === 'object' &&
+  !Array.isArray(cap) &&
+  Object.keys(cap).length > 0 &&
+  Object.values(cap).every((cap) => typeof cap === 'object');
+const isElectron = (cap: unknown) =>
+  (cap as Capabilities.DesiredCapabilities)?.browserName?.toLowerCase() === 'electron';
+const parseVersion = (version?: string) => {
+  if (!version) {
+    return undefined;
+  }
+  return findVersions(version)[0];
+};
 
+export const mapCapabilities = (
+  capabilities: Capabilities.RemoteCapabilities,
+  options: ElectronServiceOptions,
+  chromiumVersion?: string,
+) => {
   log.debug('mapping capabilities', options);
 
   if (Array.isArray(capabilities)) {
@@ -92,26 +100,35 @@ export const mapCapabilities = (capabilities: Capabilities.RemoteCapabilities, o
         Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
           if (isElectron(cap.capabilities)) {
             cap.capabilities.browserName = 'chrome';
+            cap.capabilities.browserVersion = chromiumVersion || cap.capabilities.browserVersion;
             cap.capabilities['goog:chromeOptions'] = getChromeOptions(options, cap.capabilities);
-            cap.capabilities['wdio:chromedriverOptions'] = getChromedriverOptions(options, cap.capabilities);
+            if (!chromiumVersion) {
+              cap.capabilities['wdio:chromedriverOptions'] = getChromedriverOptions(options, cap.capabilities);
+            }
           }
         });
       } else if (isElectron(cap)) {
         // regular capabilities
-        const c = cap as DesiredCapabilities;
+        const c = cap as Capabilities.DesiredCapabilities;
         c.browserName = 'chrome';
+        c.browserVersion = chromiumVersion || c.browserVersion;
         c['goog:chromeOptions'] = getChromeOptions(options, c);
-        c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
+        if (!chromiumVersion) {
+          c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
+        }
       }
     });
   } else if (isMultiremote(capabilities)) {
     // multiremote (non-parallel)
     Object.values(capabilities).forEach((cap) => {
       if (isElectron(cap.capabilities)) {
-        const c = cap.capabilities as DesiredCapabilities;
+        const c = cap.capabilities as Capabilities.DesiredCapabilities;
         c.browserName = 'chrome';
+        c.browserVersion = chromiumVersion || c.browserVersion;
         c['goog:chromeOptions'] = getChromeOptions(options, c);
-        c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
+        if (!chromiumVersion) {
+          c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
+        }
       }
     });
   }
@@ -119,4 +136,44 @@ export const mapCapabilities = (capabilities: Capabilities.RemoteCapabilities, o
   log.debug('capabilities mapped', capabilities);
 
   return capabilities;
+};
+
+export const getChromiumVersion = async (electronVersion?: string) => {
+  // get https://raw.githubusercontent.com/Kilian/electron-to-chromium/master/full-versions.json
+
+  // if fail use installed version
+  return chromiumVersions[electronVersion as keyof typeof chromiumVersions];
+};
+
+export const getElectronVersion = async (capabilities: Capabilities.RemoteCapabilities) => {
+  // check capabilities
+  if (Array.isArray(capabilities)) {
+    type RemoteCapabilities = (typeof capabilities)[number];
+    const electronCap = (capabilities as RemoteCapabilities[]).find((cap) => {
+      if (isMultiremote(cap)) {
+        // multiremote (parallel)
+        return isElectron((cap as Capabilities.MultiRemoteCapabilities).capabilities);
+      }
+
+      // regular capabilities
+      return isElectron(cap);
+    });
+
+    return electronCap ? (electronCap as Capabilities.DesiredCapabilities).browserVersion : undefined;
+  } else if (isMultiremote(capabilities)) {
+    // multiremote (non-parallel)
+    const electronCap = Object.values(capabilities).find((cap) => isElectron(cap.capabilities));
+    return electronCap ? (electronCap.capabilities as Capabilities.DesiredCapabilities).browserVersion : undefined;
+  }
+
+  // check local package.json for electron
+  const dirname = getDirname();
+  const packageJson = JSON.parse(fs.readFileSync(join(dirname, 'package.json'), { encoding: 'utf-8' })) as Partial<{
+    dependencies?: { [name: string]: string };
+    devDependencies?: { [name: string]: string };
+  }>;
+  const { dependencies, devDependencies } = packageJson;
+  const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
+
+  return localElectronVersion || undefined;
 };

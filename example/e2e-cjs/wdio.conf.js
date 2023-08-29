@@ -19,13 +19,13 @@ module.exports = {
           appPath: join(dirname, '..', 'app', 'dist'),
           appName: productName,
           appArgs: ['foo', 'bar=baz'],
-          electronVersion: '26.0.0',
         },
       ],
     ],
     capabilities: [
       {
         browserName: 'electron',
+        browserVersion: '26.0.0',
       },
     ],
     waitforTimeout: 5000,

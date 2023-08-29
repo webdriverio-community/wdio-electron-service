@@ -5,7 +5,7 @@ import extractZip from 'extract-zip';
 import { downloadArtifact as downloadElectronAssets } from '@electron/get';
 import { getDirname } from 'cross-dirname';
 
-import { log, mapCapabilities } from './utils.js';
+import { getChromiumVersion, getElectronVersion, log, mapCapabilities } from './utils.js';
 import type { ElectronServiceOptions } from './types.js';
 
 const dirname = getDirname();
@@ -56,7 +56,6 @@ async function attemptAssetsDownload(version = '') {
 
 export default class ChromeDriverLauncher {
   private electronServiceLauncherOptions;
-  private shouldDownloadChromedriver;
   protected capabilities: Capabilities.RemoteCapabilities;
   protected chromedriverOptions: WebdriverIO.ChromedriverOptions = {};
 
@@ -70,16 +69,14 @@ export default class ChromeDriverLauncher {
     log.debug('launcher received options:', options);
     process.env.WDIO_ELECTRON = 'true';
 
-    const validChromedriverPath = options.chromedriverCustomPath !== undefined || options.electronVersion !== undefined;
-    if (!validChromedriverPath) {
-      const invalidChromedriverOptsError = new Error(
-        'You must specify the electronVersion, or provide a chromedriverCustomPath value',
-      );
-      log.error(invalidChromedriverOptsError);
-      throw invalidChromedriverOptsError;
-    }
-
-    const shouldDownloadChromedriver = options.electronVersion && !options.chromedriverCustomPath;
+    // const validChromedriverPath = options.chromedriverCustomPath !== undefined || this.electronVersion !== undefined;
+    // if (!validChromedriverPath) {
+    //   const invalidChromedriverOptsError = new Error(
+    //     'You must specify the electron browserVersion in capabilities, or provide a chromedriverCustomPath value',
+    //   );
+    //   log.error(invalidChromedriverOptsError);
+    //   throw invalidChromedriverOptsError;
+    // }
 
     if (isWin) {
       const shouldRunInNode = extname(options.chromedriverCustomPath || '') === '.js';
@@ -96,22 +93,24 @@ export default class ChromeDriverLauncher {
     }
 
     this.electronServiceLauncherOptions = options;
-    this.shouldDownloadChromedriver = shouldDownloadChromedriver;
+    // this.shouldDownloadChromedriver = this.electronVersion && !this.chromiumVersion && !options.chromedriverCustomPath;
     this.capabilities = capabilities;
-
-    // this.chromedriverOptions['wdio:chromedriverOptions' as keyof typeof this.chromedriverOptions] = {
-    //   binary: options.chromedriverCustomPath
-    // } as any;
-    // log.debug('setting chromedriver options:', this.chromedriverOptions);
   }
 
   async onPrepare() {
-    if (this.shouldDownloadChromedriver) {
-      const { electronVersion } = this.electronServiceLauncherOptions;
+    // get versions
+    const electronVersion = await getElectronVersion(this.capabilities);
+    const chromiumVersion = await getChromiumVersion(electronVersion);
+    const shouldDownloadChromedriver =
+      electronVersion && !chromiumVersion && !this.electronServiceLauncherOptions.chromedriverCustomPath;
+
+    // download chromedriver if required
+    if (shouldDownloadChromedriver) {
       await attemptAssetsDownload(electronVersion);
     }
 
-    this.capabilities = mapCapabilities(this.capabilities, this.electronServiceLauncherOptions);
+    // map capabilities
+    this.capabilities = mapCapabilities(this.capabilities, this.electronServiceLauncherOptions, chromiumVersion);
     log.debug('onPrepare setting capabilities:', this.capabilities, this.electronServiceLauncherOptions);
   }
 

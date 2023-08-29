@@ -5,5 +5,4 @@ export interface ElectronServiceOptions {
   binaryPath?: string;
   chromedriverCustomPath?: string;
   customApiBrowserCommand?: string;
-  electronVersion?: string;
 }
