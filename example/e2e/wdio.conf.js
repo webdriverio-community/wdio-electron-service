@@ -24,7 +24,7 @@ export const config = {
   ],
   capabilities: [
     {
-      'browserName': 'chrome',
+      'browserName': 'electron',
       'goog:chromeOptions': {
         args: ['headless', 'disable-gpu'],
       },
