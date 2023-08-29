@@ -88,7 +88,7 @@ export const mapCapabilities = (capabilities: Capabilities.RemoteCapabilities, o
   if (Array.isArray(capabilities)) {
     capabilities.forEach((cap) => {
       if (isMultiremote(cap)) {
-        // parallel multiremote
+        // multiremote (parallel)
         Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
           if (isElectron(cap.capabilities)) {
             cap.capabilities.browserName = 'chrome';
@@ -98,27 +98,20 @@ export const mapCapabilities = (capabilities: Capabilities.RemoteCapabilities, o
         });
       } else if (isElectron(cap)) {
         // regular capabilities
-        (cap as DesiredCapabilities).browserName = 'chrome';
-        (cap as DesiredCapabilities)['goog:chromeOptions'] = getChromeOptions(options, cap as DesiredCapabilities);
-        (cap as DesiredCapabilities)['wdio:chromedriverOptions'] = getChromedriverOptions(
-          options,
-          cap as DesiredCapabilities,
-        );
+        const c = cap as DesiredCapabilities;
+        c.browserName = 'chrome';
+        c['goog:chromeOptions'] = getChromeOptions(options, c);
+        c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
       }
     });
   } else if (isMultiremote(capabilities)) {
     // multiremote (non-parallel)
     Object.values(capabilities).forEach((cap) => {
       if (isElectron(cap.capabilities)) {
-        (cap.capabilities as DesiredCapabilities).browserName = 'chrome';
-        (cap.capabilities as DesiredCapabilities)['goog:chromeOptions'] = getChromeOptions(
-          options,
-          cap.capabilities as DesiredCapabilities,
-        );
-        (cap.capabilities as DesiredCapabilities)['wdio:chromedriverOptions'] = getChromedriverOptions(
-          options,
-          cap.capabilities as DesiredCapabilities,
-        );
+        const c = cap.capabilities as DesiredCapabilities;
+        c.browserName = 'chrome';
+        c['goog:chromeOptions'] = getChromeOptions(options, c);
+        c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
       }
     });
   }
