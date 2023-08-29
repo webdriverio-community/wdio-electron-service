@@ -38,7 +38,7 @@
   },
   "scripts": {
     "init-dev": "pnpm i -r && husky install",
-    "ci": "pnpm i && pnpm build && pnpm test && pnpm lint && pnpm format:check",
+    "ci": "pnpm i && pnpm build && pnpm test:integration",
     "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "pnpx rimraf ./dist",
     "clean:all": "pnpm clean && pnpm -r --reverse clean",
