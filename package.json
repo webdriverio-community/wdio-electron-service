@@ -75,11 +75,15 @@
     "tests"
   ],
   "peerDependencies": {
-    "electron": "*"
+    "electron": "*",
+    "webdriverio": ">8.15.0"
   },
   "peerDependenciesMeta": {
     "electron": {
       "optional": true
+    },
+    "webdriverio": {
+      "optional": false
     }
   },
   "dependencies": {
@@ -117,7 +121,8 @@
     "rimraf": "^5.0.1",
     "shx": "^0.3.4",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.3"
+    "vitest": "^0.34.3",
+    "webdriverio": "^8.16.12"
   },
   "files": [
     "bin/*",
