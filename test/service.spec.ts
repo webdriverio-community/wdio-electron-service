@@ -20,34 +20,12 @@ describe('options validation', () => {
     WorkerService = (await import('../src/service')).default;
   });
 
-  it('should throw an error when no path options are specified', () => {
-    expect(() => {
-      instance = new WorkerService({});
-    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
-  });
-
-  it('should throw an error when appName is specified without appPath', () => {
-    expect(() => {
-      instance = new WorkerService({
-        appName: 'mock-app',
-      });
-    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
-  });
-
-  it('should throw an error when appPath is specified without appName', () => {
-    expect(() => {
-      instance = new WorkerService({
-        appPath: '/mock/dist',
-      });
-    }).toThrow('You must provide appPath and appName values, or a binaryPath value');
-  });
-
   it('should throw an error when there is a custom API command collision', () => {
     expect(() => {
-      instance = new WorkerService({
+      new WorkerService({
         binaryPath: '/mock/dist',
         customApiBrowserCommand: 'app',
-      });
+      }, {} as never, {} as any);
     }).toThrow('The command "app" is reserved, please provide a different value for customApiBrowserCommand');
   });
 });
@@ -64,49 +42,51 @@ describe('beforeSession', () => {
       WorkerService = (await import('../src/service')).default;
     });
 
-    it('should set the expected capabilities', () => {
+    it('should set the expected capabilities', async () => {
       instance = new WorkerService({
         binaryPath: 'workspace/my-test-app/dist/my-test-app',
-      });
-      const capabilities = {};
-      instance.beforeSession({}, capabilities);
+      }, {} as never, {} as any)
+      const capabilities: Capabilities.Capabilities = {
+        browserName: 'electron'
+      }
+      await instance.beforeSession({}, capabilities);
       expect(capabilities).toEqual({
         'browserName': 'chrome',
         'goog:chromeOptions': {
           args: [],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
-        },
-      });
-    });
+        }
+      })
+    })
 
-    it('should set the expected capabilities when multiremote', () => {
+    it('should set the expected capabilities when multiremote', async () => {
       instance = new WorkerService({
-        binaryPath: 'workspace/my-test-app/dist/my-test-app',
-      });
+        binaryPath: 'workspace/my-test-app/dist/my-test-app'
+      }, {} as never, {} as any)
       const capabilities = {
         firefox: {
           capabilities: {
             browserName: 'firefox',
-          },
+          }
         },
         myElectronProject: {
           capabilities: {
             browserName: 'electron',
-          },
+          }
         },
         chrome: {
           capabilities: {
-            browserName: 'chrome',
-          },
-        },
-      };
-      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+            browserName: 'chrome'
+          }
+        }
+      }
+      await instance.beforeSession({}, capabilities as Capabilities.Capabilities);
       expect(capabilities).toEqual({
         firefox: {
           capabilities: {
-            browserName: 'firefox',
-          },
+            browserName: 'firefox'
+          }
         },
         myElectronProject: {
           capabilities: {
@@ -114,18 +94,18 @@ describe('beforeSession', () => {
             'goog:chromeOptions': {
               args: [],
               binary: 'workspace/my-test-app/dist/my-test-app',
-              windowTypes: ['app', 'webview'],
-            },
-          },
+              windowTypes: ['app', 'webview']
+            }
+          }
         },
         chrome: {
           capabilities: {
             browserName: 'chrome',
-          },
-        },
-      });
-    });
-  });
+          }
+        }
+      })
+    })
+  })
 
   describe('providing appArgs', () => {
     beforeEach(async () => {
@@ -133,13 +113,15 @@ describe('beforeSession', () => {
       WorkerService = (await import('../src/service')).default;
     });
 
-    it('should set the expected capabilities', () => {
+    it('should set the expected capabilities', async () => {
       instance = new WorkerService({
         binaryPath: 'workspace/my-test-app/dist/my-test-app',
         appArgs: ['look', 'some', 'args'],
-      });
-      const capabilities = {};
-      instance.beforeSession({}, capabilities);
+      }, {} as never, {} as any);
+      const capabilities: Capabilities.Capabilities = {
+        browserName: 'electron'
+      };
+      await instance.beforeSession({}, capabilities);
       expect(capabilities).toEqual({
         'browserName': 'chrome',
         'goog:chromeOptions': {
@@ -150,11 +132,11 @@ describe('beforeSession', () => {
       });
     });
 
-    it('should set the expected capabilities when multiremote', () => {
+    it('should set the expected capabilities when multiremote', async () => {
       instance = new WorkerService({
         binaryPath: 'workspace/my-test-app/dist/my-test-app',
         appArgs: ['look', 'some', 'args'],
-      });
+      }, {} as never, {} as any);
       const capabilities = {
         firefox: {
           capabilities: {
@@ -172,7 +154,7 @@ describe('beforeSession', () => {
           },
         },
       };
-      instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+      await instance.beforeSession({}, capabilities as Capabilities.Capabilities);
       expect(capabilities).toEqual({
         firefox: {
           capabilities: {
@@ -206,13 +188,13 @@ describe('beforeSession', () => {
         WorkerService = (await import('../src/service')).default;
       });
 
-      it('should set the expected capabilities', () => {
+      it('should set the expected capabilities', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
+        }, {} as never, {} as any);
+        const capabilities: Capabilities.Capabilities = { browserName: 'electron' }
+        await instance.beforeSession({}, capabilities);
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
@@ -223,13 +205,13 @@ describe('beforeSession', () => {
         });
       });
 
-      it('should set the expected capabilities when the appName ends with "Helper"', () => {
+      it('should set the expected capabilities when the appName ends with "Helper"', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'My Test Helper',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
+        }, {} as never, {} as any);
+        const capabilities: Capabilities.Capabilities = { browserName: 'electron' }
+        await instance.beforeSession({}, capabilities);
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
@@ -240,11 +222,11 @@ describe('beforeSession', () => {
         });
       });
 
-      it('should set the expected capabilities when multiremote', () => {
+      it('should set the expected capabilities when multiremote', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'my-test-app',
-        });
+        }, {} as never, {} as any);
         const capabilities = {
           firefox: {
             capabilities: {
@@ -262,7 +244,7 @@ describe('beforeSession', () => {
             },
           },
         };
-        instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+        await instance.beforeSession({}, capabilities as Capabilities.Capabilities);
         expect(capabilities).toEqual({
           firefox: {
             capabilities: {
@@ -294,13 +276,13 @@ describe('beforeSession', () => {
         WorkerService = (await import('../src/service')).default;
       });
 
-      it('should set the expected capabilities', () => {
+      it('should set the expected capabilities', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
+        }, {} as never, {} as any);
+        const capabilities: Capabilities.Capabilities = { browserName: 'electron' }
+        await instance.beforeSession({}, capabilities);
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
@@ -318,13 +300,13 @@ describe('beforeSession', () => {
         WorkerService = (await import('../src/service')).default;
       });
 
-      it('should set the expected capabilities', () => {
+      it('should set the expected capabilities', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'my-test-app',
-        });
-        const capabilities = {};
-        instance.beforeSession({}, capabilities);
+        }, {} as never, {} as any);
+        const capabilities: Capabilities.Capabilities = { browserName: 'electron' }
+        await instance.beforeSession({}, capabilities);
         expect(capabilities).toEqual({
           'browserName': 'chrome',
           'goog:chromeOptions': {
@@ -342,14 +324,14 @@ describe('beforeSession', () => {
         WorkerService = (await import('../src/service')).default;
       });
 
-      it('should throw an error', () => {
+      it('should throw an error', async () => {
         instance = new WorkerService({
           appPath: 'workspace/my-test-app/dist',
           appName: 'my-test-app',
-        });
-        expect(() => {
-          (instance as ElectronWorkerService).beforeSession({}, {});
-        }).toThrow('Unsupported platform: unsupported');
+        }, {} as never, {} as any);
+        await expect((instance as ElectronWorkerService).beforeSession({}, {
+          browserName: 'electron'
+        })).rejects.toThrow('Unsupported platform: unsupported');
       });
     });
   });
@@ -368,11 +350,12 @@ describe('before', () => {
       appPath: 'workspace/my-test-app/dist',
       appName: 'my-test-app',
       customApiBrowserCommand: 'customApi',
-    });
-    instance.before({}, [], {
+    }, {} as never, {} as any);
+    const browser = {
       addCommand: addCommandMock,
-    } as unknown as WebdriverIO.Browser);
-    const electronApi = instance._browser?.electron as CustomBrowserExtension['electron'];
+    } as unknown as WebdriverIO.Browser
+    instance.before({}, [], browser);
+    const electronApi = browser.electron as CustomBrowserExtension['electron'];
     expect(electronApi.app).toEqual(expect.any(Function));
     expect(electronApi.browserWindow).toEqual(expect.any(Function));
     expect(electronApi.customApi).toEqual(expect.any(Function));

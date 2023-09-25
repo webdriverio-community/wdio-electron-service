@@ -59,7 +59,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         !cap['wdio:chromedriverOptions']?.binary
       )
 
-      const { binaryPath, appPath, appName } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions'])
+      const { binaryPath, appPath, appName, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions'])
       const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
       if (!validPathOpts) {
         const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
@@ -75,10 +75,17 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       }
 
       cap.browserName = 'chrome'
-      cap.browserVersion = chromiumVersion || cap.browserVersion
-      cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName }, cap)
-      if (!chromiumVersion) {
-        cap['wdio:chromedriverOptions'] = getChromedriverOptions(cap)
+
+      const browserVersion = chromiumVersion || cap.browserVersion
+      if (browserVersion) {
+        cap.browserVersion = browserVersion
+      }
+
+      cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap)
+
+      const chromedriverOptions = getChromedriverOptions(cap)
+      if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
+        cap['wdio:chromedriverOptions'] = chromedriverOptions
       }
     })).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`

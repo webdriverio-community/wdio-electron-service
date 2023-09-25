@@ -6,21 +6,15 @@ import debug from 'debug';
 import extractZip from 'extract-zip';
 import findVersions from 'find-versions';
 import logger, { type Logger } from '@wdio/logger';
-import { downloadArtifact as downloadElectronAssets } from '@electron/get';
-import { fullVersions as chromiumVersions } from 'electron-to-chromium';
+import { downloadArtifact } from '@electron/get';
+import { fullVersions } from 'electron-to-chromium';
 import type { Capabilities } from '@wdio/types';
 
 import type { ElectronServiceOptions } from './types';
 
-const d = debug('wdio-electron-service');
-const l = logger('electron-service');
-
-type PackageJson = {
-  dependencies?: Record<string, string>
-  devDependencies?: Record<string, string>
-}
-
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const d = debug('wdio-electron-service')
+const l = logger('electron-service')
 
 export const log: Logger = {
   ...l,
@@ -67,7 +61,8 @@ export function getChromeOptions(options: ElectronServiceOptions, cap: Capabilit
   return {
     binary: options.binaryPath || getBinaryPath(options.appPath as string, options.appName as string),
     windowTypes: ['app', 'webview'],
-    ...existingOptions
+    ...existingOptions,
+    args: [...(existingOptions.args || []), ...(options.appArgs || [])]
   }
 }
 
@@ -91,7 +86,7 @@ export const getChromiumVersion = async (electronVersion?: string) => {
   // get https://raw.githubusercontent.com/Kilian/electron-to-chromium/master/full-versions.json
 
   // if fail use installed version
-  return chromiumVersions[electronVersion as keyof typeof chromiumVersions];
+  return fullVersions[electronVersion as keyof typeof fullVersions];
 }
 
 export function downloadAssets(version: string) {
@@ -104,7 +99,7 @@ export function downloadAssets(version: string) {
     arch: process.env.npm_config_arch,
   };
   log.debug('chromedriver download config: ', conf);
-  return downloadElectronAssets(conf);
+  return downloadArtifact(conf);
 }
 
 export async function attemptAssetsDownload(version = '') {
@@ -165,7 +160,7 @@ export function getElectronCapabilities (caps: Capabilities.RemoteCapability) {
    * ```
    */
   const w3cCaps = (caps as Capabilities.W3CCapabilities).alwaysMatch
-  if (typeof w3cCaps.browserName === 'string' && isElectron(w3cCaps)) {
+  if (w3cCaps && typeof w3cCaps.browserName === 'string' && isElectron(w3cCaps)) {
     return [w3cCaps]
   }
   /**

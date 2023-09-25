@@ -34,7 +34,7 @@
   "typeScriptVersion": "5.2.2",
   "types": "./dist/index.d.ts",
   "engines": {
-    "node": "^16.13 || >=18"
+    "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
     "init-dev": "pnpm i -r && husky install",
@@ -63,7 +63,8 @@
     "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:cjs": "cd example/e2e-cjs && pnpm i && pnpm test",
     "test:integration:esm": "cd example/e2e && pnpm i && pnpm test",
-    "test:build-app": "cd example/app && pnpm i && pnpm build"
+    "test:build-app": "cd example/app && pnpm i && pnpm build",
+    "watch": "npm run build:esm -- --watch"
   },
   "keywords": [
     "webdriverio",
@@ -116,7 +117,6 @@
     "rimraf": "^5.0.1",
     "shx": "^0.3.4",
     "typescript": "^5.2.2",
-    "vite": "^4.4.9",
     "vitest": "^0.34.3"
   },
   "files": [
