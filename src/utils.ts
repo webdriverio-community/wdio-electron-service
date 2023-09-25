@@ -1,9 +1,12 @@
-import fs from 'fs';
-import { join } from 'path';
-import logger, { Logger } from '@wdio/logger';
+import path from 'node:path';
+import url from 'node:url';
+import fs from 'node:fs/promises';
+
 import debug from 'debug';
+import extractZip from 'extract-zip';
 import findVersions from 'find-versions';
-import { getDirname } from 'cross-dirname';
+import logger, { type Logger } from '@wdio/logger';
+import { downloadArtifact as downloadElectronAssets } from '@electron/get';
 import { fullVersions as chromiumVersions } from 'electron-to-chromium';
 import type { Capabilities } from '@wdio/types';
 
@@ -11,6 +14,13 @@ import type { ElectronServiceOptions } from './types';
 
 const d = debug('wdio-electron-service');
 const l = logger('electron-service');
+
+type PackageJson = {
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
+}
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const log: Logger = {
   ...l,
@@ -52,127 +62,131 @@ function getBinaryPath(distPath: string, appName: string) {
   return `${distPath}/${electronPath}`;
 }
 
-function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
-  const existingOptions = cap['goog:chromeOptions'] || {};
+export function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
+  const existingOptions = cap['goog:chromeOptions'] || {}
   return {
     binary: options.binaryPath || getBinaryPath(options.appPath as string, options.appName as string),
     windowTypes: ['app', 'webview'],
-    ...existingOptions,
-  };
+    ...existingOptions
+  }
 }
 
-function getChromedriverOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
-  const existingOptions = cap['wdio:chromedriverOptions'] || {};
-
-  return {
-    binary: options.chromedriverCustomPath,
-    ...existingOptions,
-  };
+export function getChromedriverOptions(cap: Capabilities.Capabilities) {
+  const existingOptions = cap['wdio:chromedriverOptions'] || {}
+  return existingOptions
 }
 
-const isMultiremote = (cap: unknown) =>
-  cap &&
-  typeof cap === 'object' &&
-  !Array.isArray(cap) &&
-  Object.keys(cap).length > 0 &&
-  Object.values(cap).every((cap) => typeof cap === 'object');
-const isElectron = (cap: unknown) =>
-  (cap as Capabilities.DesiredCapabilities)?.browserName?.toLowerCase() === 'electron';
-const parseVersion = (version?: string) => {
+const isElectron = (cap: unknown) => (
+  (cap as Capabilities.DesiredCapabilities)?.browserName?.toLowerCase() === 'electron'
+)
+
+export const parseVersion = (version?: string) => {
   if (!version) {
     return undefined;
   }
   return findVersions(version)[0];
-};
-
-export const mapCapabilities = (
-  capabilities: Capabilities.RemoteCapabilities,
-  options: ElectronServiceOptions,
-  chromiumVersion?: string,
-) => {
-  log.debug('mapping capabilities', options);
-
-  if (Array.isArray(capabilities)) {
-    capabilities.forEach((cap) => {
-      if (isMultiremote(cap)) {
-        // multiremote (parallel)
-        Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
-          if (isElectron(cap.capabilities)) {
-            cap.capabilities.browserName = 'chrome';
-            cap.capabilities.browserVersion = chromiumVersion || cap.capabilities.browserVersion;
-            cap.capabilities['goog:chromeOptions'] = getChromeOptions(options, cap.capabilities);
-            if (!chromiumVersion) {
-              cap.capabilities['wdio:chromedriverOptions'] = getChromedriverOptions(options, cap.capabilities);
-            }
-          }
-        });
-      } else if (isElectron(cap)) {
-        // regular capabilities
-        const c = cap as Capabilities.DesiredCapabilities;
-        c.browserName = 'chrome';
-        c.browserVersion = chromiumVersion || c.browserVersion;
-        c['goog:chromeOptions'] = getChromeOptions(options, c);
-        if (!chromiumVersion) {
-          c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
-        }
-      }
-    });
-  } else if (isMultiremote(capabilities)) {
-    // multiremote (non-parallel)
-    Object.values(capabilities).forEach((cap) => {
-      if (isElectron(cap.capabilities)) {
-        const c = cap.capabilities as Capabilities.DesiredCapabilities;
-        c.browserName = 'chrome';
-        c.browserVersion = chromiumVersion || c.browserVersion;
-        c['goog:chromeOptions'] = getChromeOptions(options, c);
-        if (!chromiumVersion) {
-          c['wdio:chromedriverOptions'] = getChromedriverOptions(options, c);
-        }
-      }
-    });
-  }
-
-  log.debug('capabilities mapped', capabilities);
-
-  return capabilities;
-};
+}
 
 export const getChromiumVersion = async (electronVersion?: string) => {
   // get https://raw.githubusercontent.com/Kilian/electron-to-chromium/master/full-versions.json
 
   // if fail use installed version
   return chromiumVersions[electronVersion as keyof typeof chromiumVersions];
-};
+}
 
-export const getElectronVersion = async (capabilities: Capabilities.RemoteCapabilities) => {
-  // check capabilities
-  if (Array.isArray(capabilities)) {
-    type RemoteCapabilities = (typeof capabilities)[number];
-    const electronCap = (capabilities as RemoteCapabilities[]).find((cap) => {
-      if (isMultiremote(cap)) {
-        // multiremote (parallel)
-        return isElectron((cap as Capabilities.MultiRemoteCapabilities).capabilities);
-      }
+export function downloadAssets(version: string) {
+  const conf = {
+    version,
+    artifactName: 'chromedriver',
+    force: process.env.force_no_cache === 'true',
+    cacheRoot: process.env.electron_config_cache,
+    platform: process.env.npm_config_platform,
+    arch: process.env.npm_config_arch,
+  };
+  log.debug('chromedriver download config: ', conf);
+  return downloadElectronAssets(conf);
+}
 
-      // regular capabilities
-      return isElectron(cap);
-    });
+export async function attemptAssetsDownload(version = '') {
+  log.debug(`downloading Chromedriver for Electron v${version}...`);
+  try {
+    const targetFolder = path.join(__dirname, '..', 'bin');
+    const zipPath = await downloadAssets(version);
+    log.debug('assets downloaded to ', zipPath);
+    await extractZip(zipPath, { dir: targetFolder });
+    log.debug('assets extracted');
+    const platform = process.env.npm_config_platform || process.platform;
+    if (platform !== 'win32') {
+      log.debug('setting file permissions...');
+      await fs.chmod(path.join(targetFolder, 'chromedriver'), 0o755);
+      log.debug('permissions set');
+    }
+  } catch (err) {
+    // check if there is a semver minor version for fallback
+    const parts = version.split('.');
+    const baseVersion = `${parts[0]}.${parts[1]}.0`;
 
-    return electronCap ? (electronCap as Capabilities.DesiredCapabilities).browserVersion : undefined;
-  } else if (isMultiremote(capabilities)) {
-    // multiremote (non-parallel)
-    const electronCap = Object.values(capabilities).find((cap) => isElectron(cap.capabilities));
-    return electronCap ? (electronCap.capabilities as Capabilities.DesiredCapabilities).browserVersion : undefined;
+    if (baseVersion === version) {
+      log.error(`error downloading Chromedriver for Electron v${version}`);
+      log.error(err);
+      throw err;
+    }
+
+    log.warn(`error downloading Chromedriver for Electron v${version}`);
+    log.debug('falling back to minor version...');
+    await attemptAssetsDownload(baseVersion);
   }
+}
 
-  // check local package.json for electron
-  const dirname = getDirname();
-  const packageJson = JSON.parse(fs.readFileSync(join(dirname, 'package.json'), { encoding: 'utf-8' })) as Partial<{
-    dependencies?: { [name: string]: string };
-    devDependencies?: { [name: string]: string };
-  }>;
-  const { dependencies, devDependencies } = packageJson;
-  const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
-
-  return localElectronVersion || undefined;
-};
+/**
+ * get capability independant of which type of capabilities is set
+ */
+export function getElectronCapabilities (caps: Capabilities.RemoteCapability) {
+  /**
+   * standard capabilities, e.g.:
+   * ```
+   * {
+   *   browserName: 'chrome'
+   * }
+   * ```
+   */
+  const standardCaps = caps as Capabilities.Capabilities
+  if (typeof standardCaps.browserName === 'string' && isElectron(standardCaps)) {
+    return [caps as Capabilities.Capabilities]
+  }
+  /**
+   * W3C specific capabilities, e.g.:
+   * ```
+   * {
+   *   alwaysMatch: {
+   *     browserName: 'chrome'
+   *   }
+   * }
+   * ```
+   */
+  const w3cCaps = (caps as Capabilities.W3CCapabilities).alwaysMatch
+  if (typeof w3cCaps.browserName === 'string' && isElectron(w3cCaps)) {
+    return [w3cCaps]
+  }
+  /**
+   * multiremote capabilities, e.g.:
+   * ```
+   * {
+   *   instanceA: {
+   *     capabilities: {
+   *        browserName: 'chrome'
+   *     }
+   *   },
+   *   instanceB: {
+   *     capabilities: {
+   *        browserName: 'chrome'
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  return Object.values(caps as Capabilities.MultiRemoteCapabilities).map((options) => (
+    (options.capabilities as Capabilities.W3CCapabilities).alwaysMatch ||
+    options.capabilities as Capabilities.Capabilities
+  )).filter((caps) => isElectron(caps))
+}
