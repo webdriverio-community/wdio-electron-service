@@ -17,18 +17,14 @@ export const config = {
       {
         appPath: join(dirname, '..', 'app', 'dist'),
         appName: productName,
+        appArgs: ['foo', 'bar=baz']
       },
     ],
   ],
-  capabilities: [
-    {
-      'browserName': 'electron',
-      'browserVersion': '26.0.0',
-      'goog:chromeOptions': {
-        args: ['foo', 'bar=baz'],
-      },
-    },
-  ],
+  capabilities: [{
+    'browserName': 'electron',
+    'browserVersion': '26.0.0',
+  }],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
   connectionRetryTimeout: 30000,
