@@ -1,24 +1,24 @@
 import type { Capabilities, Services } from '@wdio/types';
-import type { default as ServiceInstance } from '../service.js';
 
 exports.default = class CJSElectronService {
-  private instance?: Promise<ServiceInstance>;
+  private instance?: Promise<Services.ServiceInstance>;
 
   constructor(options: any, caps: never, config: any) {
     this.instance = (async () => {
-      const { default: ElectronService } = await import('../service.js');
+      const importPath = '../service.js'
+      const { default: ElectronService } = await import(importPath);
       return new ElectronService(options, caps, config);
     })();
   }
 
-  async beforeSession(config: any, capabilities: any) {
+  async beforeSession(config: any, capabilities: any, specs: string[], cid: string) {
     const instance = await this.instance;
-    return instance?.beforeSession(config, capabilities);
+    return instance?.beforeSession?.(config, capabilities, specs, cid)
   }
 
   async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
     const instance = await this.instance;
-    return instance?.before(capabilities, specs, browser);
+    return instance?.before?.(capabilities, specs, browser);
   }
 };
 

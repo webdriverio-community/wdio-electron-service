@@ -1,5 +1,4 @@
 import path from 'node:path';
-import url from 'node:url';
 import fs from 'node:fs/promises';
 
 import debug from 'debug';
@@ -10,9 +9,10 @@ import { downloadArtifact } from '@electron/get';
 import { fullVersions } from 'electron-to-chromium';
 import type { Capabilities } from '@wdio/types';
 
-import type { ElectronServiceOptions } from './types';
+import { esmDirname } from './esm/constants.js'
+import type { ElectronServiceOptions } from './types'
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const __dirname = path.resolve(esmDirname, '..')
 const d = debug('wdio-electron-service')
 const l = logger('electron-service')
 
