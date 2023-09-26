@@ -1,8 +1,7 @@
-describe('application loading', () => {
-  const { browser } = require('wdio-electron-service');
-  const { setupBrowser, WebdriverIOQueries } = require('@testing-library/webdriverio');
+import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio'
 
-  let screen: typeof WebdriverIOQueries;
+describe('application loading', () => {
+  let screen: WebdriverIOQueries;
 
   before(() => {
     screen = setupBrowser(browser);

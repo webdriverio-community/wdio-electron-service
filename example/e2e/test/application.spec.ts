@@ -1,4 +1,4 @@
-import { browser } from 'wdio-electron-service';
+import { browser, expect } from '@wdio/globals';
 
 describe('application loading', () => {
   describe('App', () => {

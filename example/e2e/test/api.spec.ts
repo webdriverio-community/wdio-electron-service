@@ -1,11 +1,10 @@
 import fs from 'fs';
-import { browser } from 'wdio-electron-service';
+import { browser, expect } from '@wdio/globals';
 
-const packageJson = JSON.parse(fs.readFileSync('../app/package.json', { encoding: 'utf-8' })) as Partial<{
-  name: string;
-  version: string;
-}>;
-const { name, version } = packageJson;
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'package.json'), { encoding: 'utf-8' })
+)
+const { name, version } = packageJson
 
 describe('electron APIs', () => {
   describe('app', () => {

@@ -1,6 +1,11 @@
 import ElectronWorkerService from './service.js';
 import type { ElectronServiceApi } from './types.js'
 
+/**
+ * set this environment variable so that the preload script can be loaded
+ */
+process.env.WDIO_ELECTRON = 'true'
+
 export default ElectronWorkerService;
 export interface BrowserExtension {
   electron: {

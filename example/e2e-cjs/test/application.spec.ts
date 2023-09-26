@@ -1,9 +1,6 @@
 describe('application loading', () => {
-  const { browser } = require('wdio-electron-service');
-
   describe('App', () => {
     it('should launch the application', async () => {
-      // await browser.waitUntilTextExists('html', 'Hello');
       const title = await browser.getTitle();
       expect(title).toEqual('Test');
     });

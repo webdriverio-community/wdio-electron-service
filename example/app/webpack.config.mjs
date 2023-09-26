@@ -1,7 +1,8 @@
+import url from 'node:url'
+import path from 'node:path'
 import webpack from 'webpack';
-import { getDirname } from 'cross-dirname';
 
-const dirname = getDirname();
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 const plugins = [new webpack.ProgressPlugin()];
 const mode = 'development';
 
@@ -27,7 +28,7 @@ export default [
       ],
     },
     output: {
-      path: `${dirname}/dist`,
+      path: `${__dirname}/dist`,
       filename: `main.js`,
     },
     plugins,
@@ -64,7 +65,7 @@ export default [
       ],
     },
     output: {
-      path: `${dirname}/dist`,
+      path: `${__dirname}/dist`,
       filename: `preload.js`,
     },
     plugins,

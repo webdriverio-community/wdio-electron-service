@@ -8,7 +8,7 @@
     "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "format": "prettier --write \"**/*.{j,t}s\"",
     "lint": "eslint \"**/*.{j,t}s\"",
-    "test": "wdio run ./wdio.conf.js || (cat ./wdio-logs/wdio-0-0.log && cat ./wdio-logs/wdio-chromedriver.log && exit 1)"
+    "test": "wdio run ./wdio.conf.ts || (cat ./wdio-logs/wdio-0-0.log && cat ./wdio-logs/wdio-chromedriver.log && exit 1)"
   },
   "devDependencies": {
     "@testing-library/dom": "^9.3.1",

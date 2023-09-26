@@ -1,5 +1,5 @@
-import { browser } from 'wdio-electron-service';
-import { setupBrowser, WebdriverIOQueries } from '@testing-library/webdriverio';
+import { browser, expect } from '@wdio/globals';
+import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 
 describe('application loading', () => {
   let screen: WebdriverIOQueries;

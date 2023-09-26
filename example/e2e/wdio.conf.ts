@@ -1,21 +1,21 @@
-import { join } from 'path';
-import fs from 'fs';
-import { getDirname } from 'cross-dirname';
+import fs from 'node:fs';
+import url from 'node:url'
+import path from 'node:path'
 
-const dirname = getDirname();
-const packageJson = JSON.parse(fs.readFileSync('../app/package.json'));
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const packageJson = JSON.parse(fs.readFileSync('../app/package.json').toString());
 const {
   build: { productName },
 } = packageJson;
 
-process.env.TEST = true;
+process.env.TEST = 'true';
 
 export const config = {
   services: [
     [
       'electron',
       {
-        appPath: join(dirname, '..', 'app', 'dist'),
+        appPath: path.join(__dirname, '..', 'app', 'dist'),
         appName: productName,
         appArgs: ['foo', 'bar=baz']
       },
@@ -38,7 +38,7 @@ export const config = {
       esm: true,
       transpileOnly: true,
       files: true,
-      project: join(dirname, 'tsconfig.test.json'),
+      project: path.join(__dirname, 'tsconfig.json'),
     },
   },
   framework: 'mocha',
