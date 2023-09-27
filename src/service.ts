@@ -127,6 +127,69 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
     this.#browser.electron = Object.create({}, api);
   }
+
+  async onPrepare(_config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities): Promise<void> {
+    const caps = getElectronCapabilities(capabilities as Capabilities.RemoteCapability) as WebDriver.Capabilities[];
+    const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
+    const { dependencies, devDependencies } = pkgJSON;
+    const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
+
+    await Promise.all(
+      caps.map(async (cap) => {
+        const electronVersion = cap.browserVersion || localElectronVersion;
+        const chromiumVersion = await getChromiumVersion(electronVersion);
+        const shouldDownloadChromedriver = Boolean(
+          electronVersion && !chromiumVersion && !cap['wdio:chromedriverOptions']?.binary,
+        );
+
+        log.debug('cap mapping');
+        log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.debug(`CD binary: ${cap['wdio:chromedriverOptions']?.binary}`);
+
+        const { binaryPath, appPath, appName, appArgs } = Object.assign(
+          {},
+          this.#globalOptions,
+          cap['wdio:electronServiceOptions'],
+        );
+        const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+        if (!validPathOpts) {
+          const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
+          log.error(invalidPathOptsError);
+          throw invalidPathOptsError;
+        }
+
+        /**
+         * download chromedriver if required
+         */
+        if (shouldDownloadChromedriver) {
+          log.debug(`downloading Chromedriver for Electron v${electronVersion}...`);
+          await attemptAssetsDownload(electronVersion);
+        } else {
+          log.debug('WDIO to handle Chromedriver download...');
+        }
+
+        cap.browserName = 'chrome';
+
+        const browserVersion = chromiumVersion || cap.browserVersion;
+        if (browserVersion) {
+          cap.browserVersion = browserVersion;
+        }
+
+        cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap);
+
+        const chromedriverOptions = getChromedriverOptions(cap);
+        if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
+          cap['wdio:chromedriverOptions'] = chromedriverOptions;
+        }
+
+        log.debug('setting cap', cap);
+      }),
+    ).catch((err) => {
+      const msg = `Failed setting up Electron session: ${err.stack}`;
+      log.error(msg);
+      throw new SevereServiceError(msg);
+    });
+  }
 }
 
 async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
