@@ -11,20 +11,16 @@ const {
 process.env.TEST = 'true';
 
 export const config = {
-  services: [
-    [
-      'electron',
-      {
+  services: ['electron'],
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'browserVersion': '26.2.2',
+      'wdio:electronServiceOptions': {
         appPath: path.join(__dirname, '..', 'app', 'dist'),
         appName: productName,
         appArgs: ['foo', 'bar=baz'],
       },
-    ],
-  ],
-  capabilities: [
-    {
-      browserName: 'electron',
-      browserVersion: '26.2.2',
     },
   ],
   waitforTimeout: 5000,
