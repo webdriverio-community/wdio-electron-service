@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
+import { setupDriver, setupBrowser } from '@wdio/utils';
 import type { Capabilities, Services, Options } from '@wdio/types';
 
 import {
@@ -126,6 +127,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     });
 
     this.#browser.electron = Object.create({}, api);
+  }
+
+  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities): Promise<void> {
+    /**
+     * pre-configure necessary driver for worker threads
+     */
+    await Promise.all([setupDriver(config, capabilities), setupBrowser(config, capabilities)]);
   }
 }
 
