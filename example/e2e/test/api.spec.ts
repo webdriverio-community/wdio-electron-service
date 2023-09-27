@@ -2,9 +2,9 @@ import fs from 'fs';
 import { browser, expect } from '@wdio/globals';
 
 const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'package.json'), { encoding: 'utf-8' })
-)
-const { name, version } = packageJson
+  fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'package.json'), { encoding: 'utf-8' }),
+);
+const { name, version } = packageJson;
 
 describe('electron APIs', () => {
   describe('app', () => {

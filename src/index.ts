@@ -1,10 +1,10 @@
 import ElectronWorkerService from './service.js';
-import type { ElectronServiceApi } from './types.js'
+import type { ElectronServiceApi } from './types.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
  */
-process.env.WDIO_ELECTRON = 'true'
+process.env.WDIO_ELECTRON = 'true';
 
 export default ElectronWorkerService;
 export interface BrowserExtension {
@@ -20,9 +20,9 @@ export interface BrowserExtension {
 
 type WdioElectronWindowObj = {
   [Key: string]: {
-    invoke: (...args: unknown[]) => Promise<unknown>
-  }
-}
+    invoke: (...args: unknown[]) => Promise<unknown>;
+  };
+};
 
 declare global {
   namespace WebdriverIO {
@@ -34,9 +34,9 @@ declare global {
   }
   namespace WebDriver {
     interface Capabilities {
-      'wdio:electronServiceOptions': ElectronServiceApi
+      'wdio:electronServiceOptions': ElectronServiceApi;
     }
   }
 }
 
-export * from './types.js'
+export * from './types.js';

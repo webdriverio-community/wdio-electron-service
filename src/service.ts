@@ -1,20 +1,23 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { SevereServiceError } from 'webdriverio'
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { SevereServiceError } from 'webdriverio';
 import type { Capabilities, Services, Options } from '@wdio/types';
 
 import {
-  log, getChromeOptions, getChromedriverOptions, getChromiumVersion, attemptAssetsDownload, getElectronCapabilities,
-  parseVersion
+  log,
+  getChromeOptions,
+  getChromedriverOptions,
+  getChromiumVersion,
+  attemptAssetsDownload,
+  getElectronCapabilities,
+  parseVersion,
 } from './utils.js';
-import type {
-  ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc
-} from './types.js';
+import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  #browser?: WebdriverIO.Browser
-  #globalOptions: ElectronServiceOptions
-  #projectRoot: string
+  #browser?: WebdriverIO.Browser;
+  #globalOptions: ElectronServiceOptions;
+  #projectRoot: string;
   #apiCommands = [
     { name: '', bridgeProp: 'custom' },
     { name: 'app', bridgeProp: 'app' },
@@ -25,12 +28,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   ];
 
   constructor(globalOptions: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
-    this.#globalOptions = globalOptions
-    this.#projectRoot = config.rootDir || process.cwd()
+    this.#globalOptions = globalOptions;
+    this.#projectRoot = config.rootDir || process.cwd();
 
     const { customApiBrowserCommand = 'api' } = globalOptions as ElectronServiceOptions;
     const customCommandCollision = this.#apiCommands.find(
-      (command) => command.name === customApiBrowserCommand) as ApiCommand;
+      (command) => command.name === customApiBrowserCommand,
+    ) as ApiCommand;
     if (customCommandCollision) {
       const customCommandCollisionError = new Error(
         `The command "${customCommandCollision.name}" is reserved, please provide a different value for customApiBrowserCommand`,
@@ -43,55 +47,59 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 
   async beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.RemoteCapability) {
-    const caps = getElectronCapabilities(capabilities) as WebDriver.Capabilities[]
-    const pkgJSON = JSON.parse(
-      (await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString()
-    )
-    const { dependencies, devDependencies } = pkgJSON
-    const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron)
+    const caps = getElectronCapabilities(capabilities) as WebDriver.Capabilities[];
+    const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
+    const { dependencies, devDependencies } = pkgJSON;
+    const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
 
-    await Promise.all(caps.map(async (cap) => {
-      const electronVersion = cap.browserVersion || localElectronVersion
-      const chromiumVersion = await getChromiumVersion(electronVersion);
-      const shouldDownloadChromedriver = Boolean(
-        electronVersion &&
-        !chromiumVersion &&
-        !cap['wdio:chromedriverOptions']?.binary
-      )
+    await Promise.all(
+      caps.map(async (cap) => {
+        const electronVersion = cap.browserVersion || localElectronVersion;
+        const chromiumVersion = await getChromiumVersion(electronVersion);
+        const shouldDownloadChromedriver = Boolean(
+          electronVersion && !chromiumVersion && !cap['wdio:chromedriverOptions']?.binary,
+        );
 
-      const { binaryPath, appPath, appName, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions'])
-      const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
-      if (!validPathOpts) {
-        const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
-        log.error(invalidPathOptsError);
-        throw invalidPathOptsError;
-      }
+        log.debug(`mapping caps, found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-      /**
-       * download chromedriver if required
-       */
-      if (shouldDownloadChromedriver) {
-        await attemptAssetsDownload(electronVersion);
-      }
+        const { binaryPath, appPath, appName, appArgs } = Object.assign(
+          {},
+          this.#globalOptions,
+          cap['wdio:electronServiceOptions'],
+        );
+        const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+        if (!validPathOpts) {
+          const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
+          log.error(invalidPathOptsError);
+          throw invalidPathOptsError;
+        }
 
-      cap.browserName = 'chrome'
+        /**
+         * download chromedriver if required
+         */
+        if (shouldDownloadChromedriver) {
+          await attemptAssetsDownload(electronVersion);
+        }
 
-      const browserVersion = chromiumVersion || cap.browserVersion
-      if (browserVersion) {
-        cap.browserVersion = browserVersion
-      }
+        cap.browserName = 'chrome';
 
-      cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap)
+        const browserVersion = chromiumVersion || cap.browserVersion;
+        if (browserVersion) {
+          cap.browserVersion = browserVersion;
+        }
 
-      const chromedriverOptions = getChromedriverOptions(cap)
-      if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
-        cap['wdio:chromedriverOptions'] = chromedriverOptions
-      }
-    })).catch((err) => {
-      const msg = `Failed setting up Electron session: ${err.stack}`
-      log.error(msg)
-      throw new SevereServiceError(msg)
-    })
+        cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap);
+
+        const chromedriverOptions = getChromedriverOptions(cap);
+        if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
+          cap['wdio:chromedriverOptions'] = chromedriverOptions;
+        }
+      }),
+    ).catch((err) => {
+      const msg = `Failed setting up Electron session: ${err.stack}`;
+      log.error(msg);
+      throw new SevereServiceError(msg);
+    });
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
@@ -121,5 +129,5 @@ async function callApi(bridgePropName: string, args: unknown[], done: (result: u
   if (window.wdioElectron[bridgePropName] === undefined) {
     throw new Error(`"${bridgePropName}" API not found on ContextBridge`);
   }
-  return done(await window.wdioElectron[bridgePropName].invoke(...args))
+  return done(await window.wdioElectron[bridgePropName].invoke(...args));
 }
