@@ -1,4 +1,4 @@
-import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio'
+import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 
 describe('application loading', () => {
   let screen: WebdriverIOQueries;

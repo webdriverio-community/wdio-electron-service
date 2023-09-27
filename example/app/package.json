@@ -11,8 +11,8 @@
     "lint": "eslint \"**/*.{j,t}s\""
   },
   "devDependencies": {
-    "electron": "^26.1.0",
-    "electron-builder": "^24.6.3",
+    "electron": "^26.2.2",
+    "electron-builder": "^24.6.4",
     "ts-loader": "^9.4.4",
     "wdio-electron-service": "file:../../",
     "webpack": "^5.88.2",

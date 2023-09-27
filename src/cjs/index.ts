@@ -5,7 +5,7 @@ exports.default = class CJSElectronService {
 
   constructor(options: any, caps: never, config: any) {
     this.instance = (async () => {
-      const importPath = '../service.js'
+      const importPath = '../service.js';
       const { default: ElectronService } = await import(importPath);
       return new ElectronService(options, caps, config);
     })();
@@ -13,7 +13,7 @@ exports.default = class CJSElectronService {
 
   async beforeSession(config: any, capabilities: any, specs: string[], cid: string) {
     const instance = await this.instance;
-    return instance?.beforeSession?.(config, capabilities, specs, cid)
+    return instance?.beforeSession?.(config, capabilities, specs, cid);
   }
 
   async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
