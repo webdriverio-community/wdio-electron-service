@@ -4,6 +4,7 @@ import { Capabilities } from '@wdio/types';
 import { BrowserExtension } from '../src/index';
 import ElectronWorkerService from '../src/service';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
+import type { Testrunner } from '@wdio/types/build/Options';
 
 interface CustomBrowserExtension extends BrowserExtension {
   electron: BrowserExtension['electron'] & {
@@ -28,7 +29,7 @@ describe('options validation', () => {
           customApiBrowserCommand: 'app',
         },
         {} as never,
-        {} as any,
+        {} as Testrunner,
       );
     }).toThrow('The command "app" is reserved, please provide a different value for customApiBrowserCommand');
   });
@@ -52,7 +53,7 @@ describe('beforeSession', () => {
           binaryPath: 'workspace/my-test-app/dist/my-test-app',
         },
         {} as never,
-        {} as any,
+        {} as Testrunner,
       );
       const capabilities: Capabilities.Capabilities = {
         browserName: 'electron',
@@ -74,7 +75,7 @@ describe('beforeSession', () => {
           binaryPath: 'workspace/my-test-app/dist/my-test-app',
         },
         {} as never,
-        {} as any,
+        {} as Testrunner,
       );
       const capabilities = {
         firefox: {
@@ -132,7 +133,7 @@ describe('beforeSession', () => {
           appArgs: ['look', 'some', 'args'],
         },
         {} as never,
-        {} as any,
+        {} as Testrunner,
       );
       const capabilities: Capabilities.Capabilities = {
         browserName: 'electron',
@@ -155,7 +156,7 @@ describe('beforeSession', () => {
           appArgs: ['look', 'some', 'args'],
         },
         {} as never,
-        {} as any,
+        {} as Testrunner,
       );
       const capabilities = {
         firefox: {
@@ -215,7 +216,7 @@ describe('beforeSession', () => {
             appName: 'my-test-app',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         const capabilities: Capabilities.Capabilities = { browserName: 'electron' };
         await instance.beforeSession({}, capabilities);
@@ -236,7 +237,7 @@ describe('beforeSession', () => {
             appName: 'My Test Helper',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         const capabilities: Capabilities.Capabilities = { browserName: 'electron' };
         await instance.beforeSession({}, capabilities);
@@ -257,7 +258,7 @@ describe('beforeSession', () => {
             appName: 'my-test-app',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         const capabilities = {
           firefox: {
@@ -315,7 +316,7 @@ describe('beforeSession', () => {
             appName: 'my-test-app',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         const capabilities: Capabilities.Capabilities = { browserName: 'electron' };
         await instance.beforeSession({}, capabilities);
@@ -343,7 +344,7 @@ describe('beforeSession', () => {
             appName: 'my-test-app',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         const capabilities: Capabilities.Capabilities = { browserName: 'electron' };
         await instance.beforeSession({}, capabilities);
@@ -371,7 +372,7 @@ describe('beforeSession', () => {
             appName: 'my-test-app',
           },
           {} as never,
-          {} as any,
+          {} as Testrunner,
         );
         await expect(
           (instance as ElectronWorkerService).beforeSession(
@@ -402,7 +403,7 @@ describe('before', () => {
         customApiBrowserCommand: 'customApi',
       },
       {} as never,
-      {} as any,
+      {} as Testrunner,
     );
     const browser = {
       addCommand: addCommandMock,
