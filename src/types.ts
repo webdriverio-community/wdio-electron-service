@@ -22,12 +22,6 @@ export interface ElectronServiceOptions {
    */
   binaryPath?: string;
   /**
-   * The version of electron that the app to be tested was built with. The service uses this value
-   * to download the appropriate version of chromedriver. It is not required if you are specifying
-   * a [`chromedriverCustomPath`](https://github.com/webdriverio-community/wdio-electron-service#chromedriverchromedrivercustompath-string).
-   */
-  electronVersion?: string;
-  /**
    * An array of string arguments to be passed through to the app on execution of the test run.
    * Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches)
    * and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be
