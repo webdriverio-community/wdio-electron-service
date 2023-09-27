@@ -24,7 +24,7 @@ export const config = {
   capabilities: [
     {
       browserName: 'electron',
-      browserVersion: '26.0.0',
+      browserVersion: '26.2.2',
     },
   ],
   waitforTimeout: 5000,
