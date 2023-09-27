@@ -102,7 +102,6 @@ export function downloadAssets(version: string) {
 }
 
 export async function attemptAssetsDownload(version = '') {
-  log.debug(`downloading Chromedriver for Electron v${version}...`);
   try {
     const targetFolder = path.join(__dirname, '..', 'bin');
     const zipPath = await downloadAssets(version);

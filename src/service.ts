@@ -60,7 +60,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           electronVersion && !chromiumVersion && !cap['wdio:chromedriverOptions']?.binary,
         );
 
-        log.debug(`mapping caps, found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.debug('cap mapping');
+        log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.debug(`CD binary: ${cap['wdio:chromedriverOptions']?.binary}`);
 
         const { binaryPath, appPath, appName, appArgs } = Object.assign(
           {},
@@ -78,7 +80,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
          * download chromedriver if required
          */
         if (shouldDownloadChromedriver) {
+          log.debug(`downloading Chromedriver for Electron v${electronVersion}...`);
           await attemptAssetsDownload(electronVersion);
+        } else {
+          log.debug('WDIO to handle Chromedriver download...');
         }
 
         cap.browserName = 'chrome';
@@ -94,6 +99,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
         }
+
+        log.debug('setting cap', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
