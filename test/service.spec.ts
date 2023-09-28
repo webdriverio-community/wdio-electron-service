@@ -301,6 +301,117 @@ describe('beforeSession', () => {
           },
         });
       });
+
+      it('should set the expected capabilities when w3c specific', async () => {
+        instance = new WorkerService(
+          {
+            appPath: 'workspace/my-test-app/dist',
+            appName: 'my-test-app',
+          },
+          {} as never,
+          {} as Testrunner,
+        );
+        const capabilities = {
+          alwaysMatch: {
+            browserName: 'electron',
+          },
+        };
+        await instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+        expect(capabilities).toEqual({
+          alwaysMatch: {
+            'browserName': 'chrome',
+            'goog:chromeOptions': {
+              args: [],
+              binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+          },
+        });
+      });
+
+      it('should set the expected capabilities when parallel multiremote', async () => {
+        instance = new WorkerService(
+          {
+            appPath: 'workspace/my-test-app/dist',
+            appName: 'my-test-app',
+          },
+          {} as never,
+          {} as Testrunner,
+        );
+        const capabilities = [
+          {
+            firefox: {
+              capabilities: {
+                browserName: 'firefox',
+              },
+            },
+            myElectronProject: {
+              capabilities: {
+                browserName: 'electron',
+              },
+            },
+            chrome: {
+              capabilities: {
+                browserName: 'chrome',
+              },
+            },
+          },
+          {
+            myElectronProject: {
+              capabilities: {
+                browserName: 'electron',
+              },
+            },
+            chrome: {
+              capabilities: {
+                browserName: 'chrome',
+              },
+            },
+          },
+        ];
+        await instance.beforeSession({}, capabilities as Capabilities.Capabilities);
+        expect(capabilities).toEqual([
+          {
+            chrome: {
+              capabilities: {
+                browserName: 'chrome',
+              },
+            },
+            firefox: {
+              capabilities: {
+                browserName: 'firefox',
+              },
+            },
+            myElectronProject: {
+              capabilities: {
+                'browserName': 'chrome',
+                'goog:chromeOptions': {
+                  args: [],
+                  binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
+                  windowTypes: ['app', 'webview'],
+                },
+              },
+            },
+          },
+          {
+            chrome: {
+              capabilities: {
+                browserName: 'chrome',
+              },
+            },
+            myElectronProject: {
+              capabilities: {
+                'browserName': 'chrome',
+                'goog:chromeOptions': {
+                  args: [],
+                  binary: 'workspace/my-test-app/dist/mac-arm64/my-test-app.app/Contents/MacOS/my-test-app',
+                  windowTypes: ['app', 'webview'],
+                },
+              },
+            },
+          },
+        ]);
+      });
     });
 
     describe('on Linux platforms', () => {
