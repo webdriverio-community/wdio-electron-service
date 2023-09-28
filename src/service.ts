@@ -8,7 +8,6 @@ import {
   getChromeOptions,
   getChromedriverOptions,
   getChromiumVersion,
-  attemptAssetsDownload,
   getElectronCapabilities,
   parseVersion,
 } from './utils.js';
@@ -56,9 +55,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
         const chromiumVersion = await getChromiumVersion(electronVersion);
-        const shouldDownloadChromedriver = Boolean(
-          electronVersion && !chromiumVersion && !cap['wdio:chromedriverOptions']?.binary,
-        );
 
         log.debug('cap mapping');
         log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
@@ -74,16 +70,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
           log.error(invalidPathOptsError);
           throw invalidPathOptsError;
-        }
-
-        /**
-         * download chromedriver if required
-         */
-        if (shouldDownloadChromedriver) {
-          log.debug(`downloading Chromedriver for Electron v${electronVersion}...`);
-          await attemptAssetsDownload(electronVersion);
-        } else {
-          log.debug('WDIO to handle Chromedriver download...');
         }
 
         cap.browserName = 'chrome';

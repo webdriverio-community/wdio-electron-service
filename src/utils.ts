@@ -1,20 +1,14 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import fetch from 'node-fetch';
 import { compareVersions } from 'compare-versions';
 
 import debug from 'debug';
-import extractZip from 'extract-zip';
 import findVersions from 'find-versions';
 import logger, { type Logger } from '@wdio/logger';
-import { downloadArtifact } from '@electron/get';
 import { fullVersions } from 'electron-to-chromium';
 import type { Capabilities } from '@wdio/types';
 
-import { esmDirname } from './esm/constants.js';
 import type { ElectronServiceOptions } from './types';
 
-const __dirname = path.resolve(esmDirname, '..');
 const d = debug('wdio-electron-service');
 const l = logger('electron-service');
 
@@ -109,49 +103,6 @@ export const getChromiumVersion = async (electronVersion?: string) => {
     return fullVersions[electronVersion as keyof typeof fullVersions];
   }
 };
-
-export function downloadAssets(version: string) {
-  const conf = {
-    version,
-    artifactName: 'chromedriver',
-    force: process.env.force_no_cache === 'true',
-    cacheRoot: process.env.electron_config_cache,
-    platform: process.env.npm_config_platform,
-    arch: process.env.npm_config_arch,
-  };
-  log.debug('chromedriver download config: ', conf);
-  return downloadArtifact(conf);
-}
-
-export async function attemptAssetsDownload(version = '') {
-  try {
-    const targetFolder = path.join(__dirname, '..', 'bin');
-    const zipPath = await downloadAssets(version);
-    log.debug('assets downloaded to ', zipPath);
-    await extractZip(zipPath, { dir: targetFolder });
-    log.debug('assets extracted');
-    const platform = process.env.npm_config_platform || process.platform;
-    if (platform !== 'win32') {
-      log.debug('setting file permissions...');
-      await fs.chmod(path.join(targetFolder, 'chromedriver'), 0o755);
-      log.debug('permissions set');
-    }
-  } catch (err) {
-    // check if there is a semver minor version for fallback
-    const parts = version.split('.');
-    const baseVersion = `${parts[0]}.${parts[1]}.0`;
-
-    if (baseVersion === version) {
-      log.error(`error downloading Chromedriver for Electron v${version}`);
-      log.error(err);
-      throw err;
-    }
-
-    log.warn(`error downloading Chromedriver for Electron v${version}`);
-    log.debug('falling back to minor version...');
-    await attemptAssetsDownload(baseVersion);
-  }
-}
 
 /**
  * get capability independent of which type of capabilities is set
