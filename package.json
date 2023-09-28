@@ -58,7 +58,7 @@
     "test:dev": "vitest --coverage",
     "test": "pnpm test:integration && pnpm test:unit",
     "test:integration": "cross-env DEBUG=wdio-electron-service pnpm test:build-app && pnpm test:integration:cjs && pnpm test:integration:esm",
-    "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
+    "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm i -r && pnpm test:integration",
     "test:integration:cjs": "cd example/e2e-cjs && pnpm i && pnpm test",
     "test:integration:esm": "cd example/e2e && pnpm i && pnpm test",
     "test:build-app": "cd example/app && pnpm i && pnpm build",
@@ -85,12 +85,12 @@
     }
   },
   "dependencies": {
-    "@electron/get": "^2.0.3",
     "@wdio/logger": "^8.11.0",
+    "compare-versions": "^6.1.0",
     "debug": "^4.3.4",
-    "electron-to-chromium": "^1.4.531",
-    "extract-zip": "^2.0.1",
-    "find-versions": "^5.1.0"
+    "electron-to-chromium": "^1.4.532",
+    "find-versions": "^5.1.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^8.50.0",

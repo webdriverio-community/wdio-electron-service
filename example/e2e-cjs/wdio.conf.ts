@@ -26,7 +26,7 @@ exports.config = {
   connectionRetryTimeout: 30000,
   logLevel: 'debug',
   runner: 'local',
-  // outputDir: 'wdio-logs',
+  outputDir: 'wdio-logs',
   specs: ['./test/*.spec.ts'],
   autoCompileOpts: {
     autoCompile: true,

@@ -3,15 +3,9 @@ import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
 import type { Capabilities, Services, Options } from '@wdio/types';
 
-import {
-  log,
-  getChromeOptions,
-  getChromedriverOptions,
-  getChromiumVersion,
-  attemptAssetsDownload,
-  getElectronCapabilities,
-  parseVersion,
-} from './utils.js';
+import { log } from './utils.js';
+import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
+import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
@@ -27,7 +21,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     { name: 'mock', bridgeProp: 'mock' },
   ];
 
-  constructor(globalOptions: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = config.rootDir || process.cwd();
 
@@ -56,9 +50,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
         const chromiumVersion = await getChromiumVersion(electronVersion);
-        const shouldDownloadChromedriver = Boolean(
-          electronVersion && !chromiumVersion && !cap['wdio:chromedriverOptions']?.binary,
-        );
 
         log.debug('cap mapping');
         log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
@@ -74,16 +65,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
           log.error(invalidPathOptsError);
           throw invalidPathOptsError;
-        }
-
-        /**
-         * download chromedriver if required
-         */
-        if (shouldDownloadChromedriver) {
-          log.debug(`downloading Chromedriver for Electron v${electronVersion}...`);
-          await attemptAssetsDownload(electronVersion);
-        } else {
-          log.debug('WDIO to handle Chromedriver download...');
         }
 
         cap.browserName = 'chrome';
