@@ -27,7 +27,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     { name: 'mock', bridgeProp: 'mock' },
   ];
 
-  constructor(globalOptions: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = config.rootDir || process.cwd();
 
