@@ -1,5 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import fetch from 'node-fetch';
+import { compareVersions } from 'compare-versions';
 
 import debug from 'debug';
 import extractZip from 'extract-zip';
@@ -81,11 +83,31 @@ export const parseVersion = (version?: string) => {
   return findVersions(version)[0];
 };
 
-export const getChromiumVersion = async (electronVersion?: string) => {
-  // get https://raw.githubusercontent.com/Kilian/electron-to-chromium/master/full-versions.json
+type ElectronRelease = {
+  chrome: string;
+  version: string;
+};
 
-  // if fail use installed version
-  return fullVersions[electronVersion as keyof typeof fullVersions];
+// TODO: extract, add timeout to prevent hitting the Electron releases endpoint over and over
+export const getChromiumVersion = async (electronVersion?: string) => {
+  const electronChromiumVersionMap: { [k: string]: string } = {};
+  log.debug('Updating Electron - Chromium version map...');
+
+  try {
+    const body = await fetch('https://electronjs.org/headers/index.json');
+    const allElectronVersions = (await body.json()) as ElectronRelease[];
+    allElectronVersions
+      .sort(({ version: a }, { version: b }) => compareVersions(a, b))
+      .forEach(({ chrome, version }) => {
+        electronChromiumVersionMap[version as keyof typeof electronChromiumVersionMap] = chrome;
+      });
+
+    return electronChromiumVersionMap[electronVersion as keyof typeof electronChromiumVersionMap];
+  } catch (e) {
+    // if fail we fall back to the locally installed electron-to-chromium
+    log.debug('Map update failed.');
+    return fullVersions[electronVersion as keyof typeof fullVersions];
+  }
 };
 
 export function downloadAssets(version: string) {
@@ -132,7 +154,7 @@ export async function attemptAssetsDownload(version = '') {
 }
 
 /**
- * get capability independant of which type of capabilities is set
+ * get capability independent of which type of capabilities is set
  */
 export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
   /**
