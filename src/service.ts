@@ -3,7 +3,8 @@ import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
 import type { Capabilities, Services, Options } from '@wdio/types';
 
-import { log, getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './utils.js';
+import { log } from './utils.js';
+import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
