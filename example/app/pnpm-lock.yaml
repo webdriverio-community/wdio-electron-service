@@ -3862,13 +3862,11 @@ packages:
       electron:
         optional: true
     dependencies:
-      '@electron/get': 2.0.3
       '@wdio/logger': 8.11.0
       compare-versions: 6.1.0
       debug: 4.3.4
       electron: 26.2.3
       electron-to-chromium: 1.4.532
-      extract-zip: 2.0.1
       find-versions: 5.1.0
       node-fetch: 3.3.2
       webdriverio: 8.16.15(typescript@5.2.2)

@@ -1,10 +1,5 @@
-import fetch from 'node-fetch';
-import { compareVersions } from 'compare-versions';
-
 import debug from 'debug';
-import findVersions from 'find-versions';
 import logger, { type Logger } from '@wdio/logger';
-import { fullVersions } from 'electron-to-chromium';
 import type { Capabilities } from '@wdio/types';
 
 import type { ElectronServiceOptions } from './types';
@@ -69,40 +64,6 @@ export function getChromedriverOptions(cap: Capabilities.Capabilities) {
 
 const isElectron = (cap: unknown) =>
   (cap as Capabilities.DesiredCapabilities)?.browserName?.toLowerCase() === 'electron';
-
-export const parseVersion = (version?: string) => {
-  if (!version) {
-    return undefined;
-  }
-  return findVersions(version)[0];
-};
-
-type ElectronRelease = {
-  chrome: string;
-  version: string;
-};
-
-// TODO: extract, add timeout to prevent hitting the Electron releases endpoint over and over
-export const getChromiumVersion = async (electronVersion?: string) => {
-  const electronChromiumVersionMap: { [k: string]: string } = {};
-  log.debug('Updating Electron - Chromium version map...');
-
-  try {
-    const body = await fetch('https://electronjs.org/headers/index.json');
-    const allElectronVersions = (await body.json()) as ElectronRelease[];
-    allElectronVersions
-      .sort(({ version: a }, { version: b }) => compareVersions(a, b))
-      .forEach(({ chrome, version }) => {
-        electronChromiumVersionMap[version as keyof typeof electronChromiumVersionMap] = chrome;
-      });
-
-    return electronChromiumVersionMap[electronVersion as keyof typeof electronChromiumVersionMap];
-  } catch (e) {
-    // if fail we fall back to the locally installed electron-to-chromium
-    log.debug('Map update failed.');
-    return fullVersions[electronVersion as keyof typeof fullVersions];
-  }
-};
 
 /**
  * get capability independent of which type of capabilities is set

@@ -3,14 +3,8 @@ import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
 import type { Capabilities, Services, Options } from '@wdio/types';
 
-import {
-  log,
-  getChromeOptions,
-  getChromedriverOptions,
-  getChromiumVersion,
-  getElectronCapabilities,
-  parseVersion,
-} from './utils.js';
+import { log, getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './utils.js';
+import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
