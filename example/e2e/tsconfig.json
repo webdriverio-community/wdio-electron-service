@@ -12,5 +12,6 @@
     "types": ["node", "@wdio/globals/types", "mocha", "expect"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "./../../node_modules/@types", "../../@types"]
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "include": ["e2e"]
 }

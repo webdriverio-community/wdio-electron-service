@@ -83,47 +83,6 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
     return [w3cCaps];
   }
   /**
-   * parallel multiremote capabilities, e.g.:
-   * ```
-   * [{
-   *   browserA: {
-   *     capabilities: {
-   *        browserName: 'chrome'
-   *     }
-   *   },
-   *   browserB: {
-   *     capabilities: {
-   *        browserName: 'chrome'
-   *     }
-   *   }
-   * },
-   * {
-   *   browserA: {
-   *     capabilities: {
-   *        browserName: 'firefox'
-   *     }
-   *   },
-   *   browserB: {
-   *     capabilities: {
-   *        browserName: 'firefox'
-   *     }
-   *   }
-   * }]
-   * ```
-   */
-  const parallelMultiremoteCaps = caps as Capabilities.MultiRemoteCapabilities[];
-  if (Array.isArray(parallelMultiremoteCaps)) {
-    return parallelMultiremoteCaps
-      .flatMap((multiremoteCaps) =>
-        Object.values(multiremoteCaps).map(
-          (options) =>
-            (options.capabilities as Capabilities.W3CCapabilities).alwaysMatch ||
-            (options.capabilities as Capabilities.Capabilities),
-        ),
-      )
-      .filter((caps) => isElectron(caps));
-  }
-  /**
    * multiremote capabilities, e.g.:
    * ```
    * {
@@ -143,7 +102,7 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
   return Object.values(caps as Capabilities.MultiRemoteCapabilities)
     .map(
       (options) =>
-        (options.capabilities as Capabilities.W3CCapabilities).alwaysMatch ||
+        (options.capabilities as Capabilities.W3CCapabilities)?.alwaysMatch ||
         (options.capabilities as Capabilities.Capabilities),
     )
     .filter((caps) => isElectron(caps));

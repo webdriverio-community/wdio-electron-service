@@ -1,3 +1,4 @@
+import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
 import type { ElectronServiceApi } from './types.js';
 
@@ -6,6 +7,7 @@ import type { ElectronServiceApi } from './types.js';
  */
 process.env.WDIO_ELECTRON = 'true';
 
+export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
 export interface BrowserExtension {
   electron: {

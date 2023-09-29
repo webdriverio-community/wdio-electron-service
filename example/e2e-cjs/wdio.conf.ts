@@ -41,5 +41,3 @@ exports.config = {
     timeout: 30000,
   },
 };
-
-console.log(exports.config);
