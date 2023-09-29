@@ -13,7 +13,12 @@ exports.default = class CJSElectronService {
     })();
   }
 
-  async beforeSession(config: Options.Testrunner, capabilities: Capabilities.Capabilities, specs: string[], cid: string) {
+  async beforeSession(
+    config: Options.Testrunner,
+    capabilities: Capabilities.Capabilities,
+    specs: string[],
+    cid: string,
+  ) {
     const instance = await this.instance;
     return instance?.beforeSession?.(config, capabilities, specs, cid);
   }
@@ -26,7 +31,7 @@ exports.default = class CJSElectronService {
 
 exports.launcher = class CJSElectronLauncher {
   private instance?: Promise<Services.ServiceInstance>;
-  
+
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   constructor(options: any, caps: never, config: Options.Testrunner) {
     this.instance = (async () => {
@@ -40,7 +45,7 @@ exports.launcher = class CJSElectronLauncher {
     const instance = await this.instance;
     return instance?.onPrepare?.(config, capabilities);
   }
-}
+};
 
 export interface BrowserExtension {
   electron: {
