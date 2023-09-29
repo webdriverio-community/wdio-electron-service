@@ -1,4 +1,4 @@
-import type { Capabilities, Services, Options } from '@wdio/types';
+import type { Capabilities, Services } from '@wdio/types';
 
 import { log } from './utils.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
@@ -14,7 +14,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     { name: 'mock', bridgeProp: 'mock' },
   ];
 
-  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceOptions) {
     const { customApiBrowserCommand = 'api' } = globalOptions as ElectronServiceOptions;
     const customCommandCollision = this.#apiCommands.find(
       (command) => command.name === customApiBrowserCommand,

@@ -29,8 +29,6 @@ describe('options validation', () => {
           binaryPath: '/mock/dist',
           customApiBrowserCommand: 'app',
         },
-        {} as never,
-        {} as Options.Testrunner,
       );
     }).toThrow('The command "app" is reserved, please provide a different value for customApiBrowserCommand');
   });
@@ -57,7 +55,7 @@ describe('launcher', () => {
         [] as never,
         {
           services: [['electron', options]],
-        } as any as Options.Testrunner,
+        } as Options.Testrunner,
       );
       const capabilities: Capabilities.Capabilities[] = [
         {
@@ -84,7 +82,7 @@ describe('launcher', () => {
         [] as never,
         {
           services: [['electron', options]],
-        } as any as Options.Testrunner,
+        } as Options.Testrunner,
       );
       const capabilities = {
         firefox: {
@@ -145,7 +143,7 @@ describe('launcher', () => {
         [] as never,
         {
           services: [['electron', options]],
-        } as any as Options.Testrunner,
+        } as Options.Testrunner,
       );
       const capabilities: Capabilities.Capabilities[] = [
         {
@@ -153,14 +151,16 @@ describe('launcher', () => {
         },
       ];
       await instance.onPrepare({} as never, capabilities);
-      expect(capabilities).toEqual([{
-        'browserName': 'chrome',
-        'goog:chromeOptions': {
-          args: ['look', 'some', 'args'],
-          binary: 'workspace/my-test-app/dist/my-test-app',
-          windowTypes: ['app', 'webview'],
+      expect(capabilities).toEqual([
+        {
+          'browserName': 'chrome',
+          'goog:chromeOptions': {
+            args: ['look', 'some', 'args'],
+            binary: 'workspace/my-test-app/dist/my-test-app',
+            windowTypes: ['app', 'webview'],
+          },
         },
-      }]);
+      ]);
     });
 
     it('should set the expected capabilities when multiremote', async () => {
@@ -168,8 +168,8 @@ describe('launcher', () => {
         'wdio:electronServiceOptions': {
           binaryPath: 'workspace/my-test-app/dist/my-test-app',
           appArgs: ['look', 'some', 'args'],
-        }
-      }
+        },
+      };
       instance = new LaunchService(
         {
           binaryPath: 'workspace/my-test-app/dist/my-test-app',
@@ -181,7 +181,7 @@ describe('launcher', () => {
       const capabilities = {
         firefox: {
           capabilities: {
-            'browserName': 'firefox',
+            browserName: 'firefox',
             ...serviceOptions,
           },
         },
@@ -361,7 +361,7 @@ describe('launcher', () => {
               windowTypes: ['app', 'webview'],
             },
           },
-          firstMatch: []
+          firstMatch: [],
         });
       });
 
@@ -491,7 +491,7 @@ describe('launcher', () => {
               {} as never,
               {} as Options.Testrunner,
             );
-            const capabilities: Capabilities.Capabilities[] = [{ browserName: 'electron' }]
+            const capabilities: Capabilities.Capabilities[] = [{ browserName: 'electron' }];
             await instance.onPrepare({} as never, capabilities);
             expect(capabilities).toEqual({
               'browserName': 'chrome',
@@ -520,12 +520,11 @@ describe('launcher', () => {
               {} as Options.Testrunner,
             );
             await expect(
-              instance.onPrepare(
-                {} as never,
-                [{
+              instance.onPrepare({} as never, [
+                {
                   browserName: 'electron',
-                }],
-              ),
+                },
+              ]),
             ).rejects.toThrow('Unsupported platform: unsupported');
           });
         });
@@ -547,8 +546,6 @@ describe('launcher', () => {
             appName: 'my-test-app',
             customApiBrowserCommand: 'customApi',
           },
-          {} as never,
-          {} as Options.Testrunner,
         );
         const browser = {
           addCommand: addCommandMock,

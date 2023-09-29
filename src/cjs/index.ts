@@ -1,9 +1,10 @@
-import type { Capabilities, Services } from '@wdio/types';
+import type { Capabilities, Services, Options } from '@wdio/types';
+import type { ElectronServiceOptions } from '../types.js';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
 
-  constructor(options: any, caps: never, config: any) {
+  constructor(options: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
     this.instance = (async () => {
       const importPath = '../service.js';
       const { default: ElectronService } = await import(importPath);
@@ -11,7 +12,7 @@ exports.default = class CJSElectronService {
     })();
   }
 
-  async beforeSession(config: any, capabilities: any, specs: string[], cid: string) {
+  async beforeSession(config: Options.Testrunner, capabilities: Capabilities.Capabilities, specs: string[], cid: string) {
     const instance = await this.instance;
     return instance?.beforeSession?.(config, capabilities, specs, cid);
   }
@@ -21,6 +22,22 @@ exports.default = class CJSElectronService {
     return instance?.before?.(capabilities, specs, browser);
   }
 };
+
+exports.launcher = class CJSElectronLauncher {
+  private instance?: Promise<Services.ServiceInstance>;
+  constructor(options: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
+    this.instance = (async () => {
+      const importPath = '../service.js';
+      const { default: ElectronService } = await import(importPath);
+      return new ElectronService(options, caps, config);
+    })();
+  }
+
+  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities) {
+    const instance = await this.instance;
+    return instance?.onPrepare?.(config, capabilities);
+  }
+}
 
 export interface BrowserExtension {
   electron: {
