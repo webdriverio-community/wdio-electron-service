@@ -26,7 +26,7 @@ describe('options validation', () => {
     expect(() => {
       new WorkerService(
         {
-          binaryPath: '/mock/dist',
+          appBinaryPath: '/mock/dist',
           customApiBrowserCommand: 'app',
         },
       );
@@ -47,8 +47,20 @@ describe('launcher', () => {
     });
 
     it('should set the expected capabilities', async () => {
+<<<<<<< HEAD
       const options: ElectronServiceOptions = {
         binaryPath: 'workspace/my-test-app/dist/my-test-app',
+=======
+      instance = new WorkerService(
+        {
+          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+        },
+        {} as never,
+        {} as Testrunner,
+      );
+      const capabilities: Capabilities.Capabilities = {
+        browserName: 'electron',
+>>>>>>> 4d41ee0 (use appBinaryPath)
       };
       instance = new LaunchService(
         options,
@@ -81,8 +93,15 @@ describe('launcher', () => {
         options,
         [] as never,
         {
+<<<<<<< HEAD
           services: [['electron', options]],
         } as Options.Testrunner,
+=======
+          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+        },
+        {} as never,
+        {} as Testrunner,
+>>>>>>> 4d41ee0 (use appBinaryPath)
       );
       const capabilities = {
         firefox: {
@@ -134,9 +153,22 @@ describe('launcher', () => {
     });
 
     it('should set the expected capabilities', async () => {
+<<<<<<< HEAD
       const options: ElectronServiceOptions = {
         binaryPath: 'workspace/my-test-app/dist/my-test-app',
         appArgs: ['look', 'some', 'args'],
+=======
+      instance = new WorkerService(
+        {
+          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+          appArgs: ['look', 'some', 'args'],
+        },
+        {} as never,
+        {} as Testrunner,
+      );
+      const capabilities: Capabilities.Capabilities = {
+        browserName: 'electron',
+>>>>>>> 4d41ee0 (use appBinaryPath)
       };
       instance = new LaunchService(
         options,
@@ -172,7 +204,7 @@ describe('launcher', () => {
       };
       instance = new LaunchService(
         {
-          binaryPath: 'workspace/my-test-app/dist/my-test-app',
+          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
           appArgs: ['look', 'some', 'args'],
         },
         {} as never,
@@ -232,6 +264,7 @@ describe('launcher', () => {
       });
     });
   });
+<<<<<<< HEAD
 
   describe('providing appPath & appName', () => {
     describe('on MacOS platforms', () => {
@@ -562,3 +595,37 @@ describe('launcher', () => {
     });
   });
 });
+=======
+});
+
+describe('before', () => {
+  const addCommandMock = vi.fn();
+
+  beforeEach(async () => {
+    mockProcessProperty('platform', 'darwin');
+    WorkerService = (await import('../src/service')).default;
+  });
+
+  it('should add API commands to the browser object', () => {
+    instance = new WorkerService(
+      {
+        appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+        customApiBrowserCommand: 'customApi',
+      },
+      {} as never,
+      {} as Testrunner,
+    );
+    const browser = {
+      addCommand: addCommandMock,
+    } as unknown as WebdriverIO.Browser;
+    instance.before({}, [], browser);
+    const electronApi = browser.electron as CustomBrowserExtension['electron'];
+    expect(electronApi.app).toEqual(expect.any(Function));
+    expect(electronApi.browserWindow).toEqual(expect.any(Function));
+    expect(electronApi.customApi).toEqual(expect.any(Function));
+    expect(electronApi.dialog).toEqual(expect.any(Function));
+    expect(electronApi.mainProcess).toEqual(expect.any(Function));
+    expect(electronApi.mock).toEqual(expect.any(Function));
+  });
+});
+>>>>>>> 4d41ee0 (use appBinaryPath)
