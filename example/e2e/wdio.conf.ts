@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import url from 'node:url';
 import path from 'node:path';
 
+import { getBinaryPath } from 'wdio-electron-service/utils';
+
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(fs.readFileSync('../app/package.json').toString());
 const {
@@ -17,8 +19,7 @@ export const config = {
       'browserName': 'electron',
       'browserVersion': '26.2.2',
       'wdio:electronServiceOptions': {
-        appPath: path.join(__dirname, '..', 'app', 'dist'),
-        appName: productName,
+        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app', 'dist'), productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
