@@ -4,7 +4,7 @@ import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
 import { Services, Options, Capabilities } from '@wdio/types';
 
-import { log } from './utils.js';
+import log from './log.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions } from './types.js';
@@ -39,15 +39,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        const { binaryPath, appPath, appName, appArgs } = Object.assign(
-          {},
-          this.#globalOptions,
-          cap['wdio:electronServiceOptions'],
-        );
+        const { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions']);
 
-        const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+        const validPathOpts = appBinaryPath !== undefined;
         if (!validPathOpts) {
-          const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
+          const invalidPathOptsError = new Error('You must provide the appBinaryPath value');
           log.error(invalidPathOptsError);
           throw invalidPathOptsError;
         }
@@ -59,7 +55,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           cap.browserVersion = browserVersion;
         }
 
-        cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap);
+        cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
