@@ -3,7 +3,7 @@ import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
 import findVersions from 'find-versions';
 
-import { log } from './utils.js';
+import log from './log.js';
 
 const electronChromiumVersionMap: { [k: string]: string } = {};
 

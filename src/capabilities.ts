@@ -2,42 +2,10 @@ import type { Capabilities } from '@wdio/types';
 
 import type { ElectronServiceOptions } from './types';
 
-function getMacExecutableName(appName: string) {
-  // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
-  if (appName.endsWith(' Helper')) {
-    return appName.replace(' Helper', '');
-  }
-
-  return appName;
-}
-
-function getBinaryPath(distPath: string, appName: string) {
-  const SupportedPlatform = {
-    darwin: 'darwin',
-    linux: 'linux',
-    win32: 'win32',
-  };
-  const { platform, arch } = process;
-
-  if (!Object.values(SupportedPlatform).includes(platform)) {
-    throw new Error(`Unsupported platform: ${platform}`);
-  }
-
-  const pathMap = {
-    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
-    linux: `linux-unpacked/${appName}`,
-    win32: `win-unpacked/${appName}.exe`,
-  };
-
-  const electronPath = pathMap[platform as keyof typeof SupportedPlatform];
-
-  return `${distPath}/${electronPath}`;
-}
-
 export function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
   const existingOptions = cap['goog:chromeOptions'] || {};
   return {
-    binary: options.binaryPath || getBinaryPath(options.appPath as string, options.appName as string),
+    binary: options.appBinaryPath,
     windowTypes: ['app', 'webview'],
     ...existingOptions,
     args: [...(existingOptions.args || []), ...(options.appArgs || [])],
