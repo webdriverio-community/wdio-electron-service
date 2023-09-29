@@ -1,10 +1,11 @@
 import type { Capabilities, Services, Options } from '@wdio/types';
-import type { ElectronServiceOptions } from '../types.js';
+// import type { ElectronServiceOptions } from '../types.js';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
 
-  constructor(options: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  constructor(options: any, caps: never, config: Options.Testrunner) {
     this.instance = (async () => {
       const importPath = '../service.js';
       const { default: ElectronService } = await import(importPath);
@@ -25,7 +26,9 @@ exports.default = class CJSElectronService {
 
 exports.launcher = class CJSElectronLauncher {
   private instance?: Promise<Services.ServiceInstance>;
-  constructor(options: ElectronServiceOptions, caps: never, config: Options.Testrunner) {
+  
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  constructor(options: any, caps: never, config: Options.Testrunner) {
     this.instance = (async () => {
       const importPath = '../service.js';
       const { default: ElectronService } = await import(importPath);
