@@ -28,7 +28,7 @@ describe('launcher', () => {
       [] as never,
       {
         services: [['electron', options]],
-      } as any as Options.Testrunner,
+      } as Options.Testrunner,
     );
     const capabilities: Capabilities.Capabilities[] = [
       {
@@ -55,7 +55,7 @@ describe('launcher', () => {
       [] as never,
       {
         services: [['electron', options]],
-      } as any as Options.Testrunner,
+      } as Options.Testrunner,
     );
     const capabilities = {
       firefox: {
@@ -110,7 +110,7 @@ describe('launcher', () => {
         [] as never,
         {
           services: [['electron', options]],
-        } as any as Options.Testrunner,
+        } as Options.Testrunner,
       );
       const capabilities: Capabilities.Capabilities[] = [
         {
