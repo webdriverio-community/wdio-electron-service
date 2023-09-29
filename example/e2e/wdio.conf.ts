@@ -19,7 +19,7 @@ export const config = {
       'browserName': 'electron',
       'browserVersion': '26.2.2',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app', 'dist'), productName),
+        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },

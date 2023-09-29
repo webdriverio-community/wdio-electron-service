@@ -4,7 +4,7 @@ import fs from 'node:fs';
 // TODO: fix CJS import of utils
 // import { getBinaryPath } from 'wdio-electron-service/utils';
 
-function getBinaryPath(distPath: string, appName: string) {
+function getBinaryPath(appPath: string, appName: string, distDirName = 'dist') {
   const SupportedPlatform = {
     darwin: 'darwin',
     linux: 'linux',
@@ -17,14 +17,14 @@ function getBinaryPath(distPath: string, appName: string) {
   }
 
   const pathMap = {
-    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${appName}`,
-    linux: `linux-unpacked/${appName}`,
-    win32: `win-unpacked/${appName}.exe`,
+    darwin: path.join(arch === 'arm64' ? 'mac-arm64' : 'mac', `${appName}.app`, 'Contents', 'MacOS', appName),
+    linux: path.join('linux-unpacked', appName),
+    win32: path.join('win-unpacked', `${appName}.exe`),
   };
 
   const electronPath = pathMap[platform as keyof typeof SupportedPlatform];
 
-  return `${distPath}/${electronPath}`;
+  return path.join(appPath, distDirName, electronPath);
 }
 
 const packageJson = JSON.parse(fs.readFileSync('../app/package.json').toString());
@@ -41,7 +41,7 @@ exports.config = {
       'browserName': 'electron',
       'browserVersion': '26.2.2',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app', 'dist'), productName),
+        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
