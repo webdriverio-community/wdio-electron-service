@@ -37,6 +37,7 @@ To use the service you need to add `electron` to your services array, followed b
 import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { getBinaryPath } from 'wdio-electron-service/utils';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const packageJson = JSON.parse(await fs.readFile('./package.json'));
@@ -53,8 +54,7 @@ export const config = {
       'browserName': 'electron',
       'browserVersion': '26.2.2', // optional override
       'wdio:electronServiceOptions': {
-        appPath: path.join(__dirname, 'dist'),
-        appName: productName,
+        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
@@ -63,7 +63,7 @@ export const config = {
 };
 ```
 
-**Note:** this code example illustrates a config that runs within an ESM environment.
+**Note:** this code example illustrates a config that runs within an ESM environment and uses `electron-builder`.
 
 ### API Configuration
 
@@ -143,8 +143,7 @@ export const config = {
     [
       'electron',
       {
-        appPath: '/foo/bar',
-        appName: 'myApp',
+        appBinaryPath: '/foo/bar/myApp'
       },
     ],
   ],
@@ -152,7 +151,7 @@ export const config = {
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
-        appName: 'myOtherApp',
+        appBinaryPath: '/foo/bar/myOtherApp'
         appArgs: ['foo', 'bar'],
       },
     },
@@ -165,8 +164,7 @@ This results in the following configuration object used for given capability:
 
 ```js
 {
-  appPath: '/foo/bar',
-  appName: 'myOtherApp',
+  appBinaryPath: '/foo/bar/myOtherApp',
   appArgs: ['foo', 'bar']
 }
 ```
@@ -175,7 +173,7 @@ This service supports the following configuration options:
 
 ### `appBinaryPath`:
 
-The path to the Electron binary of the app for testing.
+The path to the Electron binary of the app for testing. If you are using the `appPath` / `appName` approach from previous versions of the service, you can now use the [`getBinaryPath`](./src/utils.ts) util to generate the appropriate `appBinaryPath` value for an app utilising `electron-builder`, as shown in the [example configuration](#example-configuration) above.
 
 Type: `string`
 
