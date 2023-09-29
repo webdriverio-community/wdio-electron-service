@@ -4,7 +4,8 @@
   "exclude": ["esm", "node_modules", "coverage", "dist", "example", "test", "*.config.*"],
   "compilerOptions": {
     "module": "CommonJS",
-    "outDir": "dist/cjs",
+    "outDir": "dist",
+    "rootDir": "src",
     "target": "ES2020"
   }
 }
