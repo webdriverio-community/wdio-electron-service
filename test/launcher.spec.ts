@@ -7,22 +7,23 @@ import type { ElectronServiceOptions } from '../src/index';
 
 let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;
+let options: ElectronServiceOptions;
 
-describe('launcher', () => {
-  beforeEach(async () => {
-    mockProcessProperty('platform', 'darwin');
-    LaunchService = (await import('../src/launcher')).default;
-  });
+beforeEach(async () => {
+  mockProcessProperty('platform', 'darwin');
+  LaunchService = (await import('../src/launcher')).default;
+  options = {
+    appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+  };
+});
 
-  afterEach(() => {
-    instance = undefined;
-    revertProcessProperty('platform');
-  });
+afterEach(() => {
+  instance = undefined;
+  revertProcessProperty('platform');
+});
 
-  it('should set the expected capabilities', async () => {
-    const options: ElectronServiceOptions = {
-      appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-    };
+describe('onPrepare', () => {
+  beforeEach(() => {
     instance = new LaunchService(
       options,
       [] as never,
@@ -30,14 +31,75 @@ describe('launcher', () => {
         services: [['electron', options]],
       } as Options.Testrunner,
     );
+  });
+
+  it('should throw an error when there is no electron browser in capabilities', async () => {
+    const capabilities: Capabilities.Capabilities[] = [
+      {
+        browserName: 'chrome',
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      'No Electron browser found in capabilities',
+    );
+  });
+
+  it('should throw an error when there is no appBinaryPath for a given electron capability', async () => {
+    delete options.appBinaryPath;
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+      } as Options.Testrunner,
+    );
+    const capabilities: WebDriver.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'wdio:electronServiceOptions': {
+          appArgs: ['some', 'args'],
+        },
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      'Failed setting up Electron session: Error: You must provide the appBinaryPath value for all Electron capabilities',
+    );
+  });
+
+  it('should override global options with capabilities', async () => {
+    const capabilities: WebDriver.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'wdio:electronServiceOptions': {
+          appBinaryPath: 'workspace/my-other-test-app/dist/my-other-test-app',
+        },
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-other-test-app/dist/my-other-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:electronServiceOptions': {
+        appBinaryPath: 'workspace/my-other-test-app/dist/my-other-test-app',
+      },
+    });
+  });
+
+  it('should set the expected capabilities', async () => {
     const capabilities: Capabilities.Capabilities[] = [
       {
         browserName: 'electron',
+        browserVersion: '26.2.2',
       },
     ];
-    await instance.onPrepare({} as never, capabilities);
+    await instance?.onPrepare({} as never, capabilities);
     expect(capabilities[0]).toEqual({
       'browserName': 'chrome',
+      'browserVersion': '116.0.5845.190',
       'goog:chromeOptions': {
         args: [],
         binary: 'workspace/my-test-app/dist/my-test-app',
@@ -46,17 +108,53 @@ describe('launcher', () => {
     });
   });
 
-  it('should set the expected capabilities when multiremote', async () => {
-    const options: ElectronServiceOptions = {
-      appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-    };
-    instance = new LaunchService(
-      options,
-      [] as never,
+  it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
+    const capabilities: Capabilities.Capabilities[] = [
       {
-        services: [['electron', options]],
-      } as Options.Testrunner,
-    );
+        'browserName': 'electron',
+        'wdio:chromedriverOptions': {
+          binary: '/path/to/chromedriver',
+        },
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-test-app/dist/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:chromedriverOptions': {
+        binary: '/path/to/chromedriver',
+      },
+    });
+  });
+
+  it('should set the expected capabilities when W3C-specific', async () => {
+    const capabilities: Capabilities.W3CCapabilities[] = [
+      {
+        firstMatch: [],
+        alwaysMatch: {
+          browserName: 'electron',
+        },
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      firstMatch: [],
+      alwaysMatch: {
+        'browserName': 'chrome',
+        'goog:chromeOptions': {
+          args: [],
+          binary: 'workspace/my-test-app/dist/my-test-app',
+          windowTypes: ['app', 'webview'],
+        },
+      },
+    });
+  });
+
+  it('should set the expected capabilities when multiremote', async () => {
     const capabilities = {
       firefox: {
         capabilities: {
@@ -73,8 +171,16 @@ describe('launcher', () => {
           browserName: 'chrome',
         },
       },
+      myOtherElectronProject: {
+        capabilities: {
+          firstMatch: [],
+          alwaysMatch: {
+            browserName: 'electron',
+          },
+        },
+      },
     };
-    await instance.onPrepare({} as never, capabilities as Capabilities.MultiRemoteCapabilities);
+    await instance?.onPrepare({} as never, capabilities);
     expect(capabilities).toEqual({
       firefox: {
         capabilities: {
@@ -96,107 +202,91 @@ describe('launcher', () => {
           browserName: 'chrome',
         },
       },
-    });
-  });
-
-  describe('providing appArgs', () => {
-    it('should set the expected capabilities', async () => {
-      const options: ElectronServiceOptions = {
-        appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-        appArgs: ['look', 'some', 'args'],
-      };
-      instance = new LaunchService(
-        options,
-        [] as never,
-        {
-          services: [['electron', options]],
-        } as Options.Testrunner,
-      );
-      const capabilities: Capabilities.Capabilities[] = [
-        {
-          browserName: 'electron',
-        },
-      ];
-      await instance.onPrepare({} as never, capabilities);
-      expect(capabilities).toEqual([
-        {
-          'browserName': 'chrome',
-          'goog:chromeOptions': {
-            args: ['look', 'some', 'args'],
-            binary: 'workspace/my-test-app/dist/my-test-app',
-            windowTypes: ['app', 'webview'],
-          },
-        },
-      ]);
-    });
-
-    it('should set the expected capabilities when multiremote', async () => {
-      const serviceOptions = {
-        'wdio:electronServiceOptions': {
-          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-          appArgs: ['look', 'some', 'args'],
-        },
-      };
-      instance = new LaunchService(
-        {
-          appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-          appArgs: ['look', 'some', 'args'],
-        },
-        {} as never,
-        {} as Options.Testrunner,
-      );
-      const capabilities = {
-        firefox: {
-          capabilities: {
-            browserName: 'firefox',
-            ...serviceOptions,
-          },
-        },
-        myElectronProject: {
-          capabilities: {
-            'browserName': 'electron',
-            'wdio:electronServiceOptions': {
-              appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-              appArgs: ['look', 'some', 'args'],
-            },
-          },
-        },
-        chrome: {
-          capabilities: {
-            'browserName': 'chrome',
-            'wdio:electronServiceOptions': {
-              appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-              appArgs: ['look', 'some', 'args'],
-            },
-          },
-        },
-      };
-      await instance.onPrepare({} as never, capabilities as Capabilities.MultiRemoteCapabilities);
-      expect(capabilities).toEqual({
-        firefox: {
-          capabilities: {
-            ...serviceOptions,
-            browserName: 'firefox',
-          },
-        },
-        myElectronProject: {
-          capabilities: {
-            ...serviceOptions,
+      myOtherElectronProject: {
+        capabilities: {
+          firstMatch: [],
+          alwaysMatch: {
             'browserName': 'chrome',
             'goog:chromeOptions': {
-              args: ['look', 'some', 'args'],
+              args: [],
               binary: 'workspace/my-test-app/dist/my-test-app',
               windowTypes: ['app', 'webview'],
             },
           },
         },
+      },
+    });
+  });
+
+  it('should set the expected capabilities when parallel multiremote', async () => {
+    const capabilities: Capabilities.MultiRemoteCapabilities[] = [
+      {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            browserName: 'electron',
+          },
+        },
+      },
+      {
         chrome: {
           capabilities: {
-            ...serviceOptions,
             browserName: 'chrome',
           },
         },
-      });
-    });
+        myOtherElectronProject: {
+          capabilities: {
+            firstMatch: [],
+            alwaysMatch: {
+              browserName: 'electron',
+            },
+          },
+        },
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities).toEqual([
+      {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: {
+            'browserName': 'chrome',
+            'goog:chromeOptions': {
+              args: [],
+              binary: 'workspace/my-test-app/dist/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+          },
+        },
+      },
+      {
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+        myOtherElectronProject: {
+          capabilities: {
+            firstMatch: [],
+            alwaysMatch: {
+              'browserName': 'chrome',
+              'goog:chromeOptions': {
+                args: [],
+                binary: 'workspace/my-test-app/dist/my-test-app',
+                windowTypes: ['app', 'webview'],
+              },
+            },
+          },
+        },
+      },
+    ]);
   });
 });

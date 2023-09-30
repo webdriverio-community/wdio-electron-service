@@ -19,7 +19,7 @@ function getArrayCapabilities(capabilities: Capabilities.RemoteCapabilities) {
     : (capabilities as (Capabilities.DesiredCapabilities | Capabilities.W3CCapabilities)[]);
 }
 
-export default class ElectronWorkerService implements Services.ServiceInstance {
+export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
 
@@ -38,6 +38,12 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const { dependencies, devDependencies } = pkgJSON;
     const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
 
+    if (!caps.length) {
+      const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
+      log.error(noElectronCapabilityError);
+      throw noElectronCapabilityError;
+    }
+
     await Promise.all(
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
@@ -46,9 +52,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         const { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions']);
 
-        const validPathOpts = appBinaryPath !== undefined;
-        if (!validPathOpts) {
-          const invalidPathOptsError = new Error('You must provide the appBinaryPath value');
+        const invalidPathOpts = appBinaryPath === undefined;
+        if (invalidPathOpts) {
+          const invalidPathOptsError = new Error(
+            'You must provide the appBinaryPath value for all Electron capabilities',
+          );
           log.error(invalidPathOptsError);
           throw invalidPathOptsError;
         }
@@ -67,7 +75,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
         }
 
-        log.debug('setting capabaility', cap);
+        log.debug('setting capability', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
