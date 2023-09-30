@@ -1,6 +1,6 @@
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
-import type { ElectronServiceApi } from './types.js';
+import type { ElectronServiceOptions } from './types.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -36,7 +36,7 @@ declare global {
   }
   namespace WebDriver {
     interface Capabilities {
-      'wdio:electronServiceOptions': ElectronServiceApi;
+      'wdio:electronServiceOptions': ElectronServiceOptions;
     }
   }
 }

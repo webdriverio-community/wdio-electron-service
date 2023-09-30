@@ -9,9 +9,10 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "types": ["node", "@wdio/globals/types", "mocha", "expect"],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "./../../node_modules/@types", "../../@types"]
+    "types": ["node", "@wdio/globals/types"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "./../node_modules/@types", "../@types"],
+    "outDir": "dist"
   },
   "exclude": ["node_modules"],
-  "include": ["test"]
+  "include": ["src/*.ts"]
 }

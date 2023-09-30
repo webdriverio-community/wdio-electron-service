@@ -4,12 +4,12 @@ import path from 'node:path';
 import { SevereServiceError } from 'webdriverio';
 import { Services, Options, Capabilities } from '@wdio/types';
 
-import { log } from './utils.js';
+import log from './log.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions } from './types.js';
 
-export default class ElectronWorkerService implements Services.ServiceInstance {
+export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
 
@@ -20,18 +20,19 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
     const capsList = Array.isArray(capabilities)
-      ? (capabilities[0] as Capabilities.MultiRemoteCapabilities).capabilities
-        ? ((capabilities as Capabilities.MultiRemoteCapabilities[]).map((cap) => cap.capabilities) as (
-            | Capabilities.DesiredCapabilities
-            | Capabilities.W3CCapabilities
-          )[])
-        : (capabilities as (Capabilities.DesiredCapabilities | Capabilities.W3CCapabilities)[])
+      ? capabilities
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
 
-    const caps = capsList.map((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]).flat();
+    const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
     const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
     const { dependencies, devDependencies } = pkgJSON;
     const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
+
+    if (!caps.length) {
+      const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
+      log.error(noElectronCapabilityError);
+      throw noElectronCapabilityError;
+    }
 
     await Promise.all(
       caps.map(async (cap) => {
@@ -39,15 +40,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        const { binaryPath, appPath, appName, appArgs } = Object.assign(
-          {},
-          this.#globalOptions,
-          cap['wdio:electronServiceOptions'],
-        );
+        const { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions']);
 
-        const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
-        if (!validPathOpts) {
-          const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
+        const invalidPathOpts = appBinaryPath === undefined;
+        if (invalidPathOpts) {
+          const invalidPathOptsError = new Error(
+            'You must provide the appBinaryPath value for all Electron capabilities',
+          );
           log.error(invalidPathOptsError);
           throw invalidPathOptsError;
         }
@@ -59,14 +58,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           cap.browserVersion = browserVersion;
         }
 
-        cap['goog:chromeOptions'] = getChromeOptions({ binaryPath, appPath, appName, appArgs }, cap);
+        cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
         }
 
-        log.debug('setting cap', cap);
+        log.debug('setting capability', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;

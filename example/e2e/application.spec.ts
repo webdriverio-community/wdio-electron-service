@@ -1,9 +1,6 @@
-import { browser, expect } from '@wdio/globals';
-
 describe('application loading', () => {
   describe('App', () => {
     it('should launch the application', async () => {
-      // await browser.waitUntilTextExists('html', 'Hello');
       const title = await browser.getTitle();
       expect(title).toEqual('Test');
     });

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { isTest } from './util';
+import { isTest } from './util.js';
 
 declare global {
   var mainProcessGlobal: string;
@@ -29,7 +29,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.js`,
+      preload: `${appRootPath}/preload.bundle.cjs`,
       nodeIntegration: false,
       contextIsolation: true,
     },

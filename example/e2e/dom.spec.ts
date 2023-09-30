@@ -1,4 +1,3 @@
-import { browser, $, expect } from '@wdio/globals';
 import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 
 describe('application loading', () => {

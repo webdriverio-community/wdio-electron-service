@@ -3,7 +3,7 @@ import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
 import findVersions from 'find-versions';
 
-import { log } from './utils.js';
+import log from './log.js';
 
 const electronChromiumVersionMap: { [k: string]: string } = {};
 
@@ -34,7 +34,7 @@ export const getChromiumVersion = async (electronVersion?: string) => {
     return electronChromiumVersionMap[electronVersion as keyof typeof electronChromiumVersionMap];
   } catch (e) {
     // fall back to the locally installed electron-to-chromium version map
-    log.debug('Map update failed.');
+    log.debug('Map update failed: ', e);
     return fullVersions[electronVersion as keyof typeof fullVersions];
   }
 };

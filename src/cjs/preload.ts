@@ -1,1 +1,1 @@
-require('../preload');
+../preload.ts

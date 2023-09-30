@@ -1,12 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import url from 'node:url';
-import { browser, expect } from '@wdio/globals';
+import { browser } from '@wdio/globals';
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'package.json'), { encoding: 'utf-8' }),
-);
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }));
 const { name, version } = packageJson;
 
 describe('electron APIs', () => {

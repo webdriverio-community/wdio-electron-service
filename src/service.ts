@@ -1,6 +1,6 @@
 import type { Capabilities, Services } from '@wdio/types';
 
-import { log } from './utils.js';
+import log from './log.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
