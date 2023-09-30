@@ -1,3 +1,4 @@
+/// <reference types="../@types/wdio-electron-service/utils.d.ts" />
 import fs from 'node:fs';
 import url from 'node:url';
 import path from 'node:path';

@@ -11,9 +11,6 @@
     "module": "ESNext",
     "types": ["node", "@wdio/globals/types"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "./../node_modules/@types", "../@types"],
-    "paths": {
-      "wdio-electron-service/*": ["dist/*"]
-    },
     "outDir": "dist"
   },
   "exclude": ["node_modules"],
