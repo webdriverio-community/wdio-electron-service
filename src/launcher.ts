@@ -9,16 +9,6 @@ import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } fro
 import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions } from './types.js';
 
-function getArrayCapabilities(capabilities: Capabilities.RemoteCapabilities) {
-  const multiremoteCapabilities = capabilities as Capabilities.MultiRemoteCapabilities[];
-  return multiremoteCapabilities[0].capabilities
-    ? (multiremoteCapabilities.map((cap) => cap.capabilities) as (
-        | Capabilities.DesiredCapabilities
-        | Capabilities.W3CCapabilities
-      )[])
-    : (capabilities as (Capabilities.DesiredCapabilities | Capabilities.W3CCapabilities)[]);
-}
-
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
@@ -30,10 +20,10 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
   async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
     const capsList = Array.isArray(capabilities)
-      ? getArrayCapabilities(capabilities)
+      ? capabilities
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
 
-    const caps = capsList.map((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]).flat();
+    const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
     const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
     const { dependencies, devDependencies } = pkgJSON;
     const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
