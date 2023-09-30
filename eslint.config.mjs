@@ -9,7 +9,7 @@ import globals from 'globals';
 export default [
   // Ignored dirs
   {
-    ignores: ['**/dist/**/*'],
+    ignores: ['**/dist/**/*', '@types/**/*'],
   },
   // All files
   {
@@ -27,7 +27,7 @@ export default [
   // Node & Electron main process files and scripts
   {
     files: ['**/*.{js,mjs,ts}'],
-    ignores: ['example/app/preload.ts', 'example/app/util.ts'],
+    ignores: ['example/src/preload.ts', 'example/src/util.ts', 'example-cjs/src/preload.ts', 'example-cjs/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -36,7 +36,7 @@ export default [
   },
   // Electron renderer process files
   {
-    files: ['example/app/preload.ts', 'example/app/util.ts'],
+    files: ['example/src/preload.ts', 'example/src/util.ts', 'example-cjs/src/preload.ts', 'example-cjs/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -79,27 +79,32 @@ export default [
           args: 'after-used',
           ignoreRestSiblings: true,
           argsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_'
-        }
+          destructuredArrayIgnorePattern: '^_',
+        },
       ],
     },
   },
   // Example app TS files
   {
-    files: ['example/app/**/*.ts'],
+    files: ['example/src/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example/app/tsconfig.json',
+        project: 'example/tsconfig.json',
       },
     },
   },
-  // Example e2e TS files
   {
-    files: ['example/e2e/test/*.spec.ts', 'example/e2e-cjs/test/*.spec.ts'],
+    files: ['example-cjs/src/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example/e2e-cjs/tsconfig.json',
+        project: 'example-cjs/tsconfig.json',
       },
+    },
+  },
+  // Example E2E TS files
+  {
+    files: ['example/e2e/*.spec.ts', 'example-cjs/e2e/*.spec.ts'],
+    languageOptions: {
       globals: {
         ...wdio.configs.recommended.globals,
       },
@@ -109,26 +114,7 @@ export default [
     },
     rules: {
       ...wdio.configs.recommended.rules,
-      '@typescript-eslint/no-var-requires': 'off'
-    },
-  },
-  {
-    files: ['example/e2e/test/*.spec.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'example/e2e/tsconfig.json',
-      },
-    },
-  },
-  {
-    files: ['example/e2e-cjs/test/*.spec.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'example/e2e-cjs/tsconfig.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-var-requires': 'off'
+      '@typescript-eslint/no-var-requires': 'off',
     },
   },
   // Test files
