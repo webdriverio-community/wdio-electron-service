@@ -29,7 +29,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.js`,
+      preload: `${appRootPath}/preload.bundle.js`,
       nodeIntegration: false,
       contextIsolation: true,
     },
