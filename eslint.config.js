@@ -22,6 +22,7 @@ export default [
     },
     rules: {
       ...eslint.configs.recommended.rules,
+      'no-nested-ternary': 'error',
     },
   },
   // Node & Electron main process files and scripts
