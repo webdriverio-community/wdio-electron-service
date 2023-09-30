@@ -2,10 +2,11 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "ES2015",
+    "target": "ES2020",
     "paths": {
       "wdio-electron-service/*": ["dist/*"]
-    }
+    },
+    "types": ["node", "@wdio/globals/types"]
   },
   "include": ["src/*.ts"],
   "exclude": ["node_modules"]

@@ -27,7 +27,7 @@ function getBinaryPath(appPath: string, appName: string, distDirName = 'dist') {
   return path.join(appPath, distDirName, electronPath);
 }
 
-const packageJson = JSON.parse(fs.readFileSync('../app/package.json').toString());
+const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
 const {
   build: { productName },
 } = packageJson;
@@ -41,7 +41,7 @@ exports.config = {
       'browserName': 'electron',
       'browserVersion': '26.2.2',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
+        appBinaryPath: getBinaryPath(__dirname, productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
@@ -52,11 +52,12 @@ exports.config = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: 'wdio-logs',
-  specs: ['./test/*.spec.ts'],
+  specs: ['./e2e/*.spec.ts'],
   autoCompileOpts: {
     autoCompile: true,
     tsNodeOpts: {
       transpileOnly: true,
+      esm: false,
       project: path.join(__dirname, 'tsconfig.json'),
     },
   },

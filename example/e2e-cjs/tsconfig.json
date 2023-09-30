@@ -1,9 +1,0 @@
-{
-  "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "types": ["node", "@wdio/globals/types"]
-  },
-  "include": ["test"]
-}

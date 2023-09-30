@@ -1,20 +1,29 @@
 {
-  "name": "wdio-electron-service-example-app",
+  "name": "wdio-electron-service-example-cjs",
   "version": "1.0.0",
-  "main": "./dist/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "webpack && cp ./src/index.html ./dist && electron-builder -p never",
-    "ci": "pnpm build && pnpm lint",
+    "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./all-logs",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "format": "prettier --write \"**/*.{j,t}s\"",
-    "lint": "eslint \"**/*.{j,t}s\""
+    "test": "wdio run ./wdio.conf.ts"
   },
   "devDependencies": {
+    "@types/node": "^20.7.0",
+    "@wdio/cli": "^8.16.16",
+    "@wdio/globals": "^8.16.16",
+    "@wdio/local-runner": "^8.16.16",
+    "@wdio/mocha-framework": "^8.16.15",
     "electron": "^26.2.2",
     "electron-builder": "^24.6.4",
+    "global-jsdom": "^9.1.0",
+    "jsdom": "^22.1.0",
     "ts-loader": "^9.4.4",
-    "wdio-electron-service": "file:../../",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "wdio-electron-service": "file:../",
+    "webdriverio": "^8.16.16",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },
@@ -23,14 +32,14 @@
   },
   "build": {
     "asar": true,
-    "appId": "com.wdio-electron-service-example.demo",
+    "appId": "com.wdio-electron-service-example-cjs.demo",
     "copyright": "goosewobbler",
-    "productName": "wdio-electron-service-example",
+    "productName": "wdio-electron-service-example-cjs",
     "files": [
       "./dist/*"
     ],
     "linux": {
-      "executableName": "wdio-electron-service-example",
+      "executableName": "wdio-electron-service-example-cjs",
       "category": "Utility",
       "target": [
         "AppImage"

@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "include": ["src/cjs/**/*", "src/cjs/package.json"],
-  "exclude": ["esm", "node_modules", "coverage", "dist", "example", "test", "*.config.*"],
+  "exclude": ["esm", "node_modules", "coverage", "dist", "example", "example-cjs", "test", "*.config.*"],
   "compilerOptions": {
     "module": "CommonJS",
     "outDir": "dist",

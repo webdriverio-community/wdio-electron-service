@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
-  "exclude": ["src/cjs", "node_modules", "coverage", "dist", "example", "test", "*.config.*"],
+  "exclude": ["src/cjs", "node_modules", "coverage", "dist", "example", "example-cjs", "test", "*.config.*"],
   "compilerOptions": {
     "module": "ESNext",
     "outDir": "dist",

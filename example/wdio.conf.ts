@@ -5,7 +5,7 @@ import path from 'node:path';
 import { getBinaryPath } from 'wdio-electron-service/utils';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(fs.readFileSync('../app/package.json').toString());
+const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
 const {
   build: { productName },
 } = packageJson;
@@ -17,9 +17,9 @@ export const config = {
   capabilities: [
     {
       'browserName': 'electron',
-      'browserVersion': '26.2.2',
+      'browserVersion': '28.0.0-nightly.20230929',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
+        appBinaryPath: getBinaryPath(__dirname, productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
@@ -30,7 +30,7 @@ export const config = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: 'wdio-logs',
-  specs: ['./test/*.spec.ts'],
+  specs: ['./e2e/*.spec.ts'],
   autoCompileOpts: {
     autoCompile: true,
     tsNodeOpts: {
