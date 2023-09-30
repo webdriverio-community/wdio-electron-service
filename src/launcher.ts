@@ -9,6 +9,16 @@ import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } fro
 import { getChromiumVersion, parseVersion } from './versions.js';
 import type { ElectronServiceOptions } from './types.js';
 
+function getArrayCapabilities(capabilities: Capabilities.RemoteCapabilities) {
+  const multiremoteCapabilities = capabilities as Capabilities.MultiRemoteCapabilities[];
+  return multiremoteCapabilities[0].capabilities
+    ? (multiremoteCapabilities.map((cap) => cap.capabilities) as (
+        | Capabilities.DesiredCapabilities
+        | Capabilities.W3CCapabilities
+      )[])
+    : (capabilities as (Capabilities.DesiredCapabilities | Capabilities.W3CCapabilities)[]);
+}
+
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
@@ -20,12 +30,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
     const capsList = Array.isArray(capabilities)
-      ? (capabilities[0] as Capabilities.MultiRemoteCapabilities).capabilities
-        ? ((capabilities as Capabilities.MultiRemoteCapabilities[]).map((cap) => cap.capabilities) as (
-            | Capabilities.DesiredCapabilities
-            | Capabilities.W3CCapabilities
-          )[])
-        : (capabilities as (Capabilities.DesiredCapabilities | Capabilities.W3CCapabilities)[])
+      ? getArrayCapabilities(capabilities)
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
 
     const caps = capsList.map((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]).flat();
@@ -62,7 +67,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
         }
 
-        log.debug('setting cap', cap);
+        log.debug('setting capabaility', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
