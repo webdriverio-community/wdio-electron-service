@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { isTest } from './util';
+import { isTest } from './util.js';
 
 if (isTest) {
-  await import('wdio-electron-service/preload');
+  import('wdio-electron-service/preload');
 }
 
 const validChannels = ['increase-window-size', 'decrease-window-size'];

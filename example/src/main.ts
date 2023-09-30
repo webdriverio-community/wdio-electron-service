@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { isTest } from './util';
+import { isTest } from './util.js';
 
 declare global {
   var mainProcessGlobal: string;
@@ -7,7 +7,7 @@ declare global {
 }
 
 if (isTest) {
-  await import('wdio-electron-service/main');
+  import('wdio-electron-service/main');
 }
 
 const appPath = app.getAppPath();
@@ -29,8 +29,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.mjs`,
-      sandbox: true,
+      preload: `${appRootPath}/preload.bundle.cjs`,
       nodeIntegration: false,
       contextIsolation: true,
     },
