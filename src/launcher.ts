@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
+import findVersions from 'find-versions';
 import { SevereServiceError } from 'webdriverio';
 import { Services, Options, Capabilities } from '@wdio/types';
 
 import log from './log.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
-import { getChromiumVersion, parseVersion } from './versions.js';
+import { getChromiumVersion } from './versions.js';
 import type { ElectronServiceOptions } from './types.js';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
@@ -26,7 +26,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
     const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
     const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
     const { dependencies, devDependencies } = pkgJSON;
-    const localElectronVersion = parseVersion(dependencies?.electron || devDependencies?.electron);
+    const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
+    const localElectronVersion = pkgElectronVersion ? findVersions(pkgElectronVersion, { loose: true })[0] : undefined;
 
     if (!caps.length) {
       const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
@@ -52,17 +53,22 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         }
 
         cap.browserName = 'chrome';
-
-        const browserVersion = chromiumVersion || cap.browserVersion;
-        if (browserVersion) {
-          cap.browserVersion = browserVersion;
-        }
-
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
+        }
+
+        const browserVersion = chromiumVersion || cap.browserVersion;
+        if (browserVersion) {
+          cap.browserVersion = browserVersion;
+        } else if (!cap['wdio:chromedriverOptions']?.binary) {
+          const invalidBrowserVersionOptsError = new Error(
+            'You must install Electron locally, or provide a custom Chromedriver path / browserVersion value for each Electron capability',
+          );
+          log.error(invalidBrowserVersionOptsError);
+          throw invalidBrowserVersionOptsError;
         }
 
         log.debug('setting capability', cap);
