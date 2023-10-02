@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2020",
+    "types": ["node", "@wdio/globals/types"],
+    "outDir": "dist"
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -4,6 +4,11 @@ export type WdioElectronWindowObj = {
   };
 };
 
+export declare interface ElectronServiceOptions {
+  appBinaryPath?: string;
+  customApiBrowserCommand?: string;
+}
+
 declare global {
   interface Window {
     wdioElectron?: WdioElectronWindowObj;

@@ -1,9 +1,14 @@
-import { browser as wdioBrowser } from '@wdio/globals';
-import ChromedriverLauncher from './launcher.js';
+import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
+import type { ElectronServiceOptions } from './types.js';
 
+/**
+ * set this environment variable so that the preload script can be loaded
+ */
+process.env.WDIO_ELECTRON = 'true';
+
+export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
-export const launcher = ChromedriverLauncher;
 export interface BrowserExtension {
   electron: {
     api: (...arg: unknown[]) => Promise<unknown>;
@@ -15,11 +20,25 @@ export interface BrowserExtension {
   };
 }
 
+type WdioElectronWindowObj = {
+  [Key: string]: {
+    invoke: (...args: unknown[]) => Promise<unknown>;
+  };
+};
+
 declare global {
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}
   }
+  interface Window {
+    wdioElectron?: WdioElectronWindowObj;
+  }
+  namespace WebDriver {
+    interface Capabilities {
+      'wdio:electronServiceOptions': ElectronServiceOptions;
+    }
+  }
 }
 
-export const browser: WebdriverIO.Browser = wdioBrowser;
+export * from './types.js';

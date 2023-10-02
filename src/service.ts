@@ -1,99 +1,22 @@
-import { Capabilities, Options, Services } from '@wdio/types';
-import { Browser } from 'webdriverio';
-import { log } from './utils.js';
+import type { Capabilities, Services } from '@wdio/types';
 
-type WdioElectronWindowObj = {
-  [Key: string]: {
-    invoke: (...args: unknown[]) => Promise<unknown>;
-  };
-};
-
-declare global {
-  interface Window {
-    wdioElectron?: WdioElectronWindowObj;
-  }
-}
-
-function getMacExecutableName(appName: string) {
-  // https://github.com/electron-userland/electron-builder/blob/master/packages/app-builder-lib/src/macPackager.ts#L390
-  if (appName.endsWith(' Helper')) {
-    return appName.replace(' Helper', '');
-  }
-
-  return appName;
-}
-
-function getBinaryPath(distPath: string, appName: string) {
-  const SupportedPlatform = {
-    darwin: 'darwin',
-    linux: 'linux',
-    win32: 'win32',
-  };
-  const { platform, arch } = process;
-
-  if (!Object.values(SupportedPlatform).includes(platform)) {
-    throw new Error(`Unsupported platform: ${platform}`);
-  }
-
-  const pathMap = {
-    darwin: `${arch === 'arm64' ? 'mac-arm64' : 'mac'}/${appName}.app/Contents/MacOS/${getMacExecutableName(appName)}`,
-    linux: `linux-unpacked/${appName}`,
-    win32: `win-unpacked/${appName}.exe`,
-  };
-
-  const electronPath = pathMap[platform as keyof typeof SupportedPlatform];
-
-  return `${distPath}/${electronPath}`;
-}
-
-async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
-  if (window.wdioElectron === undefined) {
-    throw new Error(`ContextBridge not available for invocation of "${bridgePropName}" API`);
-  }
-  if (window.wdioElectron[bridgePropName] === undefined) {
-    throw new Error(`"${bridgePropName}" API not found on ContextBridge`);
-  }
-  done(await window.wdioElectron[bridgePropName].invoke(...args));
-}
-
-type ElectronWorkerOptions = {
-  appPath?: string;
-  appName?: string;
-  binaryPath?: string;
-  customApiBrowserCommand?: string;
-  appArgs?: string[];
-};
-type ApiCommand = { name: string; bridgeProp: string };
-type WebDriverClient = Browser;
-type WebdriverClientFunc = (this: WebDriverClient, ...args: unknown[]) => Promise<unknown>;
-type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
+import log from './log.js';
+import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  constructor(options: Services.ServiceOption) {
-    const apiCommands = [
-      { name: '', bridgeProp: 'custom' },
-      { name: 'app', bridgeProp: 'app' },
-      { name: 'browserWindow', bridgeProp: 'browserWindow' },
-      { name: 'dialog', bridgeProp: 'dialog' },
-      { name: 'mainProcess', bridgeProp: 'mainProcess' },
-      { name: 'mock', bridgeProp: 'mock' },
-    ];
-    const {
-      appPath,
-      appName,
-      appArgs = [],
-      binaryPath,
-      customApiBrowserCommand = 'api',
-    } = options as ElectronWorkerOptions;
-    const validPathOpts = binaryPath !== undefined || (appPath !== undefined && appName !== undefined);
+  #browser?: WebdriverIO.Browser;
+  #apiCommands = [
+    { name: '', bridgeProp: 'custom' },
+    { name: 'app', bridgeProp: 'app' },
+    { name: 'browserWindow', bridgeProp: 'browserWindow' },
+    { name: 'dialog', bridgeProp: 'dialog' },
+    { name: 'mainProcess', bridgeProp: 'mainProcess' },
+    { name: 'mock', bridgeProp: 'mock' },
+  ];
 
-    if (!validPathOpts) {
-      const invalidPathOptsError = new Error('You must provide appPath and appName values, or a binaryPath value');
-      log.error(invalidPathOptsError);
-      throw invalidPathOptsError;
-    }
-
-    const customCommandCollision = apiCommands.find(
+  constructor(globalOptions: ElectronServiceOptions) {
+    const { customApiBrowserCommand = 'api' } = globalOptions as ElectronServiceOptions;
+    const customCommandCollision = this.#apiCommands.find(
       (command) => command.name === customApiBrowserCommand,
     ) as ApiCommand;
     if (customCommandCollision) {
@@ -103,59 +26,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       log.error(customCommandCollisionError);
       throw customCommandCollisionError;
     } else {
-      apiCommands[0].name = customApiBrowserCommand;
+      this.#apiCommands[0].name = customApiBrowserCommand;
     }
-
-    this.options = {
-      appPath,
-      appName,
-      appArgs,
-      binaryPath,
-    };
-    this.apiCommands = apiCommands;
-  }
-
-  public options;
-
-  public apiCommands;
-
-  public _browser?: WebdriverIO.Browser;
-
-  beforeSession(_config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities): void {
-    const { appPath, appName, appArgs, binaryPath } = this.options;
-    const chromeOptions = {
-      binary: binaryPath || getBinaryPath(appPath as string, appName as string),
-      args: appArgs,
-      windowTypes: ['app', 'webview'],
-    };
-
-    const isMultiremote =
-      typeof capabilities === 'object' &&
-      !Array.isArray(capabilities) &&
-      Object.keys(capabilities).length > 0 &&
-      Object.values(capabilities).every((cap) => typeof cap === 'object');
-    const isElectron = (cap: Capabilities.Capabilities) => cap?.browserName?.toLowerCase() === 'electron';
-
-    if (isMultiremote) {
-      log.debug('setting up multiremote');
-      Object.values(capabilities).forEach((cap: { capabilities: Capabilities.Capabilities }) => {
-        if (isElectron(cap.capabilities)) {
-          cap.capabilities.browserName = 'chrome';
-          cap.capabilities['goog:chromeOptions'] = chromeOptions;
-        }
-      });
-    } else {
-      capabilities.browserName = 'chrome';
-      capabilities['goog:chromeOptions'] = chromeOptions;
-    }
-
-    log.debug('setting browser capabilities', capabilities);
   }
 
   before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
     const api: ElectronServiceApi = {};
-    this._browser = browser;
-    this.apiCommands.forEach(({ name, bridgeProp }) => {
+    this.#browser = browser;
+    this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
       api[name] = {
         value: async (...args: unknown[]) => {
@@ -168,8 +46,16 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       };
     });
 
-    //eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    this._browser.electron = Object.create({}, api);
+    this.#browser.electron = Object.create({}, api);
   }
+}
+
+async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
+  if (window.wdioElectron === undefined) {
+    throw new Error(`ContextBridge not available for invocation of "${bridgePropName}" API`);
+  }
+  if (window.wdioElectron[bridgePropName] === undefined) {
+    throw new Error(`"${bridgePropName}" API not found on ContextBridge`);
+  }
+  return done(await window.wdioElectron[bridgePropName].invoke(...args));
 }

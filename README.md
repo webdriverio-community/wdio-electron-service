@@ -2,14 +2,14 @@
 
 **WebdriverIO service for testing Electron applications**
 
-Enables cross-platform E2E testing of electron apps via the extensive WebdriverIO ecosystem. Adds electron-specific browser capabilities and handles chromedriver execution.
+Enables cross-platform E2E testing of Electron apps via the extensive WebdriverIO ecosystem. Adds Electron-specific browser capabilities and handles chromedriver execution.
 
-Spiritual successor to [Spectron](https://github.com/electron-userland/spectron) (RIP).
+Spiritual successor to [Spectron](https://github.com/electron-userland/spectron) ([RIP](https://github.com/electron-userland/spectron/issues/1045)).
 
 ## Installation
 
 ```bash
-npm i -D wdio-electron-service
+npm install --dev wdio-electron-service
 ```
 
 Or use your package manager of choice - pnpm, yarn, etc.
@@ -18,23 +18,15 @@ You will need to install `WebdriverIO`, instructions can be found [here.](https:
 
 ### Chromedriver
 
-`wdio-electron-service` needs chromedriver to work. The chromedriver version needs to be appropriate for the version of electron that your app was built with, as of v4 you can specify the electron version that you are using and the service will download and use the appropriate version of chromedriver for your app.
+`wdio-electron-service` needs Chromedriver to work. The Chromedriver version needs to be appropriate for the version of Electron that your app was built with, you can either manage this yourself or let the service handle it.
 
-#### Custom Configuration
+#### User Managed
 
-If you prefer to manage chromedriver yourself you can install it directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to tell the service where your chromedriver binary is. You can do this by specifying the `chromedriverCustomPath` property.
+If you prefer to manage Chromedriver yourself you can install it directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to tell WebdriverIO where your Chromedriver binary is through its custom [`wdio:chromedriverOptions`](https://webdriver.io/docs/capabilities#webdriverio-capabilities-to-manage-browser-driver-options) capability.
 
-```bash
-npm i -D chromedriver@100  # for Electron 18 apps
-```
+#### Service Managed
 
-```js
-        chromedriver: {
-          port: 9519,
-          logFileName: 'wdio-chromedriver.log',
-          chromedriverCustomPath: require.resolve('chromedriver/bin/chromedriver') // resolves to chromedriver binary
-        },
-```
+If you are not specifying a Chromedriver binary then the service will download and use the appropriate version for your app's Electron version. The Electron version of your app is determined by the version of Electron in your `package.json`, however you may want to override this behaviour - for instance, if the app you are testing is in a different repo from the tests. You can specify the Electron version manually by setting the `browserVersion` capability, as shown in the example configuration below.
 
 ## Example Configuration
 
@@ -42,41 +34,40 @@ To use the service you need to add `electron` to your services array, followed b
 
 ```js
 // wdio.conf.js
-import { join } from 'path';
-import fs from 'fs';
-import { getDirname } from 'cross-dirname';
+import url from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { getBinaryPath } from 'wdio-electron-service/utils';
 
-const dirname = getDirname();
-const packageJson = JSON.parse(fs.readFileSync('./package.json'));
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+const packageJson = JSON.parse(await fs.readFile('./package.json'));
 const {
   build: { productName },
 } = packageJson;
 
 export const config = {
-  outputDir: 'all-logs',
+  outputDir: 'logs',
   // ...
-  services: [
-    [
-      'electron',
-      {
-        appPath: join(dirname, 'dist'),
-        appName: productName,
+  services: ['electron'],
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'browserVersion': '26.2.2', // optional override
+      'wdio:electronServiceOptions': {
+        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
         appArgs: ['foo', 'bar=baz'],
-        chromedriver: {
-          port: 9519,
-          logFileName: 'wdio-chromedriver.log',
-        },
-        electronVersion: '23.1.0',
       },
-    ],
+    },
   ],
   // ...
 };
 ```
 
+**Note:** this code example illustrates a config that runs within an ESM environment and uses `electron-builder`.
+
 ### API Configuration
 
-If you wish to use the electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload:
+If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload:
 
 ```ts
 if (isTest) {
@@ -109,7 +100,7 @@ const appName = await browser.electron.app('getName');
 
 ### Mocking Electron APIs
 
-You can mock electron API functionality by calling the mock function with the API name, function name and mock return value. e.g. in a spec file:
+You can mock Electron API functionality by calling the mock function with the API name, function name and mock return value. e.g. in a spec file:
 
 ```ts
 await browser.electron.mock('dialog', 'showOpenDialog', 'dialog opened!');
@@ -139,93 +130,75 @@ const someValue = await browser.electron.myCustomAPI('wow'); // configured using
 
 ### Example
 
-See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example of "real-world" usage in testing a minimal electron app.
+See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example of "real-world" usage in testing a minimal Electron app.
 
 ## Configuration
 
-### `appPath`: _`string`_
+Configurations required to connect WebdriverIO with your Electron application can be applied by setting `wdio:electronServiceOptions` either on the service level or capability level, in which capability level configurations take precedence, e.g. the following WebdriverIO configuration:
 
-The path to the built app for testing. In a typical electron project this will be where `electron-builder` is configured to output, e.g. `dist` by default. Required to be used with `appName` as both are needed in order to generate a path to the electron binary.
+```ts
+export const config = {
+  // ...
+  services: [
+    [
+      'electron',
+      {
+        appBinaryPath: '/foo/bar/myApp'
+      },
+    ],
+  ],
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'wdio:electronServiceOptions': {
+        appBinaryPath: '/foo/bar/myOtherApp'
+        appArgs: ['foo', 'bar'],
+      },
+    },
+  ],
+  // ...
+};
+```
 
-### `appName`: _`string`_
+This results in the following configuration object used for given capability:
 
-The name of the built app for testing. Required to be used with `appPath` as both are needed in order to generate a path to the Electron binary.
+```js
+{
+  appBinaryPath: '/foo/bar/myOtherApp',
+  appArgs: ['foo', 'bar']
+}
+```
 
-It needs to match the name of the install directory used by `electron-builder`; this value is derived from your `electron-builder` configuration and will be either the `name` property (from `package.json`) or the `productName` property (from `electron-builder` config). You can find more information regarding this in the `electron-builder` [documentation](https://www.electron.build/configuration/configuration#configuration).
+This service supports the following configuration options:
 
-### `binaryPath`: _`string`_
+### `appBinaryPath`:
 
-The path to the electron binary of the app for testing. The path generated by using `appPath` and `appName` is tied to `electron-builder` output, if you are implementing something custom then you can use this.
+The path to the Electron binary of the app for testing. If you were using the `appPath` / `appName` approach from previous versions of the service for an app utilising `electron-builder`, you should use the [`getBinaryPath`](./src/utils.ts) util to generate the appropriate `appBinaryPath` value, as shown in the [example configuration](#example-configuration) above.
 
-### `electronVersion`: _`string`_
+Type: `string`
 
-The version of electron that the app to be tested was built with. The service uses this value to download the appropriate version of chromedriver. It is not required if you are specifying a [`chromedriverCustomPath`](#chromedriverchromedrivercustompath-string).
-
-### `appArgs`: _`string[]`_
+### `appArgs`:
 
 An array of string arguments to be passed through to the app on execution of the test run. Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches) and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be used here.
 
-### `customApiBrowserCommand`: _`string`_
+Type: `string[]`
 
-#### default `api`
+### `customApiBrowserCommand`
 
 The browser command used to access the custom electron API.
 
+Type: `string`  
+Default: `'api'`
+
 ## Chromedriver configuration
 
-This service wraps the [`wdio-chromedriver-service`](https://github.com/webdriverio-community/wdio-chromedriver-service), you can configure the following options which will be passed through to that service:
-
-### `chromedriver.port`: _`number`_
-
-#### default `9515`
-
-The port on which chromedriver should run.
-
-### `chromedriver.path`: _`string`_
-
-#### default `/`
-
-The path on which chromedriver should run.
-
-### `chromedriver.protocol`: _`string`_
-
-#### default `http`
-
-The protocol chromedriver should use.
-
-### `chromedriver.hostname`: _`string`_
-
-#### default `localhost`
-
-The hostname chromedriver should use.
-
-### `chromedriver.pollTimeOut`: _`number`_
-
-#### default `10000`
-
-The startup timeout of ChromeDriver in ms, it checks if the port is open before starting ChromeDriver and then checks again if it is closed after starting.
-
-### `chromedriver.outputDir`: _`string`_
-
-#### default defined by [`config.outputDir`](https://webdriver.io/docs/options/#outputdir)
-
-The path where the output log of the chromedriver server should be stored. If not specified, the WDIO `outputDir` config property is used and chromedriver logs are written to the same directory as the WDIO logs.
-
-### `chromedriver.logFileName`: _`string`_
-
-#### default `wdio-chromedriver.log`
-
-The name of the output log file to be written in the `outputDir`.
-
-### `chromedriver.chromedriverCustomPath`: _`string`_
-
-The path of the chromedriver binary to be executed. If not specified, the service will install the appropriate version of Chromedriver for the specified [`electronVersion`](#electronversion-string).
+You can make updates to the Chromedriver configuration through the WebdriverIO custom [`wdio:chromedriverOptions`](https://webdriver.io/docs/capabilities#webdriverio-capabilities-to-manage-browser-driver-options) capability.
 
 ## Support
 
 If you are having issues running WDIO you should open a discussion in the [main WDIO forum](https://github.com/webdriverio/webdriverio/discussions) in the first instance.
 
-The electron service discussion forum is much less active than the WDIO one, but if the issue you are experiencing is specific to electron or using the service then you can open a discussion [here](https://github.com/webdriverio-community/wdio-electron-service/discussions).
+The Electron service discussion forum is much less active than the WDIO one, but if the issue you are experiencing is specific to Electron or using the service then you can open a discussion [here](https://github.com/webdriverio-community/wdio-electron-service/discussions).
 
 ## Common Issues
 

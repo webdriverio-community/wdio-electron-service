@@ -24,7 +24,6 @@
     "types": ["node", "@wdio/globals/types"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "./@types"]
   },
-  "include": ["**/*"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "transpileOnly": true,

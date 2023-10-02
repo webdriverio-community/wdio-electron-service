@@ -1,1 +1,1 @@
-require('../main');
+../main.ts

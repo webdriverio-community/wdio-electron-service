@@ -1,123 +1,82 @@
-import { join, extname } from 'path';
-import { promises as fs } from 'fs';
-import { Capabilities, Options } from '@wdio/types';
-import extractZip from 'extract-zip';
-import { downloadArtifact as downloadElectronAssets } from '@electron/get';
-import {
-  launcher as ChromedriverServiceLauncher,
-  ServiceOptions as ChromedriverServiceOptions,
-} from 'wdio-chromedriver-service';
-import { getDirname } from 'cross-dirname';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import findVersions from 'find-versions';
+import { SevereServiceError } from 'webdriverio';
+import { Services, Options, Capabilities } from '@wdio/types';
 
-import { log } from './utils.js';
+import log from './log.js';
+import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
+import { getChromiumVersion } from './versions.js';
+import type { ElectronServiceOptions } from './types.js';
 
-const dirname = getDirname();
+export default class ElectronLaunchService implements Services.ServiceInstance {
+  #globalOptions: ElectronServiceOptions;
+  #projectRoot: string;
 
-export type ElectronLauncherServiceOpts = {
-  chromedriver?: ChromedriverServiceOptions;
-  electronVersion?: string;
-};
-
-function downloadAssets(version: string) {
-  const conf = {
-    version,
-    artifactName: 'chromedriver',
-    force: process.env.force_no_cache === 'true',
-    cacheRoot: process.env.electron_config_cache,
-    platform: process.env.npm_config_platform,
-    arch: process.env.npm_config_arch,
-    // rejectUnauthorized: process.env.npm_config_strict_ssl === 'true',
-    // quiet: ['info', 'verbose', 'silly', 'http'].indexOf(process.env.npm_config_loglevel) === -1
-  };
-  log.debug('chromedriver download config: ', conf);
-  return downloadElectronAssets(conf);
-}
-
-async function attemptAssetsDownload(version = '') {
-  log.debug(`downloading Chromedriver for Electron v${version}...`);
-  try {
-    const targetFolder = join(dirname, '..', 'bin');
-    const zipPath = await downloadAssets(version);
-    log.debug('assets downloaded to ', zipPath);
-    await extractZip(zipPath, { dir: targetFolder });
-    log.debug('assets extracted');
-    const platform = process.env.npm_config_platform || process.platform;
-    if (platform !== 'win32') {
-      log.debug('setting file permissions...');
-      await fs.chmod(join(targetFolder, 'chromedriver'), 0o755);
-      log.debug('permissions set');
-    }
-  } catch (err) {
-    // check if there is a semver minor version for fallback
-    const parts = version.split('.');
-    const baseVersion = `${parts[0]}.${parts[1]}.0`;
-
-    if (baseVersion === version) {
-      log.error(`error downloading Chromedriver for Electron v${version}`);
-      log.error(err);
-      throw err;
-    }
-
-    log.warn(`error downloading Chromedriver for Electron v${version}`);
-    log.debug('falling back to minor version...');
-    await attemptAssetsDownload(baseVersion);
-  }
-}
-
-export default class ChromeDriverLauncher extends ChromedriverServiceLauncher {
-  private electronServiceLauncherOptions;
-  private shouldDownloadChromedriver;
-
-  constructor(
-    options: ElectronLauncherServiceOpts,
-    capabilities: Capabilities.Capabilities,
-    config: Options.Testrunner,
-  ) {
-    const isWin = process.platform === 'win32';
-    const chromedriverServiceOptions = options.chromedriver || {};
-
-    log.debug('launcher received options:', options);
-    process.env.WDIO_ELECTRON = 'true';
-
-    const validChromedriverPath =
-      chromedriverServiceOptions.chromedriverCustomPath !== undefined || options.electronVersion !== undefined;
-    if (!validChromedriverPath) {
-      const invalidChromedriverOptsError = new Error(
-        'You must specify the electronVersion, or provide a chromedriverCustomPath value',
-      );
-      log.error(invalidChromedriverOptsError);
-      throw invalidChromedriverOptsError;
-    }
-
-    const shouldDownloadChromedriver =
-      options.electronVersion && (!options.chromedriver || !options.chromedriver.chromedriverCustomPath);
-
-    if (isWin) {
-      const shouldRunInNode = extname(chromedriverServiceOptions.chromedriverCustomPath || '') === '.js';
-      if (shouldRunInNode) {
-        process.env.WDIO_ELECTRON_NODE_PATH = process.execPath;
-        process.env.WDIO_ELECTRON_CHROMEDRIVER_PATH = chromedriverServiceOptions.chromedriverCustomPath;
-        chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', 'chromedriver.bat');
-      }
-    }
-
-    if (!chromedriverServiceOptions.chromedriverCustomPath) {
-      const chromedriverExecutable = isWin ? 'chromedriver.exe' : 'chromedriver';
-      chromedriverServiceOptions.chromedriverCustomPath = join(dirname, '..', 'bin', chromedriverExecutable);
-    }
-
-    log.debug('setting chromedriver service options:', chromedriverServiceOptions);
-    super(chromedriverServiceOptions, capabilities, config);
-    this.electronServiceLauncherOptions = options;
-    this.shouldDownloadChromedriver = shouldDownloadChromedriver;
+  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
+    this.#globalOptions = globalOptions;
+    this.#projectRoot = config.rootDir || process.cwd();
   }
 
-  async onPrepare() {
-    if (this.shouldDownloadChromedriver) {
-      const { electronVersion } = this.electronServiceLauncherOptions;
-      await attemptAssetsDownload(electronVersion);
+  async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
+    const capsList = Array.isArray(capabilities)
+      ? capabilities
+      : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
+
+    const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
+    const pkgJSON = JSON.parse((await fs.readFile(path.join(this.#projectRoot, 'package.json'), 'utf-8')).toString());
+    const { dependencies, devDependencies } = pkgJSON;
+    const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
+    const localElectronVersion = pkgElectronVersion ? findVersions(pkgElectronVersion, { loose: true })[0] : undefined;
+
+    if (!caps.length) {
+      const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
+      log.error(noElectronCapabilityError);
+      throw noElectronCapabilityError;
     }
 
-    return super.onPrepare();
+    await Promise.all(
+      caps.map(async (cap) => {
+        const electronVersion = cap.browserVersion || localElectronVersion;
+        const chromiumVersion = await getChromiumVersion(electronVersion);
+        log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+
+        const { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions']);
+
+        const invalidPathOpts = appBinaryPath === undefined;
+        if (invalidPathOpts) {
+          const invalidPathOptsError = new Error(
+            'You must provide the appBinaryPath value for all Electron capabilities',
+          );
+          log.error(invalidPathOptsError);
+          throw invalidPathOptsError;
+        }
+
+        cap.browserName = 'chrome';
+        cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
+
+        const chromedriverOptions = getChromedriverOptions(cap);
+        if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
+          cap['wdio:chromedriverOptions'] = chromedriverOptions;
+        }
+
+        const browserVersion = chromiumVersion || cap.browserVersion;
+        if (browserVersion) {
+          cap.browserVersion = browserVersion;
+        } else if (!cap['wdio:chromedriverOptions']?.binary) {
+          const invalidBrowserVersionOptsError = new Error(
+            'You must install Electron locally, or provide a custom Chromedriver path / browserVersion value for each Electron capability',
+          );
+          log.error(invalidBrowserVersionOptsError);
+          throw invalidBrowserVersionOptsError;
+        }
+
+        log.debug('setting capability', cap);
+      }),
+    ).catch((err) => {
+      const msg = `Failed setting up Electron session: ${err.stack}`;
+      log.error(msg);
+      throw new SevereServiceError(msg);
+    });
   }
 }

@@ -1,51 +1,46 @@
-import { browser as wdioBrowser } from '@wdio/globals';
-import type { Capabilities, Options, Services } from '@wdio/types';
-import type { default as LauncherInstance, ElectronLauncherServiceOpts } from '../launcher.js';
-import type { default as ServiceInstance } from '../service.js';
+import type { Capabilities, Services, Options } from '@wdio/types';
 
 exports.default = class CJSElectronService {
-  private instance?: ServiceInstance;
+  private instance?: Promise<Services.ServiceInstance>;
 
-  constructor(options: Services.ServiceOption) {
-    (async () => {
-      const { default: ElectronService } = await import('../service.js');
-      this.instance = new ElectronService(options);
+  constructor(options: unknown, caps: never, config: Options.Testrunner) {
+    this.instance = (async () => {
+      const importPath = '../service.js';
+      const { default: ElectronService } = await import(importPath);
+      return new ElectronService(options, caps, config);
     })();
   }
 
-  async beforeSession(config: Omit<Options.Testrunner, 'capabilities'>, capabilities: Capabilities.Capabilities) {
+  async beforeSession(
+    config: Options.Testrunner,
+    capabilities: Capabilities.Capabilities,
+    specs: string[],
+    cid: string,
+  ) {
     const instance = await this.instance;
-    return instance?.beforeSession(config, capabilities);
+    return instance?.beforeSession?.(config, capabilities, specs, cid);
   }
 
   async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
     const instance = await this.instance;
-    return instance?.before(capabilities, specs, browser);
+    return instance?.before?.(capabilities, specs, browser);
   }
 };
 
-exports.launcher = class CJSElectronServiceLauncher {
-  private instance?: LauncherInstance;
+exports.launcher = class CJSElectronLauncher {
+  private instance?: Promise<Services.ServiceInstance>;
 
-  constructor(
-    options: ElectronLauncherServiceOpts,
-    capabilities: Capabilities.Capabilities,
-    config: Options.Testrunner,
-  ) {
-    (async () => {
-      const { default: ElectronServiceLauncher } = await import('../launcher.js');
-      this.instance = new ElectronServiceLauncher(options, capabilities, config);
+  constructor(options: unknown, caps: never, config: Options.Testrunner) {
+    this.instance = (async () => {
+      const importPath = '../service.js';
+      const { default: ElectronService } = await import(importPath);
+      return new ElectronService(options, caps, config);
     })();
   }
 
-  async onPrepare() {
+  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities) {
     const instance = await this.instance;
-    return instance?.onPrepare();
-  }
-
-  async onComplete() {
-    const instance = await this.instance;
-    return instance?.onComplete();
+    return instance?.onPrepare?.(config, capabilities);
   }
 };
 
@@ -65,5 +60,3 @@ declare global {
     interface MultiRemoteBrowser extends BrowserExtension {}
   }
 }
-
-exports.browser = wdioBrowser;
