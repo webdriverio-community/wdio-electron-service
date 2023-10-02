@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
-import findVersions from 'find-versions';
 
 import log from './log.js';
 
@@ -10,13 +9,6 @@ const electronChromiumVersionMap: { [k: string]: string } = {};
 type ElectronRelease = {
   chrome: string;
   version: string;
-};
-
-export const parseVersion = (version?: string) => {
-  if (!version) {
-    return undefined;
-  }
-  return findVersions(version)[0];
 };
 
 export const getChromiumVersion = async (electronVersion?: string) => {
