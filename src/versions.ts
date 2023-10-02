@@ -4,7 +4,7 @@ import { fullVersions } from 'electron-to-chromium';
 
 import log from './log.js';
 
-const electronChromiumVersionMap: { [k: string]: string } = {};
+const electronChromiumVersionMap: { [K: string]: string } = {};
 
 type ElectronRelease = {
   chrome: string;
