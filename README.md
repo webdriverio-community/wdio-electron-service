@@ -134,7 +134,7 @@ See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example 
 
 ## Configuration
 
-Configurations required to connect WebdriverIO with your Electron application can be applied either on the service level or capability level, through `wdio:electronServiceOptions` in which capability configurations take precedence, e.g. the following WebdriverIO configuration:
+Configurations required to connect WebdriverIO with your Electron application can be applied by setting `wdio:electronServiceOptions` either on the service level or capability level, in which capability level configurations take precedence, e.g. the following WebdriverIO configuration:
 
 ```ts
 export const config = {
@@ -173,7 +173,7 @@ This service supports the following configuration options:
 
 ### `appBinaryPath`:
 
-The path to the Electron binary of the app for testing. If you are using the `appPath` / `appName` approach from previous versions of the service, you can now use the [`getBinaryPath`](./src/utils.ts) util to generate the appropriate `appBinaryPath` value for an app utilising `electron-builder`, as shown in the [example configuration](#example-configuration) above.
+The path to the Electron binary of the app for testing. If you were using the `appPath` / `appName` approach from previous versions of the service for an app utilising `electron-builder`, you should use the [`getBinaryPath`](./src/utils.ts) util to generate the appropriate `appBinaryPath` value, as shown in the [example configuration](#example-configuration) above.
 
 Type: `string`
 
