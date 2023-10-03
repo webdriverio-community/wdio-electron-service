@@ -30,7 +30,31 @@ If you are not specifying a Chromedriver binary then the service will download a
 
 ## Example Configuration
 
-To use the service you need to add `electron` to your services array, followed by a configuration object:
+To use the service you need to add `electron` to your services array and set an Electron capability with the path to your application bundle, e.g.:
+
+```js
+// wdio.conf.js
+import url from 'node:url';
+import path from 'node:path';
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+export const config = {
+  outputDir: 'logs',
+  // ...
+  services: ['electron'],
+  capabilities: [
+    {
+      browserName: 'electron',
+      'wdio:electronServiceOptions': {
+        appBinaryPath: path.resolve(__dirname, 'dist', 'myElectronApplication.exe'),
+      },
+    },
+  ],
+  // ...
+};
+```
+
+If you are utilizing [`electron-builder`](https://www.electron.build/), your configuration might resemble the following:
 
 ```js
 // wdio.conf.js
@@ -40,10 +64,7 @@ import fs from 'node:fs/promises';
 import { getBinaryPath } from 'wdio-electron-service/utils';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-const packageJson = JSON.parse(await fs.readFile('./package.json'));
-const {
-  build: { productName },
-} = packageJson;
+const pkg = JSON.parse(await fs.readFile('./package.json'));
 
 export const config = {
   outputDir: 'logs',
@@ -51,10 +72,16 @@ export const config = {
   services: ['electron'],
   capabilities: [
     {
-      'browserName': 'electron',
-      'browserVersion': '26.2.2', // optional override
+      browserName: 'electron',
+      browserVersion: '26.2.2', // optional override
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(path.join(__dirname, '..', 'app'), productName),
+        // Use `getBinaryPath` to point to the right binary, e.g. given your `productName` is "myElectronApplication"
+        // it would set the binary depending on your OS to:
+        //
+        // Linux: ./dist/linux-unpacked/myElectronApplication
+        // MacOS: ./dist/mac-arm64/myElectronApplication.app/Contents/MacOS/myElectronApplication
+        // Windows: ./win-unpacked/myElectronApplication.exe
+        appBinaryPath: getBinaryPath(__dirname, pkg.build.productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
@@ -62,8 +89,6 @@ export const config = {
   // ...
 };
 ```
-
-**Note:** this code example illustrates a config that runs within an ESM environment and uses `electron-builder`.
 
 ### API Configuration
 
