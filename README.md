@@ -93,7 +93,7 @@ export const config = {
 ### API Configuration
 
 If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload.
-To import node_modules in your `preload.js`, you have to disable the sandboxing in your `BrowserWindow` config.
+To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable the sandboxing in your `BrowserWindow` config.
 
 It is not recommended to disable sandbox mode in production, to control this behaviour you can set the `NODE_ENV` environment variable.
 
