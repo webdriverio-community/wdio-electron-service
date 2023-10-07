@@ -92,11 +92,34 @@ export const config = {
 
 ### API Configuration
 
-If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload:
+If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. Somewhere near the top of your preload.
+To import node_modules in your `preload.js`, you have to disable the sandboxing in your `BrowserWindow` config.
+
+It is recommended to not disable sandbox mode in Production, so it can be set with an Environment Variable from your package.json.
+
+```json
+"wdio": "NODE_ENV=test wdio run wdio.conf.js "
+```
+
+Set the sandbox option depending on the NODE_ENV variable
 
 ```ts
-if (isTest) {
-  import('wdio-electron-service/preload');
+const isTest = process.env.NODE_ENV === 'test';
+
+new BrowserWindow({
+  webPreferences: {
+      sandbox: !isTest
+      preload: path.join(__dirname, 'preload.js'),
+  }
+  // ...
+});
+```
+
+Load `wdio/electron-service/preload` conditionally in your `preload.js`
+
+```ts
+if (process && process.env.NODE_ENV === 'test') {
+    import('wdio-electron-service/preload');
 }
 ```
 
@@ -226,6 +249,34 @@ If you are having issues running WDIO you should open a discussion in the [main 
 The Electron service discussion forum is much less active than the WDIO one, but if the issue you are experiencing is specific to Electron or using the service then you can open a discussion [here](https://github.com/webdriverio-community/wdio-electron-service/discussions).
 
 ## Common Issues
+
+### Error: ContextBridge not available for invocation of "app" API
+
+When using Electron-Forge or Electron-Packager with Asar, it is possible that the `wdio-electron-service` module is not included in your generated app.asar.
+You can solve this, by either running the packager with the `prune: false` option or the `--no-prune` flag, or by moving "wdio-electron-service" from `devDependencies` to `dependencies`.
+It is recommend to do the former, for instance by passing an Environment-Variable to the packager
+
+#### Electron Packager
+```bash
+$ npx electron-packager --no-prune
+```
+
+#### Electron Forge
+
+```json
+"package": "NODE_ENV=test electron-forge package"
+```
+
+```ts
+// forge.config.js
+module.exports = {
+    packagerConfig: {
+        asar: true,
+        prune: process.env.NODE_ENV === 'test',
+    },
+    // ...
+}
+```
 
 ### DevToolsActivePort file doesn't exist
 
