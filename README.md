@@ -115,7 +115,7 @@ new BrowserWindow({
 });
 ```
 
-Load `wdio/electron-service/preload` conditionally in your `preload.js`
+Load `wdio-electron-service/preload` conditionally in your `preload.js`
 
 ```ts
 if (process && process.env.NODE_ENV === 'test') {
