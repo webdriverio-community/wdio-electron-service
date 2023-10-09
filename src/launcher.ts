@@ -1,5 +1,5 @@
 import findVersions from 'find-versions';
-import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up'
+import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up';
 import { SevereServiceError } from 'webdriverio';
 import { Services, Options, Capabilities } from '@wdio/types';
 
@@ -23,10 +23,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
 
     const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
-    const pkg = (
-      await readPackageUp({ cwd: this.#projectRoot }) ||
-      { packageJson: { dependencies: {}, devDependencies: {} } } as NormalizedReadResult
-    );
+    const pkg =
+      (await readPackageUp({ cwd: this.#projectRoot })) ||
+      ({ packageJson: { dependencies: {}, devDependencies: {} } } as NormalizedReadResult);
 
     const { dependencies, devDependencies } = pkg.packageJson;
     const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
