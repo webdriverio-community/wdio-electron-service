@@ -90,7 +90,7 @@ devDependencies:
     version: 29.7.0
   expect-webdriverio:
     specifier: ^4.4.0
-    version: 4.4.0(typescript@5.2.2)
+    version: 4.4.1(typescript@5.2.2)
   globals:
     specifier: ^13.22.0
     version: 13.22.0
@@ -1244,7 +1244,7 @@ packages:
     resolution: {integrity: sha512-sEeKIY5RDrQdp290/AjwM7xH1jxuzK6cydfvdZ428V1ud19i1liaSCBttbTs98FJQ3hSMiczidOyxEUAXtaluw==}
     engines: {node: ^16.13 || >=18}
     optionalDependencies:
-      expect-webdriverio: 4.4.0(typescript@5.2.2)
+      expect-webdriverio: 4.4.1(typescript@5.2.2)
       webdriverio: 8.16.18(typescript@5.2.2)
     transitivePeerDependencies:
       - bufferutil
@@ -2722,8 +2722,8 @@ packages:
       strip-final-newline: 3.0.0
     dev: true
 
-  /expect-webdriverio@4.4.0(typescript@5.2.2):
-    resolution: {integrity: sha512-7vC+b8zBUlW9sfErEYM006S5CEf6jS5tUN/aH+3+ae4uH8YqbLv3PjkzijrwDcJ24+hTZg0WTNIkEJOQbshbQA==}
+  /expect-webdriverio@4.4.1(typescript@5.2.2):
+    resolution: {integrity: sha512-RnFYy2ocC7x7GPX98GhaueoBZlcpqP0InCKvsjZFTSDNcdHR3jODTBko3Kftivm+tRkAduNvYmBL7NjhhKW4pw==}
     engines: {node: '>=16 || >=18 || >=20'}
     dependencies:
       expect: 29.7.0
