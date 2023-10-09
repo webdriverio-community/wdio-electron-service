@@ -44,7 +44,7 @@ export const config = {
   services: ['electron'],
   capabilities: [
     {
-      browserName: 'electron',
+      'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath: path.resolve(__dirname, 'dist', 'myElectronApplication.exe'),
       },
@@ -72,8 +72,8 @@ export const config = {
   services: ['electron'],
   capabilities: [
     {
-      browserName: 'electron',
-      browserVersion: '26.2.2', // optional override
+      'browserName': 'electron',
+      'browserVersion': '26.2.2', // optional override
       'wdio:electronServiceOptions': {
         // Use `getBinaryPath` to point to the right binary, e.g. given your `productName` is "myElectronApplication"
         // it would set the binary depending on your OS to:
@@ -115,18 +115,18 @@ new BrowserWindow({
 });
 ```
 
-Then somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally:
+Then somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally, e.g.:
 
 ```ts
-if (process?.env.NODE_ENV === 'test') {
-    import('wdio-electron-service/preload');
+if (process.env.NODE_ENV === 'test') {
+  import('wdio-electron-service/preload');
 }
 ```
 
-And somewhere near the top of your main index file (app entry point):
+And somewhere near the top of your main index file (app entry point), load `wdio-electron-service/main` conditionally, e.g.:
 
 ```ts
-if (isTest) {
+if (process.env.NODE_ENV === 'test') {
   import('wdio-electron-service/main');
 }
 ```
@@ -257,6 +257,7 @@ You can solve this, by either running the packager with the `prune: false` optio
 It is recommend to do the former, for instance by passing an environment variable to the packager:
 
 #### Electron Packager
+
 ```bash
 $ npx electron-packager --no-prune
 ```
@@ -270,12 +271,12 @@ $ npx electron-packager --no-prune
 ```ts
 // forge.config.js
 module.exports = {
-    packagerConfig: {
-        asar: true,
-        prune: process.env.NODE_ENV !== 'test',
-    },
-    // ...
-}
+  packagerConfig: {
+    asar: true,
+    prune: process.env.NODE_ENV !== 'test',
+  },
+  // ...
+};
 ```
 
 ### DevToolsActivePort file doesn't exist
