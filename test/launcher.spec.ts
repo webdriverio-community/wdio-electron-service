@@ -139,6 +139,32 @@ describe('onPrepare', () => {
     });
   });
 
+  it('should use the Electron version from the nearest package dependencies when browserVersion is not provided', async () => {
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dependencies', 'subpackage', 'subdir'),
+      } as Options.Testrunner,
+    );
+    const capabilities: Capabilities.Capabilities[] = [
+      {
+        browserName: 'electron',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.82',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-test-app/dist/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+    });
+  });
+
   it('should use the Electron version from the local package devDependencies when browserVersion is not provided', async () => {
     instance = new LaunchService(
       options,
@@ -157,6 +183,32 @@ describe('onPrepare', () => {
     expect(capabilities[0]).toEqual({
       'browserName': 'chrome',
       'browserVersion': '114.0.5735.45',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-test-app/dist/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+    });
+  });
+
+  it('should use the Electron version from the nearest package devDependencies when browserVersion is not provided', async () => {
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dev-dependencies', 'subpackage', 'subdir'),
+      } as Options.Testrunner,
+    );
+    const capabilities: Capabilities.Capabilities[] = [
+      {
+        browserName: 'electron',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.82',
       'goog:chromeOptions': {
         args: [],
         binary: 'workspace/my-test-app/dist/my-test-app',
