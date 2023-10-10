@@ -2,7 +2,7 @@ import type { Capabilities } from '@wdio/types';
 
 import type { ElectronServiceOptions } from './types';
 
-export function getChromeOptions(options: ElectronServiceOptions, cap: Capabilities.Capabilities) {
+export function getChromeOptions(options: ElectronServiceOptions, cap: WebdriverIO.Capabilities) {
   const existingOptions = cap['goog:chromeOptions'] || {};
   return {
     binary: options.appBinaryPath,
@@ -12,13 +12,12 @@ export function getChromeOptions(options: ElectronServiceOptions, cap: Capabilit
   };
 }
 
-export function getChromedriverOptions(cap: Capabilities.Capabilities) {
+export function getChromedriverOptions(cap: WebdriverIO.Capabilities) {
   const existingOptions = cap['wdio:chromedriverOptions'] || {};
   return existingOptions;
 }
 
-const isElectron = (cap: unknown) =>
-  (cap as Capabilities.DesiredCapabilities)?.browserName?.toLowerCase() === 'electron';
+const isElectron = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserName?.toLowerCase() === 'electron';
 
 /**
  * get capability independent of which type of capabilities is set
@@ -32,9 +31,9 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
    * }
    * ```
    */
-  const standardCaps = caps as Capabilities.Capabilities;
+  const standardCaps = caps as WebdriverIO.Capabilities;
   if (typeof standardCaps.browserName === 'string' && isElectron(standardCaps)) {
-    return [caps as Capabilities.Capabilities];
+    return [caps];
   }
   /**
    * W3C specific capabilities, e.g.:
@@ -71,7 +70,7 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
     .map(
       (options) =>
         (options.capabilities as Capabilities.W3CCapabilities)?.alwaysMatch ||
-        (options.capabilities as Capabilities.Capabilities),
+        (options.capabilities as WebdriverIO.Capabilities),
     )
     .filter((caps) => isElectron(caps));
 }

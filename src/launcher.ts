@@ -1,7 +1,7 @@
 import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up';
 import { SevereServiceError } from 'webdriverio';
-import { Services, Options, Capabilities } from '@wdio/types';
+import type { Services, Options, Capabilities } from '@wdio/types';
 
 import log from './log.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
@@ -22,7 +22,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       ? capabilities
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
 
-    const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebDriver.Capabilities[]);
+    const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebdriverIO.Capabilities);
     const pkg =
       (await readPackageUp({ cwd: this.#projectRoot })) ||
       ({ packageJson: { dependencies: {}, devDependencies: {} } } as NormalizedReadResult);

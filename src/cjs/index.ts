@@ -13,7 +13,7 @@ exports.default = class CJSElectronService {
 
   async beforeSession(
     config: Options.Testrunner,
-    capabilities: Capabilities.Capabilities,
+    capabilities: WebdriverIO.Capabilities,
     specs: string[],
     cid: string,
   ) {
@@ -21,7 +21,7 @@ exports.default = class CJSElectronService {
     return instance?.beforeSession?.(config, capabilities, specs, cid);
   }
 
-  async before(capabilities: Capabilities.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
+  async before(capabilities: WebdriverIO.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
     const instance = await this.instance;
     return instance?.before?.(capabilities, specs, browser);
   }
