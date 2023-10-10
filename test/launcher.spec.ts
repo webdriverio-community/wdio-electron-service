@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { Capabilities, Options } from '@wdio/types';
+import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
@@ -35,7 +35,7 @@ describe('onPrepare', () => {
   });
 
   it('should throw an error when there is no electron browser in capabilities', async () => {
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'chrome',
         browserVersion: '26.2.2',
@@ -55,7 +55,7 @@ describe('onPrepare', () => {
         services: [['electron', options]],
       } as Options.Testrunner,
     );
-    const capabilities: WebDriver.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         'browserName': 'electron',
         'browserVersion': '26.2.2',
@@ -70,7 +70,7 @@ describe('onPrepare', () => {
   });
 
   it('should override global options with capabilities', async () => {
-    const capabilities: WebDriver.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         'browserName': 'electron',
         'browserVersion': '26.2.2',
@@ -95,7 +95,7 @@ describe('onPrepare', () => {
   });
 
   it('should pass through browserVersion', async () => {
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
         browserVersion: 'some-version',
@@ -122,7 +122,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dependencies'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
       },
@@ -148,7 +148,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dependencies', 'subpackage', 'subdir'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
       },
@@ -174,7 +174,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dev-dependencies'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
       },
@@ -200,7 +200,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dev-dependencies', 'subpackage', 'subdir'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
       },
@@ -226,7 +226,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-electron'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
       },
@@ -237,7 +237,7 @@ describe('onPrepare', () => {
   });
 
   it('should set the expected capabilities', async () => {
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',
         browserVersion: '26.2.2',
@@ -264,7 +264,7 @@ describe('onPrepare', () => {
         rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-electron'),
       } as Options.Testrunner,
     );
-    const capabilities: Capabilities.Capabilities[] = [
+    const capabilities: WebdriverIO.Capabilities[] = [
       {
         'browserName': 'electron',
         'wdio:chromedriverOptions': {

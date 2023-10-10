@@ -30,7 +30,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  before(_capabilities: Capabilities.Capabilities, _specs: string[], browser: WebdriverIO.Browser): void {
+  before(_capabilities: Capabilities.RemoteCapability, _specs: string[], browser: WebdriverIO.Browser): void {
     const api: ElectronServiceApi = {};
     this.#browser = browser;
     this.#apiCommands.forEach(({ name, bridgeProp }) => {

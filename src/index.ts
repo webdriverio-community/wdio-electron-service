@@ -30,14 +30,12 @@ declare global {
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}
+    interface Capabilities {
+      'wdio:electronServiceOptions'?: ElectronServiceOptions;
+    }
   }
   interface Window {
     wdioElectron?: WdioElectronWindowObj;
-  }
-  namespace WebDriver {
-    interface Capabilities {
-      'wdio:electronServiceOptions': ElectronServiceOptions;
-    }
   }
 }
 
