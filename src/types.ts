@@ -1,3 +1,6 @@
+/**
+ * The options for the ElectronService.
+ */
 export interface ElectronServiceOptions {
   /**
    * The path to the electron binary of the app for testing.

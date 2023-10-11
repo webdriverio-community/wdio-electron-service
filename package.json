@@ -69,7 +69,7 @@
     "test:integration:cjs": "cd example-cjs && pnpm run ci",
     "test:integration:esm": "cd example && pnpm run ci",
     "update:all": "pnpm --filter=\\!fixture-\\* up -iL",
-    "watch": "pnpm run build:esm -- --watch"
+    "watch": "pnpm run build:esm --watch"
   },
   "keywords": [
     "webdriverio",
