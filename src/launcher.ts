@@ -100,7 +100,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
   }
 }
 
-async function detectBinaryPath (pkg: NormalizedReadResult) {
+/**
+ * detect the path to the Electron app binary
+ * @param pkg result of `readPackageUp`
+ * @param p   process object (used for testing purposes)
+ * @returns   path to the Electron app binary
+ */
+export async function detectBinaryPath (pkg: NormalizedReadResult, p = process) {
   const appName: string = pkg.packageJson.build?.productName || pkg.packageJson.name
   if (!appName) {
     return undefined
@@ -115,10 +121,10 @@ async function detectBinaryPath (pkg: NormalizedReadResult) {
      * Electron Forge always bundles into an `out` directory, until this PR is merged:
      * https://github.com/electron/forge/pull/2714
      */
-    const outDir = path.join(path.dirname(pkg.path), 'out', `${appName}-${process.platform}-${process.arch}`)
-    const appPath = process.platform === 'darwin'
+    const outDir = path.join(path.dirname(pkg.path), 'out', `${appName}-${p.platform}-${p.arch}`)
+    const appPath = p.platform === 'darwin'
       ? path.join(outDir, `${appName}.app`, 'Contents', 'MacOS', appName)
-      : process.platform === 'win32'
+      : p.platform === 'win32'
         ? path.join(outDir, `${appName}.exe`)
         : path.join(outDir, appName)
     const appExists = await fs.access(appPath).then(() => true, () => false)
@@ -136,7 +142,7 @@ async function detectBinaryPath (pkg: NormalizedReadResult) {
   )
   if (isElectronBuilderSetup) {
     const distDirName = pkg.packageJson.build?.directories?.output || 'dist'
-    const appPath = getBinaryPath(path.dirname(pkg.path), appName, distDirName)
+    const appPath = getBinaryPath(path.dirname(pkg.path), appName, distDirName, p)
     const appExists = await fs.access(appPath).then(() => true, () => false)
     if (!appExists) {
       throw new SevereServiceError(
