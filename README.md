@@ -6,6 +6,15 @@ Enables cross-platform E2E testing of Electron apps via the extensive WebdriverI
 
 Spiritual successor to [Spectron](https://github.com/electron-userland/spectron) ([RIP](https://github.com/electron-userland/spectron/issues/1045)).
 
+### Features
+
+Using this service makes testing Electron applications much easier as it takes care of the following:
+
+- 🚗 auto-setup of required Chromedriver
+- 📦 finds path to your bundled Electron application (if [Electron Forge](https://www.electronforge.io/) or [Electron Builder](https://www.electron.build/) is used)
+- 🧩 enables ability to access Electron APIs within your tests
+- 🕵️ allows to mock Electron APIs
+
 ## Installation
 
 ```bash
@@ -26,7 +35,7 @@ If you prefer to manage Chromedriver yourself you can install it directly or via
 
 #### Service Managed
 
-If you are not specifying a Chromedriver binary then the service will download and use the appropriate version for your app's Electron version. The Electron version of your app is determined by the version of Electron in your `package.json`, however you may want to override this behaviour - for instance, if the app you are testing is in a different repo from the tests. You can specify the Electron version manually by setting the `browserVersion` capability, as shown in the example configuration below.
+If you are not specifying a Chromedriver binary then the service will download and use the appropriate version for your app's Electron version. The Electron version of your app is determined by the version of `electron` or `electron-nighly` in your `package.json`, however you may want to override this behaviour - for instance, if the app you are testing is in a different repo from the tests. You can specify the Electron version manually by setting the `browserVersion` capability, as shown in the example configuration below.
 
 ## Example Configuration
 
@@ -42,58 +51,28 @@ export const config = {
   outputDir: 'logs',
   // ...
   services: ['electron'],
-  capabilities: [
-    {
-      'browserName': 'electron',
-      'wdio:electronServiceOptions': {
-        appBinaryPath: path.resolve(__dirname, 'dist', 'myElectronApplication.exe'),
-      },
-    },
-  ],
+  capabilities: [{
+      'browserName': 'electron'
+  }],
   // ...
 };
 ```
 
-If you are building your app using [`electron-builder`](https://www.electron.build/), your configuration might resemble the following:
+The service will attempt to find the path to your bundled Electron application if you use [Electron Forge](https://www.electronforge.io/) or [Electron Builder](https://www.electron.build/) as bundler. You can provide a custom path to the binary via custom service capabilities, e.g.:
 
-```js
-// wdio.conf.js
-import url from 'node:url';
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { getBinaryPath } from 'wdio-electron-service/utils';
-
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-const pkg = JSON.parse(await fs.readFile('./package.json'));
-
-export const config = {
-  outputDir: 'logs',
-  // ...
-  services: ['electron'],
-  capabilities: [
-    {
-      'browserName': 'electron',
-      'browserVersion': '26.2.2', // optional override
-      'wdio:electronServiceOptions': {
-        // Use `getBinaryPath` to point to the right binary, e.g. given your `productName` is "myElectronApplication"
-        // it would set the binary depending on your OS to:
-        //
-        // Linux: ./dist/linux-unpacked/myElectronApplication
-        // MacOS: ./dist/mac-arm64/myElectronApplication.app/Contents/MacOS/myElectronApplication
-        // Windows: ./win-unpacked/myElectronApplication.exe
-        appBinaryPath: getBinaryPath(__dirname, pkg.build.productName),
-        appArgs: ['foo', 'bar=baz'],
-      },
-    },
-  ],
-  // ...
-};
+```ts
+capabilities: [{
+  'browserName': 'electron',
+  'wdio:electronServiceOptions': {
+    appBinaryPath: './path/to/bundled/electron/app.exe',
+    appArgs: ['foo', 'bar=baz'],
+  },
+}],
 ```
 
 ### API Configuration
 
-If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app.  
-To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
+If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
 
 It is not recommended to disable sandbox mode in production; to control this behaviour you can set the `NODE_ENV` environment variable when executing WDIO:
 
