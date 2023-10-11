@@ -18,9 +18,7 @@ export const config = {
   capabilities: [
     {
       'browserName': 'electron',
-      'browserVersion': '28.0.0-nightly.20231009',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(__dirname, productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },

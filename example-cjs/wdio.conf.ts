@@ -15,9 +15,7 @@ exports.config = {
   capabilities: [
     {
       'browserName': 'electron',
-      'browserVersion': '27.0.0',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(__dirname, productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
