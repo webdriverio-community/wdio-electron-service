@@ -1,15 +1,8 @@
 /// <reference types="../@types/wdio-electron-service/utils.d.ts" />
-import fs from 'node:fs';
 import url from 'node:url';
 import path from 'node:path';
 
-import { getBinaryPath } from 'wdio-electron-service/utils';
-
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-const {
-  build: { productName },
-} = packageJson;
 
 process.env.TEST = 'true';
 

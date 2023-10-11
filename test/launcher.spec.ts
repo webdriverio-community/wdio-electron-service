@@ -12,9 +12,9 @@ let options: ElectronServiceOptions;
 
 vi.mock('node:fs/promises', () => ({
   default: {
-    access: vi.fn().mockResolvedValue(undefined)
-  }
-}))
+    access: vi.fn().mockResolvedValue(undefined),
+  },
+}));
 
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
@@ -463,111 +463,123 @@ describe('onPrepare', () => {
 });
 
 describe('detectBinaryPath', () => {
-  const pkgJSONPath = '/foo/bar/package.json'
+  const pkgJSONPath = '/foo/bar/package.json';
   const winProcess = {
     arch: 'x64',
-    platform: 'win32'
-  } as any as NodeJS.Process
+    platform: 'win32',
+  } as NodeJS.Process;
   const macProcess = {
     arch: 'arm64',
-    platform: 'darwin'
-  } as any as NodeJS.Process
+    platform: 'darwin',
+  } as NodeJS.Process;
   const linuxProcess = {
     arch: 'arm',
-    platform: 'linux'
-  } as any as NodeJS.Process
+    platform: 'linux',
+  } as NodeJS.Process;
 
   it('should return undefined if appName can not be determined', async () => {
     expect(await detectBinaryPath({ packageJson: {} } as never)).toBeUndefined();
-  })
+  });
 
-  it('should return app path for Electron Forge setup\'s', async () => {
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+  it("should return app path for Electron Forge setup's", async () => {
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              '@electron-forge/cli': '7.0.0-beta.54',
+            },
           },
-          devDependencies: {
-            '@electron-forge/cli': '7.0.0-beta.54'
-          }
-        }
-      } as never,
-      winProcess
-    )).toBe('/foo/bar/out/my-app-win32-x64/my-app.exe');
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+        } as never,
+        winProcess,
+      ),
+    ).toBe('/foo/bar/out/my-app-win32-x64/my-app.exe');
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              '@electron-forge/cli': '7.0.0-beta.54',
+            },
           },
-          devDependencies: {
-            '@electron-forge/cli': '7.0.0-beta.54'
-          }
-        }
-      } as never,
-      macProcess
-    )).toBe('/foo/bar/out/my-app-darwin-arm64/my-app.app/Contents/MacOS/my-app');
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+        } as never,
+        macProcess,
+      ),
+    ).toBe('/foo/bar/out/my-app-darwin-arm64/my-app.app/Contents/MacOS/my-app');
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              '@electron-forge/cli': '7.0.0-beta.54',
+            },
           },
-          devDependencies: {
-            '@electron-forge/cli': '7.0.0-beta.54'
-          }
-        }
-      } as never,
-      linuxProcess
-    )).toBe('/foo/bar/out/my-app-linux-arm/my-app');
-  })
+        } as never,
+        linuxProcess,
+      ),
+    ).toBe('/foo/bar/out/my-app-linux-arm/my-app');
+  });
 
-  it('should return app path for Electron Builder setup\'s', async () => {
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+  it("should return app path for Electron Builder setup's", async () => {
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              'electron-builder': '^24.6.4',
+            },
           },
-          devDependencies: {
-            'electron-builder': '^24.6.4'
-          }
-        }
-      } as never,
-      winProcess
-    )).toBe('/foo/bar/dist/win-unpacked/my-app.exe');
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+        } as never,
+        winProcess,
+      ),
+    ).toBe('/foo/bar/dist/win-unpacked/my-app.exe');
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              'electron-builder': '^24.6.4',
+            },
           },
-          devDependencies: {
-            'electron-builder': '^24.6.4'
-          }
-        }
-      } as never,
-      macProcess
-    )).toBe('/foo/bar/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
-    expect(await detectBinaryPath(
-      {
-        path: pkgJSONPath,
-        packageJson: {
-          build: {
-            productName: 'my-app'
+        } as never,
+        macProcess,
+      ),
+    ).toBe('/foo/bar/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
+    expect(
+      await detectBinaryPath(
+        {
+          path: pkgJSONPath,
+          packageJson: {
+            build: {
+              productName: 'my-app',
+            },
+            devDependencies: {
+              'electron-builder': '^24.6.4',
+            },
           },
-          devDependencies: {
-            'electron-builder': '^24.6.4'
-          }
-        }
-      } as never,
-      linuxProcess
-    )).toBe('/foo/bar/dist/linux-unpacked/my-app');  
-  })
-})
+        } as never,
+        linuxProcess,
+      ),
+    ).toBe('/foo/bar/dist/linux-unpacked/my-app');
+  });
+});

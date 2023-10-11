@@ -1,12 +1,4 @@
 import path from 'node:path';
-import fs from 'node:fs';
-
-import { getBinaryPath } from 'wdio-electron-service/utils';
-
-const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-const {
-  build: { productName },
-} = packageJson;
 
 process.env.TEST = 'true';
 
