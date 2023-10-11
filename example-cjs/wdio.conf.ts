@@ -1,12 +1,4 @@
 import path from 'node:path';
-import fs from 'node:fs';
-
-import { getBinaryPath } from 'wdio-electron-service/utils';
-
-const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-const {
-  build: { productName },
-} = packageJson;
 
 process.env.TEST = 'true';
 
@@ -15,9 +7,7 @@ exports.config = {
   capabilities: [
     {
       'browserName': 'electron',
-      'browserVersion': '27.0.0',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(__dirname, productName),
         appArgs: ['foo', 'bar=baz'],
       },
     },
