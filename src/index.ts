@@ -15,7 +15,7 @@ interface ElectronServiceAPI {
    * Call a custom handler within the Electron process.
    * @param args arbitrary arguments to pass to the handler
    * @returns a {@link Promise} that resolves once the handler was triggered
-   * 
+   *
    * @example
    * ```js
    * // in your Electron main process file
@@ -24,7 +24,7 @@ interface ElectronServiceAPI {
    *   // ...
    *   return 'some result';
    * });
-   * 
+   *
    * // in your test file
    * const result = await browser.electron.api()
    * console.log(result) // 'some result'
@@ -109,12 +109,12 @@ interface ElectronServiceAPI {
    * ```
    */
   mock: (apiName: string, funcName: string, mockReturnValue: unknown) => Promise<unknown> | unknown;
-};
+}
 
 export interface BrowserExtension {
   /**
    * Access the WebdriverIO Electron Service API.
-   * 
+   *
    * - {@link ElectronServiceAPI.api `browser.electron.api`} - Call a custom handler within the Electron process.
    * - {@link ElectronServiceAPI.app `browser.electron.app`} - Access the Electron {@link https://www.electronjs.org/docs/latest/api/app app} API and call function through the command.
    * - {@link ElectronServiceAPI.browserWindow `browser.electron.browserWindow`} - Access the Electron {@link https://www.electronjs.org/docs/latest/api/browser-window browserWindow} API and call function through the command.
@@ -122,7 +122,7 @@ export interface BrowserExtension {
    * - {@link ElectronServiceAPI.mainProcess `browser.electron.mainProcess`} - Access the Electron {@link https://www.electronjs.org/docs/latest/api/process process} API and call function through the command.
    * - {@link ElectronServiceAPI.mock `browser.electron.mock`} - Mock a function from the Electron API.
    */
-  electron: ElectronServiceAPI
+  electron: ElectronServiceAPI;
 }
 
 type WdioElectronWindowObj = {
