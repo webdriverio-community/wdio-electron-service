@@ -497,9 +497,7 @@ describe('detectBinaryPath', () => {
         } as never,
         winProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe'));
     expect(
       await detectBinaryPath(
         {
@@ -515,9 +513,7 @@ describe('detectBinaryPath', () => {
         } as never,
         macProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
     expect(
       await detectBinaryPath(
         {
@@ -533,9 +529,7 @@ describe('detectBinaryPath', () => {
         } as never,
         linuxProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app'));
   });
 
   it("should return app path for Electron Builder setup's", async () => {
@@ -554,9 +548,7 @@ describe('detectBinaryPath', () => {
         } as never,
         winProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe'));
     expect(
       await detectBinaryPath(
         {
@@ -572,9 +564,7 @@ describe('detectBinaryPath', () => {
         } as never,
         macProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
     expect(
       await detectBinaryPath(
         {
@@ -590,8 +580,6 @@ describe('detectBinaryPath', () => {
         } as never,
         linuxProcess,
       ),
-    ).toBe(
-      path.resolve('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app')
-    );
+    ).toBe(path.resolve('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app'));
   });
 });
