@@ -71,13 +71,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         const caps =
           (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
           (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
-        console.log('AH', caps);
-
         if (!caps[CUSTOM_CAPABILITY_NAME]) {
           continue;
         }
-        console.log('ATTACH TO in', instance);
-
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
       }
