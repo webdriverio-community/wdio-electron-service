@@ -12,7 +12,7 @@ export const config: Options.Testrunner = {
   services: ['electron'],
   capabilities: [
     {
-      browserName: 'electron',
+      'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appArgs: ['foo', 'bar=baz'],
       },
