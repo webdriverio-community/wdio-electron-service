@@ -37,9 +37,9 @@ If you prefer to manage Chromedriver yourself you can install it directly or via
 
 If you are not specifying a Chromedriver binary then the service will download and use the appropriate version for your app's Electron version. The Electron version of your app is determined by the version of `electron` or `electron-nighly` in your `package.json`, however you may want to override this behaviour - for instance, if the app you are testing is in a different repo from the tests. You can specify the Electron version manually by setting the `browserVersion` capability, as shown in the example configuration below.
 
-## Example Configuration
+## Configuration
 
-To use the service you need to add `electron` to your services array and set an Electron capability with the path to your application bundle, e.g.:
+To use the service you need to add `electron` to your services array and set an Electron capability, e.g.:
 
 ```js
 // wdio.conf.js
@@ -52,7 +52,7 @@ export const config = {
   // ...
   services: ['electron'],
   capabilities: [{
-      'browserName': 'electron'
+      browserName: 'electron'
   }],
   // ...
 };
@@ -62,7 +62,7 @@ The service will attempt to find the path to your bundled Electron application i
 
 ```ts
 capabilities: [{
-  'browserName': 'electron',
+  browserName: 'electron',
   'wdio:electronServiceOptions': {
     appBinaryPath: './path/to/bundled/electron/app.exe',
     appArgs: ['foo', 'bar=baz'],
@@ -70,7 +70,7 @@ capabilities: [{
 }],
 ```
 
-### API Configuration
+### APIs
 
 If you wish to use the Electron APIs then you will need to import (or require) the preload and main scripts in your app. To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
 
@@ -155,11 +155,11 @@ const someValue = await browser.electron.api('wow'); // default
 const someValue = await browser.electron.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
 ```
 
-### Example
+## Example
 
-See the [Example App](./example/app/) and [E2Es](./example/e2e/) for an example of "real-world" usage in testing a minimal Electron app.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate/actions/runs/6490587562/job/17626575914) project that showcases how to intergate WebdriverIO in an example application. You can also have a look at the [Example App](./example/app/) and [E2Es](./example/e2e/) in this repository.
 
-## Configuration
+## Service Options
 
 Configurations required to connect WebdriverIO with your Electron application can be applied by setting `wdio:electronServiceOptions` either on the service level or capability level, in which capability level configurations take precedence, e.g. the following WebdriverIO configuration:
 
