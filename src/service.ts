@@ -1,10 +1,11 @@
 import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  #browser?: WebdriverIO.Browser;
+  #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
   #apiCommands = [
     { name: '', bridgeProp: 'custom' },
     { name: 'app', bridgeProp: 'app' },
@@ -30,23 +31,53 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  before(_capabilities: Capabilities.RemoteCapability, _specs: string[], browser: WebdriverIO.Browser): void {
+  #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     const api: ElectronServiceApi = {};
-    this.#browser = browser;
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
       api[name] = {
         value: async (...args: unknown[]) => {
           try {
-            return await (browser.executeAsync as WebdriverClientFunc)(callApi, bridgeProp, args);
+            return await ((instance as WebdriverIO.Browser).executeAsync as WebdriverClientFunc)(
+              callApi,
+              bridgeProp,
+              args,
+            );
           } catch (e) {
             throw new Error(`${name} error: ${(e as Error).message}`);
           }
         },
       };
     });
+    return Object.create({}, api);
+  }
 
-    this.#browser.electron = Object.create({}, api);
+  before(
+    _capabilities: Capabilities.RemoteCapability,
+    _specs: string[],
+    instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
+  ): void {
+    const browser = instance as WebdriverIO.Browser;
+    const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
+    this.#browser = browser;
+
+    /**
+     * add electron API to browser object
+     */
+    mrBrowser.electron = this.#getElectronAPI(mrBrowser);
+    if (this.#browser.isMultiremote) {
+      for (const instance of mrBrowser.instances) {
+        const mrInstance = mrBrowser.getInstance(instance);
+        const caps =
+          (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
+          (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
+        if (!caps[CUSTOM_CAPABILITY_NAME]) {
+          continue;
+        }
+        log.debug('Adding Electron API to browser object instance named: ', instance);
+        mrInstance.electron = this.#getElectronAPI(mrInstance);
+      }
+    }
   }
 }
 

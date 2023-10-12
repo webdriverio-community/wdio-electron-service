@@ -1,12 +1,14 @@
-/// <reference types="../@types/wdio-electron-service/utils.d.ts" />
+/// <reference types="../dist/index.d.ts" />
+
 import url from 'node:url';
 import path from 'node:path';
+import type { Options } from '@wdio/types';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 process.env.TEST = 'true';
 
-export const config = {
+export const config: Options.Testrunner = {
   services: ['electron'],
   capabilities: [
     {
@@ -26,7 +28,6 @@ export const config = {
   autoCompileOpts: {
     autoCompile: true,
     tsNodeOpts: {
-      esm: true,
       transpileOnly: true,
       files: true,
       project: path.join(__dirname, 'tsconfig.json'),

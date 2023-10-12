@@ -11,12 +11,8 @@ import log from './log.js';
 import { getBinaryPath } from './utils.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
+import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from './types.js';
-
-const APP_NOT_FOUND_ERROR =
-  'Could not find Electron app at %s build with %s!\n' +
-  'If the application is not compiled, please do so before running your tests, via `%s`.\n' +
-  'Otherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
@@ -57,7 +53,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap['wdio:electronServiceOptions']);
+        let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
         if (!appBinaryPath) {
           appBinaryPath = await detectBinaryPath(pkg);
         }
@@ -89,6 +85,12 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           log.error(invalidBrowserVersionOptsError);
           throw invalidBrowserVersionOptsError;
         }
+
+        /**
+         * attach custom capability to be able to identify Electron instances
+         * in the worker process
+         */
+        cap[CUSTOM_CAPABILITY_NAME] = cap[CUSTOM_CAPABILITY_NAME] || {};
 
         log.debug('setting capability', cap);
       }),

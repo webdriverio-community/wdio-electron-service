@@ -116,6 +116,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -142,6 +143,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -168,6 +170,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -194,6 +197,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -220,6 +224,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -258,6 +263,7 @@ describe('onPrepare', () => {
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -289,6 +295,7 @@ describe('onPrepare', () => {
       'wdio:chromedriverOptions': {
         binary: '/path/to/chromedriver',
       },
+      'wdio:electronServiceOptions': {},
     });
   });
 
@@ -313,6 +320,7 @@ describe('onPrepare', () => {
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
+        'wdio:electronServiceOptions': {},
       },
     });
   });
@@ -361,6 +369,7 @@ describe('onPrepare', () => {
             binary: 'workspace/my-test-app/dist/my-test-app',
             windowTypes: ['app', 'webview'],
           },
+          'wdio:electronServiceOptions': {},
         },
       },
       chrome: {
@@ -379,6 +388,7 @@ describe('onPrepare', () => {
               binary: 'workspace/my-test-app/dist/my-test-app',
               windowTypes: ['app', 'webview'],
             },
+            'wdio:electronServiceOptions': {},
           },
         },
       },
@@ -434,6 +444,7 @@ describe('onPrepare', () => {
               binary: 'workspace/my-test-app/dist/my-test-app',
               windowTypes: ['app', 'webview'],
             },
+            'wdio:electronServiceOptions': {},
           },
         },
       },
@@ -454,6 +465,7 @@ describe('onPrepare', () => {
                 binary: 'workspace/my-test-app/dist/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
+              'wdio:electronServiceOptions': {},
             },
           },
         },

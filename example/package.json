@@ -11,7 +11,8 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./all-logs",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "test": "wdio run ./wdio.conf.ts"
+    "test": "wdio run ./wdio.conf.ts",
+    "test:multiremote": "wdio run ./wdio.multiremote.conf.ts"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
