@@ -52,6 +52,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      * add electron API to browser object
      */
     const electron = Object.create({}, api)
+    this.#browser.electron = electron;
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance)
@@ -62,8 +63,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = electron;
       }
-    } else {
-      this.#browser.electron = electron;
     }
   }
 }
