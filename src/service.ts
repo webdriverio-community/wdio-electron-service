@@ -4,7 +4,7 @@ import log from './log.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
-  #browser?: WebdriverIO.Browser;
+  #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
   #apiCommands = [
     { name: '', bridgeProp: 'custom' },
     { name: 'app', bridgeProp: 'app' },
@@ -30,7 +30,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  before(_capabilities: Capabilities.RemoteCapability, _specs: string[], browser: WebdriverIO.Browser): void {
+  before(_capabilities: Capabilities.RemoteCapability, _specs: string[], instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser): void {
+    const browser = instance as WebdriverIO.Browser
+    const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser
     const api: ElectronServiceApi = {};
     this.#browser = browser;
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
@@ -46,7 +48,23 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       };
     });
 
-    this.#browser.electron = Object.create({}, api);
+    /**
+     * add electron API to browser object
+     */
+    const electron = Object.create({}, api)
+    if (this.#browser.isMultiremote) {
+      for (const instance of mrBrowser.instances) {
+        const mrInstance = mrBrowser.getInstance(instance)
+        const caps = (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch || mrInstance.requestedCapabilities as WebdriverIO.Capabilities
+        if (!caps['wdio:electronServiceOptions']) {
+          continue
+        }
+        log.debug('Adding Electron API to browser object instance named: ', instance);
+        mrInstance.electron = electron;
+      }
+    } else {
+      this.#browser.electron = electron;
+    }
   }
 }
 
