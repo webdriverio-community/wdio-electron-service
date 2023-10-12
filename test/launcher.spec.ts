@@ -503,9 +503,7 @@ describe('detectBinaryPath', () => {
         {
           path: pkgJSONPath,
           packageJson: {
-            build: {
-              productName: 'my-app',
-            },
+            productName: 'my-app',
             devDependencies: {
               '@electron-forge/cli': '7.0.0-beta.54',
             },
@@ -554,9 +552,7 @@ describe('detectBinaryPath', () => {
         {
           path: pkgJSONPath,
           packageJson: {
-            build: {
-              productName: 'my-app',
-            },
+            productName: 'my-app',
             devDependencies: {
               'electron-builder': '^24.6.4',
             },

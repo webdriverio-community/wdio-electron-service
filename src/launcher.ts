@@ -107,7 +107,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
  * @returns   path to the Electron app binary
  */
 export async function detectBinaryPath(pkg: NormalizedReadResult, p = process) {
-  const appName: string = pkg.packageJson.build?.productName || pkg.packageJson.name;
+  const appName: string = pkg.packageJson.productName || pkg.packageJson.build?.productName || pkg.packageJson.name;
   if (!appName) {
     return undefined;
   }
