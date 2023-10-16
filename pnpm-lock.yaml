@@ -33,7 +33,7 @@ devDependencies:
     version: 8.51.0
   '@testing-library/webdriverio':
     specifier: ^3.2.1
-    version: 3.2.1(webdriverio@8.17.0)
+    version: 3.2.1(webdriverio@8.18.2)
   '@types/chromedriver':
     specifier: ^81.0.2
     version: 81.0.2
@@ -123,10 +123,10 @@ devDependencies:
     version: 5.2.2
   vitest:
     specifier: ^0.34.6
-    version: 0.34.6(jsdom@22.1.0)(webdriverio@8.17.0)
+    version: 0.34.6(jsdom@22.1.0)(webdriverio@8.18.2)
   webdriverio:
     specifier: ^8.17.0
-    version: 8.17.0(typescript@5.2.2)
+    version: 8.18.2(typescript@5.2.2)
 
 packages:
 
@@ -784,7 +784,7 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@testing-library/webdriverio@3.2.1(webdriverio@8.17.0):
+  /@testing-library/webdriverio@3.2.1(webdriverio@8.18.2):
     resolution: {integrity: sha512-mgMyCiwW+4zCidmlab9lwcO+UBz+PzlWnz9idDQ4ZS1SIHVSfJwvRLMWi+s3vNGFmc8duQxTiUHf1alW/Z48Og==}
     peerDependencies:
       webdriverio: '*'
@@ -792,7 +792,7 @@ packages:
       '@babel/runtime': 7.23.1
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 8.17.0(typescript@5.2.2)
+      webdriverio: 8.18.2(typescript@5.2.2)
     dev: true
 
   /@tootallnate/once@2.0.0:
@@ -1146,7 +1146,7 @@ packages:
       std-env: 3.4.3
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.3
-      vitest: 0.34.6(jsdom@22.1.0)(webdriverio@8.17.0)
+      vitest: 0.34.6(jsdom@22.1.0)(webdriverio@8.18.2)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1259,7 +1259,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-    optional: true
 
   /@wdio/globals@8.17.0(typescript@5.2.2):
     resolution: {integrity: sha512-SWI1faPNYgZnPwS2TZF+/Vpg2wxB8Yx0nHv/t3JvZ/QOZs/NpWJ9oXNjCDuktljNXaYhUOgYsx1e5DHHR6VTuQ==}
@@ -1308,7 +1307,6 @@ packages:
     resolution: {integrity: sha512-TABA0mksHvu5tE8qNYYDR0fDyo90NCANeghbGAtsI8TUsJzgH0dwpos3WSSiB97J9HRSZuWIMa7YuABEkBIjWQ==}
     requiresBuild: true
     dev: true
-    optional: true
 
   /@wdio/repl@8.10.1:
     resolution: {integrity: sha512-VZ1WFHTNKjR8Ga97TtV2SZM6fvRjWbYI2i/f4pJB4PtusorKvONAMJf2LQcUBIyzbVobqr7KSrcjmSwRolI+yw==}
@@ -1368,7 +1366,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-    optional: true
 
   /abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
@@ -2664,7 +2661,7 @@ packages:
       '@typescript-eslint/eslint-plugin': 6.8.0(@typescript-eslint/parser@6.8.0)(eslint@8.51.0)(typescript@5.2.2)
       '@typescript-eslint/utils': 6.7.5(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
-      vitest: 0.34.6(jsdom@22.1.0)(webdriverio@8.17.0)
+      vitest: 0.34.6(jsdom@22.1.0)(webdriverio@8.18.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -6396,7 +6393,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@0.34.6(jsdom@22.1.0)(webdriverio@8.17.0):
+  /vitest@0.34.6(jsdom@22.1.0)(webdriverio@8.18.2):
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -6451,7 +6448,7 @@ packages:
       tinypool: 0.7.0
       vite: 4.4.11(@types/node@20.8.6)
       vite-node: 0.34.6(@types/node@20.8.6)
-      webdriverio: 8.17.0(typescript@5.2.2)
+      webdriverio: 8.18.2(typescript@5.2.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -6534,7 +6531,6 @@ packages:
       - supports-color
       - utf-8-validate
     dev: true
-    optional: true
 
   /webdriverio@8.17.0(typescript@5.2.2):
     resolution: {integrity: sha512-nn4OzRAJOxWYRQDdQNM/XQ9QKYWfUjhirFwB3GeQ5vEcqzvJmU0U0DMwlMjDYi6O6RMvkJY384+GA/0Dfiq3vg==}
@@ -6618,7 +6614,6 @@ packages:
       - typescript
       - utf-8-validate
     dev: true
-    optional: true
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
