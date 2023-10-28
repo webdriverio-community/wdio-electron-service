@@ -38,21 +38,5 @@
   },
   "peerDependencies": {
     "typescript": "5.2.2"
-  },
-  "build": {
-    "asar": true,
-    "appId": "com.wdio-electron-service-example-cjs.demo",
-    "copyright": "goosewobbler",
-    "productName": "wdio-electron-service-example-cjs",
-    "files": [
-      "./dist/*"
-    ],
-    "linux": {
-      "executableName": "wdio-electron-service-example-cjs",
-      "category": "Utility",
-      "target": [
-        "AppImage"
-      ]
-    }
   }
 }
