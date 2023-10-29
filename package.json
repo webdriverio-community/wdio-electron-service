@@ -100,7 +100,7 @@
     "@wdio/logger": "^8.16.17",
     "compare-versions": "^6.1.0",
     "debug": "^4.3.4",
-    "electron-to-chromium": "^1.4.565",
+    "electron-to-chromium": "^1.4.569",
     "find-versions": "^5.1.0",
     "node-fetch": "^3.3.2",
     "read-pkg-up": "^10.1.0"
@@ -112,12 +112,12 @@
     "@types/debug": "^4.1.10",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/mocha": "^10.0.3",
-    "@types/node": "^20.8.7",
+    "@types/node": "^20.8.9",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "@vitest/coverage-v8": "^0.34.6",
-    "@wdio/cli": "^8.20.2",
-    "@wdio/globals": "^8.20.0",
+    "@wdio/cli": "^8.20.5",
+    "@wdio/globals": "^8.20.5",
     "@wdio/types": "^8.20.0",
     "cross-env": "^7.0.3",
     "electron": "^27.0.2",
@@ -138,7 +138,7 @@
     "shx": "^0.3.4",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6",
-    "webdriverio": "^8.20.0"
+    "webdriverio": "^8.20.4"
   },
   "files": [
     "bin/*",
