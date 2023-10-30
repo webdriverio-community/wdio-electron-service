@@ -75,6 +75,54 @@ describe('onPrepare', () => {
     );
   });
 
+  it('should throw an error when the appBinaryPath does not exist for a Forge dependency', async () => {
+    delete options.appBinaryPath;
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'forge-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'browserVersion': '26.2.2',
+        'wdio:electronServiceOptions': {
+          appArgs: ['some', 'args'],
+        },
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/forge-dependency-inline-config/out/forge-dependency-inline-config-darwin-arm64/forge-dependency-inline-config.app/Contents/MacOS/forge-dependency-inline-config built with Electron Forge!`,
+    );
+  });
+
+  it('should throw an error when the appBinaryPath does not exist for an electron-builder dependency', async () => {
+    delete options.appBinaryPath;
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'builder-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'browserVersion': '26.2.2',
+        'wdio:electronServiceOptions': {
+          appArgs: ['some', 'args'],
+        },
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/builder-dependency-inline-config/dist/mac-arm64/builder-dependency-inline-config.app/Contents/MacOS/builder-dependency-inline-config built with electron-builder!`,
+    );
+  });
+
   it('should override global options with capabilities', async () => {
     const capabilities: WebdriverIO.Capabilities[] = [
       {
