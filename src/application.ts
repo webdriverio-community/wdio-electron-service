@@ -3,9 +3,9 @@ import path from 'node:path';
 
 import type { NormalizedReadResult } from 'read-pkg-up';
 
-import log from './log';
-import { BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants';
-import type { BuildTool, ElectronBuilderConfig, ElectronForgeConfig } from './types';
+import log from './log.js';
+import { BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
+import type { BuildTool, ElectronBuilderConfig, ElectronForgeConfig } from './types.js';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -83,7 +83,7 @@ export async function getBuildToolConfig(pkg: NormalizedReadResult): Promise<Bui
   const isForge = Boolean(forgeConfig || forgeDependencyDetected);
 
   if (!isForge) {
-    // attempt to read `electron-builder.json`
+    // if no Forge config or dependency, attempt to read `electron-builder.json`
     try {
       log.debug('Forge not detected, reading `electron-builder.json`...');
       const data = await fs.readFile(path.join(rootDir, 'electron-builder.json'), 'utf-8');
