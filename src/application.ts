@@ -59,9 +59,8 @@ export async function getBuildToolConfig(pkg: NormalizedReadResult): Promise<Bui
   const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
 
   // Forge configuration is not currently used to determine the Electron app binary path
-  // - the presence of the package.json value below is used solely as an indicator of Forge usage
   // - when custom output directories are supported in Forge we can use this config value for path determination
-  // - https://github.com/electron/forge/pull/2714
+  // - see https://github.com/electron/forge/pull/2714
   const forgeConfig = pkg.packageJson.config?.forge as ElectronForgeConfig;
   let builderConfig: ElectronBuilderConfig;
 
