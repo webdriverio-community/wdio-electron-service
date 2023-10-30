@@ -3,6 +3,8 @@ import path from 'node:path';
 
 import type { NormalizedReadResult } from 'read-pkg-up';
 
+import log from './log';
+import { BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants';
 import type { BuildTool, ElectronBuilderConfig, ElectronForgeConfig } from './types';
 
 const SupportedPlatform = {
@@ -61,23 +63,50 @@ export async function getBuildToolConfig(pkg: NormalizedReadResult): Promise<Bui
   // Forge configuration is not currently used to determine the Electron app binary path
   // - when custom output directories are supported in Forge we can use this config value for path determination
   // - see https://github.com/electron/forge/pull/2714
-  const forgeConfig = pkg.packageJson.config?.forge as ElectronForgeConfig;
-  let builderConfig: ElectronBuilderConfig;
+  const forgePackageJsonConfig = pkg.packageJson.config?.forge;
+  const forgeCustomConfigFile = typeof forgePackageJsonConfig === 'string';
+  const forgeConfigPath = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
+  const rootDir = path.dirname(pkg.path);
+  let forgeConfig = forgePackageJsonConfig as ElectronForgeConfig;
+  let builderConfig: ElectronBuilderConfig = pkg.packageJson.build;
 
-  try {
-    // attempt to read `electron-builder.json`
-    const data = await fs.readFile(path.join(path.dirname(pkg.path), 'electron-builder.json'), 'utf-8');
-    builderConfig = JSON.parse(data);
-  } catch (err) {
-    // fall back to package.json
-    builderConfig = pkg.packageJson.build;
+  if (!forgePackageJsonConfig || forgeCustomConfigFile) {
+    // if no config or a linked file, attempt to read Forge JS-based config
+    try {
+      log.debug(`Reading Forge config file: ${forgeConfigPath}...`);
+      forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ElectronForgeConfig }).default;
+    } catch (e) {
+      log.debug(e);
+    }
   }
 
   const isForge = Boolean(forgeConfig || forgeDependencyDetected);
+
+  if (!isForge) {
+    // attempt to read `electron-builder.json`
+    try {
+      log.debug('Forge not detected, reading `electron-builder.json`...');
+      const data = await fs.readFile(path.join(rootDir, 'electron-builder.json'), 'utf-8');
+      builderConfig = JSON.parse(data);
+    } catch (e) {
+      log.debug(e);
+    }
+  }
+
   const isBuilder = Boolean(builderConfig || builderDependencyDetected);
 
+  if (isForge && isBuilder) {
+    throw new Error(MULTIPLE_BUILD_TOOLS_ERROR);
+  }
+  if (!isForge && !isBuilder) {
+    throw new Error(BUILD_TOOL_DETECTION_ERROR);
+  }
+
+  const config = isForge ? forgeConfig : builderConfig;
+  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected: ${config}`);
+
   return {
-    config: isForge ? forgeConfig : builderConfig,
+    config,
     isForge,
     isBuilder,
   };

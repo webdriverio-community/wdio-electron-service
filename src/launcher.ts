@@ -11,13 +11,7 @@ import log from './log.js';
 import { getBinaryPath, getBuildToolConfig } from './application.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import {
-  APP_NAME_DETECTION_ERROR,
-  APP_NOT_FOUND_ERROR,
-  BUILD_TOOL_DETECTION_ERROR,
-  CUSTOM_CAPABILITY_NAME,
-  MULTIPLE_BUILD_TOOLS_ERROR,
-} from './constants.js';
+import { APP_NAME_DETECTION_ERROR, APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronBuilderConfig, ElectronForgeConfig, ElectronServiceOptions } from './types.js';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
@@ -71,12 +65,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
             if (!appName) {
               throw new Error(APP_NAME_DETECTION_ERROR);
-            }
-            if (buildTool.isForge && buildTool.isBuilder) {
-              throw new Error(MULTIPLE_BUILD_TOOLS_ERROR);
-            }
-            if (!buildTool.isForge && !buildTool.isBuilder) {
-              throw new Error(BUILD_TOOL_DETECTION_ERROR);
             }
 
             appBinaryPath = await getBinaryPath(pkg.path, appName, buildTool);
