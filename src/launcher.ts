@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import util from 'node:util';
+import type { PathLike } from 'node:fs';
 
 import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up';
@@ -8,11 +8,17 @@ import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
 import log from './log.js';
-import { getBinaryPath } from './utils.js';
+import { getBinaryPath, getBuildToolConfig } from './application.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { ElectronServiceOptions } from './types.js';
+import {
+  APP_NAME_DETECTION_ERROR,
+  APP_NOT_FOUND_ERROR,
+  BUILD_TOOL_DETECTION_ERROR,
+  CUSTOM_CAPABILITY_NAME,
+  MULTIPLE_BUILD_TOOLS_ERROR,
+} from './constants.js';
+import type { ElectronBuilderConfig, ElectronForgeConfig, ElectronServiceOptions } from './types.js';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
@@ -51,20 +57,45 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
         const chromiumVersion = await getChromiumVersion(electronVersion);
-        log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.debug(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
         let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
         if (!appBinaryPath) {
-          appBinaryPath = await detectBinaryPath(pkg);
-        }
+          try {
+            const buildTool = await getBuildToolConfig(pkg);
+            const appName: string =
+              pkg.packageJson.productName ||
+              (buildTool.isBuilder && (buildTool?.config as ElectronBuilderConfig)?.productName) ||
+              (buildTool.isForge && (buildTool?.config as ElectronForgeConfig)?.packagerConfig?.name) ||
+              pkg.packageJson.name;
 
-        const invalidPathOpts = appBinaryPath === undefined;
-        if (invalidPathOpts) {
-          const invalidPathOptsError = new Error(
-            'You must provide the appBinaryPath value for all Electron capabilities',
-          );
-          log.error(invalidPathOptsError);
-          throw invalidPathOptsError;
+            if (!appName) {
+              throw new Error(APP_NAME_DETECTION_ERROR);
+            }
+            if (buildTool.isForge && buildTool.isBuilder) {
+              throw new Error(MULTIPLE_BUILD_TOOLS_ERROR);
+            }
+            if (!buildTool.isForge && !buildTool.isBuilder) {
+              throw new Error(BUILD_TOOL_DETECTION_ERROR);
+            }
+
+            appBinaryPath = await getBinaryPath(pkg.path, appName, buildTool);
+            const appExists = await fs.access(appBinaryPath as PathLike).then(
+              () => true,
+              () => false,
+            );
+
+            if (!appExists) {
+              const buildToolName = buildTool.isForge ? 'Electron Forge' : 'electron-builder';
+              const suggestedCompileCommand = `npx ${
+                buildTool.isForge ? 'electron-forge make' : 'electron-builder build'
+              }`;
+              throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
+            }
+          } catch (e) {
+            log.error(e);
+            throw new SevereServiceError((e as Error).message);
+          }
         }
 
         cap.browserName = 'chrome';
@@ -100,64 +131,4 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
-}
-
-/**
- * detect the path to the Electron app binary
- * @param pkg result of `readPackageUp`
- * @param p   process object (used for testing purposes)
- * @returns   path to the Electron app binary
- */
-export async function detectBinaryPath(pkg: NormalizedReadResult, p = process) {
-  const appName: string = pkg.packageJson.productName || pkg.packageJson.build?.productName || pkg.packageJson.name;
-  if (!appName) {
-    return undefined;
-  }
-
-  const isForgeSetup = Boolean(
-    pkg.packageJson.config?.forge || Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli'),
-  );
-  if (isForgeSetup) {
-    /**
-     * Electron Forge always bundles into an `out` directory, until this PR is merged:
-     * https://github.com/electron/forge/pull/2714
-     */
-    const outDir = path.join(path.dirname(pkg.path), 'out', `${appName}-${p.platform}-${p.arch}`);
-    const appPath =
-      p.platform === 'darwin'
-        ? path.join(outDir, `${appName}.app`, 'Contents', 'MacOS', appName)
-        : p.platform === 'win32'
-        ? path.join(outDir, `${appName}.exe`)
-        : path.join(outDir, appName);
-    const appExists = await fs.access(appPath).then(
-      () => true,
-      () => false,
-    );
-    if (!appExists) {
-      throw new SevereServiceError(
-        util.format(APP_NOT_FOUND_ERROR, appPath, 'Electron Forge', 'npx electron-forge make'),
-      );
-    }
-    return appPath;
-  }
-
-  const isElectronBuilderSetup = Boolean(
-    pkg.packageJson.build?.appId || Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder'),
-  );
-  if (isElectronBuilderSetup) {
-    const distDirName = pkg.packageJson.build?.directories?.output || 'dist';
-    const appPath = getBinaryPath(path.dirname(pkg.path), appName, distDirName, p);
-    const appExists = await fs.access(appPath).then(
-      () => true,
-      () => false,
-    );
-    if (!appExists) {
-      throw new SevereServiceError(
-        util.format(APP_NOT_FOUND_ERROR, appPath, 'Electron Builder', 'npx electron-builder build'),
-      );
-    }
-    return appPath;
-  }
-
-  return undefined;
 }
