@@ -95,7 +95,9 @@ describe('onPrepare', () => {
       },
     ];
     await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/forge-dependency-inline-config/out/forge-dependency-inline-config-darwin-arm64/forge-dependency-inline-config.app/Contents/MacOS/forge-dependency-inline-config built with Electron Forge!`,
+      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/forge-dependency-inline-config/out/forge-dependency-inline-config-darwin-arm64/forge-dependency-inline-config.app/Contents/MacOS/forge-dependency-inline-config built with Electron Forge!\n` +
+        'If the application is not compiled, please do so before running your tests, e.g. via `npx electron-forge make`.\n' +
+        'Otherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
     );
   });
 
@@ -119,7 +121,9 @@ describe('onPrepare', () => {
       },
     ];
     await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/builder-dependency-inline-config/dist/mac-arm64/builder-dependency-inline-config.app/Contents/MacOS/builder-dependency-inline-config built with electron-builder!`,
+      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/builder-dependency-inline-config/dist/mac-arm64/builder-dependency-inline-config.app/Contents/MacOS/builder-dependency-inline-config built with electron-builder!\n` +
+        'If the application is not compiled, please do so before running your tests, e.g. via `npx electron-builder build`.\n' +
+        'Otherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
     );
   });
 
