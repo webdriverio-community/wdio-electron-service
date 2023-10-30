@@ -8,11 +8,11 @@ import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
 import log from './log.js';
-import { getBinaryPath, getBuildToolConfig } from './application.js';
+import { getBinaryPath, getAppBuildInfo } from './application.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NAME_DETECTION_ERROR, APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { ElectronBuilderConfig, ElectronForgeConfig, ElectronServiceOptions } from './types.js';
+import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
+import type { ElectronServiceOptions } from './types.js';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
@@ -56,27 +56,18 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
         if (!appBinaryPath) {
           try {
-            const buildTool = await getBuildToolConfig(pkg);
-            const appName: string =
-              pkg.packageJson.productName ||
-              (buildTool.isBuilder && (buildTool?.config as ElectronBuilderConfig)?.productName) ||
-              (buildTool.isForge && (buildTool?.config as ElectronForgeConfig)?.packagerConfig?.name) ||
-              pkg.packageJson.name;
+            const appBuildInfo = await getAppBuildInfo(pkg);
+            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo);
 
-            if (!appName) {
-              throw new Error(APP_NAME_DETECTION_ERROR);
-            }
-
-            appBinaryPath = await getBinaryPath(pkg.path, appName, buildTool);
             const appExists = await fs.access(appBinaryPath as PathLike).then(
               () => true,
               () => false,
             );
 
             if (!appExists) {
-              const buildToolName = buildTool.isForge ? 'Electron Forge' : 'electron-builder';
+              const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
               const suggestedCompileCommand = `npx ${
-                buildTool.isForge ? 'electron-forge make' : 'electron-builder build'
+                appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
               }`;
               throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
             }

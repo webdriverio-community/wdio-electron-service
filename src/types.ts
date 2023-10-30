@@ -34,7 +34,8 @@ export type ElectronForgeConfig = {
   packagerConfig: { name: string };
 };
 
-export type BuildTool = {
+export type AppBuildInfo = {
+  appName: string;
   config: string | ElectronForgeConfig | ElectronBuilderConfig;
   isBuilder: boolean;
   isForge: boolean;

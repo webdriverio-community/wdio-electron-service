@@ -4,8 +4,8 @@ import path from 'node:path';
 import type { NormalizedReadResult } from 'read-pkg-up';
 
 import log from './log.js';
-import { BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
-import type { BuildTool, ElectronBuilderConfig, ElectronForgeConfig } from './types.js';
+import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
+import type { AppBuildInfo, ElectronBuilderConfig, ElectronForgeConfig } from './types.js';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -21,18 +21,18 @@ const SupportedPlatform = {
  * @param p   process object (used for testing purposes)
  * @returns   path to the Electron app binary
  */
-export async function getBinaryPath(packageJsonPath: string, appName: string, buildTool: BuildTool, p = process) {
+export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBuildInfo, p = process) {
   if (!Object.values(SupportedPlatform).includes(p.platform)) {
     throw new Error(`Unsupported platform: ${p.platform}`);
   }
 
   let outDir;
 
-  if (buildTool.isForge) {
+  if (appBuildInfo.isForge) {
     // Electron Forge always bundles into an `out` directory - see comment in getBuildToolConfig below
-    outDir = path.join(path.dirname(packageJsonPath), 'out', `${appName}-${p.platform}-${p.arch}`);
+    outDir = path.join(path.dirname(packageJsonPath), 'out', `${appBuildInfo.appName}-${p.platform}-${p.arch}`);
   } else {
-    const builderOutDirName = (buildTool.config as ElectronBuilderConfig)?.directories?.output || 'dist';
+    const builderOutDirName = (appBuildInfo.config as ElectronBuilderConfig)?.directories?.output || 'dist';
     const builderOutDirMap = {
       darwin: path.join(builderOutDirName, p.arch === 'arm64' ? 'mac-arm64' : 'mac'),
       linux: path.join(builderOutDirName, 'linux-unpacked'),
@@ -42,9 +42,9 @@ export async function getBinaryPath(packageJsonPath: string, appName: string, bu
   }
 
   const binaryPathMap = {
-    darwin: path.join(`${appName}.app`, 'Contents', 'MacOS', appName),
-    linux: appName,
-    win32: `${appName}.exe`,
+    darwin: path.join(`${appBuildInfo.appName}.app`, 'Contents', 'MacOS', appBuildInfo.appName),
+    linux: appBuildInfo.appName,
+    win32: `${appBuildInfo.appName}.exe`,
   };
   const electronBinaryPath = binaryPathMap[p.platform as keyof typeof SupportedPlatform];
 
@@ -52,11 +52,11 @@ export async function getBinaryPath(packageJsonPath: string, appName: string, bu
 }
 
 /**
- * Determine the configuration used to build the Electron application
+ * Determine build information about the Electron application
  * @param pkg path to the nearest package.json
- * @returns   promise resolving to the build tool configuration
+ * @returns   promise resolving to the app build information
  */
-export async function getBuildToolConfig(pkg: NormalizedReadResult): Promise<BuildTool> {
+export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBuildInfo> {
   const forgeDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli');
   const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
 
@@ -105,7 +105,18 @@ export async function getBuildToolConfig(pkg: NormalizedReadResult): Promise<Bui
   const config = isForge ? forgeConfig : builderConfig;
   log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected: ${config}`);
 
+  const appName: string =
+    pkg.packageJson.productName ||
+    (isBuilder && (config as ElectronBuilderConfig)?.productName) ||
+    (isForge && (config as ElectronForgeConfig)?.packagerConfig?.name) ||
+    pkg.packageJson.name;
+
+  if (!appName) {
+    throw new Error(APP_NAME_DETECTION_ERROR);
+  }
+
   return {
+    appName,
     config,
     isForge,
     isBuilder,
