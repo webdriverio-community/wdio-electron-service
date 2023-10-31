@@ -155,7 +155,7 @@ const someValue = await browser.electron.myCustomAPI('wow'); // configured using
 
 ## Example
 
-Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate/actions/runs/6490587562/job/17626575914) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example App](./example/app/) and [E2Es](./example/e2e/) in this repository.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example App](./example/app/) and [E2Es](./example/e2e/) in this repository.
 
 ## Service Options
 
