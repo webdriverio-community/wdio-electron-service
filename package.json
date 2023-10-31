@@ -40,8 +40,8 @@
     "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
-    "init-dev": "pnpm i -r --filter=\\!fixture-\\* && husky install",
-    "ci": "pnpm i --filter=\\!fixture-\\* && pnpm build && pnpm test && pnpm lint && pnpm format:check",
+    "init-dev": "pnpm i -r && husky install",
+    "ci": "pnpm i && pnpm build && pnpm test && pnpm lint && pnpm format:check",
     "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "pnpx rimraf ./dist",
     "clean:all": "pnpm clean && pnpm -r --reverse clean",
