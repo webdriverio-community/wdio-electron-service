@@ -52,7 +52,7 @@ describe('onPrepare', () => {
     );
   });
 
-  it('should throw an error when there is no appBinaryPath for a given electron capability', async () => {
+  it('should throw an error when appBinaryPath is not specified and no build tool is found', async () => {
     delete options.appBinaryPath;
     instance = new LaunchService(
       options,
@@ -75,7 +75,7 @@ describe('onPrepare', () => {
     );
   });
 
-  it('should throw an error when the appBinaryPath does not exist for a Forge dependency', async () => {
+  it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
     delete options.appBinaryPath;
     instance = new LaunchService(
       options,
@@ -95,13 +95,11 @@ describe('onPrepare', () => {
       },
     ];
     await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/forge-dependency-inline-config/out/forge-dependency-inline-config-darwin-arm64/forge-dependency-inline-config.app/Contents/MacOS/forge-dependency-inline-config built with Electron Forge!\n` +
-        'If the application is not compiled, please do so before running your tests, e.g. via `npx electron-forge make`.\n' +
-        'Otherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+      /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with Electron Forge!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-forge make`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
     );
   });
 
-  it('should throw an error when the appBinaryPath does not exist for an electron-builder dependency', async () => {
+  it('should throw an error when the detected app path does not exist for an electron-builder dependency', async () => {
     delete options.appBinaryPath;
     instance = new LaunchService(
       options,
@@ -121,9 +119,7 @@ describe('onPrepare', () => {
       },
     ];
     await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      `Failed setting up Electron session: SevereServiceError: Could not find Electron app at ${process.cwd()}/test/fixtures/builder-dependency-inline-config/dist/mac-arm64/builder-dependency-inline-config.app/Contents/MacOS/builder-dependency-inline-config built with electron-builder!\n` +
-        'If the application is not compiled, please do so before running your tests, e.g. via `npx electron-builder build`.\n' +
-        'Otherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+      /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with electron-builder!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-builder build`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
     );
   });
 
