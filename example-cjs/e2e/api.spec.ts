@@ -62,4 +62,22 @@ describe('electron APIs', () => {
       expect(result).toEqual('I opened a dialog!');
     });
   });
+
+  describe('execute', () => {
+    it('should allow to execute an arbitrary function in the main process', async () => {
+      expect(
+        await browser.electron.execute(
+          (electron, a, b, c) => {
+            const win = electron.BrowserWindow.getFocusedWindow();
+            return [typeof win, a + b + c];
+          },
+          1,
+          2,
+          3,
+        ),
+      ).toEqual(['object', 6]);
+
+      expect(await browser.electron.execute('return 1 + 2 + 3')).toBe(6);
+    });
+  });
 });

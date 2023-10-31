@@ -123,6 +123,28 @@ import { browser } from 'wdio-electron-service';
 const appName = await browser.electron.app('getName');
 ```
 
+### Execute Electron Scripts
+
+You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to potentially change the behavior of your application at runtime or trigger certain events.
+
+For example you can trigger an message modal from your test via:
+
+```ts
+await browser.electron.execute((electron, param1, param2, param3) => {
+  const appWindow = electron.BrowserWindow.getFocusedWindow();
+  electron.dialog.showMessageBox(appWindow, {
+    message: 'Hello World!',
+    detail: `${param1} + ${param2} + ${param3} = ${param1 + param2 + param3}`
+  });
+}, 1, 2, 3)
+```
+
+which will make the application trigger the following alert:
+
+![Execute Demo](./.github/assets/execute-demo.png "Execute Demo")
+
+__Note:__ The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
+
 ### Mocking Electron APIs
 
 You can mock Electron API functionality by calling the mock function with the API name, function name and mock return value. e.g. in a spec file:
@@ -212,7 +234,7 @@ Type: `string[]`
 
 The browser command used to access the custom electron API.
 
-Type: `string`  
+Type: `string`
 Default: `'api'`
 
 ## Chromedriver configuration

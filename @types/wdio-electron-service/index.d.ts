@@ -1,4 +1,5 @@
 export type WdioElectronWindowObj = {
+  execute: (script: string, args: unknown[]) => any;
   [Key: string]: {
     invoke: (...args: unknown[]) => Promise<unknown>;
   };

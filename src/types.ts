@@ -1,3 +1,5 @@
+import type { Channel } from './constants.js';
+
 /**
  * The options for the ElectronService.
  */
@@ -40,3 +42,5 @@ export type AppBuildInfo = {
   isBuilder: boolean;
   isForge: boolean;
 };
+
+export type ValidChannels = `${Channel}`;

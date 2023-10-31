@@ -1,6 +1,7 @@
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
 import type { ElectronServiceOptions } from './types.js';
+import type * as Electron from 'electron';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -109,6 +110,27 @@ interface ElectronServiceAPI {
    * ```
    */
   mock: (apiName: string, funcName: string, mockReturnValue: unknown) => Promise<unknown> | unknown;
+  /**
+   * Execute a function within the Electron main process.
+   *
+   * @example
+   * ```js
+   * await browser.electron.execute((electron, param1, param2, param3) => {
+   *   const appWindow = electron.BrowserWindow.getFocusedWindow();
+   *   electron.dialog.showMessageBox(appWindow, {
+   *     message: 'Hello World!',
+   *     detail: `${param1} + ${param2} + ${param3} = ${param1 + param2 + param3}`
+   *   });
+   * }, 1, 2, 3)
+   * ```
+   *
+   * @param script function to execute
+   * @param args function arguments
+   */
+  execute<ReturnValue, InnerArguments extends any[]>(
+    script: string | ((electron: typeof Electron, ...innerArgs: InnerArguments) => ReturnValue),
+    ...args: InnerArguments
+  ): Promise<ReturnValue>;
 }
 
 export interface BrowserExtension {
@@ -125,12 +147,6 @@ export interface BrowserExtension {
   electron: ElectronServiceAPI;
 }
 
-type WdioElectronWindowObj = {
-  [Key: string]: {
-    invoke: (...args: unknown[]) => Promise<unknown>;
-  };
-};
-
 declare global {
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
@@ -141,9 +157,6 @@ declare global {
        */
       'wdio:electronServiceOptions'?: ElectronServiceOptions;
     }
-  }
-  interface Window {
-    wdioElectron?: WdioElectronWindowObj;
   }
 }
 
