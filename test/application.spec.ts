@@ -192,8 +192,10 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when the app name is unable to be determined', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'no-app-name', 'package.json');
+    const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-inline-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    delete packageJson.name;
+    delete packageJson.config.forge.packagerConfig;
     await expect(() =>
       getAppBuildInfo({
         packageJson,
