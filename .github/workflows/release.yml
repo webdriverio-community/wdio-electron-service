@@ -34,7 +34,7 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8.10.0
-          run_install: true
+          run_install: false
       - name: NPM Setup
         run: |
           pnpm set registry "https://registry.npmjs.org/"
@@ -45,7 +45,7 @@ jobs:
           git config --global user.email "bot@webdriver.io"
           git config --global user.name "WebdriverIO Release Bot"
       - name: Install Dependencies
-        run: pnpm install --filter=\\!fixture-\\* --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
       - name: Release
