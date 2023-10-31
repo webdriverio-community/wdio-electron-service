@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       releaseType:
-        description: "Release Type"
+        description: 'Release Type'
         required: true
         type: choice
-        default: "patch"
+        default: 'patch'
         options:
           - patch
           - minor
@@ -33,7 +33,7 @@ jobs:
           node-version: 16.x
       - uses: pnpm/action-setup@v2
         with:
-          version: 8.8.0
+          version: 8.10.0
           run_install: true
       - name: NPM Setup
         run: |
@@ -45,7 +45,7 @@ jobs:
           git config --global user.email "bot@webdriver.io"
           git config --global user.name "WebdriverIO Release Bot"
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --filter=\\!fixture-\\* --frozen-lockfile
       - name: Build
         run: pnpm build
       - name: Release
