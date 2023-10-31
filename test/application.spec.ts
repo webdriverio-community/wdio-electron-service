@@ -12,7 +12,7 @@ describe('getBinaryPath', () => {
   const linuxProcess = { arch: 'arm', platform: 'linux' } as NodeJS.Process;
   const unsupportedPlatformProcess = { platform: 'aix', arch: 'mips' } as NodeJS.Process;
 
-  it('should throw an error when provided with an unsupported platform', async () => {
+  it('should throw an error when provided with an unsupported platform', async () =>
     expect(() =>
       getBinaryPath(
         pkgJSONPath,
@@ -24,10 +24,9 @@ describe('getBinaryPath', () => {
         },
         unsupportedPlatformProcess,
       ),
-    ).rejects.toThrow('Unsupported platform: aix');
-  });
+    ).rejects.toThrow('Unsupported platform: aix'));
 
-  it('should return the expected app path for an Electron Forge setup on Windows', async () => {
+  it('should return the expected app path for an Electron Forge setup on Windows', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -39,10 +38,9 @@ describe('getBinaryPath', () => {
         },
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe')));
 
-  it('should return the expected app path for an Electron Forge setup on Mac', async () => {
+  it('should return the expected app path for an Electron Forge setup on Mac', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -54,10 +52,9 @@ describe('getBinaryPath', () => {
         },
         macProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')));
 
-  it('should return the expected app path for an Electron Forge setup on Linux', async () => {
+  it('should return the expected app path for an Electron Forge setup on Linux', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -69,10 +66,9 @@ describe('getBinaryPath', () => {
         },
         linuxProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app')));
 
-  it('should return the expected app path for an electron-builder setup with custom output directory', async () => {
+  it('should return the expected app path for an electron-builder setup with custom output directory', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -84,10 +80,9 @@ describe('getBinaryPath', () => {
         },
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'custom-outdir', 'win-unpacked', 'my-app.exe'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'custom-outdir', 'win-unpacked', 'my-app.exe')));
 
-  it('should return the expected app path for an electron-builder setup on Windows', async () => {
+  it('should return the expected app path for an electron-builder setup on Windows', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -99,10 +94,9 @@ describe('getBinaryPath', () => {
         },
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe')));
 
-  it('should return the expected app path for an electron-builder setup on Mac', async () => {
+  it('should return the expected app path for an electron-builder setup on Mac', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -114,10 +108,9 @@ describe('getBinaryPath', () => {
         },
         macProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')));
 
-  it('should return the expected app path for an electron-builder setup on Linux', async () => {
+  it('should return the expected app path for an electron-builder setup on Linux', async () =>
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -129,15 +122,14 @@ describe('getBinaryPath', () => {
         },
         linuxProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app'));
-  });
+    ).toBe(path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app')));
 });
 
 describe('getBuildToolConfig', () => {
   it('should throw an error when no build tools are found', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'no-build-tool', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -150,7 +142,7 @@ describe('getBuildToolConfig', () => {
   it('should throw an error when configuration for multiple build tools are found', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -163,7 +155,7 @@ describe('getBuildToolConfig', () => {
   it('should throw an error when dependencies for multiple build tools are found', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-dependencies', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -176,7 +168,7 @@ describe('getBuildToolConfig', () => {
   it('should throw an error when configuration for electron-builder is found alongside an Electron Forge dependency', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-wrong-config-1', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -189,7 +181,7 @@ describe('getBuildToolConfig', () => {
   it('should throw an error when configuration for Electron Forge is found alongside an electron-builder dependency', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-wrong-config-2', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -202,7 +194,7 @@ describe('getBuildToolConfig', () => {
   it('should throw an error when the app name is unable to be determined', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'no-app-name', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(() =>
+    await expect(() =>
       getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -215,7 +207,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config for a Forge dependency with inline config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-inline-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -231,7 +223,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config for a Forge dependency with JS config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-js-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -247,7 +239,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config for a Forge dependency with linked JS config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-linked-js-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -263,7 +255,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config for an electron-builder dependency with inline config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'builder-dependency-inline-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -279,7 +271,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config for an electron-builder dependency with JSON config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'builder-dependency-json-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
@@ -295,7 +287,7 @@ describe('getBuildToolConfig', () => {
   it('should return the expected config when there is no app name in the build tool config', async () => {
     const packageJsonPath = path.join(__dirname, 'fixtures', 'no-app-name-in-build-tool-config', 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    expect(
+    await expect(
       await getAppBuildInfo({
         packageJson,
         path: packageJsonPath,
