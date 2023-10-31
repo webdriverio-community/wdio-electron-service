@@ -23,3 +23,20 @@ export interface ElectronServiceOptions {
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
 export type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
+
+export type ElectronBuilderConfig = {
+  productName?: string;
+  directories?: { output?: string };
+};
+
+export type ElectronForgeConfig = {
+  buildIdentifier: string;
+  packagerConfig: { name: string };
+};
+
+export type AppBuildInfo = {
+  appName: string;
+  config: string | ElectronForgeConfig | ElectronBuilderConfig;
+  isBuilder: boolean;
+  isForge: boolean;
+};

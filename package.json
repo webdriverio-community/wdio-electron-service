@@ -32,14 +32,6 @@
         "require": "./dist/cjs/preload.js"
       },
       "./dist/cjs/preload.js"
-    ],
-    "./utils": [
-      {
-        "import": "./dist/utils.js",
-        "types": "./dist/utils.d.ts",
-        "require": "./dist/cjs/utils.js"
-      },
-      "./dist/cjs/utils.js"
     ]
   },
   "typeScriptVersion": "5.2.2",

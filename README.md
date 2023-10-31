@@ -47,9 +47,11 @@ export const config = {
   outputDir: 'logs',
   // ...
   services: ['electron'],
-  capabilities: [{
-      browserName: 'electron'
-  }],
+  capabilities: [
+    {
+      browserName: 'electron',
+    },
+  ],
   // ...
 };
 ```
@@ -196,7 +198,7 @@ This service supports the following configuration options:
 
 ### `appBinaryPath`:
 
-The path to the Electron binary of the app for testing. If you were using the `appPath` / `appName` approach from previous versions of the service for an app utilising `electron-builder`, you should use the [`getBinaryPath`](./src/utils.ts) util to generate the appropriate `appBinaryPath` value, as shown in the [example configuration](#example-configuration) above.
+The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically, but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
 Type: `string`
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import util from 'node:util';
+import type { PathLike } from 'node:fs';
 
 import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up';
@@ -8,11 +8,19 @@ import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
 import log from './log.js';
-import { getBinaryPath } from './utils.js';
+import { getBinaryPath, getAppBuildInfo } from './application.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from './types.js';
+
+async function fileExists(path: PathLike) {
+  try {
+    return (await fs.stat(path)).isFile();
+  } catch (e) {
+    return false;
+  }
+}
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
@@ -51,20 +59,29 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
         const chromiumVersion = await getChromiumVersion(electronVersion);
-        log.debug(`found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.debug(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
         let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
         if (!appBinaryPath) {
-          appBinaryPath = await detectBinaryPath(pkg);
-        }
+          log.debug('No app binary found');
+          try {
+            const appBuildInfo = await getAppBuildInfo(pkg);
+            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo);
 
-        const invalidPathOpts = appBinaryPath === undefined;
-        if (invalidPathOpts) {
-          const invalidPathOptsError = new Error(
-            'You must provide the appBinaryPath value for all Electron capabilities',
-          );
-          log.error(invalidPathOptsError);
-          throw invalidPathOptsError;
+            log.debug(`Detected app binary at ${appBinaryPath}`);
+            const appExists = await fileExists(appBinaryPath as PathLike);
+
+            if (!appExists) {
+              const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
+              const suggestedCompileCommand = `npx ${
+                appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
+              }`;
+              throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
+            }
+          } catch (e) {
+            log.error(e);
+            throw new SevereServiceError((e as Error).message);
+          }
         }
 
         cap.browserName = 'chrome';
@@ -100,64 +117,4 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
-}
-
-/**
- * detect the path to the Electron app binary
- * @param pkg result of `readPackageUp`
- * @param p   process object (used for testing purposes)
- * @returns   path to the Electron app binary
- */
-export async function detectBinaryPath(pkg: NormalizedReadResult, p = process) {
-  const appName: string = pkg.packageJson.productName || pkg.packageJson.build?.productName || pkg.packageJson.name;
-  if (!appName) {
-    return undefined;
-  }
-
-  const isForgeSetup = Boolean(
-    pkg.packageJson.config?.forge || Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli'),
-  );
-  if (isForgeSetup) {
-    /**
-     * Electron Forge always bundles into an `out` directory, until this PR is merged:
-     * https://github.com/electron/forge/pull/2714
-     */
-    const outDir = path.join(path.dirname(pkg.path), 'out', `${appName}-${p.platform}-${p.arch}`);
-    const appPath =
-      p.platform === 'darwin'
-        ? path.join(outDir, `${appName}.app`, 'Contents', 'MacOS', appName)
-        : p.platform === 'win32'
-        ? path.join(outDir, `${appName}.exe`)
-        : path.join(outDir, appName);
-    const appExists = await fs.access(appPath).then(
-      () => true,
-      () => false,
-    );
-    if (!appExists) {
-      throw new SevereServiceError(
-        util.format(APP_NOT_FOUND_ERROR, appPath, 'Electron Forge', 'npx electron-forge make'),
-      );
-    }
-    return appPath;
-  }
-
-  const isElectronBuilderSetup = Boolean(
-    pkg.packageJson.build?.appId || Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder'),
-  );
-  if (isElectronBuilderSetup) {
-    const distDirName = pkg.packageJson.build?.directories?.output || 'dist';
-    const appPath = getBinaryPath(path.dirname(pkg.path), appName, distDirName, p);
-    const appExists = await fs.access(appPath).then(
-      () => true,
-      () => false,
-    );
-    if (!appExists) {
-      throw new SevereServiceError(
-        util.format(APP_NOT_FOUND_ERROR, appPath, 'Electron Builder', 'npx electron-builder build'),
-      );
-    }
-    return appPath;
-  }
-
-  return undefined;
 }

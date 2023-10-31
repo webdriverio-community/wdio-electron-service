@@ -2,7 +2,7 @@ import path from 'node:path';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 import type { Capabilities, Options } from '@wdio/types';
 
-import ElectronLaunchService, { detectBinaryPath } from '../src/launcher';
+import ElectronLaunchService from '../src/launcher';
 import { mockProcessProperty, revertProcessProperty } from './helpers';
 import type { ElectronServiceOptions } from '../src/index';
 
@@ -52,7 +52,7 @@ describe('onPrepare', () => {
     );
   });
 
-  it('should throw an error when there is no appBinaryPath for a given electron capability', async () => {
+  it('should throw an error when appBinaryPath is not specified and no build tool is found', async () => {
     delete options.appBinaryPath;
     instance = new LaunchService(
       options,
@@ -71,7 +71,55 @@ describe('onPrepare', () => {
       },
     ];
     await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      'Failed setting up Electron session: Error: You must provide the appBinaryPath value for all Electron capabilities',
+      'Failed setting up Electron session: SevereServiceError: No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+    );
+  });
+
+  it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
+    delete options.appBinaryPath;
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'forge-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'browserVersion': '26.2.2',
+        'wdio:electronServiceOptions': {
+          appArgs: ['some', 'args'],
+        },
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with Electron Forge!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-forge make`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
+    );
+  });
+
+  it('should throw an error when the detected app path does not exist for an electron-builder dependency', async () => {
+    delete options.appBinaryPath;
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'builder-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        'browserName': 'electron',
+        'browserVersion': '26.2.2',
+        'wdio:electronServiceOptions': {
+          appArgs: ['some', 'args'],
+        },
+      },
+    ];
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+      /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with electron-builder!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-builder build`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
     );
   });
 
@@ -471,123 +519,5 @@ describe('onPrepare', () => {
         },
       },
     ]);
-  });
-});
-
-describe('detectBinaryPath', () => {
-  const pkgJSONPath = '/foo/bar/package.json';
-  const winProcess = {
-    arch: 'x64',
-    platform: 'win32',
-  } as NodeJS.Process;
-  const macProcess = {
-    arch: 'arm64',
-    platform: 'darwin',
-  } as NodeJS.Process;
-  const linuxProcess = {
-    arch: 'arm',
-    platform: 'linux',
-  } as NodeJS.Process;
-
-  it('should return undefined if appName can not be determined', async () => {
-    expect(await detectBinaryPath({ packageJson: {} } as never)).toBeUndefined();
-  });
-
-  it("should return app path for Electron Forge setup's", async () => {
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            build: {
-              productName: 'my-app',
-            },
-            devDependencies: {
-              '@electron-forge/cli': '7.0.0-beta.54',
-            },
-          },
-        } as never,
-        winProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe'));
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            productName: 'my-app',
-            devDependencies: {
-              '@electron-forge/cli': '7.0.0-beta.54',
-            },
-          },
-        } as never,
-        macProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            build: {
-              productName: 'my-app',
-            },
-            devDependencies: {
-              '@electron-forge/cli': '7.0.0-beta.54',
-            },
-          },
-        } as never,
-        linuxProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app'));
-  });
-
-  it("should return app path for Electron Builder setup's", async () => {
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            build: {
-              productName: 'my-app',
-            },
-            devDependencies: {
-              'electron-builder': '^24.6.4',
-            },
-          },
-        } as never,
-        winProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe'));
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            productName: 'my-app',
-            devDependencies: {
-              'electron-builder': '^24.6.4',
-            },
-          },
-        } as never,
-        macProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'));
-    expect(
-      await detectBinaryPath(
-        {
-          path: pkgJSONPath,
-          packageJson: {
-            build: {
-              productName: 'my-app',
-            },
-            devDependencies: {
-              'electron-builder': '^24.6.4',
-            },
-          },
-        } as never,
-        linuxProcess,
-      ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app'));
   });
 });
