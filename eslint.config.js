@@ -82,9 +82,7 @@ export default [
           destructuredArrayIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': [
-        'warn'
-      ]
+      '@typescript-eslint/no-explicit-any': ['warn'],
     },
   },
   // Example app TS files
