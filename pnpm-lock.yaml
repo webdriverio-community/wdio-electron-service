@@ -26,6 +26,9 @@ dependencies:
   read-pkg-up:
     specifier: ^10.1.0
     version: 10.1.0
+  tinyspy:
+    specifier: ^2.2.0
+    version: 2.2.0
 
 devDependencies:
   '@eslint/js':
@@ -5638,7 +5641,6 @@ packages:
   /tinyspy@2.2.0:
     resolution: {integrity: sha512-d2eda04AN/cPOR89F7Xv5bK/jrQEhmcLFe6HFldoeO9AJtps+fqEnh486vnT/8y4bw38pSyxDcTCAq+Ks2aJTg==}
     engines: {node: '>=14.0.0'}
-    dev: true
 
   /titleize@3.0.0:
     resolution: {integrity: sha512-KxVu8EYHDPBdUYdKZdKtU2aj2XfEx9AfjXxE/Aj0vT06w2icA09Vus1rh6eSu1y01akYg6BjIK/hxyLJINoMLQ==}

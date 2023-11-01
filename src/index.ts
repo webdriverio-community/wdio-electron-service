@@ -11,6 +11,9 @@ process.env.WDIO_ELECTRON = 'true';
 export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
 
+type Electron = typeof Electron
+type ElectronInterface = keyof Electron
+
 interface ElectronServiceAPI {
   /**
    * Call a custom handler within the Electron process.
@@ -109,7 +112,7 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: (apiName: string, funcName: string, mockReturnValue: unknown) => Promise<unknown> | unknown;
+  mock: <Interface extends ElectronInterface>(apiName: Interface, funcName: keyof Electron[Interface]) => (() => Promise<unknown>);
   /**
    * Execute a function within the Electron main process.
    *

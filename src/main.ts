@@ -1,5 +1,13 @@
 import electron, { App, app, BrowserWindow, dialog, Dialog, ipcMain } from 'electron';
+import { fn } from './thirdParty/spy.js'
+
 import { Channel } from './constants.js';
+
+/**
+ * allow `src/commands/mock.ts` to use the method
+ */
+// @ts-ignore
+globalThis.fn = fn
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;
 type MainProcessFunction = (this: NodeJS.Process, ...args: unknown[]) => unknown;

@@ -1,3 +1,5 @@
+import { fn } from "@vitest/spy";
+
 export type WdioElectronWindowObj = {
   execute: (script: string, args: unknown[]) => any;
   [Key: string]: {
@@ -14,4 +16,6 @@ declare global {
   interface Window {
     wdioElectron?: WdioElectronWindowObj;
   }
+
+  var fn: fn
 }

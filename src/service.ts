@@ -2,6 +2,7 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
 import { execute } from './commands/execute.js';
+import { mock } from './commands/mock.js';
 
 import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
@@ -14,7 +15,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     { name: 'browserWindow', bridgeProp: 'browserWindow' },
     { name: 'dialog', bridgeProp: 'dialog' },
     { name: 'mainProcess', bridgeProp: 'mainProcess' },
-    { name: 'mock', bridgeProp: 'mock' },
   ];
 
   constructor(globalOptions: ElectronServiceOptions) {
@@ -40,6 +40,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     const api: ElectronServiceApi = {
       execute: { value: execute.bind(this) as any },
+      mock: { value: mock.bind(this) as any },
     };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
