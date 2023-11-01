@@ -1,7 +1,9 @@
 import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { execute } from './commands/execute.js';
+
+import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
 import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
@@ -31,8 +33,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
+  get browser() {
+    return this.#browser;
+  }
+
   #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
-    const api: ElectronServiceApi = {};
+    const api: ElectronServiceApi = {
+      execute: { value: execute.bind(this) as any },
+    };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
       api[name] = {
@@ -40,6 +48,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           try {
             return await ((instance as WebdriverIO.Browser).executeAsync as WebdriverClientFunc)(
               callApi,
+              CONTEXT_BRIDGE_NOT_AVAILABLE,
               bridgeProp,
               args,
             );
@@ -81,9 +90,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   }
 }
 
-async function callApi(bridgePropName: string, args: unknown[], done: (result: unknown) => void) {
+async function callApi(
+  contextBridgeNotAvailableError: string,
+  bridgePropName: string,
+  args: unknown[],
+  done: (result: unknown) => void,
+) {
   if (window.wdioElectron === undefined) {
-    throw new Error(`ContextBridge not available for invocation of "${bridgePropName}" API`);
+    throw new Error(contextBridgeNotAvailableError);
   }
   if (window.wdioElectron[bridgePropName] === undefined) {
     throw new Error(`"${bridgePropName}" API not found on ContextBridge`);

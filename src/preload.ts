@@ -1,17 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { Channel } from './constants.js';
 
-const validChannels = [
-  'wdio-electron',
-  'wdio-electron.app',
-  'wdio-electron.browserWindow',
-  'wdio-electron.dialog',
-  'wdio-electron.mainProcess',
-  'wdio-electron.mock',
-];
-
-const invoke = async (channel: string, ...data: unknown[]) => {
-  if (!validChannels.includes(channel)) {
-    throw new Error(`Channel "${channel}" is invalid`);
+const invoke = async (channel: Channel, ...data: unknown[]) => {
+  if (!Object.values(Channel).includes(channel)) {
+    throw new Error(`Channel "${channel}" is invalid!`);
   }
   if (!process.env.WDIO_ELECTRON) {
     throw new Error('Electron APIs can not be invoked outside of WDIO');
@@ -21,22 +13,23 @@ const invoke = async (channel: string, ...data: unknown[]) => {
 
 contextBridge.exposeInMainWorld('wdioElectron', {
   app: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.app', funcName, ...args),
+    invoke: (funcName: string, ...args: unknown[]) => invoke(Channel.App, funcName, ...args),
   },
   browserWindow: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.browserWindow', funcName, ...args),
+    invoke: (funcName: string, ...args: unknown[]) => invoke(Channel.BrowserWindow, funcName, ...args),
   },
   custom: {
-    invoke: (...args: unknown[]) => invoke('wdio-electron', ...args),
+    invoke: (...args: unknown[]) => invoke(Channel.Custom, ...args),
   },
   dialog: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.dialog', funcName, ...args),
+    invoke: (funcName: string, ...args: unknown[]) => invoke(Channel.Dialog, funcName, ...args),
   },
   mainProcess: {
-    invoke: (funcName: string, ...args: unknown[]) => invoke('wdio-electron.mainProcess', funcName, ...args),
+    invoke: (funcName: string, ...args: unknown[]) => invoke(Channel.MainProcess, funcName, ...args),
   },
   mock: {
     invoke: (apiName: string, funcName: string, mockReturnValue: unknown) =>
-      invoke('wdio-electron.mock', apiName, funcName, mockReturnValue),
+      invoke(Channel.Mock, apiName, funcName, mockReturnValue),
   },
+  execute: (script: string, args: unknown[]) => invoke(Channel.Execute, script, args),
 });
