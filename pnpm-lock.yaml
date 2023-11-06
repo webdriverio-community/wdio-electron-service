@@ -72,7 +72,7 @@ devDependencies:
     version: 7.0.3
   electron:
     specifier: ^27.0.2
-    version: 27.0.2
+    version: 27.0.3
   eslint:
     specifier: ^8.52.0
     version: 8.52.0
@@ -2277,8 +2277,8 @@ packages:
     resolution: {integrity: sha512-RlFobl4D3ieetbnR+2EpxdzFl9h0RAJkPK3pfiwMug2nhBin2ZCsGIAJWdpNniLz43sgXam/CgipOmvTA+rUiA==}
     dev: false
 
-  /electron@27.0.2:
-    resolution: {integrity: sha512-4fbcHQ40ZDlqhr5Pamm+M5BF7ry2lGqjFTWTJ/mrBwuiPWu6xhV/RWgUhKBaLqKNfAaNl3eMxV3Jc82gv6JauQ==}
+  /electron@27.0.3:
+    resolution: {integrity: sha512-VaB9cI1se+mUtz366NP+zxFVnkHLbCBNO4wwouw3FuGyX/m7/Bv1I89JhWOBv78tC+n11ZYMrVD23Jf6EZgVcg==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -4184,6 +4184,7 @@ packages:
   /lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       yallist: 4.0.0
 
@@ -6432,6 +6433,7 @@ packages:
 
   /yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+    requiresBuild: true
 
   /yaml@2.3.3:
     resolution: {integrity: sha512-zw0VAJxgeZ6+++/su5AFoqBbZbrEakwu+X0M5HmcwUiBL7AzcuPKjj5we4xfQLp78LkEMpD0cOnUhmgOVy3KdQ==}
