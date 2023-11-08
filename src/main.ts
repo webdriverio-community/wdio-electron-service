@@ -1,5 +1,5 @@
 import electron, { App, app, BrowserWindow, dialog, Dialog, ipcMain } from 'electron';
-import { fn } from './thirdParty/spy.js';
+import { fn } from '@vitest/spy';
 
 import { Channel } from './constants.js';
 
