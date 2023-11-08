@@ -45,6 +45,7 @@ describe('main', () => {
       ['wdio-electron.execute', expect.any(Function)],
       ['wdio-electron.mainProcess', expect.any(Function)],
       ['wdio-electron.mock', expect.any(Function)],
+      ['wdio-electron.execute', expect.any(Function)],
     ]);
   });
 

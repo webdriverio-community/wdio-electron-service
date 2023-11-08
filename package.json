@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -96,7 +96,7 @@
     "electron-to-chromium": "^1.4.569",
     "find-versions": "^5.1.0",
     "node-fetch": "^3.3.2",
-    "read-pkg-up": "^10.1.0"
+    "read-pkg-up": "^11.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^8.52.0",
