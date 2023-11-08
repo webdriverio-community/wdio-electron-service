@@ -9,7 +9,7 @@ export default [
       inlineDynamicImports: true,
       format: 'esm',
     },
-    plugins: [commonjs(), nodeResolve()],
+    plugins: [nodeResolve()],
     external: ['electron'],
   },
   {
