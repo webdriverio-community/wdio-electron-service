@@ -121,3 +121,6 @@ wdio-logs
 
 # Electron Forge output
 out
+
+# Fixtures lockfiles - installation shouldn't happen for fixtures
+test/fixtures/**/pnpm-lock.yaml
