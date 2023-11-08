@@ -39,8 +39,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     const api: ElectronServiceApi = {
-      execute: { value: execute.bind(this) as any },
-      mock: { value: mock.bind(this) as any },
+      execute: { value: execute.bind(this) as WebdriverClientFunc },
+      mock: { value: mock.bind(this) as WebdriverClientFunc },
     };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);
