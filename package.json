@@ -89,14 +89,14 @@
     }
   },
   "dependencies": {
+    "@vitest/spy": "^0.34.6",
     "@wdio/logger": "^8.16.17",
     "compare-versions": "^6.1.0",
     "debug": "^4.3.4",
     "electron-to-chromium": "^1.4.569",
     "find-versions": "^5.1.0",
     "node-fetch": "^3.3.2",
-    "read-pkg-up": "^10.1.0",
-    "tinyspy": "^2.2.0"
+    "read-pkg-up": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^8.52.0",

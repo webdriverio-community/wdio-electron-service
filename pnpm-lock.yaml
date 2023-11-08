@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@vitest/spy':
+    specifier: ^0.34.6
+    version: 0.34.6
   '@wdio/logger':
     specifier: ^8.16.17
     version: 8.16.17
@@ -26,9 +29,6 @@ dependencies:
   read-pkg-up:
     specifier: ^10.1.0
     version: 10.1.0
-  tinyspy:
-    specifier: ^2.2.0
-    version: 2.2.0
 
 devDependencies:
   '@eslint/js':
@@ -1123,7 +1123,6 @@ packages:
     resolution: {integrity: sha512-xaCvneSaeBw/cz8ySmF7ZwGvL0lBjfvqc1LpQ/vcdHEvpLn3Ff1vAvjw+CoGn0802l++5L/pxb7whwcWAw+DUQ==}
     dependencies:
       tinyspy: 2.2.0
-    dev: true
 
   /@vitest/utils@0.34.6:
     resolution: {integrity: sha512-IG5aDD8S6zlvloDsnzHw0Ut5xczlF+kv2BOTo+iXfPr54Yhi5qbVOgGB1hZaVq4iJ4C/MZ2J0y15IlsV/ZcI0A==}

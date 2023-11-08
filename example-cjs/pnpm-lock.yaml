@@ -963,6 +963,12 @@ packages:
     dev: true
     optional: true
 
+  /@vitest/spy@0.34.6:
+    resolution: {integrity: sha512-xaCvneSaeBw/cz8ySmF7ZwGvL0lBjfvqc1LpQ/vcdHEvpLn3Ff1vAvjw+CoGn0802l++5L/pxb7whwcWAw+DUQ==}
+    dependencies:
+      tinyspy: 2.2.0
+    dev: true
+
   /@wdio/cli@8.22.0(typescript@5.2.2):
     resolution: {integrity: sha512-7N8nnxon/XfkRY0NB6eJAFC/kKv6B/YVPQ7HOexQLneyBl9Fwl5AMU4+SV+6sAlFRyRn2ULfbADfMz5dOT5k3A==}
     engines: {node: ^16.13 || >=18}
@@ -1915,6 +1921,7 @@ packages:
   /commander@5.1.0:
     resolution: {integrity: sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==}
     engines: {node: '>= 6'}
+    requiresBuild: true
     dev: true
 
   /commander@9.5.0:
@@ -6398,6 +6405,7 @@ packages:
       electron:
         optional: true
     dependencies:
+      '@vitest/spy': 0.34.6
       '@wdio/logger': 8.16.17
       compare-versions: 6.1.0
       debug: 4.3.4(supports-color@8.1.1)
@@ -6406,7 +6414,6 @@ packages:
       find-versions: 5.1.0
       node-fetch: 3.3.2
       read-pkg-up: 10.1.0
-      tinyspy: 2.2.0
       webdriverio: 8.22.0(typescript@5.2.2)
     transitivePeerDependencies:
       - supports-color
