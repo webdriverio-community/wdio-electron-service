@@ -42,6 +42,7 @@ describe('main', () => {
       ['wdio-electron.app', expect.any(Function)],
       ['wdio-electron.browserWindow', expect.any(Function)],
       ['wdio-electron.dialog', expect.any(Function)],
+      ['wdio-electron.execute', expect.any(Function)],
       ['wdio-electron.mainProcess', expect.any(Function)],
       ['wdio-electron.mock', expect.any(Function)],
     ]);
