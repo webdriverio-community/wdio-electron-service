@@ -42,7 +42,7 @@ devDependencies:
     version: 4.1.12
   '@types/eslint-config-prettier':
     specifier: ^6.11.2
-    version: 6.11.2
+    version: 6.11.3
   '@types/mocha':
     specifier: ^10.0.3
     version: 10.0.3
@@ -837,8 +837,8 @@ packages:
       '@types/ms': 0.7.33
     dev: true
 
-  /@types/eslint-config-prettier@6.11.2:
-    resolution: {integrity: sha512-H9aSpNEGTyL1fJ65CIuqHMAH741pKg7jZ/Y2cdFAmqtD90PsRrmp8Cpj76PgSffSTkRLGihe1X6QlM4ec639ZA==}
+  /@types/eslint-config-prettier@6.11.3:
+    resolution: {integrity: sha512-3wXCiM8croUnhg9LdtZUJQwNcQYGWxxdOWDjPe1ykCqJFPVpzAKfs/2dgSoCtAvdPeaponcWPI7mPcGGp9dkKQ==}
     dev: true
 
   /@types/http-cache-semantics@4.0.3:
@@ -6221,6 +6221,7 @@ packages:
   /webdriver@8.21.0:
     resolution: {integrity: sha512-jQ3Me9lEAD+rQWg2g+YfTi2rADCfg7sl02jji9eVRJKJ7Vji7ceGJ6xXfj5+gEZZW8EJt7tpXILJi3etMAYwvA==}
     engines: {node: ^16.13 || >=18}
+    requiresBuild: true
     dependencies:
       '@types/node': 20.8.10
       '@types/ws': 8.5.8
