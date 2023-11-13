@@ -63,7 +63,7 @@ devDependencies:
     version: 8.21.0(typescript@5.2.2)
   '@wdio/globals':
     specifier: ^8.20.5
-    version: 8.21.0(typescript@5.2.2)
+    version: 8.22.1(typescript@5.2.2)
   '@wdio/types':
     specifier: ^8.20.0
     version: 8.21.0
@@ -1205,6 +1205,21 @@ packages:
     optionalDependencies:
       expect-webdriverio: 4.4.1(typescript@5.2.2)
       webdriverio: 8.21.0(typescript@5.2.2)
+    transitivePeerDependencies:
+      - bufferutil
+      - devtools
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+    dev: true
+
+  /@wdio/globals@8.22.1(typescript@5.2.2):
+    resolution: {integrity: sha512-Wf9D9ejiwArsAr80y7UZB0AsGLNgCWUoIbulK4vbzUU50RAymxbXeJEQgfwQ231+eHv8wIViQ45N0FoRJsHVcA==}
+    engines: {node: ^16.13 || >=18}
+    optionalDependencies:
+      expect-webdriverio: 4.4.1(typescript@5.2.2)
+      webdriverio: 8.22.1(typescript@5.2.2)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -2673,7 +2688,7 @@ packages:
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
     optionalDependencies:
-      '@wdio/globals': 8.21.0(typescript@5.2.2)
+      '@wdio/globals': 8.22.1(typescript@5.2.2)
       webdriverio: 8.22.1(typescript@5.2.2)
     transitivePeerDependencies:
       - bufferutil
