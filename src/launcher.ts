@@ -3,7 +3,7 @@ import util from 'node:util';
 import type { PathLike } from 'node:fs';
 
 import findVersions from 'find-versions';
-import { readPackageUp, type NormalizedReadResult } from 'read-pkg-up';
+import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
