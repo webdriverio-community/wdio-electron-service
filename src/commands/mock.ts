@@ -1,6 +1,7 @@
 import type * as Electron from 'electron';
-import log from '../log.js';
 import { fn, type Mock } from '@vitest/spy';
+
+import log from '../log.js';
 
 type ElectronType = typeof Electron;
 type ElectronInterface = keyof ElectronType;
@@ -11,12 +12,12 @@ const mockMap = new Map<string, Mock>();
 export async function mock<Interface extends ElectronInterface>(
   apiName: Interface,
   funcName: keyof ElectronType[Interface],
-  mockImplementation: (...args: any[]) => any | void = () => {},
+  mockImplementation: (...args: unknown[]) => unknown = () => {},
 ) {
   const id = `${apiName}.${String(funcName)}`;
   await browser.electron.execute(
     (electron, apiName, funcName) => {
-      electron[apiName][funcName] = fn(() => {}) as any;
+      electron[apiName][funcName] = fn(() => {}) as ElectronType[Interface][keyof ElectronType[Interface]];
     },
     apiName,
     funcName,
@@ -26,6 +27,7 @@ export async function mock<Interface extends ElectronInterface>(
   mockMap.set(id, mock);
 
   async function mockGetter() {
+    log.debug(`getting mock instance for electron.${apiName}.${String(funcName)}...`);
     const mock = mockMap.get(id);
     if (!mock) {
       throw new Error(`No mock registered for "${id}"`);
@@ -77,6 +79,6 @@ function patchMock<Interface extends ElectronInterface>(
         funcName,
         fnName,
         args,
-      ) as any;
+      );
   }
 }
