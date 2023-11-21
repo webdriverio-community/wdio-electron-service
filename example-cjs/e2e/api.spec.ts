@@ -51,15 +51,21 @@ describe('electron APIs', () => {
 
   describe('mock', () => {
     it('should mock the expected electron API function', async () => {
-      await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
-      const result = await browser.electron.dialog('showOpenDialog');
-      expect(result).toEqual('I opened a dialog!');
+      const mockedShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog', () => 'I opened a dialog!');
+      await browser.electron.execute((electron) => electron.dialog.showOpenDialog());
+      expect(mockedShowOpenDialog).toBeCalledTimes(1);
+      expect(mockedShowOpenDialog).toBeCalledWith('I opened a dialog!');
     });
 
     it('should mock the expected synchronous electron API function', async () => {
-      await browser.electron.mock('dialog', 'showOpenDialogSync', 'I opened a dialog!');
-      const result = await browser.electron.dialog('showOpenDialogSync');
-      expect(result).toEqual('I opened a dialog!');
+      const mockedShowOpenDialogSync = await browser.electron.mock(
+        'dialog',
+        'showOpenDialogSync',
+        () => 'I opened a dialog!',
+      );
+      await browser.electron.execute((electron) => electron.dialog.showOpenDialogSync());
+      expect(mockedShowOpenDialogSync).toBeCalledTimes(1);
+      expect(mockedShowOpenDialogSync).toBeCalledWith('I opened a dialog!');
     });
   });
 
