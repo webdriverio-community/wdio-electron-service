@@ -1,5 +1,6 @@
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
+import type { ElectronServiceMock } from './commands/mock.js';
 import type { ElectronServiceOptions } from './types.js';
 import type * as Electron from 'electron';
 
@@ -11,10 +12,14 @@ process.env.WDIO_ELECTRON = 'true';
 export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
 
-type Electron = typeof Electron
-type ElectronInterface = keyof Electron
+type ElectronType = typeof Electron;
+type ElectronInterface = keyof ElectronType;
 
 interface ElectronServiceAPI {
+  /**
+   * Used internally for storing mock objects
+   */
+  _mocks: Record<string, ElectronServiceMock>;
   /**
    * Call a custom handler within the Electron process.
    * @param args arbitrary arguments to pass to the handler
@@ -112,7 +117,10 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: <Interface extends ElectronInterface>(apiName: Interface, funcName: keyof Electron[Interface]) => (() => Promise<unknown>);
+  mock: <Interface extends ElectronInterface>(
+    apiName: Interface,
+    funcName: keyof ElectronType[Interface],
+  ) => () => Promise<unknown>;
   /**
    * Execute a function within the Electron main process.
    *

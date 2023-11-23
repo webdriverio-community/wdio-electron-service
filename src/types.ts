@@ -24,7 +24,6 @@ export interface ElectronServiceOptions {
 
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
-export type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
 
 export type ElectronBuilderConfig = {
   productName?: string;

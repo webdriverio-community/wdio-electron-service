@@ -5,80 +5,128 @@ import log from '../log.js';
 
 type ElectronType = typeof Electron;
 type ElectronInterface = keyof ElectronType;
+type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[ElectronInterface]];
+type MockFn = (...args: unknown[]) => unknown;
+type MockedFn = {
+  revert: () => void;
+};
 
-const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
-const mockMap = new Map<string, Mock>();
+export class ElectronServiceMock {
+  private mockFns: Map<string, MockFn>;
+  public apiName: ElectronInterface;
 
-export async function mock<Interface extends ElectronInterface>(
-  apiName: Interface,
-  funcName: keyof ElectronType[Interface],
-  mockImplementation: (...args: unknown[]) => unknown = () => {},
-) {
-  const id = `${apiName}.${String(funcName)}`;
-  await browser.electron.execute(
-    (electron, apiName, funcName) => {
-      electron[apiName][funcName] = fn(() => {}) as ElectronType[Interface][keyof ElectronType[Interface]];
-    },
-    apiName,
-    funcName,
-  );
+  constructor(apiName: ElectronInterface) {
+    this.apiName = apiName;
+    this.mockFns = new Map<string, MockFn>();
+  }
 
-  const mock = fn(mockImplementation);
-  mockMap.set(id, mock);
+  public async init(): Promise<{
+    getMock: (funcName: string) => Promise<MockFn>;
+    setMock: (funcName: string, mockImplementation?: MockFn) => Promise<ElectronServiceMock>;
+    unMock: (funcName: string) => Promise<ElectronServiceMock>;
+  }> {
+    const apiKeyNames = await browser.electron.execute(
+      (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
+      this.apiName,
+    );
 
-  async function mockGetter() {
-    log.debug(`getting mock instance for electron.${apiName}.${String(funcName)}...`);
-    const mock = mockMap.get(id);
+    return apiKeyNames.split(',').reduce(
+      (a, v) => ({
+        ...a,
+        [v]: {
+          mockImplementation: (mockImplementation: MockFn) => this.setMock(v, mockImplementation),
+          mockImplementationOnce: (mockImplementation: MockFn) => {
+            const existingMock = this.mockFns.get(v);
+            if (existingMock) {
+              this.setMock(v, () => {
+                this.setMock(v, existingMock);
+                return mockImplementation();
+              });
+            } else {
+              this.setMock(v, () => {
+                this.unMock(v);
+                return mockImplementation();
+              });
+            }
+          },
+        },
+      }),
+      { getMock: this.getMock.bind(this), setMock: this.setMock.bind(this), unMock: this.unMock.bind(this) },
+    );
+  }
+
+  public async setMock(funcName: string, mockImplementation: MockFn = () => {}): Promise<ElectronServiceMock> {
+    await browser.electron.execute(
+      (electron, apiName, funcName) => {
+        const electronApi = electron[apiName as keyof typeof electron];
+        const originalApi = Object.assign({}, electronApi);
+        electronApi[funcName as keyof typeof electronApi] = fn(() => {}) as ElectronApiFn;
+        (electronApi[funcName as keyof typeof electronApi] as MockedFn).revert = () => {
+          electronApi[funcName as keyof typeof electronApi] = originalApi[funcName as keyof typeof originalApi];
+        };
+      },
+      this.apiName,
+      funcName,
+    );
+    this.mockFns.set(funcName, fn(mockImplementation) as MockFn);
+    return this;
+  }
+
+  public async getMock(funcName: string) {
+    const mockId = `electron.${this.apiName}.${funcName}`;
+    log.debug(`getting mock instance for ${mockId}...`);
+    const mock = this.mockFns.get(funcName);
     if (!mock) {
-      throw new Error(`No mock registered for "${id}"`);
+      throw new Error(`No mock registered for "${mockId}"`);
     }
 
     const calls = await browser.electron.execute(
-      (electron, apiName, funcName) => (electron[apiName][funcName] as Mock).mock.calls,
-      apiName,
+      (electron, apiName, funcName) =>
+        (electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock).mock
+          .calls,
+      this.apiName,
       funcName,
     );
 
     if (!calls) {
-      throw new Error(`mock for electron.${apiName}.${String(funcName)}() not found!`);
+      throw new Error(`No mock for ${mockId}() was found!`);
     }
 
-    /**
-     * create a fake mock to reapply calls on it
-     */
+    // re-apply calls from the electron main process mock to this one
     for (const call of calls) {
-      mock(...call);
+      mock.apply(mock, call);
     }
 
     return mock;
   }
 
-  patchMock(browser, mock, mockGetter, apiName, funcName);
-  return mockGetter;
+  public async unMock(funcName?: string) {
+    // when funcName is unspecified we unmock all of the mocked functions
+    if (!funcName) {
+      for (const [mockFnName] of this.mockFns) {
+        await this.unMock(mockFnName);
+      }
+      return this;
+    }
+
+    this.mockFns.delete(funcName as string);
+    await browser.electron.execute(
+      (electron, apiName, funcName) =>
+        (
+          electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as MockedFn
+        ).revert(),
+      this.apiName,
+      funcName,
+    );
+
+    return this;
+  }
 }
 
-function patchMock<Interface extends ElectronInterface>(
-  browser: WebdriverIO.Browser,
-  mock: Mock,
-  mockGetter: any,
-  apiName: Interface,
-  funcName: keyof ElectronType[Interface],
-) {
-  log.debug(`patch mock instance for electron.${apiName}.${String(funcName)}(...)`);
-  for (const fnName of getKeys(mock)) {
-    mockGetter[fnName] = (...args: unknown[]) =>
-      browser.electron.execute(
-        (electron, apiName, funcName, fnName, args) => {
-          if (typeof (electron[apiName][funcName] as Mock)[fnName] !== 'function') {
-            throw new Error(`mock for electron.${apiName}.${String(funcName)}() not found!`);
-          }
+export async function mock(apiName: string) {
+  const electronServiceMock = new ElectronServiceMock(apiName as ElectronInterface);
 
-          (electron[apiName][funcName] as any)[fnName](...args);
-        },
-        apiName,
-        funcName,
-        fnName,
-        args,
-      );
-  }
+  browser.electron._mocks[apiName] = electronServiceMock;
+
+  return await electronServiceMock.init();
 }
