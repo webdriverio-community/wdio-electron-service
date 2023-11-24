@@ -138,7 +138,7 @@ interface ElectronServiceAPI {
    * @param script function to execute
    * @param args function arguments
    */
-  execute<ReturnValue, InnerArguments extends any[]>(
+  execute<ReturnValue, InnerArguments extends unknown[]>(
     script: string | ((electron: typeof Electron, ...innerArgs: InnerArguments) => ReturnValue),
     ...args: InnerArguments
   ): Promise<ReturnValue>;

@@ -1,7 +1,7 @@
 import { CONTEXT_BRIDGE_NOT_AVAILABLE } from '../constants.js';
 import type ElectronWorkerService from '../service.js';
 
-export async function execute<ReturnValue, InnerArguments extends any[]>(
+export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   this: ElectronWorkerService,
   script: string | ((...innerArgs: InnerArguments) => ReturnValue),
   ...args: InnerArguments

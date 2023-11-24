@@ -3,10 +3,7 @@ import { fn } from '@vitest/spy';
 
 import { Channel } from './constants.js';
 
-/**
- * allow `src/commands/mock.ts` to use the method
- */
-// @ts-ignore
+// @ts-expect-error - missing fn type for global
 globalThis.fn = fn;
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;
