@@ -36,7 +36,7 @@ devDependencies:
     version: 3.2.1(webdriverio@8.23.3)
   '@types/chromedriver':
     specifier: ^81.0.3
-    version: 81.0.4
+    version: 81.0.5
   '@types/debug':
     specifier: ^4.1.10
     version: 4.1.12
@@ -811,8 +811,8 @@ packages:
     resolution: {integrity: sha512-69TtiDzu0bcmKQv3yg1Zx409/Kd7r0b5F1PfpYJfSHzLGtB53547V4u+9iqKYsTu/O2ai6KTb0TInNpvuQ3qmg==}
     dev: true
 
-  /@types/chromedriver@81.0.4:
-    resolution: {integrity: sha512-Lb4wUfe50CKlpurFHKBFVE0bNKgl4Z4VJDCI7GOo8gbxrCwunULOlhrasjRQ3qPo5ifGXxJsd3inYGrOOyctew==}
+  /@types/chromedriver@81.0.5:
+    resolution: {integrity: sha512-VwV+WTTFHYZotBn57QQ8gd4TE7CGJ15KPM+xJJrKbiQQSccTY7zVXuConSBlyWrO+AFpVxuzmluK3xvzxGmkCw==}
     dependencies:
       '@types/node': 20.10.0
     dev: true
