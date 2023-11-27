@@ -63,7 +63,7 @@ devDependencies:
     version: 8.23.3(typescript@5.3.2)
   '@wdio/globals':
     specifier: ^8.20.5
-    version: 8.22.1(typescript@5.3.2)
+    version: 8.24.3(typescript@5.3.2)
   '@wdio/types':
     specifier: ^8.20.0
     version: 8.21.0
@@ -1155,23 +1155,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@wdio/config@8.22.1:
-    resolution: {integrity: sha512-ttxvtKFaOB5BJ6eDl1Lcq8STLN3V+yOEEkVXIrNqOdFOrAaljqzX20vaEmNtj9pQIoTZs2WoX8K2cmXdyxw+DA==}
-    engines: {node: ^16.13 || >=18}
-    requiresBuild: true
-    dependencies:
-      '@wdio/logger': 8.16.17
-      '@wdio/types': 8.21.0
-      '@wdio/utils': 8.22.0
-      decamelize: 6.0.0
-      deepmerge-ts: 5.1.0
-      glob: 10.3.10
-      import-meta-resolve: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-    optional: true
-
   /@wdio/config@8.23.1:
     resolution: {integrity: sha512-MljMBvMr+QYoy4/FytFHWorFE3CrBdEWuroOaGzC/0gkVOcHRO4nOy2rKahdcPXJAuxFwJNqqHhBPj+4tWiz9w==}
     engines: {node: ^16.13 || >=18}
@@ -1202,12 +1185,12 @@ packages:
       - supports-color
     dev: true
 
-  /@wdio/globals@8.22.1(typescript@5.3.2):
-    resolution: {integrity: sha512-Wf9D9ejiwArsAr80y7UZB0AsGLNgCWUoIbulK4vbzUU50RAymxbXeJEQgfwQ231+eHv8wIViQ45N0FoRJsHVcA==}
+  /@wdio/globals@8.23.3(typescript@5.3.2):
+    resolution: {integrity: sha512-pmsR82CvbQu2zonwsIblsvNv+wOL0hCm4eJmCzLEMQ9WBB36kO28im8B/itsh/XKzqvQ1aidhCUdSSHFwFwZsQ==}
     engines: {node: ^16.13 || >=18}
     optionalDependencies:
       expect-webdriverio: 4.6.1(typescript@5.3.2)
-      webdriverio: 8.22.1(typescript@5.3.2)
+      webdriverio: 8.23.3(typescript@5.3.2)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -1217,12 +1200,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@wdio/globals@8.23.3(typescript@5.3.2):
-    resolution: {integrity: sha512-pmsR82CvbQu2zonwsIblsvNv+wOL0hCm4eJmCzLEMQ9WBB36kO28im8B/itsh/XKzqvQ1aidhCUdSSHFwFwZsQ==}
+  /@wdio/globals@8.24.3(typescript@5.3.2):
+    resolution: {integrity: sha512-hxCe5qKl1eBSqNtI5MVSBqO5E0PR+KEal7/mAYYLN4YFUUEwNFXlamUrkbM9lj5VyYf29RAig+Mt4LgTCYaReA==}
     engines: {node: ^16.13 || >=18}
     optionalDependencies:
       expect-webdriverio: 4.6.1(typescript@5.3.2)
-      webdriverio: 8.23.3(typescript@5.3.2)
+      webdriverio: 8.24.3(typescript@5.3.2)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -1241,24 +1224,9 @@ packages:
       loglevel-plugin-prefix: 0.8.4
       strip-ansi: 7.1.0
 
-  /@wdio/protocols@8.22.0:
-    resolution: {integrity: sha512-2y5lTYAAzQWvExL1FGCe6gujVpOpTxk+czT0Qx0j0iUlfdOwp9gWVLYl8ochTJHzfeM45GHvuZ/ndT52grsTtg==}
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /@wdio/protocols@8.23.0:
     resolution: {integrity: sha512-2XTzD+lqQP3g8BWn+Bn5BTFzjHqzZNwq7DjlYrb27Bq8nOA+1DEcj3WzQ6V6CktTnKI/LAYKA1IFAF//Azrp/Q==}
     dev: true
-
-  /@wdio/repl@8.10.1:
-    resolution: {integrity: sha512-VZ1WFHTNKjR8Ga97TtV2SZM6fvRjWbYI2i/f4pJB4PtusorKvONAMJf2LQcUBIyzbVobqr7KSrcjmSwRolI+yw==}
-    engines: {node: ^16.13 || >=18}
-    requiresBuild: true
-    dependencies:
-      '@types/node': 20.10.0
-    dev: true
-    optional: true
 
   /@wdio/repl@8.23.1:
     resolution: {integrity: sha512-u6zG2cgBm67V5/WlQzadWqLGXs3moH8MOsgoljULQncelSBBZGZ5DyLB4p7jKcUAsKtMjgmFQmIvpQoqmyvdfg==}
@@ -1288,30 +1256,6 @@ packages:
     dependencies:
       '@types/node': 20.10.0
     dev: true
-
-  /@wdio/utils@8.22.0:
-    resolution: {integrity: sha512-n09ZLfe6NADQ7XyeO45nPBtNHi8nwu1RpOI18c94SrRS7gmO0CQWpjSilJCoHvu10ekUPJE7Oh/1Nw28w7ceVg==}
-    engines: {node: ^16.13 || >=18}
-    requiresBuild: true
-    dependencies:
-      '@puppeteer/browsers': 1.8.0
-      '@wdio/logger': 8.16.17
-      '@wdio/types': 8.21.0
-      decamelize: 6.0.0
-      deepmerge-ts: 5.1.0
-      edgedriver: 5.3.8
-      geckodriver: 4.2.1
-      get-port: 7.0.0
-      got: 13.0.0
-      import-meta-resolve: 3.0.0
-      locate-app: 2.1.0
-      safaridriver: 0.1.0
-      split2: 4.2.0
-      wait-port: 1.1.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-    optional: true
 
   /@wdio/utils@8.23.1:
     resolution: {integrity: sha512-VA47MOpt+7svHj3W9r+DUl3t73tJbjF7+ZXL0Lk7QLe79xevd+mPk+YmuTEepn+0MljJWAuqRCEKFG/HK77RNw==}
@@ -2753,7 +2697,7 @@ packages:
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
     optionalDependencies:
-      '@wdio/globals': 8.23.3(typescript@5.3.2)
+      '@wdio/globals': 8.24.3(typescript@5.3.2)
       '@wdio/logger': 8.16.17
       webdriverio: 8.24.3(typescript@5.3.2)
     transitivePeerDependencies:
@@ -6294,29 +6238,6 @@ packages:
     resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
     engines: {node: '>= 8'}
 
-  /webdriver@8.22.1:
-    resolution: {integrity: sha512-EQY2YjbOZInuvYAqEEP7w7voWSy9cPMt3UB1o1+obKhrD8dkIDZNkPocpZUI59PokqHTXk4zIclV50k1KpyyiA==}
-    engines: {node: ^16.13 || >=18}
-    requiresBuild: true
-    dependencies:
-      '@types/node': 20.10.0
-      '@types/ws': 8.5.8
-      '@wdio/config': 8.22.1
-      '@wdio/logger': 8.16.17
-      '@wdio/protocols': 8.22.0
-      '@wdio/types': 8.21.0
-      '@wdio/utils': 8.22.0
-      deepmerge-ts: 5.1.0
-      got: 12.6.1
-      ky: 0.33.3
-      ws: 8.14.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: true
-    optional: true
-
   /webdriver@8.23.1:
     resolution: {integrity: sha512-0PLN6cqP5cSorZBU2OBk2XKhxKpWWKzvClHBiGCqZIuofZ3kPTq7uYFapej0c4xFmKXHEiLIN7Qkt4H3gWTs8g==}
     engines: {node: ^16.13 || >=18}
@@ -6359,49 +6280,6 @@ packages:
       - supports-color
       - utf-8-validate
     dev: true
-
-  /webdriverio@8.22.1(typescript@5.3.2):
-    resolution: {integrity: sha512-SFqCKM93DPZU5Vn2r9OMi5EFbJHmWnIf8KXZvdzVOkGzQxFDtJ8LDgzwH1/LZxjG9nO+D7y+4wyQl7V24b8L+Q==}
-    engines: {node: ^16.13 || >=18}
-    requiresBuild: true
-    peerDependencies:
-      devtools: ^8.14.0
-    peerDependenciesMeta:
-      devtools:
-        optional: true
-    dependencies:
-      '@types/node': 20.10.0
-      '@wdio/config': 8.22.1
-      '@wdio/logger': 8.16.17
-      '@wdio/protocols': 8.22.0
-      '@wdio/repl': 8.10.1
-      '@wdio/types': 8.21.0
-      '@wdio/utils': 8.22.0
-      archiver: 6.0.1
-      aria-query: 5.3.0
-      css-shorthand-properties: 1.1.1
-      css-value: 0.0.1
-      devtools-protocol: 0.0.1213968
-      grapheme-splitter: 1.0.4
-      import-meta-resolve: 3.0.0
-      is-plain-obj: 4.1.0
-      lodash.clonedeep: 4.5.0
-      lodash.zip: 4.2.0
-      minimatch: 9.0.3
-      puppeteer-core: 20.9.0(typescript@5.3.2)
-      query-selector-shadow-dom: 1.0.1
-      resq: 1.11.0
-      rgb2hex: 0.2.5
-      serialize-error: 11.0.2
-      webdriver: 8.22.1
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - typescript
-      - utf-8-validate
-    dev: true
-    optional: true
 
   /webdriverio@8.23.3(typescript@5.3.2):
     resolution: {integrity: sha512-kH+GAQrC6GfrF0LDX5odqn3CVvVrdIeTAYsQtji9tmb2YTJMIx57GNL1NIXhV4MFtalcEc9UjhZCwekLMemEOg==}
