@@ -3,6 +3,7 @@ import ElectronWorkerService from './service.js';
 import type { ElectronServiceMock } from './commands/mock.js';
 import type { ElectronServiceOptions } from './types.js';
 import type * as Electron from 'electron';
+import { browser as wdioBrowser } from '@wdio/globals';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -14,6 +15,17 @@ export default ElectronWorkerService;
 
 type ElectronType = typeof Electron;
 type ElectronInterface = keyof ElectronType;
+type MockedFn = {
+  mockImplementation: (fn: () => void) => void;
+  mockReturnValue: (returnValue: unknown) => void;
+};
+type MockedApi = {
+  [K: string]: MockedFn;
+} & {
+  getMock: (funcName?: string) => Promise<void>;
+  setMock: (funcName?: string, mockImplementation?: () => void, mockReturnValue?: unknown) => Promise<void>;
+  unMock: (funcName?: string) => Promise<void>;
+};
 
 interface ElectronServiceAPI {
   /**
@@ -117,10 +129,7 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: <Interface extends ElectronInterface>(
-    apiName: Interface,
-    funcName: keyof ElectronType[Interface],
-  ) => () => Promise<unknown>;
+  mock: <Interface extends ElectronInterface>(apiName: Interface) => Promise<MockedApi>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -142,6 +151,20 @@ interface ElectronServiceAPI {
     script: string | ((electron: typeof Electron, ...innerArgs: InnerArguments) => ReturnValue),
     ...args: InnerArguments
   ): Promise<ReturnValue>;
+  /**
+   * Clear mocked function(s)
+   *
+   * @example
+   * ```js
+   * // clears all mocked functions
+   * await browser.electron.clearMocks()
+   * // clears all mocked functions of dialog API
+   * await browser.electron.clearMocks('dialog')
+   * ```
+   *
+   * @param apiName mocked api to clear
+   */
+  clearMocks: (apiName?: string) => Promise<void>;
 }
 
 export interface BrowserExtension {
@@ -169,6 +192,9 @@ declare global {
       'wdio:electronServiceOptions'?: ElectronServiceOptions;
     }
   }
+
+  var browser: WebdriverIO.Browser;
 }
 
+export const browser: WebdriverIO.Browser = wdioBrowser;
 export * from './types.js';

@@ -1,4 +1,5 @@
 import type { Capabilities, Services, Options } from '@wdio/types';
+import { browser as wdioBrowser } from '@wdio/globals';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
@@ -60,3 +61,5 @@ declare global {
     interface MultiRemoteBrowser extends BrowserExtension {}
   }
 }
+
+export const browser: WebdriverIO.Browser = wdioBrowser;
