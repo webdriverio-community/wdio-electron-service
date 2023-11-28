@@ -35,38 +35,33 @@ export class ElectronServiceMock {
         ...a,
         [v]: {
           mockImplementation: (mockImplementation: MockFn) => this.setMock(v, mockImplementation),
-          mockImplementationOnce: (mockImplementation: MockFn) => {
-            const existingMock = this.mockFns.get(v);
-            if (existingMock) {
-              this.setMock(v, () => {
-                this.setMock(v, existingMock);
-                return mockImplementation();
-              });
-            } else {
-              this.setMock(v, () => {
-                this.unMock(v);
-                return mockImplementation();
-              });
-            }
-          },
+          mockReturnValue: (returnValue: unknown) => this.setMock(v, undefined, returnValue),
         },
       }),
       { getMock: this.getMock.bind(this), setMock: this.setMock.bind(this), unMock: this.unMock.bind(this) },
     );
   }
 
-  public async setMock(funcName: string, mockImplementation: MockFn = () => {}): Promise<ElectronServiceMock> {
+  public async setMock(
+    funcName: string,
+    mockImplementation: MockFn = () => {},
+    mockReturnValue?: unknown,
+  ): Promise<ElectronServiceMock> {
     await browser.electron.execute(
-      (electron, apiName, funcName) => {
+      (electron, apiName, funcName, returnValue) => {
         const electronApi = electron[apiName as keyof typeof electron];
         const originalApi = Object.assign({}, electronApi);
-        electronApi[funcName as keyof typeof electronApi] = fn(() => {}) as ElectronApiFn;
+        const mockFn = fn<[], unknown>(() => {});
+
+        mockFn.mockReturnValue(returnValue);
+        electronApi[funcName as keyof typeof electronApi] = mockFn as ElectronApiFn;
         (electronApi[funcName as keyof typeof electronApi] as MockedFn).revert = () => {
           electronApi[funcName as keyof typeof electronApi] = originalApi[funcName as keyof typeof originalApi];
         };
       },
       this.apiName,
       funcName,
+      mockReturnValue,
     );
     this.mockFns.set(funcName, fn(mockImplementation) as MockFn);
     return this;
