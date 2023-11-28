@@ -1,4 +1,4 @@
-import { fn } from "@vitest/spy";
+import { fn } from '@vitest/spy';
 
 export type WdioElectronWindowObj = {
   execute: (script: string, args: unknown[]) => any;
@@ -17,5 +17,5 @@ declare global {
     wdioElectron?: WdioElectronWindowObj;
   }
 
-  var fn: fn
+  var fn: fn;
 }
