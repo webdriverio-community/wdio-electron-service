@@ -1,9 +1,11 @@
+import { browser as wdioBrowser } from '@wdio/globals';
+import { fn as vitestFn } from '@vitest/spy';
+import type * as Electron from 'electron';
+
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
 import type { ElectronServiceMock } from './commands/mock.js';
 import type { ElectronServiceOptions } from './types.js';
-import type * as Electron from 'electron';
-import { browser as wdioBrowser } from '@wdio/globals';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -194,6 +196,7 @@ declare global {
   }
 
   var browser: WebdriverIO.Browser;
+  var fn: typeof vitestFn;
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;

@@ -3,7 +3,6 @@ import { fn } from '@vitest/spy';
 
 import { Channel } from './constants.js';
 
-// @ts-expect-error - missing fn type for global
 globalThis.fn = fn;
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;

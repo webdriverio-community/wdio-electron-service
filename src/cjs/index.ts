@@ -1,5 +1,6 @@
-import type { Capabilities, Services, Options } from '@wdio/types';
+import { fn as vitestFn } from '@vitest/spy';
 import { browser as wdioBrowser } from '@wdio/globals';
+import type { Capabilities, Services, Options } from '@wdio/types';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
@@ -60,6 +61,7 @@ declare global {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}
   }
+  var fn: typeof vitestFn;
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
