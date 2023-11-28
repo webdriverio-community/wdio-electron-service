@@ -6,7 +6,7 @@ import { ElectronServiceMock, mock } from './commands/mock.js';
 
 import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
 import type { ElectronServiceOptions, ApiCommand, WebdriverClientFunc } from './types.js';
-import { clearMocks } from './commands/clearMocks.js';
+import { removeMocks } from './commands/removeMocks.js';
 
 type ElectronServiceApi = Record<
   string,
@@ -48,7 +48,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       _mocks: { value: {} as Record<string, ElectronServiceMock> },
       execute: { value: execute.bind(this) as WebdriverClientFunc },
       mock: { value: mock.bind(this) as WebdriverClientFunc },
-      clearMocks: { value: clearMocks.bind(this) as WebdriverClientFunc },
+      removeMocks: { value: removeMocks.bind(this) as WebdriverClientFunc },
     };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);

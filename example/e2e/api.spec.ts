@@ -56,7 +56,7 @@ describe('electron APIs', () => {
 
 describe('mock', () => {
   afterEach(async () => {
-    await browser.electron.clearMocks();
+    await browser.electron.removeMocks();
   });
 
   describe('setMock', () => {

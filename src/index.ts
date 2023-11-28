@@ -154,19 +154,19 @@ interface ElectronServiceAPI {
     ...args: InnerArguments
   ): Promise<ReturnValue>;
   /**
-   * Clear mocked function(s)
+   * Remove mocked function(s)
    *
    * @example
    * ```js
    * // clears all mocked functions
-   * await browser.electron.clearMocks()
+   * await browser.electron.removeMocks()
    * // clears all mocked functions of dialog API
-   * await browser.electron.clearMocks('dialog')
+   * await browser.electron.removeMocks('dialog')
    * ```
    *
    * @param apiName mocked api to clear
    */
-  clearMocks: (apiName?: string) => Promise<void>;
+  removeMocks: (apiName?: string) => Promise<void>;
 }
 
 export interface BrowserExtension {
