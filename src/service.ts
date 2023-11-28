@@ -43,6 +43,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     return this.#browser;
   }
 
+  set browser(browser) {
+    this.#browser = browser;
+  }
+
   #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     const api: ElectronServiceApi = {
       _mocks: { value: {} as Record<string, ElectronServiceMock> },

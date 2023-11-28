@@ -10,12 +10,12 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
    * parameter check
    */
   if (typeof script !== 'string' && typeof script !== 'function') {
-    throw new Error('Expecting script to be type of "string" or "function"!');
+    throw new Error('Expecting script to be type of "string" or "function"');
   }
 
   const browser = this.browser as WebdriverIO.Browser;
   if (!browser) {
-    throw new Error(`browser not yet initiated`);
+    throw new Error('WDIO browser is not yet initialised');
   }
 
   if (typeof script === 'string') {
