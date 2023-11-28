@@ -1,3 +1,6 @@
+import { expect } from '@wdio/globals';
+import { browser } from 'wdio-electron-service';
+
 describe('application loading', () => {
   describe('App', () => {
     it('should launch the application', async () => {
