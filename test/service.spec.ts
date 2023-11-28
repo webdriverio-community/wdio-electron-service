@@ -1,8 +1,8 @@
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
-import ElectronWorkerService from '../src/service';
 import { mockProcessProperty } from './helpers';
-import { BrowserExtension } from '../src';
+import type { BrowserExtension } from '../src';
+import type ElectronWorkerService from '../src/service';
 
 interface CustomBrowserExtension extends BrowserExtension {
   electron: BrowserExtension['electron'] & {
