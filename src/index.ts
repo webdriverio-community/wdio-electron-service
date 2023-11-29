@@ -21,11 +21,12 @@ type MockedFn = {
   mockImplementation: (fn: () => void) => void;
   mockReturnValue: (returnValue: unknown) => void;
 };
-type MockedApi = {
+type MockedApiFn = {
   [K: string]: MockedFn;
 } & {
-  getMock: (funcName?: string) => Promise<void>;
-  setMock: (funcName?: string, mockImplementation?: () => void, mockReturnValue?: unknown) => Promise<void>;
+  mockImplementation: (implementationFn: () => unknown) => Promise<MockedFn>;
+  mockReturnValue: (returnValue: unknown) => Promise<MockedFn>;
+  update: (funcName?: string) => Promise<void>;
   unMock: (funcName?: string) => Promise<void>;
 };
 
@@ -131,7 +132,11 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: <Interface extends ElectronInterface>(apiName: Interface, funcName?: string) => Promise<MockedApi>;
+  mock: <Interface extends ElectronInterface>(
+    apiName: Interface,
+    funcName?: string,
+    returnValue?: unknown,
+  ) => Promise<MockedApiFn>;
   /**
    * Execute a function within the Electron main process.
    *
