@@ -131,7 +131,7 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: <Interface extends ElectronInterface>(apiName: Interface) => Promise<MockedApi>;
+  mock: <Interface extends ElectronInterface>(apiName: Interface, funcName?: string) => Promise<MockedApi>;
   /**
    * Execute a function within the Electron main process.
    *

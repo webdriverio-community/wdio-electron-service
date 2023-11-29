@@ -57,10 +57,9 @@ describe('mock', () => {
     await browser.electron.removeMocks();
   });
 
-  describe('setMock', () => {
+  describe('mock', () => {
     it('should mock an electron API function', async () => {
-      const dialog = await browser.electron.mock('dialog');
-      await dialog.setMock('showOpenDialog');
+      const dialog = await browser.electron.mock('dialog', 'showOpenDialog');
       await browser.electron.execute(
         async (electron) =>
           await electron.dialog.showOpenDialog({
@@ -78,8 +77,7 @@ describe('mock', () => {
     });
 
     it('should mock a synchronous electron API function', async () => {
-      const dialog = await browser.electron.mock('dialog');
-      await dialog.setMock('showOpenDialogSync');
+      const dialog = await browser.electron.mock('dialog', 'showOpenDialogSync');
       await browser.electron.execute((electron) =>
         electron.dialog.showOpenDialogSync({
           title: 'my dialog',

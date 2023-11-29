@@ -20,15 +20,18 @@ export class ElectronServiceMock {
     this.mockFns = new Map<string, MockFn>();
   }
 
-  public async init(): Promise<{
+  public async init(funcName?: string): Promise<{
     getMock: (funcName: string) => Promise<MockFn>;
-    setMock: (funcName: string, mockImplementation?: MockFn) => Promise<ElectronServiceMock>;
     unMock: (funcName: string) => Promise<ElectronServiceMock>;
   }> {
     const apiKeyNames = await browser.electron.execute(
       (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
       this.apiName,
     );
+
+    if (funcName) {
+      await this.setMock(funcName);
+    }
 
     return apiKeyNames.split(',').reduce(
       (a, v) => ({
@@ -38,11 +41,11 @@ export class ElectronServiceMock {
           mockReturnValue: (returnValue: unknown) => this.setMock(v, undefined, returnValue),
         },
       }),
-      { getMock: this.getMock.bind(this), setMock: this.setMock.bind(this), unMock: this.unMock.bind(this) },
+      { getMock: this.getMock.bind(this), unMock: this.unMock.bind(this) },
     );
   }
 
-  public async setMock(
+  private async setMock(
     funcName: string,
     mockImplementation: MockFn = () => {},
     mockReturnValue?: unknown,
@@ -118,10 +121,10 @@ export class ElectronServiceMock {
   }
 }
 
-export async function mock(apiName: string) {
+export async function mock(apiName: string, funcName: string) {
   const electronServiceMock = new ElectronServiceMock(apiName as ElectronInterface);
 
   browser.electron._mocks[apiName] = electronServiceMock;
 
-  return await electronServiceMock.init();
+  return await electronServiceMock.init(funcName);
 }
