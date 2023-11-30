@@ -54,51 +54,14 @@ describe('electron APIs', () => {
   });
 });
 
-describe('mock', () => {
+describe('mocking', () => {
   afterEach(async () => {
     await browser.electron.removeMocks();
   });
 
-  it('should mock an electron API function', async () => {
-    const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
-    await browser.electron.execute(
-      async (electron) =>
-        await electron.dialog.showOpenDialog({
-          title: 'my dialog',
-          properties: ['openFile', 'openDirectory'],
-        }),
-    );
-
-    const mockedShowOpenDialog = await showOpenDialog.update();
-    expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
-    expect(mockedShowOpenDialog).toHaveBeenCalledWith({
-      title: 'my dialog',
-      properties: ['openFile', 'openDirectory'],
-    });
-  });
-
-  it('should mock a synchronous electron API function', async () => {
-    const showOpenDialogSync = await browser.electron.mock('dialog', 'showOpenDialogSync');
-    await browser.electron.execute((electron) =>
-      electron.dialog.showOpenDialogSync({
-        title: 'my dialog',
-        properties: ['openFile', 'openDirectory'],
-      }),
-    );
-
-    const mockedShowOpenDialogSync = await showOpenDialogSync.update();
-    expect(mockedShowOpenDialogSync).toHaveBeenCalledTimes(1);
-    expect(mockedShowOpenDialogSync).toHaveBeenCalledWith({
-      title: 'my dialog',
-      properties: ['openFile', 'openDirectory'],
-    });
-  });
-
-  describe('mockImplementation', () => {
+  describe('mock', () => {
     it('should mock an electron API function', async () => {
       const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
-      let callsCount = 0;
-      await showOpenDialog.mockImplementation(() => callsCount++);
       await browser.electron.execute(
         async (electron) =>
           await electron.dialog.showOpenDialog({
@@ -113,37 +76,107 @@ describe('mock', () => {
         title: 'my dialog',
         properties: ['openFile', 'openDirectory'],
       });
-      expect(callsCount).toBe(1);
+    });
+
+    it('should mock a synchronous electron API function', async () => {
+      const showOpenDialogSync = await browser.electron.mock('dialog', 'showOpenDialogSync');
+      await browser.electron.execute((electron) =>
+        electron.dialog.showOpenDialogSync({
+          title: 'my dialog',
+          properties: ['openFile', 'openDirectory'],
+        }),
+      );
+
+      const mockedShowOpenDialogSync = await showOpenDialogSync.update();
+      expect(mockedShowOpenDialogSync).toHaveBeenCalledTimes(1);
+      expect(mockedShowOpenDialogSync).toHaveBeenCalledWith({
+        title: 'my dialog',
+        properties: ['openFile', 'openDirectory'],
+      });
+    });
+
+    describe('mockImplementation', () => {
+      it('should mock an electron API function', async () => {
+        const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+        let callsCount = 0;
+        await showOpenDialog.mockImplementation(() => callsCount++);
+        await browser.electron.execute(
+          async (electron) =>
+            await electron.dialog.showOpenDialog({
+              title: 'my dialog',
+              properties: ['openFile', 'openDirectory'],
+            }),
+        );
+
+        const mockedShowOpenDialog = await showOpenDialog.update();
+        expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
+        expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+          title: 'my dialog',
+          properties: ['openFile', 'openDirectory'],
+        });
+        expect(callsCount).toBe(1);
+      });
+    });
+
+    describe('mockReturnValue', () => {
+      it('should return the expected value from the mock API', async () => {
+        const mockGetName = await browser.electron.mock('app', 'getName');
+        await mockGetName.mockReturnValue('This is a mock');
+
+        const name = await browser.electron.execute((electron) => electron.app.getName());
+
+        expect(name).toBe('This is a mock');
+      });
     });
   });
 
-  describe('mockReturnValue', () => {
-    it('should return the expected value from the mock API', async () => {
-      const mockGetName = await browser.electron.mock('app', 'getName');
-      await mockGetName.mockReturnValue('This is a mock');
+  describe('mockAll', () => {
+    it('should mock all functions on an API', async () => {
+      const mockedDialog = await browser.electron.mockAll('dialog');
+      await browser.electron.execute(
+        async (electron) =>
+          await electron.dialog.showOpenDialog({
+            title: 'my dialog',
+            properties: ['openFile', 'openDirectory'],
+          }),
+      );
+      await browser.electron.execute((electron) =>
+        electron.dialog.showOpenDialogSync({
+          title: 'my dialog',
+          properties: ['openFile', 'openDirectory'],
+        }),
+      );
 
-      const name = await browser.electron.execute((electron) => electron.app.getName());
-
-      expect(name).toBe('This is a mock');
+      const mockedShowOpenDialog = await mockedDialog.showOpenDialog.update();
+      expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
+      expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+        title: 'my dialog',
+        properties: ['openFile', 'openDirectory'],
+      });
+      const mockedShowOpenDialogSync = await mockedDialog.showOpenDialogSync.update();
+      expect(mockedShowOpenDialogSync).toHaveBeenCalledTimes(1);
+      expect(mockedShowOpenDialogSync).toHaveBeenCalledWith({
+        title: 'my dialog',
+        properties: ['openFile', 'openDirectory'],
+      });
     });
   });
-});
 
-describe('unMock', () => {
-  it('should remove an existing mock', async () => {
-    const app = await browser.electron.mock('app', 'getName');
-    await app.unMock('getName');
+  describe('unMock', () => {
+    it('should remove an existing mock', async () => {
+      const getVersion = await browser.electron.mock('app', 'getVersion', 'mocked version');
+      let version = await browser.electron.execute((electron) => electron.app.getVersion());
+      expect(version).toBe('mocked version');
 
-    expect(async () => await app.update('getName')).rejects.toThrowError(
-      'No mock registered for "electron.app.getName"',
-    );
+      await getVersion.unMock();
 
-    const getNameFunctionName = await browser.electron.execute((electron) => electron.app.getName.name);
-    // the name of a mocked function will be 'spy'
-    expect(getNameFunctionName).toBe('getName');
+      expect(async () => await getVersion.update()).rejects.toThrowError(
+        'No mock registered for "electron.app.getVersion"',
+      );
 
-    const name = await browser.electron.execute((electron) => electron.app.getName());
-    expect(name).toBe(appName);
+      version = await browser.electron.execute((electron) => electron.app.getVersion());
+      expect(version).toBe(appVersion);
+    });
   });
 });
 

@@ -3,10 +3,10 @@ import type { Capabilities, Services } from '@wdio/types';
 import log from './log.js';
 import { execute } from './commands/execute.js';
 import { ElectronServiceMock, mock } from './commands/mock.js';
-
+import { removeMocks } from './commands/removeMocks.js';
+import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
 import type { ElectronServiceOptions, ApiCommand, WebdriverClientFunc } from './types.js';
-import { removeMocks } from './commands/removeMocks.js';
 
 type ElectronServiceApi = Record<
   string,
@@ -52,6 +52,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       _mocks: { value: {} as Record<string, ElectronServiceMock> },
       execute: { value: execute.bind(this) as WebdriverClientFunc },
       mock: { value: mock.bind(this) as WebdriverClientFunc },
+      mockAll: { value: mockAll.bind(this) as WebdriverClientFunc },
       removeMocks: { value: removeMocks.bind(this) as WebdriverClientFunc },
     };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {

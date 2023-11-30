@@ -1,10 +1,8 @@
-import type * as Electron from 'electron';
 import { fn, type Mock } from '@vitest/spy';
 
 import log from '../log.js';
+import type { ElectronInterface, ElectronType } from 'src/types.js';
 
-type ElectronType = typeof Electron;
-type ElectronInterface = keyof ElectronType;
 type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[ElectronInterface]];
 type MockFn = (...args: unknown[]) => unknown;
 type WrappedMockFn = {
@@ -26,7 +24,24 @@ export class ElectronServiceMock {
     this.mockFns = new Map<string, MockFn>();
   }
 
-  public async init(funcName: string, mockReturnValue?: unknown): Promise<WrappedMockFn> {
+  public async init(): Promise<Record<string, WrappedMockFn>> {
+    const apiFnNames = await browser.electron.execute(
+      (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
+      this.apiName,
+    );
+
+    const mockedApis: Record<string, WrappedMockFn> = apiFnNames
+      .split(',')
+      .reduce((a, funcName) => ({ ...a, [funcName]: 'placeholder' }), {});
+
+    for (const apiFn in mockedApis) {
+      mockedApis[apiFn as keyof typeof mockedApis] = await this.initFn(apiFn);
+    }
+
+    return mockedApis;
+  }
+
+  public async initFn(funcName: string, mockReturnValue?: unknown): Promise<WrappedMockFn> {
     const mock = (await this.setMock(funcName, undefined, mockReturnValue)) as WrappedMockFn;
     mock.mockReturnValue = async (returnValue: unknown) => {
       await this.unMock(funcName);
@@ -40,22 +55,6 @@ export class ElectronServiceMock {
     mock.unMock = this.unMock.bind(this, funcName);
 
     return mock;
-
-    // const apiKeyNames = await browser.electron.execute(
-    //   (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
-    //   this.apiName,
-    // );
-
-    // return apiKeyNames.split(',').reduce(
-    //   (a, v) => ({
-    //     ...a,
-    //     [v]: {
-    //       mockImplementation: (mockImplementation: MockFn) => this.setMock(v, mockImplementation),
-    //       mockReturnValue: (returnValue: unknown) => this.setMock(v, undefined, returnValue),
-    //     },
-    //   }),
-    //   { update: this.getMock.bind(this, funcName), unMock: this.unMock.bind(this) },
-    // );
   }
 
   private async setMock(
@@ -140,9 +139,7 @@ export class ElectronServiceMock {
 export async function mock(apiName: string, funcName: string, mockReturnValue?: unknown) {
   const electronServiceMock = new ElectronServiceMock(apiName as ElectronInterface);
 
-  // TODO: no funcName case
-
   browser.electron._mocks[apiName] = electronServiceMock;
 
-  return await electronServiceMock.init(funcName, mockReturnValue);
+  return await electronServiceMock.initFn(funcName, mockReturnValue);
 }
