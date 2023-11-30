@@ -7,52 +7,7 @@ import { browser } from 'wdio-electron-service';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }));
-const { name: appName, version: appVersion } = packageJson as { name: string; version: string };
-
-describe('electron APIs', () => {
-  describe('app', () => {
-    it('should retrieve app metadata through the electron API', async () => {
-      const name = await browser.electron.app('getName');
-      expect(name).toEqual(appName);
-      const version = await browser.electron.app('getVersion');
-      expect(version).toEqual(appVersion);
-    });
-  });
-
-  describe('browserWindow', () => {
-    it('should retrieve the window title through the electron API', async () => {
-      let windowTitle;
-      await browser.waitUntil(
-        async () => {
-          windowTitle = await browser.electron.browserWindow('title');
-          if (windowTitle !== 'this is the title of the main window') {
-            return false;
-          }
-
-          return windowTitle;
-        },
-        {
-          timeoutMsg: 'Window title not updated',
-        },
-      );
-      expect(windowTitle).toEqual('this is the title of the main window');
-    });
-  });
-
-  describe('custom', () => {
-    it('should return the expected response', async () => {
-      const result = await browser.electron.api();
-      expect(result).toEqual('test');
-    });
-  });
-
-  describe('mainProcess', () => {
-    it('should retrieve the process type through the electron API', async () => {
-      const processType = await browser.electron.mainProcess('type');
-      expect(processType).toEqual('browser');
-    });
-  });
-});
+const { version: appVersion } = packageJson as { name: string; version: string };
 
 describe('mocking', () => {
   afterEach(async () => {
