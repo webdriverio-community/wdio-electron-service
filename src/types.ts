@@ -1,3 +1,5 @@
+import type * as Electron from 'electron';
+
 import type { Channel } from './constants.js';
 
 /**
@@ -24,7 +26,9 @@ export interface ElectronServiceOptions {
 
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
-export type ElectronServiceApi = Record<string, { value: (...args: unknown[]) => Promise<unknown> }>;
+
+export type ElectronType = typeof Electron;
+export type ElectronInterface = keyof ElectronType;
 
 export type ElectronBuilderConfig = {
   productName?: string;

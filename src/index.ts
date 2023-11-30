@@ -1,7 +1,11 @@
+import { browser as wdioBrowser } from '@wdio/globals';
+import { fn as vitestFn } from '@vitest/spy';
+import type * as Electron from 'electron';
+
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
-import type { ElectronServiceOptions } from './types.js';
-import type * as Electron from 'electron';
+import type { ElectronServiceMock } from './commands/mock.js';
+import type { ElectronInterface, ElectronServiceOptions } from './types.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -11,10 +15,19 @@ process.env.WDIO_ELECTRON = 'true';
 export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
 
-type Electron = typeof Electron
-type ElectronInterface = keyof Electron
+type MockFn = (...args: unknown[]) => unknown;
+type WrappedMockFn = {
+  mockReturnValue: (returnValue: unknown) => Promise<MockFn>;
+  mockImplementation: (implementationFn: () => unknown) => Promise<MockFn>;
+  update: () => Promise<MockFn>;
+  unMock: () => Promise<void>;
+} & MockFn;
 
 interface ElectronServiceAPI {
+  /**
+   * Used internally for storing mock objects
+   */
+  _mocks: Record<string, ElectronServiceMock>;
   /**
    * Call a custom handler within the Electron process.
    * @param args arbitrary arguments to pass to the handler
@@ -98,7 +111,7 @@ interface ElectronServiceAPI {
    */
   mainProcess: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
   /**
-   * Mock a function from the Electron API.
+   * Mock a specific function from an Electron API.
    * @param apiName name of the API to mock
    * @param funcName name of the function to mock
    * @param mockReturnValue value to return when the mocked function is called
@@ -112,7 +125,25 @@ interface ElectronServiceAPI {
    * expect(result).toEqual('I opened a dialog!');
    * ```
    */
-  mock: <Interface extends ElectronInterface>(apiName: Interface, funcName: keyof Electron[Interface]) => (() => Promise<unknown>);
+  mock: <Interface extends ElectronInterface>(
+    apiName: Interface,
+    funcName?: string,
+    returnValue?: unknown,
+  ) => Promise<WrappedMockFn>;
+  /**
+   * Mock all functions from an Electron API.
+   * @param apiName name of the API to mock
+   * @returns a {@link Promise} that resolves once the mock is registered
+   *
+   * @example
+   * ```js
+   * // mock the app's getName function
+   * await browser.electron.mockAll('dialog');
+   * const result = await browser.electron.dialog('showOpenDialog');
+   * expect(result).toEqual('I opened a dialog!');
+   * ```
+   */
+  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, WrappedMockFn>>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -130,10 +161,24 @@ interface ElectronServiceAPI {
    * @param script function to execute
    * @param args function arguments
    */
-  execute<ReturnValue, InnerArguments extends any[]>(
+  execute<ReturnValue, InnerArguments extends unknown[]>(
     script: string | ((electron: typeof Electron, ...innerArgs: InnerArguments) => ReturnValue),
     ...args: InnerArguments
   ): Promise<ReturnValue>;
+  /**
+   * Remove mocked function(s)
+   *
+   * @example
+   * ```js
+   * // clears all mocked functions
+   * await browser.electron.removeMocks()
+   * // clears all mocked functions of dialog API
+   * await browser.electron.removeMocks('dialog')
+   * ```
+   *
+   * @param apiName mocked api to clear
+   */
+  removeMocks: (apiName?: string) => Promise<void>;
 }
 
 export interface BrowserExtension {
@@ -161,6 +206,10 @@ declare global {
       'wdio:electronServiceOptions'?: ElectronServiceOptions;
     }
   }
+
+  var browser: WebdriverIO.Browser;
+  var fn: typeof vitestFn;
 }
 
+export const browser: WebdriverIO.Browser = wdioBrowser;
 export * from './types.js';

@@ -1,13 +1,9 @@
 import electron, { App, app, BrowserWindow, dialog, Dialog, ipcMain } from 'electron';
-import { fn } from './thirdParty/spy.js'
+import { fn } from '@vitest/spy';
 
 import { Channel } from './constants.js';
 
-/**
- * allow `src/commands/mock.ts` to use the method
- */
-// @ts-ignore
-globalThis.fn = fn
+globalThis.fn = fn;
 
 type AppFunction = (this: App, ...args: unknown[]) => unknown;
 type MainProcessFunction = (this: NodeJS.Process, ...args: unknown[]) => unknown;
@@ -38,6 +34,10 @@ ipcMain.handle(Channel.Dialog, (_event, funcName: string, ...args: unknown[]) =>
   return dialogProp;
 });
 
+ipcMain.handle(Channel.Execute, (_, script: string, args: unknown[]) => {
+  return new Function(`return (${script}).apply(this, arguments)`)(electron, ...args);
+});
+
 ipcMain.handle(Channel.MainProcess, (_event, funcName: string, ...args: unknown[]) => {
   const processProp = process[funcName as keyof NodeJS.Process];
   if (typeof processProp === 'function') {
@@ -64,8 +64,4 @@ ipcMain.handle(Channel.Mock, (_event, apiName: string, funcName: string, mockRet
     funcName,
     mockReturnValue,
   };
-});
-
-ipcMain.handle(Channel.Execute, (_, script: string, args: unknown[]) => {
-  return new Function(`return (${script}).apply(this, arguments)`)(electron, ...args);
 });

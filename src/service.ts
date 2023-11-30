@@ -2,10 +2,16 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
 import { execute } from './commands/execute.js';
-import { mock } from './commands/mock.js';
-
+import { ElectronServiceMock, mock } from './commands/mock.js';
+import { removeMocks } from './commands/removeMocks.js';
+import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
-import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
+import type { ElectronServiceOptions, ApiCommand, WebdriverClientFunc } from './types.js';
+
+type ElectronServiceApi = Record<
+  string,
+  { value: (...args: unknown[]) => Promise<unknown> } | { value: Record<string, ElectronServiceMock> }
+>;
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
@@ -37,10 +43,17 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     return this.#browser;
   }
 
+  set browser(browser) {
+    this.#browser = browser;
+  }
+
   #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     const api: ElectronServiceApi = {
-      execute: { value: execute.bind(this) as any },
-      mock: { value: mock.bind(this) as any },
+      _mocks: { value: {} as Record<string, ElectronServiceMock> },
+      execute: { value: execute.bind(this) as WebdriverClientFunc },
+      mock: { value: mock.bind(this) as WebdriverClientFunc },
+      mockAll: { value: mockAll.bind(this) as WebdriverClientFunc },
+      removeMocks: { value: removeMocks.bind(this) as WebdriverClientFunc },
     };
     this.#apiCommands.forEach(({ name, bridgeProp }) => {
       log.debug('adding api command for ', name);

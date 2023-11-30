@@ -1,7 +1,7 @@
 import { CONTEXT_BRIDGE_NOT_AVAILABLE } from '../constants.js';
 import type ElectronWorkerService from '../service.js';
 
-export async function execute<ReturnValue, InnerArguments extends any[]>(
+export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   this: ElectronWorkerService,
   script: string | ((...innerArgs: InnerArguments) => ReturnValue),
   ...args: InnerArguments
@@ -10,12 +10,12 @@ export async function execute<ReturnValue, InnerArguments extends any[]>(
    * parameter check
    */
   if (typeof script !== 'string' && typeof script !== 'function') {
-    throw new Error('Expecting script to be type of "string" or "function"!');
+    throw new Error('Expecting script to be type of "string" or "function"');
   }
 
   const browser = this.browser as WebdriverIO.Browser;
   if (!browser) {
-    throw new Error(`browser not yet initiated`);
+    throw new Error('WDIO browser is not yet initialised');
   }
 
   if (typeof script === 'string') {
