@@ -12,9 +12,9 @@ const { name, version } = packageJson;
 describe('Electron APIs using Multiremote', () => {
   it('should retrieve app metadata through the electron API', async () => {
     const appName = await browser.electron.execute((electron) => electron.app.getName());
-    expect(appName).toEqual([name, name]);
+    expect(appName).toBe([name, name]);
     const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
-    expect(appVersion).toEqual([version, version]);
+    expect(appVersion).toBe([version, version]);
   });
 
   it('should allow to retrieve API values from single instance', async () => {
