@@ -35,10 +35,20 @@ export interface ElectronServiceAPI {
    *
    * @example
    * ```js
-   * // mock the app's getName function
-   * await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
-   * const result = await browser.electron.dialog('showOpenDialog');
-   * expect(result).toEqual('I opened a dialog!');
+   * // mock the dialog API showOpenDialog method
+   * const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+   * await browser.electron.execute(
+   *   async (electron) =>
+   *     await electron.dialog.showOpenDialog({
+   *       properties: ['openFile', 'openDirectory'],
+   *     }),
+   * );
+   *
+   * const mockedShowOpenDialog = await showOpenDialog.update();
+   * expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
+   * expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+   *   properties: ['openFile', 'openDirectory'],
+   * });
    * ```
    */
   mock: <Interface extends ElectronInterface>(
@@ -53,10 +63,12 @@ export interface ElectronServiceAPI {
    *
    * @example
    * ```js
-   * // mock the app's getName function
-   * await browser.electron.mockAll('dialog');
-   * const result = await browser.electron.dialog('showOpenDialog');
-   * expect(result).toEqual('I opened a dialog!');
+   * // mock multiple functions from the app API
+   * const app = await browser.electron.mockAll('app');
+   * await app.getName.mockReturnValue('mocked-app');
+   * await app.getVersion.mockReturnValue('1.0.0-mocked.12');
+   * const result = await browser.electron.execute((electron) => `${electron.app.getName()}::${electron.app.getVersion()}`);
+   * expect(result).toEqual('mocked-app::1.0.0-mocked.12');
    * ```
    */
   mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, WrappedMockFn>>;
@@ -86,13 +98,13 @@ export interface ElectronServiceAPI {
    *
    * @example
    * ```js
-   * // clears all mocked functions
+   * // removes all mocked functions
    * await browser.electron.removeMocks()
-   * // clears all mocked functions of dialog API
+   * // removes all mocked functions of dialog API
    * await browser.electron.removeMocks('dialog')
    * ```
    *
-   * @param apiName mocked api to clear
+   * @param apiName mocked api to remove
    */
   removeMocks: (apiName?: string) => Promise<void>;
 }

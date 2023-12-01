@@ -17,7 +17,10 @@ export interface BrowserExtension {
   /**
    * Access the WebdriverIO Electron Service API.
    *
-   * - {@link ElectronServiceAPI.mock `browser.electron.mock`} - Mock a function from the Electron API.
+   * - {@link ElectronServiceAPI.execute `browser.electron.execute`} - Execute code in the Electron main process context
+   * - {@link ElectronServiceAPI.mock `browser.electron.mock`} - Mock a function from the Electron API, e.g. `dialog.showOpenDialog`
+   * - {@link ElectronServiceAPI.mockAll `browser.electron.mockAll`} - Mock an entire API object of the Electron API, e.g. `app` or `dialog`
+   * - {@link ElectronServiceAPI.removeMocks `browser.electron.removeMocks`} - Remove mock functions from the Electron API
    */
   electron: ElectronServiceAPI;
 }
