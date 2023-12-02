@@ -108,71 +108,93 @@ if (process.env.NODE_ENV === 'test') {
 }
 ```
 
-The APIs should not work outside of WDIO but for security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure the APIs are only exposed when the app is being tested.
-
-After importing the scripts the APIs should now be available in tests.
-
-Currently available APIs: [`app`](https://www.electronjs.org/docs/latest/api/app), [`browserWindow`](https://www.electronjs.org/docs/latest/api/browser-window), [`dialog`](https://www.electronjs.org/docs/latest/api/dialog), [`mainProcess`](https://www.electronjs.org/docs/latest/api/process).
-
-The service re-exports the WDIO browser object with the `.electron` namespace for API usage in your tests:
-
-```ts
-import { browser } from 'wdio-electron-service';
-
-// in a test
-const appName = await browser.electron.app('getName');
-```
+For security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure electron main process access is only available when the app is being tested.
 
 ### Execute Electron Scripts
 
-You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to potentially change the behavior of your application at runtime or trigger certain events.
+You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to access the Electron APIs in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
 
-For example you can trigger an message modal from your test via:
+For example, you can trigger an message modal from your test via:
 
 ```ts
-await browser.electron.execute((electron, param1, param2, param3) => {
-  const appWindow = electron.BrowserWindow.getFocusedWindow();
-  electron.dialog.showMessageBox(appWindow, {
-    message: 'Hello World!',
-    detail: `${param1} + ${param2} + ${param3} = ${param1 + param2 + param3}`
-  });
-}, 1, 2, 3)
+await browser.electron.execute(
+  (electron, param1, param2, param3) => {
+    const appWindow = electron.BrowserWindow.getFocusedWindow();
+    electron.dialog.showMessageBox(appWindow, {
+      message: 'Hello World!',
+      detail: `${param1} + ${param2} + ${param3} = ${param1 + param2 + param3}`,
+    });
+  },
+  1,
+  2,
+  3,
+);
 ```
 
 which will make the application trigger the following alert:
 
-![Execute Demo](./.github/assets/execute-demo.png "Execute Demo")
+![Execute Demo](./.github/assets/execute-demo.png 'Execute Demo')
 
-__Note:__ The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
+**Note:** The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
 
 ### Mocking Electron APIs
 
-You can mock Electron API functionality by calling the mock function with the API name, function name and mock return value. e.g. in a spec file:
+You can mock Electron API functionality by calling the mock function with the API name and function name. e.g. in a spec file:
 
 ```ts
-await browser.electron.mock('dialog', 'showOpenDialog', 'dialog opened!');
-const result = await browser.electron.dialog('showOpenDialog');
-console.log(result); // 'dialog opened!'
-```
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await browser.electron.execute(
+  async (electron) =>
+    await electron.dialog.showOpenDialog({
+      properties: ['openFile', 'openDirectory'],
+    }),
+);
 
-### Custom Electron API
-
-You can also implement a custom API if you wish. To do this you will need to define a handler in your main process:
-
-```ts
-import { ipcMain } from 'electron';
-
-ipcMain.handle('wdio-electron', () => {
-  // access some Electron or Node things on the main process
-  return 'such api';
+const mockedShowOpenDialog = await showOpenDialog.update();
+expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
+expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+  properties: ['openFile', 'openDirectory'],
 });
 ```
 
-The custom API can then be called in a spec file:
+Make sure to call `update()` on the mock before using it with `expect`.
+
+You can also pass a mockReturnValue, or set it after defining your mock:
 
 ```ts
-const someValue = await browser.electron.api('wow'); // default
-const someValue = await browser.electron.myCustomAPI('wow'); // configured using `customApiBrowserCommand`
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
+```
+
+```ts
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await showOpenDialog.mockReturnValue('I opened a dialog!');
+```
+
+Which results in the following:
+
+```ts
+const result = await browser.electron.execute(async (electron) => await electron.dialog.showOpenDialog());
+expect(result).toBe('I opened a dialog!');
+```
+
+You can mock all functions from an API using `mockAll`, the mocks are returned as an object:
+
+```ts
+const dialog = await browser.electron.mockAll('dialog');
+await dialog.showOpenDialog.mockReturnValue('I opened a dialog!');
+await dialog.showMessageBox.mockReturnValue('I opened a message box!');
+```
+
+Mocks can be removed by calling `removeMocks`, or directly by calling `unMock` on the mock itself:
+
+```ts
+// removes all mocked functions
+await browser.electron.removeMocks();
+// removes all mocked functions from the dialog API
+await browser.electron.removeMocks('dialog');
+// removes the showOpenDialog mock from the dialog API
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await showOpenDialog.unMock();
 ```
 
 ## Example

@@ -23,25 +23,15 @@ describe('preload', () => {
 
   it('should throw an error when the WDIO_ELECTRON environment variable does not exist', async () => {
     delete process.env.WDIO_ELECTRON;
-    await expect(
-      (window.wdioElectron as WdioElectronWindowObj).mainProcess.invoke('look', 'some', 'args'),
-    ).rejects.toThrow('Electron APIs can not be invoked outside of WDIO');
+    await expect((window.wdioElectron as WdioElectronWindowObj).execute('look', ['some', 'args'])).rejects.toThrow(
+      'Electron APIs can not be invoked outside of WDIO',
+    );
     expect(ipcRendererInvokeMock).not.toHaveBeenCalled();
   });
 
-  const apis = ['custom', 'mock', 'mainProcess', 'app', 'browserWindow', 'dialog'];
-
-  apis.forEach((apiName) => {
-    describe(`${apiName} api`, () => {
-      it('should call invoke with the expected params', async () => {
-        await (window.wdioElectron as WdioElectronWindowObj)[apiName as keyof WdioElectronWindowObj].invoke(
-          'look',
-          'some',
-          'args',
-        );
-        const ipcChannelName = apiName === 'custom' ? 'wdio-electron' : `wdio-electron.${apiName}`;
-        expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, 'look', 'some', 'args');
-      });
-    });
+  it('should call invoke with the expected params', async () => {
+    await (window.wdioElectron as WdioElectronWindowObj).execute('look', ['some', 'args']);
+    const ipcChannelName = 'wdio-electron.execute';
+    expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, 'look', ['some', 'args']);
   });
 });

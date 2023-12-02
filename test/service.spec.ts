@@ -1,57 +1,54 @@
-import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { describe, beforeEach, it, expect } from 'vitest';
 
-import ElectronWorkerService from '../src/service';
 import { mockProcessProperty } from './helpers';
-import { BrowserExtension } from '../src';
-
-interface CustomBrowserExtension extends BrowserExtension {
-  electron: BrowserExtension['electron'] & {
-    customApi?: (...arg: unknown[]) => Promise<unknown>;
-  };
-}
+import type { BrowserExtension } from '../src';
+import type ElectronWorkerService from '../src/service';
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
-describe('options validation', () => {
-  beforeEach(async () => {
-    mockProcessProperty('platform', 'darwin');
-    WorkerService = (await import('../src/service')).default;
-  });
-
-  it('should throw an error when there is a custom API command collision', () => {
-    expect(() => {
-      new WorkerService({
-        appBinaryPath: '/mock/dist',
-        customApiBrowserCommand: 'app',
-      });
-    }).toThrow('The command "app" is reserved, please provide a different value for customApiBrowserCommand');
-  });
-});
-
 describe('before', () => {
-  const addCommandMock = vi.fn();
-
   beforeEach(async () => {
     mockProcessProperty('platform', 'darwin');
     WorkerService = (await import('../src/service')).default;
   });
 
-  it('should add API commands to the browser object', () => {
-    instance = new WorkerService({
-      appBinaryPath: 'workspace/my-test-app/dist',
-      customApiBrowserCommand: 'customApi',
-    });
-    const browser = {
-      addCommand: addCommandMock,
-    } as unknown as WebdriverIO.Browser;
+  it('should add commands to the browser object', () => {
+    instance = new WorkerService();
+    const browser = {} as unknown as WebdriverIO.Browser;
     instance.before({}, [], browser);
-    const electronApi = browser.electron as CustomBrowserExtension['electron'];
-    expect(electronApi.app).toEqual(expect.any(Function));
-    expect(electronApi.browserWindow).toEqual(expect.any(Function));
-    expect(electronApi.customApi).toEqual(expect.any(Function));
-    expect(electronApi.dialog).toEqual(expect.any(Function));
-    expect(electronApi.mainProcess).toEqual(expect.any(Function));
-    expect(electronApi.mock).toEqual(expect.any(Function));
+    const serviceApi = browser.electron as BrowserExtension['electron'];
+    expect(serviceApi.execute).toEqual(expect.any(Function));
+    expect(serviceApi.mock).toEqual(expect.any(Function));
+    expect(serviceApi.mockAll).toEqual(expect.any(Function));
+    expect(serviceApi.removeMocks).toEqual(expect.any(Function));
+  });
+
+  describe('when multiremote', () => {
+    it('should add commands to the browser object when multiremote', () => {
+      instance = new WorkerService();
+      const browser = {
+        instanceMap: {
+          electron: { requestedCapabilities: { 'wdio:electronServiceOptions': {} } },
+          firefox: { requestedCapabilities: {} },
+        },
+        isMultiremote: true,
+        instances: ['electron', 'firefox'],
+        getInstance: (instanceName: string) => browser.instanceMap[instanceName as keyof typeof browser.instanceMap],
+      };
+      instance.browser = browser as unknown as WebdriverIO.MultiRemoteBrowser;
+      instance.before({}, [], instance.browser);
+
+      const electronInstance = instance.browser.getInstance('electron');
+      console.log('ZOMG', electronInstance, browser);
+      let serviceApi = electronInstance.electron;
+      expect(serviceApi.execute).toEqual(expect.any(Function));
+      expect(serviceApi.mock).toEqual(expect.any(Function));
+      expect(serviceApi.mockAll).toEqual(expect.any(Function));
+      expect(serviceApi.removeMocks).toEqual(expect.any(Function));
+
+      const firefoxInstance = browser.getInstance('firefox') as unknown as BrowserExtension;
+      expect(firefoxInstance.electron).toBeUndefined();
+    });
   });
 });

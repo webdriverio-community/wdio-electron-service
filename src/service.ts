@@ -2,63 +2,34 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
 import { execute } from './commands/execute.js';
-
-import { CUSTOM_CAPABILITY_NAME, CONTEXT_BRIDGE_NOT_AVAILABLE } from './constants.js';
-import type { ElectronServiceOptions, ApiCommand, ElectronServiceApi, WebdriverClientFunc } from './types.js';
+import { ElectronServiceMock, mock } from './commands/mock.js';
+import { removeMocks } from './commands/removeMocks.js';
+import { mockAll } from './commands/mockAll.js';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import type { ElectronServiceAPI } from './types.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
-  #apiCommands = [
-    { name: '', bridgeProp: 'custom' },
-    { name: 'app', bridgeProp: 'app' },
-    { name: 'browserWindow', bridgeProp: 'browserWindow' },
-    { name: 'dialog', bridgeProp: 'dialog' },
-    { name: 'mainProcess', bridgeProp: 'mainProcess' },
-    { name: 'mock', bridgeProp: 'mock' },
-  ];
 
-  constructor(globalOptions: ElectronServiceOptions) {
-    const { customApiBrowserCommand = 'api' } = globalOptions as ElectronServiceOptions;
-    const customCommandCollision = this.#apiCommands.find(
-      (command) => command.name === customApiBrowserCommand,
-    ) as ApiCommand;
-    if (customCommandCollision) {
-      const customCommandCollisionError = new Error(
-        `The command "${customCommandCollision.name}" is reserved, please provide a different value for customApiBrowserCommand`,
-      );
-      log.error(customCommandCollisionError);
-      throw customCommandCollisionError;
-    } else {
-      this.#apiCommands[0].name = customApiBrowserCommand;
-    }
-  }
+  constructor() {}
 
   get browser() {
     return this.#browser;
   }
 
-  #getElectronAPI(instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
-    const api: ElectronServiceApi = {
-      execute: { value: execute.bind(this) as any },
+  set browser(browser) {
+    this.#browser = browser;
+  }
+
+  #getElectronAPI() {
+    const api = {
+      _mocks: {} as Record<string, ElectronServiceMock>,
+      execute: execute.bind(this),
+      mock: mock.bind(this),
+      mockAll: mockAll.bind(this),
+      removeMocks: removeMocks.bind(this),
     };
-    this.#apiCommands.forEach(({ name, bridgeProp }) => {
-      log.debug('adding api command for ', name);
-      api[name] = {
-        value: async (...args: unknown[]) => {
-          try {
-            return await ((instance as WebdriverIO.Browser).executeAsync as WebdriverClientFunc)(
-              callApi,
-              CONTEXT_BRIDGE_NOT_AVAILABLE,
-              bridgeProp,
-              args,
-            );
-          } catch (e) {
-            throw new Error(`${name} error: ${(e as Error).message}`);
-          }
-        },
-      };
-    });
-    return Object.create({}, api);
+    return Object.assign({}, api) as ElectronServiceAPI;
   }
 
   before(
@@ -73,34 +44,20 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     /**
      * add electron API to browser object
      */
-    mrBrowser.electron = this.#getElectronAPI(mrBrowser);
+    mrBrowser.electron = this.#getElectronAPI();
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
         const caps =
           (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
           (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
+
         if (!caps[CUSTOM_CAPABILITY_NAME]) {
           continue;
         }
         log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
+        mrInstance.electron = this.#getElectronAPI();
       }
     }
   }
-}
-
-async function callApi(
-  contextBridgeNotAvailableError: string,
-  bridgePropName: string,
-  args: unknown[],
-  done: (result: unknown) => void,
-) {
-  if (window.wdioElectron === undefined) {
-    throw new Error(contextBridgeNotAvailableError);
-  }
-  if (window.wdioElectron[bridgePropName] === undefined) {
-    throw new Error(`"${bridgePropName}" API not found on ContextBridge`);
-  }
-  return done(await window.wdioElectron[bridgePropName].invoke(...args));
 }
