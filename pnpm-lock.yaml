@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@vitest/spy':
     specifier: ^1.0.0-beta.5
-    version: 1.0.0-beta.6
+    version: 1.0.1
   '@wdio/logger':
     specifier: ^8.16.17
     version: 8.16.17
@@ -1242,8 +1242,8 @@ packages:
       tinyspy: 2.2.0
     dev: true
 
-  /@vitest/spy@1.0.0-beta.6:
-    resolution: {integrity: sha512-AaR9a/ecsJ4lMeC5ZdsTfXqBVxA7ZrmT3q/ooUGXYvAtSxETn39gWC6h7wxUCtKwTLClq+5FmA03Co5/zmGMBw==}
+  /@vitest/spy@1.0.1:
+    resolution: {integrity: sha512-yXwm1uKhBVr/5MhVeSmtNqK+0q2RXIchJt8kokEKdrWLtkPeDgdbZ6SjR1VQGZuNdWL6sSBnLayIyVvcS0qLfA==}
     dependencies:
       tinyspy: 2.2.0
     dev: false
