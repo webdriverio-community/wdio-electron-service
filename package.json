@@ -65,7 +65,7 @@
     "test:integration:cjs": "cd example-cjs && pnpm run ci",
     "test:integration:esm": "cd example && pnpm run ci",
     "test:integration:electron-builder": "cd example-electron-builder && pnpm run ci",
-    "update:all": "pnpm --filter=\\!fixture-\\* up -iL",
+    "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
     "watch": "pnpm run build:esm --watch"
   },
   "keywords": [
