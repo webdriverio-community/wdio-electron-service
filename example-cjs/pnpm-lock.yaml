@@ -48,8 +48,8 @@ devDependencies:
     specifier: ^8.20.3
     version: 8.24.6
   electron:
-    specifier: ^27.1.3
-    version: 27.1.3
+    specifier: ^28.0.0
+    version: 28.0.0
   global-jsdom:
     specifier: ^9.1.0
     version: 9.1.0(jsdom@23.0.1)
@@ -70,7 +70,7 @@ devDependencies:
     version: 5.3.2
   wdio-electron-service:
     specifier: file:../
-    version: file:..(electron@27.1.3)(webdriverio@8.24.6)
+    version: file:..(electron@28.0.0)(webdriverio@8.24.6)
   webdriverio:
     specifier: ^8.23.3
     version: 8.24.6(typescript@5.3.2)
@@ -2336,10 +2336,6 @@ packages:
     dev: true
     optional: true
 
-  /electron-to-chromium@1.4.597:
-    resolution: {integrity: sha512-0XOQNqHhg2YgRVRUrS4M4vWjFCFIP2ETXcXe/0KIQBjXE9Cpy+tgzzYfuq6HGai3hWq0YywtG+5XK8fyG08EjA==}
-    dev: true
-
   /electron-to-chromium@1.4.601:
     resolution: {integrity: sha512-SpwUMDWe9tQu8JX5QCO1+p/hChAi9AE9UpoC3rcHVc+gdCGlbT3SGb5I1klgb952HRIyvt9wZhSz9bNBYz9swA==}
     dev: true
@@ -2359,8 +2355,8 @@ packages:
     dev: true
     optional: true
 
-  /electron@27.1.3:
-    resolution: {integrity: sha512-7eD8VMhhlL5J531OOawn00eMthUkX1e3qN5Nqd7eMK8bg5HxQBrn8bdPlvUEnCano9KhrVwaDnGeuzWoDOGpjQ==}
+  /electron@28.0.0:
+    resolution: {integrity: sha512-eDhnCFBvG0PGFVEpNIEdBvyuGUBsFdlokd+CtuCe2ER3P+17qxaRfWRxMmksCOKgDHb5Wif5UxqOkZSlA4snlw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -6414,7 +6410,7 @@ packages:
       readable-stream: 3.6.2
     dev: true
 
-  file:..(electron@27.1.3)(webdriverio@8.24.6):
+  file:..(electron@28.0.0)(webdriverio@8.24.6):
     resolution: {directory: .., type: directory}
     id: file:..
     name: wdio-electron-service
@@ -6430,8 +6426,8 @@ packages:
       '@wdio/logger': 8.16.17
       compare-versions: 6.1.0
       debug: 4.3.4(supports-color@8.1.1)
-      electron: 27.1.3
-      electron-to-chromium: 1.4.597
+      electron: 28.0.0
+      electron-to-chromium: 1.4.601
       find-versions: 5.1.0
       node-fetch: 3.3.2
       read-package-up: 11.0.0

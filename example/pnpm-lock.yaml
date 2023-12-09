@@ -27,8 +27,8 @@ devDependencies:
     specifier: ^8.17.0
     version: 8.24.6
   electron:
-    specifier: 28.0.0-beta.11
-    version: 28.0.0-beta.11
+    specifier: ^28.0.0
+    version: 28.0.0
   electron-builder:
     specifier: ^24.6.4
     version: 24.9.1
@@ -52,7 +52,7 @@ devDependencies:
     version: 5.3.2
   wdio-electron-service:
     specifier: file:../
-    version: file:..(electron@28.0.0-beta.11)(webdriverio@8.24.6)
+    version: file:..(electron@28.0.0)(webdriverio@8.24.6)
   webdriverio:
     specifier: ^8.23.3
     version: 8.24.6(typescript@5.3.2)
@@ -1983,8 +1983,8 @@ packages:
     resolution: {integrity: sha512-SpwUMDWe9tQu8JX5QCO1+p/hChAi9AE9UpoC3rcHVc+gdCGlbT3SGb5I1klgb952HRIyvt9wZhSz9bNBYz9swA==}
     dev: true
 
-  /electron@28.0.0-beta.11:
-    resolution: {integrity: sha512-B3qczetEdA2snHperFPjMfjRdegoZxr6spvfiMlhjeVa18IFzi7/yANguxfHE045+fHtzhy6lGl7Qf5ZqOqheQ==}
+  /electron@28.0.0:
+    resolution: {integrity: sha512-eDhnCFBvG0PGFVEpNIEdBvyuGUBsFdlokd+CtuCe2ER3P+17qxaRfWRxMmksCOKgDHb5Wif5UxqOkZSlA4snlw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -5186,7 +5186,7 @@ packages:
       readable-stream: 3.6.2
     dev: true
 
-  file:..(electron@28.0.0-beta.11)(webdriverio@8.24.6):
+  file:..(electron@28.0.0)(webdriverio@8.24.6):
     resolution: {directory: .., type: directory}
     id: file:..
     name: wdio-electron-service
@@ -5202,7 +5202,7 @@ packages:
       '@wdio/logger': 8.16.17
       compare-versions: 6.1.0
       debug: 4.3.4(supports-color@8.1.1)
-      electron: 28.0.0-beta.11
+      electron: 28.0.0
       electron-to-chromium: 1.4.601
       find-versions: 5.1.0
       node-fetch: 3.3.2
