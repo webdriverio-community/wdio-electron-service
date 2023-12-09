@@ -60,11 +60,11 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:integration && pnpm test:unit",
-    "test:integration": "cross-env DEBUG=wdio-electron-service pnpm test:integration:cjs && pnpm test:integration:esm && pnpm test:integration:multiremote",
+    "test:integration": "cross-env DEBUG=wdio-electron-service pnpm test:integration:cjs && pnpm test:integration:esm && pnpm test:integration:electron-builder",
     "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:cjs": "cd example-cjs && pnpm run ci",
     "test:integration:esm": "cd example && pnpm run ci",
-    "test:integration:multiremote": "cd example && pnpm run test:multiremote",
+    "test:integration:electron-builder": "cd example-electron-builder && pnpm run ci",
     "update:all": "pnpm --filter=\\!fixture-\\* up -iL",
     "watch": "pnpm run build:esm --watch"
   },
