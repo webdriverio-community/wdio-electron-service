@@ -1,13 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import url from 'node:url';
-
 import { browser } from 'wdio-electron-service';
 import { multiremotebrowser, expect } from '@wdio/globals';
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }));
-const { name, version } = packageJson;
+const { name, version } = globalThis.packageJson;
 
 describe('Electron APIs using Multiremote', () => {
   it('should retrieve app metadata through the electron API', async () => {

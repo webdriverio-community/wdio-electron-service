@@ -1,11 +1,15 @@
-/// <reference types="../dist/index.d.ts" />
-
 import url from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 import type { Options } from '@wdio/types';
+import type { PackageJson } from 'read-package-up';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'package.json'), { encoding: 'utf-8' }),
+) as PackageJson;
 
+globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
 export const config: Options.Testrunner = {
@@ -16,7 +20,7 @@ export const config: Options.Testrunner = {
       'wdio:electronServiceOptions': {
         appArgs: ['foo', 'bar=baz'],
       },
-    },
+    } as WebdriverIO.Capabilities,
   ],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
