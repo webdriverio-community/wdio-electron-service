@@ -27,7 +27,7 @@ export default [
   // Node & Electron main process files and scripts
   {
     files: ['**/*.{js,mjs,ts}'],
-    ignores: ['example/src/preload.ts', 'example/src/util.ts', 'example-cjs/src/preload.ts', 'example-cjs/src/util.ts'],
+    ignores: ['example*/src/preload.ts', 'example*/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -36,7 +36,7 @@ export default [
   },
   // Electron renderer process files
   {
-    files: ['example/src/preload.ts', 'example/src/util.ts', 'example-cjs/src/preload.ts', 'example-cjs/src/util.ts'],
+    files: ['example*/src/preload.ts', 'example*/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -87,24 +87,35 @@ export default [
   },
   // Example app TS files
   {
-    files: ['example/src/**/*.ts'],
+    files: ['example/**/*.ts'],
+    ignores: ['example/out/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example/tsconfig.json',
+        project: 'example/tsconfig.eslint.json',
       },
     },
   },
   {
-    files: ['example-cjs/src/**/*.ts'],
+    files: ['example-cjs/**/*.ts'],
+    ignores: ['example-cjs/out/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example-cjs/tsconfig.json',
+        project: 'example-cjs/tsconfig.eslint.json',
+      },
+    },
+  },
+  {
+    files: ['example-electron-builder/**/*.ts'],
+    ignores: ['example-electron-builder/out/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'example-electron-builder/tsconfig.eslint.json',
       },
     },
   },
   // Example E2E TS files
   {
-    files: ['example/e2e/*.spec.ts', 'example-cjs/e2e/*.spec.ts'],
+    files: ['example*/e2e/*.spec.ts'],
     languageOptions: {
       globals: {
         ...wdio.configs.recommended.globals,

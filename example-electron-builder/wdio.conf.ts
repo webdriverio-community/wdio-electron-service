@@ -1,0 +1,1 @@
+../example/wdio.conf.ts

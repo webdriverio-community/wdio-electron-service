@@ -1,11 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }));
-const { version: appVersion } = packageJson as { name: string; version: string };
+const { version: appVersion } = globalThis.packageJson;
 
 describe('mocking', () => {
   afterEach(async () => {
