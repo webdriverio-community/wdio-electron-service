@@ -21,10 +21,12 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
   }
 
-  #getElectronAPI() {
+  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
+    const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
     const api = {
       _mocks: {} as Record<string, ElectronServiceMock>,
-      execute: execute.bind(this),
+      execute: (script: string | ((...innerArgs: unknown[]) => unknown), ...args: unknown[]) =>
+        execute.apply(this, [browser, script, ...args]),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
       removeMocks: removeMocks.bind(this),
@@ -56,7 +58,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
           continue;
         }
         log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI();
+
+        mrInstance.electron = this.#getElectronAPI(mrInstance);
       }
     }
   }
