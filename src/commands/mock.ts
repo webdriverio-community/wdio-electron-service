@@ -16,12 +16,12 @@ type MockedFn = {
 };
 
 export class ElectronServiceMock {
-  #mockFns: Map<string, MockFn>;
+  mockFns: Map<string, MockFn>;
   apiName: ElectronInterface;
 
   constructor(apiName: ElectronInterface) {
     this.apiName = apiName;
-    this.#mockFns = new Map<string, MockFn>();
+    this.mockFns = new Map<string, MockFn>();
   }
 
   async init(): Promise<Record<string, WrappedMockFn>> {
@@ -75,7 +75,7 @@ export class ElectronServiceMock {
       mockReturnValue,
     );
     const mockFn = fn(mockImplementation) as MockFn;
-    this.#mockFns.set(funcName, mockFn);
+    this.mockFns.set(funcName, mockFn);
 
     return mockFn;
   }
@@ -86,7 +86,7 @@ export class ElectronServiceMock {
     if (!funcName) {
       throw new Error(`No mock registered for "${mockId}"`);
     }
-    const mock = this.#mockFns.get(funcName);
+    const mock = this.mockFns.get(funcName);
     if (!mock) {
       throw new Error(`No mock registered for "${mockId}"`);
     }
@@ -114,13 +114,13 @@ export class ElectronServiceMock {
   async unMock(funcName?: string) {
     // when funcName is unspecified we unmock all of the mocked functions
     if (!funcName) {
-      for (const [mockFnName] of this.#mockFns) {
+      for (const [mockFnName] of this.mockFns) {
         await this.unMock(mockFnName);
       }
       return;
     }
 
-    this.#mockFns.delete(funcName as string);
+    this.mockFns.delete(funcName as string);
     await browser.electron.execute(
       (electron, apiName, funcName) =>
         (
