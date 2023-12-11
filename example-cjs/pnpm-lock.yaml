@@ -34,7 +34,7 @@ devDependencies:
     version: 28.0.0
   global-jsdom:
     specifier: ^9.1.0
-    version: 9.1.0(jsdom@23.0.1)
+    version: 9.2.0(jsdom@23.0.1)
   jsdom:
     specifier: ^23.0.0
     version: 23.0.1
@@ -2896,11 +2896,11 @@ packages:
     dev: true
     optional: true
 
-  /global-jsdom@9.1.0(jsdom@23.0.1):
-    resolution: {integrity: sha512-mNjpiQBgCTApFeRZxU3L01pjzulHIbwtk+5rGDdqUDACTupvhHywpgaZtXNMn/97HofZzHEoXdNR5qFNgjZCSg==}
+  /global-jsdom@9.2.0(jsdom@23.0.1):
+    resolution: {integrity: sha512-mspbiuYwcl5nbl2VRvHNaF4SzSmSMCTJGXXatzHYZAf6u3rO/aLXQICbVNTVI+vN8jaq1s4QcvKYnWhVepSbFQ==}
     engines: {node: '>=16'}
     peerDependencies:
-      jsdom: '>=22 <23'
+      jsdom: '>=23 <24'
     dependencies:
       jsdom: 23.0.1
     dev: true
