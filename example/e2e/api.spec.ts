@@ -19,9 +19,9 @@ describe('mocking', () => {
           }),
       );
 
-      const mockedShowOpenDialog = await showOpenDialog.update();
-      expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
-      expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+      // const mockedShowOpenDialog = await showOpenDialog.update();
+      expect(showOpenDialog).toHaveBeenCalledTimes(1);
+      expect(showOpenDialog).toHaveBeenCalledWith({
         title: 'my dialog',
         properties: ['openFile', 'openDirectory'],
       });
@@ -36,9 +36,8 @@ describe('mocking', () => {
         }),
       );
 
-      const mockedShowOpenDialogSync = await showOpenDialogSync.update();
-      expect(mockedShowOpenDialogSync).toHaveBeenCalledTimes(1);
-      expect(mockedShowOpenDialogSync).toHaveBeenCalledWith({
+      expect(showOpenDialogSync).toHaveBeenCalledTimes(1);
+      expect(showOpenDialogSync).toHaveBeenCalledWith({
         title: 'my dialog',
         properties: ['openFile', 'openDirectory'],
       });
@@ -57,9 +56,8 @@ describe('mocking', () => {
             }),
         );
 
-        const mockedShowOpenDialog = await showOpenDialog.update();
-        expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
-        expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+        expect(showOpenDialog).toHaveBeenCalledTimes(1);
+        expect(showOpenDialog).toHaveBeenCalledWith({
           title: 'my dialog',
           properties: ['openFile', 'openDirectory'],
         });
@@ -96,15 +94,13 @@ describe('mocking', () => {
         }),
       );
 
-      const mockedShowOpenDialog = await mockedDialog.showOpenDialog.update();
-      expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
-      expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+      expect(mockedDialog.showOpenDialog).toHaveBeenCalledTimes(1);
+      expect(mockedDialog.showOpenDialog).toHaveBeenCalledWith({
         title: 'my dialog',
         properties: ['openFile', 'openDirectory'],
       });
-      const mockedShowOpenDialogSync = await mockedDialog.showOpenDialogSync.update();
-      expect(mockedShowOpenDialogSync).toHaveBeenCalledTimes(1);
-      expect(mockedShowOpenDialogSync).toHaveBeenCalledWith({
+      expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledTimes(1);
+      expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledWith({
         title: 'my dialog',
         properties: ['openFile', 'openDirectory'],
       });
@@ -118,10 +114,6 @@ describe('mocking', () => {
       expect(version).toBe('mocked version');
 
       await getVersion.unMock();
-
-      expect(async () => await getVersion.update()).rejects.toThrowError(
-        'No mock registered for "electron.app.getVersion"',
-      );
 
       version = await browser.electron.execute((electron) => electron.app.getVersion());
       expect(version).toBe(appVersion);

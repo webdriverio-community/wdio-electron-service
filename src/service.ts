@@ -76,4 +76,22 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       });
     }
   }
+
+  async afterCommand(commandName: string) {
+    if (commandName === 'execute') {
+      // ensure mocks are updated
+      const mocks = Object.values<ElectronServiceMock>((this.browser as WebdriverIO.Browser)?.electron._mocks);
+
+      await Promise.all(
+        mocks.map(async (mock: ElectronServiceMock) => {
+          const mockedFnNames = mock.mockFns.keys();
+          await Promise.all(
+            Array.from(mockedFnNames).map(async (mockedFnName: string) => {
+              await mock.getMock(mockedFnName);
+            }),
+          );
+        }),
+      );
+    }
+  }
 }
