@@ -6,8 +6,12 @@ import type { BrowserWindow } from 'electron';
 describe('application loading', () => {
   let screen: WebdriverIOQueries;
 
-  before(() => {
+  before(async () => {
     screen = setupBrowser(browser);
+    await browser.waitUntil(
+      async () => await browser.electron.execute((electron) => Boolean(electron.BrowserWindow.getAllWindows().length)),
+      { timeout: 20000 },
+    );
   });
 
   describe('keyboard input', () => {
