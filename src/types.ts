@@ -1,17 +1,9 @@
 import type * as Electron from 'electron';
 
-import ElectronLaunchService from './launcher.js';
-import ElectronWorkerService from './service.js';
-import type { Channel } from './constants.js';
-import type { ElectronServiceMock } from './commands/mock.js';
-
 /**
  * set this environment variable so that the preload script can be loaded
  */
 process.env.WDIO_ELECTRON = 'true';
-
-export const launcher = ElectronLaunchService;
-export default ElectronWorkerService;
 
 type MockFn = (...args: unknown[]) => unknown;
 type WrappedMockFn = {
@@ -22,10 +14,6 @@ type WrappedMockFn = {
 } & MockFn;
 
 export interface ElectronServiceAPI {
-  /**
-   * Used internally for storing mock objects
-   */
-  _mocks: Record<string, ElectronServiceMock>;
   /**
    * Mock a function from the Electron API.
    * @param apiName name of the API to mock
@@ -154,4 +142,6 @@ export type AppBuildInfo = {
   isForge: boolean;
 };
 
-export type ValidChannels = `${Channel}`;
+export type WdioElectronWindowObj = {
+  execute: (script: string, args: unknown[]) => unknown;
+};

@@ -21,14 +21,14 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   }
 
   return browser.execute(
-    function executeWithinElectron(errMessage, script, ...args) {
+    function executeWithinElectron(errMessage: string, script: string, ...args) {
       if (window.wdioElectron === undefined) {
         throw new Error(errMessage);
       }
-      return window.wdioElectron.execute(script as string, args);
+      return window.wdioElectron.execute(script, args);
     },
     CONTEXT_BRIDGE_NOT_AVAILABLE,
     `${script}`,
     ...args,
-  );
+  ) as ReturnValue;
 }

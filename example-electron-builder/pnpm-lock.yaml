@@ -33,13 +33,13 @@ devDependencies:
     specifier: ^24.6.4
     version: 24.9.1
   global-jsdom:
-    specifier: ^9.1.0
+    specifier: ^9.2.0
     version: 9.2.0(jsdom@23.0.1)
   jsdom:
     specifier: ^23.0.0
     version: 23.0.1
   rollup:
-    specifier: ^4.0.2
+    specifier: ^4.8.0
     version: 4.8.0
   ts-loader:
     specifier: ^9.4.4
@@ -860,12 +860,12 @@ packages:
       '@wdio/types': 8.24.12
       decamelize: 6.0.0
       deepmerge-ts: 5.1.0
-      edgedriver: 5.3.8
-      geckodriver: 4.2.1
+      edgedriver: 5.3.9
+      geckodriver: 4.3.0
       get-port: 7.0.0
       import-meta-resolve: 4.0.0
       locate-app: 2.1.0
-      safaridriver: 0.1.0
+      safaridriver: 0.1.1
       split2: 4.2.0
       wait-port: 1.1.0
     transitivePeerDependencies:
@@ -1312,7 +1312,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001568
-      electron-to-chromium: 1.4.609
+      electron-to-chromium: 1.4.610
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.2)
     dev: true
@@ -1929,8 +1929,8 @@ packages:
       which: 2.0.2
     dev: true
 
-  /edgedriver@5.3.8:
-    resolution: {integrity: sha512-FWLPDuwJDeGGgtmlqTXb4lQi/HV9yylLo1F9O1g9TLqSemA5T6xH28seUIfyleVirLFtDQyKNUxKsMhMT4IfnA==}
+  /edgedriver@5.3.9:
+    resolution: {integrity: sha512-G0wNgFMFRDnFfKaXG2R6HiyVHqhKwdQ3EgoxW3wPlns2wKqem7F+HgkWBcevN7Vz0nN4AXtskID7/6jsYDXcKw==}
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -1984,8 +1984,8 @@ packages:
       - supports-color
     dev: true
 
-  /electron-to-chromium@1.4.609:
-    resolution: {integrity: sha512-ihiCP7PJmjoGNuLpl7TjNA8pCQWu09vGyjlPYw1Rqww4gvNuCcmvl+44G+2QyJ6S2K4o+wbTS++Xz0YN8Q9ERw==}
+  /electron-to-chromium@1.4.610:
+    resolution: {integrity: sha512-mqi2oL1mfeHYtOdCxbPQYV/PL7YrQlxbvFEZ0Ee8GbDdShimqt2/S6z2RWqysuvlwdOrQdqvE0KZrBTipAeJzg==}
     dev: true
 
   /electron@28.0.0:
@@ -2397,8 +2397,8 @@ packages:
       globule: 1.3.4
     dev: true
 
-  /geckodriver@4.2.1:
-    resolution: {integrity: sha512-4m/CRk0OI8MaANRuFIahvOxYTSjlNAO2p9JmE14zxueknq6cdtB5M9UGRQ8R9aMV0bLGNVHHDnDXmoXdOwJfWg==}
+  /geckodriver@4.3.0:
+    resolution: {integrity: sha512-QfpvxFsMORwKpvnLslkHCr3NTCczHAvkte6+pQGsiUZXKBe6mO4TTb727b+9KMVSK6XZqhR6ZwImKdP+F5vS6A==}
     engines: {node: ^16.13 || >=18 || >=20}
     hasBin: true
     requiresBuild: true
@@ -4081,8 +4081,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /safaridriver@0.1.0:
-    resolution: {integrity: sha512-azzzIP3gR1TB9bVPv7QO4Zjw0rR1BWEU/s2aFdUMN48gxDjxEB13grAEuXDmkKPgE74cObymDxmAmZnL3clj4w==}
+  /safaridriver@0.1.1:
+    resolution: {integrity: sha512-dpCmh2EYKh9G61nR+ve0w2+WW2YJX59Rtke0pUoUXbvGKPDLK+NcL7I3VBS1UcGJbA6ptQTT82JcGwJHALD0kQ==}
     dev: true
 
   /safe-buffer@5.1.2:
@@ -5159,7 +5159,7 @@ packages:
       compare-versions: 6.1.0
       debug: 4.3.4(supports-color@8.1.1)
       electron: 28.0.0
-      electron-to-chromium: 1.4.609
+      electron-to-chromium: 1.4.610
       find-versions: 5.1.0
       node-fetch: 3.3.2
       read-package-up: 11.0.0

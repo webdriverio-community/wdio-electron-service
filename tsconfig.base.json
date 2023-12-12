@@ -13,6 +13,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
+    "stripInternal": true,
     "newLine": "lf",
     "noEmitOnError": true,
     "lib": ["DOM", "ESNext"],
