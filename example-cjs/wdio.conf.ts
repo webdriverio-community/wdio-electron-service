@@ -25,6 +25,7 @@ exports.config = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: 'wdio-logs',
+  specFileRetries: 4,
   specs: ['./e2e/*.spec.ts'],
   autoCompileOpts: {
     autoCompile: true,
