@@ -2,7 +2,6 @@ import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { execute } from '../../src/commands/execute';
 import ElectronWorkerService from '../../src';
-import { CONTEXT_BRIDGE_NOT_AVAILABLE } from '../../src/constants';
 
 describe('execute', () => {
   let workerService;
@@ -40,10 +39,6 @@ describe('execute', () => {
 
   it('should execute a function', async () => {
     await execute.call(workerService, () => 1 + 2 + 3);
-    expect(globalThis.browser.execute).toHaveBeenCalledWith(
-      expect.any(Function),
-      CONTEXT_BRIDGE_NOT_AVAILABLE,
-      '() => 1 + 2 + 3',
-    );
+    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
   });
 });
