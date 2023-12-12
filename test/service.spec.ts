@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { mockProcessProperty } from './helpers';
 import type { BrowserExtension } from '../src';
@@ -15,7 +15,9 @@ describe('before', () => {
 
   it('should add commands to the browser object', () => {
     instance = new WorkerService();
-    const browser = {} as unknown as WebdriverIO.Browser;
+    const browser = {
+      waitUntil: vi.fn().mockResolvedValue(true),
+    } as unknown as WebdriverIO.Browser;
     instance.before({}, [], browser);
     const serviceApi = browser.electron as BrowserExtension['electron'];
     expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -29,8 +31,11 @@ describe('before', () => {
       instance = new WorkerService();
       const browser = {
         instanceMap: {
-          electron: { requestedCapabilities: { 'wdio:electronServiceOptions': {} } },
-          firefox: { requestedCapabilities: {} },
+          electron: {
+            requestedCapabilities: { 'wdio:electronServiceOptions': {} },
+            waitUntil: vi.fn().mockResolvedValue(true),
+          },
+          firefox: { requestedCapabilities: {}, waitUntil: vi.fn().mockResolvedValue(true) },
         },
         isMultiremote: true,
         instances: ['electron', 'firefox'],
@@ -40,7 +45,6 @@ describe('before', () => {
       instance.before({}, [], instance.browser);
 
       const electronInstance = instance.browser.getInstance('electron');
-      console.log('ZOMG', electronInstance, browser);
       let serviceApi = electronInstance.electron;
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));
