@@ -1,7 +1,6 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { execute } from '../../src/commands/execute';
-import ElectronWorkerService from '../../src';
 
 describe('execute', () => {
   beforeEach(async () => {
@@ -36,7 +35,7 @@ describe('execute', () => {
   });
 
   it('should execute a function', async () => {
-    await execute.call(workerService, () => 1 + 2 + 3);
+    await execute(globalThis.browser, () => 1 + 2 + 3);
     expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
   });
 });

@@ -1,5 +1,3 @@
-import type ElectronWorkerService from '../service.js';
-
 export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   browser: WebdriverIO.Browser,
   script: string | ((...innerArgs: InnerArguments) => ReturnValue),
