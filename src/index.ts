@@ -4,7 +4,8 @@ import type { PackageJson } from 'read-package-up';
 
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
-import type { ElectronServiceAPI, ElectronServiceOptions } from './types.js';
+import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from './types.js';
+import type { ElectronServiceMock } from './commands/mock.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -23,10 +24,19 @@ export interface BrowserExtension {
    * - {@link ElectronServiceAPI.mockAll `browser.electron.mockAll`} - Mock an entire API object of the Electron API, e.g. `app` or `dialog`
    * - {@link ElectronServiceAPI.removeMocks `browser.electron.removeMocks`} - Remove mock functions from the Electron API
    */
-  electron: ElectronServiceAPI;
+  electron: ElectronServiceAPI & {
+    /**
+     * Used internally for storing mock objects
+     * @internal
+     */
+    _mocks: Record<string, ElectronServiceMock>;
+  };
 }
 
 declare global {
+  interface Window {
+    wdioElectron: WdioElectronWindowObj;
+  }
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}

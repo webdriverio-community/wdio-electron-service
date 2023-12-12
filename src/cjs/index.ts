@@ -1,6 +1,9 @@
 import { fn as vitestFn } from '@vitest/spy';
 import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Services, Options } from '@wdio/types';
+import type { PackageJson } from 'read-package-up';
+
+import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from './types.js';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
@@ -46,22 +49,36 @@ exports.launcher = class CJSElectronLauncher {
   }
 };
 
-export interface BrowserExtension {
-  electron: {
-    api: (...arg: unknown[]) => Promise<unknown>;
-    app: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
-    mainProcess: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
-    browserWindow: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
-    dialog: (funcName: string, ...arg: unknown[]) => Promise<unknown>;
-  };
+interface BrowserExtension {
+  /**
+   * Access the WebdriverIO Electron Service API.
+   *
+   * - {@link ElectronServiceAPI.execute `browser.electron.execute`} - Execute code in the Electron main process context
+   * - {@link ElectronServiceAPI.mock `browser.electron.mock`} - Mock a function from the Electron API, e.g. `dialog.showOpenDialog`
+   * - {@link ElectronServiceAPI.mockAll `browser.electron.mockAll`} - Mock an entire API object of the Electron API, e.g. `app` or `dialog`
+   * - {@link ElectronServiceAPI.removeMocks `browser.electron.removeMocks`} - Remove mock functions from the Electron API
+   */
+  electron: ElectronServiceAPI;
 }
 
 declare global {
+  interface Window {
+    wdioElectron: WdioElectronWindowObj;
+  }
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}
+    interface Capabilities {
+      /**
+       * custom capabilities to configure the Electron service
+       */
+      'wdio:electronServiceOptions'?: ElectronServiceOptions;
+    }
   }
+
+  var browser: WebdriverIO.Browser;
   var fn: typeof vitestFn;
+  var packageJson: PackageJson;
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
