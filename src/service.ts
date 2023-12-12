@@ -2,11 +2,11 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
 import { execute } from './commands/execute.js';
-import { ElectronServiceMock, mock } from './commands/mock.js';
+import { type ElectronServiceMock, mock } from './commands/mock.js';
 import { removeMocks } from './commands/removeMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { ElectronServiceAPI } from './types.js';
+import type { BrowserExtension } from './index.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
@@ -29,7 +29,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       mockAll: mockAll.bind(this),
       removeMocks: removeMocks.bind(this),
     };
-    return Object.assign({}, api) as ElectronServiceAPI;
+    return Object.assign({}, api) as BrowserExtension['electron'];
   }
 
   before(
