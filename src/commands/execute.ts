@@ -1,7 +1,5 @@
-import type ElectronWorkerService from '../service.js';
-
 export async function execute<ReturnValue, InnerArguments extends unknown[]>(
-  this: ElectronWorkerService,
+  browser: WebdriverIO.Browser,
   script: string | ((...innerArgs: InnerArguments) => ReturnValue),
   ...args: InnerArguments
 ): Promise<ReturnValue> {
@@ -12,7 +10,6 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     throw new Error('Expecting script to be type of "string" or "function"');
   }
 
-  const browser = this.browser as WebdriverIO.Browser;
   if (!browser) {
     throw new Error('WDIO browser is not yet initialised');
   }
