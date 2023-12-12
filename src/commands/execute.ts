@@ -1,4 +1,3 @@
-import { CONTEXT_BRIDGE_NOT_AVAILABLE } from '../constants.js';
 import type ElectronWorkerService from '../service.js';
 
 export async function execute<ReturnValue, InnerArguments extends unknown[]>(
@@ -23,13 +22,17 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   }
 
   return browser.execute(
-    function executeWithinElectron(errMessage: string, script: string, ...args) {
+    function executeWithinElectron(script: string, ...args) {
       if (window.wdioElectron === undefined) {
+        const errMessage =
+          'Electron context bridge not available! ' +
+          'Did you import the service hook scripts into your application via e.g. ' +
+          "`import('wdio-electron-service/main')` and `import('wdio-electron-service/preload')`?\n\n" +
+          'Find more information at https://webdriver.io/docs/desktop-testing/electron#api-configuration';
         throw new Error(errMessage);
       }
       return window.wdioElectron.execute(script, args);
     },
-    CONTEXT_BRIDGE_NOT_AVAILABLE,
     `${script}`,
     ...args,
   ) as ReturnValue;
