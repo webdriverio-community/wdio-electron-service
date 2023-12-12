@@ -19,7 +19,6 @@ describe('mocking', () => {
           }),
       );
 
-      // const mockedShowOpenDialog = await showOpenDialog.update();
       expect(showOpenDialog).toHaveBeenCalledTimes(1);
       expect(showOpenDialog).toHaveBeenCalledWith({
         title: 'my dialog',
