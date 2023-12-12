@@ -1,7 +1,7 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { execute } from '../../src/commands/execute';
-import { CONTEXT_BRIDGE_NOT_AVAILABLE } from '../../src/constants';
+import ElectronWorkerService from '../../src';
 
 describe('execute', () => {
   beforeEach(async () => {
@@ -36,11 +36,7 @@ describe('execute', () => {
   });
 
   it('should execute a function', async () => {
-    await execute(globalThis.browser, () => 1 + 2 + 3);
-    expect(globalThis.browser.execute).toHaveBeenCalledWith(
-      expect.any(Function),
-      CONTEXT_BRIDGE_NOT_AVAILABLE,
-      '() => 1 + 2 + 3',
-    );
+    await execute.call(workerService, () => 1 + 2 + 3);
+    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
   });
 });
