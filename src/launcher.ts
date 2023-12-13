@@ -70,7 +70,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
         if (appEntryPoint) {
           appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', 'electron');
-          appArgs = [`"${appEntryPoint}"`, ...(appArgs || [])];
+          appArgs = [`--app=${appEntryPoint}`, ...(appArgs || [])];
         } else if (!appBinaryPath) {
           log.debug('No app binary found');
           try {
