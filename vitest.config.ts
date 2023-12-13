@@ -1,7 +1,5 @@
 import { configDefaults, defineConfig } from 'vitest/config';
 
-const symlinkedCJSFiles = ['src/cjs/constants.ts', 'src/cjs/main.ts', 'src/cjs/preload.ts', 'src/cjs/types.ts'];
-
 export default defineConfig({
   test: {
     include: ['test/**/*.spec.ts'],
@@ -10,7 +8,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       include: ['src/**/*'],
-      exclude: [...symlinkedCJSFiles, 'src/types.ts'],
+      exclude: ['src/cjs/*.ts', 'src/index.ts', 'src/types.ts'],
       thresholds: {
         lines: 70,
         functions: 70,
