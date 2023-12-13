@@ -9,7 +9,7 @@
     "build:bundle": "tsc && rollup -c rollup.config.js",
     "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
     "ci": "pnpm i && pnpm build && pnpm test",
-    "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./all-logs",
+    "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
     "test": "wdio run ./wdio.conf.ts"
   },
