@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import util from 'node:util';
 import type { PathLike } from 'node:fs';
 
@@ -61,8 +62,16 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.debug(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
-        if (!appBinaryPath) {
+        let { appBinaryPath, appEntryPoint, appArgs } = Object.assign(
+          {},
+          this.#globalOptions,
+          cap[CUSTOM_CAPABILITY_NAME],
+        );
+
+        if (appEntryPoint) {
+          appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', 'electron');
+          appArgs = [`"${appEntryPoint}"`, ...(appArgs || [])];
+        } else if (!appBinaryPath) {
           log.debug('No app binary found');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
