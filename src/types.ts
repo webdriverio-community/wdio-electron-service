@@ -5,13 +5,13 @@ import type * as Electron from 'electron';
  */
 process.env.WDIO_ELECTRON = 'true';
 
-type MockFn = (...args: unknown[]) => unknown;
+export type AbstractFn = (...args: unknown[]) => unknown;
 type WrappedMockFn = {
-  mockReturnValue: (returnValue: unknown) => Promise<MockFn>;
-  mockImplementation: (implementationFn: () => unknown) => Promise<MockFn>;
-  update: () => Promise<MockFn>;
+  mockReturnValue: (returnValue: unknown) => Promise<AbstractFn>;
+  mockImplementation: (implementationFn: () => unknown) => Promise<AbstractFn>;
+  update: () => Promise<AbstractFn>;
   unMock: () => Promise<void>;
-} & MockFn;
+} & AbstractFn;
 
 export interface ElectronServiceAPI {
   /**
