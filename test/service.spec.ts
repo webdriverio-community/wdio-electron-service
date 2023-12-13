@@ -40,7 +40,6 @@ describe('before', () => {
       instance.before({}, [], instance.browser);
 
       const electronInstance = instance.browser.getInstance('electron');
-      console.log('ZOMG', electronInstance, browser);
       let serviceApi = electronInstance.electron;
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));
