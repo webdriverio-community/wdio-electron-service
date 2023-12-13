@@ -21,7 +21,7 @@ describe('application loading', () => {
     describe('when the make larger button is clicked', () => {
       it('should increase the window height and width by 10 pixels', async () => {
         let bounds = (await browser.electron.execute((electron) => {
-          const browserWindow = electron.BrowserWindow.getFocusedWindow() as BrowserWindow;
+          const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
         })) as {
           width: number;
@@ -36,7 +36,7 @@ describe('application loading', () => {
         biggerClickCount = await browser.$('.click-count .bigger').getText();
         expect(biggerClickCount).toEqual('1');
         bounds = (await browser.electron.execute((electron) => {
-          const browserWindow = electron.BrowserWindow.getFocusedWindow() as BrowserWindow;
+          const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
         })) as {
           width: number;
@@ -50,7 +50,7 @@ describe('application loading', () => {
     describe('when the make smaller button is clicked', () => {
       it('should decrease the window height and width by 10 pixels', async () => {
         let bounds = (await browser.electron.execute((electron) => {
-          const browserWindow = electron.BrowserWindow.getFocusedWindow() as BrowserWindow;
+          const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
         })) as {
           width: number;
@@ -61,7 +61,7 @@ describe('application loading', () => {
         const elem = await browser.$('.make-smaller');
         await elem.click();
         bounds = (await browser.electron.execute((electron) => {
-          const browserWindow = electron.BrowserWindow.getFocusedWindow() as BrowserWindow;
+          const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
         })) as {
           width: number;

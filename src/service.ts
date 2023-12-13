@@ -34,11 +34,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     return Object.assign({}, api) as BrowserExtension['electron'];
   }
 
-  before(
+  async before(
     _capabilities: Capabilities.RemoteCapability,
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
-  ): void {
+  ): Promise<void> {
     const browser = instance as WebdriverIO.Browser;
     const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
     this.#browser = browser;
@@ -57,10 +57,24 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         if (!caps[CUSTOM_CAPABILITY_NAME]) {
           continue;
         }
-        log.debug('Adding Electron API to browser object instance named: ', instance);
 
+        log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
+
+        // wait until an Electron BrowserWindow is available
+        await mrInstance.waitUntil(async () => {
+          const numWindows = await mrInstance.electron.execute(
+            (electron) => electron.BrowserWindow.getAllWindows().length,
+          );
+          return numWindows > 0;
+        });
       }
+    } else {
+      // wait until an Electron BrowserWindow is available
+      await browser.waitUntil(async () => {
+        const numWindows = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows().length);
+        return numWindows > 0;
+      });
     }
   }
 }
