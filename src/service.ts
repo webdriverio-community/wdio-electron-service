@@ -6,7 +6,7 @@ import { type ElectronServiceMock, mock } from './commands/mock.js';
 import { removeMocks } from './commands/removeMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { BrowserExtension } from './index.js';
+import type { AbstractFn, BrowserExtension } from './index.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
@@ -25,8 +25,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
     const api = {
       _mocks: {} as Record<string, ElectronServiceMock>,
-      execute: (script: string | ((...innerArgs: unknown[]) => unknown), ...args: unknown[]) =>
-        execute.apply(this, [browser, script, ...args]),
+      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
       removeMocks: removeMocks.bind(this),

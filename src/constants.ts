@@ -11,11 +11,5 @@ export const APP_NAME_DETECTION_ERROR =
 export const CUSTOM_CAPABILITY_NAME = 'wdio:electronServiceOptions';
 
 export enum Channel {
-  Custom = 'wdio-electron',
-  App = 'wdio-electron.app',
-  BrowserWindow = 'wdio-electron.browserWindow',
-  Dialog = 'wdio-electron.dialog',
-  MainProcess = 'wdio-electron.mainProcess',
-  Mock = 'wdio-electron.mock',
   Execute = 'wdio-electron.execute',
 }
