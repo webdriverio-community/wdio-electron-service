@@ -5,10 +5,12 @@
   "module": "dist/main.bundle.js",
   "type": "module",
   "scripts": {
+    "prepare": "pnpm fix-electron-install",
     "build": "tsc && rollup -c rollup.config.js && cp ./src/index.html ./dist",
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
+    "fix-electron-install": "rm -rf ./node_modules/electron/dist && node ./node_modules/electron/install.js",
     "test": "wdio run ./wdio.conf.ts"
   },
   "devDependencies": {
