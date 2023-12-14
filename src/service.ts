@@ -6,6 +6,7 @@ import { type ElectronServiceMock, mock } from './commands/mock.js';
 import { removeMocks } from './commands/removeMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import mockStore from './mockStore.js';
 import type { AbstractFn, BrowserExtension } from './index.js';
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
@@ -77,19 +78,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  async afterCommand(commandName: string) {
-    if (commandName === 'execute') {
-      // ensure mocks are updated
-      const mocks = Object.values<ElectronServiceMock>((this.browser as WebdriverIO.Browser)?.electron._mocks);
+  async afterCommand() {
+    // ensure mocks are updated
+    const mockIds = [...mockStore.mockFns.keys()];
 
+    if (mockIds.length > 0) {
       await Promise.all(
-        mocks.map(async (mock: ElectronServiceMock) => {
-          const mockedFnNames = mock.mockFns.keys();
-          await Promise.all(
-            Array.from(mockedFnNames).map(async (mockedFnName: string) => {
-              await mock.getMock(mockedFnName);
-            }),
-          );
+        mockIds.map(async (mockId: string) => {
+          await mockStore.getMock(mockId);
         }),
       );
     }
