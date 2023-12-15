@@ -1,4 +1,5 @@
 import type * as Electron from 'electron';
+import type { ElectronServiceMock } from './mock.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -6,12 +7,6 @@ import type * as Electron from 'electron';
 process.env.WDIO_ELECTRON = 'true';
 
 export type AbstractFn = (...args: unknown[]) => unknown;
-type WrappedMockFn = {
-  mockReturnValue: (returnValue: unknown) => Promise<AbstractFn>;
-  mockImplementation: (implementationFn: () => unknown) => Promise<AbstractFn>;
-  update: () => Promise<AbstractFn>;
-  unMock: () => Promise<void>;
-} & AbstractFn;
 
 export interface ElectronServiceAPI {
   /**
@@ -43,7 +38,7 @@ export interface ElectronServiceAPI {
     apiName: Interface,
     funcName?: string,
     returnValue?: unknown,
-  ) => Promise<WrappedMockFn>;
+  ) => Promise<ElectronServiceMock>;
   /**
    * Mock all functions from an Electron API.
    * @param apiName name of the API to mock
@@ -59,7 +54,7 @@ export interface ElectronServiceAPI {
    * expect(result).toEqual('mocked-app::1.0.0-mocked.12');
    * ```
    */
-  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, WrappedMockFn>>;
+  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, ElectronServiceMock>>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -144,4 +139,5 @@ export type AppBuildInfo = {
 
 export type WdioElectronWindowObj = {
   execute: (script: string, args: unknown[]) => unknown;
+  originalApi?: Record<ElectronInterface, ElectronType[ElectronInterface]>;
 };

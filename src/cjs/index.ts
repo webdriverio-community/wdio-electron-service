@@ -3,7 +3,7 @@ import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Services, Options } from '@wdio/types';
 import type { PackageJson } from 'read-package-up';
 
-import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from './types.js';
+import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from '../types.js';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;

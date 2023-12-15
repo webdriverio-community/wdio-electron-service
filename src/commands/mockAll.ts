@@ -1,10 +1,17 @@
-import { ElectronServiceMock } from './mock.js';
+import { ElectronServiceMock } from 'src/mock.js';
+import { mock } from './mock.js';
 import type { ElectronInterface } from 'src/types.js';
 
 export async function mockAll(apiName: string) {
-  const electronServiceMock = new ElectronServiceMock(apiName as ElectronInterface);
+  const apiFnNames = await browser.electron.execute(
+    (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
+    apiName,
+  );
+  const mockedApis: Record<string, ElectronServiceMock> = apiFnNames
+    .split(',')
+    .reduce((a, funcName) => ({ ...a, [funcName]: 'placeholder' }), {});
 
-  browser.electron._mocks[apiName] = electronServiceMock;
-
-  return await electronServiceMock.init();
+  for (const funcName in mockedApis) {
+    await mock(apiName as ElectronInterface, funcName);
+  }
 }

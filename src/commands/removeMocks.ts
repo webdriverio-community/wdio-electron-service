@@ -1,8 +1,10 @@
+import mockStore from '../mockStore.js';
+
 export async function removeMocks(apiName?: string) {
-  for (const mockName in browser.electron._mocks) {
-    const mock = browser.electron._mocks[mockName];
-    if (!apiName || mock.apiName === apiName) {
-      await mock.unMock();
+  for (const mockName in mockStore.mockFns) {
+    const mock = mockStore.getMock(mockName);
+    if (!apiName || (await mock).getMockName() === apiName) {
+      (await mock).mockRestore();
     }
   }
 }
