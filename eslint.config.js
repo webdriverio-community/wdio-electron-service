@@ -61,6 +61,7 @@ export default [
       ...ts.configs['eslint-recommended'].rules,
       ...ts.configs.recommended.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
+      'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
       '@typescript-eslint/no-empty-interface': [
         'error',
         {
