@@ -1,6 +1,6 @@
-import { ElectronServiceMock } from 'src/mock.js';
+import { ElectronServiceMock } from '../mock.js';
 import { mock } from './mock.js';
-import type { ElectronInterface } from 'src/types.js';
+import type { ElectronInterface } from '../types.js';
 
 export async function mockAll(apiName: string) {
   const apiFnNames = await browser.electron.execute(

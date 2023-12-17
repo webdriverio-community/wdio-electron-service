@@ -1,6 +1,6 @@
 import { fn as vitestFn, MockContext, type Mock } from '@vitest/spy';
-import type { ElectronInterface, ElectronType } from './types';
-import log from './log';
+import type { ElectronInterface, ElectronType } from './types.js';
+import log from './log.js';
 
 type BasicFn = (...args: unknown[]) => unknown;
 type BasicAsyncFn = (...args: unknown[]) => Promise<unknown>;
