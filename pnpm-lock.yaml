@@ -33,7 +33,7 @@ dependencies:
 devDependencies:
   '@eslint/js':
     specifier: ^8.55.0
-    version: 8.55.0
+    version: 8.56.0
   '@testing-library/webdriverio':
     specifier: ^3.2.1
     version: 3.2.1(webdriverio@8.26.2)
@@ -440,11 +440,6 @@ packages:
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@eslint/js@8.55.0:
-    resolution: {integrity: sha512-qQfo2mxH5yVom1kacMtZZJFVdW+E70mqHMJvVg6WTLo+VBuQJ4TojZlfWBjK0ve5BdEeNAVxOsl/nvNMpJOaJA==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
   /@eslint/js@8.56.0:
