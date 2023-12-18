@@ -19,7 +19,7 @@ dependencies:
     version: 4.3.4
   electron-to-chromium:
     specifier: ^1.4.610
-    version: 1.4.610
+    version: 1.4.615
   find-versions:
     specifier: ^5.1.0
     version: 5.1.0
@@ -2291,8 +2291,8 @@ packages:
       jake: 10.8.7
     dev: true
 
-  /electron-to-chromium@1.4.610:
-    resolution: {integrity: sha512-mqi2oL1mfeHYtOdCxbPQYV/PL7YrQlxbvFEZ0Ee8GbDdShimqt2/S6z2RWqysuvlwdOrQdqvE0KZrBTipAeJzg==}
+  /electron-to-chromium@1.4.615:
+    resolution: {integrity: sha512-/bKPPcgZVUziECqDc+0HkT87+0zhaWSZHNXqF8FLd2lQcptpmUFwoCSWjCdOng9Gdq+afKArPdEg/0ZW461Eng==}
     dev: false
 
   /electron@28.0.0:
