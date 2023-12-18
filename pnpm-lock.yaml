@@ -66,7 +66,7 @@ devDependencies:
     version: 8.26.1(typescript@5.3.3)
   '@wdio/types':
     specifier: ^8.20.0
-    version: 8.24.12
+    version: 8.26.2
   cross-env:
     specifier: ^7.0.3
     version: 7.0.3
@@ -1309,6 +1309,13 @@ packages:
 
   /@wdio/types@8.24.12:
     resolution: {integrity: sha512-SaD3OacDiW06DvSgAQ7sDBbpiI9qZRg7eoVYeBg3uSGVtUq84vTETRhhV7D6xTC00IqZu+mmN2TY5/q+7Gqy7w==}
+    engines: {node: ^16.13 || >=18}
+    dependencies:
+      '@types/node': 20.10.4
+    dev: true
+
+  /@wdio/types@8.26.2:
+    resolution: {integrity: sha512-LBaoTr4jrPu9knQBN1/7BD3SLkaGoQPcbE3GKIxeaOu0fRMOtEr22HxoONahOlQDvyPoOBmSoZw8wUvIfwhrRw==}
     engines: {node: ^16.13 || >=18}
     dependencies:
       '@types/node': 20.10.4
