@@ -125,6 +125,64 @@ describe('mocking', () => {
     });
   });
 
+  describe('mockClear', () => {
+    it('should clear the mock', async () => {
+      const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+      await mockShowOpenDialog.mockReturnValue('mocked name');
+
+      await browser.electron.execute((electron) => electron.dialog.showOpenDialog({}));
+      await browser.electron.execute((electron) =>
+        electron.dialog.showOpenDialog({
+          title: 'my dialog',
+        }),
+      );
+      await browser.electron.execute((electron) =>
+        electron.dialog.showOpenDialog({
+          title: 'another dialog',
+        }),
+      );
+
+      expect(mockShowOpenDialog.mock.calls).toStrictEqual([
+        [{}],
+        [
+          {
+            title: 'my dialog',
+          },
+        ],
+        [
+          {
+            title: 'another dialog',
+          },
+        ],
+      ]);
+
+      expect(mockShowOpenDialog.mock.instances).toStrictEqual([
+        expect.any(Function),
+        expect.any(Function),
+        expect.any(Function),
+      ]);
+      expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([8, 9, 10]);
+      expect(mockShowOpenDialog.mock.lastCall).toStrictEqual([
+        {
+          title: 'another dialog',
+        },
+      ]);
+      expect(mockShowOpenDialog.mock.results).toStrictEqual([
+        { type: 'return', value: undefined },
+        { type: 'return', value: undefined },
+        { type: 'return', value: undefined },
+      ]);
+
+      await mockShowOpenDialog.mockClear();
+
+      expect(mockShowOpenDialog.mock.calls).toStrictEqual([]);
+      expect(mockShowOpenDialog.mock.instances).toStrictEqual([]);
+      expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([]);
+      expect(mockShowOpenDialog.mock.lastCall).toBeUndefined();
+      expect(mockShowOpenDialog.mock.results).toStrictEqual([]);
+    });
+  });
+
   // describe('mockAll', () => {
   //   it('should mock all functions on an API', async () => {
   //     const mockedDialog = await browser.electron.mockAll('dialog');

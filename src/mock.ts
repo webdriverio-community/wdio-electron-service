@@ -71,6 +71,7 @@ async function setElectronMock(
 export function createMock(apiName: string, funcName: string) {
   const mock = vitestFn() as unknown as AsyncMock;
   const originalMockImplementation = mock.mockImplementation;
+  const originalMockClear = mock.mockClear;
 
   mock.updating = false;
   mock.mockName(`electron.${apiName}.${funcName}`);
@@ -125,32 +126,6 @@ export function createMock(apiName: string, funcName: string) {
     return mock;
   };
 
-  // mock.mockResolvedValue = async (obj: unknown) => {
-  //   await setElectronMock(apiName, funcName, undefined, Promise.resolve(obj));
-  //   mock.mockResolvedValue(obj);
-  //   return mock;
-  // };
-
-  // mock.mockResolvedValueOnce = async (obj: unknown) => {
-  //   const implementationFn = () => mock.mockReset();
-  //   await setElectronMock(apiName, funcName, implementationFn, Promise.resolve(obj));
-  //   mock.mockResolvedValueOnce(obj);
-  //   return mock;
-  // };
-
-  // mock.mockRejectedValue = async (obj: unknown) => {
-  //   await setElectronMock(apiName, funcName, undefined, Promise.reject(obj));
-  //   mock.mockReturnValue(obj);
-  //   return mock;
-  // };
-
-  // mock.mockRejectedValueOnce = async (obj: unknown) => {
-  //   const implementationFn = () => mock.mockReset();
-  //   await setElectronMock(apiName, funcName, implementationFn, Promise.reject(obj));
-  //   mock.mockRejectedValueOnce(obj);
-  //   return mock;
-  // };
-
   mock.update = async () => {
     mock.updating = true;
     const calls = await browser.electron.execute(
@@ -178,19 +153,16 @@ export function createMock(apiName: string, funcName: string) {
   };
 
   mock.mockClear = async () => {
-    mock.mock.calls = [];
-    mock.mock.instances = [];
-    mock.mock.invocationCallOrder = [];
-    mock.mock.lastCall = undefined;
-    mock.mock.results = [];
     await browser.electron.execute(
-      (electron, apiName, funcName) =>
+      (electron, apiName, funcName) => {
         (
           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock
-        ).mockClear(),
+        ).mockClear();
+      },
       apiName,
       funcName,
     );
+    originalMockClear();
     return mock;
   };
 
@@ -207,6 +179,32 @@ export function createMock(apiName: string, funcName: string) {
     );
     return mock;
   };
+
+  // mock.mockResolvedValue = async (obj: unknown) => {
+  //   await setElectronMock(apiName, funcName, undefined, Promise.resolve(obj));
+  //   mock.mockResolvedValue(obj);
+  //   return mock;
+  // };
+
+  // mock.mockResolvedValueOnce = async (obj: unknown) => {
+  //   const implementationFn = () => mock.mockReset();
+  //   await setElectronMock(apiName, funcName, implementationFn, Promise.resolve(obj));
+  //   mock.mockResolvedValueOnce(obj);
+  //   return mock;
+  // };
+
+  // mock.mockRejectedValue = async (obj: unknown) => {
+  //   await setElectronMock(apiName, funcName, undefined, Promise.reject(obj));
+  //   mock.mockReturnValue(obj);
+  //   return mock;
+  // };
+
+  // mock.mockRejectedValueOnce = async (obj: unknown) => {
+  //   const implementationFn = () => mock.mockReset();
+  //   await setElectronMock(apiName, funcName, implementationFn, Promise.reject(obj));
+  //   mock.mockRejectedValueOnce(obj);
+  //   return mock;
+  // };
 
   return mock;
 }
