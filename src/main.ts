@@ -1,6 +1,6 @@
 import electron, { app, ipcMain } from 'electron';
 import { fn, spyOn } from '@vitest/spy';
-import { copyStrict } from 'fast-copy';
+import copy from 'fast-copy';
 
 import { Channel } from './constants.js';
 import { ElectronInterface, ElectronType } from './types.js';
@@ -17,7 +17,7 @@ app.whenReady().then(() => {
     for (const apiElement in electron[apiName]) {
       const apiElementName = apiElement as keyof ElectronType[ElectronInterface];
 
-      globalThis.originalApi[apiName][apiElementName] = copyStrict(electron[apiName][apiElementName]);
+      globalThis.originalApi[apiName][apiElementName] = copy(electron[apiName][apiElementName]);
     }
   }
 });
