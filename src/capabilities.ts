@@ -1,6 +1,6 @@
 import type { Capabilities } from '@wdio/types';
 
-import type { ElectronServiceOptions } from './types';
+import type { ElectronServiceOptions } from './types.js';
 
 export function getChromeOptions(options: ElectronServiceOptions, cap: WebdriverIO.Capabilities) {
   const existingOptions = cap['goog:chromeOptions'] || {};
