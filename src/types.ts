@@ -1,5 +1,5 @@
 import type * as Electron from 'electron';
-import type { ElectronServiceMock } from './mock.js';
+import type { AsyncMock } from './mock.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -38,7 +38,7 @@ export interface ElectronServiceAPI {
     apiName: Interface,
     funcName?: string,
     returnValue?: unknown,
-  ) => Promise<ElectronServiceMock>;
+  ) => Promise<AsyncMock>;
   /**
    * Mock all functions from an Electron API.
    * @param apiName name of the API to mock
@@ -54,7 +54,7 @@ export interface ElectronServiceAPI {
    * expect(result).toEqual('mocked-app::1.0.0-mocked.12');
    * ```
    */
-  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, ElectronServiceMock>>;
+  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, AsyncMock>>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -139,5 +139,4 @@ export type AppBuildInfo = {
 
 export type WdioElectronWindowObj = {
   execute: (script: string, args: unknown[]) => unknown;
-  originalApi?: Record<ElectronInterface, ElectronType[ElectronInterface]>;
 };

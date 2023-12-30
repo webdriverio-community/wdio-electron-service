@@ -1,41 +1,31 @@
 import log from './log.js';
-import type { ElectronServiceMock } from './mock.js';
+import type { AsyncMock } from './mock.js';
 
 export class ElectronServiceMockStore {
-  mockFns: Map<string, ElectronServiceMock>;
+  #mockFns: Map<string, AsyncMock>;
 
   constructor() {
-    this.mockFns = new Map<string, ElectronServiceMock>();
+    this.#mockFns = new Map<string, AsyncMock>();
   }
 
-  setMock(mock: ElectronServiceMock): void {
-    this.mockFns.set(mock.getMockName(), mock);
+  setMock(mock: AsyncMock): AsyncMock {
+    this.#mockFns.set(mock.getMockName(), mock);
+    return mock;
   }
 
-  async getMock(mockId: string) {
+  getMock(mockId: string) {
     log.debug(`getting mock instance for ${mockId}...`);
-    const mock = this.mockFns.get(mockId);
+    const mock = this.#mockFns.get(mockId);
     if (!mock) {
       throw new Error(`No mock registered for "${mockId}"`);
     }
 
-    await mock.update();
-
     return mock;
   }
 
-  //   async unMock(mockId: string) {
-  //     const [_, apiName, funcName] = mockId.split('.');
-  //     this.mockFns.delete(mockId);
-  //     await browser.electron.execute(
-  //       (electron, apiName, funcName) =>
-  //         (
-  //           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as MockedFn
-  //         ).revert(),
-  //       apiName,
-  //       funcName,
-  //     );
-  //   }
+  getMocks() {
+    return Array.from(this.#mockFns.entries());
+  }
 }
 
 const mockStore = new ElectronServiceMockStore();

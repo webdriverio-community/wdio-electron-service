@@ -8,6 +8,38 @@ process.env.WDIO_ELECTRON = 'true';
 
 export type AbstractFn = (...args: unknown[]) => unknown;
 
+type Omitted =
+  | 'mockImplementation'
+  | 'mockImplementationOnce'
+  | 'mockReturnValue'
+  | 'mockReturnValueOnce'
+  | 'mockResolvedValue'
+  | 'mockResolvedValueOnce'
+  | 'mockRejectedValue'
+  | 'mockRejectedValueOnce'
+  | 'withImplementation';
+
+interface AsyncMockInstance extends Omit<Mock, Omitted> {
+  mockName(name: string): any;
+  mockClear(): any;
+  mockReset(): any;
+  mockImplementation(fn: AbstractFn): Promise<AsyncMock>;
+  mockImplementationOnce(fn: AbstractFn): Promise<any>;
+  mockReturnValue(obj: unknown): Promise<any>;
+  mockReturnValueOnce(obj: unknown): Promise<any>;
+  mockResolvedValue(obj: unknown): Promise<any>;
+  mockResolvedValueOnce(obj: unknown): Promise<any>;
+  mockRejectedValue(obj: unknown): Promise<any>;
+  mockRejectedValueOnce(obj: unknown): Promise<any>;
+  mockRestore(): Promise<AsyncMock>;
+  update(): Promise<AsyncMock>;
+}
+
+export interface AsyncMock<TArgs extends any[] = any, TReturns = any> extends AsyncMockInstance {
+  new (...args: TArgs): TReturns;
+  (...args: TArgs): TReturns;
+}
+
 export interface ElectronServiceAPI {
   /**
    * Mock a function from the Electron API.
@@ -38,7 +70,7 @@ export interface ElectronServiceAPI {
     apiName: Interface,
     funcName?: string,
     returnValue?: unknown,
-  ) => Promise<Mock>;
+  ) => Promise<AsyncMock>;
   /**
    * Mock all functions from an Electron API.
    * @param apiName name of the API to mock
@@ -54,7 +86,7 @@ export interface ElectronServiceAPI {
    * expect(result).toEqual('mocked-app::1.0.0-mocked.12');
    * ```
    */
-  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, Mock>>;
+  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, AsyncMock>>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -139,5 +171,4 @@ export type AppBuildInfo = {
 
 export type WdioElectronWindowObj = {
   execute: (script: string, args: unknown[]) => unknown;
-  originalApi?: Record<ElectronInterface, ElectronType[ElectronInterface]>;
 };

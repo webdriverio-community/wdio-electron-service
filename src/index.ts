@@ -1,10 +1,16 @@
 import { browser as wdioBrowser } from '@wdio/globals';
-import { fn as vitestFn } from '@vitest/spy';
+import { fn as vitestFn, spyOn as vitestSpyOn } from '@vitest/spy';
 import type { PackageJson } from 'read-package-up';
 
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
-import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from './types.js';
+import type {
+  ElectronInterface,
+  ElectronServiceAPI,
+  ElectronServiceOptions,
+  ElectronType,
+  WdioElectronWindowObj,
+} from './types.js';
 
 /**
  * set this environment variable so that the preload script can be loaded
@@ -30,6 +36,7 @@ declare global {
   interface Window {
     wdioElectron: WdioElectronWindowObj;
   }
+
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface MultiRemoteBrowser extends BrowserExtension {}
@@ -41,8 +48,10 @@ declare global {
     }
   }
 
-  var browser: WebdriverIO.Browser;
   var fn: typeof vitestFn;
+  var spyOn: typeof vitestSpyOn;
+  var originalApi: Record<ElectronInterface, ElectronType[ElectronInterface]>;
+  var browser: WebdriverIO.Browser;
   var packageJson: PackageJson;
 }
 

@@ -45,7 +45,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     /**
      * add electron API to browser object
      */
-    mrBrowser.electron = this.#getElectronAPI();
+    browser.electron = this.#getElectronAPI();
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
@@ -77,14 +77,18 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  async afterCommand() {
+  async afterCommand(commandName: string, _args: unknown[][]) {
     // ensure mocks are updated
-    const mockIds = [...mockStore.mockFns.keys()];
+    const mocks = mockStore.getMocks();
 
-    if (mockIds.length > 0) {
+    if (commandName.includes('execute') && mocks.length > 0) {
       await Promise.all(
-        mockIds.map(async (mockId: string) => {
-          await mockStore.getMock(mockId);
+        mocks.map(async ([_mockId, mock]) => {
+          if (!mock.updating) {
+            return await mock.update();
+          } else {
+            return Promise.resolve();
+          }
         }),
       );
     }
