@@ -51,11 +51,11 @@ async function setElectronMock(
     (electron, apiName, funcName, mockImplementation, mockReturnValue) => {
       const electronApi = electron[apiName as keyof typeof electron];
 
-      let mockFn = globalThis.fn(eval(mockImplementation));
+      const mockFn = globalThis.fn(eval(mockImplementation));
       // const mockFn = globalThis.spyOn<any, string>(electronApi, funcName);
       // mockFn.mockImplementation(eval(mockImplementation));
       if (mockReturnValue !== undefined) {
-        mockFn = mockFn.mockReturnValue(mockReturnValue);
+        mockFn.mockReturnValue(mockReturnValue);
       }
 
       // replace target API with mock
