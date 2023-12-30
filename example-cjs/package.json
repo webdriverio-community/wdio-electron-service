@@ -30,6 +30,11 @@
     "wdio-electron-service": "file:../",
     "webdriverio": "^8.23.3"
   },
+  "pnpm": {
+    "overrides": {
+      "@electron/packager": "18.1.1"
+    }
+  },
   "peerDependencies": {
     "typescript": "5.2.2"
   }
