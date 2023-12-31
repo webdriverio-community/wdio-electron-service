@@ -6,6 +6,7 @@ const ipcMain = {
 };
 const app = {
   getName: () => 'test',
+  whenReady: () => Promise.resolve(),
 };
 const electronMock = {
   ipcMain,
