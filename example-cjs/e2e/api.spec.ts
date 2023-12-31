@@ -265,35 +265,31 @@ describe('mocking', () => {
     });
   });
 
-  // describe('mockAll', () => {
-  //   it('should mock all functions on an API', async () => {
-  //     const mockedDialog = await browser.electron.mockAll('dialog');
-  //     await browser.electron.execute(
-  //       async (electron) =>
-  //         await electron.dialog.showOpenDialog({
-  //           title: 'my dialog',
-  //           properties: ['openFile', 'openDirectory'],
-  //         }),
-  //     );
-  //     await browser.electron.execute((electron) =>
-  //       electron.dialog.showOpenDialogSync({
-  //         title: 'my dialog',
-  //         properties: ['openFile', 'openDirectory'],
-  //       }),
-  //     );
+  describe('mockAll', () => {
+    it('should mock all functions on an API', async () => {
+      const mockedDialog = await browser.electron.mockAll('dialog');
+      await browser.electron.execute(
+        async (electron) =>
+          await electron.dialog.showOpenDialog({
+            title: 'my dialog',
+          }),
+      );
+      await browser.electron.execute((electron) =>
+        electron.dialog.showOpenDialogSync({
+          title: 'my dialog',
+        }),
+      );
 
-  //     expect(mockedDialog.showOpenDialog).toHaveBeenCalledTimes(1);
-  //     expect(mockedDialog.showOpenDialog).toHaveBeenCalledWith({
-  //       title: 'my dialog',
-  //       properties: ['openFile', 'openDirectory'],
-  //     });
-  //     expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledTimes(1);
-  //     expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledWith({
-  //       title: 'my dialog',
-  //       properties: ['openFile', 'openDirectory'],
-  //     });
-  //   });
-  // });
+      expect(mockedDialog.showOpenDialog).toHaveBeenCalledTimes(1);
+      expect(mockedDialog.showOpenDialog).toHaveBeenCalledWith({
+        title: 'my dialog',
+      });
+      expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledTimes(1);
+      expect(mockedDialog.showOpenDialogSync).toHaveBeenCalledWith({
+        title: 'my dialog',
+      });
+    });
+  });
 });
 
 describe('execute', () => {

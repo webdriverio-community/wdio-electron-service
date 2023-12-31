@@ -1,6 +1,5 @@
 import { AsyncMock } from '../mock.js';
 import { mock } from './mock.js';
-import type { ElectronInterface } from '../types.js';
 
 export async function mockAll(apiName: string) {
   const apiFnNames = await browser.electron.execute(
@@ -12,6 +11,8 @@ export async function mockAll(apiName: string) {
     .reduce((a, funcName) => ({ ...a, [funcName]: 'placeholder' }), {});
 
   for (const funcName in mockedApis) {
-    await mock(apiName as ElectronInterface, funcName);
+    mockedApis[funcName] = await mock(apiName, funcName);
   }
+
+  return mockedApis;
 }
