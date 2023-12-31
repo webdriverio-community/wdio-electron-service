@@ -72,6 +72,7 @@ export function createMock(apiName: string, funcName: string) {
   const mock = vitestFn() as unknown as AsyncMock;
   const originalMockImplementation = mock.mockImplementation;
   const originalMockClear = mock.mockClear;
+  const originalMockReset = mock.mockReset;
 
   mock.updating = false;
   mock.mockName(`electron.${apiName}.${funcName}`);
@@ -167,16 +168,17 @@ export function createMock(apiName: string, funcName: string) {
   };
 
   mock.mockReset = async () => {
-    // mock.mockClear();
-    // await setElectronMock(apiName, funcName, () => undefined);
     await browser.electron.execute(
-      (electron, apiName, funcName) =>
-        (
-          electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock
-        ).mockReset(),
+      (electron, apiName, funcName) => {
+        (electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock)
+          .mockReset()
+          .mockClear();
+      },
       apiName,
       funcName,
     );
+    originalMockReset();
+    originalMockClear();
     return mock;
   };
 
