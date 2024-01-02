@@ -109,6 +109,20 @@ export interface ElectronServiceAPI {
     ...args: InnerArguments
   ): Promise<ReturnValue>;
   /**
+   * Reset mocked function(s)
+   *
+   * @example
+   * ```js
+   * // resets all mocked functions
+   * await browser.electron.resetAllMocks()
+   * // resets all mocked functions of dialog API
+   * await browser.electron.resetAllMocks('dialog')
+   * ```
+   *
+   * @param apiName mocked api to reset
+   */
+  resetAllMocks: (apiName?: string) => Promise<void>;
+  /**
    * Remove mocked function(s)
    *
    * @example

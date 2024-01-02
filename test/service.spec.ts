@@ -23,6 +23,7 @@ describe('before', () => {
     expect(serviceApi.execute).toEqual(expect.any(Function));
     expect(serviceApi.mock).toEqual(expect.any(Function));
     expect(serviceApi.mockAll).toEqual(expect.any(Function));
+    expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
   });
 
@@ -49,6 +50,7 @@ describe('before', () => {
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
+      expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
 
       const firefoxInstance = browser.getInstance('firefox') as unknown as BrowserExtension;
