@@ -23,7 +23,7 @@ describe('before', () => {
     expect(serviceApi.execute).toEqual(expect.any(Function));
     expect(serviceApi.mock).toEqual(expect.any(Function));
     expect(serviceApi.mockAll).toEqual(expect.any(Function));
-    expect(serviceApi.removeMocks).toEqual(expect.any(Function));
+    expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
   });
 
   describe('when multiremote', () => {
@@ -49,7 +49,7 @@ describe('before', () => {
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
-      expect(serviceApi.removeMocks).toEqual(expect.any(Function));
+      expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
 
       const firefoxInstance = browser.getInstance('firefox') as unknown as BrowserExtension;
       expect(firefoxInstance.electron).toBeUndefined();

@@ -3,7 +3,7 @@ import type { Capabilities, Services } from '@wdio/types';
 import log from './log.js';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
-import { removeMocks } from './commands/removeMocks.js';
+import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import mockStore from './mockStore.js';
@@ -28,7 +28,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
-      removeMocks: removeMocks.bind(this),
+      restoreAllMocks: restoreAllMocks.bind(this),
     };
     return Object.assign({}, api) as unknown as BrowserExtension['electron'];
   }

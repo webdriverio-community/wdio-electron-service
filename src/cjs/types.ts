@@ -114,14 +114,14 @@ export interface ElectronServiceAPI {
    * @example
    * ```js
    * // removes all mocked functions
-   * await browser.electron.removeMocks()
+   * await browser.electron.restoreAllMocks()
    * // removes all mocked functions of dialog API
-   * await browser.electron.removeMocks('dialog')
+   * await browser.electron.restoreAllMocks('dialog')
    * ```
    *
    * @param apiName mocked api to remove
    */
-  removeMocks: (apiName?: string) => Promise<void>;
+  restoreAllMocks: (apiName?: string) => Promise<void>;
 }
 
 /**

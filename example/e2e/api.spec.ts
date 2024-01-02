@@ -5,7 +5,7 @@ import { browser } from 'wdio-electron-service';
 const { name: appName, version: appVersion } = globalThis.packageJson;
 
 afterEach(async () => {
-  await browser.electron.removeMocks();
+  await browser.electron.restoreAllMocks();
 });
 
 describe('mocking', () => {
