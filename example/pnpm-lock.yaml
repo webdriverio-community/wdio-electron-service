@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@electron/packager': 18.1.1
-
 devDependencies:
   '@electron-forge/cli':
     specifier: ^7.2.0
@@ -150,7 +147,7 @@ packages:
       '@electron-forge/template-webpack-typescript': 7.2.0
       '@electron-forge/tracer': 7.2.0
       '@electron/get': 3.0.0
-      '@electron/packager': 18.1.1
+      '@electron/packager': 18.1.3
       '@electron/rebuild': 3.4.1
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
@@ -220,7 +217,7 @@ packages:
     engines: {node: '>= 16.4.0'}
     dependencies:
       '@electron-forge/tracer': 7.2.0
-      '@electron/packager': 18.1.1
+      '@electron/packager': 18.1.3
       '@electron/rebuild': 3.4.1
       listr2: 5.0.8
     transitivePeerDependencies:
@@ -373,9 +370,9 @@ packages:
       - supports-color
     dev: true
 
-  /@electron/packager@18.1.1:
-    resolution: {integrity: sha512-NAqcAs/tnGS6O3RuWfTbPsRCBXt96qijFqvAhTtBQfxkL0nlHqnwTnr2HUPpNc5L2Xo/8nBeP8BKfMd+ySLNsQ==}
-    engines: {node: '>= 16.4.0'}
+  /@electron/packager@18.1.3:
+    resolution: {integrity: sha512-21T5MxUf7DwV07IIes3jO/571mXCjOGVPdmYJFPCVDTimFiHQSW0Oy+OIGQaKBiNIXfnP29KylsCQbmds6O6Iw==}
+    engines: {node: '>= 16.13.0'}
     hasBin: true
     dependencies:
       '@electron/asar': 3.2.8
