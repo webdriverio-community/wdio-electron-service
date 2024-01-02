@@ -20,6 +20,7 @@ describe('before', () => {
     } as unknown as WebdriverIO.Browser;
     instance.before({}, [], browser);
     const serviceApi = browser.electron as BrowserExtension['electron'];
+    expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.execute).toEqual(expect.any(Function));
     expect(serviceApi.mock).toEqual(expect.any(Function));
     expect(serviceApi.mockAll).toEqual(expect.any(Function));
@@ -47,6 +48,7 @@ describe('before', () => {
 
       const electronInstance = instance.browser.getInstance('electron');
       let serviceApi = electronInstance.electron;
+      expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
