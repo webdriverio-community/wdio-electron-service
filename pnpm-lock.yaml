@@ -1169,14 +1169,6 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@typescript-eslint/visitor-keys@6.17.0:
-    resolution: {integrity: sha512-H6VwB/k3IuIeQOyYczyyKN8wH6ed8EwliaYHLxOIhyF0dYEIsN8+Bk3GE19qafeMKyZJJHP8+O1HiFhFLUNKSg==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    dependencies:
-      '@typescript-eslint/types': 6.17.0
-      eslint-visitor-keys: 3.4.3
-    dev: true
-
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
@@ -1349,7 +1341,7 @@ packages:
       get-port: 7.0.0
       import-meta-resolve: 4.0.0
       locate-app: 2.2.4
-      safaridriver: 0.1.1
+      safaridriver: 0.1.2
       split2: 4.2.0
       wait-port: 1.1.0
     transitivePeerDependencies:
@@ -5321,8 +5313,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /safaridriver@0.1.1:
-    resolution: {integrity: sha512-dpCmh2EYKh9G61nR+ve0w2+WW2YJX59Rtke0pUoUXbvGKPDLK+NcL7I3VBS1UcGJbA6ptQTT82JcGwJHALD0kQ==}
+  /safaridriver@0.1.2:
+    resolution: {integrity: sha512-4R309+gWflJktzPXBQCobbWEHlzC4aK3a+Ov3tz2Ib2aBxiwd11phkdIBH1l0EO22x24CJMUQkpKFumRriCSRg==}
     dev: true
 
   /safe-array-concat@1.0.1:
