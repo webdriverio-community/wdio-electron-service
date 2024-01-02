@@ -980,8 +980,8 @@ packages:
     dev: true
     optional: true
 
-  /@vitest/spy@1.1.0:
-    resolution: {integrity: sha512-sNOVSU/GE+7+P76qYo+VXdXhXffzWZcYIPQfmkiRxaNCSPiLANvQx5Mx6ZURJ/ndtEkUJEpvKLXqAYTKEY+lTg==}
+  /@vitest/spy@1.1.1:
+    resolution: {integrity: sha512-hDU2KkOTfFp4WFFPWwHFauddwcKuGQ7gF6Un/ZZkCogoAiTMN7/7YKvUDbywPZZ754iCQGjdUmXN3t4k0jm1IQ==}
     dependencies:
       tinyspy: 2.2.0
     dev: true
@@ -1153,7 +1153,7 @@ packages:
       geckodriver: 4.3.0
       get-port: 7.0.0
       import-meta-resolve: 4.0.0
-      locate-app: 2.2.1
+      locate-app: 2.2.4
       safaridriver: 0.1.1
       split2: 4.2.0
       wait-port: 1.1.0
@@ -3596,10 +3596,10 @@ packages:
     engines: {node: '>=6.11.5'}
     dev: true
 
-  /locate-app@2.2.1:
-    resolution: {integrity: sha512-pauh1Zr39Tf7G1BvvD9Q2XISfR3jJcMibw3WVbdKVKPN8b1xYN/Xi+3zPak64OqelYRiCNLOJGldfRyNQ2N4pw==}
+  /locate-app@2.2.4:
+    resolution: {integrity: sha512-fGv1FEAMsJWW3F+/WdxZ4dnXT0k4dnj2RJa79tQ0KHwpWHXan8PnaIJ161Ot6UdUwyxFWplSaiHU8/Yo02R94Q==}
     dependencies:
-      n12: 0.4.0
+      n12: 1.8.6
       type-fest: 2.13.0
       userhome: 1.0.0
     dev: true
@@ -4002,8 +4002,8 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dev: true
 
-  /n12@0.4.0:
-    resolution: {integrity: sha512-p/hj4zQ8d3pbbFLQuN1K9honUxiDDhueOWyFLw/XgBv+wZCE44bcLH4CIcsolOceJQduh4Jf7m/LfaTxyGmGtQ==}
+  /n12@1.8.6:
+    resolution: {integrity: sha512-a+9bk4vwyYkBtoo1ONHLakCME4pl+qXZteHcDH3+91Wxa365SgxcXP4X0bLHYjoIR4u+b/yE8IJeQPJqhJpodQ==}
     dev: true
 
   /nanoid@3.3.3:
@@ -6002,7 +6002,7 @@ packages:
       electron:
         optional: true
     dependencies:
-      '@vitest/spy': 1.1.0
+      '@vitest/spy': 1.1.1
       '@wdio/logger': 8.24.12
       compare-versions: 6.1.0
       debug: 4.3.4(supports-color@8.1.1)
