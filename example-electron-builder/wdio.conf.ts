@@ -19,6 +19,7 @@ export const config: Options.Testrunner = {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appArgs: ['foo', 'bar=baz'],
+        restoreMocks: true,
       },
     } as WebdriverIO.Capabilities,
   ],

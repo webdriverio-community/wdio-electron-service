@@ -16,6 +16,7 @@ exports.config = {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appArgs: ['foo', 'bar=baz'],
+        restoreMocks: true,
       },
     } as WebdriverIO.Capabilities,
   ],

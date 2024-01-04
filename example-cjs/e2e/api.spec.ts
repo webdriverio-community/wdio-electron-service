@@ -4,10 +4,6 @@ import { browser } from 'wdio-electron-service';
 
 const { name: pkgAppName, version: pkgAppVersion } = globalThis.packageJson;
 
-afterEach(async () => {
-  await browser.electron.restoreAllMocks();
-});
-
 describe('mock', () => {
   it('should mock an electron API function', async () => {
     const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
