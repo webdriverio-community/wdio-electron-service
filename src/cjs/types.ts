@@ -167,6 +167,18 @@ export interface ElectronServiceOptions {
    * used here.
    */
   appArgs?: string[];
+  /**
+   * Calls .mockClear() on all spies before each test. This will clear mock history, but not reset its implementation to the default one.
+   */
+  clearMocks?: boolean;
+  /**
+   * Calls .mockReset() on all spies before each test. This will clear mock history and reset its implementation to an empty function (will return undefined).
+   */
+  resetMocks?: boolean;
+  /**
+   * Calls .mockRestore() on all spies before each test. This will clear mock history and reset its implementation to the original one.
+   */
+  restoreMocks?: boolean;
 }
 
 export type ApiCommand = { name: string; bridgeProp: string };
