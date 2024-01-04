@@ -24,7 +24,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   #resetMocks = false;
   #restoreMocks = false;
 
-  constructor(globalOptions: ElectronServiceOptions) {
+  constructor(globalOptions: ElectronServiceOptions = {}) {
     this.#globalOptions = globalOptions;
   }
 
