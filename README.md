@@ -252,13 +252,6 @@ An array of string arguments to be passed through to the app on execution of the
 
 Type: `string[]`
 
-### `customApiBrowserCommand`
-
-The browser command used to access the custom electron API.
-
-Type: `string`
-Default: `'api'`
-
 ## Chromedriver configuration
 
 You can make updates to the Chromedriver configuration through the WebdriverIO custom [`wdio:chromedriverOptions`](https://webdriver.io/docs/capabilities#webdriverio-capabilities-to-manage-browser-driver-options) capability.

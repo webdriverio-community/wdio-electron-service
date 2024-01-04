@@ -167,11 +167,6 @@ export interface ElectronServiceOptions {
    * used here.
    */
   appArgs?: string[];
-  /**
-   * The browser command used to access the custom electron API.
-   * @default api
-   */
-  customApiBrowserCommand?: string;
 }
 
 export type ApiCommand = { name: string; bridgeProp: string };
