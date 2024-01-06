@@ -1,4 +1,4 @@
-import { fn as vitestFn, spyOn as vitestSpyOn } from '@vitest/spy';
+import { fn as vitestFn } from '@vitest/spy';
 import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Services, Options } from '@wdio/types';
 import type { PackageJson } from 'read-package-up';
@@ -86,7 +86,6 @@ declare global {
 
   var browser: WebdriverIO.Browser;
   var fn: typeof vitestFn;
-  var spyOn: typeof vitestSpyOn;
   var originalApi: Record<ElectronInterface, ElectronType[ElectronInterface]>;
   var packageJson: PackageJson;
 }

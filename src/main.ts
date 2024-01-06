@@ -1,12 +1,11 @@
 import electron, { app, ipcMain } from 'electron';
-import { fn, spyOn } from '@vitest/spy';
+import { fn } from '@vitest/spy';
 import copy from 'fast-copy';
 
 import { Channel } from './constants.js';
 import { ElectronInterface, ElectronType } from './types.js';
 
 globalThis.fn = fn;
-globalThis.spyOn = spyOn;
 globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
 
 // store electron API

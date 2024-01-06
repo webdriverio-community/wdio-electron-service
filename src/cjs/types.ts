@@ -20,19 +20,15 @@ type Omitted =
   | 'withImplementation';
 
 interface AsyncMockInstance extends Omit<Mock, Omitted> {
-  mockName(name: string): any;
+  mockImplementation(fn: AbstractFn): Promise<AsyncMock>;
+  mockImplementationOnce(fn: AbstractFn): Promise<AsyncMock>;
+  mockReturnValue(obj: unknown): Promise<AsyncMock>;
+  mockReturnValueOnce(obj: unknown): Promise<AsyncMock>;
   mockClear(): any;
   mockReset(): any;
-  mockImplementation(fn: AbstractFn): Promise<AsyncMock>;
-  mockImplementationOnce(fn: AbstractFn): Promise<any>;
-  mockReturnValue(obj: unknown): Promise<any>;
-  mockReturnValueOnce(obj: unknown): Promise<any>;
-  mockResolvedValue(obj: unknown): Promise<any>;
-  mockResolvedValueOnce(obj: unknown): Promise<any>;
-  mockRejectedValue(obj: unknown): Promise<any>;
-  mockRejectedValueOnce(obj: unknown): Promise<any>;
   mockRestore(): Promise<AsyncMock>;
   update(): Promise<AsyncMock>;
+  updating: boolean;
 }
 
 export interface AsyncMock<TArgs extends any[] = any, TReturns = any> extends AsyncMockInstance {

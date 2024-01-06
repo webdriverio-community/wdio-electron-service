@@ -1,4 +1,3 @@
-import log from './log.js';
 import type { AsyncMock } from './mock.js';
 
 export class ElectronServiceMockStore {
@@ -14,7 +13,6 @@ export class ElectronServiceMockStore {
   }
 
   getMock(mockId: string) {
-    log.debug(`getting mock instance for ${mockId}...`);
     const mock = this.#mockFns.get(mockId);
     if (!mock) {
       throw new Error(`No mock registered for "${mockId}"`);
