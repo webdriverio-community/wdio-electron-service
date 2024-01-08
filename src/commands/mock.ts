@@ -1,8 +1,17 @@
-import { type AsyncMock, createMock } from '../mock.js';
+import { createMock } from '../mock.js';
 import mockStore from '../mockStore.js';
+import type { ElectronMock } from '../types.js';
 
-export async function mock(apiName: string, funcName: string): Promise<AsyncMock> {
-  const mock = createMock(apiName, funcName);
-  await mock.mockImplementation(() => undefined);
-  return mockStore.setMock(mock);
+export async function mock(apiName: string, funcName: string): Promise<ElectronMock> {
+  try {
+    // retrieve an existing mock
+    const mock = mockStore.getMock(`electron.${apiName}.${funcName}`);
+    await mock.mockImplementation(() => undefined);
+    return mock;
+  } catch (e) {
+    // mock doesn't exist, create a new one
+    const mock = await createMock(apiName, funcName);
+    await mock.mockImplementation(() => undefined);
+    return mockStore.setMock(mock);
+  }
 }
