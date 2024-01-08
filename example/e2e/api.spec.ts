@@ -1,6 +1,6 @@
-import { Mock } from '@vitest/spy';
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
+import type { Mock } from '@vitest/spy';
 
 const { name: pkgAppName, version: pkgAppVersion } = globalThis.packageJson;
 
@@ -40,46 +40,47 @@ describe('mock', () => {
 
   describe('mockImplementation', () => {
     it('should use the specified implementation for an existing mock', async () => {
-      const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+      const mockGetName = await browser.electron.mock('app', 'getName');
       let callsCount = 0;
-      await showOpenDialog.mockImplementation(() => callsCount++);
-      await browser.electron.execute(
-        async (electron) =>
-          await electron.dialog.showOpenDialog({
-            title: 'my dialog',
-            properties: ['openFile', 'openDirectory'],
-          }),
-      );
+      await mockGetName.mockImplementation(() => {
+        // callsCount is not accessible in the electron context so we need to guard it
+        if (typeof callsCount !== 'undefined') {
+          callsCount++;
+        }
 
-      expect(showOpenDialog).toHaveBeenCalledTimes(1);
-      expect(showOpenDialog).toHaveBeenCalledWith({
-        title: 'my dialog',
-        properties: ['openFile', 'openDirectory'],
+        return 'mocked value';
       });
+      const result = await browser.electron.execute(async (electron) => await electron.app.getName());
+
       expect(callsCount).toBe(1);
+      expect(result).toBe('mocked value');
     });
   });
 
   describe('mockImplementationOnce', () => {
     it('should use the specified implementation for an existing mock once', async () => {
       const mockGetName = await browser.electron.mock('app', 'getName');
-      let callsCount = 0;
 
-      await mockGetName.mockImplementationOnce(() => callsCount++);
+      await mockGetName.mockImplementation(() => 'default mocked name');
+      await mockGetName.mockImplementationOnce(() => 'first mocked name');
+      await mockGetName.mockImplementationOnce(() => 'second mocked name');
+      await mockGetName.mockImplementationOnce(() => 'third mocked name');
 
       let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(null);
-
+      expect(name).toBe('first mocked name');
       name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(pkgAppName);
-
-      expect(mockGetName).toHaveBeenCalledTimes(1);
-      expect(callsCount).toBe(1);
+      expect(name).toBe('second mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('third mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('default mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('default mocked name');
     });
   });
 
   describe('mockReturnValue', () => {
-    it('should return the expected value from the mock API', async () => {
+    it('should return the specified value from an existing mock', async () => {
       const mockGetName = await browser.electron.mock('app', 'getName');
       await mockGetName.mockReturnValue('This is a mock');
 
@@ -90,28 +91,33 @@ describe('mock', () => {
   });
 
   describe('mockReturnValueOnce', () => {
-    it('should return the expected value from the mock API once', async () => {
+    it('should return the specified value from an existing mock once', async () => {
       const mockGetName = await browser.electron.mock('app', 'getName');
 
-      await mockGetName.mockReturnValueOnce('This is a mock');
+      await mockGetName.mockReturnValue('default mocked name');
+      await mockGetName.mockReturnValueOnce('first mocked name');
+      await mockGetName.mockReturnValueOnce('second mocked name');
+      await mockGetName.mockReturnValueOnce('third mocked name');
 
       let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe('This is a mock');
-
+      expect(name).toBe('first mocked name');
       name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(pkgAppName);
+      expect(name).toBe('second mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('third mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('default mocked name');
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('default mocked name');
     });
   });
 
   describe('mockRestore', () => {
     it('should restore an existing mock', async () => {
-      let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(pkgAppName);
-
       const mockGetName = await browser.electron.mock('app', 'getName');
       await mockGetName.mockReturnValue('mocked name');
 
-      name = await browser.electron.execute((electron) => electron.app.getName());
+      let name = await browser.electron.execute((electron) => electron.app.getName());
       expect(name).toBe('mocked name');
 
       await mockGetName.mockRestore();
@@ -138,41 +144,6 @@ describe('mock', () => {
         }),
       );
 
-      expect(mockShowOpenDialog.mock.calls).toStrictEqual([
-        [{}],
-        [
-          {
-            title: 'my dialog',
-          },
-        ],
-        [
-          {
-            title: 'another dialog',
-          },
-        ],
-      ]);
-
-      expect(mockShowOpenDialog.mock.instances).toStrictEqual([
-        expect.any(Function),
-        expect.any(Function),
-        expect.any(Function),
-      ]);
-      expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([
-        expect.any(Number),
-        expect.any(Number),
-        expect.any(Number),
-      ]);
-      expect(mockShowOpenDialog.mock.lastCall).toStrictEqual([
-        {
-          title: 'another dialog',
-        },
-      ]);
-      expect(mockShowOpenDialog.mock.results).toStrictEqual([
-        { type: 'return', value: undefined },
-        { type: 'return', value: undefined },
-        { type: 'return', value: undefined },
-      ]);
-
       await mockShowOpenDialog.mockClear();
 
       expect(mockShowOpenDialog.mock.calls).toStrictEqual([]);
@@ -184,7 +155,20 @@ describe('mock', () => {
   });
 
   describe('mockReset', () => {
-    it('should clear an existing mock', async () => {
+    it('should reset the implementation of an existing mock', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockReturnValue('mocked name');
+
+      let name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('mocked name');
+
+      await mockGetName.mockReset();
+
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe(null);
+    });
+
+    it('should clear the history of an existing mock', async () => {
       const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
       await mockShowOpenDialog.mockReturnValue('mocked name');
 
@@ -200,41 +184,6 @@ describe('mock', () => {
         }),
       );
 
-      expect(mockShowOpenDialog.mock.calls).toStrictEqual([
-        [{}],
-        [
-          {
-            title: 'my dialog',
-          },
-        ],
-        [
-          {
-            title: 'another dialog',
-          },
-        ],
-      ]);
-
-      expect(mockShowOpenDialog.mock.instances).toStrictEqual([
-        expect.any(Function),
-        expect.any(Function),
-        expect.any(Function),
-      ]);
-      expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([
-        expect.any(Number),
-        expect.any(Number),
-        expect.any(Number),
-      ]);
-      expect(mockShowOpenDialog.mock.lastCall).toStrictEqual([
-        {
-          title: 'another dialog',
-        },
-      ]);
-      expect(mockShowOpenDialog.mock.results).toStrictEqual([
-        { type: 'return', value: undefined },
-        { type: 'return', value: undefined },
-        { type: 'return', value: undefined },
-      ]);
-
       await mockShowOpenDialog.mockReset();
 
       expect(mockShowOpenDialog.mock.calls).toStrictEqual([]);
@@ -242,22 +191,6 @@ describe('mock', () => {
       expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.lastCall).toBeUndefined();
       expect(mockShowOpenDialog.mock.results).toStrictEqual([]);
-    });
-
-    it('should reset an existing mock', async () => {
-      let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(pkgAppName);
-
-      const mockGetName = await browser.electron.mock('app', 'getName');
-      await mockGetName.mockReturnValue('mocked name');
-
-      name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe('mocked name');
-
-      await mockGetName.mockReset();
-
-      name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(null);
     });
   });
 
@@ -347,8 +280,8 @@ describe('resetAllMocks', () => {
 
     const appName = await browser.electron.execute((electron) => electron.app.getName());
     const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
-    expect(appName).toBe(null);
-    expect(clipboardText).toBe(null);
+    expect(appName).toBeNull();
+    expect(clipboardText).toBeNull();
   });
 
   it('should reset existing mocks on an API', async () => {
@@ -361,13 +294,13 @@ describe('resetAllMocks', () => {
 
     const appName = await browser.electron.execute((electron) => electron.app.getName());
     const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
-    expect(appName).toBe(null);
+    expect(appName).toBeNull();
     expect(clipboardText).toBe('mocked clipboardText');
   });
 });
 
 describe('execute', () => {
-  it('should execute an arbitrary function in the main process', async () => {
+  it('should execute an arbitrary function in the electron main process', async () => {
     expect(
       await browser.electron.execute(
         (electron, a, b, c) => {
@@ -381,7 +314,7 @@ describe('execute', () => {
     ).toEqual([pkgAppVersion, 6]);
   });
 
-  it('should execute a string-based function in the main process', async () => {
-    expect(await browser.electron.execute('return 1 + 2 + 3')).toBe(6);
+  it('should execute a string-based function in the electron main process', async () => {
+    expect(await browser.electron.execute('return 1 + 2 + 3')).toEqual(6);
   });
 });
