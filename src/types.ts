@@ -285,6 +285,8 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
   /**
    * Will reset the mocked Electron API function. The mock history will be cleared and the implementation will be reset to an empty function (will return undefined).
    *
+   * This also resets all "once" implementations.
+   *
    * @example
    * ```js
    *  const mockGetName = await browser.electron.mock('app', 'getName')
