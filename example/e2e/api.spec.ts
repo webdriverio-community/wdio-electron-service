@@ -6,7 +6,7 @@ const { name: pkgAppName, version: pkgAppVersion } = globalThis.packageJson;
 
 describe('mock', () => {
   it('should mock an electron API function', async () => {
-    const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+    const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
     await browser.electron.execute(async (electron) => {
       await electron.dialog.showOpenDialog({
         title: 'my dialog',
@@ -15,15 +15,15 @@ describe('mock', () => {
       return (electron.dialog.showOpenDialog as Mock).mock.calls;
     });
 
-    expect(showOpenDialog).toHaveBeenCalledTimes(1);
-    expect(showOpenDialog).toHaveBeenCalledWith({
+    expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
+    expect(mockShowOpenDialog).toHaveBeenCalledWith({
       title: 'my dialog',
       properties: ['openFile', 'openDirectory'],
     });
   });
 
   it('should mock a synchronous electron API function', async () => {
-    const showOpenDialogSync = await browser.electron.mock('dialog', 'showOpenDialogSync');
+    const mockShowOpenDialogSync = await browser.electron.mock('dialog', 'showOpenDialogSync');
     await browser.electron.execute((electron) =>
       electron.dialog.showOpenDialogSync({
         title: 'my dialog',
@@ -31,8 +31,8 @@ describe('mock', () => {
       }),
     );
 
-    expect(showOpenDialogSync).toHaveBeenCalledTimes(1);
-    expect(showOpenDialogSync).toHaveBeenCalledWith({
+    expect(mockShowOpenDialogSync).toHaveBeenCalledTimes(1);
+    expect(mockShowOpenDialogSync).toHaveBeenCalledWith({
       title: 'my dialog',
       properties: ['openFile', 'openDirectory'],
     });
@@ -159,12 +159,33 @@ describe('mock', () => {
       const mockGetName = await browser.electron.mock('app', 'getName');
       await mockGetName.mockReturnValue('mocked name');
 
-      let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe('mocked name');
+      await mockGetName.mockReset();
+
+      const name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe(null);
+    });
+
+    it('should reset mockReturnValueOnce implementations of an existing mock', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockReturnValueOnce('first mocked name');
+      await mockGetName.mockReturnValueOnce('second mocked name');
+      await mockGetName.mockReturnValueOnce('third mocked name');
 
       await mockGetName.mockReset();
 
-      name = await browser.electron.execute((electron) => electron.app.getName());
+      const name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe(null);
+    });
+
+    it('should reset mockImplementationOnce implementations of an existing mock', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockImplementationOnce(() => 'first mocked name');
+      await mockGetName.mockImplementationOnce(() => 'second mocked name');
+      await mockGetName.mockImplementationOnce(() => 'third mocked name');
+
+      await mockGetName.mockReset();
+
+      const name = await browser.electron.execute((electron) => electron.app.getName());
       expect(name).toBe(null);
     });
 
