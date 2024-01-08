@@ -3,7 +3,7 @@ import { fn } from '@vitest/spy';
 import copy from 'fast-copy';
 
 import { Channel } from './constants.js';
-import { ElectronInterface, ElectronType } from './types.js';
+import type { ElectronInterface, ElectronType } from './types.js';
 
 globalThis.fn = fn;
 globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
@@ -21,6 +21,6 @@ app.whenReady().then(() => {
   }
 });
 
-ipcMain.handle(Channel.Execute, (_, script: string, args: unknown[]) => {
+ipcMain.handle(Channel.Execute, (_event: Electron.IpcMainInvokeEvent, script: string, args: unknown[]) => {
   return new Function(`return (${script}).apply(this, arguments)`)(electron, ...args);
 });

@@ -1,6 +1,5 @@
 import { fn as vitestFn, type Mock } from '@vitest/spy';
 import type { AbstractFn, ElectronApiFn, ElectronInterface, ElectronMock, ElectronType } from './types.js';
-// import log from './log.js';
 
 async function restoreElectronFunctionality(apiName: string, funcName: string) {
   await browser.electron.execute(

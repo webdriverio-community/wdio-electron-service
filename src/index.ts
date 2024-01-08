@@ -1,5 +1,5 @@
 import { browser as wdioBrowser } from '@wdio/globals';
-import { fn as vitestFn, spyOn as vitestSpyOn } from '@vitest/spy';
+import { fn as vitestFn } from '@vitest/spy';
 import type { PackageJson } from 'read-package-up';
 
 import ElectronLaunchService from './launcher.js';
@@ -51,7 +51,6 @@ declare global {
   }
 
   var fn: typeof vitestFn;
-  var spyOn: typeof vitestSpyOn;
   var originalApi: Record<ElectronInterface, ElectronType[ElectronInterface]>;
   var browser: WebdriverIO.Browser;
   var packageJson: PackageJson;
