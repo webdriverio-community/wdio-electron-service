@@ -1,13 +1,13 @@
-import type { AsyncMock } from './mock.js';
+import { ElectronMock } from './types.js';
 
 export class ElectronServiceMockStore {
-  #mockFns: Map<string, AsyncMock>;
+  #mockFns: Map<string, ElectronMock>;
 
   constructor() {
-    this.#mockFns = new Map<string, AsyncMock>();
+    this.#mockFns = new Map<string, ElectronMock>();
   }
 
-  setMock(mock: AsyncMock): AsyncMock {
+  setMock(mock: ElectronMock): ElectronMock {
     this.#mockFns.set(mock.getMockName(), mock);
     return mock;
   }

@@ -1,12 +1,15 @@
 import type * as Electron from 'electron';
-import type { AsyncMock } from './mock.js';
+import type { Mock } from '@vitest/spy';
 
 /**
  * set this environment variable so that the preload script can be loaded
  */
 process.env.WDIO_ELECTRON = 'true';
 
-export type AbstractFn = (...args: unknown[]) => unknown;
+export type Fn = (...args: unknown[]) => unknown;
+export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
+export type AbstractFn = Fn | AsyncFn;
+export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[ElectronInterface]];
 
 export interface ElectronServiceAPI {
   /**
@@ -27,9 +30,8 @@ export interface ElectronServiceAPI {
    *     }),
    * );
    *
-   * const mockedShowOpenDialog = await showOpenDialog.update();
-   * expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
-   * expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+   * expect(showOpenDialog).toHaveBeenCalledTimes(1);
+   * expect(showOpenDialog).toHaveBeenCalledWith({
    *   properties: ['openFile', 'openDirectory'],
    * });
    * ```
@@ -38,7 +40,7 @@ export interface ElectronServiceAPI {
     apiName: Interface,
     funcName?: string,
     returnValue?: unknown,
-  ) => Promise<AsyncMock>;
+  ) => Promise<ElectronMock>;
   /**
    * Mock all functions from an Electron API.
    * @param apiName name of the API to mock
@@ -54,7 +56,7 @@ export interface ElectronServiceAPI {
    * expect(result).toEqual('mocked-app::1.0.0-mocked.12');
    * ```
    */
-  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, AsyncMock>>;
+  mockAll: <Interface extends ElectronInterface>(apiName: Interface) => Promise<Record<string, ElectronMock>>;
   /**
    * Execute a function within the Electron main process.
    *
@@ -77,7 +79,7 @@ export interface ElectronServiceAPI {
     ...args: InnerArguments
   ): Promise<ReturnValue>;
   /**
-   * Clear mocked function(s)
+   * Clear mocked Electron API function(s)
    *
    * @example
    * ```js
@@ -91,7 +93,7 @@ export interface ElectronServiceAPI {
    */
   clearAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Reset mocked function(s)
+   * Reset mocked Electron API function(s)
    *
    * @example
    * ```js
@@ -105,13 +107,13 @@ export interface ElectronServiceAPI {
    */
   resetAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Remove mocked function(s)
+   * Restore mocked Electron API function(s)
    *
    * @example
    * ```js
-   * // removes all mocked functions
+   * // restores all mocked functions
    * await browser.electron.restoreAllMocks()
-   * // removes all mocked functions of dialog API
+   * // restores all mocked functions of dialog API
    * await browser.electron.restoreAllMocks('dialog')
    * ```
    *
@@ -121,7 +123,7 @@ export interface ElectronServiceAPI {
 }
 
 /**
- * The options for the ElectronService.
+ * The options for the Electron Service.
  */
 export interface ElectronServiceOptions {
   /**
@@ -136,15 +138,15 @@ export interface ElectronServiceOptions {
    */
   appArgs?: string[];
   /**
-   * Calls .mockClear() on all spies before each test. This will clear mock history, but not reset its implementation to the default one.
+   * Calls .mockClear() on all mocked APIs before each test. This will clear mock history, but not reset its implementation.
    */
   clearMocks?: boolean;
   /**
-   * Calls .mockReset() on all spies before each test. This will clear mock history and reset its implementation to an empty function (will return undefined).
+   * Calls .mockReset() on all mocked APIs before each test. This will clear mock history and reset its implementation to an empty function (will return undefined).
    */
   resetMocks?: boolean;
   /**
-   * Calls .mockRestore() on all spies before each test. This will clear mock history and reset its implementation to the original one.
+   * Calls .mockRestore() on all mocked APIs before each test. This will restore the original API function, the mock will be removed.
    */
   restoreMocks?: boolean;
 }
@@ -173,5 +175,157 @@ export type AppBuildInfo = {
 };
 
 export type WdioElectronWindowObj = {
-  execute: (script: string, args: unknown[]) => unknown;
+  execute: (script: string, args?: unknown[]) => unknown;
 };
+
+type Override =
+  | 'mockImplementation'
+  | 'mockImplementationOnce'
+  | 'mockReturnValue'
+  | 'mockReturnValueOnce'
+  | 'mockClear'
+  | 'mockReset';
+type NotImplemented =
+  | 'mockResolvedValue'
+  | 'mockResolvedValueOnce'
+  | 'mockRejectedValue'
+  | 'mockRejectedValueOnce'
+  | 'withImplementation';
+
+interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
+  /**
+   * Accepts a function that will be used as an implementation of the mock.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   * let callsCount = 0;
+   * await mockGetName.mockImplementation(() => {
+   *   // callsCount is not accessible in the electron context so we need to guard it
+   *   if (typeof callsCount !== 'undefined') {
+   *     callsCount++;
+   *   }
+   *   return 'mocked value';
+   * });
+   *
+   * const result = await browser.electron.execute(async (electron) => await electron.app.getName());
+   * expect(callsCount).toBe(1);
+   * expect(result).toBe('mocked value');
+   * ```
+   */
+  mockImplementation(fn: AbstractFn): Promise<ElectronMock>;
+  /**
+   * Accepts a function that will be used as mock's implementation during the next call. If chained, every consecutive call will produce different results.
+   *
+   * When the mocked function runs out of implementations, it will invoke the default implementation set with `mockImplementation`.
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockImplementationOnce(() => 'first mock');
+   *  await mockGetName.mockImplementationOnce(() => 'second mock');
+   *
+   *  let name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe('first mock');
+   *  name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe('second mock');
+   *  name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBeNull();
+   * ```
+   */
+  mockImplementationOnce(fn: AbstractFn): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be returned whenever the mock function is called.
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockReturnValue('mocked name');
+   *
+   *  const name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe('mocked name');
+   * ```
+   */
+  mockReturnValue(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be returned during the next function call. If chained, every consecutive call will return the specified value.
+   *
+   * When there are no more mockReturnValueOnce values to use, mock will fallback to previously defined implementation if there is one.
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockReturnValueOnce('first mock');
+   *  await mockGetName.mockReturnValueOnce('second mock');
+   *
+   *  let name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe('first mock');
+   *  name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe('second mock');
+   *  name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBeNull();
+   * ```
+   */
+  mockReturnValueOnce(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Will clear the history of the mocked Electron API function. The mock implementation will not be reset.
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await browser.electron.execute((electron) => electron.app.getName());
+   *
+   *  await mockGetName.mockClear();
+   *
+   *  await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(mockGetName).toHaveBeenCalledTimes(1);
+   * ```
+   */
+  mockClear(): Promise<ElectronMock>;
+  /**
+   * Will reset the mocked Electron API function. The mock history will be cleared and the implementation will be reset to an empty function (will return undefined).
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockReturnValue('mocked name');
+   *  await browser.electron.execute((electron) => electron.app.getName());
+   *
+   *  await mockGetName.mockReset();
+   *
+   *  const name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBeUndefined();
+   *  expect(mockGetName).toHaveBeenCalledTimes(1);
+   * ```
+   */
+  mockReset(): Promise<ElectronMock>;
+  /**
+   * Will restore the original implementation to the Electron API function.
+   *
+   * @example
+   * ```js
+   *  const appName = await browser.electron.execute((electron) => electron.app.getName());
+   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockReturnValue('mocked name');
+   *
+   *  await mockGetName.mockRestore();
+   *
+   *  const name = await browser.electron.execute((electron) => electron.app.getName());
+   *  expect(name).toBe(appName);
+   * ```
+   */
+  mockRestore(): Promise<ElectronMock>;
+  /**
+   * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
+   */
+  update(): Promise<ElectronMock>;
+  /**
+   * Used internally to determine whether the mock function is being updated.
+   */
+  updating: boolean;
+}
+
+export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {
+  new (...args: TArgs): TReturns;
+  (...args: TArgs): TReturns;
+}
