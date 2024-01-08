@@ -2,6 +2,25 @@ import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 
 import { mockAll } from '../../src/commands/mockAll.js';
 
+interface CustomMatchers<R = unknown> {
+  anyMockFunction(): R;
+}
+
+declare module 'vitest' {
+  interface Assertion<T = any> extends CustomMatchers<T> {}
+  interface AsymmetricMatchersContaining extends CustomMatchers {}
+}
+
+expect.extend({
+  anyMockFunction(received) {
+    const { isNot } = this;
+    return {
+      pass: vi.isMockFunction(received),
+      message: () => `${received} is${isNot ? ' not' : ''} a Mock`,
+    };
+  },
+});
+
 describe('mockAll', () => {
   beforeEach(async () => {
     globalThis.browser = {
@@ -21,13 +40,15 @@ describe('mockAll', () => {
 
   it('should return mock functions for all API methods', async () => {
     const mockedDialog = await mockAll('dialog');
-    expect(mockedDialog.showOpenDialogSync.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showOpenDialog.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showSaveDialogSync.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showSaveDialog.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showMessageBoxSync.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showMessageBox.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showErrorBox.mock.calls).toStrictEqual([]);
-    expect(mockedDialog.showCertificateTrustDialog.mock.calls).toStrictEqual([]);
+    expect(mockedDialog).toStrictEqual({
+      showOpenDialogSync: expect.anyMockFunction(),
+      showOpenDialog: expect.anyMockFunction(),
+      showSaveDialogSync: expect.anyMockFunction(),
+      showSaveDialog: expect.anyMockFunction(),
+      showMessageBoxSync: expect.anyMockFunction(),
+      showMessageBox: expect.anyMockFunction(),
+      showErrorBox: expect.anyMockFunction(),
+      showCertificateTrustDialog: expect.anyMockFunction(),
+    });
   });
 });
