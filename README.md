@@ -17,17 +17,25 @@ Using the service makes testing Electron applications much easier:
 
 ## Installation
 
-```bash
-npm install --dev wdio-electron-service
-```
-
-Or use your package manager of choice - pnpm, yarn, etc.
-
 You will need to install `WebdriverIO`, instructions can be found [here.](https://webdriver.io/docs/gettingstarted)
 
 ## Quick Start
 
-To use the service you need to add `electron` to your services array and set an Electron capability, e.g.:
+The recommended way to get up and running quickly is to use the [WDIO configuration wizard](https://webdriver.io/docs/gettingstarted#initiate-a-webdriverio-setup)
+
+### Manual Quick Start
+
+To get started without using the configuration wizard, you will need to install the service and `@wdio/cli`:
+
+```bash
+npm install --dev @wdio/cli wdio-electron-service
+```
+
+Or use your package manager of choice - pnpm, yarn, etc.
+
+Next, create your WDIO configuration file. If you need some inspiration for this, there is a working configuration in the [example directory](./example/wdio.conf.ts) of this repository, as well as the [WDIO configuration reference page](https://webdriver.io/docs/configuration).
+
+You will need to add `electron` to your services array and set an Electron capability, e.g.:
 
 ```js
 // wdio.conf.js
@@ -44,7 +52,9 @@ export const config = {
 };
 ```
 
-This will spin up an instance of your app in the same way that WDIO handles browsers such as Chrome or Firefox. The service works with WDIO (parallel) multiremote if you need to run additional instances simultaneously, e.g. multiple instances of your app or different combinations of your app and a Web browser.
+Finally, [run some tests](https://webdriver.io/docs/gettingstarted#run-test) using your configuration file.
+
+This will spin up an instance of your app in the same way that WDIO handles browsers such as Chrome or Firefox. The service works with [WDIO (parallel) multiremote](https://webdriver.io/docs/multiremote) if you need to run additional instances simultaneously, e.g. multiple instances of your app or different combinations of your app and a Web browser.
 
 If you use [Electron Forge](https://www.electronforge.io/) or [Electron Builder](https://www.electron.build/) to package your app then the service will automatically attempt to find the path to your bundled Electron application. You can provide a custom path to the binary via custom service capabilities, e.g.:
 
@@ -60,13 +70,15 @@ capabilities: [{
 
 ## Documentation
 
-**[Configuration](./docs/configuration.md)** \
-**[Electron APIs](./docs/electron-apis.md)** \
+**[Service Configuration](./docs/configuration/service-configuration.md)** \
+**[Chromedriver Configuration](./docs/configuration/chromedriver-configuration.md)** \
+**[Accessing Electron APIs](./docs/electron-apis/accessing-apis.md)** \
+**[Mocking Electron APIs](./docs/electron-apis/mocking-apis.md)** \
 **[Common Issues](./docs/common-issues.md)**
 
 ## Example Integrations
 
-Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example App](./example/app/) and [E2Es](./example/e2e/) in this repository.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example App](./example/app/) and [E2Es](./example/e2e/) directories in this repository.
 
 ## Support
 
