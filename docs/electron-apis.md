@@ -1,0 +1,130 @@
+## Electron APIs
+
+### Setup
+
+If you wish to access the Electron APIs then you will need to import (or require) the preload and main scripts in your app. To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
+
+It is not recommended to disable sandbox mode in production; to control this behaviour you can set the `NODE_ENV` environment variable when executing WDIO:
+
+```json
+"wdio": "NODE_ENV=test wdio run wdio.conf.js "
+```
+
+In your BrowserWindow configuration, set the sandbox option depending on the NODE_ENV variable:
+
+```ts
+const isTest = process.env.NODE_ENV === 'test';
+
+new BrowserWindow({
+  webPreferences: {
+    sandbox: !isTest
+    preload: path.join(__dirname, 'preload.js'),
+  }
+  // ...
+});
+```
+
+Then somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally, e.g.:
+
+```ts
+if (process.env.NODE_ENV === 'test') {
+  import('wdio-electron-service/preload');
+}
+```
+
+And somewhere near the top of your main index file (app entry point), load `wdio-electron-service/main` conditionally, e.g.:
+
+```ts
+if (process.env.NODE_ENV === 'test') {
+  import('wdio-electron-service/main');
+}
+```
+
+For security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure electron main process access is only available when the app is being tested.
+
+### Execute Scripts
+
+You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to access the Electron APIs in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
+
+For example, you can trigger a message modal from your test via:
+
+```ts
+await browser.electron.execute(
+  (electron, param1, param2, param3) => {
+    const appWindow = electron.BrowserWindow.getFocusedWindow();
+    electron.dialog.showMessageBox(appWindow, {
+      message: 'Hello World!',
+      detail: `${param1} + ${param2} + ${param3} = ${param1 + param2 + param3}`,
+    });
+  },
+  1,
+  2,
+  3,
+);
+```
+
+which will make the application trigger the following alert:
+
+![Execute Demo](./.github/assets/execute-demo.png 'Execute Demo')
+
+**Note:** The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
+
+### Mocking APIs
+
+You can mock Electron API functionality by calling the mock function with the API name and function name. e.g. in a spec file:
+
+```ts
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await browser.electron.execute(
+  async (electron) =>
+    await electron.dialog.showOpenDialog({
+      properties: ['openFile', 'openDirectory'],
+    }),
+);
+
+const mockedShowOpenDialog = await showOpenDialog.update();
+expect(mockedShowOpenDialog).toHaveBeenCalledTimes(1);
+expect(mockedShowOpenDialog).toHaveBeenCalledWith({
+  properties: ['openFile', 'openDirectory'],
+});
+```
+
+Make sure to call `update()` on the mock before using it with `expect`.
+
+You can also pass a mockReturnValue, or set it after defining your mock:
+
+```ts
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog', 'I opened a dialog!');
+```
+
+```ts
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await showOpenDialog.mockReturnValue('I opened a dialog!');
+```
+
+Which results in the following:
+
+```ts
+const result = await browser.electron.execute(async (electron) => await electron.dialog.showOpenDialog());
+expect(result).toBe('I opened a dialog!');
+```
+
+You can mock all functions from an API using `mockAll`, the mocks are returned as an object:
+
+```ts
+const dialog = await browser.electron.mockAll('dialog');
+await dialog.showOpenDialog.mockReturnValue('I opened a dialog!');
+await dialog.showMessageBox.mockReturnValue('I opened a message box!');
+```
+
+Mocks can be removed by calling `removeMocks`, or directly by calling `unMock` on the mock itself:
+
+```ts
+// removes all mocked functions
+await browser.electron.removeMocks();
+// removes all mocked functions from the dialog API
+await browser.electron.removeMocks('dialog');
+// removes the showOpenDialog mock from the dialog API
+const showOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+await showOpenDialog.unMock();
+```
