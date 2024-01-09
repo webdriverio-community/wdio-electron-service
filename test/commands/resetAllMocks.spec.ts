@@ -1,6 +1,6 @@
 import { vi, describe, beforeEach, it, expect, Mock, afterEach } from 'vitest';
 
-import { resetAllMocks } from '../../src/commands/resetAllMocks';
+import { resetAllMocks } from '../../src/commands/resetAllMocks.js';
 import mockStore from '../../src/mockStore.js';
 
 vi.mock('../../src/mockStore.js', () => ({
