@@ -73,7 +73,7 @@ expect(result).toBe('mocked value');
 
 ### `mockImplementationOnce`
 
-Accepts a function that will be used as mock's implementation during the next call. If chained, every consecutive call will produce differenesults.
+Accepts a function that will be used as mock's implementation during the next call. If chained, every consecutive call will produce different results.
 
 When the mocked function runs out of implementations, it will invoke the default implementation set with [`mockImplementation`](#mockimplementation).
 
