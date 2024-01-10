@@ -347,21 +347,6 @@ describe('mock object functionality', () => {
     });
   });
 
-  describe('mockRestore', () => {
-    it('should restore an existing mock', async () => {
-      const mockGetName = await browser.electron.mock('app', 'getName');
-      await mockGetName.mockReturnValue('mocked name');
-
-      let name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe('mocked name');
-
-      await mockGetName.mockRestore();
-
-      name = await browser.electron.execute((electron) => electron.app.getName());
-      expect(name).toBe(pkgAppName);
-    });
-  });
-
   describe('mockClear', () => {
     it('should clear an existing mock', async () => {
       const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
@@ -447,6 +432,21 @@ describe('mock object functionality', () => {
       expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.lastCall).toBeUndefined();
       expect(mockShowOpenDialog.mock.results).toStrictEqual([]);
+    });
+  });
+
+  describe('mockRestore', () => {
+    it('should restore an existing mock', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockReturnValue('mocked name');
+
+      let name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe('mocked name');
+
+      await mockGetName.mockRestore();
+
+      name = await browser.electron.execute((electron) => electron.app.getName());
+      expect(name).toBe(pkgAppName);
     });
   });
 });

@@ -42,9 +42,9 @@ For security reasons it is encouraged to use dynamic imports wrapped in conditio
 
 ## Execute Scripts
 
-You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to access the Electron APIs in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
+Arbitrary scripts can be executed within the context of your Electron application main process using `browser.electron.execute(...)`. This allows Electron APIs to be accessed in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
 
-For example, you can trigger a message modal from your test via:
+For example, a message modal can be triggered from a test via:
 
 ```ts
 await browser.electron.execute(
@@ -61,8 +61,8 @@ await browser.electron.execute(
 );
 ```
 
-which will make the application trigger the following alert:
+...which results in the application displaying the following alert:
 
-![Execute Demo](../.github/assets/execute-demo.png 'Execute Demo')
+![Execute Demo](../../.github/assets/execute-demo.png 'Execute Demo')
 
 **Note:** The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
