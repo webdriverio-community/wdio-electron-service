@@ -37,7 +37,35 @@ await showMessageBox.mockReturnValue('I opened a message box!');
 
 ### `clearAllMocks`
 
-Calls [`mockClear`](#mockclear) on each active mock. Passing an apiName string will clear mocks of that specific API.
+Calls [`mockClear`](#mockclear) on each active mock:
+
+```js
+const mockSetName = await browser.electron.mock('app', 'setName');
+const mockWriteText = await browser.electron.mock('clipboard', 'writeText');
+
+await browser.electron.execute((electron) => electron.app.setName('new app name'));
+await browser.electron.execute((electron) => electron.clipboard.writeText('text to be written'));
+
+await browser.electron.clearAllMocks();
+
+expect(mockSetName.mock.calls).toStrictEqual([]);
+expect(mockWriteText.mock.calls).toStrictEqual([]);
+```
+
+Passing an apiName string will clear mocks of that specific API:
+
+```js
+const mockSetName = await browser.electron.mock('app', 'setName');
+const mockWriteText = await browser.electron.mock('clipboard', 'writeText');
+
+await browser.electron.execute((electron) => electron.app.setName('new app name'));
+await browser.electron.execute((electron) => electron.clipboard.writeText('text to be written'));
+
+await browser.electron.clearAllMocks('app');
+
+expect(mockSetName.mock.calls).toStrictEqual([]);
+expect(mockWriteText.mock.calls).toStrictEqual([['text to be written']]);
+```
 
 ### `resetAllMocks`
 
@@ -75,7 +103,37 @@ expect(clipboardText).toBe('mocked clipboardText');
 
 ### `restoreAllMocks`
 
-Calls [`mockRestore`](#mockrestore) on each active mock. Passing an apiName string will restore mocks of that specific API.
+Calls [`mockRestore`](#mockrestore) on each active mock:
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockReadText = await browser.electron.mock('clipboard', 'readText');
+await mockGetName.mockReturnValue('mocked appName');
+await mockReadText.mockReturnValue('mocked clipboardText');
+
+await browser.electron.restoreAllMocks();
+
+const appName = await browser.electron.execute((electron) => electron.app.getName());
+const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
+expect(appName).toBe('my real app name');
+expect(clipboardText).toBe('some real clipboard text');
+```
+
+Passing an apiName string will restore mocks of that specific API:
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockReadText = await browser.electron.mock('clipboard', 'readText');
+await mockGetName.mockReturnValue('mocked appName');
+await mockReadText.mockReturnValue('mocked clipboardText');
+
+await browser.electron.restoreAllMocks('app');
+
+const appName = await browser.electron.execute((electron) => electron.app.getName());
+const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
+expect(appName).toBe('my real app name');
+expect(clipboardText).toBe('mocked clipboardText');
+```
 
 ## Mock Object
 
