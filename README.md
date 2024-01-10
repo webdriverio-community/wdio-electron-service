@@ -74,7 +74,12 @@ capabilities: [{
 **[Chromedriver Configuration](./docs/configuration/chromedriver-configuration.md)** \
 **[Accessing Electron APIs](./docs/electron-apis/accessing-apis.md)** \
 **[Mocking Electron APIs](./docs/electron-apis/mocking-apis.md)** \
+**[Development](./docs/development.md)**
 **[Common Issues](./docs/common-issues.md)**
+
+## Development
+
+Check out our [development doc](./docs/development.md) if you are interested in contributing.
 
 ## Example Integrations
 
