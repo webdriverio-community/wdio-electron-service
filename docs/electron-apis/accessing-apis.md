@@ -1,4 +1,4 @@
-## Accessing Electron APIs
+# Accessing Electron APIs
 
 If you wish to access the Electron APIs then you will need to import (or require) the preload and main scripts in your app. To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
 
@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'test') {
 
 For security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure electron main process access is only available when the app is being tested.
 
-### Execute Scripts
+## Execute Scripts
 
 You can execute arbitrary scripts within the context of your Electron application main process using `browser.electron.execute(...)`. This allows you to access the Electron APIs in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
 
