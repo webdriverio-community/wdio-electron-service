@@ -41,7 +41,37 @@ Calls [`mockClear`](#mockclear) on each active mock. Passing an apiName string w
 
 ### `resetAllMocks`
 
-Calls [`mockReset`](#mockreset) on each active mock. Passing an apiName string will reset mocks of that specific API.
+Calls [`mockReset`](#mockreset) on each active mock:
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockReadText = await browser.electron.mock('clipboard', 'readText');
+await mockGetName.mockReturnValue('mocked appName');
+await mockReadText.mockReturnValue('mocked clipboardText');
+
+await browser.electron.resetAllMocks();
+
+const appName = await browser.electron.execute((electron) => electron.app.getName());
+const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
+expect(appName).toBeUndefined();
+expect(clipboardText).toBeUndefined();
+```
+
+Passing an apiName string will reset mocks of that specific API:
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockReadText = await browser.electron.mock('clipboard', 'readText');
+await mockGetName.mockReturnValue('mocked appName');
+await mockReadText.mockReturnValue('mocked clipboardText');
+
+await browser.electron.resetAllMocks('app');
+
+const appName = await browser.electron.execute((electron) => electron.app.getName());
+const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
+expect(appName).toBeUndefined();
+expect(clipboardText).toBe('mocked clipboardText');
+```
 
 ### `restoreAllMocks`
 
