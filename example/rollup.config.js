@@ -19,7 +19,7 @@ export default [
       inlineDynamicImports: true,
       format: 'cjs',
     },
-    plugins: [commonjs(), nodeResolve()],
+    plugins: [nodeResolve(), commonjs()],
     external: ['electron'],
   },
 ];

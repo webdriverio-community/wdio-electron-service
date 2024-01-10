@@ -1,6 +1,6 @@
 import type { Capabilities } from '@wdio/types';
 
-import type { ElectronServiceOptions } from './types';
+import type { ElectronServiceOptions } from './types.js';
 
 export function getChromeOptions(options: ElectronServiceOptions, cap: WebdriverIO.Capabilities) {
   const existingOptions = cap['goog:chromeOptions'] || {};
@@ -20,11 +20,11 @@ export function getChromedriverOptions(cap: WebdriverIO.Capabilities) {
 const isElectron = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserName?.toLowerCase() === 'electron';
 
 /**
- * get capability independent of which type of capabilities is set
+ * Get capability independent of which type of capabilities is set
  */
 export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
   /**
-   * standard capabilities, e.g.:
+   * Standard capabilities, e.g.:
    * ```
    * {
    *   browserName: 'chrome'
@@ -50,7 +50,7 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
     return [w3cCaps];
   }
   /**
-   * multiremote capabilities, e.g.:
+   * Multiremote capabilities, e.g.:
    * ```
    * {
    *   instanceA: {

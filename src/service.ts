@@ -1,17 +1,32 @@
 import type { Capabilities, Services } from '@wdio/types';
 
 import log from './log.js';
-import { execute } from './commands/execute.js';
-import { type ElectronServiceMock, mock } from './commands/mock.js';
-import { removeMocks } from './commands/removeMocks.js';
-import { mockAll } from './commands/mockAll.js';
+import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { AbstractFn, BrowserExtension } from './index.js';
+import { execute } from './commands/execute.js';
+import { mock } from './commands/mock.js';
+import { clearAllMocks } from './commands/clearAllMocks.js';
+import { resetAllMocks } from './commands/resetAllMocks.js';
+import { restoreAllMocks } from './commands/restoreAllMocks.js';
+import { mockAll } from './commands/mockAll.js';
+import type { AbstractFn, BrowserExtension, ElectronServiceOptions } from './index.js';
+
+const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
+  await browser.waitUntil(async () => {
+    const numWindows = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows().length);
+    return numWindows > 0;
+  });
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
+  #globalOptions: ElectronServiceOptions;
+  #clearMocks = false;
+  #resetMocks = false;
+  #restoreMocks = false;
 
-  constructor() {}
+  constructor(globalOptions: ElectronServiceOptions = {}) {
+    this.#globalOptions = globalOptions;
+  }
 
   get browser() {
     return this.#browser;
@@ -24,28 +39,38 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
     const api = {
-      _mocks: {} as Record<string, ElectronServiceMock>,
+      clearAllMocks: clearAllMocks.bind(this),
       execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
-      removeMocks: removeMocks.bind(this),
+      resetAllMocks: resetAllMocks.bind(this),
+      restoreAllMocks: restoreAllMocks.bind(this),
     };
-    return Object.assign({}, api) as BrowserExtension['electron'];
+    return Object.assign({}, api) as unknown as BrowserExtension['electron'];
   }
 
   async before(
-    _capabilities: Capabilities.RemoteCapability,
+    capabilities: WebdriverIO.Capabilities,
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
     const browser = instance as WebdriverIO.Browser;
     const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
+    const { clearMocks, resetMocks, restoreMocks } = Object.assign(
+      {},
+      this.#globalOptions,
+      capabilities[CUSTOM_CAPABILITY_NAME],
+    );
+
+    this.#clearMocks = clearMocks ?? false;
+    this.#resetMocks = resetMocks ?? false;
+    this.#restoreMocks = restoreMocks ?? false;
     this.#browser = browser;
 
     /**
      * add electron API to browser object
      */
-    mrBrowser.electron = this.#getElectronAPI();
+    browser.electron = this.#getElectronAPI();
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
@@ -61,19 +86,40 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         mrInstance.electron = this.#getElectronAPI(mrInstance);
 
         // wait until an Electron BrowserWindow is available
-        await mrInstance.waitUntil(async () => {
-          const numWindows = await mrInstance.electron.execute(
-            (electron) => electron.BrowserWindow.getAllWindows().length,
-          );
-          return numWindows > 0;
-        });
+        await waitUntilWindowAvailable(mrInstance);
       }
     } else {
       // wait until an Electron BrowserWindow is available
-      await browser.waitUntil(async () => {
-        const numWindows = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows().length);
-        return numWindows > 0;
-      });
+      await waitUntilWindowAvailable(browser);
+    }
+  }
+
+  async beforeTest() {
+    if (this.#clearMocks) {
+      await clearAllMocks();
+    }
+    if (this.#resetMocks) {
+      await resetAllMocks();
+    }
+    if (this.#restoreMocks) {
+      await restoreAllMocks();
+    }
+  }
+
+  async afterCommand(_commandName: string, _args: unknown[][]) {
+    // ensure mocks are updated
+    const mocks = mockStore.getMocks();
+
+    if (mocks.length > 0) {
+      await Promise.all(
+        mocks.map(async ([_mockId, mock]) => {
+          if (!mock.updating) {
+            return await mock.update();
+          } else {
+            return Promise.resolve();
+          }
+        }),
+      );
     }
   }
 }

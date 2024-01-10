@@ -5,12 +5,9 @@ import { execute } from '../../src/commands/execute';
 describe('execute', () => {
   beforeEach(async () => {
     globalThis.browser = {
-      execute: vi
-        .fn()
-        .mockImplementation(
-          (fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
-            typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
-        ),
+      execute: vi.fn((fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
+        typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
+      ),
     } as unknown as WebdriverIO.Browser;
     globalThis.wdioElectron = {
       execute: vi.fn(),

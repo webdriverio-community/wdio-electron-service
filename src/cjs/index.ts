@@ -3,7 +3,13 @@ import { browser as wdioBrowser } from '@wdio/globals';
 import type { Capabilities, Services, Options } from '@wdio/types';
 import type { PackageJson } from 'read-package-up';
 
-import type { ElectronServiceAPI, ElectronServiceOptions, WdioElectronWindowObj } from './types.js';
+import type {
+  ElectronInterface,
+  ElectronServiceAPI,
+  ElectronServiceOptions,
+  ElectronType,
+  WdioElectronWindowObj,
+} from './types.js';
 
 exports.default = class CJSElectronService {
   private instance?: Promise<Services.ServiceInstance>;
@@ -53,10 +59,12 @@ interface BrowserExtension {
   /**
    * Access the WebdriverIO Electron Service API.
    *
+   * - {@link ElectronServiceAPI.clearAllMocks `browser.electron.clearAllMocks`} - Clear mock functions from the Electron API
    * - {@link ElectronServiceAPI.execute `browser.electron.execute`} - Execute code in the Electron main process context
    * - {@link ElectronServiceAPI.mock `browser.electron.mock`} - Mock a function from the Electron API, e.g. `dialog.showOpenDialog`
    * - {@link ElectronServiceAPI.mockAll `browser.electron.mockAll`} - Mock an entire API object of the Electron API, e.g. `app` or `dialog`
-   * - {@link ElectronServiceAPI.removeMocks `browser.electron.removeMocks`} - Remove mock functions from the Electron API
+   * - {@link ElectronServiceAPI.resetAllMocks `browser.electron.resetAllMocks`} - Reset mock functions from the Electron API
+   * - {@link ElectronServiceAPI.restoreAllMocks `browser.electron.restoreAllMocks`} - Remove mock functions from the Electron API
    */
   electron: ElectronServiceAPI;
 }
@@ -78,6 +86,7 @@ declare global {
 
   var browser: WebdriverIO.Browser;
   var fn: typeof vitestFn;
+  var originalApi: Record<ElectronInterface, ElectronType[ElectronInterface]>;
   var packageJson: PackageJson;
 }
 
