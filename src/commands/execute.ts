@@ -2,7 +2,7 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   browser: WebdriverIO.Browser,
   script: string | ((...innerArgs: InnerArguments) => ReturnValue),
   ...args: InnerArguments
-): Promise<ReturnValue> {
+): Promise<ReturnValue | undefined> {
   /**
    * parameter check
    */
@@ -15,10 +15,10 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   }
 
   if (typeof script === 'string') {
-    return browser.execute(script);
+    return (await browser.execute(script)) ?? undefined;
   }
 
-  return browser.execute(
+  const returnValue = await browser.execute(
     function executeWithinElectron(script: string, ...args) {
       if (window.wdioElectron === undefined) {
         const errMessage =
@@ -32,5 +32,7 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     },
     `${script}`,
     ...args,
-  ) as ReturnValue;
+  );
+
+  return (returnValue as ReturnValue) ?? undefined;
 }
