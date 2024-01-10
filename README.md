@@ -17,11 +17,11 @@ Using the service makes testing Electron applications much easier:
 
 ## Installation
 
-You will need to install `WebdriverIO`, instructions can be found [here.](https://webdriver.io/docs/gettingstarted)
+You will need to install `WebdriverIO`, instructions can be found [here](https://webdriver.io/docs/gettingstarted).
 
 ## Quick Start
 
-The recommended way to get up and running quickly is to use the [WDIO configuration wizard](https://webdriver.io/docs/gettingstarted#initiate-a-webdriverio-setup)
+The recommended way to get up and running quickly is to use the [WDIO configuration wizard](https://webdriver.io/docs/gettingstarted#initiate-a-webdriverio-setup).
 
 ### Manual Quick Start
 
@@ -79,7 +79,7 @@ capabilities: [{
 
 ## Development
 
-Check out our [development doc](./docs/development.md) if you are interested in contributing.
+Read the [development doc](./docs/development.md) if you are interested in contributing.
 
 ## Example Integrations
 
