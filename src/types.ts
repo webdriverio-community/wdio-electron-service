@@ -183,14 +183,13 @@ type Override =
   | 'mockImplementationOnce'
   | 'mockReturnValue'
   | 'mockReturnValueOnce'
-  | 'mockClear'
-  | 'mockReset';
-type NotImplemented =
   | 'mockResolvedValue'
   | 'mockResolvedValueOnce'
   | 'mockRejectedValue'
   | 'mockRejectedValueOnce'
-  | 'withImplementation';
+  | 'mockClear'
+  | 'mockReset';
+type NotImplemented = 'withImplementation';
 
 interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
   /**
@@ -267,6 +266,10 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    * ```
    */
   mockReturnValueOnce(obj: unknown): Promise<ElectronMock>;
+  mockResolvedValue(obj: unknown): Promise<ElectronMock>;
+  mockResolvedValueOnce(obj: unknown): Promise<ElectronMock>;
+  mockRejectedValue(obj: unknown): Promise<ElectronMock>;
+  mockRejectedValueOnce(obj: unknown): Promise<ElectronMock>;
   /**
    * Clears the history of the mocked Electron API function. The mock implementation will not be reset.
    *

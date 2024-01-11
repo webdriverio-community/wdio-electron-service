@@ -183,14 +183,13 @@ type Override =
   | 'mockImplementationOnce'
   | 'mockReturnValue'
   | 'mockReturnValueOnce'
-  | 'mockClear'
-  | 'mockReset';
-type NotImplemented =
   | 'mockResolvedValue'
   | 'mockResolvedValueOnce'
   | 'mockRejectedValue'
   | 'mockRejectedValueOnce'
-  | 'withImplementation';
+  | 'mockClear'
+  | 'mockReset';
+type NotImplemented = 'withImplementation';
 
 interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
   /**
@@ -250,7 +249,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
   /**
    * Accepts a value that will be returned during the next function call. If chained, every consecutive call will return the specified value.
    *
-   * When there are no more mockReturnValueOnce values to use, mock will fallback to previously defined implementation if there is one.
+   * When there are no more `mockReturnValueOnce` values to use, the mock will fall back to the previously defined implementation if there is one.
    *
    * @example
    * ```js
@@ -267,8 +266,12 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    * ```
    */
   mockReturnValueOnce(obj: unknown): Promise<ElectronMock>;
+  mockResolvedValue(obj: unknown): Promise<ElectronMock>;
+  mockResolvedValueOnce(obj: unknown): Promise<ElectronMock>;
+  mockRejectedValue(obj: unknown): Promise<ElectronMock>;
+  mockRejectedValueOnce(obj: unknown): Promise<ElectronMock>;
   /**
-   * Will clear the history of the mocked Electron API function. The mock implementation will not be reset.
+   * Clears the history of the mocked Electron API function. The mock implementation will not be reset.
    *
    * @example
    * ```js
@@ -283,7 +286,9 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    */
   mockClear(): Promise<ElectronMock>;
   /**
-   * Will reset the mocked Electron API function. The mock history will be cleared and the implementation will be reset to an empty function (will return undefined).
+   * Resets the mocked Electron API function. The mock history will be cleared and the implementation will be reset to an empty function (returning `undefined`).
+   *
+   * This also resets all "once" implementations.
    *
    * @example
    * ```js
@@ -300,7 +305,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    */
   mockReset(): Promise<ElectronMock>;
   /**
-   * Will restore the original implementation to the Electron API function.
+   * Restores the original implementation to the Electron API function.
    *
    * @example
    * ```js

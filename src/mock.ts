@@ -126,6 +126,62 @@ export async function createMock(apiName: string, funcName: string) {
     return mock;
   };
 
+  mock.mockResolvedValue = async (obj: unknown) => {
+    await browser.electron.execute(
+      (electron, apiName, funcName, resolvedValue) => {
+        const electronApi = electron[apiName as keyof typeof electron];
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockResolvedValue(resolvedValue);
+      },
+      apiName,
+      funcName,
+      obj,
+    );
+
+    return mock;
+  };
+
+  mock.mockResolvedValueOnce = async (obj: unknown) => {
+    await browser.electron.execute(
+      (electron, apiName, funcName, resolvedValue) => {
+        const electronApi = electron[apiName as keyof typeof electron];
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockResolvedValueOnce(resolvedValue);
+      },
+      apiName,
+      funcName,
+      obj,
+    );
+
+    return mock;
+  };
+
+  mock.mockRejectedValue = async (obj: unknown) => {
+    await browser.electron.execute(
+      (electron, apiName, funcName, rejectedValue) => {
+        const electronApi = electron[apiName as keyof typeof electron];
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockRejectedValue(rejectedValue);
+      },
+      apiName,
+      funcName,
+      obj,
+    );
+
+    return mock;
+  };
+
+  mock.mockRejectedValueOnce = async (obj: unknown) => {
+    await browser.electron.execute(
+      (electron, apiName, funcName, rejectedValue) => {
+        const electronApi = electron[apiName as keyof typeof electron];
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockRejectedValueOnce(rejectedValue);
+      },
+      apiName,
+      funcName,
+      obj,
+    );
+
+    return mock;
+  };
+
   mock.mockClear = async () => {
     // clears mock history
     await browser.electron.execute(
