@@ -207,9 +207,9 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *   return 'mocked value';
    * });
    *
-   * const result = await browser.electron.execute(async (electron) => await electron.app.getName());
+   * const name = await browser.electron.execute(async (electron) => await electron.app.getName());
    * expect(callsCount).toBe(1);
-   * expect(result).toBe('mocked value');
+   * expect(name).toBe('mocked value');
    * ```
    */
   mockImplementation(fn: AbstractFn): Promise<ElectronMock>;
@@ -220,7 +220,8 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *
    * @example
    * ```js
-   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
+   *  await mockGetName.mockImplementation(() => 'default mock');
    *  await mockGetName.mockImplementationOnce(() => 'first mock');
    *  await mockGetName.mockImplementationOnce(() => 'second mock');
    *
@@ -229,7 +230,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *  name = await browser.electron.execute((electron) => electron.app.getName());
    *  expect(name).toBe('second mock');
    *  name = await browser.electron.execute((electron) => electron.app.getName());
-   *  expect(name).toBeNull();
+   *  expect(name).toBe('default mock');
    * ```
    */
   mockImplementationOnce(fn: AbstractFn): Promise<ElectronMock>;
@@ -238,7 +239,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *
    * @example
    * ```js
-   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
    *  await mockGetName.mockReturnValue('mocked name');
    *
    *  const name = await browser.electron.execute((electron) => electron.app.getName());
@@ -254,6 +255,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    * @example
    * ```js
    *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  await mockGetName.mockReturnValue('default mock');
    *  await mockGetName.mockReturnValueOnce('first mock');
    *  await mockGetName.mockReturnValueOnce('second mock');
    *
@@ -262,20 +264,105 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *  name = await browser.electron.execute((electron) => electron.app.getName());
    *  expect(name).toBe('second mock');
    *  name = await browser.electron.execute((electron) => electron.app.getName());
-   *  expect(name).toBeNull();
+   *  expect(name).toBe('default mock');
    * ```
    */
   mockReturnValueOnce(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be resolved when an async function is called.
+   *
+   * @example
+   * ```js
+   *  const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+   *  await mockGetFileIcon.mockResolvedValue('This is a mock');
+   *
+   *  const fileIcon = await browser.electron.execute(
+   *    async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+   *  );
+   *
+   *  expect(fileIcon).toBe('This is a mock');
+   * ```
+   */
   mockResolvedValue(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be resolved during the next function call. If chained, every consecutive call will resolve the specified value.
+   *
+   * @example
+   * ```js
+   *  const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+   *  await mockGetFileIcon.mockResolvedValue('default mock')
+   *  await mockGetFileIcon.mockResolvedValueOnce('first mock');
+   *  await mockGetFileIcon.mockResolvedValueOnce('second mock');
+   *
+   *  let fileIcon = await browser.electron.execute(
+   *    async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+   *  );
+   *  expect(fileIcon).toBe('first mock');
+   *  fileIcon = await browser.electron.execute(
+   *    async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+   *  );
+   *  expect(fileIcon).toBe('second mock');
+   *  fileIcon = await browser.electron.execute(
+   *    async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+   *  );
+   *  expect(fileIcon).toBe('default mock');
+   * ```
+   */
   mockResolvedValueOnce(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be rejected when an async function is called.
+   *
+   * @example
+   * ```js
+   *  const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+   *  await mockGetFileIcon.mockRejectedValue('This is a mock error');
+   *
+   *  const fileIconError = await browser.electron.execute(async (electron) => {
+   *    try {
+   *      await electron.app.getFileIcon('/path/to/icon');
+   *    } catch (e) {
+   *      return e;
+   *    }
+   *  });
+   *
+   *  expect(fileIconError).toBe('This is a mock error');
+   * ```
+   */
   mockRejectedValue(obj: unknown): Promise<ElectronMock>;
+  /**
+   * Accepts a value that will be rejected during the next function call. If chained, every consecutive call will resolve the specified value.
+   *
+   * @example
+   * ```js
+   *  const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+   *  await mockGetFileIcon.mockRejectedValue('default mocked icon error')
+   *  await mockGetFileIcon.mockRejectedValueOnce('first mocked icon error');
+   *  await mockGetFileIcon.mockRejectedValueOnce('second mocked icon error');
+   *
+   *  const getFileIcon = async () =>
+   *    await browser.electron.execute(async (electron) => {
+   *      try {
+   *        await electron.app.getFileIcon('/path/to/icon');
+   *      } catch (e) {
+   *        return e;
+   *      }
+   *    });
+   *
+   *  let fileIcon = await getFileIcon();
+   *  expect(fileIcon).toBe('first mocked icon error');
+   *  fileIcon = await getFileIcon();
+   *  expect(fileIcon).toBe('second mocked icon error');
+   *  fileIcon = await getFileIcon();
+   *  expect(fileIcon).toBe('default mocked icon error');
+   * ```
+   */
   mockRejectedValueOnce(obj: unknown): Promise<ElectronMock>;
   /**
    * Clears the history of the mocked Electron API function. The mock implementation will not be reset.
    *
    * @example
    * ```js
-   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
    *  await browser.electron.execute((electron) => electron.app.getName());
    *
    *  await mockGetName.mockClear();
@@ -292,7 +379,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    *
    * @example
    * ```js
-   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
    *  await mockGetName.mockReturnValue('mocked name');
    *  await browser.electron.execute((electron) => electron.app.getName());
    *
@@ -310,7 +397,7 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    * @example
    * ```js
    *  const appName = await browser.electron.execute((electron) => electron.app.getName());
-   *  const mockGetName = await browser.electron.mock('app', 'getName')
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
    *  await mockGetName.mockReturnValue('mocked name');
    *
    *  await mockGetName.mockRestore();
