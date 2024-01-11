@@ -1,4 +1,4 @@
-import { ElectronMock } from './types.js';
+import type { ElectronMock } from './types.js';
 
 export class ElectronServiceMockStore {
   #mockFns: Map<string, ElectronMock>;
