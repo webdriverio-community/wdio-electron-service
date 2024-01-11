@@ -347,6 +347,91 @@ describe('mock object functionality', () => {
     });
   });
 
+  describe('mockResolvedValue', () => {
+    it('should resolve with the specified value from an existing mock', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+      await mockGetFileIcon.mockResolvedValue('This is a mock');
+
+      const fileIcon = await browser.electron.execute(
+        async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+      );
+
+      expect(fileIcon).toBe('This is a mock');
+    });
+  });
+
+  describe('mockResolvedValueOnce', () => {
+    it('should resolve with the specified value from an existing mock once', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+      await mockGetFileIcon.mockResolvedValue('default mocked icon');
+      await mockGetFileIcon.mockResolvedValueOnce('first mocked icon');
+      await mockGetFileIcon.mockResolvedValueOnce('second mocked icon');
+      await mockGetFileIcon.mockResolvedValueOnce('third mocked icon');
+
+      let fileIcon = await browser.electron.execute(
+        async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+      );
+      expect(fileIcon).toBe('first mocked icon');
+      fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+      expect(fileIcon).toBe('second mocked icon');
+      fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+      expect(fileIcon).toBe('third mocked icon');
+      fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+      expect(fileIcon).toBe('default mocked icon');
+      fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+      expect(fileIcon).toBe('default mocked icon');
+    });
+  });
+
+  describe('mockRejectedValue', () => {
+    it('should reject with the specified value from an existing mock', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+      await mockGetFileIcon.mockRejectedValue('This is a mock error');
+
+      const fileIconError = await browser.electron.execute(async (electron) => {
+        try {
+          await electron.app.getFileIcon('/path/to/icon');
+        } catch (e) {
+          return e;
+        }
+      });
+
+      expect(fileIconError).toBe('This is a mock error');
+    });
+  });
+
+  describe('mockRejectedValueOnce', () => {
+    it('should return the specified value from an existing mock once', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+      await mockGetFileIcon.mockRejectedValue('default mocked icon error');
+      await mockGetFileIcon.mockRejectedValueOnce('first mocked icon error');
+      await mockGetFileIcon.mockRejectedValueOnce('second mocked icon error');
+      await mockGetFileIcon.mockRejectedValueOnce('third mocked icon error');
+
+      const getFileIcon = async () =>
+        await browser.electron.execute(async (electron) => {
+          try {
+            await electron.app.getFileIcon('/path/to/icon');
+          } catch (e) {
+            return e;
+          }
+        });
+
+      let fileIcon = await getFileIcon();
+      expect(fileIcon).toBe('first mocked icon error');
+      fileIcon = await getFileIcon();
+      expect(fileIcon).toBe('second mocked icon error');
+      fileIcon = await getFileIcon();
+      expect(fileIcon).toBe('third mocked icon error');
+      fileIcon = await getFileIcon();
+      expect(fileIcon).toBe('default mocked icon error');
+      fileIcon = await getFileIcon();
+      expect(fileIcon).toBe('default mocked icon error');
+    });
+  });
+
   describe('mockClear', () => {
     it('should clear an existing mock', async () => {
       const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
