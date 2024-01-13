@@ -1,6 +1,6 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
-import { execute } from '../../src/commands/execute';
+import { execute } from '../../src/commands/execute.js';
 
 describe('execute', () => {
   beforeEach(async () => {

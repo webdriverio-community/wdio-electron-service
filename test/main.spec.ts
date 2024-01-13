@@ -22,7 +22,7 @@ beforeEach(async () => {
   ipcMain.handle.mockImplementation((channel: string, listener: () => void) => {
     listeners[channel] = listener;
   });
-  await import('../src/main');
+  await import('../src/main.js');
 });
 
 afterEach(() => {

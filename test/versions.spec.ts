@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import nock from 'nock';
 
-import { getChromiumVersion } from '../src/versions';
+import { getChromiumVersion } from '../src/versions.js';
 
 describe('getChromiumVersion', () => {
   it('should find the Chromium version for a given Electron version', async () => {

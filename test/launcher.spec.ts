@@ -2,9 +2,9 @@ import path from 'node:path';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 import type { Capabilities, Options } from '@wdio/types';
 
-import ElectronLaunchService from '../src/launcher';
-import { mockProcessProperty, revertProcessProperty } from './helpers';
-import type { ElectronServiceOptions } from '../src/index';
+import ElectronLaunchService from '../src/launcher.js';
+import { mockProcessProperty, revertProcessProperty } from './helpers.js';
+import type { ElectronServiceOptions } from '../src/index.js';
 
 let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;
@@ -18,7 +18,7 @@ vi.mock('node:fs/promises', () => ({
 
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
-  LaunchService = (await import('../src/launcher')).default;
+  LaunchService = (await import('../src/launcher.js')).default;
   options = {
     appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
   };

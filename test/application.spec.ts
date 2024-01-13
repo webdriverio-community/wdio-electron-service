@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
-import { getBinaryPath, getAppBuildInfo } from '../src/application';
+import { getBinaryPath, getAppBuildInfo } from '../src/application.js';
 
 describe('getBinaryPath', () => {
   const pkgJSONPath = '/foo/bar/package.json';

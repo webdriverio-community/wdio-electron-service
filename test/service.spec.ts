@@ -1,19 +1,19 @@
 import { vi, describe, beforeEach, it, expect, Mock } from 'vitest';
 
-import { mockProcessProperty } from './helpers';
-import { clearAllMocks } from '../src/commands/clearAllMocks';
-import { resetAllMocks } from '../src/commands/resetAllMocks';
-import { restoreAllMocks } from '../src/commands/restoreAllMocks';
-import type { BrowserExtension, ElectronMock } from '../src';
-import type ElectronWorkerService from '../src/service';
-import mockStore from '../src/mockStore';
+import { mockProcessProperty } from './helpers.js';
+import { clearAllMocks } from '../src/commands/clearAllMocks.js';
+import { resetAllMocks } from '../src/commands/resetAllMocks.js';
+import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
+import type { BrowserExtension, ElectronMock } from '../src/index.js';
+import type ElectronWorkerService from '../src/service.js';
+import mockStore from '../src/mockStore.js';
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
-  WorkerService = (await import('../src/service')).default;
+  WorkerService = (await import('../src/service.js')).default;
 });
 
 describe('before', () => {
@@ -66,13 +66,13 @@ describe('before', () => {
 });
 
 describe('beforeTest', () => {
-  vi.mock('../src/commands/clearAllMocks', () => ({
+  vi.mock('../src/commands/clearAllMocks.js', () => ({
     clearAllMocks: vi.fn().mockReturnValue({}),
   }));
-  vi.mock('../src/commands/resetAllMocks', () => ({
+  vi.mock('../src/commands/resetAllMocks.js', () => ({
     resetAllMocks: vi.fn().mockReturnValue({}),
   }));
-  vi.mock('../src/commands/restoreAllMocks', () => ({
+  vi.mock('../src/commands/restoreAllMocks.js', () => ({
     restoreAllMocks: vi.fn().mockReturnValue({}),
   }));
 
