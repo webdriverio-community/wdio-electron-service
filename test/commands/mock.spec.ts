@@ -1,12 +1,27 @@
 import { vi, describe, beforeEach, it, expect, Mock, afterEach } from 'vitest';
 
-import { mock } from '../../src/commands/mock.js';
-import mockStore from '../../src/mockStore.js';
 import { createMock } from '../../src/mock.js';
+import mockStore from '../../src/mockStore.js';
 
 vi.mock('../../src/mock.js', () => ({
   createMock: vi.fn(),
 }));
+vi.mock('../../src/mockStore.js', () => ({
+  default: {
+    getMock: vi.fn(),
+    setMock: vi.fn(),
+  },
+}));
+
+let mock;
+
+beforeEach(async () => {
+  mock = (await import('../../src/commands/mock.js')).mock;
+});
+
+afterEach(() => {
+  vi.resetModules();
+});
 
 describe('mock', () => {
   let mockedGetName;
@@ -18,36 +33,40 @@ describe('mock', () => {
     };
   });
 
-  afterEach(() => {
-    mockStore.removeMock('electron.app.getName');
-  });
-
   it('should return an existing mock', async () => {
-    mockStore.setMock(mockedGetName);
+    (mockStore.getMock as Mock).mockReturnValue(mockedGetName);
 
     const retrievedMock = await mock('app', 'getName');
-    expect(retrievedMock).toBe(mockedGetName);
+    expect(mockStore.getMock).toBeCalledWith('electron.app.getName');
+    expect(retrievedMock).toStrictEqual(mockedGetName);
   });
 
   it('should reset an existing mock', async () => {
-    mockStore.setMock(mockedGetName);
+    (mockStore.getMock as Mock).mockReturnValue(mockedGetName);
 
     const retrievedMock = await mock('app', 'getName');
     expect(retrievedMock.mockReset).toHaveBeenCalled();
   });
 
-  it('should create a new mock', async () => {
-    (createMock as Mock).mockResolvedValue(mockedGetName);
+  describe('when there is no existing mock', () => {
+    beforeEach(() => {
+      (mockStore.getMock as Mock).mockImplementation(() => {
+        throw new Error('No mock by that name');
+      });
+    });
 
-    const createdMock = await mock('app', 'getName');
-    expect(createdMock).toBe(mockedGetName);
-  });
+    it('should create a new mock', async () => {
+      (createMock as Mock).mockReturnValue(mockedGetName);
 
-  it('should put newly created mocks in the store', async () => {
-    (createMock as Mock).mockResolvedValue(mockedGetName);
+      const createdMock = await mock('app', 'getName');
+      expect(createdMock.getMockName()).toBe('electron.app.getName');
+    });
 
-    await mock('app', 'getName');
-    const storedMock = mockStore.getMock('electron.app.getName');
-    expect(storedMock).toBe(mockedGetName);
+    it('should put newly created mocks in the store', async () => {
+      (createMock as Mock).mockReturnValue(mockedGetName);
+
+      await mock('app', 'getName');
+      expect(mockStore.setMock).toBeCalledWith(mockedGetName);
+    });
   });
 });
