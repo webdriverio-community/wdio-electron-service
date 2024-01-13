@@ -6,7 +6,6 @@ import mockStore from '../../src/mockStore.js';
 vi.mock('../../src/mockStore.js', () => ({
   default: {
     getMocks: vi.fn(),
-    removeMock: vi.fn(),
   },
 }));
 

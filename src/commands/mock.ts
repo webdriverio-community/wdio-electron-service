@@ -4,13 +4,14 @@ import type { ElectronMock } from '../types.js';
 
 export async function mock(apiName: string, funcName: string): Promise<ElectronMock> {
   try {
-    // retrieve an existing mock
-    const mock = mockStore.getMock(`electron.${apiName}.${funcName}`);
-    await mock.mockReset();
-    return mock;
+    // retrieve an existing mock from the store
+    const existingMock = mockStore.getMock(`electron.${apiName}.${funcName}`);
+    await existingMock.mockReset();
+    return existingMock;
   } catch (e) {
-    // mock doesn't exist, create a new one
-    const mock = await createMock(apiName, funcName);
-    return mockStore.setMock(mock);
+    // mock doesn't exist, create a new one and store it
+    const newMock = await createMock(apiName, funcName);
+    mockStore.setMock(newMock);
+    return newMock;
   }
 }
