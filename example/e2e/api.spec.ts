@@ -402,7 +402,7 @@ describe('mock object functionality', () => {
   });
 
   describe('mockRejectedValueOnce', () => {
-    it('should return the specified value from an existing mock once', async () => {
+    it('should reject with the specified value from an existing mock once', async () => {
       const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
 
       await mockGetFileIcon.mockRejectedValue('default mocked icon error');
