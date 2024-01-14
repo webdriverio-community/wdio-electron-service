@@ -16,7 +16,7 @@ vi.mock('electron', () => ({
 describe('preload', () => {
   beforeEach(async () => {
     process.env.WDIO_ELECTRON = 'true';
-    await import('../src/preload');
+    await import('../src/preload.js');
   });
 
   it('should throw an error when the WDIO_ELECTRON environment variable does not exist', async () => {

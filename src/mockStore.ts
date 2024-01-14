@@ -1,4 +1,4 @@
-import { ElectronMock } from './types.js';
+import type { ElectronMock } from './types.js';
 
 export class ElectronServiceMockStore {
   #mockFns: Map<string, ElectronMock>;
@@ -23,10 +23,6 @@ export class ElectronServiceMockStore {
 
   getMocks() {
     return Array.from(this.#mockFns.entries());
-  }
-
-  removeMock(mockId: string) {
-    this.#mockFns.delete(mockId);
   }
 }
 

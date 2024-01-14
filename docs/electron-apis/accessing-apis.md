@@ -5,7 +5,7 @@ If you wish to access the Electron APIs then you will need to import (or require
 It is not recommended to disable sandbox mode in production; to control this behaviour you can set the `NODE_ENV` environment variable when executing WDIO:
 
 ```json
-"wdio": "NODE_ENV=test wdio run wdio.conf.js "
+"wdio": "NODE_ENV=test wdio run wdio.conf.js"
 ```
 
 In your BrowserWindow configuration, set the sandbox option depending on the NODE_ENV variable:

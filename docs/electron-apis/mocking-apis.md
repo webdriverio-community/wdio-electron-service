@@ -209,6 +209,89 @@ name = await browser.electron.execute((electron) => electron.app.getName());
 expect(name).toBeNull();
 ```
 
+### `mockResolvedValue`
+
+Accepts a value that will be resolved whenever the mock function is called.
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+await mockGetFileIcon.mockResolvedValue('This is a mock');
+
+const fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+
+expect(fileIcon).toBe('This is a mock');
+```
+
+### `mockResolvedValueOnce`
+
+Accepts a value that will be resolved during the next function call. If chained, every consecutive call will resolve the specified value.
+
+When there are no more `mockResolvedValueOnce` values to use, the mock will fall back to the previously defined implementation if there is one.
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+await mockGetFileIcon.mockResolvedValue('default mocked icon');
+await mockGetFileIcon.mockResolvedValueOnce('first mocked icon');
+await mockGetFileIcon.mockResolvedValueOnce('second mocked icon');
+
+let fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+expect(fileIcon).toBe('first mocked icon');
+fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+expect(fileIcon).toBe('second mocked icon');
+fileIcon = await browser.electron.execute(async (electron) => await electron.app.getFileIcon('/path/to/icon'));
+expect(fileIcon).toBe('default mocked icon');
+```
+
+### `mockRejectedValue`
+
+Accepts a value that will be rejected whenever the mock function is called.
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+await mockGetFileIcon.mockRejectedValue('This is a mock error');
+
+const fileIconError = await browser.electron.execute(async (electron) => {
+  try {
+    await electron.app.getFileIcon('/path/to/icon');
+  } catch (e) {
+    return e;
+  }
+});
+
+expect(fileIconError).toBe('This is a mock error');
+```
+
+### `mockRejectedValueOnce`
+
+Accepts a value that will be rejected during the next function call. If chained, every consecutive call will reject the specified value.
+
+When there are no more `mockRejectedValueOnce` values to use, the mock will fall back to the previously defined implementation if there is one.
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+await mockGetFileIcon.mockRejectedValue('default mocked icon error');
+await mockGetFileIcon.mockRejectedValueOnce('first mocked icon error');
+await mockGetFileIcon.mockRejectedValueOnce('second mocked icon error');
+
+const getFileIcon = async () =>
+  await browser.electron.execute(async (electron) => {
+    try {
+      await electron.app.getFileIcon('/path/to/icon');
+    } catch (e) {
+      return e;
+    }
+  });
+
+let fileIcon = await getFileIcon();
+expect(fileIcon).toBe('first mocked icon error');
+fileIcon = await getFileIcon();
+expect(fileIcon).toBe('second mocked icon error');
+fileIcon = await getFileIcon();
+expect(fileIcon).toBe('default mocked icon error');
+```
+
 ### `mockClear`
 
 Clears the history of the mocked Electron API function. The mock implementation will not be reset.

@@ -1,25 +1,7 @@
+/// <reference types="../../@types/vitest" />
 import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 
 import { mockAll } from '../../src/commands/mockAll.js';
-
-interface CustomMatchers<R = unknown> {
-  anyMockFunction(): R;
-}
-
-declare module 'vitest' {
-  interface Assertion<T = any> extends CustomMatchers<T> {}
-  interface AsymmetricMatchersContaining extends CustomMatchers {}
-}
-
-expect.extend({
-  anyMockFunction(received) {
-    const { isNot } = this;
-    return {
-      pass: vi.isMockFunction(received),
-      message: () => `${received} is${isNot ? ' not' : ''} a Mock`,
-    };
-  },
-});
 
 describe('mockAll', () => {
   beforeEach(async () => {
