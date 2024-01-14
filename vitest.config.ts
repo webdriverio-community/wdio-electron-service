@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['test/**/*.spec.ts'],
     exclude: [...configDefaults.exclude, 'example*/**/*'],
     environment: 'jsdom',
+    setupFiles: 'test/setup.ts',
     coverage: {
       enabled: true,
       include: ['src/**/*'],

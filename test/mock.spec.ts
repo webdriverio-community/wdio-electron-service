@@ -1,26 +1,7 @@
+/// <reference types="../../@types/vitest" />
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 
 import { createMock } from '../src/mock.js';
-
-interface CustomMatchers<R = unknown> {
-  anyMockFunction(): R;
-}
-
-// TODO - extract expect extension from here and mockAll
-declare module 'vitest' {
-  interface Assertion<T = any> extends CustomMatchers<T> {}
-  interface AsymmetricMatchersContaining extends CustomMatchers {}
-}
-
-expect.extend({
-  anyMockFunction(received) {
-    const { isNot } = this;
-    return {
-      pass: vi.isMockFunction(received),
-      message: () => `${received} is${isNot ? ' not' : ''} a Mock`,
-    };
-  },
-});
 
 beforeEach(() => {
   globalThis.fn = vi.fn;
