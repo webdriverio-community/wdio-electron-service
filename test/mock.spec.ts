@@ -97,4 +97,96 @@ describe('createMock', () => {
 
     // TODO: outerMockImplOnce
   });
+
+  describe('mockReturnValue', () => {
+    it('should set mockReturnValue of the inner mock', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      await mock.mockReturnValue('mock return value');
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBe('mock return value');
+    });
+  });
+
+  describe('mockReturnValueOnce', () => {
+    it('should set mockReturnValueOnce of the inner mock', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      await mock.mockReturnValue('default mock return value');
+      await mock.mockReturnValueOnce('first mock return value');
+      await mock.mockReturnValueOnce('second mock return value');
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBe('first mock return value');
+      expect(electron.app.getName()).toBe('second mock return value');
+      expect(electron.app.getName()).toBe('default mock return value');
+    });
+  });
+
+  describe('mockResolvedValue', () => {
+    it('should set mockResolvedValue of the inner mock', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      const electron = {
+        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.mockResolvedValue('mock resolved value');
+      processExecuteCalls(electron);
+
+      expect(await electron.app.getFileIcon('/path/to/icon')).toBe('mock resolved value');
+    });
+  });
+
+  describe('mockResolvedValueOnce', () => {
+    it('should set mockResolvedValueOnce of the inner mock', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      const electron = {
+        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.mockResolvedValue('default mock resolved value');
+      await mock.mockResolvedValueOnce('first mock resolved value');
+      await mock.mockResolvedValueOnce('second mock resolved value');
+      processExecuteCalls(electron);
+
+      expect(await electron.app.getFileIcon('/path/to/icon')).toBe('first mock resolved value');
+      expect(await electron.app.getFileIcon('/path/to/icon')).toBe('second mock resolved value');
+      expect(await electron.app.getFileIcon('/path/to/icon')).toBe('default mock resolved value');
+    });
+  });
+
+  describe('mockRejectedValue', () => {
+    it('should set mockRejectedValue of the inner mock', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      const electron = {
+        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.mockRejectedValue('mock rejected value');
+      processExecuteCalls(electron);
+
+      await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('mock rejected value');
+    });
+  });
+
+  describe('mockRejectedValueOnce', () => {
+    it('should set mockRejectedValueOnce of the inner mock', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      const electron = {
+        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.mockRejectedValue('default mock rejected value');
+      await mock.mockRejectedValueOnce('first mock rejected value');
+      await mock.mockRejectedValueOnce('second mock rejected value');
+      processExecuteCalls(electron);
+
+      await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
+        'first mock rejected value',
+      );
+      await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
+        'second mock rejected value',
+      );
+      await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
+        'default mock rejected value',
+      );
+    });
+  });
 });
