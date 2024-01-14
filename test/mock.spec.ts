@@ -189,4 +189,10 @@ describe('createMock', () => {
       );
     });
   });
+
+  // TODO: mockClear
+
+  // TODO: mockReset
+
+  // TODO: mockRestore
 });
