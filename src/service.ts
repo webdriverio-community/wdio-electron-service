@@ -110,7 +110,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     // ensure mocks are updated
     const mocks = mockStore.getMocks();
 
-    if (commandName.includes('execute') && mocks.length > 0) {
+    if (commandName.includes('executeScript') && mocks.length > 0) {
       await Promise.all(
         mocks.map(async ([_mockId, mock]) => {
           if (!mock.updating) {

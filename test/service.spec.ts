@@ -129,7 +129,7 @@ describe('afterCommand', () => {
       ['electron.app.getName', { update: vi.fn().mockResolvedValue({}), updating: false } as unknown as ElectronMock],
       ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}), updating: true } as unknown as ElectronMock],
     ];
-    await instance.afterCommand('execute', [['look', 'some', 'args']]);
+    await instance.afterCommand('executeScript', [['look', 'some', 'args']]);
 
     expect(mocks[0][1].update).toHaveBeenCalled();
     expect(mocks[1][1].update).not.toHaveBeenCalled();
