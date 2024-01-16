@@ -9,11 +9,14 @@ import { clearAllMocks } from './commands/clearAllMocks.js';
 import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
-import type { AbstractFn, BrowserExtension, ElectronServiceOptions } from './index.js';
+import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from './index.js';
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
-    const numWindows = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows().length);
+    const numWindows = await browser.electron.execute<number, [ExecuteOpts]>(
+      (electron) => electron.BrowserWindow.getAllWindows().length,
+      { internal: true },
+    );
     return numWindows > 0;
   });
 
@@ -106,20 +109,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  async afterCommand(_commandName: string, _args: unknown[][]) {
+  async afterCommand(commandName: string, args: unknown[]) {
     // ensure mocks are updated
     const mocks = mockStore.getMocks();
+    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
-    if (mocks.length > 0) {
-      await Promise.all(
-        mocks.map(async ([_mockId, mock]) => {
-          if (!mock.updating) {
-            return await mock.update();
-          } else {
-            return Promise.resolve();
-          }
-        }),
-      );
+    if (commandName === 'execute' && mocks.length > 0 && !isInternalCommand()) {
+      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }
 }

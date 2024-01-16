@@ -174,6 +174,10 @@ export type AppBuildInfo = {
   isForge: boolean;
 };
 
+export type ExecuteOpts = {
+  internal?: boolean;
+};
+
 export type WdioElectronWindowObj = {
   execute: (script: string, args?: unknown[]) => unknown;
 };
@@ -411,10 +415,6 @@ interface ElectronMockInstance extends Omit<Mock, Override | NotImplemented> {
    * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
    */
   update(): Promise<ElectronMock>;
-  /**
-   * Used internally to determine whether the mock function is being updated.
-   */
-  updating: boolean;
 }
 
 export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {
