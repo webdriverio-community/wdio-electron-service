@@ -123,15 +123,39 @@ describe('afterCommand', () => {
     (mockStore.getMocks as Mock).mockImplementation(() => mocks);
   });
 
-  it('should update mocks which are not already updating', async () => {
+  it('should not update mocks when the command is not `execute`', async () => {
     instance = new WorkerService();
     mocks = [
-      ['electron.app.getName', { update: vi.fn().mockResolvedValue({}), updating: false } as unknown as ElectronMock],
-      ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}), updating: true } as unknown as ElectronMock],
+      ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
+      ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
     ];
-    await instance.afterCommand('executeScript', [['look', 'some', 'args']]);
+    await instance.afterCommand('someCommand', [['look', 'some', 'args']]);
+
+    expect(mocks[0][1].update).not.toHaveBeenCalled();
+    expect(mocks[1][1].update).not.toHaveBeenCalled();
+  });
+
+  it('should not update mocks when the command is `execute` and internal is set', async () => {
+    instance = new WorkerService();
+    mocks = [
+      ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
+      ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
+    ];
+    await instance.afterCommand('execute', [['look', 'some', 'args'], { internal: true }]);
+
+    expect(mocks[0][1].update).not.toHaveBeenCalled();
+    expect(mocks[1][1].update).not.toHaveBeenCalled();
+  });
+
+  it('should update mocks when the command is `execute` and internal is not set', async () => {
+    instance = new WorkerService();
+    mocks = [
+      ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
+      ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as ElectronMock],
+    ];
+    await instance.afterCommand('execute', [['look', 'some', 'args']]);
 
     expect(mocks[0][1].update).toHaveBeenCalled();
-    expect(mocks[1][1].update).not.toHaveBeenCalled();
+    expect(mocks[1][1].update).toHaveBeenCalled();
   });
 });
