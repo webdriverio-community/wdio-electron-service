@@ -27,6 +27,16 @@ function processExecuteCalls(electron: ElectronObj) {
   }
 }
 
+async function processAsyncExecuteCalls(electron: ElectronObj) {
+  const executeCalls = (globalThis.browser.electron.execute as Mock).mock.calls as ExecuteCalls;
+
+  return Promise.all(
+    executeCalls.map(([executeFn, apiName, funcName, ...additionalArgs]) =>
+      executeFn(electron, apiName, funcName, ...additionalArgs),
+    ),
+  );
+}
+
 beforeEach(() => {
   globalThis.fn = vi.fn;
   globalThis.browser = {
@@ -62,7 +72,7 @@ describe('createMock', () => {
 
   it('should initialise the inner mock', async () => {
     await createMock('app', 'getName');
-    const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+    const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
     processExecuteCalls(electron);
 
     expect(electron.app.getName).toStrictEqual(expect.anyMockFunction());
@@ -71,20 +81,18 @@ describe('createMock', () => {
   describe('mockImplementation', () => {
     it('should set mockImplementation of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
-      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
       await mock.mockImplementation(() => 'mock implementation');
       processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('mock implementation');
     });
-
-    // TODO: outerMockImpl
   });
 
   describe('mockImplementationOnce', () => {
     it('should set mockImplementationOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
-      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
       await mock.mockImplementation(() => 'default mock implementation');
       await mock.mockImplementationOnce(() => 'first mock implementation');
       await mock.mockImplementationOnce(() => 'second mock implementation');
@@ -94,14 +102,12 @@ describe('createMock', () => {
       expect(electron.app.getName()).toBe('second mock implementation');
       expect(electron.app.getName()).toBe('default mock implementation');
     });
-
-    // TODO: outerMockImplOnce
   });
 
   describe('mockReturnValue', () => {
     it('should set mockReturnValue of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
-      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
       await mock.mockReturnValue('mock return value');
       processExecuteCalls(electron);
 
@@ -112,7 +118,7 @@ describe('createMock', () => {
   describe('mockReturnValueOnce', () => {
     it('should set mockReturnValueOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
-      const electron = { app: { getName: () => 'not a mock' } as Omit<ElectronType['app'], 'on'> };
+      const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
       await mock.mockReturnValue('default mock return value');
       await mock.mockReturnValueOnce('first mock return value');
       await mock.mockReturnValueOnce('second mock return value');
@@ -128,7 +134,7 @@ describe('createMock', () => {
     it('should set mockResolvedValue of the inner mock', async () => {
       const mock = await createMock('app', 'getFileIcon');
       const electron = {
-        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+        app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
       await mock.mockResolvedValue('mock resolved value');
       processExecuteCalls(electron);
@@ -141,7 +147,7 @@ describe('createMock', () => {
     it('should set mockResolvedValueOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getFileIcon');
       const electron = {
-        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+        app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
       await mock.mockResolvedValue('default mock resolved value');
       await mock.mockResolvedValueOnce('first mock resolved value');
@@ -158,7 +164,7 @@ describe('createMock', () => {
     it('should set mockRejectedValue of the inner mock', async () => {
       const mock = await createMock('app', 'getFileIcon');
       const electron = {
-        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+        app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
       await mock.mockRejectedValue('mock rejected value');
       processExecuteCalls(electron);
@@ -171,7 +177,7 @@ describe('createMock', () => {
     it('should set mockRejectedValueOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getFileIcon');
       const electron = {
-        app: { getFileIcon: () => Promise.resolve('not a mock') } as unknown as Omit<ElectronType['app'], 'on'>,
+        app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
       await mock.mockRejectedValue('default mock rejected value');
       await mock.mockRejectedValueOnce('first mock rejected value');
@@ -190,9 +196,104 @@ describe('createMock', () => {
     });
   });
 
-  // TODO: mockClear
+  describe('mockClear', () => {
+    it('should clear the inner mock', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      processExecuteCalls(electron);
 
-  // TODO: mockReset
+      electron.app.getName();
+      electron.app.getName();
+      electron.app.getName();
 
-  // TODO: mockRestore
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[], [], []]);
+
+      await mock.mockClear();
+      processExecuteCalls(electron);
+
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([]);
+    });
+  });
+
+  describe('mockReset', () => {
+    it('should reset the inner mock', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.mockImplementation(() => 'mocked name');
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBe('mocked name');
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
+
+      await mock.mockReset();
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBeUndefined();
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
+    });
+  });
+
+  describe('mockRestore', () => {
+    it('should restore the inner mock', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      globalThis.originalApi = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBeUndefined();
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
+
+      await mock.mockRestore();
+      processExecuteCalls(electron);
+
+      expect(electron.app.getName()).toBe('actual name');
+      expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
+    });
+  });
+
+  describe('mockReturnThis', () => {
+    it('should allow chaining', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name', getVersion: () => 'actual version' } as unknown as Omit<
+          ElectronType['app'],
+          'on'
+        >,
+      };
+
+      await mock.mockReturnThis();
+      processExecuteCalls(electron);
+
+      expect((electron.app.getName() as unknown as Omit<ElectronType['app'], 'on'>).getVersion()).toBe(
+        'actual version',
+      );
+    });
+  });
+
+  describe('withImplementation', () => {
+    it('should temporarily override mock implementation', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await mock.withImplementation(
+        () => 'temporary name',
+        (electron) => electron.app.getName(),
+      );
+      const executeResults = await processAsyncExecuteCalls(electron);
+
+      // first result is that of the mock initialisation call
+      expect(executeResults).toStrictEqual([undefined, 'temporary name']);
+    });
+  });
+
+  // TODO: update
 });
