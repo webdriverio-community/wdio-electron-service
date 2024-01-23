@@ -534,4 +534,84 @@ describe('mock object functionality', () => {
       expect(name).toBe(pkgAppName);
     });
   });
+
+  describe('getMockName', () => {
+    it('should retrieve the mock name', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      expect(mockGetName.getMockName()).toBe('electron.app.getName');
+    });
+  });
+
+  describe('mockName', () => {
+    it('should set the mock name', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      mockGetName.mockName('my first mock');
+
+      expect(mockGetName.getMockName()).toBe('my first mock');
+    });
+  });
+
+  describe('getMockImplementation', () => {
+    it('should retrieve the mock implementation', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockImplementation(() => 'mocked name');
+      const mockImpl = mockGetName.getMockImplementation() as () => string;
+
+      expect(mockImpl()).toBe('mocked name');
+    });
+  });
+
+  describe('mockReturnThis', () => {
+    it('should allow chaining', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      const mockGetVersion = await browser.electron.mock('app', 'getVersion');
+      await mockGetName.mockReturnThis();
+      await browser.electron.execute((electron) =>
+        (electron.app.getName() as unknown as { getVersion: () => string }).getVersion(),
+      );
+
+      expect(mockGetVersion).toHaveBeenCalled();
+    });
+  });
+
+  describe('withImplementation', () => {
+    it('should temporarily override mock implementation', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      await mockGetName.mockImplementation(() => 'default mock name');
+      await mockGetName.mockImplementationOnce(() => 'first mock name');
+      await mockGetName.mockImplementationOnce(() => 'second mock name');
+      const withImplementationResult = await mockGetName.withImplementation(
+        () => 'temporary mock name',
+        (electron) => electron.app.getName(),
+      );
+
+      expect(withImplementationResult).toBe('temporary mock name');
+      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('first mock name');
+      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('second mock name');
+      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('default mock name');
+    });
+
+    it('should handle promises', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+      await mockGetFileIcon.mockResolvedValue('default mock icon');
+      await mockGetFileIcon.mockResolvedValueOnce('first mock icon');
+      await mockGetFileIcon.mockResolvedValueOnce('second mock icon');
+      const withImplementationResult = await mockGetFileIcon.withImplementation(
+        () => Promise.resolve('temporary mock icon'),
+        async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+      );
+
+      expect(withImplementationResult).toBe('temporary mock icon');
+      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
+        'first mock icon',
+      );
+      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
+        'second mock icon',
+      );
+      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
+        'default mock icon',
+      );
+    });
+  });
 });
