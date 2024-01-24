@@ -433,7 +433,7 @@ interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
    *  expect(mockGetVersion).toHaveBeenCalled();
    * ```
    */
-  mockReturnThis(): Promise<any>;
+  mockReturnThis(): Promise<unknown>;
   /**
    * Overrides the original mock implementation temporarily while the callback is being executed.
    * The electron object is passed into the callback in the same way as for `execute`.
