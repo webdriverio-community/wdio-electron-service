@@ -182,7 +182,7 @@ export type WdioElectronWindowObj = {
   execute: (script: string, args?: unknown[]) => unknown;
 };
 
-type AsyncOverride =
+type Override =
   | 'mockImplementation'
   | 'mockImplementationOnce'
   | 'mockReturnValue'
@@ -194,9 +194,10 @@ type AsyncOverride =
   | 'mockClear'
   | 'mockReset'
   | 'mockReturnThis'
+  | 'mockName'
   | 'withImplementation';
 
-interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
+interface ElectronMockInstance extends Omit<Mock, Override> {
   /**
    * Accepts a function that will be used as an implementation of the mock.
    *
@@ -219,7 +220,7 @@ interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
    */
   mockImplementation(fn: AbstractFn): Promise<ElectronMock>;
   /**
-   * Accepts a function that will be used as mock's implementation during the next call. If chained, every consecutive call will produce different results.
+   * Accepts a function that will be used as the mock's implementation during the next call. If chained, every consecutive call will produce different results.
    *
    * When the mocked function runs out of implementations, it will invoke the default implementation set with `mockImplementation`.
    *
@@ -413,13 +414,15 @@ interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
    */
   mockRestore(): Promise<ElectronMock>;
   /**
-   * Useful if you need to return `this` context from the method without invoking implementation. This is a shorthand for:
+   * Useful if you need to return the `this` context from the method without invoking implementation. This is a shorthand for:
    *
    * ```js
    *  await spy.mockImplementation(function () {
    *    return this;
    *  });
    * ```
+   *
+   * ...which enables API functions to be chained:
    *
    * @example
    * ```js
@@ -449,7 +452,7 @@ interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
    *  expect(withImplementationResult).toBe('temporary mock name');
    * ```
    *
-   * Can also be used with an asynchronous callback:
+   * It can also be used with an asynchronous callback:
    *
    * @example
    * ```js
@@ -467,6 +470,43 @@ interface ElectronMockInstance extends Omit<Mock, AsyncOverride> {
     implFn: AbstractFn,
     callbackFn: (electron: typeof Electron, ...innerArgs: InnerArguments) => ReturnValue,
   ): Promise<unknown>;
+  /**
+   * Assigns a name to the mock. Useful to see the name of the mock if an assertion fails.
+   * The name can be retrieved via `getMockName`.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   * mockGetName.mockName('test mock');
+   *
+   * expect(mockGetName.getMockName()).toBe('test mock');
+   * ```
+   */
+  mockName(name: string): ElectronMock;
+  /**
+   * Returns the assigned name of the mock. Defaults to `electron.<apiName>.<funcName>`.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   *
+   * expect(mockGetName.getMockName()).toBe('electron.app.getName');
+   * ```
+   */
+  getMockName(): string;
+  /**
+   * Returns the current mock implementation.  The default implementation is an empty function (returns `undefined`).
+   *
+   * @example
+   * ```js
+   *  const mockGetName = await browser.electron.mock('app', 'getName');
+   *  await mockGetName.mockImplementation(() => 'mocked name');
+   *  const mockImpl = mockGetName.getMockImplementation();
+   *
+   *  expect(mockImpl()).toBe('mocked name');
+   * ```
+   */
+  getMockImplementation(): AbstractFn;
   /**
    * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
    */
