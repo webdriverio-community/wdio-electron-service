@@ -412,7 +412,7 @@ await spy.mockImplementation(function () {
 });
 ```
 
-This enables API functions to be chained:
+...which enables API functions to be chained:
 
 ```js
 const mockGetName = await browser.electron.mock('app', 'getName');
