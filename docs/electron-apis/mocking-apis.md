@@ -338,3 +338,87 @@ await mockGetName.mockRestore();
 const name = await browser.electron.execute((electron) => electron.app.getName());
 expect(name).toBe(appName);
 ```
+
+### `withImplementation`
+
+Overrides the original mock implementation temporarily while the callback is being executed.
+The electron object is passed into the callback in the same way as for `execute`.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const withImplementationResult = await mockGetName.withImplementation(
+  () => 'temporary mock name',
+  (electron) => electron.app.getName(),
+);
+
+expect(withImplementationResult).toBe('temporary mock name');
+```
+
+It can also be used with an asynchronous callback:
+
+@example
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+const withImplementationResult = await mockGetFileIcon.withImplementation(
+  () => Promise.resolve('temporary mock icon'),
+  async (electron) => await electron.app.getFileIcon('/path/to/icon'),
+);
+
+expect(withImplementationResult).toBe('temporary mock icon');
+```
+
+### `getMockImplementation`
+
+Returns the current mock implementation if there is one.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+await mockGetName.mockImplementation(() => 'mocked name');
+const mockImpl = mockGetName.getMockImplementation();
+
+expect(mockImpl()).toBe('mocked name');
+```
+
+### `getMockName`
+
+Returns the assigned name of the mock. Defaults to `electron.<apiName>.<funcName>`.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+
+expect(mockGetName.getMockName()).toBe('electron.app.getName');
+```
+
+### `mockName`
+
+Assigns a name to the mock. The name can be retrieved via [`getMockName`](#getmockname).
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+
+mockGetName.mockName('test mock');
+
+expect(mockGetName.getMockName()).toBe('test mock');
+```
+
+### `mockReturnThis`
+
+Useful if you need to return the `this` context from the method without invoking implementation. This is a shorthand for:
+
+```js
+await spy.mockImplementation(function () {
+  return this;
+});
+```
+
+...which enables API functions to be chained:
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockGetVersion = await browser.electron.mock('app', 'getVersion');
+await mockGetName.mockReturnThis();
+await browser.electron.execute((electron) => electron.app.getName().getVersion());
+
+expect(mockGetVersion).toHaveBeenCalled();
+```
