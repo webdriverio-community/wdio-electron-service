@@ -560,6 +560,13 @@ describe('mock object functionality', () => {
 
       expect(mockImpl()).toBe('mocked name');
     });
+
+    it('should retrieve an empty mock implementation', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      const mockImpl = mockGetName.getMockImplementation() as () => undefined;
+
+      expect(mockImpl()).toBeUndefined();
+    });
   });
 
   describe('mockReturnThis', () => {
