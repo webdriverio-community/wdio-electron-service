@@ -3,8 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "baseUrl": ".",
-    "outDir": "../dist",
+    "outDir": "../dist"
   },
   "include": ["./*.spec.ts"],
-  "exclude": [],
+  "exclude": []
 }

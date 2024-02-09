@@ -4,8 +4,8 @@
     "module": "CommonJS",
     "target": "ES2020",
     "types": ["node", "@wdio/globals/types"],
-    "outDir": "dist",
+    "outDir": "dist"
   },
   "include": ["src/*.ts"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules"]
 }
