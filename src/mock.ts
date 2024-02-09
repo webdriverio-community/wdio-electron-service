@@ -20,13 +20,14 @@ async function restoreElectronFunctionality(apiName: string, funcName: string) {
 
 export async function createMock(apiName: string, funcName: string) {
   const outerMock = vitestFn();
-  const mock = outerMock as unknown as ElectronMock;
   const outerMockImplementation = outerMock.mockImplementation;
   const outerMockImplementationOnce = outerMock.mockImplementationOnce;
   const outerMockClear = outerMock.mockClear;
   const outerMockReset = outerMock.mockReset;
 
-  mock.mockName(`electron.${apiName}.${funcName}`);
+  outerMock.mockName(`electron.${apiName}.${funcName}`);
+
+  const mock = outerMock as unknown as ElectronMock;
 
   // initialise inner (Electron) mock
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(
