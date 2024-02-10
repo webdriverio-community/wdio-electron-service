@@ -19,19 +19,19 @@
     ],
     "./main": [
       {
-        "import": "./dist/main.js",
+        "import": "./dist/main.bundle.js",
         "types": "./dist/main.d.ts",
-        "require": "./dist/cjs/main.js"
+        "require": "./dist/cjs/main.bundle.js"
       },
-      "./dist/cjs/main.js"
+      "./dist/cjs/main.bundle.js"
     ],
     "./preload": [
       {
-        "import": "./dist/preload.js",
+        "import": "./dist/preload.bundle.js",
         "types": "./dist/preload.d.ts",
-        "require": "./dist/cjs/preload.js"
+        "require": "./dist/cjs/preload.bundle.js"
       },
-      "./dist/cjs/preload.js"
+      "./dist/cjs/preload.bundle.js"
     ]
   },
   "typeScriptVersion": "5.2.2",
@@ -45,9 +45,10 @@
     "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
     "clean:dist": "pnpx rimraf ./dist",
     "clean:all": "pnpm clean && pnpm -r --reverse clean",
-    "build": "pnpm build:esm && pnpm build:cjs",
+    "build": "pnpm build:esm && pnpm build:cjs && pnpm build:bundle",
     "build:esm": "tsc",
     "build:cjs": "tsc --build --verbose tsconfig.cjs.json",
+    "build:bundle": "rollup -c rollup.config.js",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
@@ -101,6 +102,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.55.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
     "@types/eslint-config-prettier": "^6.11.2",
@@ -128,6 +131,7 @@
     "prettier": "^3.2.2",
     "release-it": "^17.0.0",
     "rimraf": "^5.0.5",
+    "rollup": "^4.9.6",
     "shx": "^0.3.4",
     "typescript": "^5.3.2",
     "vitest": "^1.2.0",
