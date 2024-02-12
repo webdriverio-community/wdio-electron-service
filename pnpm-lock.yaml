@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  expect-webdriverio: 4.9.3
+  expect-webdriverio: 4.11.7
 
 dependencies:
   '@vitest/spy':
@@ -95,8 +95,8 @@ devDependencies:
     specifier: ^29.7.0
     version: 29.7.0
   expect-webdriverio:
-    specifier: 4.9.3
-    version: 4.9.3(typescript@5.3.3)
+    specifier: 4.11.7
+    version: 4.11.7(typescript@5.3.3)
   globals:
     specifier: ^13.23.0
     version: 13.24.0
@@ -1360,7 +1360,7 @@ packages:
     resolution: {integrity: sha512-2r80BX8aS5YiQ6cFuxtt44g2Y5P01MoHJTR3w21suSyiVoH70mxvJf6vJsLB+jtGfaXLJzOjlZkgXrd+Kn+keA==}
     engines: {node: ^16.13 || >=18}
     optionalDependencies:
-      expect-webdriverio: 4.9.3(typescript@5.3.3)
+      expect-webdriverio: 4.11.7(typescript@5.3.3)
       webdriverio: 8.31.1(typescript@5.3.3)
     transitivePeerDependencies:
       - bufferutil
@@ -2774,8 +2774,8 @@ packages:
       strip-final-newline: 3.0.0
     dev: true
 
-  /expect-webdriverio@4.9.3(typescript@5.3.3):
-    resolution: {integrity: sha512-ASHsFc/QaK5ipF4ct3e8hd3elm8wNXk/Qa3EemtYDmfUQ4uzwqDf75m/QFQpwVNCjEpkNP7Be/6X9kz7bN0P9Q==}
+  /expect-webdriverio@4.11.7(typescript@5.3.3):
+    resolution: {integrity: sha512-r+blJXutw7j1KTJcLqo8cm7E+lnPQChlzCVnWb0HvOqZajSpypr3/aJ2nBll69VQwnTVTfHzTElKXaFh7XT5HA==}
     engines: {node: '>=16 || >=18 || >=20'}
     dependencies:
       '@vitest/snapshot': 1.2.2
