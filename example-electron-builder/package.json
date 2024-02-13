@@ -13,6 +13,9 @@
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
     "test": "wdio run ./wdio.conf.ts"
   },
+  "dependencies": {
+    "wdio-electron-service": "file:../"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-node-resolve": "^15.2.1",
@@ -29,13 +32,7 @@
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2",
-    "wdio-electron-service": "file:../",
     "webdriverio": "^8.27.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "expect-webdriverio": "4.9.3"
-    }
   },
   "peerDependencies": {
     "typescript": "5.2.2"
