@@ -114,6 +114,15 @@ export default [
       },
     },
   },
+  {
+    files: ['example-no-binary/**/*.ts'],
+    ignores: ['example-no-binary/out/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'example-no-binary/tsconfig.eslint.json',
+      },
+    },
+  },
   // Example E2E TS files
   {
     files: ['example*/e2e/*.spec.ts'],

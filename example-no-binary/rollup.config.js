@@ -1,0 +1,1 @@
+../example/rollup.config.js
