@@ -12,7 +12,7 @@ export const config: Options.Testrunner = {
         'wdio:electronServiceOptions': {
           appArgs: ['browser=A'],
         },
-      },
+      } as WebdriverIO.Capabilities,
     },
     browserB: {
       capabilities: {
@@ -20,7 +20,7 @@ export const config: Options.Testrunner = {
         'wdio:electronServiceOptions': {
           appArgs: ['browser=B'],
         },
-      },
+      } as WebdriverIO.Capabilities,
     },
   },
 };
