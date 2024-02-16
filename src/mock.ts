@@ -263,7 +263,6 @@ export async function createMock(apiName: string, funcName: string) {
           result = callback(electron);
         });
 
-        console.log('YOYOYO', result);
         return (result as Promise<unknown>)?.then ? await result : result;
       },
       apiName,
