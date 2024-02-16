@@ -1,8 +1,15 @@
 /// <reference types="../../@types/vitest" />
+import { isAsyncFunction } from 'node:util/types';
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 
 import { createMock } from '../src/mock.js';
 import { ElectronInterface, ElectronType } from '../src/types.js';
+
+let mockFn: Mock;
+
+vi.mock('@vitest/spy', () => ({
+  fn: () => mockFn,
+}));
 
 type ElectronMockExecuteFn = (
   electron: Partial<ElectronType>,
@@ -18,27 +25,35 @@ type ExecuteCalls = [
   ...additionalArgs: unknown[],
 ][];
 
-function processExecuteCalls(electron: ElectronObj) {
+async function processExecuteCalls(electron: ElectronObj) {
   const executeCalls = (globalThis.browser.electron.execute as Mock).mock.calls as ExecuteCalls;
+  const asyncExecuteCalls = executeCalls.filter(([executeFn]) => isAsyncFunction(executeFn));
+  const syncExecuteCalls = executeCalls.filter(([executeFn]) => !isAsyncFunction(executeFn));
 
-  for (const executeCall of executeCalls) {
+  console.log('ASYNC', asyncExecuteCalls);
+  console.log('SYNC', syncExecuteCalls);
+
+  // clear the mock
+  (globalThis.browser.electron.execute as Mock).mockClear();
+
+  // process sync calls
+  for (const executeCall of syncExecuteCalls) {
     const [executeFn, apiName, funcName, ...additionalArgs] = executeCall;
     executeFn(electron, apiName, funcName, ...additionalArgs);
   }
-}
 
-async function processAsyncExecuteCalls(electron: ElectronObj) {
-  const executeCalls = (globalThis.browser.electron.execute as Mock).mock.calls as ExecuteCalls;
-
-  return Promise.all(
-    executeCalls.map(([executeFn, apiName, funcName, ...additionalArgs]) =>
-      executeFn(electron, apiName, funcName, ...additionalArgs),
-    ),
-  );
+  // process async calls
+  return asyncExecuteCalls.length > 0
+    ? Promise.all(
+        asyncExecuteCalls.map(([executeFn, apiName, funcName, ...additionalArgs]) =>
+          executeFn(electron, apiName, funcName, ...additionalArgs),
+        ),
+      )
+    : Promise.resolve();
 }
 
 beforeEach(() => {
-  globalThis.fn = vi.fn;
+  mockFn = vi.fn();
   globalThis.browser = {
     electron: {
       execute: vi.fn(),
@@ -73,7 +88,7 @@ describe('createMock', () => {
   it('should initialise the inner mock', async () => {
     await createMock('app', 'getName');
     const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
-    processExecuteCalls(electron);
+    await processExecuteCalls(electron);
 
     expect(electron.app.getName).toStrictEqual(expect.anyMockFunction());
   });
@@ -82,8 +97,9 @@ describe('createMock', () => {
     it('should set mockImplementation of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
       const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
+      await processExecuteCalls(electron);
       await mock.mockImplementation(() => 'mock implementation');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('mock implementation');
     });
@@ -93,10 +109,11 @@ describe('createMock', () => {
     it('should set mockImplementationOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
       const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
+      await processExecuteCalls(electron);
       await mock.mockImplementation(() => 'default mock implementation');
       await mock.mockImplementationOnce(() => 'first mock implementation');
       await mock.mockImplementationOnce(() => 'second mock implementation');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('first mock implementation');
       expect(electron.app.getName()).toBe('second mock implementation');
@@ -108,8 +125,9 @@ describe('createMock', () => {
     it('should set mockReturnValue of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
       const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
+      await processExecuteCalls(electron);
       await mock.mockReturnValue('mock return value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('mock return value');
     });
@@ -119,10 +137,11 @@ describe('createMock', () => {
     it('should set mockReturnValueOnce of the inner mock', async () => {
       const mock = await createMock('app', 'getName');
       const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
+      await processExecuteCalls(electron);
       await mock.mockReturnValue('default mock return value');
       await mock.mockReturnValueOnce('first mock return value');
       await mock.mockReturnValueOnce('second mock return value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('first mock return value');
       expect(electron.app.getName()).toBe('second mock return value');
@@ -136,8 +155,9 @@ describe('createMock', () => {
       const electron = {
         app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.mockResolvedValue('mock resolved value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(await electron.app.getFileIcon('/path/to/icon')).toBe('mock resolved value');
     });
@@ -149,10 +169,11 @@ describe('createMock', () => {
       const electron = {
         app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.mockResolvedValue('default mock resolved value');
       await mock.mockResolvedValueOnce('first mock resolved value');
       await mock.mockResolvedValueOnce('second mock resolved value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(await electron.app.getFileIcon('/path/to/icon')).toBe('first mock resolved value');
       expect(await electron.app.getFileIcon('/path/to/icon')).toBe('second mock resolved value');
@@ -166,10 +187,11 @@ describe('createMock', () => {
       const electron = {
         app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.mockRejectedValue('mock rejected value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
-      await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('mock rejected value');
+      await expect(() => electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('mock rejected value');
     });
   });
 
@@ -179,10 +201,11 @@ describe('createMock', () => {
       const electron = {
         app: { getFileIcon: () => Promise.resolve('actual fileIcon') } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.mockRejectedValue('default mock rejected value');
       await mock.mockRejectedValueOnce('first mock rejected value');
       await mock.mockRejectedValueOnce('second mock rejected value');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
         'first mock rejected value',
@@ -202,7 +225,7 @@ describe('createMock', () => {
       const electron = {
         app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
       };
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       electron.app.getName();
       electron.app.getName();
@@ -211,7 +234,7 @@ describe('createMock', () => {
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[], [], []]);
 
       await mock.mockClear();
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([]);
     });
@@ -223,14 +246,15 @@ describe('createMock', () => {
       const electron = {
         app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.mockImplementation(() => 'mocked name');
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('mocked name');
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
 
       await mock.mockReset();
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBeUndefined();
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
@@ -244,15 +268,15 @@ describe('createMock', () => {
         app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
       };
       globalThis.originalApi = {
-        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
-      };
-      processExecuteCalls(electron);
+        app: { getName: () => 'actual name' },
+      } as ElectronType;
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBeUndefined();
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
 
       await mock.mockRestore();
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect(electron.app.getName()).toBe('actual name');
       expect((electron.app.getName as Mock).mock.calls).toStrictEqual([[]]);
@@ -268,9 +292,10 @@ describe('createMock', () => {
           'on'
         >,
       };
+      await processExecuteCalls(electron);
 
       await mock.mockReturnThis();
-      processExecuteCalls(electron);
+      await processExecuteCalls(electron);
 
       expect((electron.app.getName() as unknown as Omit<ElectronType['app'], 'on'>).getVersion()).toBe(
         'actual version',
@@ -284,11 +309,12 @@ describe('createMock', () => {
       const electron = {
         app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
       };
+      await processExecuteCalls(electron);
       await mock.withImplementation(
         () => 'temporary name',
         (electron) => electron.app.getName(),
       );
-      const executeResults = await processAsyncExecuteCalls(electron);
+      const executeResults = await processExecuteCalls(electron);
 
       // first result is that of the mock initialisation call
       expect(executeResults).toStrictEqual([undefined, 'temporary name']);
