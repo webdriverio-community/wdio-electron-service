@@ -7,7 +7,7 @@ import { ElectronInterface, ElectronType } from '../src/types.js';
 
 let mockFn: Mock;
 
-vi.mock('@vitest/spy', () => ({
+vi.doMock('@vitest/spy', () => ({
   fn: () => mockFn,
 }));
 
@@ -29,9 +29,6 @@ async function processExecuteCalls(electron: ElectronObj) {
   const executeCalls = (globalThis.browser.electron.execute as Mock).mock.calls as ExecuteCalls;
   const asyncExecuteCalls = executeCalls.filter(([executeFn]) => isAsyncFunction(executeFn));
   const syncExecuteCalls = executeCalls.filter(([executeFn]) => !isAsyncFunction(executeFn));
-
-  console.log('ASYNC', asyncExecuteCalls);
-  console.log('SYNC', syncExecuteCalls);
 
   // clear the mock
   (globalThis.browser.electron.execute as Mock).mockClear();
@@ -117,6 +114,7 @@ describe('createMock', () => {
 
       expect(electron.app.getName()).toBe('first mock implementation');
       expect(electron.app.getName()).toBe('second mock implementation');
+      expect(electron.app.getName()).toBe('default mock implementation');
       expect(electron.app.getName()).toBe('default mock implementation');
     });
   });
@@ -293,7 +291,6 @@ describe('createMock', () => {
         >,
       };
       await processExecuteCalls(electron);
-
       await mock.mockReturnThis();
       await processExecuteCalls(electron);
 
@@ -316,8 +313,7 @@ describe('createMock', () => {
       );
       const executeResults = await processExecuteCalls(electron);
 
-      // first result is that of the mock initialisation call
-      expect(executeResults).toStrictEqual([undefined, 'temporary name']);
+      expect(executeResults).toStrictEqual(['temporary name']);
     });
   });
 
