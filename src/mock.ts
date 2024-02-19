@@ -31,9 +31,10 @@ export async function createMock(apiName: string, funcName: string) {
 
   // initialise inner (Electron) mock
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(
-    (electron, apiName, funcName) => {
+    async (electron, apiName, funcName) => {
       const electronApi = electron[apiName as keyof typeof electron];
-      const mockFn = globalThis.fn();
+      const spy = await import('@vitest/spy');
+      const mockFn = spy.fn();
 
       // replace target API with mock
       electronApi[funcName as keyof typeof electronApi] = mockFn as ElectronApiFn;
@@ -229,11 +230,12 @@ export async function createMock(apiName: string, funcName: string) {
   };
 
   mock.mockRestore = async () => {
-    // restores inner mock implementation to the original function and clears mock history
+    // restores inner mock implementation to the original function
     await restoreElectronFunctionality(apiName, funcName);
 
-    // only need to clear outer mock - inner mock is gone
+    // clear mocks
     outerMockClear();
+    await mock.mockClear();
 
     return mock;
   };
@@ -262,7 +264,6 @@ export async function createMock(apiName: string, funcName: string) {
           result = callback(electron);
         });
 
-        console.log('YOYOYO', result);
         return (result as Promise<unknown>)?.then ? await result : result;
       },
       apiName,

@@ -42,12 +42,14 @@
   "scripts": {
     "init-dev": "pnpm i --filter=\\!fixture-\\* -r && husky install",
     "ci": "pnpm i && pnpm build && pnpm test && pnpm lint && pnpm format:check",
-    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
+    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist ./src/cjs/preload.ts ./src/cjs/main.ts ./src/cjs/constants.ts ./src/cjs/types.ts",
     "clean:dist": "pnpx rimraf ./dist",
     "clean:all": "pnpm clean && pnpm -r --reverse clean",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc",
-    "build:cjs": "tsc --build --verbose tsconfig.cjs.json",
+    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
+    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts && cp -f ./src/types.ts ./src/cjs/types.ts",
+    "build:cjs:compile": "tsc --build --verbose tsconfig.cjs.json",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
@@ -106,8 +108,8 @@
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/mocha": "^10.0.5",
     "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^6.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
     "@vitest/coverage-v8": "^1.2.0",
     "@wdio/cli": "^8.27.2",
     "@wdio/globals": "^8.27.2",
@@ -119,7 +121,7 @@
     "eslint-plugin-vitest": "^0.3.16",
     "eslint-plugin-wdio": "^8.20.0",
     "expect": "^29.7.0",
-    "expect-webdriverio": "4.11.7",
+    "expect-webdriverio": "^4.11.7",
     "globals": "^14.0.0",
     "husky": "^9.0.10",
     "jsdom": "^24.0.0",
@@ -132,11 +134,6 @@
     "typescript": "^5.3.2",
     "vitest": "^1.2.0",
     "webdriverio": "^8.27.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "expect-webdriverio": "4.11.7"
-    }
   },
   "files": [
     "bin/*",

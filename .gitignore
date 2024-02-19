@@ -112,6 +112,7 @@ bin/gen
 
 # Integration test logs
 wdio-logs
+wdio-multiremote-logs
 
 # OS files
 .DS_Store
@@ -122,5 +123,12 @@ wdio-logs
 # Electron Forge output
 out
 
-# Fixtures lockfiles - installation shouldn't happen for fixtures
+# Lockfiles - fixtures and cjs dirs contain package.json files but should not be installed
 test/fixtures/**/pnpm-lock.yaml
+src/cjs/pnpm-lock.yaml
+
+# CJS build files
+src/cjs/constants.ts
+src/cjs/main.ts
+src/cjs/preload.ts
+src/cjs/types.ts
