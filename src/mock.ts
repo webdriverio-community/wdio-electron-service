@@ -74,7 +74,8 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(eval(mockImplementationStr));
+        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(mockImpl);
       },
       apiName,
       funcName,
@@ -90,7 +91,8 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementationOnce(eval(mockImplementationStr));
+        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementationOnce(mockImpl);
       },
       apiName,
       funcName,
@@ -256,11 +258,12 @@ export async function createMock(apiName: string, funcName: string) {
   mock.withImplementation = async (implFn, callbackFn) => {
     return await browser.electron.execute<unknown, [string, string, string, string, ExecuteOpts]>(
       async (electron, apiName, funcName, implFnStr, callbackFnStr) => {
-        const callback = eval(callbackFnStr);
+        const callback = eval?.(`"use strict"; ${callbackFnStr}`) as AbstractFn;
+        const impl = eval?.(`"use strict"; ${implFnStr}`) as AbstractFn;
         let result: unknown | Promise<unknown>;
         (
           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock
-        ).withImplementation(eval(implFnStr), () => {
+        ).withImplementation(impl, () => {
           result = callback(electron);
         });
 
