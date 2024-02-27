@@ -182,6 +182,21 @@ export type WdioElectronWindowObj = {
   execute: (script: string, args?: unknown[]) => unknown;
 };
 
+// TODO: replace unknowns in `mockReturnValue`, calls, results, lastCall, etc. to stop users passing functions
+
+type ElectronMockResult = {
+  type: 'return' | 'throw';
+  value: unknown;
+};
+
+// TODO: doc comments here
+interface ElectronMockContext {
+  calls: unknown[][];
+  invocationCallOrder: number[];
+  results: ElectronMockResult[];
+  lastCall: unknown;
+}
+
 type Override =
   | 'mockImplementation'
   | 'mockImplementationOnce'
@@ -195,7 +210,8 @@ type Override =
   | 'mockReset'
   | 'mockReturnThis'
   | 'mockName'
-  | 'withImplementation';
+  | 'withImplementation'
+  | 'mock';
 
 interface ElectronMockInstance extends Omit<Mock, Override> {
   /**
@@ -511,6 +527,10 @@ interface ElectronMockInstance extends Omit<Mock, Override> {
    * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
    */
   update(): Promise<ElectronMock>;
+  /**
+   * Current context of the mock. It stores information about all invocation calls and results.
+   */
+  mock: ElectronMockContext;
 }
 
 export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {
