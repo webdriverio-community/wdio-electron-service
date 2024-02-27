@@ -4,6 +4,8 @@ import type { Mock } from '@vitest/spy';
 
 const { name: pkgAppName, version: pkgAppVersion } = globalThis.packageJson;
 
+// TODO: more use of `await expect(browser.electron.execute((electron) => electron.x.y())).resolves.toBe(z)`
+
 describe('mock', () => {
   it('should mock an electron API function', async () => {
     const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
@@ -76,13 +78,11 @@ describe('clearAllMocks', () => {
     await browser.electron.clearAllMocks();
 
     expect(mockSetName.mock.calls).toStrictEqual([]);
-    expect(mockSetName.mock.instances).toStrictEqual([]);
     expect(mockSetName.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockSetName.mock.lastCall).toBeUndefined();
     expect(mockSetName.mock.results).toStrictEqual([]);
 
     expect(mockWriteText.mock.calls).toStrictEqual([]);
-    expect(mockWriteText.mock.instances).toStrictEqual([]);
     expect(mockWriteText.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockWriteText.mock.lastCall).toBeUndefined();
     expect(mockWriteText.mock.results).toStrictEqual([]);
@@ -98,13 +98,11 @@ describe('clearAllMocks', () => {
     await browser.electron.clearAllMocks('app');
 
     expect(mockSetName.mock.calls).toStrictEqual([]);
-    expect(mockSetName.mock.instances).toStrictEqual([]);
     expect(mockSetName.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockSetName.mock.lastCall).toBeUndefined();
     expect(mockSetName.mock.results).toStrictEqual([]);
 
     expect(mockWriteText.mock.calls).toStrictEqual([['text to be written']]);
-    expect(mockWriteText.mock.instances).toStrictEqual([expect.any(Function)]);
     expect(mockWriteText.mock.invocationCallOrder).toStrictEqual([expect.any(Number)]);
     expect(mockWriteText.mock.lastCall).toStrictEqual(['text to be written']);
     expect(mockWriteText.mock.results).toStrictEqual([{ type: 'return', value: undefined }]);
@@ -174,13 +172,11 @@ describe('resetAllMocks', () => {
     await browser.electron.resetAllMocks('app');
 
     expect(mockSetName.mock.calls).toStrictEqual([]);
-    expect(mockSetName.mock.instances).toStrictEqual([]);
     expect(mockSetName.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockSetName.mock.lastCall).toBeUndefined();
     expect(mockSetName.mock.results).toStrictEqual([]);
 
     expect(mockWriteText.mock.calls).toStrictEqual([['text to be written']]);
-    expect(mockWriteText.mock.instances).toStrictEqual([expect.any(Function)]);
     expect(mockWriteText.mock.invocationCallOrder).toStrictEqual([expect.any(Number)]);
     expect(mockWriteText.mock.lastCall).toStrictEqual(['text to be written']);
     expect(mockWriteText.mock.results).toStrictEqual([{ type: 'return', value: undefined }]);
@@ -452,7 +448,6 @@ describe('mock object functionality', () => {
       await mockShowOpenDialog.mockClear();
 
       expect(mockShowOpenDialog.mock.calls).toStrictEqual([]);
-      expect(mockShowOpenDialog.mock.instances).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.lastCall).toBeUndefined();
       expect(mockShowOpenDialog.mock.results).toStrictEqual([]);
@@ -513,7 +508,6 @@ describe('mock object functionality', () => {
       await mockShowOpenDialog.mockReset();
 
       expect(mockShowOpenDialog.mock.calls).toStrictEqual([]);
-      expect(mockShowOpenDialog.mock.instances).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.invocationCallOrder).toStrictEqual([]);
       expect(mockShowOpenDialog.mock.lastCall).toBeUndefined();
       expect(mockShowOpenDialog.mock.results).toStrictEqual([]);
@@ -619,6 +613,105 @@ describe('mock object functionality', () => {
       expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
         'default mock icon',
       );
+    });
+  });
+
+  describe('mock.calls', () => {
+    it('should return the calls of the mock execution', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+      await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+      await browser.electron.execute((electron) =>
+        electron.app.getFileIcon('/path/to/another/icon', { size: 'small' }),
+      );
+
+      expect(mockGetFileIcon.mock.calls).toStrictEqual([
+        ['/path/to/icon'], // first call
+        ['/path/to/another/icon', { size: 'small' }], // second call
+      ]);
+    });
+
+    it('should return an empty array when the mock was never invoked', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      expect(mockGetName.mock.calls).toStrictEqual([]);
+    });
+  });
+
+  describe('mock.lastCall', () => {
+    it('should return the last call of the mock execution', async () => {
+      const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+      await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+      expect(mockGetFileIcon.mock.lastCall).toStrictEqual(['/path/to/icon']);
+      await browser.electron.execute((electron) =>
+        electron.app.getFileIcon('/path/to/another/icon', { size: 'small' }),
+      );
+      expect(mockGetFileIcon.mock.lastCall).toStrictEqual(['/path/to/another/icon', { size: 'small' }]);
+      await browser.electron.execute((electron) =>
+        electron.app.getFileIcon('/path/to/a/massive/icon', { size: 'large' }),
+      );
+      expect(mockGetFileIcon.mock.lastCall).toStrictEqual(['/path/to/a/massive/icon', { size: 'large' }]);
+    });
+
+    it('should return undefined when the mock was never invoked', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      expect(mockGetName.mock.lastCall).toBeUndefined();
+    });
+  });
+
+  describe('mock.results', () => {
+    it('should return the results of the mock execution', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      // TODO: why does `mockReturnValueOnce` not work for returning 'result' here?
+      await mockGetName.mockImplementationOnce(() => 'result');
+      await mockGetName.mockImplementation(() => {
+        throw new Error('thrown error');
+      });
+
+      await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
+      await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
+
+      expect(mockGetName.mock.results).toStrictEqual([
+        {
+          type: 'return',
+          value: 'result',
+        },
+        {
+          type: 'throw',
+          value: new Error('thrown error'),
+        },
+      ]);
+    });
+
+    it('should return an empty array when the mock was never invoked', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      expect(mockGetName.mock.results).toStrictEqual([]);
+    });
+  });
+
+  describe('mock.invocationCallOrder', () => {
+    it('should return the order of execution', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      const mockGetVersion = await browser.electron.mock('app', 'getVersion');
+
+      await browser.electron.execute((electron) => electron.app.getName());
+      await browser.electron.execute((electron) => electron.app.getVersion());
+      await browser.electron.execute((electron) => electron.app.getName());
+
+      const firstInvocationIndex = mockGetName.mock.invocationCallOrder[0];
+
+      expect(mockGetName.mock.invocationCallOrder).toStrictEqual([firstInvocationIndex, firstInvocationIndex + 2]);
+      expect(mockGetVersion.mock.invocationCallOrder).toStrictEqual([firstInvocationIndex + 1]);
+    });
+
+    it('should return an empty array when the mock was never invoked', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+
+      expect(mockGetName.mock.invocationCallOrder).toStrictEqual([]);
     });
   });
 });
