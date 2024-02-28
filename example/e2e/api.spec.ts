@@ -4,8 +4,6 @@ import type { Mock } from '@vitest/spy';
 
 const { name: pkgAppName, version: pkgAppVersion } = globalThis.packageJson;
 
-// TODO: more use of `await expect(browser.electron.execute((electron) => electron.x.y())).resolves.toBe(z)`
-
 describe('mock', () => {
   it('should mock an electron API function', async () => {
     const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
@@ -264,7 +262,7 @@ describe('execute', () => {
   });
 
   it('should execute a string-based function in the electron main process', async () => {
-    expect(await browser.electron.execute('return 1 + 2 + 3')).toEqual(6);
+    await expect(browser.electron.execute('return 1 + 2 + 3')).resolves.toEqual(6);
   });
 });
 
@@ -588,9 +586,12 @@ describe('mock object functionality', () => {
       );
 
       expect(withImplementationResult).toBe('temporary mock name');
-      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('first mock name');
-      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('second mock name');
-      expect(await browser.electron.execute((electron) => electron.app.getName())).toBe('default mock name');
+      const firstName = await browser.electron.execute((electron) => electron.app.getName());
+      expect(firstName).toBe('first mock name');
+      const secondName = await browser.electron.execute((electron) => electron.app.getName());
+      expect(secondName).toBe('second mock name');
+      const thirdName = await browser.electron.execute((electron) => electron.app.getName());
+      expect(thirdName).toBe('default mock name');
     });
 
     it('should handle promises', async () => {
@@ -604,15 +605,12 @@ describe('mock object functionality', () => {
       );
 
       expect(withImplementationResult).toBe('temporary mock icon');
-      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
-        'first mock icon',
-      );
-      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
-        'second mock icon',
-      );
-      expect(await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'))).toBe(
-        'default mock icon',
-      );
+      const firstIcon = await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+      expect(firstIcon).toBe('first mock icon');
+      const secondIcon = await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+      expect(secondIcon).toBe('second mock icon');
+      const thirdIcon = await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+      expect(thirdIcon).toBe('default mock icon');
     });
   });
 
