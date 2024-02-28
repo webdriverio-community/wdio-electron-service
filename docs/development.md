@@ -81,13 +81,13 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 
 Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub Workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/).
 
-To publish a release, run the Workflow with default **Branch** `main` and **NPM Tag** `latest` and the appropriate **Release Type**. This will:
+To publish a release, run the Workflow with defaults for **Branch** `main` and **NPM Tag** `latest`, and the appropriate **Release Type**. This will:
 
 * Create a Git tag
 * Create a GitHub Release
 * Publish to npm
 
-To publish a pre-release, also referred to as a test release, run the Workflow with the **NPM Tag** `next`. This will:
+To publish a pre-release, also referred to as a test release, run the Workflow with the **Release Type** `patch` and the **NPM Tag** `next`. This will:
 
 * Create a Git tag with the `-next.0` suffix. Consecutive pre-releases will increment the last number.
 * Create a GitHub Pre-Release
