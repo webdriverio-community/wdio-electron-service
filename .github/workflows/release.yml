@@ -1,3 +1,4 @@
+---
 name: Manual NPM Publish
 
 on:
@@ -13,7 +14,7 @@ on:
           - minor
           - major
       distTag:
-        description: 'NPM tag (e.g. use "next" to release a test version)'
+        description: 'NPM tag (e.g. use "next" to release a test (pre-release) version)'
         required: true
         default: 'latest'
 
@@ -48,8 +49,17 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
+
+      - name: Pre-release
+        if: ${{ inputs.distTag != 'latest' }}
+        run: pnpm run release:ci ${{inputs.releaseType}} --preRelease=${{inputs.distTag}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release
-        run: pnpm run release:ci --npm.tag=${{github.event.inputs.distTag}} -- ${{github.event.inputs.releaseType}}
+        if: ${{ inputs.distTag == 'latest' }}
+        run: pnpm run release:ci ${{inputs.releaseType}} --npm.tag=${{inputs.distTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
