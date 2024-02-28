@@ -356,8 +356,6 @@ expect(withImplementationResult).toBe('temporary mock name');
 
 It can also be used with an asynchronous callback:
 
-@example
-
 ```js
 const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
 const withImplementationResult = await mockGetFileIcon.withImplementation(
@@ -421,4 +419,83 @@ await mockGetName.mockReturnThis();
 await browser.electron.execute((electron) => electron.app.getName().getVersion());
 
 expect(mockGetVersion).toHaveBeenCalled();
+```
+
+### `mock.calls`
+
+This is an array containing all arguments for each call. Each item of the array is the arguments of that call.
+
+```js
+const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+
+await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/another/icon', { size: 'small' }));
+
+expect(mockGetFileIcon.mock.calls).toStrictEqual([
+  ['/path/to/icon'], // first call
+  ['/path/to/another/icon', { size: 'small' }], // second call
+]);
+```
+
+### `mock.lastCall`
+
+This contains the arguments of the last call. If the mock wasn't called, it will return `undefined`.
+
+```js
+const mockSetName = await browser.electron.mock('app', 'setName');
+
+await browser.electron.execute((electron) => electron.app.setName('test'));
+expect(mockSetName.mock.lastCall).toStrictEqual(['test']);
+await browser.electron.execute((electron) => electron.app.setName('test 2'));
+expect(mockSetName.mock.lastCall).toStrictEqual(['test 2']);
+await browser.electron.execute((electron) => electron.app.setName('test 3'));
+expect(mockSetName.mock.lastCall).toStrictEqual(['test 3']);
+```
+
+### `mock.results`
+
+This is an array containing all values that were returned from the mock. Each item of the array is an object with the properties type and value. Available types are:
+
+    'return' - the mock returned without throwing.
+    'throw' - the mock threw a value.
+
+The value property contains the returned value or the thrown error. If the mock returned a promise, the value will be the resolved value, not the Promise itself, unless it was never resolved.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+
+await mockGetName.mockImplementationOnce(() => 'result');
+await mockGetName.mockImplementation(() => {
+  throw new Error('thrown error');
+});
+
+await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
+await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
+
+expect(mockGetName.mock.results).toStrictEqual([
+  {
+    type: 'return',
+    value: 'result',
+  },
+  {
+    type: 'throw',
+    value: new Error('thrown error'),
+  },
+]);
+```
+
+### `mock.invocationCallOrder`
+
+The order of mock invocation. This returns an array of numbers that are shared between all defined mocks. Will return an empty array if the mock was never invoked.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+const mockGetVersion = await browser.electron.mock('app', 'getVersion');
+
+await browser.electron.execute((electron) => electron.app.getName());
+await browser.electron.execute((electron) => electron.app.getVersion());
+await browser.electron.execute((electron) => electron.app.getName());
+
+expect(mockGetName.mock.invocationCallOrder).toStrictEqual([1, 3]);
+expect(mockGetVersion.mock.invocationCallOrder).toStrictEqual([2]);
 ```
