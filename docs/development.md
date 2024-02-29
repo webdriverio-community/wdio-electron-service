@@ -83,14 +83,14 @@ Project maintainers can publish a release or pre-release of the npm package by m
 
 To publish a release, run the Workflow with defaults for **Branch** `main` and **NPM Tag** `latest`, and the appropriate **Release Type**. This will:
 
-* Create a Git tag
-* Create a GitHub Release
-* Publish to npm
+- Create a Git tag
+- Create a GitHub Release
+- Publish to npm
 
 To publish a pre-release, also referred to as a test release, run the Workflow with the **Release Type** `patch` and the **NPM Tag** `next`. This will:
 
-* Create a Git tag with the `-next.0` suffix. Consecutive pre-releases will increment the last number.
-* Create a GitHub Pre-Release
-* Publish to npm
+- Create a Git tag with the `-next.0` suffix. Consecutive pre-releases will increment the last number.
+- Create a GitHub Pre-Release
+- Publish to npm
 
 The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
