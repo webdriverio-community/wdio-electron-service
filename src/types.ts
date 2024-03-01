@@ -120,6 +120,17 @@ export interface ElectronServiceAPI {
    * @param apiName mocked api to remove
    */
   restoreAllMocks: (apiName?: string) => Promise<void>;
+  /**
+   * Checks that a given parameter is an Electron mock function. If you are using TypeScript, it will also narrow down its type.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   *
+   * expect(browser.electron.isMockFunction(mockGetName)).toBe(true);
+   * ```
+   */
+  isMockFunction: (fn: unknown) => fn is ElectronMockInstance;
 }
 
 /**
@@ -294,7 +305,7 @@ type Override =
   | 'withImplementation'
   | 'mock';
 
-interface ElectronMockInstance extends Omit<Mock, Override> {
+export interface ElectronMockInstance extends Omit<Mock, Override> {
   /**
    * Accepts a function that will be used as an implementation of the mock.
    *
@@ -612,6 +623,10 @@ interface ElectronMockInstance extends Omit<Mock, Override> {
    * Current context of the mock. It stores information about all invocation calls and results.
    */
   mock: ElectronMockContext;
+  /**
+   * Used internally to distinguish the electron mock from other mocks
+   */
+  __isElectronMock: true;
 }
 
 export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {
