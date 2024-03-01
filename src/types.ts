@@ -2,7 +2,7 @@ import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
 
 /**
- * set this environment variable so that the preload script can be loaded
+ * Set this environment variable so that the preload script can be loaded
  */
 process.env.WDIO_ELECTRON = 'true';
 
@@ -14,6 +14,7 @@ export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[E
 export interface ElectronServiceAPI {
   /**
    * Mock a function from the Electron API.
+   *
    * @param apiName name of the API to mock
    * @param funcName name of the function to mock
    * @param mockReturnValue value to return when the mocked function is called
@@ -43,6 +44,7 @@ export interface ElectronServiceAPI {
   ) => Promise<ElectronMock>;
   /**
    * Mock all functions from an Electron API.
+   *
    * @param apiName name of the API to mock
    * @returns a {@link Promise} that resolves once the mock is registered
    *
@@ -79,7 +81,7 @@ export interface ElectronServiceAPI {
     ...args: InnerArguments
   ): Promise<ReturnValue>;
   /**
-   * Clear mocked Electron API function(s)
+   * Clear mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -93,7 +95,7 @@ export interface ElectronServiceAPI {
    */
   clearAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Reset mocked Electron API function(s)
+   * Reset mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -107,7 +109,7 @@ export interface ElectronServiceAPI {
    */
   resetAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Restore mocked Electron API function(s)
+   * Restore mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -624,7 +626,7 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
    */
   mock: ElectronMockContext;
   /**
-   * Used internally to distinguish the electron mock from other mocks
+   * Used internally to distinguish the electron mock from other mocks.
    */
   __isElectronMock: true;
 }
