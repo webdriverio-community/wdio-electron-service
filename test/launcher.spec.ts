@@ -1,5 +1,7 @@
 import path from 'node:path';
+
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
+import nock from 'nock';
 import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher.js';
@@ -22,6 +24,22 @@ beforeEach(async () => {
   options = {
     appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
   };
+  nock('https://electronjs.org')
+    .get('/headers/index.json')
+    .reply(200, [
+      {
+        version: '25.0.0',
+        chrome: '114.0.5735.45',
+      },
+      {
+        version: '26.0.0',
+        chrome: '116.0.5845.82',
+      },
+      {
+        version: '26.2.2',
+        chrome: '116.0.5845.190',
+      },
+    ]);
 });
 
 afterEach(() => {
