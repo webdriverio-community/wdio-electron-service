@@ -628,7 +628,7 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
   /**
    * Used internally to distinguish the electron mock from other mocks.
    */
-  __isElectronMock: true;
+  __isElectronMock: boolean;
 }
 
 export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {

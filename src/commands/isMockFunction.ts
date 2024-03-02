@@ -1,6 +1,7 @@
-import { vi } from 'vitest';
-import { ElectronMockInstance } from 'src/types.js';
+import type { ElectronMockInstance } from 'src/types.js';
 
 export function isMockFunction(fn: unknown): fn is ElectronMockInstance {
-  return vi.isMockFunction(fn) && '__isElectronMock' in fn;
+  return (
+    typeof fn === 'function' && '__isElectronMock' in fn && (fn as unknown as ElectronMockInstance).__isElectronMock
+  );
 }

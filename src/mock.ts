@@ -29,6 +29,8 @@ export async function createMock(apiName: string, funcName: string) {
 
   const mock = outerMock as unknown as ElectronMock;
 
+  mock.__isElectronMock = true;
+
   // initialise inner (Electron) mock
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(
     async (electron, apiName, funcName) => {
