@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 import type { Mock } from '@vitest/spy';
@@ -257,7 +256,12 @@ describe('isMockFunction', () => {
   });
 
   it('should return false when provided with a vitest mock', async () => {
-    expect(vi.fn()).toBe(false);
+    // We have to dynamic import `@vitest/spy` due to it being an ESM only module
+    // To avoid ts-node transforming this import into a `require` we abstract it using `Function`
+    // https://github.com/TypeStrong/ts-node/discussions/1290
+    const dynamicImport = new Function('specifier', 'return import(specifier)');
+    const spy = await dynamicImport('@vitest/spy');
+    expect(browser.electron.isMockFunction(spy.fn())).toBe(false);
   });
 });
 
