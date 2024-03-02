@@ -135,6 +135,16 @@ expect(appName).toBe('my real app name');
 expect(clipboardText).toBe('mocked clipboardText');
 ```
 
+### `isMockFunction`
+
+Checks that a given parameter is an Electron mock function. If you are using TypeScript, it will also narrow down its type.
+
+```js
+const mockGetName = await browser.electron.mock('app', 'getName');
+
+expect(browser.electron.isMockFunction(mockGetName)).toBe(true);
+```
+
 ## Mock Object
 
 Each mock object has the following methods available:
