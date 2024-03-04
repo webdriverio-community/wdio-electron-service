@@ -1,5 +1,4 @@
-import vitest from 'vitest';
-
+export * from 'vitest';
 interface CustomMatchers<R = unknown> {
   anyMockFunction(): R;
 }

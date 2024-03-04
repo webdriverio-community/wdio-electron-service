@@ -148,13 +148,11 @@ describe('resetAllMocks', () => {
     await browser.electron.resetAllMocks();
 
     expect(mockGetName.mock.calls).toStrictEqual([]);
-    expect(mockGetName.mock.instances).toStrictEqual([]);
     expect(mockGetName.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockGetName.mock.lastCall).toBeUndefined();
     expect(mockGetName.mock.results).toStrictEqual([]);
 
     expect(mockReadText.mock.calls).toStrictEqual([]);
-    expect(mockReadText.mock.instances).toStrictEqual([]);
     expect(mockReadText.mock.invocationCallOrder).toStrictEqual([]);
     expect(mockReadText.mock.lastCall).toBeUndefined();
     expect(mockReadText.mock.results).toStrictEqual([]);
@@ -243,6 +241,27 @@ describe('restoreAllMocks', () => {
     const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
     expect(appName).toBe(pkgAppName);
     expect(clipboardText).toBe('mocked clipboardText');
+  });
+});
+
+describe('isMockFunction', () => {
+  it('should return true when provided with an electron mock', async () => {
+    const mockGetName = await browser.electron.mock('app', 'getName');
+
+    expect(browser.electron.isMockFunction(mockGetName)).toBe(true);
+  });
+
+  it('should return false when provided with a function', async () => {
+    expect(browser.electron.isMockFunction(() => {})).toBe(false);
+  });
+
+  it('should return false when provided with a vitest mock', async () => {
+    // We have to dynamic import `@vitest/spy` due to it being an ESM only module
+    // To avoid ts-node transforming this import into a `require` we abstract it using `Function`
+    // https://github.com/TypeStrong/ts-node/discussions/1290
+    const dynamicImport = new Function('specifier', 'return import(specifier)');
+    const spy = await dynamicImport('@vitest/spy');
+    expect(browser.electron.isMockFunction(spy.fn())).toBe(false);
   });
 });
 
