@@ -619,6 +619,8 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
   getMockImplementation(): AbstractFn;
   /**
    * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
+   *
+   * @private
    */
   update(): Promise<ElectronMock>;
   /**
@@ -627,6 +629,8 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
   mock: ElectronMockContext;
   /**
    * Used internally to distinguish the electron mock from other mocks.
+   *
+   * @private
    */
   __isElectronMock: boolean;
 }
