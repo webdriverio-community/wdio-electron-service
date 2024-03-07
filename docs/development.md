@@ -101,11 +101,11 @@ To publish a pre-release, also referred to as a test release, run the Workflow w
 
 Use the **Release Type** to control which version to increment for the pre-release. The following table provides examples for publishing a pre-release from the current version `6.3.1`:
 
-| Release Type  | Pre-Release Version   |
-|---------------|-----------------------|
-| `major`       | `7.0.0-next.0`        |
-| `minor`       | `6.4.0-next.0`        |
-| `patch`       | `6.3.2-next.0`        |
-| `pre-release` | `6.3.1-next.0`        |
+| Release Type  | Pre-Release Version |
+| ------------- | ------------------- |
+| `major`       | `7.0.0-next.0`      |
+| `minor`       | `6.4.0-next.0`      |
+| `patch`       | `6.3.2-next.0`      |
+| `pre-release` | `6.3.1-next.0`      |
 
 Consecutive pre-releases can increment the `pre-release` version in the suffix. For example, if the current version is `6.3.1-next.0`, the next `pre-release` will be `6.3.1-next.1`.
