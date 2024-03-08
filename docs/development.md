@@ -81,18 +81,31 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 
 ## Release
 
-Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub Workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/).
+Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub Workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release. The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
 
-To publish a release, run the Workflow with defaults for **Branch** `main` and **NPM Tag** `latest`, and the appropriate **Release Type**. This will:
+### Publish a Release
+
+To publish a release, run the Workflow with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
 
 - Create a Git tag
 - Create a GitHub Release
 - Publish to npm
 
-To publish a pre-release, also referred to as a test release, run the Workflow with the **Release Type** `patch` and the **NPM Tag** `next`. This will:
+### Publish a Pre-Release
 
-- Create a Git tag with the `-next.0` suffix. Consecutive pre-releases will increment the last number.
+To publish a pre-release, also referred to as a test release, run the Workflow with the **NPM Tag** `next`. This will:
+
+- Create a Git tag with the `-next.0` suffix
 - Create a GitHub Pre-Release
 - Publish to npm
 
-The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
+Use the **Release Type** to control which version to increment for the pre-release. The following table provides examples for publishing a pre-release from the current version `6.3.1`:
+
+| Release Type  | Pre-Release Version |
+| ------------- | ------------------- |
+| `major`       | `7.0.0-next.0`      |
+| `minor`       | `6.4.0-next.0`      |
+| `patch`       | `6.3.2-next.0`      |
+| `pre-release` | `6.3.1-next.0`      |
+
+Consecutive pre-releases can increment the `pre-release` version in the suffix. For example, if the current version is `6.3.1-next.0`, the next `pre-release` will be `6.3.1-next.1`.
