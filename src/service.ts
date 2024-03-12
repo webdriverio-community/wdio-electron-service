@@ -14,10 +14,7 @@ import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts 
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
-    const numWindows = await browser.electron.execute<number, [ExecuteOpts]>(
-      (electron) => electron.BrowserWindow.getAllWindows().length,
-      { internal: true },
-    );
+    const numWindows = (await browser.getWindowHandles()).length;
     return numWindows > 0;
   });
 
