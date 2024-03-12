@@ -25,6 +25,7 @@ on:
         type: boolean
 
 env:
+  DRY_RUN_ARG: ${{ inputs.dryRun && '--dry-run' || '' }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
@@ -64,7 +65,7 @@ jobs:
             unset INCREMENT_ARG
           fi
 
-          pnpm run release:ci $INCREMENT_ARG --preRelease=${{inputs.distTag}}
+          pnpm run release:ci $INCREMENT_ARG $DRY_RUN_ARG --preRelease=${{inputs.distTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -77,7 +78,7 @@ jobs:
             exit 1
           fi
 
-          pnpm run release:ci ${{inputs.releaseType}} --npm.tag=${{inputs.distTag}}
+          pnpm run release:ci ${{inputs.releaseType}} $DRY_RUN_ARG --npm.tag=${{inputs.distTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
