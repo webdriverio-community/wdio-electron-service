@@ -35,9 +35,13 @@ export const getChromiumVersion = async (electronReleases: ElectronRelease[], el
 };
 
 export const isSupportedElectron = async (electronReleases: ElectronRelease[], electronVersion?: string) => {
-  const releaseIndex = electronReleases.findIndex((electronRelease) => electronRelease.version === electronVersion);
+  const electronMajorVersion = electronVersion?.split('.')[0] || '';
+  const electronMajorReleases = electronReleases.reverse().filter((release) => release.version.endsWith('.0.0'));
+  const releaseIndex = electronMajorReleases.findIndex((majorRelease) =>
+    majorRelease.version?.startsWith(electronMajorVersion),
+  );
 
-  // Electron versions > 2 behind the latest are not supported
+  // Electron versions > 2 behind the latest major version are not supported
   // TODO: do we need the -1 check?
   if (releaseIndex > 2 || releaseIndex === -1) {
     return false;
