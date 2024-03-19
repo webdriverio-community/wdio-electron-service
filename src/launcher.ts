@@ -10,7 +10,7 @@ import type { Services, Options, Capabilities } from '@wdio/types';
 import log from './log.js';
 import { getBinaryPath, getAppBuildInfo } from './application.js';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
-import { getChromiumVersion } from './versions.js';
+import { fetchElectronReleases, getChromiumVersion, isSupportedElectron } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from './types.js';
 
@@ -55,10 +55,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw noElectronCapabilityError;
     }
 
+    // Releases are used to get the chromium version for a given Electron version and determine support
+    const electronReleases = await fetchElectronReleases();
+
     await Promise.all(
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
-        const chromiumVersion = await getChromiumVersion(electronVersion);
+        const chromiumVersion = await getChromiumVersion(electronReleases, electronVersion);
         log.debug(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
         let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
@@ -77,6 +80,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
                 appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
               }`;
               throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
+            }
+
+            const electronVersionIsSupported = await isSupportedElectron(electronReleases, electronVersion);
+            if (!electronVersionIsSupported) {
+              throw new Error(
+                `The Electron version ${electronVersion} is not supported. This means you will need to manually configure chromedriver.  See https://github.com/webdriverio-community/wdio-electron-service/blob/main/docs/configuration/chromedriver-configuration.md#user-managed`,
+              );
             }
           } catch (e) {
             log.error(e);
