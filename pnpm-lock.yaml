@@ -22,7 +22,7 @@ dependencies:
     version: 1.4.716
   fast-copy:
     specifier: ^3.0.1
-    version: 3.0.1
+    version: 3.0.2
   find-versions:
     specifier: ^5.1.0
     version: 5.1.0
@@ -2910,8 +2910,8 @@ packages:
       - supports-color
     dev: true
 
-  /fast-copy@3.0.1:
-    resolution: {integrity: sha512-Knr7NOtK3HWRYGtHoJrjkaWepqT8thIVGAwt0p0aUs1zqkAzXZV4vo9fFNwyb5fcqK1GKYFYxldQdIDVKhUAfA==}
+  /fast-copy@3.0.2:
+    resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
     dev: false
 
   /fast-deep-equal@2.0.1:
