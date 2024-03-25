@@ -39,7 +39,7 @@ devDependencies:
     version: 8.57.0
   '@testing-library/webdriverio':
     specifier: ^3.2.1
-    version: 3.2.1(webdriverio@8.34.1)
+    version: 3.2.1(webdriverio@8.35.1)
   '@types/debug':
     specifier: ^4.1.10
     version: 4.1.12
@@ -129,7 +129,7 @@ devDependencies:
     version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
   webdriverio:
     specifier: ^8.27.2
-    version: 8.34.1(typescript@5.4.2)
+    version: 8.35.1(typescript@5.4.2)
 
 packages:
 
@@ -906,7 +906,7 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@testing-library/webdriverio@3.2.1(webdriverio@8.34.1):
+  /@testing-library/webdriverio@3.2.1(webdriverio@8.35.1):
     resolution: {integrity: sha512-mgMyCiwW+4zCidmlab9lwcO+UBz+PzlWnz9idDQ4ZS1SIHVSfJwvRLMWi+s3vNGFmc8duQxTiUHf1alW/Z48Og==}
     peerDependencies:
       webdriverio: '*'
@@ -914,7 +914,7 @@ packages:
       '@babel/runtime': 7.24.0
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 8.34.1(typescript@5.4.2)
+      webdriverio: 8.35.1(typescript@5.4.2)
     dev: true
 
   /@tootallnate/quickjs-emscripten@0.23.0:
@@ -1356,7 +1356,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-    optional: true
 
   /@wdio/globals@8.34.1(typescript@5.4.2):
     resolution: {integrity: sha512-snN9o23a9EKfNgV0TqwiWeoeWrj6BCopBVDa6Pdx4GUw6RyRDIX2StqT9mB3n8v3FPlLjs0Lym0DL9tNbV39uA==}
@@ -1457,7 +1456,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-    optional: true
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -2409,7 +2407,6 @@ packages:
     resolution: {integrity: sha512-QDbb27xcTVReQQW/GHJsdQqGKwYBE7re7gxehj467kKP2DKuYBUj6i2k5LRiAC66J1yZG/9gsxooz/s9pcm0Og==}
     requiresBuild: true
     dev: true
-    optional: true
 
   /diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
@@ -6649,7 +6646,6 @@ packages:
       - supports-color
       - utf-8-validate
     dev: true
-    optional: true
 
   /webdriverio@8.34.1(typescript@5.4.2):
     resolution: {integrity: sha512-9C+sy8mkvIGdKFFHL5oq6s2Uhq1lsAXybG3MsF0QA2822Jm+oYHN4KohrOGF0yBJc/x5JRaW3/hXvldnj7a55A==}
@@ -6733,7 +6729,6 @@ packages:
       - typescript
       - utf-8-validate
     dev: true
-    optional: true
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
