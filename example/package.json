@@ -11,7 +11,7 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.multiremote.conf.ts"
+    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.old-electron.conf.ts && wdio run ./wdio.multiremote.conf.ts"
   },
   "dependencies": {
     "wdio-electron-service": "file:../"
