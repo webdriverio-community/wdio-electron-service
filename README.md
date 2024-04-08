@@ -37,10 +37,10 @@ Next, create your WDIO configuration file. If you need some inspiration for this
 
 You will need to add `electron` to your services array and set an Electron capability, e.g.:
 
-```js
-// wdio.conf.js
+`wdio.conf.ts`
+
+```ts
 export const config = {
-  outputDir: 'logs',
   // ...
   services: ['electron'],
   capabilities: [
@@ -58,14 +58,22 @@ This will spin up an instance of your app in the same way that WDIO handles brow
 
 If you use [Electron Forge](https://www.electronforge.io/) or [Electron Builder](https://www.electron.build/) to package your app then the service will automatically attempt to find the path to your bundled Electron application. You can provide a custom path to the binary via custom service capabilities, e.g.:
 
+`wdio.conf.ts`
+
 ```ts
-capabilities: [{
-  browserName: 'electron',
-  'wdio:electronServiceOptions': {
-    appBinaryPath: './path/to/bundled/electron/app.exe',
-    appArgs: ['foo', 'bar=baz'],
-  },
-}],
+export const config = {
+  // ...
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'wdio:electronServiceOptions': {
+        appBinaryPath: './path/to/bundled/electron/app.exe',
+        appArgs: ['foo', 'bar=baz'],
+      },
+    },
+  ],
+  // ...
+};
 ```
 
 ## Documentation

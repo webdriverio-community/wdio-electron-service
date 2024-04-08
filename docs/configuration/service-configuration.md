@@ -2,6 +2,8 @@
 
 The service can be configured by setting `wdio:electronServiceOptions` either on the service level or capability level, in which capability level configurations take precedence, e.g. the following WebdriverIO configuration:
 
+_`wdio.conf.ts`_
+
 ```ts
 export const config = {
   // ...
@@ -28,10 +30,10 @@ export const config = {
 
 ...would result in the following configuration object:
 
-```js
+```json
 {
-  appBinaryPath: '/foo/bar/myOtherApp',
-  appArgs: ['foo', 'bar']
+  "appBinaryPath": "/foo/bar/myOtherApp",
+  "appArgs": ["foo", "bar"]
 }
 ```
 

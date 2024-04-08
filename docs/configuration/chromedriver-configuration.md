@@ -6,10 +6,10 @@
 
 If you are not specifying a Chromedriver binary then the service will download and use the appropriate version for your app's Electron version. The Electron version of your app is determined by the version of `electron` or `electron-nightly` in your `package.json`, however you may want to override this behaviour - for instance, if the app you are testing is in a different repo from the tests. You can specify the Electron version manually by setting the `browserVersion` capability, as shown in the example configuration below:
 
-```js
-// wdio.conf.js
+_`wdio.conf.ts`_
+
+```ts
 export const config = {
-  outputDir: 'logs',
   // ...
   services: ['electron'],
   capabilities: [
