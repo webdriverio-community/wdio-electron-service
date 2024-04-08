@@ -2,43 +2,59 @@
 
 If you wish to access the Electron APIs then you will need to import (or require) the preload and main scripts in your app.
 
-Somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally, e.g.:
+Somewhere near the top of your preload script, load `wdio-electron-service/preload` conditionally, e.g.:
+
+_`preload/index.ts`_
 
 ```ts
-if (process.env.NODE_ENV === 'test') {
+if (process.env.TEST === 'true') {
   import('wdio-electron-service/preload');
 }
 ```
 
 And somewhere near the top of your main index file (app entry point), load `wdio-electron-service/main` conditionally, e.g.:
 
+_`main/index.ts`_
+
 ```ts
-if (process.env.NODE_ENV === 'test') {
+if (process.env.TEST === 'true') {
   import('wdio-electron-service/main');
 }
 ```
 
 **_For security reasons it is encouraged to ensure electron main process access is only available when the app is being tested._**
 
-This is the reason for the above dynamic imports wrapped in conditionals. An alternative approach is to use a separate test index file for both your preload and main entry points, e.g.
+This is the reason for the above dynamic imports wrapped in conditionals. You will need to specify the TEST environment variable at the top of your WDIO config file:
 
-`main/index.test.ts`
+_`wdio.conf.ts`_
+
+```ts
+// ...
+process.env.TEST = 'true';
+// ...
+```
+
+An alternative approach is to use a separate test index file for both your preload and main entry points, e.g.
+
+_`main/index.test.ts`_
 
 ```ts
 import('wdio-electron-service/main');
 import('./index.js');
 ```
 
-`preload/index.test.ts`
+_`preload/index.test.ts`_
 
 ```ts
 import('wdio-electron-service/preload');
 import('./index.js');
 ```
 
-You can then switch the test and production entry points of the application depending on the presence of an environment variable.
+You can then switch the test and production entry points of the application depending on the presence of the TEST environment variable.
 
 e.g. for a Vite-based application:
+
+_`vite.config.ts`_
 
 ```ts
 export default defineConfig(({ mode }) => {
@@ -66,14 +82,24 @@ If you are not bundling your preload script you will be unable to import 3rd-par
 
 It is not recommended to disable sandbox mode in production; to control this behaviour you can set the `NODE_ENV` environment variable when executing WDIO:
 
+_`package.json`_
+
 ```json
-"wdio": "NODE_ENV=test wdio run wdio.conf.js"
+// ...
+"scripts": {
+  // ...
+  "wdio": "TEST=true wdio run wdio.conf.js",
+  // ...
+}
+// ...
 ```
 
-In your BrowserWindow configuration, set the sandbox option depending on the NODE_ENV variable:
+In your BrowserWindow configuration, set the sandbox option depending on the TEST variable:
+
+_`main/index.ts`_
 
 ```ts
-const isTest = process.env.NODE_ENV === 'test';
+const isTest = process.env.TEST === 'true';
 
 new BrowserWindow({
   webPreferences: {
