@@ -35,8 +35,8 @@ dependencies:
 
 devDependencies:
   '@eslint/js':
-    specifier: ^8.55.0
-    version: 8.57.0
+    specifier: ^9.0.0
+    version: 9.0.0
   '@testing-library/webdriverio':
     specifier: ^3.2.1
     version: 3.2.1(webdriverio@8.35.1)
@@ -457,6 +457,11 @@ packages:
   /@eslint/js@8.57.0:
     resolution: {integrity: sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    dev: true
+
+  /@eslint/js@9.0.0:
+    resolution: {integrity: sha512-RThY/MnKrhubF6+s1JflwUjPEsnCEmYCWwqa/aRISKWNXGZ9epUwft4bUMM35SdKF9xvBrLydAM1RDHd1Z//ZQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     dev: true
 
   /@humanwhocodes/config-array@0.11.14:
