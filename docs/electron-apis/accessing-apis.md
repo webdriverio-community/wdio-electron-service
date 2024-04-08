@@ -1,6 +1,68 @@
 # Accessing Electron APIs
 
-If you wish to access the Electron APIs then you will need to import (or require) the preload and main scripts in your app. To import 3rd-party packages (node_modules) in your `preload.js`, you have to disable sandboxing in your `BrowserWindow` config.
+If you wish to access the Electron APIs then you will need to import (or require) the preload and main scripts in your app.
+
+Somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally, e.g.:
+
+```ts
+if (process.env.NODE_ENV === 'test') {
+  import('wdio-electron-service/preload');
+}
+```
+
+And somewhere near the top of your main index file (app entry point), load `wdio-electron-service/main` conditionally, e.g.:
+
+```ts
+if (process.env.NODE_ENV === 'test') {
+  import('wdio-electron-service/main');
+}
+```
+
+**_For security reasons it is encouraged to ensure electron main process access is only available when the app is being tested._**
+
+This is the reason for the above dynamic imports wrapped in conditionals. An alternative approach is to use a separate test index file for both your preload and main entry points, e.g.
+
+`main/index.test.ts`
+
+```ts
+import('wdio-electron-service/main');
+import('./index.js');
+```
+
+`preload/index.test.ts`
+
+```ts
+import('wdio-electron-service/preload');
+import('./index.js');
+```
+
+You can then switch the test and production entry points of the application depending on the presence of an environment variable.
+
+e.g. for a Vite-based application:
+
+```ts
+export default defineConfig(({ mode }) => {
+  const isProd = mode === 'production';
+  const isTest = process.env.TEST === 'true';
+
+  return {
+    main: {
+      // ...
+      entry: { main: isTest ? 'src/main/index.test.ts' : 'src/main/index.ts' },
+      // ...
+    },
+    preload: {
+      // ...
+      entry: { preload: isTest ? 'src/preload/index.test.ts' : 'src/preload/index.ts' },
+      // ...
+    },
+  };
+});
+```
+
+### Additional steps for non-bundled preload scripts
+
+If you are not bundling your preload script you will be unable to import 3rd-party packages (node_modules) in your `preload.js`. In this case you have to ensure sandboxing is disabled in your `BrowserWindow` config.
 
 It is not recommended to disable sandbox mode in production; to control this behaviour you can set the `NODE_ENV` environment variable when executing WDIO:
 
@@ -21,24 +83,6 @@ new BrowserWindow({
   // ...
 });
 ```
-
-Then somewhere near the top of your `preload.js`, load `wdio-electron-service/preload` conditionally, e.g.:
-
-```ts
-if (process.env.NODE_ENV === 'test') {
-  import('wdio-electron-service/preload');
-}
-```
-
-And somewhere near the top of your main index file (app entry point), load `wdio-electron-service/main` conditionally, e.g.:
-
-```ts
-if (process.env.NODE_ENV === 'test') {
-  import('wdio-electron-service/main');
-}
-```
-
-For security reasons it is encouraged to use dynamic imports wrapped in conditionals to ensure electron main process access is only available when the app is being tested.
 
 ## Execute Scripts
 
