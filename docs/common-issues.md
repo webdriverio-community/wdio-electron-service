@@ -14,7 +14,7 @@ $ npx electron-packager --no-prune
 
 #### Electron Forge
 
-`package.json`
+_`package.json`_
 
 ```json
 {
@@ -28,7 +28,7 @@ $ npx electron-packager --no-prune
 }
 ```
 
-`forge.config.js`
+_`forge.config.js`_
 
 ```ts
 module.exports = {
