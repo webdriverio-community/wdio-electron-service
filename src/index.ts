@@ -12,11 +12,6 @@ import type {
   WdioElectronWindowObj,
 } from './types.js';
 
-/**
- * set this environment variable so that the preload script can be loaded
- */
-process.env.WDIO_ELECTRON = 'true';
-
 export const launcher = ElectronLaunchService;
 export default ElectronWorkerService;
 

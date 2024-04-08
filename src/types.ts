@@ -1,11 +1,6 @@
 import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
 
-/**
- * Set this environment variable so that the preload script can be loaded
- */
-process.env.WDIO_ELECTRON = 'true';
-
 export type Fn = (...args: unknown[]) => unknown;
 export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
 export type AbstractFn = Fn | AsyncFn;
