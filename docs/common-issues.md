@@ -14,16 +14,28 @@ $ npx electron-packager --no-prune
 
 #### Electron Forge
 
+_`package.json`_
+
 ```json
-"package": "NODE_ENV=test electron-forge package"
+{
+  // ...
+  "scripts": {
+    // ...
+    "package": "TEST=true electron-forge package"
+    // ...
+  }
+  // ...
+}
 ```
 
+_`forge.config.js`_
+
 ```ts
-// forge.config.js
 module.exports = {
+  // ...
   packagerConfig: {
     asar: true,
-    prune: process.env.NODE_ENV !== 'test',
+    prune: process.env.TEST !== 'true',
   },
   // ...
 };

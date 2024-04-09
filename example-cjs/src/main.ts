@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util';
 
 if (isTest) {
-  import('wdio-electron-service/main');
+  require('wdio-electron-service/main');
 }
 
 const appPath = app.getAppPath();
@@ -21,7 +21,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.bundle.js`,
+      preload: `${appRootPath}/preload.js`,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,

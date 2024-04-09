@@ -6,6 +6,7 @@ import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
 import { clearAllMocks } from './commands/clearAllMocks.js';
+import { isMockFunction } from './commands/isMockFunction.js';
 import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
@@ -13,10 +14,7 @@ import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts 
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
-    const numWindows = await browser.electron.execute<number, [ExecuteOpts]>(
-      (electron) => electron.BrowserWindow.getAllWindows().length,
-      { internal: true },
-    );
+    const numWindows = (await browser.getWindowHandles()).length;
     return numWindows > 0;
   });
 
@@ -44,6 +42,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const api = {
       clearAllMocks: clearAllMocks.bind(this),
       execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
+      isMockFunction: isMockFunction.bind(this),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
       resetAllMocks: resetAllMocks.bind(this),
