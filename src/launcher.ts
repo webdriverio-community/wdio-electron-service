@@ -22,16 +22,20 @@ async function fileExists(path: PathLike) {
   }
 }
 
+export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
+  [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
+};
+
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
 
-  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = config.rootDir || process.cwd();
   }
 
-  async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
+  async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
     const capsList = Array.isArray(capabilities)
       ? capabilities
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);

@@ -11,7 +11,9 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.multiremote.conf.ts"
+    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.multiremote.conf.ts && pnpm test:standalone",
+    "test:standalone": "ts-node ./e2e-standalone/api.spec.ts",
+    "test:standalone:local": "cd .. && pnpm build && cd - && rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
     "wdio-electron-service": "file:../"
