@@ -13,7 +13,7 @@ const packageJson = JSON.parse(
 
 const getBinaryExtension = () => {
   if (process.platform === 'darwin') {
-    return '.app';
+    return '.app/Contents/MacOS/wdio-electron-service-example';
   } else if (process.platform === 'win32') {
     return '.exe';
   }
