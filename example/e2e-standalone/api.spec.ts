@@ -1,6 +1,7 @@
 import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
+import { exit } from 'node:process';
 
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
@@ -34,3 +35,5 @@ const appVersion = await browser.electron.execute((electron) => electron.app.get
 if (appVersion !== packageJson.version) {
   throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
 }
+
+exit();
