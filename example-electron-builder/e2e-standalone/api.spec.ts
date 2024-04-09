@@ -24,8 +24,14 @@ const getBinaryExtension = () => {
   return '';
 };
 
-const getBinaryPath = () =>
-  `./out/${PACKAGE_NAME}-${process.platform}-${process.arch}/${PACKAGE_NAME}${getBinaryExtension()}`;
+const outDirName = 'dist';
+const outDirMap = {
+  darwin: path.join(outDirName, process.arch === 'arm64' ? 'mac-arm64' : 'mac'),
+  linux: path.join(outDirName, 'linux-unpacked'),
+  win32: path.join(outDirName, 'win-unpacked'),
+};
+
+const getBinaryPath = () => `./${outDirMap[process.platform]}/${PACKAGE_NAME}${getBinaryExtension()}`;
 
 const browser = await startSession({
   appBinaryPath: getBinaryPath(),
