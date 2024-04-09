@@ -6,6 +6,8 @@ import process from 'node:process';
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
 
+process.env.TEST = 'true';
+
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }),

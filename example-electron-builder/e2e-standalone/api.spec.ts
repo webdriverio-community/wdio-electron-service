@@ -6,6 +6,8 @@ import process from 'node:process';
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
 
+process.env.TEST = 'true';
+
 const PACKAGE_NAME = 'wdio-electron-service-example-electron-builder';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
