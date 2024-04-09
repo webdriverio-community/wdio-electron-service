@@ -6,6 +6,7 @@ import process from 'node:process';
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
 
+const PACKAGE_NAME = 'wdio-electron-service-example-electron-builder';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }),
@@ -13,7 +14,7 @@ const packageJson = JSON.parse(
 
 const getBinaryExtension = () => {
   if (process.platform === 'darwin') {
-    return '.app/Contents/MacOS/wdio-electron-service-example';
+    return `.app/Contents/MacOS/${PACKAGE_NAME}`;
   } else if (process.platform === 'win32') {
     return '.exe';
   }
@@ -21,11 +22,11 @@ const getBinaryExtension = () => {
   return '';
 };
 
-const getBinaryPath = (packageName: string) =>
-  `./out/${packageName}-${process.platform}-${process.arch}/${packageName}${getBinaryExtension()}`;
+const getBinaryPath = () =>
+  `./out/${PACKAGE_NAME}-${process.platform}-${process.arch}/${PACKAGE_NAME}${getBinaryExtension()}`;
 
 const browser = await startSession({
-  appBinaryPath: getBinaryPath('wdio-electron-service-example'),
+  appBinaryPath: getBinaryPath(),
   appArgs: ['foo', 'bar=baz'],
 });
 
