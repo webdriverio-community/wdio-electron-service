@@ -1,7 +1,7 @@
 import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import { exit } from 'node:process';
+import process from 'node:process';
 
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
@@ -21,8 +21,11 @@ const getBinaryExtension = () => {
   return '';
 };
 
+const getBinaryPath = (packageName: string) =>
+  `./out/${packageName}-${process.platform}-${process.arch}/${packageName}${getBinaryExtension()}`;
+
 const browser = await startSession({
-  appBinaryPath: `./out/wdio-electron-service-example-${process.platform}-${process.arch}/wdio-electron-service-example${getBinaryExtension()}`,
+  appBinaryPath: getBinaryPath('wdio-electron-service-example'),
   appArgs: ['foo', 'bar=baz'],
 });
 
@@ -36,4 +39,4 @@ if (appVersion !== packageJson.version) {
   throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
 }
 
-exit();
+process.exit();
