@@ -1,12 +1,10 @@
 import path from 'node:path';
-import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
 
 import { startSession } from 'wdio-electron-service';
 import type { PackageJson } from 'read-package-up';
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'package.json'), { encoding: 'utf-8' }),
 ) as PackageJson;
@@ -24,19 +22,23 @@ const getBinaryExtension = () => {
 const getBinaryPath = (packageName: string) =>
   `./out/${packageName}-${process.platform}-${process.arch}/${packageName}${getBinaryExtension()}`;
 
-const browser = await startSession({
-  appBinaryPath: getBinaryPath('wdio-electron-service-example'),
-  appArgs: ['foo', 'bar=baz'],
-});
+async function init() {
+  const browser = await startSession({
+    appBinaryPath: getBinaryPath('wdio-electron-service-example'),
+    appArgs: ['foo', 'bar=baz'],
+  });
 
-const appName = await browser.electron.execute((electron) => electron.app.getName());
-if (appName !== packageJson.name) {
-  throw new Error(`appName test failed: ${appName} !== ${packageJson.name}`);
+  const appName = await browser.electron.execute((electron) => electron.app.getName());
+  if (appName !== packageJson.name) {
+    throw new Error(`appName test failed: ${appName} !== ${packageJson.name}`);
+  }
+
+  const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
+  if (appVersion !== packageJson.version) {
+    throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
+  }
+
+  process.exit();
 }
 
-const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
-if (appVersion !== packageJson.version) {
-  throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
-}
-
-process.exit();
+init();

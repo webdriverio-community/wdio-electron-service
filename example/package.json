@@ -11,7 +11,8 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.multiremote.conf.ts && pnpm test:standalone",
+    "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
+    "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "test:standalone": "ts-node ./e2e-standalone/api.spec.ts",
     "test:standalone:local": "cd .. && pnpm build && cd - && rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },

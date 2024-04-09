@@ -1,5 +1,5 @@
-import path from 'node:path';
 import url from 'node:url';
+import path from 'node:path';
 import fs from 'node:fs';
 import process from 'node:process';
 

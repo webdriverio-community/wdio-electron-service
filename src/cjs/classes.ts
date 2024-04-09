@@ -1,12 +1,16 @@
 import { Capabilities, Options, Services } from '@wdio/types';
 
+// Workaround for ts-node converting dynamic imports to requires
+// see https://github.com/TypeStrong/ts-node/discussions/1290
+const dynamicImport = new Function('specifier', 'return import(specifier)');
+
 export class CJSElectronLauncher {
   private instance?: Promise<Services.ServiceInstance>;
 
   constructor(options: unknown, caps: unknown, config: Options.Testrunner) {
     this.instance = (async () => {
       const importPath = '../service.js';
-      const { default: ElectronService } = await import(importPath);
+      const { default: ElectronService } = await dynamicImport(importPath);
       return new ElectronService(options, caps, config);
     })();
   }
@@ -23,7 +27,7 @@ export class CJSElectronService {
   constructor(globalOptions: unknown) {
     this.instance = (async () => {
       const importPath = '../service.js';
-      const { default: ElectronService } = await import(importPath);
+      const { default: ElectronService } = await dynamicImport(importPath);
       return new ElectronService(globalOptions);
     })();
   }
