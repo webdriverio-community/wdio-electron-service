@@ -41,7 +41,11 @@ async function init() {
     throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
   }
 
-  await browser.electron.execute((electron) => electron.app.quit());
+  // clean up - quit the app on Mac as it remains loaded
+  // calling app.quit on linux here breaks the E2Es on CI
+  if (process.platform === 'darwin') {
+    await browser.electron.execute((electron) => electron.app.quit());
+  }
 
   process.exit();
 }
