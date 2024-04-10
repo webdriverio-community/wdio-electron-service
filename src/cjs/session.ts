@@ -6,12 +6,10 @@ import { ElectronServiceOptions } from './types.js';
 import { Options } from '@wdio/types';
 
 export async function init(opts: ElectronServiceOptions) {
-  const testRunnerOpts = { ...opts } as Options.Testrunner;
+  const testRunnerOpts = opts as Options.Testrunner;
   let capabilities = {
     browserName: 'electron',
-    [CUSTOM_CAPABILITY_NAME]: {
-      ...opts,
-    },
+    [CUSTOM_CAPABILITY_NAME]: opts,
   };
 
   const launcher = new CJSElectronLauncher(opts, capabilities, testRunnerOpts);
