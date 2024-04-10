@@ -48,4 +48,6 @@ if (appVersion !== packageJson.version) {
   throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
 }
 
+await browser.electron.execute((electron) => electron.app.quit());
+
 process.exit();
