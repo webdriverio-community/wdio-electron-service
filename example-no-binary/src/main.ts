@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util.js';
 
+console.log('ZOMG main script');
+
 if (isTest) {
   import('wdio-electron-service/main');
 }

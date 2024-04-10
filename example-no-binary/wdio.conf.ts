@@ -19,8 +19,12 @@ export const config: Options.Testrunner = {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appEntryPoint: path.join(__dirname, 'dist', 'main.bundle.js'),
+        // appEntryPoint: path.join(__dirname, 'test-main.js'),
         appArgs: ['foo', 'bar=baz'],
       },
+      // 'wdio:chromedriverOptions': {
+      //   binary: '/Users/sam/Downloads/chromedriver-v19', // your path to the chrome driver.
+      // },
     } as WebdriverIO.Capabilities,
   ],
   waitforTimeout: 5000,

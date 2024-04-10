@@ -69,8 +69,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         );
 
         if (appEntryPoint) {
+          // appBinaryPath = path.join(this.#projectRoot, 'node_modules', 'wdio-electron-service', 'bin', 'electron.sh');
+          // appBinaryPath = path.join(this.#projectRoot, 'node_modules', 'electron', 'node_modules', '.bin', 'electron');
           appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', 'electron');
-          appArgs = [`--app=${appEntryPoint}`, ...(appArgs || [])];
+          // appBinaryPath = path.join(this.#projectRoot, 'test.sh');
+          // appArgs = [];
+          appArgs = [`--app=${appEntryPoint}`]; // , ...(appArgs || [])
+          log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
         } else if (!appBinaryPath) {
           log.debug('No app binary found');
           try {
@@ -95,6 +100,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
         cap.browserName = 'chrome';
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
+
+        log.debug('chrome args: ', cap['goog:chromeOptions']['args']);
 
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
