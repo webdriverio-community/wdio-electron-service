@@ -66,7 +66,7 @@ devDependencies:
     version: 8.36.1(typescript@5.4.5)
   '@wdio/globals':
     specifier: ^8.27.2
-    version: 8.35.1(typescript@5.4.5)
+    version: 8.36.1(typescript@5.4.5)
   '@wdio/types':
     specifier: ^8.27.2
     version: 8.32.4
@@ -1413,21 +1413,6 @@ packages:
       import-meta-resolve: 4.0.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@wdio/globals@8.35.1(typescript@5.4.5):
-    resolution: {integrity: sha512-T3IUFcKXRU9WWleAV72DGFWUiXSSr8SBvpc2cUJrvZ5Je9R2gEsrts5eHCY7amXtfeylfMgy5EayGMajgcna6A==}
-    engines: {node: ^16.13 || >=18}
-    optionalDependencies:
-      expect-webdriverio: 4.13.0(typescript@5.4.5)
-      webdriverio: 8.35.1(typescript@5.4.5)
-    transitivePeerDependencies:
-      - bufferutil
-      - devtools
-      - encoding
-      - supports-color
-      - typescript
-      - utf-8-validate
     dev: true
 
   /@wdio/globals@8.36.1(typescript@5.4.5):
@@ -6715,6 +6700,7 @@ packages:
   /webdriver@8.36.1:
     resolution: {integrity: sha512-547RivYCHStVqtiGQBBcABAkzJbPnAWsxpXGzmj5KL+TOM2JF41N2iQRtUxXqr0jme1Nzzye7WS7Y7iSnK6i1g==}
     engines: {node: ^16.13 || >=18}
+    requiresBuild: true
     dependencies:
       '@types/node': 20.12.7
       '@types/ws': 8.5.10
