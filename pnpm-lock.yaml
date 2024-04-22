@@ -39,7 +39,7 @@ devDependencies:
     version: 9.0.0
   '@testing-library/webdriverio':
     specifier: ^3.2.1
-    version: 3.2.1(webdriverio@8.35.1)
+    version: 3.2.1(webdriverio@8.36.1)
   '@types/debug':
     specifier: ^4.1.10
     version: 4.1.12
@@ -129,7 +129,7 @@ devDependencies:
     version: 1.5.0(@types/node@20.12.7)(jsdom@24.0.0)
   webdriverio:
     specifier: ^8.27.2
-    version: 8.35.1(typescript@5.4.5)
+    version: 8.36.1(typescript@5.4.5)
 
 packages:
 
@@ -911,7 +911,7 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@testing-library/webdriverio@3.2.1(webdriverio@8.35.1):
+  /@testing-library/webdriverio@3.2.1(webdriverio@8.36.1):
     resolution: {integrity: sha512-mgMyCiwW+4zCidmlab9lwcO+UBz+PzlWnz9idDQ4ZS1SIHVSfJwvRLMWi+s3vNGFmc8duQxTiUHf1alW/Z48Og==}
     peerDependencies:
       webdriverio: '*'
@@ -919,7 +919,7 @@ packages:
       '@babel/runtime': 7.24.0
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 8.35.1(typescript@5.4.5)
+      webdriverio: 8.36.1(typescript@5.4.5)
     dev: true
 
   /@tootallnate/quickjs-emscripten@0.23.0:
@@ -1399,6 +1399,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+    optional: true
 
   /@wdio/config@8.36.1:
     resolution: {integrity: sha512-yCENnym0CrYuLKMJ3fv00WkjCR8QpPqVohGBkq5FvZOZpVJEpoG86Q8l4HtyRnd6ggMTKCA1vTQ/myhbPmZmaQ==}
@@ -1500,6 +1501,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+    optional: true
 
   /@wdio/utils@8.36.1:
     resolution: {integrity: sha512-xmgPHU11/o9n2FeRmDFkPRC0okiwA1i2xOcR2c3aSpuk99XkAm9RaMn/6u9LFaqsCpgaVxazcYEGSceO7U4hZA==}
@@ -2468,6 +2470,7 @@ packages:
     resolution: {integrity: sha512-QDbb27xcTVReQQW/GHJsdQqGKwYBE7re7gxehj467kKP2DKuYBUj6i2k5LRiAC66J1yZG/9gsxooz/s9pcm0Og==}
     requiresBuild: true
     dev: true
+    optional: true
 
   /devtools-protocol@0.0.1282316:
     resolution: {integrity: sha512-i7eIqWdVxeXBY/M+v83yRkOV1sTHnr3XYiC0YNBivLIE6hBfE2H0c2o8VC5ynT44yjy+Ei0kLrBQFK/RUKaAHQ==}
@@ -6711,6 +6714,7 @@ packages:
       - supports-color
       - utf-8-validate
     dev: true
+    optional: true
 
   /webdriver@8.36.1:
     resolution: {integrity: sha512-547RivYCHStVqtiGQBBcABAkzJbPnAWsxpXGzmj5KL+TOM2JF41N2iQRtUxXqr0jme1Nzzye7WS7Y7iSnK6i1g==}
@@ -6760,7 +6764,7 @@ packages:
       is-plain-obj: 4.1.0
       lodash.clonedeep: 4.5.0
       lodash.zip: 4.2.0
-      minimatch: 9.0.3
+      minimatch: 9.0.4
       puppeteer-core: 20.9.0(typescript@5.4.5)
       query-selector-shadow-dom: 1.0.1
       resq: 1.11.0
@@ -6774,6 +6778,7 @@ packages:
       - typescript
       - utf-8-validate
     dev: true
+    optional: true
 
   /webdriverio@8.36.1(typescript@5.4.5):
     resolution: {integrity: sha512-vzE09oFQeMbOYJ/75jZ13sDIljzC3HH7uoUJKAMAEtyrn/bu1F9Sg/4IDEsvQaRD3pz3ae6SkRld33lcQk6HJA==}
