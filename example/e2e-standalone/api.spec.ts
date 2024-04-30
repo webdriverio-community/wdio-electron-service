@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import process from 'node:process';
 
 import { startSession } from 'wdio-electron-service';
+import { isCI } from 'ci-info';
 import type { PackageJson } from 'read-package-up';
 
 process.env.TEST = 'true';
@@ -41,9 +42,9 @@ if (appVersion !== packageJson.version) {
   throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
 }
 
-// clean up - quit the app on Mac as it remains loaded
+// clean up - quit the app as it remains loaded
 // calling app.quit on linux here breaks the E2Es on CI
-if (process.platform === 'darwin') {
+if (process.platform !== 'linux' || !isCI) {
   await browser.electron.execute((electron) => electron.app.quit());
 }
 
