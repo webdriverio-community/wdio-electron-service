@@ -5,3 +5,7 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    ignore:
+      # For all packages, ignore all major and minor updates
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
