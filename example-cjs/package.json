@@ -11,7 +11,7 @@
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
     "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
     "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
-    "test:standalone": "ts-node ./e2e-standalone/api.spec.ts"
+    "test:standalone": "tsx ./e2e-standalone/api.spec.ts"
   },
   "dependencies": {
     "wdio-electron-service": "file:../"
@@ -28,6 +28,7 @@
     "jsdom": "^24.0.0",
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.2",
     "webdriverio": "^8.27.2"
   },

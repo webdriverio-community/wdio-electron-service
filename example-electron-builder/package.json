@@ -13,7 +13,7 @@
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
     "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
     "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
-    "test:standalone": "ts-node ./e2e-standalone/api.spec.ts"
+    "test:standalone": "tsx ./e2e-standalone/api.spec.ts"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
@@ -30,6 +30,7 @@
     "rollup": "^4.9.5",
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.2",
     "wdio-electron-service": "file:../",
     "webdriverio": "^8.27.2"
