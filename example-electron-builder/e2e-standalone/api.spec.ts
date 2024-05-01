@@ -50,8 +50,8 @@ if (appVersion !== packageJson.version) {
 }
 
 // clean up - quit the app as it remains loaded
-// calling app.quit on linux here breaks the E2Es on CI
-if (process.platform !== 'linux' || !isCI) {
+// calling app.quit on CI will break the E2Es
+if (!isCI) {
   await browser.electron.execute((electron) => electron.app.quit());
 }
 
