@@ -51,4 +51,4 @@ declare global {
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
-export const startSession: (opts: ElectronServiceOptions) => Promise<WebdriverIO.Browser> = initSession;
+export const startElectron: (opts: ElectronServiceOptions) => Promise<WebdriverIO.Browser> = initSession;

@@ -3,7 +3,7 @@ import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
 
-import { startSession } from 'wdio-electron-service';
+import { startElectron } from 'wdio-electron-service';
 import { isCI } from 'ci-info';
 import type { PackageJson } from 'read-package-up';
 
@@ -27,7 +27,7 @@ const getBinaryExtension = () => {
 const getBinaryPath = (packageName: string) =>
   `./out/${packageName}-${process.platform}-${process.arch}/${packageName}${getBinaryExtension()}`;
 
-const browser = await startSession({
+const browser = await startElectron({
   appBinaryPath: getBinaryPath('wdio-electron-service-example'),
   appArgs: ['foo', 'bar=baz'],
 });

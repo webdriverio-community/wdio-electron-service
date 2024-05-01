@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import process from 'node:process';
 
-import { startSession } from 'wdio-electron-service';
+import { startElectron } from 'wdio-electron-service';
 import { isCI } from 'ci-info';
 import type { PackageJson } from 'read-package-up';
 
@@ -27,7 +27,7 @@ const getBinaryPath = () =>
   `./out/${PACKAGE_NAME}-${process.platform}-${process.arch}/${PACKAGE_NAME}${getBinaryExtension()}`;
 
 async function init() {
-  const browser = await startSession({
+  const browser = await startElectron({
     appBinaryPath: getBinaryPath(),
     appArgs: ['foo', 'bar=baz'],
   });
