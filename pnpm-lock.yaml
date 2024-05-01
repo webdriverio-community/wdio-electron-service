@@ -4,6 +4,7 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+<<<<<<< HEAD
 importers:
 
   .:
@@ -135,6 +136,134 @@ importers:
       webdriverio:
         specifier: ^8.27.2
         version: 8.36.1(typescript@5.4.5)
+=======
+dependencies:
+  '@vitest/spy':
+    specifier: ^1.2.0
+    version: 1.5.3
+  '@wdio/logger':
+    specifier: ^8.16.17
+    version: 8.28.0
+  compare-versions:
+    specifier: ^6.1.0
+    version: 6.1.0
+  debug:
+    specifier: ^4.3.4
+    version: 4.3.4
+  electron-to-chromium:
+    specifier: ^1.4.630
+    version: 1.4.752
+  fast-copy:
+    specifier: ^3.0.1
+    version: 3.0.2
+  find-versions:
+    specifier: ^6.0.0
+    version: 6.0.0
+  node-fetch:
+    specifier: ^3.3.2
+    version: 3.3.2
+  read-package-up:
+    specifier: ^11.0.0
+    version: 11.0.0
+
+devDependencies:
+  '@eslint/js':
+    specifier: ^9.0.0
+    version: 9.1.1
+  '@testing-library/webdriverio':
+    specifier: ^3.2.1
+    version: 3.2.1(webdriverio@8.36.1)
+  '@types/debug':
+    specifier: ^4.1.10
+    version: 4.1.12
+  '@types/eslint-config-prettier':
+    specifier: ^6.11.2
+    version: 6.11.3
+  '@types/mocha':
+    specifier: ^10.0.5
+    version: 10.0.6
+  '@types/node':
+    specifier: ^20.11.0
+    version: 20.12.8
+  '@typescript-eslint/eslint-plugin':
+    specifier: ^7.0.1
+    version: 7.8.0(@typescript-eslint/parser@7.8.0)(eslint@8.57.0)(typescript@5.4.5)
+  '@typescript-eslint/parser':
+    specifier: ^7.0.1
+    version: 7.8.0(eslint@8.57.0)(typescript@5.4.5)
+  '@vitest/coverage-v8':
+    specifier: ^1.2.0
+    version: 1.5.3(vitest@1.5.3)
+  '@wdio/cli':
+    specifier: ^8.27.2
+    version: 8.36.1(typescript@5.4.5)
+  '@wdio/globals':
+    specifier: ^8.27.2
+    version: 8.36.1(typescript@5.4.5)
+  '@wdio/types':
+    specifier: ^8.27.2
+    version: 8.36.1
+  cross-env:
+    specifier: ^7.0.3
+    version: 7.0.3
+  electron:
+    specifier: ^30.0.1
+    version: 30.0.1
+  eslint:
+    specifier: ^8.55.0
+    version: 8.57.0
+  eslint-config-prettier:
+    specifier: ^9.0.0
+    version: 9.1.0(eslint@8.57.0)
+  eslint-plugin-vitest:
+    specifier: ^0.5.3
+    version: 0.5.4(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.3)
+  eslint-plugin-wdio:
+    specifier: ^8.20.0
+    version: 8.24.12
+  expect:
+    specifier: ^29.7.0
+    version: 29.7.0
+  expect-webdriverio:
+    specifier: ^4.11.7
+    version: 4.13.0(typescript@5.4.5)
+  globals:
+    specifier: ^15.0.0
+    version: 15.1.0
+  husky:
+    specifier: ^9.0.10
+    version: 9.0.11
+  jsdom:
+    specifier: ^24.0.0
+    version: 24.0.0
+  lint-staged:
+    specifier: ^15.0.2
+    version: 15.2.2
+  nock:
+    specifier: ^13.3.6
+    version: 13.5.4
+  prettier:
+    specifier: ^3.2.2
+    version: 3.2.5
+  release-it:
+    specifier: ^17.0.0
+    version: 17.2.1(typescript@5.4.5)
+  rimraf:
+    specifier: ^5.0.5
+    version: 5.0.5
+  shx:
+    specifier: ^0.3.4
+    version: 0.3.4
+  typescript:
+    specifier: ^5.3.2
+    version: 5.4.5
+  vitest:
+    specifier: ^1.2.0
+    version: 1.5.3(@types/node@20.12.8)(jsdom@24.0.0)
+  webdriverio:
+    specifier: ^8.27.2
+    version: 8.36.1(typescript@5.4.5)
+>>>>>>> origin/main
 
 packages:
 
@@ -3886,7 +4015,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -4129,7 +4258,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       '@types/responselike': 1.0.3
 
   '@types/debug@4.1.12':
@@ -4156,13 +4285,23 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
 
   '@types/mocha@10.0.6': {}
 
   '@types/ms@0.7.34': {}
 
+<<<<<<< HEAD
   '@types/node@20.12.7':
+=======
+  /@types/node@20.12.8:
+    resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
+>>>>>>> origin/main
     dependencies:
       undici-types: 5.26.5
 
@@ -4170,7 +4309,12 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
 
   '@types/semver@7.5.8': {}
 
@@ -4180,7 +4324,12 @@ snapshots:
 
   '@types/ws@8.5.10':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -4190,7 +4339,12 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
     optional: true
 
   '@typescript-eslint/eslint-plugin@7.8.0(@typescript-eslint/parser@7.8.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
@@ -4296,7 +4450,7 @@ snapshots:
       std-env: 3.7.0
       strip-literal: 2.1.0
       test-exclude: 6.0.0
-      vitest: 1.5.3(@types/node@20.12.7)(jsdom@24.0.0)
+      vitest: 1.5.3(@types/node@20.12.8)(jsdom@24.0.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4331,8 +4485,13 @@ snapshots:
 
   '@wdio/cli@8.36.1(typescript@5.4.5)':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
       '@vitest/snapshot': 1.5.3
+=======
+      '@types/node': 20.12.8
+      '@vitest/snapshot': 1.5.0
+>>>>>>> origin/main
       '@wdio/config': 8.36.1
       '@wdio/globals': 8.36.1(typescript@5.4.5)
       '@wdio/logger': 8.28.0
@@ -4398,11 +4557,21 @@ snapshots:
 
   '@wdio/repl@8.24.12':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
 
   '@wdio/types@8.36.1':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 20.12.7
+=======
+      '@types/node': 20.12.8
+    dev: true
+>>>>>>> origin/main
 
   '@wdio/utils@8.36.1':
     dependencies:
@@ -5019,12 +5188,18 @@ snapshots:
     dependencies:
       jake: 10.8.7
 
+<<<<<<< HEAD
   electron-to-chromium@1.4.752: {}
+=======
+  /electron-to-chromium@1.4.752:
+    resolution: {integrity: sha512-P3QJreYI/AUTcfBVrC4zy9KvnZWekViThgQMX/VpJ+IsOBbcX5JFpORM4qWapwWQ+agb2nYAOyn/4PMXOk0m2Q==}
+    dev: false
+>>>>>>> origin/main
 
   electron@30.0.1:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -5189,9 +5364,13 @@ snapshots:
     dependencies:
       '@typescript-eslint/utils': 7.8.0(eslint@8.57.0)(typescript@5.4.5)
       eslint: 8.57.0
+<<<<<<< HEAD
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.8.0(@typescript-eslint/parser@7.8.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
       vitest: 1.5.3(@types/node@20.12.7)(jsdom@24.0.0)
+=======
+      vitest: 1.5.3(@types/node@20.12.8)(jsdom@24.0.0)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -6045,7 +6224,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -7419,13 +7598,24 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
+<<<<<<< HEAD
   vite-node@1.5.3(@types/node@20.12.7):
+=======
+  /vite-node@1.5.3(@types/node@20.12.8):
+    resolution: {integrity: sha512-axFo00qiCpU/JLd8N1gu9iEYL3xTbMbMrbe5nDp9GL0nb6gurIdZLkkFogZXWnE8Oyy5kfSLwNVIcVsnhE7lgQ==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+>>>>>>> origin/main
     dependencies:
       cac: 6.7.14
       debug: 4.3.4
       pathe: 1.1.2
       picocolors: 1.0.0
+<<<<<<< HEAD
       vite: 5.2.10(@types/node@20.12.7)
+=======
+      vite: 5.1.4(@types/node@20.12.8)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -7436,6 +7626,7 @@ snapshots:
       - supports-color
       - terser
 
+<<<<<<< HEAD
   vite@5.2.10(@types/node@20.12.7):
     dependencies:
       esbuild: 0.20.2
@@ -7447,6 +7638,70 @@ snapshots:
 
   vitest@1.5.3(@types/node@20.12.7)(jsdom@24.0.0):
     dependencies:
+=======
+  /vite@5.1.4(@types/node@20.12.8):
+    resolution: {integrity: sha512-n+MPqzq+d9nMVTKyewqw6kSt+R3CkvF9QAKY8obiQn8g1fwTscKxyfaYnC632HtBXAQGc1Yjomphwn1dtwGAHg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || >=20.0.0
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      '@types/node': 20.12.8
+      esbuild: 0.19.12
+      postcss: 8.4.35
+      rollup: 4.12.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
+  /vitest@1.5.3(@types/node@20.12.8)(jsdom@24.0.0):
+    resolution: {integrity: sha512-2oM7nLXylw3mQlW6GXnRriw+7YvZFk/YNV8AxIC3Z3MfFbuziLGWP9GPxxu/7nRlXhqyxBikpamr+lEEj1sUEw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 1.5.3
+      '@vitest/ui': 1.5.3
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+    dependencies:
+      '@types/node': 20.12.8
+>>>>>>> origin/main
       '@vitest/expect': 1.5.3
       '@vitest/runner': 1.5.3
       '@vitest/snapshot': 1.5.3
@@ -7464,8 +7719,13 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.8.0
       tinypool: 0.8.4
+<<<<<<< HEAD
       vite: 5.2.10(@types/node@20.12.7)
       vite-node: 1.5.3(@types/node@20.12.7)
+=======
+      vite: 5.1.4(@types/node@20.12.8)
+      vite-node: 1.5.3(@types/node@20.12.8)
+>>>>>>> origin/main
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 20.12.7
@@ -7499,7 +7759,7 @@ snapshots:
 
   webdriver@8.36.1:
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       '@types/ws': 8.5.10
       '@wdio/config': 8.36.1
       '@wdio/logger': 8.28.0
@@ -7517,7 +7777,7 @@ snapshots:
 
   webdriverio@8.36.1(typescript@5.4.5):
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.12.8
       '@wdio/config': 8.36.1
       '@wdio/logger': 8.28.0
       '@wdio/protocols': 8.32.0
