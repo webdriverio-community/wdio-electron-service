@@ -17,13 +17,13 @@ jobs:
         node-version: [18.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache pnpm modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-pnpm-modules
         with:
@@ -31,14 +31,18 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 9.0.6
           run_install: false
-      - name: Run headless test
-        uses: coactions/setup-xvfb@v1.0.1
-        with:
-          run: pnpm run ci
+      - name: Run Tests
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+          xvfb-run pnpm run ci
+          else
+          pnpm run ci
+          fi
+        shell: bash
       - name: 🐛 Debug Build
         uses: stateful/vscode-server-action@v1
         if: failure()
