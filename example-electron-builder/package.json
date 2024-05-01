@@ -1,8 +1,8 @@
 {
   "name": "wdio-electron-service-example-electron-builder",
   "version": "1.0.0",
-  "main": "dist/main.bundle.js",
-  "module": "dist/main.bundle.js",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
   "type": "module",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
