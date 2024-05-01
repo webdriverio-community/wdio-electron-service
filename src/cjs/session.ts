@@ -1,10 +1,9 @@
 import { remote } from 'webdriverio';
+import type { Options } from '@wdio/types';
 
 import { CJSElectronLauncher, CJSElectronService } from './classes.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { ElectronServiceOptions } from './types.js';
-import { Options } from '@wdio/types';
-
+import type { ElectronServiceOptions } from './types.js';
 export async function init(opts: ElectronServiceOptions) {
   const testRunnerOpts = opts as Options.Testrunner;
   let capabilities = {
@@ -16,8 +15,6 @@ export async function init(opts: ElectronServiceOptions) {
   const service = new CJSElectronService(opts);
 
   await launcher.onPrepare(testRunnerOpts, [capabilities]);
-
-  console.log('setting caps', capabilities);
 
   // initialise session
   const browser = await remote({
