@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import process from 'node:process';
 
 import { startElectron } from 'wdio-electron-service';
-import { isCI } from 'ci-info';
+// import { isCI } from 'ci-info';
 import type { PackageJson } from 'read-package-up';
 
 process.env.TEST = 'true';
@@ -51,8 +51,8 @@ if (appVersion !== packageJson.version) {
 
 // Clean up - quit the app as it remains loaded
 // Linux uses xvfb on CI, app.quit will break the E2Es in this case
-if (!isCI) {
-  await browser.electron.execute((electron) => electron.app.quit());
-}
+// if (!isCI) {
+await browser.deleteSession();
+// }
 
 process.exit();
