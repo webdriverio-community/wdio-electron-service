@@ -42,8 +42,8 @@ if (appVersion !== packageJson.version) {
   throw new Error(`appVersion test failed: ${appVersion} !== ${packageJson.version}`);
 }
 
-// clean up - quit the app as it remains loaded
-// calling app.quit on CI will break the E2Es
+// Clean up - quit the app as it remains loaded
+// Linux uses xvfb on CI, app.quit will break the E2Es in this case
 if (!isCI) {
   await browser.electron.execute((electron) => electron.app.quit());
 }
