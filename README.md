@@ -82,6 +82,7 @@ export const config = {
 **[Chromedriver Configuration](./docs/configuration/chromedriver-configuration.md)** \
 **[Accessing Electron APIs](./docs/electron-apis/accessing-apis.md)** \
 **[Mocking Electron APIs](./docs/electron-apis/mocking-apis.md)** \
+**[Standalone Mode](./docs/standalone-mode.md)** \
 **[Development](./docs/development.md)** \
 **[Common Issues](./docs/common-issues.md)**
 

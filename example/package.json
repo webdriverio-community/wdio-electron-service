@@ -1,8 +1,8 @@
 {
   "name": "wdio-electron-service-example",
   "version": "1.0.0",
-  "main": "dist/main.bundle.js",
-  "module": "dist/main.bundle.js",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
   "type": "module",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
@@ -11,7 +11,10 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "test": "wdio run ./wdio.conf.ts && wdio run ./wdio.multiremote.conf.ts"
+    "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
+    "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
+    "test:standalone": "tsx ./e2e-standalone/api.spec.ts",
+    "test:standalone:local": "cd .. && pnpm build && cd - && rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
     "wdio-electron-service": "file:../"
@@ -25,12 +28,13 @@
     "@wdio/globals": "^8.27.2",
     "@wdio/local-runner": "^8.27.2",
     "@wdio/mocha-framework": "^8.27.2",
-    "electron": "^29.0.1",
+    "electron": "^29.3.1",
     "global-jsdom": "^24.0.0",
     "jsdom": "^24.0.0",
     "rollup": "^4.9.5",
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.2",
     "webdriverio": "^8.27.2"
   },

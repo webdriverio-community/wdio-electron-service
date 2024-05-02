@@ -1,8 +1,9 @@
 import { fn as vitestFn } from '@vitest/spy';
 import { browser as wdioBrowser } from '@wdio/globals';
-import type { Capabilities, Services, Options } from '@wdio/types';
 import type { PackageJson } from 'read-package-up';
 
+import { init as initSession } from './session.js';
+import { CJSElectronLauncher, CJSElectronService } from './classes.js';
 import type {
   ElectronInterface,
   ElectronServiceAPI,
@@ -11,49 +12,8 @@ import type {
   WdioElectronWindowObj,
 } from './types.js';
 
-exports.default = class CJSElectronService {
-  private instance?: Promise<Services.ServiceInstance>;
-
-  constructor(options: unknown, caps: never, config: Options.Testrunner) {
-    this.instance = (async () => {
-      const importPath = '../service.js';
-      const { default: ElectronService } = await import(importPath);
-      return new ElectronService(options, caps, config);
-    })();
-  }
-
-  async beforeSession(
-    config: Options.Testrunner,
-    capabilities: WebdriverIO.Capabilities,
-    specs: string[],
-    cid: string,
-  ) {
-    const instance = await this.instance;
-    return instance?.beforeSession?.(config, capabilities, specs, cid);
-  }
-
-  async before(capabilities: WebdriverIO.Capabilities, specs: string[], browser: WebdriverIO.Browser) {
-    const instance = await this.instance;
-    return instance?.before?.(capabilities, specs, browser);
-  }
-};
-
-exports.launcher = class CJSElectronLauncher {
-  private instance?: Promise<Services.ServiceInstance>;
-
-  constructor(options: unknown, caps: never, config: Options.Testrunner) {
-    this.instance = (async () => {
-      const importPath = '../service.js';
-      const { default: ElectronService } = await import(importPath);
-      return new ElectronService(options, caps, config);
-    })();
-  }
-
-  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities) {
-    const instance = await this.instance;
-    return instance?.onPrepare?.(config, capabilities);
-  }
-};
+exports.default = CJSElectronService;
+exports.launcher = CJSElectronLauncher;
 
 interface BrowserExtension {
   /**
@@ -91,3 +51,4 @@ declare global {
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
+export const startElectron: (opts: ElectronServiceOptions) => Promise<WebdriverIO.Browser> = initSession;

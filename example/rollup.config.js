@@ -3,16 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 
 export default [
   {
-    input: 'dist/main.js',
-    output: {
-      file: 'dist/main.bundle.js',
-      inlineDynamicImports: true,
-      format: 'esm',
-    },
-    plugins: [nodeResolve()],
-    external: ['electron'],
-  },
-  {
     input: 'dist/preload.js',
     output: {
       file: 'dist/preload.bundle.cjs',

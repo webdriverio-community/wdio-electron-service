@@ -2,6 +2,7 @@ import { browser as wdioBrowser } from '@wdio/globals';
 import { fn as vitestFn } from '@vitest/spy';
 import type { PackageJson } from 'read-package-up';
 
+import { init as initSession } from './session.js';
 import ElectronLaunchService from './launcher.js';
 import ElectronWorkerService from './service.js';
 import type {
@@ -52,4 +53,5 @@ declare global {
 }
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
+export const startElectron: (opts: ElectronServiceOptions) => Promise<WebdriverIO.Browser> = initSession;
 export * from './types.js';
