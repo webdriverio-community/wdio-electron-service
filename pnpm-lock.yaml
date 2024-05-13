@@ -75,7 +75,7 @@ devDependencies:
     version: 7.0.3
   electron:
     specifier: ^29.3.1
-    version: 29.3.2
+    version: 29.3.3
   eslint:
     specifier: ^8.57.0
     version: 8.57.0
@@ -2446,8 +2446,8 @@ packages:
     resolution: {integrity: sha512-70APzI2AGyJgcWVSnfJCytP2Gejptk6cIm0t5uuUfwdKN63xBIZBzD0N5l/s0hWr8tj0w/p6UaPz+hLAm+Orjw==}
     dev: false
 
-  /electron@29.3.2:
-    resolution: {integrity: sha512-pRWsaFtbd78kEHR0lg5aMhZDY6b5JykIEhZRtyTCaJpGFObB2NFIJDzR7mTia0cZp3pPq60n/SS4gRxvSM5WFQ==}
+  /electron@29.3.3:
+    resolution: {integrity: sha512-I/USTe9UsQUKb/iuiYnmt074vHxNHCJZWYiU4Xg6lNPKVBsPadAhZcc+g2gYLqC1rA7KT4AvKTmNsY8n7oEUCw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
