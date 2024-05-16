@@ -5,7 +5,13 @@ import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
-import type { AppBuildInfo, ElectronBuilderConfig, ElectronForgeConfig } from './types.js';
+import type {
+  AppBuildInfo,
+  ElectronBuilderArch,
+  ElectronBuilderConfig,
+  ElectronForgeConfig,
+  ForgeArch,
+} from './types.js';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -26,19 +32,26 @@ export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBu
     throw new Error(`Unsupported platform: ${p.platform}`);
   }
 
-  let outDir;
+  let outDirs: string[];
 
   if (appBuildInfo.isForge) {
+    // TODO: use allOfficialArchsForPlatformAndVersion
+    const archs: ForgeArch[] = ['arm64', 'armv7l', 'ia32', 'mips64el', 'universal', 'x64'];
     // Electron Forge always bundles into an `out` directory - see comment in getBuildToolConfig below
-    outDir = path.join(path.dirname(packageJsonPath), 'out', `${appBuildInfo.appName}-${p.platform}-${p.arch}`);
+    outDirs = archs.map((arch) =>
+      path.join(path.dirname(packageJsonPath), 'out', `${appBuildInfo.appName}-${p.platform}-${arch}`),
+    );
   } else {
+    const archs: ElectronBuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
     const builderOutDirName = (appBuildInfo.config as ElectronBuilderConfig)?.directories?.output || 'dist';
-    const builderOutDirMap = {
-      darwin: path.join(builderOutDirName, p.arch === 'arm64' ? 'mac-arm64' : 'mac'),
+    const builderOutDirMap = (arch: ElectronBuilderArch) => ({
+      darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${p.arch}`),
       linux: path.join(builderOutDirName, 'linux-unpacked'),
       win32: path.join(builderOutDirName, 'win-unpacked'),
-    };
-    outDir = path.join(path.dirname(packageJsonPath), builderOutDirMap[p.platform as keyof typeof SupportedPlatform]);
+    });
+    outDirs = archs.map((arch) =>
+      path.join(path.dirname(packageJsonPath), builderOutDirMap(arch)[p.platform as keyof typeof SupportedPlatform]),
+    );
   }
 
   const binaryPathMap = {
@@ -48,7 +61,30 @@ export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBu
   };
   const electronBinaryPath = binaryPathMap[p.platform as keyof typeof SupportedPlatform];
 
-  return path.join(outDir, electronBinaryPath);
+  const binaryPaths = outDirs.map((outDir) => path.join(outDir, electronBinaryPath));
+
+  // for each path, check if it exists and is executable
+  const executableBinaryPaths = binaryPaths.filter(async (binaryPath) => {
+    try {
+      await fs.access(binaryPath, fs.constants.X_OK);
+      return true;
+    } catch (e) {
+      log.debug(e);
+      return false;
+    }
+  });
+
+  // no binary case
+  if (executableBinaryPaths.length === 0) {
+    throw new Error(`No executable binary found, checked [${binaryPaths.join(', ')}]`);
+  }
+
+  // multiple binaries case
+  if (executableBinaryPaths.length > 1) {
+    log.debug(`Detected multiple app binaries, using the first one: ${executableBinaryPaths[0]}`);
+  }
+
+  return executableBinaryPaths[0];
 }
 
 /**

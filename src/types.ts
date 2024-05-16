@@ -1,5 +1,7 @@
 import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
+import type { OfficialArch } from '@electron/packager';
+import type { ArchType } from 'builder-util';
 
 export type Fn = (...args: unknown[]) => unknown;
 export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -174,6 +176,9 @@ export type ElectronForgeConfig = {
   buildIdentifier: string;
   packagerConfig: { name: string };
 };
+
+export type ElectronBuilderArch = ArchType;
+export type ForgeArch = OfficialArch;
 
 export type AppBuildInfo = {
   appName: string;
