@@ -70,22 +70,27 @@ export async function getBinaryPath(
   const binaryPaths = outDirs.map((outDir) => path.join(outDir, electronBinaryPath));
 
   // for each path, check if it exists and is executable
-  const executableBinaryPaths = binaryPaths.filter(async (binaryPath) => {
-    try {
-      await fs.access(binaryPath, fs.constants.X_OK);
-      return true;
-    } catch (e) {
-      log.debug(e);
-      return false;
-    }
-  });
+  const binaryPathsAccessResults = await Promise.all(
+    binaryPaths.map(async (binaryPath) => {
+      try {
+        await fs.access(binaryPath, fs.constants.X_OK);
+        return true;
+      } catch (e) {
+        log.debug(e);
+        return false;
+      }
+    }),
+  );
 
-  // no binary case
+  // get the list of executable paths
+  const executableBinaryPaths = binaryPaths.filter((_binaryPath, index) => binaryPathsAccessResults[index]);
+
+  // no executable binary case
   if (executableBinaryPaths.length === 0) {
     throw new Error(`No executable binary found, checked: \n[${binaryPaths.join(', \n')}]`);
   }
 
-  // multiple binaries case
+  // multiple executable binaries case
   if (executableBinaryPaths.length > 1) {
     log.debug(`Detected multiple app binaries, using the first one: \n${executableBinaryPaths.join(', \n')}`);
   }
