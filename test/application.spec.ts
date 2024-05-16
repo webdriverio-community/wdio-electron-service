@@ -49,6 +49,11 @@ describe('getBinaryPath', () => {
     ).rejects.toThrow('Unsupported platform: aix'));
 
   it('should throw an error when no binary is found for a Forge setup', async () => {
+    const binaryPaths = [
+      path.join('/foo', 'bar', 'out', 'my-app-win32-ia32', 'my-app.exe'),
+      path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe'),
+      path.join('/foo', 'bar', 'out', 'my-app-win32-arm64', 'my-app.exe'),
+    ];
     (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
     await expect(
       getBinaryPath(
@@ -62,10 +67,17 @@ describe('getBinaryPath', () => {
         '29.3.1',
         winProcess,
       ),
-    ).rejects.toThrowErrorMatchingSnapshot();
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
   });
 
   it('should throw an error when no binary is found for a Builder setup on MacOS', async () => {
+    const binaryPaths = [
+      path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-armv7l', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-ia32', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-universal', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+    ];
     (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
     await expect(
       getBinaryPath(
@@ -79,10 +91,11 @@ describe('getBinaryPath', () => {
         '29.3.1',
         macProcess,
       ),
-    ).rejects.toThrowErrorMatchingSnapshot();
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
   });
 
   it('should throw an error when no binary is found for a Builder setup', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe');
     (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
     await expect(
       getBinaryPath(
@@ -96,7 +109,7 @@ describe('getBinaryPath', () => {
         '29.3.1',
         winProcess,
       ),
-    ).rejects.toThrow(`No executable binary found, checked: \n/foo/bar/dist/win-unpacked/my-app.exe`);
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPath}`);
   });
 
   it('should return the expected app path for a Forge setup with multiple executable binaries', async () => {
