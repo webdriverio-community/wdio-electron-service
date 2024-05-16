@@ -50,7 +50,7 @@ export async function getBinaryPath(
     const archs: BuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
     const builderOutDirName = (appBuildInfo.config as BuilderConfig)?.directories?.output || 'dist';
     const builderOutDirMap = (arch: BuilderArch) => ({
-      darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${p.arch}`),
+      darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${arch}`),
       linux: path.join(builderOutDirName, 'linux-unpacked'),
       win32: path.join(builderOutDirName, 'win-unpacked'),
     });
