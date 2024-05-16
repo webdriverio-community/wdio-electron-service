@@ -12,6 +12,7 @@ import type {
   ElectronForgeConfig,
   ForgeArch,
 } from './types.js';
+import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -27,7 +28,12 @@ const SupportedPlatform = {
  * @param p   process object (used for testing purposes)
  * @returns   path to the Electron app binary
  */
-export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBuildInfo, p = process) {
+export async function getBinaryPath(
+  packageJsonPath: string,
+  appBuildInfo: AppBuildInfo,
+  electronVersion?: string,
+  p = process,
+) {
   if (!Object.values(SupportedPlatform).includes(p.platform)) {
     throw new Error(`Unsupported platform: ${p.platform}`);
   }
@@ -35,13 +41,18 @@ export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBu
   let outDirs: string[];
 
   if (appBuildInfo.isForge) {
-    // TODO: use allOfficialArchsForPlatformAndVersion
-    const archs: ForgeArch[] = ['arm64', 'armv7l', 'ia32', 'mips64el', 'universal', 'x64'];
-    // Electron Forge always bundles into an `out` directory - see comment in getBuildToolConfig below
+    // Forge case
+    const archs = allOfficialArchsForPlatformAndVersion(
+      p.platform as keyof typeof SupportedPlatform,
+      electronVersion,
+    ) as ForgeArch[];
+
+    // Electron Forge always bundles into an `out` directory - see comment in getAppBuildInfo below
     outDirs = archs.map((arch) =>
       path.join(path.dirname(packageJsonPath), 'out', `${appBuildInfo.appName}-${p.platform}-${arch}`),
     );
   } else {
+    // electron-builder case
     const archs: ElectronBuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
     const builderOutDirName = (appBuildInfo.config as ElectronBuilderConfig)?.directories?.output || 'dist';
     const builderOutDirMap = (arch: ElectronBuilderArch) => ({
@@ -49,6 +60,7 @@ export async function getBinaryPath(packageJsonPath: string, appBuildInfo: AppBu
       linux: path.join(builderOutDirName, 'linux-unpacked'),
       win32: path.join(builderOutDirName, 'win-unpacked'),
     });
+
     outDirs = archs.map((arch) =>
       path.join(path.dirname(packageJsonPath), builderOutDirMap(arch)[p.platform as keyof typeof SupportedPlatform]),
     );
