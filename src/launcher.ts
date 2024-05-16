@@ -70,7 +70,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           log.debug('No app binary found');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
-            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo);
+            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
             log.debug(`Detected app binary at ${appBinaryPath}`);
             const appExists = await fileExists(appBinaryPath as PathLike);
