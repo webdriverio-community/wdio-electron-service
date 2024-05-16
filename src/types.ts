@@ -168,19 +168,19 @@ export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]
 export type ElectronType = typeof Electron;
 export type ElectronInterface = keyof ElectronType;
 
-export type ElectronBuilderConfig = {
+export type BuilderConfig = {
   productName?: string;
   directories?: { output?: string };
 };
 
 export type ForgeConfig = ElectronForgeConfig;
 
-export type ElectronBuilderArch = ArchType;
+export type BuilderArch = ArchType;
 export type ForgeArch = OfficialArch;
 
 export type AppBuildInfo = {
   appName: string;
-  config: string | ForgeConfig | ElectronBuilderConfig;
+  config: string | ForgeConfig | BuilderConfig;
   isBuilder: boolean;
   isForge: boolean;
 };

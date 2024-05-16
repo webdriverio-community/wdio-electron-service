@@ -5,7 +5,7 @@ import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
-import type { AppBuildInfo, ElectronBuilderArch, ElectronBuilderConfig, ForgeConfig, ForgeArch } from './types.js';
+import type { AppBuildInfo, BuilderArch, BuilderConfig, ForgeConfig, ForgeArch } from './types.js';
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 
 const SupportedPlatform = {
@@ -47,9 +47,9 @@ export async function getBinaryPath(
     );
   } else {
     // electron-builder case
-    const archs: ElectronBuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
-    const builderOutDirName = (appBuildInfo.config as ElectronBuilderConfig)?.directories?.output || 'dist';
-    const builderOutDirMap = (arch: ElectronBuilderArch) => ({
+    const archs: BuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
+    const builderOutDirName = (appBuildInfo.config as BuilderConfig)?.directories?.output || 'dist';
+    const builderOutDirMap = (arch: BuilderArch) => ({
       darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${p.arch}`),
       linux: path.join(builderOutDirName, 'linux-unpacked'),
       win32: path.join(builderOutDirName, 'win-unpacked'),
@@ -106,7 +106,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   const forgeConfigPath = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
   const rootDir = path.dirname(pkg.path);
   let forgeConfig = forgePackageJsonConfig as ForgeConfig;
-  let builderConfig: ElectronBuilderConfig = pkg.packageJson.build;
+  let builderConfig: BuilderConfig = pkg.packageJson.build;
 
   if (!forgePackageJsonConfig || forgeCustomConfigFile) {
     // if no config or a linked file, attempt to read Forge JS-based config
@@ -147,7 +147,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
   const appName: string =
     pkg.packageJson.productName ||
-    (isBuilder && (config as ElectronBuilderConfig)?.productName) ||
+    (isBuilder && (config as BuilderConfig)?.productName) ||
     (isForge && (config as ForgeConfig)?.packagerConfig?.name) ||
     pkg.packageJson.name;
 
