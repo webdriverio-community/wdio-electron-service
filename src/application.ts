@@ -82,12 +82,12 @@ export async function getBinaryPath(
 
   // no binary case
   if (executableBinaryPaths.length === 0) {
-    throw new Error(`No executable binary found, checked [${binaryPaths.join(', ')}]`);
+    throw new Error(`No executable binary found, checked: \n[${binaryPaths.join(', \n')}]`);
   }
 
   // multiple binaries case
   if (executableBinaryPaths.length > 1) {
-    log.debug(`Detected multiple app binaries, using the first one: ${executableBinaryPaths[0]}`);
+    log.debug(`Detected multiple app binaries, using the first one: \n${executableBinaryPaths.join(', \n')}`);
   }
 
   return executableBinaryPaths[0];
@@ -141,9 +141,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   }
 
   const config = isForge ? forgeConfig : builderConfig;
-  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected:
-    ${JSON.stringify(config)}
-  `);
+  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected: \n${JSON.stringify(config)}`);
 
   const appName: string =
     pkg.packageJson.productName ||
