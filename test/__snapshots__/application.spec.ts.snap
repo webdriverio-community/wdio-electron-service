@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getBinaryPath > should throw an error when no binary is found for a Builder setup on MacOS 1`] = `
+[Error: No executable binary found, checked: 
+/foo/bar/dist/mac-arm64/my-app.app/Contents/MacOS/my-app, 
+/foo/bar/dist/mac-armv7l/my-app.app/Contents/MacOS/my-app, 
+/foo/bar/dist/mac-ia32/my-app.app/Contents/MacOS/my-app, 
+/foo/bar/dist/mac-universal/my-app.app/Contents/MacOS/my-app, 
+/foo/bar/dist/mac/my-app.app/Contents/MacOS/my-app]
+`;
+
+exports[`getBinaryPath > should throw an error when no binary is found for a Forge setup 1`] = `
+[Error: No executable binary found, checked: 
+/foo/bar/out/my-app-win32-ia32/my-app.exe, 
+/foo/bar/out/my-app-win32-x64/my-app.exe, 
+/foo/bar/out/my-app-win32-arm64/my-app.exe]
+`;
