@@ -1,6 +1,7 @@
 import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
 import type { OfficialArch } from '@electron/packager';
+import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
 import type { ArchType } from 'builder-util';
 
 export type Fn = (...args: unknown[]) => unknown;
@@ -172,17 +173,14 @@ export type ElectronBuilderConfig = {
   directories?: { output?: string };
 };
 
-export type ElectronForgeConfig = {
-  buildIdentifier: string;
-  packagerConfig: { name: string };
-};
+export type ForgeConfig = ElectronForgeConfig;
 
 export type ElectronBuilderArch = ArchType;
 export type ForgeArch = OfficialArch;
 
 export type AppBuildInfo = {
   appName: string;
-  config: string | ElectronForgeConfig | ElectronBuilderConfig;
+  config: string | ForgeConfig | ElectronBuilderConfig;
   isBuilder: boolean;
   isForge: boolean;
 };

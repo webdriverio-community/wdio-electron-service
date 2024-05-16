@@ -5,13 +5,7 @@ import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
-import type {
-  AppBuildInfo,
-  ElectronBuilderArch,
-  ElectronBuilderConfig,
-  ElectronForgeConfig,
-  ForgeArch,
-} from './types.js';
+import type { AppBuildInfo, ElectronBuilderArch, ElectronBuilderConfig, ForgeConfig, ForgeArch } from './types.js';
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 
 const SupportedPlatform = {
@@ -47,9 +41,9 @@ export async function getBinaryPath(
       electronVersion,
     ) as ForgeArch[];
 
-    // Electron Forge always bundles into an `out` directory - see comment in getAppBuildInfo below
+    const forgeOutDir = (appBuildInfo.config as ForgeConfig)?.outDir || 'out';
     outDirs = archs.map((arch) =>
-      path.join(path.dirname(packageJsonPath), 'out', `${appBuildInfo.appName}-${p.platform}-${arch}`),
+      path.join(path.dirname(packageJsonPath), forgeOutDir, `${appBuildInfo.appName}-${p.platform}-${arch}`),
     );
   } else {
     // electron-builder case
@@ -107,22 +101,18 @@ export async function getBinaryPath(
 export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBuildInfo> {
   const forgeDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli');
   const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
-
-  // Forge configuration is not currently used to determine the Electron app binary path
-  // - when custom output directories are supported in Forge we can use this config value for path determination
-  // - see https://github.com/electron/forge/pull/2714
   const forgePackageJsonConfig = pkg.packageJson.config?.forge;
   const forgeCustomConfigFile = typeof forgePackageJsonConfig === 'string';
   const forgeConfigPath = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
   const rootDir = path.dirname(pkg.path);
-  let forgeConfig = forgePackageJsonConfig as ElectronForgeConfig;
+  let forgeConfig = forgePackageJsonConfig as ForgeConfig;
   let builderConfig: ElectronBuilderConfig = pkg.packageJson.build;
 
   if (!forgePackageJsonConfig || forgeCustomConfigFile) {
     // if no config or a linked file, attempt to read Forge JS-based config
     try {
       log.debug(`Reading Forge config file: ${forgeConfigPath}...`);
-      forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ElectronForgeConfig }).default;
+      forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ForgeConfig }).default;
     } catch (e) {
       log.debug(e);
     }
@@ -156,7 +146,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   const appName: string =
     pkg.packageJson.productName ||
     (isBuilder && (config as ElectronBuilderConfig)?.productName) ||
-    (isForge && (config as ElectronForgeConfig)?.packagerConfig?.name) ||
+    (isForge && (config as ForgeConfig)?.packagerConfig?.name) ||
     pkg.packageJson.name;
 
   if (!appName) {
