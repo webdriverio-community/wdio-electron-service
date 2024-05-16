@@ -47,7 +47,6 @@ export async function getBinaryPath(
     );
   } else {
     // electron-builder case
-    const archs: BuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
     const builderOutDirName = (appBuildInfo.config as BuilderConfig)?.directories?.output || 'dist';
     const builderOutDirMap = (arch: BuilderArch) => ({
       darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${arch}`),
@@ -55,9 +54,19 @@ export async function getBinaryPath(
       win32: path.join(builderOutDirName, 'win-unpacked'),
     });
 
-    outDirs = archs.map((arch) =>
-      path.join(path.dirname(packageJsonPath), builderOutDirMap(arch)[p.platform as keyof typeof SupportedPlatform]),
-    );
+    if (p.platform === 'darwin') {
+      // macOS output dir depends on the arch used
+      // - we check all of the possible dirs
+      const archs: BuilderArch[] = ['arm64', 'armv7l', 'ia32', 'universal', 'x64'];
+      outDirs = archs.map((arch) =>
+        path.join(path.dirname(packageJsonPath), builderOutDirMap(arch)[p.platform as keyof typeof SupportedPlatform]),
+      );
+    } else {
+      // other platforms have a single output dir which is not dependent on the arch
+      outDirs = [
+        path.join(path.dirname(packageJsonPath), builderOutDirMap('x64')[p.platform as keyof typeof SupportedPlatform]),
+      ];
+    }
   }
 
   const binaryPathMap = {
@@ -87,7 +96,7 @@ export async function getBinaryPath(
 
   // no executable binary case
   if (executableBinaryPaths.length === 0) {
-    throw new Error(`No executable binary found, checked: \n[${binaryPaths.join(', \n')}]`);
+    throw new Error(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
   }
 
   // multiple executable binaries case
