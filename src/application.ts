@@ -141,7 +141,9 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   }
 
   const config = isForge ? forgeConfig : builderConfig;
-  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected: ${config}`);
+  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected:
+    ${JSON.stringify(config)}
+  `);
 
   const appName: string =
     pkg.packageJson.productName ||
