@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import util from 'node:util';
-import type { PathLike } from 'node:fs';
 
 import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
@@ -15,24 +14,20 @@ import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from './types.js';
 
-async function fileExists(path: PathLike) {
-  try {
-    return (await fs.stat(path)).isFile();
-  } catch (e) {
-    return false;
-  }
-}
+export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
+  [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
+};
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceOptions;
   #projectRoot: string;
 
-  constructor(globalOptions: ElectronServiceOptions, _caps: never, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = config.rootDir || process.cwd();
   }
 
-  async onPrepare(_: never, capabilities: Capabilities.RemoteCapabilities) {
+  async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
     const capsList = Array.isArray(capabilities)
       ? capabilities
       : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
@@ -80,12 +75,12 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           log.debug('No app binary found');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
-            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo);
 
-            log.debug(`Detected app binary at ${appBinaryPath}`);
-            const appExists = await fileExists(appBinaryPath as PathLike);
+            try {
+              appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-            if (!appExists) {
+              log.debug(`Detected app binary at ${appBinaryPath}`);
+            } catch (e) {
               const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
               const suggestedCompileCommand = `npx ${
                 appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'

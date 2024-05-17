@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "6.3.0",
+  "version": "6.6.0",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -40,14 +40,17 @@
     "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
-    "init-dev": "pnpm i --filter=\\!fixture-\\* -r && husky install",
+    "prepare": "husky",
+    "init-dev": "pnpm i --filter=\\!fixture-\\* -r",
     "ci": "pnpm i && pnpm build && pnpm test && pnpm lint && pnpm format:check",
-    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist",
+    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist ./src/cjs/preload.ts ./src/cjs/main.ts ./src/cjs/constants.ts ./src/cjs/types.ts",
     "clean:dist": "pnpx rimraf ./dist",
     "clean:all": "pnpm clean && pnpm -r --reverse clean",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc",
-    "build:cjs": "tsc --build --verbose tsconfig.cjs.json",
+    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
+    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts && cp -f ./src/types.ts ./src/cjs/types.ts",
+    "build:cjs:compile": "tsc --build --verbose tsconfig.cjs.json",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
@@ -66,6 +69,7 @@
     "test:integration:esm": "cd example && pnpm run ci",
     "test:integration:electron-builder": "cd example-electron-builder && pnpm run ci",
     "test:integration:no-binary": "cd example-no-binary && pnpm run ci",
+    "test:integration:mac-universal": "cd example-electron-builder && pnpm run ci:mac-universal",
     "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
     "watch": "pnpm run build:esm --watch"
   },
@@ -96,33 +100,36 @@
     "debug": "^4.3.4",
     "electron-to-chromium": "^1.4.630",
     "fast-copy": "^3.0.1",
-    "find-versions": "^5.1.0",
+    "find-versions": "^6.0.0",
     "node-fetch": "^3.3.2",
     "read-package-up": "^11.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^8.55.0",
+    "@electron-forge/shared-types": "^7.4.0",
+    "@electron/packager": "^18.3.2",
+    "@eslint/js": "^9.0.0",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/mocha": "^10.0.5",
     "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
     "@vitest/coverage-v8": "^1.2.0",
     "@wdio/cli": "^8.27.2",
     "@wdio/globals": "^8.27.2",
     "@wdio/types": "^8.27.2",
+    "builder-util": "25.0.0-alpha.6",
     "cross-env": "^7.0.3",
-    "electron": "^28.0.0",
-    "eslint": "^8.55.0",
+    "electron": "^29.3.1",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-vitest": "^0.3.16",
+    "eslint-plugin-vitest": "^0.5.3",
     "eslint-plugin-wdio": "^8.20.0",
     "expect": "^29.7.0",
-    "expect-webdriverio": "4.9.3",
-    "globals": "^13.23.0",
-    "husky": "^8.0.3",
+    "expect-webdriverio": "^4.11.7",
+    "globals": "^15.0.0",
+    "husky": "^9.0.10",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.0.2",
     "nock": "^13.3.6",
@@ -134,11 +141,6 @@
     "vitest": "^1.2.0",
     "webdriverio": "^8.27.2"
   },
-  "pnpm": {
-    "overrides": {
-      "expect-webdriverio": "4.9.3"
-    }
-  },
   "files": [
     "bin/*",
     "dist/*"
@@ -148,5 +150,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@8.15.6+sha256.01c01eeb990e379b31ef19c03e9d06a14afa5250b82e81303f88721c99ff2e6f"
+  "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b"
 }

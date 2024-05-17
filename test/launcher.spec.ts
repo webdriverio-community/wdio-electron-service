@@ -1,8 +1,12 @@
 import path from 'node:path';
-import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
+
+import { describe, beforeEach, afterEach, it, expect, vi, Mock } from 'vitest';
+import nock from 'nock';
 import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher.js';
+import { getAppBuildInfo, getBinaryPath } from '../src/application.js';
+import { BUILD_TOOL_DETECTION_ERROR } from '../src/constants.js';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 import type { ElectronServiceOptions } from '../src/index.js';
 
@@ -16,12 +20,37 @@ vi.mock('node:fs/promises', () => ({
   },
 }));
 
+vi.mock('../src/application.js', () => ({
+  getBinaryPath: vi.fn().mockResolvedValue('workspace/my-test-app/dist/my-test-app'),
+  getAppBuildInfo: vi.fn().mockResolvedValue({
+    appName: 'my-test-app',
+    isForge: true,
+    config: {},
+  }),
+}));
+
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
   LaunchService = (await import('../src/launcher.js')).default;
   options = {
     appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
   };
+  nock('https://electronjs.org')
+    .get('/headers/index.json')
+    .reply(200, [
+      {
+        version: '25.0.0',
+        chrome: '114.0.5735.45',
+      },
+      {
+        version: '26.0.0',
+        chrome: '116.0.5845.82',
+      },
+      {
+        version: '26.2.2',
+        chrome: '116.0.5845.190',
+      },
+    ]);
 });
 
 afterEach(() => {
@@ -54,10 +83,12 @@ describe('onPrepare', () => {
 
   it('should throw an error when appBinaryPath is not specified and no build tool is found', async () => {
     delete options.appBinaryPath;
+    (getAppBuildInfo as Mock).mockRejectedValueOnce(new Error(BUILD_TOOL_DETECTION_ERROR));
     instance = new LaunchService(
       options,
       [] as never,
       {
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-build-tool'),
         services: [['electron', options]],
       } as Options.Testrunner,
     );
@@ -77,6 +108,7 @@ describe('onPrepare', () => {
 
   it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
     delete options.appBinaryPath;
+    (getBinaryPath as Mock).mockRejectedValueOnce(new Error('b0rk'));
     instance = new LaunchService(
       options,
       [] as never,
@@ -101,6 +133,12 @@ describe('onPrepare', () => {
 
   it('should throw an error when the detected app path does not exist for an electron-builder dependency', async () => {
     delete options.appBinaryPath;
+    (getBinaryPath as Mock).mockRejectedValueOnce(new Error('b0rk'));
+    (getAppBuildInfo as Mock).mockResolvedValueOnce({
+      appName: 'my-test-app',
+      isForge: false,
+      config: {},
+    });
     instance = new LaunchService(
       options,
       [] as never,
@@ -296,6 +334,71 @@ describe('onPrepare', () => {
   });
 
   it('should set the expected capabilities', async () => {
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        browserName: 'electron',
+        browserVersion: '26.2.2',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.190',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-test-app/dist/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:electronServiceOptions': {},
+    });
+  });
+
+  it('should set the expected capabilities when the detected app path exists for a Forge dependency', async () => {
+    delete options.appBinaryPath;
+    (getBinaryPath as Mock).mockResolvedValueOnce('workspace/my-test-app/out/my-test-app');
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'forge-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        browserName: 'electron',
+        browserVersion: '26.2.2',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.190',
+      'goog:chromeOptions': {
+        args: [],
+        binary: 'workspace/my-test-app/out/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:electronServiceOptions': {},
+    });
+  });
+
+  it('should set the expected capabilities when the detected app path exists for an electron-builder dependency', async () => {
+    delete options.appBinaryPath;
+    (getBinaryPath as Mock).mockResolvedValueOnce('workspace/my-test-app/dist/my-test-app');
+    (getAppBuildInfo as Mock).mockResolvedValueOnce({
+      appName: 'my-test-app',
+      isForge: false,
+      config: {},
+    });
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'builder-dependency-inline-config'),
+      } as Options.Testrunner,
+    );
     const capabilities: WebdriverIO.Capabilities[] = [
       {
         browserName: 'electron',

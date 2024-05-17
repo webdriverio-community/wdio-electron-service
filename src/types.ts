@@ -1,10 +1,8 @@
 import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
-
-/**
- * set this environment variable so that the preload script can be loaded
- */
-process.env.WDIO_ELECTRON = 'true';
+import type { OfficialArch } from '@electron/packager';
+import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
+import type { ArchType } from 'builder-util';
 
 export type Fn = (...args: unknown[]) => unknown;
 export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -14,6 +12,7 @@ export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[E
 export interface ElectronServiceAPI {
   /**
    * Mock a function from the Electron API.
+   *
    * @param apiName name of the API to mock
    * @param funcName name of the function to mock
    * @param mockReturnValue value to return when the mocked function is called
@@ -43,6 +42,7 @@ export interface ElectronServiceAPI {
   ) => Promise<ElectronMock>;
   /**
    * Mock all functions from an Electron API.
+   *
    * @param apiName name of the API to mock
    * @returns a {@link Promise} that resolves once the mock is registered
    *
@@ -79,7 +79,7 @@ export interface ElectronServiceAPI {
     ...args: InnerArguments
   ): Promise<ReturnValue>;
   /**
-   * Clear mocked Electron API function(s)
+   * Clear mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -93,7 +93,7 @@ export interface ElectronServiceAPI {
    */
   clearAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Reset mocked Electron API function(s)
+   * Reset mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -107,7 +107,7 @@ export interface ElectronServiceAPI {
    */
   resetAllMocks: (apiName?: string) => Promise<void>;
   /**
-   * Restore mocked Electron API function(s)
+   * Restore mocked Electron API function(s).
    *
    * @example
    * ```js
@@ -120,6 +120,17 @@ export interface ElectronServiceAPI {
    * @param apiName mocked api to remove
    */
   restoreAllMocks: (apiName?: string) => Promise<void>;
+  /**
+   * Checks that a given parameter is an Electron mock function. If you are using TypeScript, it will also narrow down its type.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   *
+   * expect(browser.electron.isMockFunction(mockGetName)).toBe(true);
+   * ```
+   */
+  isMockFunction: (fn: unknown) => fn is ElectronMockInstance;
 }
 
 /**
@@ -161,19 +172,19 @@ export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]
 export type ElectronType = typeof Electron;
 export type ElectronInterface = keyof ElectronType;
 
-export type ElectronBuilderConfig = {
+export type BuilderConfig = {
   productName?: string;
   directories?: { output?: string };
 };
 
-export type ElectronForgeConfig = {
-  buildIdentifier: string;
-  packagerConfig: { name: string };
-};
+export type ForgeConfig = ElectronForgeConfig;
+
+export type BuilderArch = ArchType;
+export type ForgeArch = OfficialArch;
 
 export type AppBuildInfo = {
   appName: string;
-  config: string | ElectronForgeConfig | ElectronBuilderConfig;
+  config: string | ForgeConfig | BuilderConfig;
   isBuilder: boolean;
   isForge: boolean;
 };
@@ -185,6 +196,102 @@ export type ExecuteOpts = {
 export type WdioElectronWindowObj = {
   execute: (script: string, args?: unknown[]) => unknown;
 };
+
+enum ElectronMockResultType {
+  Return = 'return',
+  Throw = 'throw',
+}
+
+type ElectronMockResult = {
+  type: ElectronMockResultType;
+  value: unknown;
+};
+
+interface ElectronMockContext {
+  /**
+   * This is an array containing all arguments for each call. Each item of the array is the arguments of that call.
+   *
+   * @example
+   * ```js
+   * const mockGetFileIcon = await browser.electron.mock('app', 'getFileIcon');
+   *
+   * await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/icon'));
+   * await browser.electron.execute((electron) => electron.app.getFileIcon('/path/to/another/icon', { size: 'small' }));
+   *
+   * expect(mockGetFileIcon.mock.calls).toStrictEqual([
+   *   ['/path/to/icon'], // first call
+   *   ['/path/to/another/icon', { size: 'small' }], // second call
+   * ]);
+   * ```
+   */
+  calls: unknown[][];
+  /**
+   * The order of mock invocation. This returns an array of numbers that are shared between all defined mocks. Will return an empty array if the mock was never invoked.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   * const mockGetVersion = await browser.electron.mock('app', 'getVersion');
+   *
+   * await browser.electron.execute((electron) => electron.app.getName());
+   * await browser.electron.execute((electron) => electron.app.getVersion());
+   * await browser.electron.execute((electron) => electron.app.getName());
+   *
+   * expect(mockGetName.mock.invocationCallOrder).toStrictEqual([1, 3]);
+   * expect(mockGetVersion.mock.invocationCallOrder).toStrictEqual([2]);
+   * ```
+   */
+  invocationCallOrder: number[];
+  /**
+   * This is an array containing all values that were returned from the mock. Each item of the array is an object with the properties type and value. Available types are:
+   *
+   *     'return' - the mock returned without throwing.
+   *     'throw' - the mock threw a value.
+   *
+   * The value property contains the returned value or the thrown error. If the mock returned a promise, the value will be the resolved value, not the Promise itself, unless it was never resolved.
+   *
+   * @example
+   * ```js
+   * const mockGetName = await browser.electron.mock('app', 'getName');
+   *
+   * await mockGetName.mockImplementationOnce(() => 'result');
+   * await mockGetName.mockImplementation(() => {
+   *   throw new Error('thrown error');
+   * });
+   *
+   * await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
+   * await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
+   *
+   * expect(mockGetName.mock.results).toStrictEqual([
+   *   {
+   *     type: 'return',
+   *     value: 'result',
+   *   },
+   *   {
+   *     type: 'throw',
+   *     value: new Error('thrown error'),
+   *   },
+   * ]);
+   * ```
+   */
+  results: ElectronMockResult[];
+  /**
+   * This contains the arguments of the last call. If the mock wasn't called, it will return `undefined`.
+   *
+   * @example
+   * ```js
+   * const mockSetName = await browser.electron.mock('app', 'setName');
+   *
+   * await browser.electron.execute((electron) => electron.app.setName('test'));
+   * expect(mockSetName.mock.lastCall).toStrictEqual(['test']);
+   * await browser.electron.execute((electron) => electron.app.setName('test 2'));
+   * expect(mockSetName.mock.lastCall).toStrictEqual(['test 2']);
+   * await browser.electron.execute((electron) => electron.app.setName('test 3'));
+   * expect(mockSetName.mock.lastCall).toStrictEqual(['test 3']);
+   * ```
+   */
+  lastCall: unknown;
+}
 
 type Override =
   | 'mockImplementation'
@@ -199,9 +306,10 @@ type Override =
   | 'mockReset'
   | 'mockReturnThis'
   | 'mockName'
-  | 'withImplementation';
+  | 'withImplementation'
+  | 'mock';
 
-interface ElectronMockInstance extends Omit<Mock, Override> {
+export interface ElectronMockInstance extends Omit<Mock, Override> {
   /**
    * Accepts a function that will be used as an implementation of the mock.
    *
@@ -513,8 +621,20 @@ interface ElectronMockInstance extends Omit<Mock, Override> {
   getMockImplementation(): AbstractFn;
   /**
    * Used internally to update the outer mock function with calls from the inner (Electron context) mock.
+   *
+   * @private
    */
   update(): Promise<ElectronMock>;
+  /**
+   * Current context of the mock. It stores information about all invocation calls and results.
+   */
+  mock: ElectronMockContext;
+  /**
+   * Used internally to distinguish the electron mock from other mocks.
+   *
+   * @private
+   */
+  __isElectronMock: boolean;
 }
 
 export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {

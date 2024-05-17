@@ -29,11 +29,14 @@ export async function createMock(apiName: string, funcName: string) {
 
   const mock = outerMock as unknown as ElectronMock;
 
+  mock.__isElectronMock = true;
+
   // initialise inner (Electron) mock
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(
-    (electron, apiName, funcName) => {
+    async (electron, apiName, funcName) => {
       const electronApi = electron[apiName as keyof typeof electron];
-      const mockFn = globalThis.fn();
+      const spy = await import('@vitest/spy');
+      const mockFn = spy.fn();
 
       // replace target API with mock
       electronApi[funcName as keyof typeof electronApi] = mockFn as ElectronApiFn;
@@ -73,7 +76,8 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(eval(mockImplementationStr));
+        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(mockImpl);
       },
       apiName,
       funcName,
@@ -89,7 +93,8 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementationOnce(eval(mockImplementationStr));
+        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementationOnce(mockImpl);
       },
       apiName,
       funcName,
@@ -229,11 +234,12 @@ export async function createMock(apiName: string, funcName: string) {
   };
 
   mock.mockRestore = async () => {
-    // restores inner mock implementation to the original function and clears mock history
+    // restores inner mock implementation to the original function
     await restoreElectronFunctionality(apiName, funcName);
 
-    // only need to clear outer mock - inner mock is gone
+    // clear mocks
     outerMockClear();
+    await mock.mockClear();
 
     return mock;
   };
@@ -254,15 +260,15 @@ export async function createMock(apiName: string, funcName: string) {
   mock.withImplementation = async (implFn, callbackFn) => {
     return await browser.electron.execute<unknown, [string, string, string, string, ExecuteOpts]>(
       async (electron, apiName, funcName, implFnStr, callbackFnStr) => {
-        const callback = eval(callbackFnStr);
+        const callback = eval?.(`"use strict"; ${callbackFnStr}`) as AbstractFn;
+        const impl = eval?.(`"use strict"; ${implFnStr}`) as AbstractFn;
         let result: unknown | Promise<unknown>;
         (
           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock
-        ).withImplementation(eval(implFnStr), () => {
+        ).withImplementation(impl, () => {
           result = callback(electron);
         });
 
-        console.log('YOYOYO', result);
         return (result as Promise<unknown>)?.then ? await result : result;
       },
       apiName,

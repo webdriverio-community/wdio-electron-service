@@ -1,10 +1,11 @@
+---
 name: Manual NPM Publish
 
 on:
   workflow_dispatch:
     inputs:
       releaseType:
-        description: 'Release Type'
+        description: 'Release Type. Increment the "major", "minor", "patch", or "pre-release" version.'
         required: true
         type: choice
         default: 'patch'
@@ -12,28 +13,35 @@ on:
           - patch
           - minor
           - major
+          - pre-release
       distTag:
-        description: 'NPM tag (e.g. use "next" to release a test version)'
+        description: 'NPM tag (e.g. use "next" to release a test (pre-release) version)'
         required: true
         default: 'latest'
+      dryRun:
+        description: Do not touch or write anything. Show the commands.
+        required: true
+        default: false
+        type: boolean
 
 env:
+  DRY_RUN_ARG: ${{ inputs.dryRun && '--dry-run' || '' }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: 'main'
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
-      - uses: pnpm/action-setup@v2
+          node-version: 18.x
+      - uses: pnpm/action-setup@v3
         with:
-          version: 8.10.0
+          version: 9.1.1
           run_install: false
       - name: NPM Setup
         run: |
@@ -48,8 +56,29 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
+
+      - name: Pre-release
+        if: ${{ inputs.distTag != 'latest' }}
+        run: |
+          INCREMENT_ARG=${{inputs.releaseType}}
+          if [ "$INCREMENT_ARG" == "pre-release" ]; then
+            unset INCREMENT_ARG
+          fi
+
+          pnpm run release:ci $INCREMENT_ARG $DRY_RUN_ARG --preRelease=${{inputs.distTag}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release
-        run: pnpm run release:ci --npm.tag=${{github.event.inputs.distTag}} -- ${{github.event.inputs.releaseType}}
+        if: ${{ inputs.distTag == 'latest' }}
+        run: |
+          if [ "${{inputs.releaseType}}" == "pre-release" ]; then
+            echo "::error ::Invalid Workflow Input: Cannot increment the "pre-release" version for a release. When the NPM Tag is set to \"latest\" the pre-release suffix (-next.0) is not added."
+            exit 1
+          fi
+
+          pnpm run release:ci ${{inputs.releaseType}} $DRY_RUN_ARG --npm.tag=${{inputs.distTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

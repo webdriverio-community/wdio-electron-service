@@ -1,16 +1,37 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, Mock } from 'vitest';
 
 import { getBinaryPath, getAppBuildInfo } from '../src/application.js';
 
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const originalFs = await importOriginal<typeof import('node:fs/promises')>();
+
+  return {
+    default: {
+      ...originalFs,
+      access: vi.fn(),
+    },
+  };
+});
+
 describe('getBinaryPath', () => {
   const pkgJSONPath = '/foo/bar/package.json';
-  const winProcess = { arch: 'x64', platform: 'win32' } as NodeJS.Process;
-  const macProcess = { arch: 'arm64', platform: 'darwin' } as NodeJS.Process;
-  const linuxProcess = { arch: 'arm', platform: 'linux' } as NodeJS.Process;
-  const unsupportedPlatformProcess = { platform: 'aix', arch: 'mips' } as NodeJS.Process;
+  const winProcess = { platform: 'win32' } as NodeJS.Process;
+  const macProcess = { platform: 'darwin' } as NodeJS.Process;
+  const linuxProcess = { platform: 'linux' } as NodeJS.Process;
+  const unsupportedPlatformProcess = { platform: 'aix' } as NodeJS.Process;
+
+  function mockBinaryPath(binaryPath: string) {
+    (fs.access as Mock).mockImplementation((path: string) => {
+      if (path === binaryPath) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject(new Error(`ENOENT: no such file or directory, access '${path}' !== '${binaryPath}'`));
+      }
+    });
+  }
 
   it('should throw an error when provided with an unsupported platform', async () =>
     expect(() =>
@@ -22,13 +43,20 @@ describe('getBinaryPath', () => {
           isForge: true,
           isBuilder: false,
         },
+        '29.3.1',
         unsupportedPlatformProcess,
       ),
     ).rejects.toThrow('Unsupported platform: aix'));
 
-  it('should return the expected app path for an Electron Forge setup on Windows', async () =>
-    expect(
-      await getBinaryPath(
+  it('should throw an error when no binary is found for a Forge setup', async () => {
+    const binaryPaths = [
+      path.join('/foo', 'bar', 'out', 'my-app-win32-ia32', 'my-app.exe'),
+      path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe'),
+      path.join('/foo', 'bar', 'out', 'my-app-win32-arm64', 'my-app.exe'),
+    ];
+    (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
+    await expect(
+      getBinaryPath(
         pkgJSONPath,
         {
           appName: 'my-app',
@@ -36,25 +64,111 @@ describe('getBinaryPath', () => {
           isForge: true,
           isBuilder: false,
         },
+        '29.3.1',
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe')));
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
+  });
 
-  it('should return the expected app path for an Electron Forge setup on Mac', async () =>
-    expect(
-      await getBinaryPath(
+  it('should throw an error when no binary is found for a Builder setup on MacOS', async () => {
+    const binaryPaths = [
+      path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-armv7l', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-ia32', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac-universal', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+      path.join('/foo', 'bar', 'dist', 'mac', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
+    ];
+    (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
+    await expect(
+      getBinaryPath(
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
-          isForge: true,
-          isBuilder: false,
+          config: 'path/to/builder-config.js',
+          isForge: false,
+          isBuilder: true,
         },
+        '29.3.1',
         macProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-darwin-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')));
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
+  });
 
-  it('should return the expected app path for an Electron Forge setup on Linux', async () =>
+  it('should throw an error when no binary is found for a Builder setup', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe');
+    (fs.access as Mock).mockImplementation(() => Promise.reject(new Error('No such file or directory')));
+    await expect(
+      getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: 'path/to/builder-config.js',
+          isForge: false,
+          isBuilder: true,
+        },
+        '29.3.1',
+        winProcess,
+      ),
+    ).rejects.toThrow(`No executable binary found, checked: \n${binaryPath}`);
+  });
+
+  it('should return the expected app path for a Forge setup with multiple executable binaries', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'out', 'my-app-win32-ia32', 'my-app.exe');
+    (fs.access as Mock).mockImplementation(() => Promise.resolve());
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: { packagerConfig: { name: 'my-app' } },
+          isForge: true,
+          isBuilder: false,
+        },
+        '29.3.1',
+        winProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Builder setup with multiple executable binaries', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app');
+    (fs.access as Mock).mockImplementation(() => Promise.resolve());
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: { packagerConfig: { name: 'my-app' } },
+          isForge: false,
+          isBuilder: true,
+        },
+        '29.3.1',
+        macProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Forge setup with custom output directory', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'custom-outdir', 'my-app-win32-x64', 'my-app.exe');
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: { packagerConfig: { name: 'my-app' }, outDir: 'custom-outdir' },
+          isForge: true,
+          isBuilder: false,
+        },
+        '29.3.1',
+        winProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Forge setup on Windows', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'out', 'my-app-win32-x64', 'my-app.exe');
+    mockBinaryPath(binaryPath);
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -64,11 +178,87 @@ describe('getBinaryPath', () => {
           isForge: true,
           isBuilder: false,
         },
+        '29.3.1',
+        winProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Forge setup on Arm Mac', async () => {
+    const binaryPath = path.join(
+      '/foo',
+      'bar',
+      'out',
+      'my-app-darwin-arm64',
+      'my-app.app',
+      'Contents',
+      'MacOS',
+      'my-app',
+    );
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: 'path/to/forge-config.js',
+          isForge: true,
+          isBuilder: false,
+        },
+        '29.3.1',
+        macProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Forge setup on Intel Mac', async () => {
+    const binaryPath = path.join(
+      '/foo',
+      'bar',
+      'out',
+      'my-app-darwin-x64',
+      'my-app.app',
+      'Contents',
+      'MacOS',
+      'my-app',
+    );
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: 'path/to/forge-config.js',
+          isForge: true,
+          isBuilder: false,
+        },
+        '29.3.1',
+        macProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for a Forge setup on Linux', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'out', 'my-app-linux-x64', 'my-app');
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: 'path/to/forge-config.js',
+          isForge: true,
+          isBuilder: false,
+        },
+        '29.3.1',
         linuxProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'out', 'my-app-linux-arm', 'my-app')));
+    ).toBe(binaryPath);
+  });
 
-  it('should return the expected app path for an electron-builder setup with custom output directory', async () =>
+  it('should return the expected app path for an electron-builder setup with custom output directory', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'custom-outdir', 'win-unpacked', 'my-app.exe');
+    mockBinaryPath(binaryPath);
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -78,11 +268,15 @@ describe('getBinaryPath', () => {
           isForge: false,
           isBuilder: true,
         },
+        '29.3.1',
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'custom-outdir', 'win-unpacked', 'my-app.exe')));
+    ).toBe(binaryPath);
+  });
 
-  it('should return the expected app path for an electron-builder setup on Windows', async () =>
+  it('should return the expected app path for an electron-builder setup on Windows', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe');
+    mockBinaryPath(binaryPath);
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -92,11 +286,15 @@ describe('getBinaryPath', () => {
           isForge: false,
           isBuilder: true,
         },
+        '29.3.1',
         winProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe')));
+    ).toBe(binaryPath);
+  });
 
-  it('should return the expected app path for an electron-builder setup on Mac', async () =>
+  it('should return the expected app path for an electron-builder setup on Arm Mac', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app');
+    mockBinaryPath(binaryPath);
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -106,11 +304,15 @@ describe('getBinaryPath', () => {
           isForge: false,
           isBuilder: true,
         },
+        '29.3.1',
         macProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app')));
+    ).toBe(binaryPath);
+  });
 
-  it('should return the expected app path for an electron-builder setup on Linux', async () =>
+  it('should return the expected app path for an electron-builder setup on Intel Mac', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'mac', 'my-app.app', 'Contents', 'MacOS', 'my-app');
+    mockBinaryPath(binaryPath);
     expect(
       await getBinaryPath(
         pkgJSONPath,
@@ -120,9 +322,47 @@ describe('getBinaryPath', () => {
           isForge: false,
           isBuilder: true,
         },
+        '29.3.1',
+        macProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for an electron-builder setup on Mac (universal arch)', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-universal', 'my-app.app', 'Contents', 'MacOS', 'my-app');
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: { productName: 'my-app' },
+          isForge: false,
+          isBuilder: true,
+        },
+        '29.3.1',
+        macProcess,
+      ),
+    ).toBe(binaryPath);
+  });
+
+  it('should return the expected app path for an electron-builder setup on Linux', async () => {
+    const binaryPath = path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app');
+    mockBinaryPath(binaryPath);
+    expect(
+      await getBinaryPath(
+        pkgJSONPath,
+        {
+          appName: 'my-app',
+          config: { productName: 'my-app' },
+          isForge: false,
+          isBuilder: true,
+        },
+        '29.3.1',
         linuxProcess,
       ),
-    ).toBe(path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app')));
+    ).toBe(binaryPath);
+  });
 });
 
 describe('getBuildToolConfig', () => {
