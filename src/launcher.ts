@@ -1,6 +1,4 @@
-import fs from 'node:fs/promises';
 import util from 'node:util';
-import type { PathLike } from 'node:fs';
 
 import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
@@ -13,14 +11,6 @@ import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } fro
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from './types.js';
-
-async function fileExists(path: PathLike) {
-  try {
-    return (await fs.stat(path)).isFile();
-  } catch (e) {
-    return false;
-  }
-}
 
 export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
   [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
@@ -70,12 +60,12 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           log.debug('No app binary found');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
-            appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo);
 
-            log.debug(`Detected app binary at ${appBinaryPath}`);
-            const appExists = await fileExists(appBinaryPath as PathLike);
+            try {
+              appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-            if (!appExists) {
+              log.debug(`Detected app binary at ${appBinaryPath}`);
+            } catch (e) {
               const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
               const suggestedCompileCommand = `npx ${
                 appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'

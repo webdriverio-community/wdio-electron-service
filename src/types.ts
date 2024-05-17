@@ -1,5 +1,8 @@
 import type * as Electron from 'electron';
 import type { Mock } from '@vitest/spy';
+import type { OfficialArch } from '@electron/packager';
+import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
+import type { ArchType } from 'builder-util';
 
 export type Fn = (...args: unknown[]) => unknown;
 export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -165,19 +168,19 @@ export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]
 export type ElectronType = typeof Electron;
 export type ElectronInterface = keyof ElectronType;
 
-export type ElectronBuilderConfig = {
+export type BuilderConfig = {
   productName?: string;
   directories?: { output?: string };
 };
 
-export type ElectronForgeConfig = {
-  buildIdentifier: string;
-  packagerConfig: { name: string };
-};
+export type ForgeConfig = ElectronForgeConfig;
+
+export type BuilderArch = ArchType;
+export type ForgeArch = OfficialArch;
 
 export type AppBuildInfo = {
   appName: string;
-  config: string | ElectronForgeConfig | ElectronBuilderConfig;
+  config: string | ForgeConfig | BuilderConfig;
   isBuilder: boolean;
   isForge: boolean;
 };

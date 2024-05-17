@@ -68,6 +68,7 @@
     "test:integration:cjs": "cd example-cjs && pnpm run ci",
     "test:integration:esm": "cd example && pnpm run ci",
     "test:integration:electron-builder": "cd example-electron-builder && pnpm run ci",
+    "test:integration:mac-universal": "cd example-electron-builder && pnpm run ci:mac-universal",
     "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
     "watch": "pnpm run build:esm --watch"
   },
@@ -103,6 +104,8 @@
     "read-package-up": "^11.0.0"
   },
   "devDependencies": {
+    "@electron-forge/shared-types": "^7.4.0",
+    "@electron/packager": "^18.3.2",
     "@eslint/js": "^9.0.0",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
@@ -115,6 +118,7 @@
     "@wdio/cli": "^8.27.2",
     "@wdio/globals": "^8.27.2",
     "@wdio/types": "^8.27.2",
+    "builder-util": "25.0.0-alpha.6",
     "cross-env": "^7.0.3",
     "electron": "^29.3.1",
     "eslint": "^8.57.0",
