@@ -84,7 +84,7 @@ export const config = {
 **[Mocking Electron APIs](./docs/electron-apis/mocking-apis.md)** \
 **[Standalone Mode](./docs/standalone-mode.md)** \
 **[Development](./docs/development.md)** \
-**[Common Issues](./docs/common-issues.md)**
+**[Common Issues & Debugging](./docs/common-issues-debugging.md)**
 
 ## Development
 

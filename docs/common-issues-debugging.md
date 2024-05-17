@@ -1,4 +1,14 @@
-## Common Issues
+## Common Issues & Debugging
+
+These are some common issues which others have encountered whilst using the service.
+
+If you need extra insight into what the service is doing you can set the environment var `DEBUG=wdio-electron-service` to enable debug logging, e.g.
+
+```bash
+$ DEBUG=wdio-electron-service wdio run ./wdio.conf.ts
+```
+
+This is utilising the [`debug`](https://github.com/debug-js/debug) logging package.
 
 ### Error: ContextBridge not available for invocation of "app" API
 
