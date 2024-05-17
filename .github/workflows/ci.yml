@@ -38,9 +38,15 @@ jobs:
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-          xvfb-run pnpm run ci
+            xvfb-run pnpm run ci
           else
-          pnpm run ci
+            pnpm run ci
+          fi
+        shell: bash
+      - name: Run MacOS specific tests
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            pnpm run test:integration:mac-universal
           fi
         shell: bash
       - name: 🐛 Debug Build
