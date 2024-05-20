@@ -93,6 +93,7 @@
     }
   },
   "dependencies": {
+    "@electron/packager": "^18.3.2",
     "@vitest/spy": "^1.2.0",
     "@wdio/logger": "^8.16.17",
     "compare-versions": "^6.1.0",
@@ -105,7 +106,6 @@
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
-    "@electron/packager": "^18.3.2",
     "@eslint/js": "^9.0.0",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
