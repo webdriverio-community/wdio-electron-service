@@ -86,7 +86,7 @@ importers:
         version: 7.0.3
       electron:
         specifier: ^29.3.1
-        version: 29.3.3
+        version: 29.4.0
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -1595,8 +1595,8 @@ packages:
   electron-to-chromium@1.4.765:
     resolution: {integrity: sha512-70APzI2AGyJgcWVSnfJCytP2Gejptk6cIm0t5uuUfwdKN63xBIZBzD0N5l/s0hWr8tj0w/p6UaPz+hLAm+Orjw==}
 
-  electron@29.3.3:
-    resolution: {integrity: sha512-I/USTe9UsQUKb/iuiYnmt074vHxNHCJZWYiU4Xg6lNPKVBsPadAhZcc+g2gYLqC1rA7KT4AvKTmNsY8n7oEUCw==}
+  electron@29.4.0:
+    resolution: {integrity: sha512-4DTO8U66oiI8rShrDSu2zDPW6GWRiCebyb1MHSfQkLWCNI/PnLyGKeqYPUoVgc0FWaNN2sCBn8NKJHb++hE2LQ==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -5904,7 +5904,7 @@ snapshots:
 
   electron-to-chromium@1.4.765: {}
 
-  electron@29.3.3:
+  electron@29.4.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.12.11
