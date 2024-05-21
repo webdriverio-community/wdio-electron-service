@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
 import type { AppBuildInfo, BuilderArch, BuilderConfig, ForgeConfig, ForgeArch } from './types.js';
-import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 
 const SupportedPlatform = {
   darwin: 'darwin',
