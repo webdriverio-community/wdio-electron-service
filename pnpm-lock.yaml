@@ -16,7 +16,7 @@ importers:
         version: 1.6.0
       '@wdio/logger':
         specifier: ^8.16.17
-        version: 8.28.0
+        version: 8.38.0
       compare-versions:
         specifier: ^6.1.0
         version: 6.1.0
@@ -6229,7 +6229,7 @@ snapshots:
       lodash.isequal: 4.5.0
     optionalDependencies:
       '@wdio/globals': 8.38.0(encoding@0.1.13)(typescript@5.4.5)
-      '@wdio/logger': 8.28.0
+      '@wdio/logger': 8.38.0
       webdriverio: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
     transitivePeerDependencies:
       - bufferutil
