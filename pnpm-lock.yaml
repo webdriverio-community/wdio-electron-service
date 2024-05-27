@@ -74,7 +74,7 @@ importers:
         version: 8.36.1(encoding@0.1.13)(typescript@5.4.5)
       '@wdio/globals':
         specifier: ^8.27.2
-        version: 8.36.1(encoding@0.1.13)(typescript@5.4.5)
+        version: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
       '@wdio/types':
         specifier: ^8.27.2
         version: 8.37.0
@@ -877,6 +877,10 @@ packages:
 
   '@wdio/globals@8.36.1':
     resolution: {integrity: sha512-Qpj6gZCRNxqdVkTwYyi4JdeYO4tLSUj3Ti6yxO0v9A4IRaKW1tS29KUcGgjL9CFSBKAOi2zRY8vvFz1u6ewxtQ==}
+    engines: {node: ^16.13 || >=18}
+
+  '@wdio/globals@8.38.0':
+    resolution: {integrity: sha512-3Lo7R305gwJrloUolrgSRaMbIFKwnj/SPoYUt94dsTF1oM3TpyWpomcVokElNQiOFx9WYjMmBla2M+YcnoGmgw==}
     engines: {node: ^16.13 || >=18}
 
   '@wdio/logger@8.28.0':
@@ -5162,6 +5166,18 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@wdio/globals@8.38.0(encoding@0.1.13)(typescript@5.4.5)':
+    optionalDependencies:
+      expect-webdriverio: 4.13.0(encoding@0.1.13)(typescript@5.4.5)
+      webdriverio: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - devtools
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+
   '@wdio/logger@8.28.0':
     dependencies:
       chalk: 5.3.0
@@ -6260,7 +6276,7 @@ snapshots:
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
     optionalDependencies:
-      '@wdio/globals': 8.36.1(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/globals': 8.38.0(encoding@0.1.13)(typescript@5.4.5)
       '@wdio/logger': 8.28.0
       webdriverio: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
     transitivePeerDependencies:
