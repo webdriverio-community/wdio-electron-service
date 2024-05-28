@@ -3,7 +3,7 @@ import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import vitest from 'eslint-plugin-vitest';
-import * as wdio from 'eslint-plugin-wdio';
+import wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
 export default [
@@ -20,9 +20,7 @@ export default [
         ...globals.es2021,
       },
     },
-    rules: {
-      ...eslint.configs.recommended.rules,
-    },
+    ...eslint.configs.recommended,
   },
   // Node & Electron main process files and scripts
   {
@@ -117,28 +115,15 @@ export default [
   // Example E2E TS files
   {
     files: ['example*/e2e/*.spec.ts'],
-    languageOptions: {
-      globals: {
-        ...wdio.configs.recommended.globals,
-      },
-    },
-    plugins: {
-      wdio,
-    },
     rules: {
-      ...wdio.configs.recommended.rules,
       '@typescript-eslint/no-var-requires': 'off',
     },
+    ...wdio.configs['flat/recommended'],
   },
   // Test files
   {
     files: ['test/**/*.spec.ts'],
-    plugins: {
-      vitest,
-    },
-    rules: {
-      ...vitest.configs.recommended.rules,
-    },
+    ...vitest.configs.recommended,
   },
   // ensure all rules work with prettier
   prettier,
