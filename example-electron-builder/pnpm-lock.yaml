@@ -30,8 +30,8 @@ importers:
         specifier: ^8.38.0
         version: 8.38.0
       electron:
-        specifier: ^30.0.8
-        version: 30.0.8
+        specifier: ^29.4.1
+        version: 29.4.1
       electron-builder:
         specifier: 24.13.0
         version: 24.13.0
@@ -58,7 +58,7 @@ importers:
         version: 5.4.5
       wdio-electron-service:
         specifier: file:../
-        version: file:..(electron@30.0.8)(webdriverio@8.38.0(typescript@5.4.5))
+        version: file:..(electron@29.4.1)(webdriverio@8.38.0(typescript@5.4.5))
       webdriverio:
         specifier: ^8.38.0
         version: 8.38.0(typescript@5.4.5)
@@ -1258,8 +1258,8 @@ packages:
   electron-to-chromium@1.4.783:
     resolution: {integrity: sha512-bT0jEz/Xz1fahQpbZ1D7LgmPYZ3iHVY39NcWWro1+hA2IvjiPeaXtfSqrQ+nXjApMvQRE2ASt1itSLRrebHMRQ==}
 
-  electron@30.0.8:
-    resolution: {integrity: sha512-ivzXJJ/9gdb4oOw+5SDuaZpSInz8C+Z021dKZfFLMltKbDa4sSqt5cRBiUg7J36Z2kdus+Jai0bdHWutYE9wAA==}
+  electron@29.4.1:
+    resolution: {integrity: sha512-YQvMAtdmjMF1yGfQFuO/KOmy+04SKot85NalppK/8zxKwOKrrK6dJBp+nJWteqBwRAKiasSrC1lDalF6hZct/w==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -4559,7 +4559,7 @@ snapshots:
 
   electron-to-chromium@1.4.783: {}
 
-  electron@30.0.8:
+  electron@29.4.1:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.12.12
@@ -6421,7 +6421,7 @@ snapshots:
     dependencies:
       defaults: 1.0.4
 
-  wdio-electron-service@file:..(electron@30.0.8)(webdriverio@8.38.0(typescript@5.4.5)):
+  wdio-electron-service@file:..(electron@29.4.1)(webdriverio@8.38.0(typescript@5.4.5)):
     dependencies:
       '@electron/packager': 18.3.2
       '@vitest/spy': 1.6.0
@@ -6435,7 +6435,7 @@ snapshots:
       read-package-up: 11.0.0
       webdriverio: 8.38.0(typescript@5.4.5)
     optionalDependencies:
-      electron: 30.0.8
+      electron: 29.4.1
     transitivePeerDependencies:
       - supports-color
 
