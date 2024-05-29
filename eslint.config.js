@@ -60,10 +60,10 @@ export default [
       ...ts.configs.recommended.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
       'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
-      '@typescript-eslint/no-empty-interface': [
+      '@typescript-eslint/no-empty-object-type': [
         'error',
         {
-          allowSingleExtends: true,
+          allowInterfaces: 'with-single-extends',
         },
       ],
       '@typescript-eslint/no-namespace': [
@@ -79,6 +79,9 @@ export default [
           ignoreRestSiblings: true,
           argsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
       '@typescript-eslint/no-explicit-any': ['warn'],

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util';
 
 if (isTest) {
-  require('wdio-electron-service/main');
+  import('wdio-electron-service/main');
 }
 
 const appPath = app.getAppPath();
