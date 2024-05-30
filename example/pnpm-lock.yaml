@@ -10,7 +10,7 @@ importers:
     dependencies:
       wdio-electron-service:
         specifier: file:../
-        version: file:..(electron@30.0.8)(webdriverio@8.38.0(encoding@0.1.13)(typescript@5.4.5))
+        version: file:..(electron@29.4.1)(webdriverio@8.38.0(encoding@0.1.13)(typescript@5.4.5))
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.2.0
@@ -37,8 +37,8 @@ importers:
         specifier: ^8.38.0
         version: 8.38.0
       electron:
-        specifier: ^30.0.8
-        version: 30.0.8
+        specifier: ^29.4.1
+        version: 29.4.1
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)
@@ -840,6 +840,7 @@ packages:
   are-we-there-yet@3.0.1:
     resolution: {integrity: sha512-QZW4EDmGwlYur0Yyf/b2uGucHQMa8aFUP7eu9ddR73vvhFyt4V0Vl3QHPcTNJ8l6qYOBdxgXdnBXQrHilfRQBg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   arg@4.1.3:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
@@ -1312,8 +1313,8 @@ packages:
   electron-to-chromium@1.4.783:
     resolution: {integrity: sha512-bT0jEz/Xz1fahQpbZ1D7LgmPYZ3iHVY39NcWWro1+hA2IvjiPeaXtfSqrQ+nXjApMvQRE2ASt1itSLRrebHMRQ==}
 
-  electron@30.0.8:
-    resolution: {integrity: sha512-ivzXJJ/9gdb4oOw+5SDuaZpSInz8C+Z021dKZfFLMltKbDa4sSqt5cRBiUg7J36Z2kdus+Jai0bdHWutYE9wAA==}
+  electron@29.4.1:
+    resolution: {integrity: sha512-YQvMAtdmjMF1yGfQFuO/KOmy+04SKot85NalppK/8zxKwOKrrK6dJBp+nJWteqBwRAKiasSrC1lDalF6hZct/w==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -1613,6 +1614,7 @@ packages:
   gauge@4.0.4:
     resolution: {integrity: sha512-f9m+BEN5jkg6a0fZjleidjN51VE1X+mPFQ2DJ0uv1V39oCLCbsGe6yjbBnp7eK7z/+GAon99a3nHuqbuuthyPg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   gaze@1.1.3:
     resolution: {integrity: sha512-BRdNm8hbWzFzWHERTrejLqwHDfS4GibPoq5wjTPIoJHoBtKGPg3xAFfxmM+9ztbXelxcf2hwQcaz1PtmFeue8g==}
@@ -2398,6 +2400,7 @@ packages:
   npmlog@6.0.2:
     resolution: {integrity: sha512-/vBvz5Jfr9dT/aFWd0FIRf+T/Q2WBsLENygUaFUqstqsycmZAP/t5BvFJTK0viFmSUxiUKTUplWy5vt+rvKIxg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   nwsapi@2.2.10:
     resolution: {integrity: sha512-QK0sRs7MKv0tKe1+5uZIQk/C8XGza4DAnztJG8iD+TpJIORARrCxczA738awHrZoHeTjSSoHqao2teO0dC/gFQ==}
@@ -3931,7 +3934,7 @@ snapshots:
   '@npmcli/fs@2.1.2':
     dependencies:
       '@gar/promisify': 1.1.3
-      semver: 7.6.0
+      semver: 7.6.2
 
   '@npmcli/move-file@2.0.1':
     dependencies:
@@ -4958,7 +4961,7 @@ snapshots:
 
   electron-to-chromium@1.4.783: {}
 
-  electron@30.0.8:
+  electron@29.4.1:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.12.12
@@ -7111,7 +7114,7 @@ snapshots:
     dependencies:
       defaults: 1.0.4
 
-  wdio-electron-service@file:..(electron@30.0.8)(webdriverio@8.38.0(encoding@0.1.13)(typescript@5.4.5)):
+  wdio-electron-service@file:..(electron@29.4.1)(webdriverio@8.38.0(encoding@0.1.13)(typescript@5.4.5)):
     dependencies:
       '@electron/packager': 18.3.2
       '@vitest/spy': 1.5.3
@@ -7125,7 +7128,7 @@ snapshots:
       read-package-up: 11.0.0
       webdriverio: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
     optionalDependencies:
-      electron: 30.0.8
+      electron: 29.4.1
     transitivePeerDependencies:
       - supports-color
 
