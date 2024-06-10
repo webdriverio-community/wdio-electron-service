@@ -104,7 +104,7 @@ importers:
         version: 29.7.0
       expect-webdriverio:
         specifier: ^4.11.7
-        version: 4.13.0(encoding@0.1.13)(typescript@5.4.5)
+        version: 4.14.0(encoding@0.1.13)(typescript@5.4.5)
       globals:
         specifier: ^15.0.0
         version: 15.3.0
@@ -398,6 +398,7 @@ packages:
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -405,6 +406,7 @@ packages:
 
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -1765,8 +1767,8 @@ packages:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
 
-  expect-webdriverio@4.13.0:
-    resolution: {integrity: sha512-y2LF6vECifTOiOk0i0FMPWJGyntiW+eqzQWFZimu9Cae8XMUH5q4F5SzpfGCxsvmOdf3uFjlr+u9IXrQBN5o0Q==}
+  expect-webdriverio@4.14.0:
+    resolution: {integrity: sha512-bPZ9zfyJHF41dO8o7iFcEV4Dvcw45yhsv1WjtJyPLZPjQ+ixVBrbSil9+rjRiONoX4f45EZRCqaGvPlzNC523Q==}
     engines: {node: '>=16 || >=18 || >=20'}
 
   expect@29.7.0:
@@ -5119,7 +5121,7 @@ snapshots:
 
   '@wdio/globals@8.38.0(encoding@0.1.13)(typescript@5.4.5)':
     optionalDependencies:
-      expect-webdriverio: 4.13.0(encoding@0.1.13)(typescript@5.4.5)
+      expect-webdriverio: 4.14.0(encoding@0.1.13)(typescript@5.4.5)
       webdriverio: 8.38.0(encoding@0.1.13)(typescript@5.4.5)
     transitivePeerDependencies:
       - bufferutil
@@ -6186,7 +6188,7 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
-  expect-webdriverio@4.13.0(encoding@0.1.13)(typescript@5.4.5):
+  expect-webdriverio@4.14.0(encoding@0.1.13)(typescript@5.4.5):
     dependencies:
       '@vitest/snapshot': 1.6.0
       expect: 29.7.0
