@@ -122,7 +122,7 @@ importers:
         version: 13.5.4
       prettier:
         specifier: ^3.2.2
-        version: 3.3.0
+        version: 3.3.1
       release-it:
         specifier: ^17.0.0
         version: 17.3.0(typescript@5.4.5)
@@ -3243,8 +3243,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prettier@3.3.0:
-    resolution: {integrity: sha512-J9odKxERhCQ10OC2yb93583f6UnYutOeiV5i0zEDS7UGTdUt0u+y8erxl3lBKvwo/JHyyoEdXjwp4dke9oyZ/g==}
+  prettier@3.3.1:
+    resolution: {integrity: sha512-7CAwy5dRsxs8PHXT3twixW9/OEll8MLE0VRPCJyl7CkS6VHGPSlsVaWTiASPTyGyYRyApxlaWTzwUxVNrhcwDg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -7845,7 +7845,7 @@ snapshots:
 
   prettier@2.8.1: {}
 
-  prettier@3.3.0: {}
+  prettier@3.3.1: {}
 
   pretty-format@27.5.1:
     dependencies:
