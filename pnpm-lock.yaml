@@ -441,6 +441,8 @@ importers:
         specifier: ^8.27.2
         version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
 
+  packages/wdio-electron-service/dist/cjs: {}
+
   packages/wdio-electron-service/src/cjs: {}
 
   packages/wdio-electron-service/test/fixtures/builder-dependency-inline-config:
