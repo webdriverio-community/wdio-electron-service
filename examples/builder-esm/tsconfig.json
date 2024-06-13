@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "types": ["node"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"],
+    "outDir": "dist"
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}

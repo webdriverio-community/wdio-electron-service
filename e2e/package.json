@@ -1,0 +1,38 @@
+{
+  "name": "e2e",
+  "description": "WebdriverIO Electron Service E2E Test Suite",
+  "type": "module",
+  "private": "true",
+  "scripts": {
+    "ci": "pnpm i && pnpm test",
+    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "exec": "wdio run ./wdio.conf.ts && pnpm exec:multiremote && pnpm exec:standalone",
+    "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
+    "exec:standalone": "tsx ./standalone/api.spec.ts",
+    "exec:standalone:local": "cd .. && pnpm build && cd - && pnpx rimraf ./node_modules && pnpm i && pnpm test:standalone"
+  },
+  "dependencies": {
+    "@testing-library/webdriverio": "^3.2.1",
+    "@wdio/cli": "^8.27.2",
+    "@wdio/globals": "^8.36.1",
+    "@wdio/local-runner": "^8.27.2",
+    "@wdio/mocha-framework": "^8.27.2",
+    "electron": "^29.3.1",
+    "ts-node": "^10.9.1",
+    "wdio-electron-service": "workspace:*",
+    "webdriverio": "^8.27.2"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@vitest/spy": "^1.2.0",
+    "@wdio/types": "^8.38.2",
+    "global-jsdom": "^24.0.0",
+    "jsdom": "^24.0.0",
+    "read-package-up": "^11.0.0",
+    "ts-loader": "^9.4.4",
+    "tsx": "^4.8.2",
+    "typescript": "^5.3.2"
+  }
+}
