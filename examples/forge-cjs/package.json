@@ -20,6 +20,8 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-node-resolve": "^15.2.1",
     "@types/node": "^20.11.0",
     "@wdio/cli": "^8.27.2",
     "@wdio/globals": "^8.27.2",
@@ -28,6 +30,7 @@
     "electron": "^29.3.1",
     "global-jsdom": "^24.0.0",
     "jsdom": "^24.0.0",
+    "rollup": "^4.9.5",
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
     "tsx": "^4.8.2",

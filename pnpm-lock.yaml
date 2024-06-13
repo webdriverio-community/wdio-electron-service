@@ -252,6 +252,12 @@ importers:
       '@electron-forge/cli':
         specifier: ^7.4.0
         version: 7.4.0(encoding@0.1.13)
+      '@rollup/plugin-commonjs':
+        specifier: ^25.0.4
+        version: 25.0.8(rollup@4.18.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.1
+        version: 15.2.3(rollup@4.18.0)
       '@types/node':
         specifier: ^20.11.0
         version: 20.14.2
@@ -276,6 +282,9 @@ importers:
       jsdom:
         specifier: ^24.0.0
         version: 24.1.0
+      rollup:
+        specifier: ^4.9.5
+        version: 4.18.0
       ts-loader:
         specifier: ^9.4.4
         version: 9.5.1(typescript@5.4.5)(webpack@5.92.0)
