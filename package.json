@@ -25,7 +25,7 @@
     "test:integration:builder-esm": "cross-env EXAMPLE_DIR=builder-esm pnpm test:integration:exec",
     "test:integration:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm test:integration:exec",
     "test:integration:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm test:integration:exec",
-    "test:integration:exec": "cross-env DEBUG=wdio-electron-service lerna run exec --scope=e2e",
+    "test:integration:exec": "cross-env DEBUG=wdio-electron-service lerna run exec --scope=e2e --verbose",
     "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
     "watch": "lerna run build --scope=wdio-electron-service --watch"
   },
