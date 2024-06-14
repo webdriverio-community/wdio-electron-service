@@ -11,6 +11,7 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && pnpx rimraf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
     "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
+    "install:hacky-fix": "cp -rf ../../node_modules/@vitest/spy ./node_modules/@vitest/spy",
     "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
     "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "test:standalone": "tsx ./e2e-standalone/api.spec.ts"

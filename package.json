@@ -10,7 +10,7 @@
     "ci": "pnpm init-repo && pnpm build && pnpm test && pnpm lint && pnpm format:check",
     "ci:mac-universal": "lerna run build:mac-universal && pnpm test:integration:builder-cjs && pnpm test:integration:builder-esm",
     "clean": "lerna run clean",
-    "init-repo": "pnpm i --filter=!\"fixture-*\" -r",
+    "init-repo": "pnpm i --filter=!\"fixture-*\" && lerna run install:hacky-fix",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
