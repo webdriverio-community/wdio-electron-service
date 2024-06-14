@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build:builder": "lerna run build --scope=example-builder*",
-    "build:forge": "lerna run init-forge-examples,pack && lerna run build --scope=example-forge*",
+    "build:forge": "lerna run pack && lerna run init:forge-esm && lerna run init:forge-cjs && lerna run build --scope=example-forge*",
     "ci": "pnpm init-repo && pnpm ci:builder && pnpm ci:forge && pnpm lint && pnpm format:check",
     "ci:forge": "pnpm build:forge && pnpm test:integration:forge-cjs && pnpm test:integration:forge-esm",
     "ci:builder": "pnpm build:builder && pnpm test:integration:builder-cjs && pnpm test:integration:builder-esm",
