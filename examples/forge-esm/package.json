@@ -14,7 +14,7 @@
     "ci:mac-universal": "pnpm i && pnpm build:mac-universal && pnpm test",
     "clean": "pnpm clean:dist && pnpm dlx rimraf ./node_modules ./package-lock.json ./wdio-logs ./out",
     "clean:dist": "pnpm dlx rimraf ./dist && mkdir -p ./dist",
-    "init-forge-examples": "pnpm clean && npm i && npm --save false i ../../packages/wdio-electron-service/*.tgz",
+    "init-forge-examples": "pnpm clean && npm i && npm --save=false i ../../packages/wdio-electron-service/*.tgz",
     "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
     "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "test:standalone": "tsx ./e2e-standalone/api.spec.ts",
