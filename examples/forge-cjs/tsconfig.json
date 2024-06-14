@@ -5,7 +5,7 @@
     "target": "ES2020",
     "baseUrl": ".",
     "types": [],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../node_modules/@types", "../../@types"],
     "outDir": "dist"
   },
   "include": ["src/*.ts"],
