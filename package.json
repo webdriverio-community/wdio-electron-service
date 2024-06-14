@@ -19,7 +19,7 @@
     "test:unit": "lerna run test:unit --scope=wdio-electron-service",
     "test:unit:dev": "lerna run test:unit:dev --scope=wdio-electron-service",
     "test": "pnpm test:integration && pnpm test:unit",
-    "test:integration": "pnpm test:integration:forge-cjs && pnpm test:integration:forge-esm && pnpm test:integration:builder-cjs && pnpm test:integration:builder-esm",
+    "test:integration": "pnpm test:integration:forge-esm && pnpm test:integration:forge-cjs && pnpm test:integration:builder-esm && pnpm test:integration:builder-cjs",
     "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm test:integration",
     "test:integration:builder-cjs": "cross-env EXAMPLE_DIR=builder-cjs pnpm test:integration:exec",
     "test:integration:builder-esm": "cross-env EXAMPLE_DIR=builder-esm pnpm test:integration:exec",
