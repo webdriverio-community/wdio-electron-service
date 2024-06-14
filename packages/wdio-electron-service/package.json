@@ -40,13 +40,14 @@
     "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
-    "clean": "pnpm clean:dist && pnpx rimraf ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts ./src/cjs/constants.ts ./src/cjs/types.ts",
-    "clean:dist": "pnpx rimraf ./dist",
+    "clean": "pnpm clean:dist && pnpm dlx rimraf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts ./src/cjs/constants.ts ./src/cjs/types.ts",
+    "clean:dist": "pnpm dlx rimraf ./dist",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc",
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts && cp -f ./src/types.ts ./src/cjs/types.ts",
     "build:cjs:compile": "tsc --build --verbose tsconfig.cjs.json",
+    "pack": "pnpm pack",
     "release": "release-it --github.release",
     "release:ci": "pnpm release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "release:patch": "pnpm release patch",
@@ -87,7 +88,8 @@
     "fast-copy": "^3.0.1",
     "find-versions": "^6.0.0",
     "node-fetch": "^3.3.2",
-    "read-package-up": "^11.0.0"
+    "read-package-up": "^11.0.0",
+    "tinyspy": "^3.0.0"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
@@ -113,5 +115,14 @@
   "files": [
     "bin/*",
     "dist/*"
-  ]
+  ],
+  "nx": {
+    "targets": {
+      "pack": {
+        "dependsOn": [
+          "build"
+        ]
+      }
+    }
+  }
 }

@@ -12,16 +12,13 @@
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
     "ci:mac-universal": "pnpm i && pnpm build:mac-universal && pnpm test",
-    "clean": "pnpm clean:dist && pnpx rimraf ./node_modules pnpm-lock.yaml ./wdio-logs ./out",
-    "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist",
-    "install:hacky-fix": "cp -rf ../../node_modules/@vitest/spy ./node_modules/@vitest/spy",
+    "clean": "pnpm clean:dist && pnpm dlx rimraf ./node_modules ./package-lock.json ./wdio-logs ./out",
+    "clean:dist": "pnpm dlx rimraf ./dist && mkdir -p ./dist",
+    "init-forge-examples": "pnpm clean && npm i && npm --save false i ../../packages/wdio-electron-service/*.tgz",
     "test": "wdio run ./wdio.conf.ts && pnpm test:multiremote && pnpm test:standalone",
     "test:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "test:standalone": "tsx ./e2e-standalone/api.spec.ts",
-    "test:standalone:local": "cd .. && pnpm build && cd - && pnpx rimraf ./node_modules && pnpm i && pnpm test:standalone"
-  },
-  "dependencies": {
-    "wdio-electron-service": "workspace:*"
+    "test:standalone:local": "cd .. && pnpm build && cd - && pnpm dlx rimraf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
@@ -47,9 +44,10 @@
   },
   "nx": {
     "targets": {
-      "build": {
+      "init-forge-examples": {
         "dependsOn": [
-          "^build"
+          "^build",
+          "^pack"
         ]
       }
     },

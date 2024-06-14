@@ -6,11 +6,14 @@
     "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
-    "build": "lerna run build",
-    "ci": "pnpm init-repo && pnpm build && pnpm test && pnpm lint && pnpm format:check",
+    "build:builder": "lerna run build --scope=example-builder*",
+    "build:forge": "lerna run init-forge-examples,pack && lerna run build --scope=example-forge*",
+    "ci": "pnpm init-repo && pnpm ci:builder && pnpm ci:forge && pnpm lint && pnpm format:check",
+    "ci:forge": "pnpm build:forge && pnpm test:integration:forge-cjs && pnpm test:integration:forge-esm",
+    "ci:builder": "pnpm build:builder && pnpm test:integration:builder-cjs && pnpm test:integration:builder-esm",
     "ci:mac-universal": "lerna run build:mac-universal && pnpm test:integration:builder-cjs && pnpm test:integration:builder-esm",
-    "clean": "lerna run clean",
-    "init-repo": "pnpm i --filter=!\"fixture-*\" && lerna run install:hacky-fix",
+    "clean": "lerna run clean && pnpm dlx rimraf node_modules || pnpm dlx rimraf node_modules",
+    "init-repo": "pnpm i --filter=!\"fixture-*\" --filter=!\"*forge*\"",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
@@ -25,7 +28,7 @@
     "test:integration:builder-esm": "cross-env EXAMPLE_DIR=builder-esm pnpm test:integration:exec",
     "test:integration:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm test:integration:exec",
     "test:integration:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm test:integration:exec",
-    "test:integration:exec": "cross-env DEBUG=wdio-electron-service lerna run exec --scope=e2e --verbose",
+    "test:integration:exec": "cross-env DEBUG=wdio-electron-service lerna run exec --scope=e2e",
     "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
     "watch": "lerna run build --scope=wdio-electron-service --watch"
   },
@@ -53,5 +56,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b"
+  "packageManager": "pnpm@9.3.0+sha256.e1f9e8d1a16607a46dd3c158b5f7a7dc7945501d1c6222d454d63d033d1d918f"
 }

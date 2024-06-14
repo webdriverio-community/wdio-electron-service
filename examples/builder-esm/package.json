@@ -13,7 +13,7 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "ci:mac-universal": "pnpm i && pnpm build:mac-universal && pnpm test",
     "clean": "pnpm clean:dist && rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
-    "clean:dist": "pnpx rimraf ./dist && mkdir -p ./dist"
+    "clean:dist": "pnpm dlx rimraf ./dist && mkdir -p ./dist"
   },
   "dependencies": {
     "wdio-electron-service": "workspace:*"
