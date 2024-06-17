@@ -104,7 +104,7 @@ importers:
         version: 29.7.0
       expect-webdriverio:
         specifier: ^4.11.7
-        version: 4.14.0(encoding@0.1.13)(typescript@5.4.5)
+        version: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
       globals:
         specifier: ^15.0.0
         version: 15.4.0
@@ -1763,8 +1763,8 @@ packages:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
 
-  expect-webdriverio@4.14.0:
-    resolution: {integrity: sha512-bPZ9zfyJHF41dO8o7iFcEV4Dvcw45yhsv1WjtJyPLZPjQ+ixVBrbSil9+rjRiONoX4f45EZRCqaGvPlzNC523Q==}
+  expect-webdriverio@4.15.1:
+    resolution: {integrity: sha512-xtBSidt7Whs1fsUC+utxVzfmkmaStXWW17b+BcMCiCltx0Yku6l7BTv1Y14DEKX8L6rttaDQobYyRtBKbi4ssg==}
     engines: {node: '>=16 || >=18 || >=20'}
 
   expect@29.7.0:
@@ -5117,7 +5117,7 @@ snapshots:
 
   '@wdio/globals@8.38.2(encoding@0.1.13)(typescript@5.4.5)':
     optionalDependencies:
-      expect-webdriverio: 4.14.0(encoding@0.1.13)(typescript@5.4.5)
+      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
       webdriverio: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
     transitivePeerDependencies:
       - bufferutil
@@ -6180,7 +6180,7 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
-  expect-webdriverio@4.14.0(encoding@0.1.13)(typescript@5.4.5):
+  expect-webdriverio@4.15.1(encoding@0.1.13)(typescript@5.4.5):
     dependencies:
       '@vitest/snapshot': 1.6.0
       expect: 29.7.0
