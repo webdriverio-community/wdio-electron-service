@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
 
-import log from './log.js';
+import { log } from '@repo/utils';
 
 const electronChromiumVersionMap: { [K: string]: string } = {};
 

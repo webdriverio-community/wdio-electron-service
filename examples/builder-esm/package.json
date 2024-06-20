@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
-    "build:bundle": "tsc && rollup -c rollup.config.js",
+    "build:bundle": "tsc --outDir dist",
     "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
     "build:package:mac-universal": "cp ./src/index.html ./dist && electron-builder -p never -m --universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",
     "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@types/node": "^20.11.0",
     "@wdio/cli": "^8.27.2",

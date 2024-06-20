@@ -5,12 +5,11 @@ import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
-import log from './log.js';
-import { getBinaryPath, getAppBuildInfo } from './application.js';
+import { getBinaryPath, getAppBuildInfo } from '@repo/utils';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { ElectronServiceOptions } from './types.js';
+import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME, log } from '@repo/utils';
+import type { ElectronServiceOptions } from '@repo/types';
 
 export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
   [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;

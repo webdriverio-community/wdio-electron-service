@@ -1,4 +1,4 @@
-import { Capabilities, Options, Services } from '@wdio/types';
+import type { Capabilities, Options, Services } from '@wdio/types';
 
 // Workaround for ts-node converting dynamic imports to requires
 // see https://github.com/TypeStrong/ts-node/discussions/1290

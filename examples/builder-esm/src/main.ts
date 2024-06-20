@@ -21,7 +21,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.bundle.cjs`,
+      preload: `${appRootPath}/preload.cjs`,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,

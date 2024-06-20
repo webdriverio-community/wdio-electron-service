@@ -203,6 +203,9 @@ importers:
       '@rollup/plugin-commonjs':
         specifier: ^25.0.4
         version: 25.0.8(rollup@4.18.0)
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@4.18.0)
       '@rollup/plugin-node-resolve':
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.18.0)
@@ -360,11 +363,98 @@ importers:
         specifier: ^8.27.2
         version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
 
-  packages/wdio-electron-service:
+  packages/constants:
+    devDependencies:
+      shx:
+        specifier: ^0.3.4
+        version: 0.3.4
+      typescript:
+        specifier: ^5.3.2
+        version: 5.4.5
+
+  packages/types:
+    devDependencies:
+      '@electron-forge/shared-types':
+        specifier: ^7.4.0
+        version: 7.4.0
+      '@electron/packager':
+        specifier: ^18.3.2
+        version: 18.3.2
+      '@vitest/spy':
+        specifier: ^1.6.0
+        version: 1.6.0
+      '@wdio/globals':
+        specifier: ^8.27.2
+        version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/types':
+        specifier: ^8.38.2
+        version: 8.38.2
+      builder-util:
+        specifier: 25.0.0-alpha.6
+        version: 25.0.0-alpha.6
+      electron:
+        specifier: ^29.3.1
+        version: 29.4.2
+      read-package-up:
+        specifier: ^11.0.0
+        version: 11.0.0
+      typescript:
+        specifier: ^5.3.2
+        version: 5.4.5
+      webdriverio:
+        specifier: ^8.27.2
+        version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
+
+  packages/utils:
     dependencies:
       '@electron/packager':
         specifier: ^18.3.2
         version: 18.3.2
+      '@repo/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@wdio/logger':
+        specifier: ^8.16.17
+        version: 8.38.0
+      debug:
+        specifier: ^4.3.4
+        version: 4.3.5
+      read-package-up:
+        specifier: ^11.0.0
+        version: 11.0.0
+    devDependencies:
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/debug':
+        specifier: ^4.1.10
+        version: 4.1.12
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.14.2
+      '@vitest/coverage-v8':
+        specifier: ^1.2.0
+        version: 1.6.0(vitest@1.6.0(@types/node@20.14.2)(jsdom@24.1.0)(terser@5.31.1))
+      jsdom:
+        specifier: ^24.0.0
+        version: 24.1.0
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.7
+      shx:
+        specifier: ^0.3.4
+        version: 0.3.4
+      typescript:
+        specifier: ^5.3.2
+        version: 5.4.5
+      vitest:
+        specifier: ^1.2.0
+        version: 1.6.0(@types/node@20.14.2)(jsdom@24.1.0)(terser@5.31.1)
+
+  packages/utils/src/cjs: {}
+
+  packages/wdio-electron-service:
+    dependencies:
       '@vitest/spy':
         specifier: ^1.2.0
         version: 1.6.0
@@ -399,6 +489,12 @@ importers:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
         version: 7.4.0
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@testing-library/webdriverio':
         specifier: ^3.2.1
         version: 3.2.1(webdriverio@8.38.2(encoding@0.1.13)(typescript@5.4.5))
@@ -432,9 +528,6 @@ importers:
       nock:
         specifier: ^13.3.6
         version: 13.5.4
-      prettier:
-        specifier: ^3.2.2
-        version: 3.3.2
       release-it:
         specifier: ^17.0.0
         version: 17.3.0(typescript@5.4.5)
@@ -453,8 +546,6 @@ importers:
       webdriverio:
         specifier: ^8.27.2
         version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
-
-  packages/wdio-electron-service/dist/cjs: {}
 
   packages/wdio-electron-service/src/cjs: {}
 
@@ -1420,6 +1511,15 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+
+  '@rollup/plugin-json@6.1.0':
+    resolution: {integrity: sha512-EGI2te5ENk1coGeADSIwZ7G2Q8CJS2sF120T7jLw4xFw9n7wIOXHo+kIYRAoVpJAN+kmqZSoO3Fp4JtoNF4ReA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
     peerDependenciesMeta:
       rollup:
         optional: true
@@ -7943,6 +8043,12 @@ snapshots:
     optionalDependencies:
       rollup: 4.18.0
 
+  '@rollup/plugin-json@6.1.0(rollup@4.18.0)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@4.18.0)
+    optionalDependencies:
+      rollup: 4.18.0
+
   '@rollup/plugin-node-resolve@15.2.3(rollup@4.18.0)':
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.18.0)
@@ -11371,7 +11477,7 @@ snapshots:
 
   jest-diff@29.7.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       diff-sequences: 29.6.3
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
@@ -12365,7 +12471,7 @@ snapshots:
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
       axios: 1.7.2
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 8.0.1

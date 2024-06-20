@@ -1,6 +1,6 @@
 import { createMock } from '../mock.js';
 import mockStore from '../mockStore.js';
-import type { ElectronMock } from '../types.js';
+import type { ElectronMock } from '@repo/types';
 
 export async function mock(apiName: string, funcName: string): Promise<ElectronMock> {
   try {

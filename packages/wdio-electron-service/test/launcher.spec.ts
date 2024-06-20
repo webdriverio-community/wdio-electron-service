@@ -5,8 +5,8 @@ import nock from 'nock';
 import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher.js';
-import { getAppBuildInfo, getBinaryPath } from '../src/application.js';
-import { BUILD_TOOL_DETECTION_ERROR } from '../src/constants.js';
+import { getAppBuildInfo, getBinaryPath } from '@repo/utils';
+import { BUILD_TOOL_DETECTION_ERROR } from '@repo/utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 import type { ElectronServiceOptions } from '../src/index.js';
 
@@ -14,20 +14,28 @@ let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;
 let options: ElectronServiceOptions;
 
+function getFixtureDir(fixtureName: string) {
+  return path.join(process.cwd(), '..', '..', 'fixtures', fixtureName);
+}
+
 vi.mock('node:fs/promises', () => ({
   default: {
     access: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
-vi.mock('../src/application.js', () => ({
-  getBinaryPath: vi.fn().mockResolvedValue('workspace/my-test-app/dist/my-test-app'),
-  getAppBuildInfo: vi.fn().mockResolvedValue({
-    appName: 'my-test-app',
-    isForge: true,
-    config: {},
-  }),
-}));
+vi.mock('@repo/utils', async (importOriginal: () => Promise<Record<string, unknown>>) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    getBinaryPath: vi.fn().mockResolvedValue('workspace/my-test-app/dist/my-test-app'),
+    getAppBuildInfo: vi.fn().mockResolvedValue({
+      appName: 'my-test-app',
+      isForge: true,
+      config: {},
+    }),
+  };
+});
 
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
@@ -88,7 +96,7 @@ describe('onPrepare', () => {
       options,
       [] as never,
       {
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-build-tool'),
+        rootDir: getFixtureDir('no-build-tool'),
         services: [['electron', options]],
       } as Options.Testrunner,
     );
@@ -114,7 +122,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'forge-dependency-inline-config'),
+        rootDir: getFixtureDir('forge-dependency-inline-config'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -144,7 +152,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'builder-dependency-inline-config'),
+        rootDir: getFixtureDir('builder-dependency-inline-config'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -212,7 +220,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dependencies'),
+        rootDir: getFixtureDir('electron-in-dependencies'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -239,7 +247,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dependencies', 'subpackage', 'subdir'),
+        rootDir: path.join(getFixtureDir('electron-in-dependencies'), 'subpackage', 'subdir'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -266,7 +274,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dev-dependencies'),
+        rootDir: getFixtureDir('electron-in-dev-dependencies'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -293,7 +301,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'electron-in-dev-dependencies', 'subpackage', 'subdir'),
+        rootDir: path.join(getFixtureDir('electron-in-dev-dependencies'), 'subpackage', 'subdir'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -320,7 +328,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-electron'),
+        rootDir: getFixtureDir('no-electron'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -361,7 +369,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'forge-dependency-inline-config'),
+        rootDir: getFixtureDir('forge-dependency-inline-config'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -396,7 +404,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'builder-dependency-inline-config'),
+        rootDir: getFixtureDir('builder-dependency-inline-config'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [
@@ -424,7 +432,7 @@ describe('onPrepare', () => {
       [] as never,
       {
         services: [['electron', options]],
-        rootDir: path.join(process.cwd(), 'test', 'fixtures', 'no-electron'),
+        rootDir: getFixtureDir('no-electron'),
       } as Options.Testrunner,
     );
     const capabilities: WebdriverIO.Capabilities[] = [

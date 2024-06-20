@@ -1,4 +1,4 @@
-import type { ElectronMockInstance } from '../types.js';
+import type { ElectronMockInstance } from '@repo/types';
 
 export function isMockFunction(fn: unknown): fn is ElectronMockInstance {
   return (

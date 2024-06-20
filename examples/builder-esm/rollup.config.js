@@ -6,7 +6,6 @@ export default [
     input: 'dist/preload.js',
     output: {
       file: 'dist/preload.bundle.cjs',
-      inlineDynamicImports: true,
       format: 'cjs',
     },
     plugins: [nodeResolve(), commonjs()],

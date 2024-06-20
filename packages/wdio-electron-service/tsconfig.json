@@ -1,14 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/cjs/preload.mts",
+    "src/cjs/main.mts",
+    "src/cjs/classes.mts",
+    "src/cjs/session.mts",
+    "src/cjs/index.mts"
+  ],
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "ESNext",
-    "outDir": "dist",
-    "target": "ES2020",
+    "target": "ES2022",
     "noEmit": false,
-    "types": ["node"],
+    "types": ["node", "electron-to-chromium"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   }
 }

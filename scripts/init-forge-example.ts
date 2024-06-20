@@ -1,8 +1,8 @@
-import shell from 'shelljs';
 import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
+import shell from 'shelljs';
 import type { PackageJson } from 'read-package-up';
 
 // read version from main package

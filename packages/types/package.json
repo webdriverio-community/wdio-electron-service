@@ -1,0 +1,32 @@
+{
+  "name": "@repo/types",
+  "version": "1.0.0",
+  "description": "Types for WebdriverIO Electron Service",
+  "private": true,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typeScriptVersion": "5.2.2",
+  "scripts": {
+    "clean": "pnpm clean:dist && pnpm dlx rimraf ./node_modules pnpm-lock.yaml",
+    "clean:dist": "pnpm dlx rimraf ./dist",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@electron-forge/shared-types": "^7.4.0",
+    "@electron/packager": "^18.3.2",
+    "@vitest/spy": "^1.6.0",
+    "@wdio/globals": "^8.27.2",
+    "@wdio/types": "^8.38.2",
+    "builder-util": "25.0.0-alpha.6",
+    "electron": "^29.3.1",
+    "read-package-up": "^11.0.0",
+    "typescript": "^5.3.2",
+    "webdriverio": "^8.27.2"
+  },
+  "files": [
+    "dist/*"
+  ]
+}

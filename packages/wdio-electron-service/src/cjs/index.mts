@@ -2,15 +2,15 @@ import { fn as vitestFn } from '@vitest/spy';
 import { browser as wdioBrowser } from '@wdio/globals';
 import type { PackageJson } from 'read-package-up';
 
-import { init as initSession } from './session.js';
-import { CJSElectronLauncher, CJSElectronService } from './classes.js';
+import { init as initSession } from './session.mjs';
+import { CJSElectronLauncher, CJSElectronService } from './classes.mjs';
 import type {
   ElectronInterface,
   ElectronServiceAPI,
   ElectronServiceOptions,
   ElectronType,
   WdioElectronWindowObj,
-} from './types.js';
+} from '@repo/types';
 
 exports.default = CJSElectronService;
 exports.launcher = CJSElectronLauncher;

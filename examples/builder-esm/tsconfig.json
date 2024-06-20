@@ -8,11 +8,9 @@
   },
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
     "types": ["node"],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"],
-    "outDir": "dist"
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   },
-  "include": ["src/*.ts"],
+  "include": ["src/*.ts", "src/preload.cts"],
   "exclude": ["node_modules"]
 }

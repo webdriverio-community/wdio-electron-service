@@ -1,8 +1,8 @@
 import type { Capabilities, Services } from '@wdio/types';
 
-import log from './log.js';
+import { log } from '@repo/utils';
 import mockStore from './mockStore.js';
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { CUSTOM_CAPABILITY_NAME } from '@repo/utils';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
 import { clearAllMocks } from './commands/clearAllMocks.js';

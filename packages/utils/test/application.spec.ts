@@ -5,6 +5,10 @@ import { describe, it, expect, vi, Mock } from 'vitest';
 
 import { getBinaryPath, getAppBuildInfo } from '../src/application.js';
 
+function getFixturePackagePath(fixtureName: string) {
+  return path.join(process.cwd(), '..', '..', 'fixtures', fixtureName, 'package.json');
+}
+
 vi.mock('node:fs/promises', async (importOriginal) => {
   const originalFs = await importOriginal<typeof import('node:fs/promises')>();
 
@@ -367,7 +371,7 @@ describe('getBinaryPath', () => {
 
 describe('getBuildToolConfig', () => {
   it('should throw an error when no build tools are found', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'no-build-tool', 'package.json');
+    const packageJsonPath = getFixturePackagePath('no-build-tool');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -380,7 +384,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when configuration for multiple build tools are found', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -393,7 +397,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when dependencies for multiple build tools are found', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-dependencies', 'package.json');
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-dependencies');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -406,7 +410,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when configuration for electron-builder is found alongside an Electron Forge dependency', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-wrong-config-1', 'package.json');
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-1');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -419,7 +423,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when configuration for Electron Forge is found alongside an electron-builder dependency', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'multiple-build-tools-wrong-config-2', 'package.json');
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-2');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -432,7 +436,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should throw an error when the app name is unable to be determined', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-inline-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     delete packageJson.name;
     delete packageJson.config.forge.packagerConfig;
@@ -447,7 +451,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config for a Forge dependency with inline config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-inline-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -463,7 +467,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config for a Forge dependency with JS config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-js-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('forge-dependency-js-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -479,7 +483,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config for a Forge dependency with linked JS config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'forge-dependency-linked-js-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('forge-dependency-linked-js-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -495,7 +499,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config for an electron-builder dependency with inline config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'builder-dependency-inline-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('builder-dependency-inline-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -511,7 +515,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config for an electron-builder dependency with JSON config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'builder-dependency-json-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('builder-dependency-json-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -527,7 +531,7 @@ describe('getBuildToolConfig', () => {
   });
 
   it('should return the expected config when there is no app name in the build tool config', async () => {
-    const packageJsonPath = path.join(__dirname, 'fixtures', 'no-app-name-in-build-tool-config', 'package.json');
+    const packageJsonPath = getFixturePackagePath('no-app-name-in-build-tool-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({

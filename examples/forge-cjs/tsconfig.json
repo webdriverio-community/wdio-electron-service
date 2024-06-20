@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.base.cjs.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2020",
+    "target": "ES2022",
     "baseUrl": ".",
     "types": [],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../node_modules/@types", "../../@types"],

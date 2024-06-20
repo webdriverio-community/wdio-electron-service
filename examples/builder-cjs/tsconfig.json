@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.base.cjs.json",
   "ts-node": {
     "esm": false,
     "compilerOptions": {
@@ -8,7 +8,6 @@
   },
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
     "types": ["node"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"],
     "outDir": "dist"

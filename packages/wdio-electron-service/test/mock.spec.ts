@@ -3,7 +3,7 @@ import { isAsyncFunction } from 'node:util/types';
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 
 import { createMock } from '../src/mock.js';
-import { ElectronInterface, ElectronType } from '../src/types.js';
+import { ElectronInterface, ElectronType } from '@repo/types';
 
 let mockFn: Mock;
 

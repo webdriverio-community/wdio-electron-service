@@ -1,6 +1,6 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { ElectronServiceMockStore } from '../src/mockStore.js';
-import { ElectronMock } from '../src/types.js';
+import { ElectronMock } from '@repo/types';
 
 let mockStore: ElectronServiceMockStore;
 
