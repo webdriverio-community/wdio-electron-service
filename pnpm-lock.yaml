@@ -451,6 +451,8 @@ importers:
         specifier: ^1.2.0
         version: 1.6.0(@types/node@20.14.2)(jsdom@24.1.0)(terser@5.31.1)
 
+  packages/utils/dist/cjs: {}
+
   packages/utils/src/cjs: {}
 
   packages/wdio-electron-service:
@@ -546,6 +548,8 @@ importers:
       webdriverio:
         specifier: ^8.27.2
         version: 8.38.2(encoding@0.1.13)(typescript@5.4.5)
+
+  packages/wdio-electron-service/dist/cjs: {}
 
   packages/wdio-electron-service/src/cjs: {}
 
