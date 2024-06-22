@@ -16,7 +16,7 @@
     "ci:builder": "pnpm build:builder && pnpm test:e2e:builder-cjs && pnpm test:e2e:builder-esm",
     "ci:mac-universal": "turbo run clean:dist --filter=example* && turbo run build:mac-universal test:e2e:mac-universal",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
-    "init-repo": "pnpm i --filter=!\"fixture-*\"",
+    "init-repo": "pnpm i --filter=!\"fixture-*\" --filter=!\"*forge*\"",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
