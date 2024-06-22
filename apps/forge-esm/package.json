@@ -41,10 +41,5 @@
   },
   "peerDependencies": {
     "typescript": "5.2.2"
-  },
-  "dependencies": {
-    "@repo/types": "file:../../packages/types",
-    "@repo/utils": "file:../../packages/utils",
-    "wdio-electron-service": "file:../../packages/wdio-electron-service/wdio-electron-service-6.6.1.tgz"
   }
 }
