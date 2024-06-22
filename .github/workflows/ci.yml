@@ -35,13 +35,15 @@ jobs:
         with:
           version: 9.3.0
           run_install: false
-      - name: Set PNPM store path
+      - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            pnpm run ci:linux
+            export DISPLAY=':99.0'
+            Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+            pnpm run ci
           else
             pnpm run ci
           fi
