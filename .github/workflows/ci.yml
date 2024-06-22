@@ -41,7 +41,7 @@ jobs:
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            xvfb-run pnpm run ci
+            pnpm run ci:linux
           else
             pnpm run ci
           fi
