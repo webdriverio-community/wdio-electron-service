@@ -10,7 +10,7 @@
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
-    "clean:dist": "pnpm dlx shx rm -rf ./dist && mkdir -p ./dist",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
     "clean:package": "pnpm pkg delete dependencies",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
