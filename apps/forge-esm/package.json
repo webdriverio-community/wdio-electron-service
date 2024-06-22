@@ -12,9 +12,11 @@
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
     "ci:mac-universal": "pnpm i && pnpm build:mac-universal && pnpm test",
-    "clean": "pnpm clean:dist && pnpm dlx rimraf ./node_modules ./package-lock.json ./wdio-logs ./out",
-    "clean:dist": "pnpm dlx rimraf ./dist && pnpm dlx mkdirp ./dist",
-    "init:forge-esm": "tsx ../../scripts/init-forge-example.ts forge-esm"
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && mkdir -p ./dist",
+    "clean:package": "pnpm pkg delete dependencies",
+    "init": "tsx ../../scripts/init-forge-example.ts forge-esm",
+    "test:e2e": "cross-env EXAMPLE_DIR=forge-esm DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
@@ -25,7 +27,7 @@
     "@wdio/globals": "^8.27.2",
     "@wdio/local-runner": "^8.27.2",
     "@wdio/mocha-framework": "^8.27.2",
-    "electron": "^29.3.1",
+    "electron": "^31.0.2",
     "global-jsdom": "^24.0.0",
     "jsdom": "^24.0.0",
     "rollup": "^4.9.5",
@@ -37,18 +39,5 @@
   },
   "peerDependencies": {
     "typescript": "5.2.2"
-  },
-  "nx": {
-    "targets": {
-      "init:forge-esm": {
-        "dependsOn": [
-          "^build",
-          "^pack"
-        ]
-      }
-    },
-    "implicitDependencies": [
-      "wdio-electron-service"
-    ]
   }
 }

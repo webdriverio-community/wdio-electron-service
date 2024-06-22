@@ -2,16 +2,19 @@ import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
+import type { NormalizedPackageJson } from 'read-package-up';
 import type { Options } from '@wdio/types';
-import type { PackageJson } from 'read-package-up';
 
-import { getBinaryPath } from './utils.js';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@repo/utils';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', 'examples', exampleDir, 'package.json'), { encoding: 'utf-8' }),
-) as PackageJson;
+const packageJsonPath = path.join(__dirname, '..', '..', 'apps', exampleDir, 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
+const pkg = { packageJson, path: packageJsonPath };
+const electronVersion = getElectronVersion(pkg);
+const appBuildInfo = await getAppBuildInfo(pkg);
+const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
 
 globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
@@ -22,7 +25,7 @@ export const config: Options.Testrunner = {
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
-        appBinaryPath: getBinaryPath(exampleDir, path.join(__dirname, '..')),
+        appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
         restoreMocks: true,
       },

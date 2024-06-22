@@ -9,7 +9,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       include: ['src/**/*'],
-      exclude: ['src/cjs/*.mts', 'src/index.ts', 'src/types.ts'],
+      exclude: ['src/cjs/*.ts', 'src/index.ts'],
       thresholds: {
         lines: 85,
         functions: 85,

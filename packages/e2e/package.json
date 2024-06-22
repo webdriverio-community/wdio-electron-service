@@ -1,23 +1,24 @@
 {
-  "name": "e2e",
+  "name": "@repo/e2e",
   "description": "WebdriverIO Electron Service E2E Test Suite",
   "type": "module",
   "private": "true",
   "scripts": {
     "ci": "pnpm i && pnpm test",
-    "clean": "pnpm dlx rimraf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
     "exec": "wdio run ./wdio.conf.ts && pnpm exec:multiremote && pnpm exec:standalone",
     "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "tsx ./standalone/api.spec.ts",
-    "exec:standalone:local": "cd .. && pnpm build && cd - && pnpm dlx rimraf ./node_modules && pnpm i && pnpm test:standalone"
+    "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
+    "@repo/utils": "workspace:*",
     "@testing-library/webdriverio": "^3.2.1",
     "@wdio/cli": "^8.27.2",
     "@wdio/globals": "^8.36.1",
     "@wdio/local-runner": "^8.27.2",
     "@wdio/mocha-framework": "^8.27.2",
-    "electron": "^29.3.1",
+    "electron": "^31.0.2",
     "ts-node": "^10.9.1",
     "wdio-electron-service": "workspace:*",
     "webdriverio": "^8.27.2"

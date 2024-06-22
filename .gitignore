@@ -123,18 +123,18 @@ wdio-multiremote-logs*
 # Electron Forge output
 out
 
-# Lockfiles - fixtures and cjs dirs contain package.json files but should not be installed
+# Lockfiles from fixtures and cjs dirs containing package.json files
+# - these packages should not be installed, can be ignored
 test/fixtures/**/pnpm-lock.yaml
-src/cjs/pnpm-lock.yaml
+**/src/cjs/pnpm-lock.yaml
 
 # CJS build files
-src/cjs/constants.ts
-src/cjs/main.ts
-src/cjs/preload.ts
-src/cjs/types.ts
+packages/wdio-electron-service/src/cjs/constants.ts
+packages/wdio-electron-service/src/cjs/main.ts
+packages/wdio-electron-service/src/cjs/preload.ts
 
-# Lerna files
-.nx
+# Turbo files
+.turbo
 
-# NPM package-lock files
+# NPM lockfiles
 package-lock.json

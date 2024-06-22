@@ -13,14 +13,15 @@ const packageJson = JSON.parse(
   }),
 ) as PackageJson;
 
-// navigate to example directory
-shell.cd(path.join(__dirname, '..', 'examples', process.argv[2] || 'forge-esm'));
+// navigate to directory of target app
+shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
 
-// remove dependencies installed with pnpm
+// remove any dependencies installed with pnpm
 shell.exec('pnpm clean');
 
-// install dependencies with npm
+// install repo dependencies with npm
 shell.exec('npm install');
 shell.exec(
-  `npm install --no-save ../../packages/wdio-electron-service/wdio-electron-service-${packageJson.version}.tgz`,
+  `npm install wdio-electron-service@file:../../packages/wdio-electron-service/wdio-electron-service-${packageJson.version}.tgz`,
 );
+shell.exec('npm install @repo/types@file:../../packages/types @repo/utils@file:../../packages/utils');

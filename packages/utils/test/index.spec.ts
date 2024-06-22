@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, it, expect, vi, Mock } from 'vitest';
 
-import { getBinaryPath, getAppBuildInfo } from '../src/application.js';
+import { getBinaryPath, getAppBuildInfo } from '../src/index.js';
 
 function getFixturePackagePath(fixtureName: string) {
   return path.join(process.cwd(), '..', '..', 'fixtures', fixtureName, 'package.json');

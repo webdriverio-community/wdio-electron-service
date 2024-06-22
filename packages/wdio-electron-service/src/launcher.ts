@@ -1,14 +1,14 @@
 import util from 'node:util';
 
-import findVersions from 'find-versions';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
 import type { Services, Options, Capabilities } from '@wdio/types';
 
-import { getBinaryPath, getAppBuildInfo } from '@repo/utils';
+import log from '@repo/utils/log';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@repo/utils';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME, log } from '@repo/utils';
+import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from '@repo/types';
 
 export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
@@ -34,19 +34,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       (await readPackageUp({ cwd: this.#projectRoot })) ||
       ({ packageJson: { dependencies: {}, devDependencies: {} } } as NormalizedReadResult);
 
-    const { dependencies, devDependencies } = pkg.packageJson;
-    const pkgElectronVersion =
-      dependencies?.electron ||
-      devDependencies?.electron ||
-      dependencies?.['electron-nightly'] ||
-      devDependencies?.['electron-nightly'];
-    const localElectronVersion = pkgElectronVersion ? findVersions(pkgElectronVersion, { loose: true })[0] : undefined;
-
     if (!caps.length) {
       const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
       log.error(noElectronCapabilityError);
       throw noElectronCapabilityError;
     }
+
+    const localElectronVersion = getElectronVersion(pkg);
 
     await Promise.all(
       caps.map(async (cap) => {

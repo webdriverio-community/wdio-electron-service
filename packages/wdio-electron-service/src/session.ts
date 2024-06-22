@@ -3,7 +3,8 @@ import type { Options } from '@wdio/types';
 
 import ElectronWorkerService from './service.js';
 import ElectronLaunchService from './launcher.js';
-import { CUSTOM_CAPABILITY_NAME, log } from '@repo/utils';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import log from '@repo/utils/log';
 import type { ElectronServiceOptions } from '@repo/types';
 
 export async function init(opts: ElectronServiceOptions) {

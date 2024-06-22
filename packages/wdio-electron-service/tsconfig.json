@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*.ts",
-    "src/cjs/preload.mts",
-    "src/cjs/main.mts",
-    "src/cjs/classes.mts",
-    "src/cjs/session.mts",
-    "src/cjs/index.mts"
+    "src/cjs/preload.ts",
+    "src/cjs/main.ts",
+    "src/cjs/classes.ts",
+    "src/cjs/session.ts",
+    "src/cjs/index.ts"
   ],
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {

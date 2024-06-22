@@ -10,8 +10,8 @@
   },
   "typeScriptVersion": "5.2.2",
   "scripts": {
-    "clean": "pnpm clean:dist && pnpm dlx rimraf ./node_modules pnpm-lock.yaml",
-    "clean:dist": "pnpm dlx rimraf ./dist",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "@wdio/globals": "^8.27.2",
     "@wdio/types": "^8.38.2",
     "builder-util": "25.0.0-alpha.6",
-    "electron": "^29.3.1",
+    "electron": "^31.0.2",
     "read-package-up": "^11.0.0",
     "typescript": "^5.3.2",
     "webdriverio": "^8.27.2"

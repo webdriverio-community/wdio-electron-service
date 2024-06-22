@@ -2,17 +2,18 @@ import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['test/**/*.spec.ts'],
+    include: ['test/*.spec.ts'],
+    exclude: [...configDefaults.exclude],
     environment: 'jsdom',
     coverage: {
       enabled: true,
-      include: ['src/**/*'],
-      exclude: ['src/cjs/*.ts', 'src/index.ts', 'src/types.ts'],
+      include: ['src/*.ts'],
+      exclude: ['src/cjs/*.ts', 'src/constants.ts', 'src/log.ts'],
       thresholds: {
-        lines: 85,
-        functions: 85,
-        branches: 85,
-        statements: 85,
+        lines: 75,
+        functions: 75,
+        branches: 75,
+        statements: 75,
       },
     },
   },

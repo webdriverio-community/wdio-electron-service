@@ -6,7 +6,6 @@ import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher.js';
 import { getAppBuildInfo, getBinaryPath } from '@repo/utils';
-import { BUILD_TOOL_DETECTION_ERROR } from '@repo/utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 import type { ElectronServiceOptions } from '../src/index.js';
 
@@ -91,7 +90,7 @@ describe('onPrepare', () => {
 
   it('should throw an error when appBinaryPath is not specified and no build tool is found', async () => {
     delete options.appBinaryPath;
-    (getAppBuildInfo as Mock).mockRejectedValueOnce(new Error(BUILD_TOOL_DETECTION_ERROR));
+    (getAppBuildInfo as Mock).mockRejectedValueOnce(new Error('b0rk - no build tool found'));
     instance = new LaunchService(
       options,
       [] as never,
@@ -109,9 +108,7 @@ describe('onPrepare', () => {
         },
       },
     ];
-    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-      'Failed setting up Electron session: SevereServiceError: No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
-    );
+    await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow('b0rk - no build tool found');
   });
 
   it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {

@@ -40,14 +40,16 @@
     "node": "^16.13 || >=18 || >=20"
   },
   "scripts": {
-    "clean": "pnpm clean:dist && pnpm dlx rimraf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
-    "clean:dist": "pnpm dlx rimraf ./dist",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc --outDir dist",
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
-    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/preload.ts ./src/cjs/preload.ts",
+    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
+    "prepack": "pnpm i @repo/types@file:../types @repo/utils@file:../utils",
     "pack": "pnpm pack",
+    "postpack": "pnpm i @repo/types@workspace:* @repo/utils@workspace:*",
     "release": "release-it --github.release",
     "release:ci": "pnpm release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "release:patch": "pnpm release patch",
@@ -79,21 +81,20 @@
     }
   },
   "dependencies": {
+    "@repo/types": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@vitest/spy": "^1.2.0",
     "@wdio/logger": "^8.16.17",
     "compare-versions": "^6.1.0",
     "debug": "^4.3.4",
     "electron-to-chromium": "^1.4.630",
     "fast-copy": "^3.0.1",
-    "find-versions": "^6.0.0",
     "node-fetch": "^3.3.2",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.0"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
-    "@repo/types": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
     "@types/node": "^20.11.0",
@@ -102,7 +103,7 @@
     "@wdio/globals": "^8.27.2",
     "@wdio/types": "^8.38.2",
     "builder-util": "25.0.0-alpha.6",
-    "electron": "^29.3.1",
+    "electron": "^31.0.2",
     "jsdom": "^24.0.0",
     "nock": "^13.3.6",
     "release-it": "^17.0.0",
@@ -115,19 +116,5 @@
   "files": [
     "bin/*",
     "dist/*"
-  ],
-  "nx": {
-    "targets": {
-      "build": {
-        "dependsOn": [
-          "^build"
-        ]
-      },
-      "pack": {
-        "dependsOn": [
-          "build"
-        ]
-      }
-    }
-  }
+  ]
 }

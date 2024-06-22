@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Channel } from '@repo/utils';
+import { Channel } from './constants.js';
 
 const invoke = async (channel: Channel, ...data: unknown[]) => ipcRenderer.invoke(channel, ...data);
 

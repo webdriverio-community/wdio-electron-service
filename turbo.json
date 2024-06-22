@@ -1,0 +1,94 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "cache": false
+    },
+    "@repo/types#build": {
+      "cache": false
+    },
+    "@repo/utils#build": {
+      "dependsOn": ["@repo/types#build"],
+      "cache": false
+    },
+    "wdio-electron-service#build": {
+      "dependsOn": ["@repo/utils#build"],
+      "cache": false
+    },
+    "pack": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
+    "clean:package": {
+      "cache": false
+    },
+    "test": {
+      "cache": false
+    },
+    "ci:e2e": {
+      "cache": false
+    },
+    "test:unit": {
+      "cache": false
+    },
+    "test:e2e": {
+      "cache": false
+    },
+    "exec": {
+      "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"],
+      "cache": false
+    },
+    "init": {
+      "cache": false
+    },
+    "example-forge-cjs#init": {
+      "dependsOn": ["wdio-electron-service#pack"],
+      "cache": false
+    },
+    "example-forge-esm#init": {
+      "dependsOn": ["wdio-electron-service#pack"],
+      "cache": false
+    },
+    "example-forge-cjs#build": {
+      "dependsOn": ["example-forge-cjs#init"],
+      "cache": false
+    },
+    "example-forge-esm#build": {
+      "dependsOn": ["example-forge-esm#init"],
+      "cache": false
+    },
+    "example-builder-esm#build": {
+      "dependsOn": ["wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-builder-cjs#build": {
+      "dependsOn": ["wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-forge-cjs#test:e2e": {
+      "dependsOn": ["example-forge-cjs#build", "wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-forge-esm#test:e2e": {
+      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-builder-cjs#test:e2e": {
+      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-builder-esm#test:e2e": {
+      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build"],
+      "cache": false
+    },
+    "//#lint": {
+      "cache": false
+    },
+    "//#format:check": {
+      "cache": false
+    }
+  }
+}
