@@ -218,8 +218,8 @@ importers:
         specifier: ^8.27.2
         version: 8.39.0
       electron:
-        specifier: ^31.0.2
-        version: 31.0.2
+        specifier: ^29.4.1
+        version: 29.4.2
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)
@@ -272,8 +272,8 @@ importers:
         specifier: ^8.27.2
         version: 8.39.0
       electron:
-        specifier: ^31.0.2
-        version: 31.0.2
+        specifier: ^29.4.1
+        version: 29.4.2
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)
@@ -2518,6 +2518,11 @@ packages:
 
   electron-to-chromium@1.4.808:
     resolution: {integrity: sha512-0ItWyhPYnww2VOuCGF4s1LTfbrdAV2ajy/TN+ZTuhR23AHI6rWHCrBXJ/uxoXOvRRqw8qjYVrG81HFI7x/2wdQ==}
+
+  electron@29.4.2:
+    resolution: {integrity: sha512-XyIkuWQguwY8hGtLg0j5Q4Fqphdbh0ctBsKCSVzJ/R7Z2+2WN/oQ1M+zYwchmfiDgiuL3EKkrBrfPdxXYdMr+A==}
+    engines: {node: '>= 12.20.55'}
+    hasBin: true
 
   electron@31.0.2:
     resolution: {integrity: sha512-55efQ5yfLN+AQHcFC00AXQqtxC3iAGaxX2GQ3EDbFJ0ca9GHNOdSXkcrdBElLleiDrR2hpXNkQxN1bDn0oxe6w==}
@@ -8271,6 +8276,14 @@ snapshots:
       - supports-color
 
   electron-to-chromium@1.4.808: {}
+
+  electron@29.4.2:
+    dependencies:
+      '@electron/get': 2.0.3
+      '@types/node': 20.14.7
+      extract-zip: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
 
   electron@31.0.2:
     dependencies:
