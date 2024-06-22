@@ -35,6 +35,9 @@ jobs:
         with:
           version: 9.3.0
           run_install: false
+      - name: Set PNPM store path
+        run: |
+          pnpm config set store-dir ~/.pnpm-store --global
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
