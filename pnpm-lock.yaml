@@ -100,8 +100,8 @@ importers:
         specifier: ^8.27.2
         version: 8.39.0
       electron:
-        specifier: ^31.0.2
-        version: 31.0.2
+        specifier: ^29.4.1
+        version: 29.4.2
       electron-builder:
         specifier: 24.13.0
         version: 24.13.0
@@ -161,8 +161,8 @@ importers:
         specifier: ^8.27.2
         version: 8.39.0
       electron:
-        specifier: ^31.0.2
-        version: 31.0.2
+        specifier: ^29.4.1
+        version: 29.4.2
       electron-builder:
         specifier: 24.13.0
         version: 24.13.0
@@ -2302,11 +2302,6 @@ packages:
 
   electron@29.4.2:
     resolution: {integrity: sha512-XyIkuWQguwY8hGtLg0j5Q4Fqphdbh0ctBsKCSVzJ/R7Z2+2WN/oQ1M+zYwchmfiDgiuL3EKkrBrfPdxXYdMr+A==}
-    engines: {node: '>= 12.20.55'}
-    hasBin: true
-
-  electron@31.0.2:
-    resolution: {integrity: sha512-55efQ5yfLN+AQHcFC00AXQqtxC3iAGaxX2GQ3EDbFJ0ca9GHNOdSXkcrdBElLleiDrR2hpXNkQxN1bDn0oxe6w==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -7658,14 +7653,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@31.0.2:
-    dependencies:
-      '@electron/get': 2.0.3
-      '@types/node': 20.14.8
-      extract-zip: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
-
   emoji-regex@10.3.0: {}
 
   emoji-regex@8.0.0: {}
@@ -9810,7 +9797,7 @@ snapshots:
   proxy-agent@6.3.0:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
       lru-cache: 7.18.3
@@ -9823,7 +9810,7 @@ snapshots:
   proxy-agent@6.3.1:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
       lru-cache: 7.18.3
