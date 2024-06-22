@@ -299,19 +299,6 @@ importers:
         specifier: ^8.27.2
         version: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
 
-  packages/constants:
-    devDependencies:
-      shx:
-        specifier: ^0.3.4
-        version: 0.3.4
-      typescript:
-        specifier: ^5.3.2
-        version: 5.5.2
-
-  packages/constants/dist/cjs: {}
-
-  packages/constants/src/cjs: {}
-
   packages/e2e:
     dependencies:
       '@repo/utils':
@@ -458,10 +445,6 @@ importers:
         specifier: ^1.2.0
         version: 1.6.0(@types/node@20.14.7)(jsdom@24.1.0)(terser@5.31.1)
 
-  packages/utils/dist/cjs: {}
-
-  packages/utils/src/cjs: {}
-
   packages/wdio-electron-service:
     dependencies:
       '@repo/types':
@@ -552,97 +535,6 @@ importers:
       webdriverio:
         specifier: ^8.27.2
         version: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
-
-  packages/wdio-electron-service/dist/cjs: {}
-
-  packages/wdio-electron-service/src/cjs: {}
-
-  packages/wdio-electron-service/test/fixtures/builder-dependency-inline-config:
-    devDependencies:
-      electron-builder:
-        specifier: ^24.6.4
-        version: 24.13.3(electron-builder-squirrel-windows@24.13.3(dmg-builder@24.13.3))
-
-  packages/wdio-electron-service/test/fixtures/builder-dependency-json-config:
-    devDependencies:
-      electron-builder:
-        specifier: ^24.6.4
-        version: 24.13.3(electron-builder-squirrel-windows@24.13.3(dmg-builder@24.13.3))
-
-  packages/wdio-electron-service/test/fixtures/electron-in-dependencies:
-    dependencies:
-      electron:
-        specifier: ^31.0.2
-        version: 31.0.2
-
-  packages/wdio-electron-service/test/fixtures/electron-in-dependencies/subpackage:
-    dependencies:
-      electron:
-        specifier: ^31.0.2
-        version: 31.0.2
-
-  packages/wdio-electron-service/test/fixtures/electron-in-dev-dependencies:
-    devDependencies:
-      electron:
-        specifier: ^31.0.2
-        version: 31.0.2
-
-  packages/wdio-electron-service/test/fixtures/electron-in-dev-dependencies/subpackage:
-    devDependencies:
-      electron:
-        specifier: ^31.0.2
-        version: 31.0.2
-
-  packages/wdio-electron-service/test/fixtures/forge-dependency-inline-config:
-    devDependencies:
-      '@electron-forge/cli':
-        specifier: ^6.4.2
-        version: 6.4.2(encoding@0.1.13)
-
-  packages/wdio-electron-service/test/fixtures/forge-dependency-js-config:
-    devDependencies:
-      '@electron-forge/cli':
-        specifier: ^6.4.2
-        version: 6.4.2(encoding@0.1.13)
-
-  packages/wdio-electron-service/test/fixtures/forge-dependency-linked-js-config:
-    devDependencies:
-      '@electron-forge/cli':
-        specifier: ^6.4.2
-        version: 6.4.2(encoding@0.1.13)
-
-  packages/wdio-electron-service/test/fixtures/multiple-build-tools-config: {}
-
-  packages/wdio-electron-service/test/fixtures/multiple-build-tools-dependencies:
-    devDependencies:
-      '@electron-forge/cli':
-        specifier: ^6.4.2
-        version: 6.4.2(encoding@0.1.13)
-      electron-builder:
-        specifier: ^24.6.4
-        version: 24.13.3(electron-builder-squirrel-windows@24.13.3(dmg-builder@24.13.3))
-
-  packages/wdio-electron-service/test/fixtures/multiple-build-tools-wrong-config-1:
-    devDependencies:
-      '@electron-forge/cli':
-        specifier: ^6.4.2
-        version: 6.4.2(encoding@0.1.13)
-
-  packages/wdio-electron-service/test/fixtures/multiple-build-tools-wrong-config-2:
-    devDependencies:
-      electron-builder:
-        specifier: ^24.6.4
-        version: 24.13.3(electron-builder-squirrel-windows@24.13.3(dmg-builder@24.13.3))
-
-  packages/wdio-electron-service/test/fixtures/no-app-name-in-build-tool-config:
-    devDependencies:
-      electron-builder:
-        specifier: ^24.6.4
-        version: 24.13.3(electron-builder-squirrel-windows@24.13.3(dmg-builder@24.13.3))
-
-  packages/wdio-electron-service/test/fixtures/no-build-tool: {}
-
-  packages/wdio-electron-service/test/fixtures/no-electron: {}
 
 packages:
 
