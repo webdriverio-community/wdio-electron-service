@@ -42,6 +42,9 @@
     "test:e2e": {
       "cache": false
     },
+    "test:e2e:linux": {
+      "cache": false
+    },
     "test:e2e:mac-universal": {
       "dependsOn": ["build:mac-universal"],
       "cache": false

@@ -14,6 +14,7 @@
     "clean:package": "pnpm pkg delete dependencies",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
+    "test:e2e:linux": "xvfb-run cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
   },
   "devDependencies": {
@@ -37,5 +38,10 @@
   },
   "peerDependencies": {
     "typescript": "5.2.2"
+  },
+  "dependencies": {
+    "@repo/types": "file:../../packages/types",
+    "@repo/utils": "file:../../packages/utils",
+    "wdio-electron-service": "file:../../packages/wdio-electron-service/wdio-electron-service-6.6.1.tgz"
   }
 }
