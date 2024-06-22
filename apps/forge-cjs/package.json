@@ -13,7 +13,8 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist && mkdir -p ./dist",
     "clean:package": "pnpm pkg delete dependencies",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
-    "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
+    "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
+    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
