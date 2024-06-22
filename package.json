@@ -9,6 +9,7 @@
     "build:builder": "turbo run build --scope=example-builder*",
     "build:forge": "turbo run pack && turbo run init:forge-examples && turbo run build --scope=example-forge*",
     "ci": "pnpm init-repo && turbo run build test:unit test:e2e lint format:check",
+    "ci:linux": "pnpm init-repo && xvfb-run turbo run build test:unit test:e2e lint format:check",
     "ci:e2e": "turbo run test:e2e --filter=!\"fixture-*\"",
     "ci:e2e:graph": "turbo run build test:e2e --filter=!\"fixture-*\" --graph=graph.png",
     "ci:forge": "pnpm build:forge && pnpm test:e2e:forge-cjs && pnpm test:e2e:forge-esm",
