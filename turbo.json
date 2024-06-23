@@ -91,15 +91,15 @@
       "cache": false
     },
     "example-forge-esm#test:e2e": {
-      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"],
+      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build"],
       "cache": false
     },
     "example-builder-cjs#test:e2e": {
-      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"],
+      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build"],
       "cache": false
     },
     "example-builder-esm#test:e2e": {
-      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "example-builder-cjs#test:e2e"],
+      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build"],
       "cache": false
     },
     "example-forge-cjs#test:e2e:ci-linux": {
@@ -107,19 +107,15 @@
       "cache": false
     },
     "example-forge-esm#test:e2e:ci-linux": {
-      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"],
+      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build"],
       "cache": false
     },
     "example-builder-cjs#test:e2e:ci-linux": {
-      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e:ci-linux"],
+      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build"],
       "cache": false
     },
     "example-builder-esm#test:e2e:ci-linux": {
-      "dependsOn": [
-        "example-builder-esm#build",
-        "wdio-electron-service#build",
-        "example-builder-cjs#test:e2e:ci-linux"
-      ],
+      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build"],
       "cache": false
     },
     "//#lint": {
