@@ -1,6 +1,7 @@
-// This config file can be converted back to ESM once we can upgrade Forge to the latest version
-// We are currently using Forge 6.x until the following issue is resolved (affecting Forge 7.x on Windows):
+// This config file can be converted back to ESM once we are able to upgrade Forge to the latest version
+// Forge v7.0.0 is required to support ESM, but 7.x is currently broken on Windows:
 // https://github.com/electron/forge/issues/3448
+
 const path = require('node:path');
 //import url from 'node:url';
 
