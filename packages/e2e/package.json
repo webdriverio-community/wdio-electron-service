@@ -7,7 +7,7 @@
     "ci": "pnpm i && pnpm test",
     "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
     "exec": "pnpm exec:main && pnpm exec:multiremote && pnpm exec:standalone",
-    "exec:ci-linux": "xvfb-run pnpm exec:main && xvfb-run pnpm exec:multiremote && xvfb-run pnpm exec:standalone",
+    "exec:ci-linux": "xvfb-run wdio run ./wdio.conf.ts && xvfb-run wdio run ./wdio.multiremote.conf.ts && xvfb-run tsx ./standalone/api.spec.ts",
     "exec:main": "wdio run ./wdio.conf.ts",
     "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "tsx ./standalone/api.spec.ts",
