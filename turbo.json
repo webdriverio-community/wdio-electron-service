@@ -41,7 +41,7 @@
     "test:e2e": {
       "cache": false
     },
-    "test:e2e:linux": {
+    "test:e2e:ci-linux": {
       "cache": false
     },
     "test:e2e:mac-universal": {
@@ -52,6 +52,10 @@
       "cache": false
     },
     "exec": {
+      "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"],
+      "cache": false
+    },
+    "exec:ci-linux": {
       "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"],
       "cache": false
     },
@@ -96,6 +100,26 @@
     },
     "example-builder-esm#test:e2e": {
       "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "example-builder-cjs#test:e2e"],
+      "cache": false
+    },
+    "example-forge-cjs#test:e2e:ci-linux": {
+      "dependsOn": ["example-forge-cjs#build", "wdio-electron-service#build"],
+      "cache": false
+    },
+    "example-forge-esm#test:e2e:ci-linux": {
+      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"],
+      "cache": false
+    },
+    "example-builder-cjs#test:e2e:ci-linux": {
+      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e:ci-linux"],
+      "cache": false
+    },
+    "example-builder-esm#test:e2e:ci-linux": {
+      "dependsOn": [
+        "example-builder-esm#build",
+        "wdio-electron-service#build",
+        "example-builder-cjs#test:e2e:ci-linux"
+      ],
       "cache": false
     },
     "//#lint": {

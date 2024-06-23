@@ -7,6 +7,7 @@
     "ci": "pnpm i && pnpm test",
     "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
     "exec": "wdio run ./wdio.conf.ts && pnpm exec:multiremote && pnpm exec:standalone",
+    "exec:ci-linux": "xvfb-run wdio run ./wdio.conf.ts && pnpm exec:multiremote && pnpm exec:standalone",
     "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "tsx ./standalone/api.spec.ts",
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
