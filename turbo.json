@@ -75,7 +75,7 @@
       "cache": false
     },
     "example-forge-esm#build": {
-      "dependsOn": ["example-forge-esm#init"],
+      "dependsOn": ["example-forge-esm#init", "example-forge-cjs#build"],
       "cache": false
     },
     "example-builder-esm#build": {
