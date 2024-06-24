@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/packager':
         specifier: ^18.3.2
-        version: 18.3.2
+        version: 18.3.3
       '@vitest/spy':
         specifier: ^1.2.0
         version: 1.6.0
@@ -213,8 +213,8 @@ packages:
     engines: {node: '>=12.0.0'}
     hasBin: true
 
-  '@electron/packager@18.3.2':
-    resolution: {integrity: sha512-orjylavppgIh24qkNpWm2B/LQUpCS/YLOoKoU+eMK/hJgIhShLDsusPIQzgUGVwNCichu8/zPAGfdQZXHG0gtw==}
+  '@electron/packager@18.3.3':
+    resolution: {integrity: sha512-hGXzwbUdxv49XvlYwlVPC6W6j6WaXUAzKkYyyTeiwdhxvHFMfQSEJxVHsQpqMFzZZ7wrr7iqiokOFZ/qkgEzUQ==}
     engines: {node: '>= 16.13.0'}
     hasBin: true
 
@@ -4310,7 +4310,7 @@ snapshots:
   '@electron-forge/shared-types@7.4.0':
     dependencies:
       '@electron-forge/tracer': 7.4.0
-      '@electron/packager': 18.3.2
+      '@electron/packager': 18.3.3
       '@electron/rebuild': 3.6.0
       listr2: 7.0.2
     transitivePeerDependencies:
@@ -4374,7 +4374,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/packager@18.3.2':
+  '@electron/packager@18.3.3':
     dependencies:
       '@electron/asar': 3.2.10
       '@electron/get': 3.0.0
@@ -4393,7 +4393,7 @@ snapshots:
       plist: 3.1.0
       resedit: 2.0.2
       resolve: 1.22.8
-      semver: 7.6.0
+      semver: 7.6.2
       yargs-parser: 21.1.1
     transitivePeerDependencies:
       - supports-color
@@ -5000,7 +5000,7 @@ snapshots:
       '@typescript-eslint/types': 7.8.0
       '@typescript-eslint/typescript-estree': 7.8.0(typescript@5.4.5)
       eslint: 8.57.0
-      semver: 7.6.0
+      semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
       - typescript
