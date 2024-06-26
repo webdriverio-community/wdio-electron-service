@@ -180,12 +180,21 @@ export type ForgeConfig = ElectronForgeConfig;
 export type BuilderArch = ArchType;
 export type ForgeArch = OfficialArch;
 
-export type AppBuildInfo = {
+export type ForgeBuildInfo = {
   appName: string;
-  config: string | ForgeConfig | BuilderConfig;
-  isBuilder: boolean;
-  isForge: boolean;
+  config: ForgeConfig;
+  isBuilder: false;
+  isForge: true;
 };
+
+export type BuilderBuildInfo = {
+  appName: string;
+  config: BuilderConfig;
+  isBuilder: true;
+  isForge: false;
+};
+
+export type AppBuildInfo = ForgeBuildInfo | BuilderBuildInfo;
 
 export type ExecuteOpts = {
   internal?: boolean;
