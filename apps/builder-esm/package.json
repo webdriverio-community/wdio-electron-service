@@ -10,8 +10,6 @@
     "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
     "build:package:mac-universal": "cp ./src/index.html ./dist && electron-builder -p never -m --universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
-    "ci": "pnpm i && pnpm build && pnpm test",
-    "ci:mac-universal": "pnpm i && pnpm build:mac-universal && pnpm test",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
     "test:e2e": "cross-env EXAMPLE_DIR=builder-esm DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
