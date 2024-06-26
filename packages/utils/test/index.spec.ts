@@ -3,7 +3,8 @@ import path from 'node:path';
 
 import { describe, it, expect, vi, Mock } from 'vitest';
 
-import { getBinaryPath, getAppBuildInfo } from '../src/index.js';
+import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '../src/index.js';
+import { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 
 function getFixturePackagePath(fixtureName: string) {
   return path.join(process.cwd(), '..', '..', 'fixtures', fixtureName, 'package.json');
@@ -544,5 +545,80 @@ describe('getBuildToolConfig', () => {
       isBuilder: true,
       isForge: false,
     });
+  });
+});
+
+describe('getElectronVersion', () => {
+  it('should return the electron version from package.json dependencies', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {
+          electron: '^29.4.1',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('29.4.1');
+  });
+
+  it('should return the electron version from package.json devDependencies', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        devDependencies: {
+          electron: '^29.4.1',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('29.4.1');
+  });
+
+  it('should return the nightly electron version from package.json dependencies', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {
+          'electron-nightly': '33.0.0-nightly.20240621',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('33.0.0-nightly.20240621');
+  });
+
+  it('should return the nightly electron version from package.json devDependencies', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        devDependencies: {
+          'electron-nightly': '33.0.0-nightly.20240621',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('33.0.0-nightly.20240621');
+  });
+
+  it('should return undefined when there is no electron dependency', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {},
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBeUndefined();
   });
 });
