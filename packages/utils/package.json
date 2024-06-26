@@ -33,9 +33,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc --outDir dist",
-    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
-    "build:cjs:compile": "tsc --build tsconfig.cjs.json",
-    "build:cjs:copy": "shx cp -f ./src/*.ts ./src/cjs",
+    "build:cjs": "tsc --build tsconfig.cjs.json",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit"
