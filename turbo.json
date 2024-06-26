@@ -56,6 +56,10 @@
     "build:mac-universal": {
       "cache": false
     },
+    "example-forge-cjs#build:mac-universal": {
+      "dependsOn": ["example-forge-esm#build"],
+      "cache": false
+    },
     "exec": {
       "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"],
       "cache": false
