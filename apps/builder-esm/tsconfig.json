@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
+  "compilerOptions": {
+    "target": "ESNext",
+    "types": ["node"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
+  },
+  "include": ["src/*.ts", "src/preload.cts"],
+  "exclude": ["node_modules"]
+}

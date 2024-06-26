@@ -7,7 +7,7 @@ Development and building the service locally requires [Node.JS](https://nodejs.o
 To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to install an appropriate version of NodeJS, then [install PNPM](https://pnpm.io/installation), check out the repo with git, and run the following command:
 
 ```bash
-pnpm init-dev
+pnpm init-repo
 ```
 
 This will initialise the repo for development, installing all sub-packages. [Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged).

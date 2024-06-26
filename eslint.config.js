@@ -3,7 +3,7 @@ import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import vitest from 'eslint-plugin-vitest';
-import * as wdio from 'eslint-plugin-wdio';
+import wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
 export default [
@@ -119,7 +119,7 @@ export default [
     files: ['example*/e2e/*.spec.ts'],
     languageOptions: {
       globals: {
-        ...wdio.configs.recommended.globals,
+        ...wdio.configs['flat/recommended'].globals,
       },
     },
     plugins: {

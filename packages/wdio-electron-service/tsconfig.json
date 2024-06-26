@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src/**/*.ts",
+    "src/cjs/preload.ts",
+    "src/cjs/main.ts",
+    "src/cjs/classes.ts",
+    "src/cjs/session.ts",
+    "src/cjs/index.ts"
+  ],
+  "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ES2022",
+    "noEmit": false,
+    "types": ["node", "electron-to-chromium"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
+  }
+}
