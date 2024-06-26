@@ -38,6 +38,11 @@
       "dependsOn": ["@repo/utils#build"],
       "cache": false
     },
+    "test:dev": {
+      "dependsOn": ["@repo/utils#build"],
+      "persistent": true,
+      "cache": false
+    },
     "test:e2e": {
       "cache": false
     },

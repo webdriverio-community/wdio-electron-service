@@ -404,6 +404,7 @@ importers:
       '@electron/packager':
         specifier: ^18.3.2
         version: 18.3.3
+<<<<<<< HEAD
       '@wdio/logger':
         specifier: ^8.16.17
         version: 8.38.0
@@ -453,6 +454,8 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+=======
+>>>>>>> origin/main
       '@vitest/spy':
         specifier: ^1.2.0
         version: 1.6.0
@@ -467,7 +470,11 @@ importers:
         version: 4.3.5
       electron-to-chromium:
         specifier: ^1.4.630
+<<<<<<< HEAD
         version: 1.4.810
+=======
+        version: 1.4.811
+>>>>>>> origin/main
       fast-copy:
         specifier: ^3.0.1
         version: 3.0.2
@@ -486,6 +493,7 @@ importers:
         version: 7.4.0
       '@testing-library/webdriverio':
         specifier: ^3.2.1
+<<<<<<< HEAD
         version: 3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.2))
       '@types/debug':
         specifier: ^4.1.10
@@ -502,6 +510,36 @@ importers:
       '@wdio/globals':
         specifier: ^8.27.2
         version: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+        version: 3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5))
+      '@types/debug':
+        specifier: ^4.1.10
+        version: 4.1.12
+      '@types/eslint-config-prettier':
+        specifier: ^6.11.2
+        version: 6.11.3
+      '@types/mocha':
+        specifier: ^10.0.5
+        version: 10.0.7
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.14.8
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.0.1
+        version: 7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/parser':
+        specifier: ^7.0.1
+        version: 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+      '@vitest/coverage-v8':
+        specifier: ^1.2.0
+        version: 1.6.0(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0))
+      '@wdio/cli':
+        specifier: ^8.27.2
+        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/globals':
+        specifier: ^8.27.2
+        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
       '@wdio/types':
         specifier: ^8.38.2
         version: 8.39.0
@@ -511,6 +549,33 @@ importers:
       electron:
         specifier: ^29.4.1
         version: 29.4.2
+<<<<<<< HEAD
+=======
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
+      eslint-config-prettier:
+        specifier: ^9.0.0
+        version: 9.1.0(eslint@8.57.0)
+      eslint-plugin-vitest:
+        specifier: ^0.5.3
+        version: 0.5.4(@typescript-eslint/eslint-plugin@7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0))
+      eslint-plugin-wdio:
+        specifier: ^8.20.0
+        version: 8.24.12
+      expect:
+        specifier: ^29.7.0
+        version: 29.7.0
+      expect-webdriverio:
+        specifier: ^4.11.7
+        version: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
+      globals:
+        specifier: ^15.0.0
+        version: 15.6.0
+      husky:
+        specifier: ^9.0.10
+        version: 9.0.11
+>>>>>>> origin/main
       jsdom:
         specifier: ^24.0.0
         version: 24.1.0
@@ -531,10 +596,17 @@ importers:
         version: 5.5.2
       vitest:
         specifier: ^1.2.0
+<<<<<<< HEAD
         version: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)(terser@5.31.1)
       webdriverio:
         specifier: ^8.27.2
         version: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+        version: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)
+      webdriverio:
+        specifier: ^8.27.2
+        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
 
 packages:
 
@@ -1254,18 +1326,24 @@ packages:
   '@types/keyv@3.1.4':
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
 
+<<<<<<< HEAD
   '@types/minimatch@5.1.2':
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
 
+=======
+>>>>>>> origin/main
   '@types/mocha@10.0.7':
     resolution: {integrity: sha512-GN8yJ1mNTcFcah/wKEFIJckJx9iJLoMSzWcfRRuxz/Jk+U6KQNnml+etbtxFK8lPjzOw3zp4Ha/kjSst9fsHYw==}
 
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
+<<<<<<< HEAD
   '@types/node-fetch@2.6.11':
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
 
+=======
+>>>>>>> origin/main
   '@types/node@20.14.8':
     resolution: {integrity: sha512-DO+2/jZinXfROG7j7WKFn/3C6nFwxy2lLpgLjEXJz+0XKphZlTLJ14mo8Vfg8X5BWN6XjyESXq+LcYdT7tR3bA==}
 
@@ -1305,8 +1383,8 @@ packages:
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
-  '@typescript-eslint/eslint-plugin@7.13.1':
-    resolution: {integrity: sha512-kZqi+WZQaZfPKnsflLJQCz6Ze9FFSMfXrrIOcyargekQxG37ES7DJNpJUE9Q/X5n3yTIP/WPutVNzgknQ7biLg==}
+  '@typescript-eslint/eslint-plugin@7.14.1':
+    resolution: {integrity: sha512-aAJd6bIf2vvQRjUG3ZkNXkmBpN+J7Wd0mfQiiVCJMu9Z5GcZZdcc0j8XwN/BM97Fl7e3SkTXODSk4VehUv7CGw==}
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
       '@typescript-eslint/parser': ^7.0.0
@@ -1316,8 +1394,8 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/parser@7.13.1':
-    resolution: {integrity: sha512-1ELDPlnLvDQ5ybTSrMhRTFDfOQEOXNM+eP+3HT/Yq7ruWpciQw+Avi73pdEbA4SooCawEWo3dtYbF68gN7Ed1A==}
+  '@typescript-eslint/parser@7.14.1':
+    resolution: {integrity: sha512-8lKUOebNLcR0D7RvlcloOacTOWzOqemWEWkKSVpMZVF/XVcwjPR+3MD08QzbW9TCGJ+DwIc6zUSGZ9vd8cO1IA==}
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
       eslint: ^8.56.0
@@ -1326,12 +1404,21 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/scope-manager@7.13.1':
-    resolution: {integrity: sha512-adbXNVEs6GmbzaCpymHQ0MB6E4TqoiVbC0iqG3uijR8ZYfpAXMGttouQzF4Oat3P2GxDVIrg7bMI/P65LiQZdg==}
+  '@typescript-eslint/scope-manager@7.14.1':
+    resolution: {integrity: sha512-gPrFSsoYcsffYXTOZ+hT7fyJr95rdVe4kGVX1ps/dJ+DfmlnjFN/GcMxXcVkeHDKqsq6uAcVaQaIi3cFffmAbA==}
     engines: {node: ^18.18.0 || >=20.0.0}
 
+<<<<<<< HEAD
   '@typescript-eslint/type-utils@7.13.1':
     resolution: {integrity: sha512-aWDbLu1s9bmgPGXSzNCxELu+0+HQOapV/y+60gPXafR8e2g1Bifxzevaa+4L2ytCWm+CHqpELq4CSoN9ELiwCg==}
+=======
+  '@typescript-eslint/scope-manager@7.8.0':
+    resolution: {integrity: sha512-viEmZ1LmwsGcnr85gIq+FCYI7nO90DVbE37/ll51hjv9aG+YZMb4WDE2fyWpUR4O/UrhGRpYXK/XajcGTk2B8g==}
+    engines: {node: ^18.18.0 || >=20.0.0}
+
+  '@typescript-eslint/type-utils@7.14.1':
+    resolution: {integrity: sha512-/MzmgNd3nnbDbOi3LfasXWWe292+iuo+umJ0bCCMCPc1jLO/z2BQmWUUUXvXLbrQey/JgzdF/OV+I5bzEGwJkQ==}
+>>>>>>> origin/main
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
       eslint: ^8.56.0
@@ -1340,12 +1427,21 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/types@7.13.1':
-    resolution: {integrity: sha512-7K7HMcSQIAND6RBL4kDl24sG/xKM13cA85dc7JnmQXw2cBDngg7c19B++JzvJHRG3zG36n9j1i451GBzRuHchw==}
+  '@typescript-eslint/types@7.14.1':
+    resolution: {integrity: sha512-mL7zNEOQybo5R3AavY+Am7KLv8BorIv7HCYS5rKoNZKQD9tsfGUpO4KdAn3sSUvTiS4PQkr2+K0KJbxj8H9NDg==}
     engines: {node: ^18.18.0 || >=20.0.0}
 
+<<<<<<< HEAD
   '@typescript-eslint/typescript-estree@7.13.1':
     resolution: {integrity: sha512-uxNr51CMV7npU1BxZzYjoVz9iyjckBduFBP0S5sLlh1tXYzHzgZ3BR9SVsNed+LmwKrmnqN3Kdl5t7eZ5TS1Yw==}
+=======
+  '@typescript-eslint/types@7.8.0':
+    resolution: {integrity: sha512-wf0peJ+ZGlcH+2ZS23aJbOv+ztjeeP8uQ9GgwMJGVLx/Nj9CJt17GWgWWoSmoRVKAX2X+7fzEnAjxdvK2gqCLw==}
+    engines: {node: ^18.18.0 || >=20.0.0}
+
+  '@typescript-eslint/typescript-estree@7.14.1':
+    resolution: {integrity: sha512-k5d0VuxViE2ulIO6FbxxSZaxqDVUyMbXcidC8rHvii0I56XZPv8cq+EhMns+d/EVIL41sMXqRbK3D10Oza1bbA==}
+>>>>>>> origin/main
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
       typescript: '*'
@@ -1353,14 +1449,39 @@ packages:
       typescript:
         optional: true
 
+<<<<<<< HEAD
   '@typescript-eslint/utils@7.13.1':
     resolution: {integrity: sha512-h5MzFBD5a/Gh/fvNdp9pTfqJAbuQC4sCN2WzuXme71lqFJsZtLbjxfSk4r3p02WIArOF9N94pdsLiGutpDbrXQ==}
+=======
+  '@typescript-eslint/typescript-estree@7.8.0':
+    resolution: {integrity: sha512-5pfUCOwK5yjPaJQNy44prjCwtr981dO8Qo9J9PwYXZ0MosgAbfEMB008dJ5sNo3+/BN6ytBPuSvXUg9SAqB0dg==}
+    engines: {node: ^18.18.0 || >=20.0.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@typescript-eslint/utils@7.14.1':
+    resolution: {integrity: sha512-CMmVVELns3nak3cpJhZosDkm63n+DwBlDX8g0k4QUa9BMnF+lH2lr3d130M1Zt1xxmB3LLk3NV7KQCq86ZBBhQ==}
+>>>>>>> origin/main
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
       eslint: ^8.56.0
 
+<<<<<<< HEAD
   '@typescript-eslint/visitor-keys@7.13.1':
     resolution: {integrity: sha512-k/Bfne7lrP7hcb7m9zSsgcBmo+8eicqqfNAJ7uUY+jkTFpKeH2FSkWpFRtimBxgkyvqfu9jTPRbYOvud6isdXA==}
+=======
+  '@typescript-eslint/utils@7.8.0':
+    resolution: {integrity: sha512-L0yFqOCflVqXxiZyXrDr80lnahQfSOfc9ELAAZ75sqicqp2i36kEZZGuUymHNFoYOqxRT05up760b4iGsl02nQ==}
+    engines: {node: ^18.18.0 || >=20.0.0}
+    peerDependencies:
+      eslint: ^8.56.0
+
+  '@typescript-eslint/visitor-keys@7.14.1':
+    resolution: {integrity: sha512-Crb+F75U1JAEtBeQGxSKwI60hZmmzaqA3z9sYsVm8X7W5cwLEm5bRe0/uXS6+MR/y8CVpKSR/ontIAIEPFcEkA==}
+>>>>>>> origin/main
     engines: {node: ^18.18.0 || >=20.0.0}
 
   '@ungap/structured-clone@1.2.0':
@@ -1397,10 +1518,13 @@ packages:
 
   '@wdio/globals@8.39.0':
     resolution: {integrity: sha512-qZo6JjRCIOtdvba6fdSqj6b91TnWXD6rmamyud93FTqbcspnhBvr8lmgOs5wnslTKeeTTigCjpsT310b4/AyHA==}
+<<<<<<< HEAD
     engines: {node: ^16.13 || >=18}
 
   '@wdio/local-runner@8.39.0':
     resolution: {integrity: sha512-TSGJVVWqshH7IO13OKw7G/364q3FczZDEh4h6bYe+GAs91KpZrEhZanyALgjh5F3crWtlffX+GA2HUwpi8X0sA==}
+=======
+>>>>>>> origin/main
     engines: {node: ^16.13 || >=18}
 
   '@wdio/logger@8.38.0':
@@ -1424,6 +1548,13 @@ packages:
 
   '@wdio/types@8.39.0':
     resolution: {integrity: sha512-86lcYROTapOJuFd9ouomFDfzDnv3Kn+jE0RmqfvN9frZAeLVJ5IKjX9M6HjplsyTZhjGO1uCaehmzx+HJus33Q==}
+<<<<<<< HEAD
+=======
+    engines: {node: ^16.13 || >=18}
+
+  '@wdio/utils@8.39.0':
+    resolution: {integrity: sha512-jY+n6jlGeK+9Tx8T659PKLwMQTGpLW5H78CSEWgZLbjbVSr2LfGR8Lx0CRktNXxAtqEVZPj16Pi74OtAhvhE6Q==}
+>>>>>>> origin/main
     engines: {node: ^16.13 || >=18}
 
   '@wdio/utils@8.39.0':
@@ -2289,6 +2420,7 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
+<<<<<<< HEAD
   electron-builder@24.13.0:
     resolution: {integrity: sha512-wbmdwBSYMsJHeqiU+PEATHEoy0orHSJtt28PtXL6+YNa5Lo0lOpkBxT+Jfs33LjpvheNLhc/68dETJOTDM8gOg==}
     engines: {node: '>=14.0.0'}
@@ -2299,6 +2431,10 @@ packages:
 
   electron-to-chromium@1.4.810:
     resolution: {integrity: sha512-Kaxhu4T7SJGpRQx99tq216gCq2nMxJo+uuT6uzz9l8TVN2stL7M06MIIXAtr9jsrLs2Glflgf2vMQRepxawOdQ==}
+=======
+  electron-to-chromium@1.4.811:
+    resolution: {integrity: sha512-CDyzcJ5XW78SHzsIOdn27z8J4ist8eaFLhdto2hSMSJQgsiwvbv2fbizcKUICryw1Wii1TI/FEkvzvJsR3awrA==}
+>>>>>>> origin/main
 
   electron@29.4.2:
     resolution: {integrity: sha512-XyIkuWQguwY8hGtLg0j5Q4Fqphdbh0ctBsKCSVzJ/R7Z2+2WN/oQ1M+zYwchmfiDgiuL3EKkrBrfPdxXYdMr+A==}
@@ -6214,12 +6350,20 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
+<<<<<<< HEAD
   '@testing-library/webdriverio@3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.2))':
+=======
+  '@testing-library/webdriverio@3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5))':
+>>>>>>> origin/main
     dependencies:
       '@babel/runtime': 7.24.7
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
+<<<<<<< HEAD
       webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
 
   '@tootallnate/once@2.0.0': {}
 
@@ -6287,17 +6431,23 @@ snapshots:
     dependencies:
       '@types/node': 20.14.8
 
+<<<<<<< HEAD
   '@types/minimatch@5.1.2': {}
 
+=======
+>>>>>>> origin/main
   '@types/mocha@10.0.7': {}
 
   '@types/ms@0.7.34': {}
 
+<<<<<<< HEAD
   '@types/node-fetch@2.6.11':
     dependencies:
       '@types/node': 20.14.8
       form-data: 4.0.0
 
+=======
+>>>>>>> origin/main
   '@types/node@20.14.8':
     dependencies:
       undici-types: 5.26.5
@@ -6343,6 +6493,7 @@ snapshots:
       '@types/node': 20.14.8
     optional: true
 
+<<<<<<< HEAD
   '@typescript-eslint/eslint-plugin@7.13.1(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)':
     dependencies:
       '@eslint-community/regexpp': 4.10.1
@@ -6351,6 +6502,16 @@ snapshots:
       '@typescript-eslint/type-utils': 7.13.1(eslint@8.57.0)(typescript@5.5.2)
       '@typescript-eslint/utils': 7.13.1(eslint@8.57.0)(typescript@5.5.2)
       '@typescript-eslint/visitor-keys': 7.13.1
+=======
+  '@typescript-eslint/eslint-plugin@7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
+    dependencies:
+      '@eslint-community/regexpp': 4.10.0
+      '@typescript-eslint/parser': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/scope-manager': 7.14.1
+      '@typescript-eslint/type-utils': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/utils': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/visitor-keys': 7.14.1
+>>>>>>> origin/main
       eslint: 8.57.0
       graphemer: 1.4.0
       ignore: 5.3.1
@@ -6361,12 +6522,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.5.2)':
     dependencies:
       '@typescript-eslint/scope-manager': 7.13.1
       '@typescript-eslint/types': 7.13.1
       '@typescript-eslint/typescript-estree': 7.13.1(typescript@5.5.2)
       '@typescript-eslint/visitor-keys': 7.13.1
+=======
+  '@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5)':
+    dependencies:
+      '@typescript-eslint/scope-manager': 7.14.1
+      '@typescript-eslint/types': 7.14.1
+      '@typescript-eslint/typescript-estree': 7.14.1(typescript@5.4.5)
+      '@typescript-eslint/visitor-keys': 7.14.1
+>>>>>>> origin/main
       debug: 4.3.5
       eslint: 8.57.0
     optionalDependencies:
@@ -6374,15 +6544,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/scope-manager@7.13.1':
+  '@typescript-eslint/scope-manager@7.14.1':
     dependencies:
-      '@typescript-eslint/types': 7.13.1
-      '@typescript-eslint/visitor-keys': 7.13.1
+      '@typescript-eslint/types': 7.14.1
+      '@typescript-eslint/visitor-keys': 7.14.1
 
   '@typescript-eslint/type-utils@7.13.1(eslint@8.57.0)(typescript@5.5.2)':
     dependencies:
+<<<<<<< HEAD
       '@typescript-eslint/typescript-estree': 7.13.1(typescript@5.5.2)
       '@typescript-eslint/utils': 7.13.1(eslint@8.57.0)(typescript@5.5.2)
+=======
+      '@typescript-eslint/types': 7.8.0
+      '@typescript-eslint/visitor-keys': 7.8.0
+
+  '@typescript-eslint/type-utils@7.14.1(eslint@8.57.0)(typescript@5.4.5)':
+    dependencies:
+      '@typescript-eslint/typescript-estree': 7.14.1(typescript@5.4.5)
+      '@typescript-eslint/utils': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+>>>>>>> origin/main
       debug: 4.3.5
       eslint: 8.57.0
       ts-api-utils: 1.3.0(typescript@5.5.2)
@@ -6391,12 +6571,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/types@7.13.1': {}
+  '@typescript-eslint/types@7.14.1': {}
 
+<<<<<<< HEAD
   '@typescript-eslint/typescript-estree@7.13.1(typescript@5.5.2)':
+=======
+  '@typescript-eslint/types@7.8.0': {}
+
+  '@typescript-eslint/typescript-estree@7.14.1(typescript@5.4.5)':
+>>>>>>> origin/main
     dependencies:
-      '@typescript-eslint/types': 7.13.1
-      '@typescript-eslint/visitor-keys': 7.13.1
+      '@typescript-eslint/types': 7.14.1
+      '@typescript-eslint/visitor-keys': 7.14.1
       debug: 4.3.5
       globby: 11.1.0
       is-glob: 4.0.3
@@ -6408,25 +6594,71 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@typescript-eslint/utils@7.13.1(eslint@8.57.0)(typescript@5.5.2)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
       '@typescript-eslint/scope-manager': 7.13.1
       '@typescript-eslint/types': 7.13.1
       '@typescript-eslint/typescript-estree': 7.13.1(typescript@5.5.2)
+=======
+  '@typescript-eslint/typescript-estree@7.8.0(typescript@5.4.5)':
+    dependencies:
+      '@typescript-eslint/types': 7.8.0
+      '@typescript-eslint/visitor-keys': 7.8.0
+      debug: 4.3.5
+      globby: 11.1.0
+      is-glob: 4.0.3
+      minimatch: 9.0.4
+      semver: 7.6.2
+      ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
+      typescript: 5.4.5
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/utils@7.14.1(eslint@8.57.0)(typescript@5.4.5)':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
+      '@typescript-eslint/scope-manager': 7.14.1
+      '@typescript-eslint/types': 7.14.1
+      '@typescript-eslint/typescript-estree': 7.14.1(typescript@5.4.5)
+>>>>>>> origin/main
       eslint: 8.57.0
     transitivePeerDependencies:
       - supports-color
       - typescript
 
+<<<<<<< HEAD
   '@typescript-eslint/visitor-keys@7.13.1':
+=======
+  '@typescript-eslint/utils@7.8.0(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
-      '@typescript-eslint/types': 7.13.1
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
+      '@types/json-schema': 7.0.15
+      '@types/semver': 7.5.8
+      '@typescript-eslint/scope-manager': 7.8.0
+      '@typescript-eslint/types': 7.8.0
+      '@typescript-eslint/typescript-estree': 7.8.0(typescript@5.4.5)
+      eslint: 8.57.0
+      semver: 7.6.2
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
+  '@typescript-eslint/visitor-keys@7.14.1':
+>>>>>>> origin/main
+    dependencies:
+      '@typescript-eslint/types': 7.14.1
       eslint-visitor-keys: 3.4.3
 
   '@ungap/structured-clone@1.2.0': {}
 
+<<<<<<< HEAD
   '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0)(terser@5.31.1))':
+=======
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0))':
+>>>>>>> origin/main
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -6441,7 +6673,11 @@ snapshots:
       std-env: 3.7.0
       strip-literal: 2.1.0
       test-exclude: 6.0.0
+<<<<<<< HEAD
       vitest: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)(terser@5.31.1)
+=======
+      vitest: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - supports-color
 
@@ -6474,12 +6710,20 @@ snapshots:
       loupe: 2.3.7
       pretty-format: 29.7.0
 
+<<<<<<< HEAD
   '@wdio/cli@8.39.0(encoding@0.1.13)(typescript@5.5.2)':
+=======
+  '@wdio/cli@8.39.0(encoding@0.1.13)(typescript@5.4.5)':
+>>>>>>> origin/main
     dependencies:
       '@types/node': 20.14.8
       '@vitest/snapshot': 1.6.0
       '@wdio/config': 8.39.0
+<<<<<<< HEAD
       '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
       '@wdio/types': 8.39.0
@@ -6498,7 +6742,11 @@ snapshots:
       lodash.union: 4.6.0
       read-pkg-up: 10.0.0
       recursive-readdir: 2.2.3
+<<<<<<< HEAD
       webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -6520,6 +6768,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@wdio/globals@8.39.0(encoding@0.1.13)(typescript@5.5.2)':
     optionalDependencies:
       expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.5.2)
@@ -6542,6 +6791,12 @@ snapshots:
       async-exit-hook: 2.0.1
       split2: 4.2.0
       stream-buffers: 3.0.3
+=======
+  '@wdio/globals@8.39.0(encoding@0.1.13)(typescript@5.4.5)':
+    optionalDependencies:
+      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -6577,6 +6832,7 @@ snapshots:
   '@wdio/runner@8.39.0(encoding@0.1.13)(typescript@5.5.2)':
     dependencies:
       '@types/node': 20.14.8
+<<<<<<< HEAD
       '@wdio/config': 8.39.0
       '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.2)
       '@wdio/logger': 8.38.0
@@ -6594,6 +6850,8 @@ snapshots:
       - supports-color
       - typescript
       - utf-8-validate
+=======
+>>>>>>> origin/main
 
   '@wdio/types@8.39.0':
     dependencies:
@@ -7615,6 +7873,7 @@ snapshots:
     dependencies:
       jake: 10.9.1
 
+<<<<<<< HEAD
   electron-builder@24.13.0:
     dependencies:
       app-builder-lib: 24.13.0
@@ -7644,6 +7903,9 @@ snapshots:
       - supports-color
 
   electron-to-chromium@1.4.810: {}
+=======
+  electron-to-chromium@1.4.811: {}
+>>>>>>> origin/main
 
   electron@29.4.2:
     dependencies:
@@ -7823,13 +8085,22 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
+<<<<<<< HEAD
   eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.13.1(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0)):
+=======
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0)):
+>>>>>>> origin/main
     dependencies:
       '@typescript-eslint/utils': 7.13.1(eslint@8.57.0)(typescript@5.5.2)
       eslint: 8.57.0
     optionalDependencies:
+<<<<<<< HEAD
       '@typescript-eslint/eslint-plugin': 7.13.1(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)
       vitest: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)(terser@5.31.1)
+=======
+      '@typescript-eslint/eslint-plugin': 7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+      vitest: 1.6.0(@types/node@20.14.8)(jsdom@24.1.0)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -7970,9 +8241,15 @@ snapshots:
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
     optionalDependencies:
+<<<<<<< HEAD
       '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.2)
       '@wdio/logger': 8.38.0
       webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.2)
+=======
+      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/logger': 8.38.0
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -10831,6 +11108,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
+<<<<<<< HEAD
   verror@1.10.1:
     dependencies:
       assert-plus: 1.0.0
@@ -10839,12 +11117,20 @@ snapshots:
     optional: true
 
   vite-node@1.6.0(@types/node@20.14.8)(terser@5.31.1):
+=======
+  vite-node@1.6.0(@types/node@20.14.8):
+>>>>>>> origin/main
     dependencies:
       cac: 6.7.14
       debug: 4.3.5
       pathe: 1.1.2
+<<<<<<< HEAD
       picocolors: 1.0.1
       vite: 5.3.1(@types/node@20.14.8)(terser@5.31.1)
+=======
+      picocolors: 1.0.0
+      vite: 5.2.11(@types/node@20.14.8)
+>>>>>>> origin/main
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -10855,7 +11141,11 @@ snapshots:
       - supports-color
       - terser
 
+<<<<<<< HEAD
   vite@5.3.1(@types/node@20.14.8)(terser@5.31.1):
+=======
+  vite@5.2.11(@types/node@20.14.8):
+>>>>>>> origin/main
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.38
@@ -10865,7 +11155,11 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.31.1
 
+<<<<<<< HEAD
   vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0)(terser@5.31.1):
+=======
+  vitest@1.6.0(@types/node@20.14.8)(jsdom@24.1.0):
+>>>>>>> origin/main
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -10884,8 +11178,13 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.8.0
       tinypool: 0.8.4
+<<<<<<< HEAD
       vite: 5.3.1(@types/node@20.14.8)(terser@5.31.1)
       vite-node: 1.6.0(@types/node@20.14.8)(terser@5.31.1)
+=======
+      vite: 5.2.11(@types/node@20.14.8)
+      vite-node: 1.6.0(@types/node@20.14.8)
+>>>>>>> origin/main
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 20.14.8
@@ -10940,7 +11239,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+<<<<<<< HEAD
   webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.2):
+=======
+  webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5):
+>>>>>>> origin/main
     dependencies:
       '@types/node': 20.14.8
       '@wdio/config': 8.39.0

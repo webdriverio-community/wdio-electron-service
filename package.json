@@ -22,7 +22,7 @@
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "prepare": "husky",
-    "test:dev": "turbo run test:unit:dev --filter=wdio-electron-service",
+    "test:dev": "turbo run test:dev",
     "test": "turbo run test test:e2e",
     "test:e2e": "turbo run test:e2e:forge test:e2e:builder",
     "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm init-repo && pnpm ci:e2e && turbo run clean:package || turbo run clean:package",
