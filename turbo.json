@@ -57,7 +57,7 @@
       "cache": false
     },
     "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["example-forge-esm#build"],
+      "dependsOn": ["example-forge-esm#build:mac-universal"],
       "cache": false
     },
     "exec": {
@@ -92,7 +92,7 @@
       "cache": false
     },
     "example-builder-cjs#build": {
-      "dependsOn": ["wdio-electron-service#build"],
+      "dependsOn": ["wdio-electron-service#build", "example-builder-esm#build"],
       "cache": false
     },
     "example-forge-cjs#test:e2e": {
