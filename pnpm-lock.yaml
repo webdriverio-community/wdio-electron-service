@@ -77,7 +77,7 @@ importers:
         version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
       '@wdio/types':
         specifier: ^8.27.2
-        version: 8.38.2
+        version: 8.39.0
       builder-util:
         specifier: 25.0.0-alpha.9
         version: 25.0.0-alpha.9
@@ -886,10 +886,6 @@ packages:
 
   '@wdio/repl@8.24.12':
     resolution: {integrity: sha512-321F3sWafnlw93uRTSjEBVuvWCxTkWNDs7ektQS15drrroL3TMeFOynu4rDrIz0jXD9Vas0HCD2Tq/P0uxFLdw==}
-    engines: {node: ^16.13 || >=18}
-
-  '@wdio/types@8.38.2':
-    resolution: {integrity: sha512-+wj1c1OSLdnN4WO5b44Ih4263dTl/eSwMGSI4/pCgIyXIuYQH38JQ+6WRa+c8vJEskUzboq2cSgEQumVZ39ozQ==}
     engines: {node: ^16.13 || >=18}
 
   '@wdio/types@8.39.0':
@@ -5137,10 +5133,6 @@ snapshots:
   '@wdio/protocols@8.38.0': {}
 
   '@wdio/repl@8.24.12':
-    dependencies:
-      '@types/node': 20.14.8
-
-  '@wdio/types@8.38.2':
     dependencies:
       '@types/node': 20.14.8
 
