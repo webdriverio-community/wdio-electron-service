@@ -47,7 +47,7 @@ importers:
         version: 9.5.0
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5))
+        version: 3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3))
       '@types/debug':
         specifier: ^4.1.10
         version: 4.1.12
@@ -62,19 +62,19 @@ importers:
         version: 20.14.9
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.0.1
-        version: 7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)
       '@typescript-eslint/parser':
         specifier: ^7.0.1
-        version: 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.14.1(eslint@8.57.0)(typescript@5.5.3)
       '@vitest/coverage-v8':
         specifier: ^1.2.0
         version: 1.6.0(vitest@1.6.0(@types/node@20.14.9)(jsdom@24.1.0))
       '@wdio/cli':
         specifier: ^8.27.2
-        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+        version: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
         specifier: ^8.27.2
-        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+        version: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/types':
         specifier: ^8.27.2
         version: 8.39.0
@@ -95,7 +95,7 @@ importers:
         version: 9.1.0(eslint@8.57.0)
       eslint-plugin-vitest:
         specifier: ^0.5.3
-        version: 0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.6.0(@types/node@20.14.9)(jsdom@24.1.0))
+        version: 0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)(vitest@1.6.0(@types/node@20.14.9)(jsdom@24.1.0))
       eslint-plugin-wdio:
         specifier: ^8.20.0
         version: 8.24.12
@@ -104,7 +104,7 @@ importers:
         version: 29.7.0
       expect-webdriverio:
         specifier: ^4.11.7
-        version: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
+        version: 4.15.1(encoding@0.1.13)(typescript@5.5.3)
       globals:
         specifier: ^15.0.0
         version: 15.6.0
@@ -125,7 +125,7 @@ importers:
         version: 3.3.2
       release-it:
         specifier: ^17.0.0
-        version: 17.4.1(typescript@5.4.5)
+        version: 17.4.1(typescript@5.5.3)
       rimraf:
         specifier: ^5.0.5
         version: 5.0.7
@@ -134,13 +134,13 @@ importers:
         version: 0.3.4
       typescript:
         specifier: ^5.3.2
-        version: 5.4.5
+        version: 5.5.3
       vitest:
         specifier: ^1.2.0
         version: 1.6.0(@types/node@20.14.9)(jsdom@24.1.0)
       webdriverio:
         specifier: ^8.27.2
-        version: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+        version: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
 
 packages:
 
@@ -3843,8 +3843,8 @@ packages:
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
 
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+  typescript@5.5.3:
+    resolution: {integrity: sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -4617,7 +4617,7 @@ snapshots:
       prettier: 2.8.1
       spacetrim: 0.11.23
 
-  '@puppeteer/browsers@1.4.6(typescript@5.4.5)':
+  '@puppeteer/browsers@1.4.6(typescript@5.5.3)':
     dependencies:
       debug: 4.3.4
       extract-zip: 2.0.1
@@ -4627,7 +4627,7 @@ snapshots:
       unbzip2-stream: 1.4.3
       yargs: 17.7.1
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4718,12 +4718,12 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/webdriverio@3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5))':
+  '@testing-library/webdriverio@3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3))':
     dependencies:
       '@babel/runtime': 7.24.5
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
 
   '@tootallnate/once@2.0.0': {}
 
@@ -4799,34 +4799,34 @@ snapshots:
       '@types/node': 20.14.9
     optional: true
 
-  '@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
-      '@typescript-eslint/parser': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/parser': 7.14.1(eslint@8.57.0)(typescript@5.5.3)
       '@typescript-eslint/scope-manager': 7.15.0
-      '@typescript-eslint/type-utils': 7.15.0(eslint@8.57.0)(typescript@5.4.5)
-      '@typescript-eslint/utils': 7.15.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/type-utils': 7.15.0(eslint@8.57.0)(typescript@5.5.3)
+      '@typescript-eslint/utils': 7.15.0(eslint@8.57.0)(typescript@5.5.3)
       '@typescript-eslint/visitor-keys': 7.15.0
       eslint: 8.57.0
       graphemer: 1.4.0
       ignore: 5.3.1
       natural-compare: 1.4.0
-      ts-api-utils: 1.3.0(typescript@5.4.5)
+      ts-api-utils: 1.3.0(typescript@5.5.3)
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 7.14.1
       '@typescript-eslint/types': 7.14.1
-      '@typescript-eslint/typescript-estree': 7.14.1(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 7.14.1(typescript@5.5.3)
       '@typescript-eslint/visitor-keys': 7.14.1
       debug: 4.3.5
       eslint: 8.57.0
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4845,15 +4845,15 @@ snapshots:
       '@typescript-eslint/types': 7.8.0
       '@typescript-eslint/visitor-keys': 7.8.0
 
-  '@typescript-eslint/type-utils@7.15.0(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/type-utils@7.15.0(eslint@8.57.0)(typescript@5.5.3)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.4.5)
-      '@typescript-eslint/utils': 7.15.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.5.3)
+      '@typescript-eslint/utils': 7.15.0(eslint@8.57.0)(typescript@5.5.3)
       debug: 4.3.5
       eslint: 8.57.0
-      ts-api-utils: 1.3.0(typescript@5.4.5)
+      ts-api-utils: 1.3.0(typescript@5.5.3)
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4863,7 +4863,7 @@ snapshots:
 
   '@typescript-eslint/types@7.8.0': {}
 
-  '@typescript-eslint/typescript-estree@7.14.1(typescript@5.4.5)':
+  '@typescript-eslint/typescript-estree@7.14.1(typescript@5.5.3)':
     dependencies:
       '@typescript-eslint/types': 7.14.1
       '@typescript-eslint/visitor-keys': 7.14.1
@@ -4872,13 +4872,13 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.4
       semver: 7.6.2
-      ts-api-utils: 1.3.0(typescript@5.4.5)
+      ts-api-utils: 1.3.0(typescript@5.5.3)
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/typescript-estree@7.15.0(typescript@5.4.5)':
+  '@typescript-eslint/typescript-estree@7.15.0(typescript@5.5.3)':
     dependencies:
       '@typescript-eslint/types': 7.15.0
       '@typescript-eslint/visitor-keys': 7.15.0
@@ -4887,13 +4887,13 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.4
       semver: 7.6.2
-      ts-api-utils: 1.3.0(typescript@5.4.5)
+      ts-api-utils: 1.3.0(typescript@5.5.3)
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/typescript-estree@7.8.0(typescript@5.4.5)':
+  '@typescript-eslint/typescript-estree@7.8.0(typescript@5.5.3)':
     dependencies:
       '@typescript-eslint/types': 7.8.0
       '@typescript-eslint/visitor-keys': 7.8.0
@@ -4902,31 +4902,31 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.4
       semver: 7.6.2
-      ts-api-utils: 1.3.0(typescript@5.4.5)
+      ts-api-utils: 1.3.0(typescript@5.5.3)
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@7.15.0(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/utils@7.15.0(eslint@8.57.0)(typescript@5.5.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
       '@typescript-eslint/scope-manager': 7.15.0
       '@typescript-eslint/types': 7.15.0
-      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.5.3)
       eslint: 8.57.0
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  '@typescript-eslint/utils@7.8.0(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/utils@7.8.0(eslint@8.57.0)(typescript@5.5.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
       '@types/json-schema': 7.0.15
       '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 7.8.0
       '@typescript-eslint/types': 7.8.0
-      '@typescript-eslint/typescript-estree': 7.8.0(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 7.8.0(typescript@5.5.3)
       eslint: 8.57.0
       semver: 7.6.2
     transitivePeerDependencies:
@@ -4998,12 +4998,12 @@ snapshots:
       loupe: 2.3.7
       pretty-format: 29.7.0
 
-  '@wdio/cli@8.39.0(encoding@0.1.13)(typescript@5.4.5)':
+  '@wdio/cli@8.39.0(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@types/node': 20.14.9
       '@vitest/snapshot': 1.6.0
       '@wdio/config': 8.39.0
-      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
       '@wdio/types': 8.39.0
@@ -5022,7 +5022,7 @@ snapshots:
       lodash.union: 4.6.0
       read-pkg-up: 10.0.0
       recursive-readdir: 2.2.3
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -5044,10 +5044,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wdio/globals@8.39.0(encoding@0.1.13)(typescript@5.4.5)':
+  '@wdio/globals@8.39.0(encoding@0.1.13)(typescript@5.5.3)':
     optionalDependencies:
-      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.4.5)
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.5.3)
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -5578,14 +5578,14 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig@9.0.0(typescript@5.4.5):
+  cosmiconfig@9.0.0(typescript@5.5.3):
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       parse-json: 5.2.0
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
 
   crc-32@1.2.2: {}
 
@@ -5887,12 +5887,12 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.6.0(@types/node@20.14.9)(jsdom@24.1.0)):
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)(vitest@1.6.0(@types/node@20.14.9)(jsdom@24.1.0)):
     dependencies:
-      '@typescript-eslint/utils': 7.8.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/utils': 7.8.0(eslint@8.57.0)(typescript@5.5.3)
       eslint: 8.57.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/eslint-plugin': 7.15.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)
       vitest: 1.6.0(@types/node@20.14.9)(jsdom@24.1.0)
     transitivePeerDependencies:
       - supports-color
@@ -6004,16 +6004,16 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
-  expect-webdriverio@4.15.1(encoding@0.1.13)(typescript@5.4.5):
+  expect-webdriverio@4.15.1(encoding@0.1.13)(typescript@5.5.3):
     dependencies:
       '@vitest/snapshot': 1.6.0
       expect: 29.7.0
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
     optionalDependencies:
-      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/logger': 8.38.0
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.4.5)
+      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -7655,16 +7655,16 @@ snapshots:
     dependencies:
       escape-goat: 4.0.0
 
-  puppeteer-core@20.9.0(encoding@0.1.13)(typescript@5.4.5):
+  puppeteer-core@20.9.0(encoding@0.1.13)(typescript@5.5.3):
     dependencies:
-      '@puppeteer/browsers': 1.4.6(typescript@5.4.5)
+      '@puppeteer/browsers': 1.4.6(typescript@5.5.3)
       chromium-bidi: 0.4.16(devtools-protocol@0.0.1147663)
       cross-fetch: 4.0.0(encoding@0.1.13)
       debug: 4.3.4
       devtools-protocol: 0.0.1147663
       ws: 8.13.0
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -7793,13 +7793,13 @@ snapshots:
     dependencies:
       rc: 1.2.8
 
-  release-it@17.4.1(typescript@5.4.5):
+  release-it@17.4.1(typescript@5.5.3):
     dependencies:
       '@iarna/toml': 2.2.5
       '@octokit/rest': 20.1.1
       async-retry: 1.3.3
       chalk: 5.3.0
-      cosmiconfig: 9.0.0(typescript@5.4.5)
+      cosmiconfig: 9.0.0(typescript@5.5.3)
       execa: 8.0.1
       git-url-parse: 14.0.0
       globby: 14.0.2
@@ -8282,9 +8282,9 @@ snapshots:
     dependencies:
       escape-string-regexp: 1.0.5
 
-  ts-api-utils@1.3.0(typescript@5.4.5):
+  ts-api-utils@1.3.0(typescript@5.5.3):
     dependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
 
   tslib@2.6.2: {}
 
@@ -8315,7 +8315,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typescript@5.4.5: {}
+  typescript@5.5.3: {}
 
   ufo@1.5.3: {}
 
@@ -8487,7 +8487,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  webdriverio@8.39.0(encoding@0.1.13)(typescript@5.4.5):
+  webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3):
     dependencies:
       '@types/node': 20.14.9
       '@wdio/config': 8.39.0
@@ -8508,7 +8508,7 @@ snapshots:
       lodash.clonedeep: 4.5.0
       lodash.zip: 4.2.0
       minimatch: 9.0.4
-      puppeteer-core: 20.9.0(encoding@0.1.13)(typescript@5.4.5)
+      puppeteer-core: 20.9.0(encoding@0.1.13)(typescript@5.5.3)
       query-selector-shadow-dom: 1.0.1
       resq: 1.11.0
       rgb2hex: 0.2.5
