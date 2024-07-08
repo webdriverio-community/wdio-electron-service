@@ -71,7 +71,7 @@ importers:
         version: 1.6.0(vitest@1.6.0(@types/node@20.14.10)(jsdom@24.1.0))
       '@wdio/cli':
         specifier: ^8.27.2
-        version: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+        version: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
         specifier: ^8.27.2
         version: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
@@ -864,17 +864,13 @@ packages:
   '@vitest/utils@1.6.0':
     resolution: {integrity: sha512-21cPiuGMoMZwiOHa2i4LXkMkMkCGzA+MVFV70jRwHo95dL4x/ts5GZhML1QWuy7yfp3WzK3lRvZi3JnXTYqrBw==}
 
-  '@wdio/cli@8.39.0':
-    resolution: {integrity: sha512-kAd+8TYjJWRN6gZaRGiSu6Yj3k4+ULRt2NWAgNtGhnr0/Rwlr3j9bjAIhXGL574VqrH+rSnrevDdeGuLcZa1xg==}
+  '@wdio/cli@8.39.1':
+    resolution: {integrity: sha512-CUze/nbOMzgSEp+Qo27dnM5IhlOPAiBJCPX3xO85/kjweqqxmAB1QBKww1Mz9YlNIXineaHrkgqlUQIvEqOJdQ==}
     engines: {node: ^16.13 || >=18}
     hasBin: true
 
   '@wdio/config@8.39.0':
     resolution: {integrity: sha512-yNuGPMPibY91s936gnJCHWlStvIyDrwLwGfLC/NCdTin4F7HL4Gp5iJnHWkJFty1/DfFi8jjoIUBNLM8HEez+A==}
-    engines: {node: ^16.13 || >=18}
-
-  '@wdio/globals@8.39.0':
-    resolution: {integrity: sha512-qZo6JjRCIOtdvba6fdSqj6b91TnWXD6rmamyud93FTqbcspnhBvr8lmgOs5wnslTKeeTTigCjpsT310b4/AyHA==}
     engines: {node: ^16.13 || >=18}
 
   '@wdio/globals@8.39.1':
@@ -4963,12 +4959,12 @@ snapshots:
       loupe: 2.3.7
       pretty-format: 29.7.0
 
-  '@wdio/cli@8.39.0(encoding@0.1.13)(typescript@5.5.3)':
+  '@wdio/cli@8.39.1(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@types/node': 20.14.10
       '@vitest/snapshot': 1.6.0
       '@wdio/config': 8.39.0
-      '@wdio/globals': 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+      '@wdio/globals': 8.39.1(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
       '@wdio/types': 8.39.0
@@ -4987,7 +4983,7 @@ snapshots:
       lodash.union: 4.6.0
       read-pkg-up: 10.0.0
       recursive-readdir: 2.2.3
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+      webdriverio: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -5008,18 +5004,6 @@ snapshots:
       import-meta-resolve: 4.1.0
     transitivePeerDependencies:
       - supports-color
-
-  '@wdio/globals@8.39.0(encoding@0.1.13)(typescript@5.5.3)':
-    optionalDependencies:
-      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.5.3)
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
-    transitivePeerDependencies:
-      - bufferutil
-      - devtools
-      - encoding
-      - supports-color
-      - typescript
-      - utf-8-validate
 
   '@wdio/globals@8.39.1(encoding@0.1.13)(typescript@5.5.3)':
     optionalDependencies:
@@ -8531,7 +8515,6 @@ snapshots:
       - supports-color
       - typescript
       - utf-8-validate
-    optional: true
 
   webidl-conversions@3.0.1: {}
 
