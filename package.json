@@ -18,6 +18,7 @@
     "ci:builder": "pnpm build:builder && pnpm test:e2e:builder-cjs && pnpm test:e2e:builder-esm",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "dev": "turbo watch wdio-electron-service#build",
+    "graph": "pnpm ci:e2e:graph && pnpm ci:e2e-mac-universal:graph",
     "init-repo": "pnpm i --filter=!\"*forge*\"",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
