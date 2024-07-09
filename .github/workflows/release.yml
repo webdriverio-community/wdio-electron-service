@@ -41,7 +41,7 @@ jobs:
           node-version: 18.x
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.3.0
+          version: 9.5.0
           run_install: false
       - name: NPM Setup
         run: |

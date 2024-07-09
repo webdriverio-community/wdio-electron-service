@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.3.0
+          version: 9.5.0
           run_install: false
       - name: Set pnpm store path
         run: |
