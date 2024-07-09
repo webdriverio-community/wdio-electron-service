@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 16) with [PNPM](https://pnpm.io) as a package manager.
+Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 18) with [PNPM](https://pnpm.io) as a package manager.
 
 To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to install an appropriate version of NodeJS, then [install PNPM](https://pnpm.io/installation), check out the repo with git, and run the following command:
 
