@@ -70,7 +70,7 @@
   ],
   "peerDependencies": {
     "electron": "*",
-    "webdriverio": ">8.15.0"
+    "webdriverio": ">9.0.0"
   },
   "peerDependenciesMeta": {
     "electron": {
@@ -110,7 +110,7 @@
     "shx": "^0.3.4",
     "typescript": "^5.5.3",
     "vitest": "^2.0.1",
-    "webdriverio": "^8.39.1"
+    "webdriverio": "9.0.0-alpha.351"
   },
   "files": [
     "bin/*",
