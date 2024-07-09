@@ -45,7 +45,7 @@ export function getElectronCapabilities(caps: Capabilities.TestrunnerCapabilitie
    * }
    * ```
    */
-  const w3cCaps = (caps as unknown as Capabilities.W3CCapabilities).alwaysMatch;
+  const w3cCaps = (caps as Capabilities.W3CCapabilities).alwaysMatch;
   if (w3cCaps && typeof w3cCaps.browserName === 'string' && isElectron(w3cCaps)) {
     return [w3cCaps];
   }
