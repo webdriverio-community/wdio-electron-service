@@ -27,7 +27,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
     const capsList = Array.isArray(capabilities)
       ? capabilities
-      : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
+      : Object.values(capabilities).map((multiremoteOption) => (multiremoteOption as any).capabilities);
 
     const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebdriverIO.Capabilities);
     const pkg =
