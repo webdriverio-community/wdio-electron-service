@@ -11,7 +11,7 @@ import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from '@repo/types';
 
-export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
+export type ElectronServiceCapabilities = Capabilities.TestrunnerCapabilities & {
   [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
 };
 
