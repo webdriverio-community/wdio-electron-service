@@ -1,11 +1,19 @@
-import { ElectronServiceOptions } from '@repo/types';
 import type { Capabilities, Options, Services } from '@wdio/types';
+
+// TODO: We shouldn't need this workaround any more but removing it causes compilation failures
+// Workaround for ts-node converting dynamic imports to requires
+// see https://github.com/TypeStrong/ts-node/discussions/1290
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 
 export class CJSElectronLauncher {
   private instance: Promise<Services.ServiceInstance>;
 
-  constructor(options: ElectronServiceOptions, caps: unknown, config: Options.Testrunner) {
-    this.instance = import('../launcher.js').then(({ default: Launcher }) => new Launcher(options, caps, config));
+  constructor(options: unknown, caps: unknown, config: Options.Testrunner) {
+    this.instance = (async () => {
+      const importPath = '../launcher.js';
+      const { default: Launcher } = await dynamicImport(importPath);
+      return new Launcher(options, caps, config);
+    })();
   }
 
   async onPrepare(config: Options.Testrunner, capabilities: Capabilities.TestrunnerCapabilities) {
@@ -17,8 +25,12 @@ export class CJSElectronLauncher {
 export class CJSElectronService {
   private instance: Promise<Services.ServiceInstance>;
 
-  constructor(globalOptions: ElectronServiceOptions) {
-    this.instance = import('../service.js').then(({ default: Service }) => new Service(globalOptions));
+  constructor(globalOptions: unknown) {
+    this.instance = (async () => {
+      const importPath = '../service.js';
+      const { default: Service } = await dynamicImport(importPath);
+      return new Service(globalOptions);
+    })();
   }
 
   async beforeSession(
