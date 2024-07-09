@@ -53,6 +53,14 @@ Dependencies can be updated interactively via:
 pnpm update:all
 ```
 
+## Updating E2E Task Graphs
+
+Task graphs can be updated by running:
+
+```bash
+pnpm graph
+```
+
 ## Formatting
 
 The repo uses [Prettier](https://prettier.io) for formatting. It is encouraged to format code on save using, e.g. the [Prettier plugin for VSCode](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode), however it is not a requirement; Husky is configured to run Prettier on git pre-commit hook to ensure consistent formatting across the repo.
