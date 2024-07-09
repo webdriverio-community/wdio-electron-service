@@ -1,11 +1,5 @@
 {
   "extends": "../../tsconfig.base.cjs.json",
-  "ts-node": {
-    "esm": false,
-    "compilerOptions": {
-      "module": "ESNext"
-    }
-  },
   "compilerOptions": {
     "target": "ESNext",
     "types": ["node"],
