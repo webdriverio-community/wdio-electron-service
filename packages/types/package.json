@@ -17,14 +17,14 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
     "@electron/packager": "^18.3.2",
-    "@vitest/spy": "^1.6.0",
-    "@wdio/globals": "^8.27.2",
+    "@vitest/spy": "^2.0.1",
+    "@wdio/globals": "^8.39.1",
     "@wdio/types": "^8.38.2",
-    "builder-util": "25.0.0-alpha.9",
+    "builder-util": "25.0.0-alpha.10",
     "electron": "^29.4.1",
     "read-package-up": "^11.0.0",
-    "typescript": "^5.3.2",
-    "webdriverio": "^8.27.2"
+    "typescript": "^5.5.3",
+    "webdriverio": "^8.39.1"
   },
   "files": [
     "dist/*"
