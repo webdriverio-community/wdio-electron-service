@@ -10,14 +10,25 @@ To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to inst
 pnpm init-repo
 ```
 
-This will initialise the repo for development, installing all sub-packages. [Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged).
+This will install all dependencies, initialising the repo for development.
+
+[Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged). \
+[Turborepo](https://turbo.build) is used to handle builds and testing.
+
+## Rebuilding on file changes
+
+During development it is helpful to rebuild the main package and dependencies when files change. To do this, run the dev script in a new terminal:
+
+```bash
+pnpm dev
+```
 
 ## Testing
 
-E2E / Integration tests can be run locally via:
+E2E tests can be run locally via:
 
 ```bash
-pnpm test:integration-local
+pnpm test:e2e-local
 ```
 
 And unit tests (using [Vitest](https://vitest.dev/)) can be run via:
