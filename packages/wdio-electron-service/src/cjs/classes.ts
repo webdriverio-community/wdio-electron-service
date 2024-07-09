@@ -15,7 +15,7 @@ export class CJSElectronLauncher {
     })();
   }
 
-  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities) {
+  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.TestrunnerCapabilities) {
     const instance = (await this.instance) as Services.ServiceInstance;
     return instance.onPrepare?.(config, capabilities);
   }
