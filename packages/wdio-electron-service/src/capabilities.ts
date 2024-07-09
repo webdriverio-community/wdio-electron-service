@@ -22,7 +22,7 @@ const isElectron = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserN
 /**
  * Get capability independent of which type of capabilities is set
  */
-export function getElectronCapabilities(caps: Capabilities.TestrunnerCapabilities) {
+export function getElectronCapabilities(caps: Capabilities.RequestedStandaloneCapabilities) {
   /**
    * Standard capabilities, e.g.:
    * ```
