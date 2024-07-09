@@ -26,7 +26,7 @@
   },
   "typeScriptVersion": "5.2.2",
   "engines": {
-    "node": "^16.13 || >=18 || >=20"
+    "node": ">=18 || >=20"
   },
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./src/cjs/*.ts",

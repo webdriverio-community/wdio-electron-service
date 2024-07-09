@@ -37,7 +37,7 @@
   "typeScriptVersion": "5.2.2",
   "types": "./dist/index.d.ts",
   "engines": {
-    "node": "^16.13 || >=18 || >=20"
+    "node": ">=18 || >=20"
   },
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
