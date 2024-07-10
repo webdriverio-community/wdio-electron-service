@@ -1,5 +1,6 @@
 import type { Capabilities, Options, Services } from '@wdio/types';
 
+// TODO: We shouldn't need this workaround any more but removing it causes compilation failures
 // Workaround for ts-node converting dynamic imports to requires
 // see https://github.com/TypeStrong/ts-node/discussions/1290
 const dynamicImport = new Function('specifier', 'return import(specifier)');
@@ -15,7 +16,7 @@ export class CJSElectronLauncher {
     })();
   }
 
-  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.RemoteCapabilities) {
+  async onPrepare(config: Options.Testrunner, capabilities: Capabilities.TestrunnerCapabilities) {
     const instance = (await this.instance) as Services.ServiceInstance;
     return instance.onPrepare?.(config, capabilities);
   }

@@ -11,7 +11,7 @@ import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import type { ElectronServiceOptions } from '@repo/types';
 
-export type ElectronServiceCapabilities = Capabilities.RemoteCapabilities & {
+export type ElectronServiceCapabilities = Capabilities.TestrunnerCapabilities & {
   [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
 };
 
@@ -27,7 +27,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
     const capsList = Array.isArray(capabilities)
       ? capabilities
-      : Object.values(capabilities).map((multiremoteOption) => multiremoteOption.capabilities);
+      : Object.values(capabilities as Capabilities.RequestedMultiremoteCapabilities).map(
+          (multiremoteOption) => (multiremoteOption as Capabilities.WithRequestedCapabilities).capabilities,
+        );
 
     const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebdriverIO.Capabilities);
     const pkg =

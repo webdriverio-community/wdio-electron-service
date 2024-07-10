@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
 

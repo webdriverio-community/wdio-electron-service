@@ -22,7 +22,7 @@ const isElectron = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserN
 /**
  * Get capability independent of which type of capabilities is set
  */
-export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
+export function getElectronCapabilities(caps: Capabilities.RequestedStandaloneCapabilities) {
   /**
    * Standard capabilities, e.g.:
    * ```
@@ -66,7 +66,7 @@ export function getElectronCapabilities(caps: Capabilities.RemoteCapability) {
    * }
    * ```
    */
-  return Object.values(caps as Capabilities.MultiRemoteCapabilities)
+  return Object.values(caps as Capabilities.WithRequestedMultiremoteCapabilities['capabilities'])
     .map(
       (options) =>
         (options.capabilities as Capabilities.W3CCapabilities)?.alwaysMatch ||

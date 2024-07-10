@@ -12,9 +12,15 @@
     "pack": {
       "dependsOn": ["build"]
     },
-    "clean": {},
-    "clean:package": {},
-    "clean:dist": {},
+    "clean": {
+      "cache": false
+    },
+    "clean:package": {
+      "cache": false
+    },
+    "clean:dist": {
+      "cache": false
+    },
     "test": {},
     "ci:e2e": {},
     "test:unit": {

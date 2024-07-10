@@ -25,9 +25,5 @@
     "checkJs": true,
     "noEmit": false
   },
-  "exclude": ["node_modules", "dist"],
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true
-  }
+  "exclude": ["node_modules", "dist"]
 }
