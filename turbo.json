@@ -9,8 +9,8 @@
     "wdio-electron-service#build": {
       "dependsOn": ["@repo/utils#build"]
     },
-    "pack": {
-      "dependsOn": ["build"]
+    "wdio-electron-service#pack-for-forge-npm-install": {
+      "dependsOn": ["wdio-electron-service#build"]
     },
     "clean": {
       "cache": false
@@ -48,10 +48,10 @@
     },
     "init": {},
     "example-forge-cjs#init": {
-      "dependsOn": ["wdio-electron-service#pack"]
+      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
     },
     "example-forge-esm#init": {
-      "dependsOn": ["wdio-electron-service#pack"]
+      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
     },
     "example-forge-cjs#build": {
       "dependsOn": ["example-forge-cjs#init"]
