@@ -1,17 +1,20 @@
 ---
-name: Manual Release Publish
+name: Manual Pre-Release Publish
 
 on:
   workflow_dispatch:
     inputs:
       npmTag:
-        description: 'NPM tag.  Leave blank to use the default "latest" tag.'
+        description: 'NPM tag.  Leave blank to use the default "next" tag.'
         required: true
-        default: 'latest'
-      releaseVersion:
-        description: 'The new version to create.'
+        default: 'next'
+      preReleaseName:
+        description: 'Pre-Release Name, this is used in the version string, e.g. "beta" for `7.0.0-beta.0`.  Leave blank to use the default "next".'
         required: true
-        default: 'patch'
+        default: 'next'
+      preReleaseVersion:
+        description: 'The new Pre-Release version to create.  Leave blank to increment an existing pre-release version.'
+        required: false
         type: choice
         options:
           - patch
@@ -53,8 +56,13 @@ jobs:
           git config --global user.name "WebdriverIO Release Bot"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-      - name: Release
-        run: pnpm run release ${{inputs.releaseVersion}} $DRY_RUN_ARG --npm.tag=${{inputs.npmTag}}
+      - name: Publish Pre-Release
+        run: |
+          if [ "${{inputs.preReleaseVersion}}" == "" ]; then
+            pnpm run release:ci $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+          else
+            pnpm run release:ci ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
