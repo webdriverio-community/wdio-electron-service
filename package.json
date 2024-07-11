@@ -6,6 +6,7 @@
     "node": ">=18 || >=20"
   },
   "scripts": {
+    "build": "turbo run build --filter=wdio-electron-service",
     "build:builder": "turbo run build --scope=example-builder*",
     "build:forge": "turbo run build --scope=example-forge*",
     "ci": "pnpm init-repo && turbo run build test:unit test:e2e lint format:check",
