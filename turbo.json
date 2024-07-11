@@ -32,7 +32,7 @@
       "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
     },
     "example-forge-esm#init": {
-      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
+      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install", "example-forge-cjs#init"]
     },
     "example-forge-cjs#build": {
       "dependsOn": ["example-forge-cjs#init"]
