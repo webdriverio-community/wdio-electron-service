@@ -100,11 +100,11 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 
 ## Release
 
-Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub Workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release. The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
+Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release. The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
 
 ### Publish a Release
 
-To publish a release, run the Workflow with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
+To publish a release, run the release workflow on Github with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
 
 - Create a Git tag
 - Create a GitHub Release
@@ -112,7 +112,7 @@ To publish a release, run the Workflow with the defaults for **Branch** `main` a
 
 ### Publish a Pre-Release
 
-To publish a pre-release, also referred to as a test release, run the Workflow with the **NPM Tag** `next`. This will:
+To publish a pre-release, also referred to as a test release, run the workflow with the **NPM Tag** `next`. This will:
 
 - Create a Git tag with the `-next.0` suffix
 - Create a GitHub Pre-Release
