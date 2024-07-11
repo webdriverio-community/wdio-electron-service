@@ -38,10 +38,10 @@
       "dependsOn": ["example-forge-cjs#init"]
     },
     "example-forge-esm#build": {
-      "dependsOn": ["example-forge-esm#init", "example-forge-cjs#build"]
+      "dependsOn": ["example-forge-esm#init"]
     },
     "example-builder-cjs#build": {
-      "dependsOn": ["wdio-electron-service#build", "example-builder-esm#build"]
+      "dependsOn": ["wdio-electron-service#build"]
     },
     "example-builder-cjs#test:e2e": {
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
@@ -50,7 +50,7 @@
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e:ci-linux"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["wdio-electron-service#build"]
+      "dependsOn": ["wdio-electron-service#build", "example-builder-cjs#build"]
     },
     "example-builder-esm#test:e2e": {
       "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "example-builder-cjs#test:e2e"]
