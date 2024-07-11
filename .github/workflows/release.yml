@@ -1,5 +1,5 @@
 ---
-name: Manual NPM Publish
+name: Manual Release Publish
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
         with:
           version: 9.4.0
           run_install: false
-      - name: NPM Setup
+      - name: Package Manager Setup
         run: |
           pnpm set registry "https://registry.npmjs.org/"
           pnpm set //registry.npmjs.org/:_authToken $NPM_TOKEN
@@ -54,8 +54,6 @@ jobs:
           git config --global user.name "WebdriverIO Release Bot"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build
-        run: pnpm build
 
       - name: Pre-release
         if: ${{ inputs.distTag != 'latest' }}
@@ -78,7 +76,7 @@ jobs:
             exit 1
           fi
 
-          pnpm run release:ci ${{inputs.releaseType}} $DRY_RUN_ARG --npm.tag=${{inputs.distTag}}
+          pnpm run release ${{inputs.releaseType}} $DRY_RUN_ARG --npm.tag=${{inputs.distTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
