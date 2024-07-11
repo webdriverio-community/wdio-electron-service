@@ -1,3 +1,4 @@
+// Electron Forge does not support pnpm, so this script is used to initialise a forge example app with npm
 import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
