@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build:builder": "turbo run build --scope=example-builder*",
-    "build:forge": "turbo run pack && turbo run init:forge-examples && turbo run build --scope=example-forge*",
+    "build:forge": "turbo run build --scope=example-forge*",
     "ci": "pnpm init-repo && turbo run build test:unit test:e2e lint format:check",
     "ci:linux": "pnpm init-repo && turbo run build test:unit test:e2e:ci-linux lint format:check",
     "ci:e2e": "turbo run test:e2e",
