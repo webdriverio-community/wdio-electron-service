@@ -71,6 +71,10 @@
       "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
     },
     "init": {},
+    "release": {
+      "dependsOn": ["wdio-electron-service#build"],
+      "cache": false
+    },
     "test": {},
     "test:dev": {
       "dependsOn": ["@repo/utils#build"],
