@@ -47,7 +47,7 @@ importers:
         version: 9.6.0
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3))
+        version: 3.2.1(webdriverio@8.39.1(encoding@0.1.13)(typescript@5.5.3))
       '@types/debug':
         specifier: ^4.1.10
         version: 4.1.12
@@ -140,7 +140,7 @@ importers:
         version: 1.6.0(@types/node@20.14.10)(jsdom@24.1.0)
       webdriverio:
         specifier: ^8.27.2
-        version: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+        version: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
 
 packages:
 
@@ -3972,15 +3972,6 @@ packages:
     resolution: {integrity: sha512-Kc3+SfiH4ufyrIht683VT2vnJocx0pfH8rYdyPvEh1b2OYewtFTHK36k9rBDHZiBmk6jcSXs4M2xeFgOuon9Lg==}
     engines: {node: ^16.13 || >=18}
 
-  webdriverio@8.39.0:
-    resolution: {integrity: sha512-pDpGu0V+TL1LkXPode67m3s+IPto4TcmcOzMpzFgu2oeLMBornoLN3yQSFR1fjZd1gK4UfnG3lJ4poTGOfbWfw==}
-    engines: {node: ^16.13 || >=18}
-    peerDependencies:
-      devtools: ^8.14.0
-    peerDependenciesMeta:
-      devtools:
-        optional: true
-
   webdriverio@8.39.1:
     resolution: {integrity: sha512-dPwLgLNtP+l4vnybz+YFxxH8nBKOP7j6VVzKtfDyTLDQg9rz3U8OA4xMMQCBucnrVXy3KcKxGqlnMa+c4IfWCQ==}
     engines: {node: ^16.13 || >=18}
@@ -4706,12 +4697,12 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/webdriverio@3.2.1(webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3))':
+  '@testing-library/webdriverio@3.2.1(webdriverio@8.39.1(encoding@0.1.13)(typescript@5.5.3))':
     dependencies:
       '@babel/runtime': 7.24.5
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+      webdriverio: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
 
   '@tootallnate/once@2.0.0': {}
 
@@ -5974,7 +5965,7 @@ snapshots:
     optionalDependencies:
       '@wdio/globals': 8.39.1(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/logger': 8.38.0
-      webdriverio: 8.39.0(encoding@0.1.13)(typescript@5.5.3)
+      webdriverio: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -8446,40 +8437,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - supports-color
-      - utf-8-validate
-
-  webdriverio@8.39.0(encoding@0.1.13)(typescript@5.5.3):
-    dependencies:
-      '@types/node': 20.14.10
-      '@wdio/config': 8.39.0
-      '@wdio/logger': 8.38.0
-      '@wdio/protocols': 8.38.0
-      '@wdio/repl': 8.24.12
-      '@wdio/types': 8.39.0
-      '@wdio/utils': 8.39.0
-      archiver: 7.0.1
-      aria-query: 5.3.0
-      css-shorthand-properties: 1.1.1
-      css-value: 0.0.1
-      devtools-protocol: 0.0.1302984
-      grapheme-splitter: 1.0.4
-      import-meta-resolve: 4.1.0
-      is-plain-obj: 4.1.0
-      jszip: 3.10.1
-      lodash.clonedeep: 4.5.0
-      lodash.zip: 4.2.0
-      minimatch: 9.0.4
-      puppeteer-core: 20.9.0(encoding@0.1.13)(typescript@5.5.3)
-      query-selector-shadow-dom: 1.0.1
-      resq: 1.11.0
-      rgb2hex: 0.2.5
-      serialize-error: 11.0.3
-      webdriver: 8.39.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - typescript
       - utf-8-validate
 
   webdriverio@8.39.1(encoding@0.1.13)(typescript@5.5.3):
