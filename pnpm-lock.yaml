@@ -19,7 +19,7 @@ importers:
         version: 8.38.0
       compare-versions:
         specifier: ^6.1.0
-        version: 6.1.0
+        version: 6.1.1
       debug:
         specifier: ^4.3.4
         version: 4.3.5
@@ -1308,8 +1308,8 @@ packages:
     resolution: {integrity: sha512-pJDh5/4wrEnXX/VWRZvruAGHkzKdr46z11OlTPN+VrATlWWhSKewNCJ1futCO5C7eJB3nPMFZA1LeYtcFboZ2A==}
     engines: {node: '>=0.10.0'}
 
-  compare-versions@6.1.0:
-    resolution: {integrity: sha512-LNZQXhqUvqUTotpZ00qLSaify3b4VFD588aRr8MKFw4CMUr98ytzCW5wDH5qx/DEY5kCDXcbcRuCqL0szEf2tg==}
+  compare-versions@6.1.1:
+    resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
 
   compress-commons@6.0.2:
     resolution: {integrity: sha512-6FqVXeETqWPoGcfzrXb37E50NP0LXT8kAMu5ooZayhWWdgEY4lBEEcbQNXtkuKQsGduxiIcI4gOTsxTmuq/bSg==}
@@ -5506,7 +5506,7 @@ snapshots:
 
   compare-version@0.1.2: {}
 
-  compare-versions@6.1.0: {}
+  compare-versions@6.1.1: {}
 
   compress-commons@6.0.2:
     dependencies:
