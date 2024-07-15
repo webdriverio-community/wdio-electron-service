@@ -25,7 +25,7 @@ importers:
         version: 4.3.5
       electron-to-chromium:
         specifier: ^1.4.630
-        version: 1.4.819
+        version: 1.4.828
       fast-copy:
         specifier: ^3.0.1
         version: 3.0.2
@@ -1556,8 +1556,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  electron-to-chromium@1.4.819:
-    resolution: {integrity: sha512-8RwI6gKUokbHWcN3iRij/qpvf/wCbIVY5slODi85werwqUQwpFXM+dvUBND93Qh7SB0pW3Hlq3/wZsqQ3M9Jaw==}
+  electron-to-chromium@1.4.828:
+    resolution: {integrity: sha512-QOIJiWpQJDHAVO4P58pwb133Cwee0nbvy/MV1CwzZVGpkH1RX33N3vsaWRCpR6bF63AAq366neZrRTu7Qlsbbw==}
 
   electron@29.4.3:
     resolution: {integrity: sha512-Fr/D7Iru7zGFK5DtNf3Ck/DBxLHtP/o/32pRXsSoGTVqyHKu2genIiSUiOhbxdu+gQZw4Do+BDDR6inkyr4CGQ==}
@@ -5742,7 +5742,7 @@ snapshots:
     dependencies:
       jake: 10.9.1
 
-  electron-to-chromium@1.4.819: {}
+  electron-to-chromium@1.4.828: {}
 
   electron@29.4.3:
     dependencies:
