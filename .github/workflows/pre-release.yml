@@ -61,7 +61,7 @@ jobs:
           if [ "${{inputs.preReleaseVersion}}" == "" ]; then
             pnpm run release -- $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           else
-            pnpm run release ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+            pnpm run release -- ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
