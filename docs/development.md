@@ -23,7 +23,7 @@ During development it is helpful to rebuild the main package and dependencies wh
 pnpm dev
 ```
 
-## Testing
+## Testing - E2Es
 
 E2E tests can be run locally via:
 
@@ -31,7 +31,17 @@ E2E tests can be run locally via:
 pnpm test:e2e-local
 ```
 
-And unit tests (using [Vitest](https://vitest.dev/)) can be run via:
+Below are the task graphs for the E2Es:
+
+![E2E Task Graph](../.github/assets/e2e-graph.png 'E2E Task Graph')
+
+...and for the Mac-Universal E2Es:
+
+![Mac-Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac-Universal E2E Task Graph')
+
+## Testing - Units
+
+Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
 
 ```bash
 pnpm test:unit
