@@ -59,7 +59,7 @@ jobs:
       - name: Publish Pre-Release
         run: |
           if [ "${{inputs.preReleaseVersion}}" == "" ]; then
-            pnpm run release $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+            pnpm run release -- $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           else
             pnpm run release ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           fi
