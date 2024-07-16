@@ -1,0 +1,60 @@
+{
+  "name": "example-builder-esm",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build:bundle && pnpm build:package",
+    "build:bundle": "tsc --outDir dist",
+    "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
+    "build:package:mac-universal": "cp ./src/index.html ./dist && electron-builder -p never -m --universal",
+    "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
+    "test:e2e": "cross-env EXAMPLE_DIR=builder-esm DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
+    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-esm DEBUG=wdio-electron-service turbo exec:ci-linux --filter=@repo/e2e",
+    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
+  },
+  "dependencies": {
+    "wdio-electron-service": "workspace:*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@types/node": "^20.14.10",
+    "@wdio/cli": "9.0.0-alpha.351",
+    "@wdio/globals": "9.0.0-alpha.351",
+    "@wdio/local-runner": "9.0.0-alpha.351",
+    "@wdio/mocha-framework": "9.0.0-alpha.351",
+    "electron": "^29.4.1",
+    "electron-builder": "24.13.0",
+    "global-jsdom": "^24.0.0",
+    "jsdom": "^24.0.0",
+    "rollup": "^4.18.1",
+    "ts-loader": "^9.4.4",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3",
+    "webdriverio": "9.0.0-alpha.351"
+  },
+  "peerDependencies": {
+    "typescript": "5.2.2"
+  },
+  "build": {
+    "asar": true,
+    "appId": "com.example-builder-esm.demo",
+    "copyright": "goosewobbler",
+    "productName": "example-builder-esm",
+    "files": [
+      "./dist/*"
+    ],
+    "linux": {
+      "executableName": "example-builder-esm",
+      "category": "Utility",
+      "target": [
+        "AppImage"
+      ]
+    }
+  }
+}

@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
@@ -21,13 +23,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": true,
-    "noEmit": false,
-    "types": ["node", "@wdio/globals/types"],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "./@types"]
+    "noEmit": false
   },
-  "exclude": ["node_modules", "dist"],
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true
-  }
+  "exclude": ["node_modules", "dist"]
 }

@@ -33,24 +33,27 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.1.1
+          version: 9.4.0
           run_install: false
+      - name: Set pnpm store path
+        run: |
+          pnpm config set store-dir ~/.pnpm-store --global
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            xvfb-run pnpm run ci
+            pnpm run ci:linux
           else
             pnpm run ci
           fi
         shell: bash
-      - name: Run MacOS specific tests
+      - name: Run MacOS-specific Tests
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run test:integration:mac-universal
+            pnpm run ci:e2e-mac-universal
           fi
         shell: bash
       - name: 🐛 Debug Build
         uses: stateful/vscode-server-action@v1
         if: failure()
         with:
-          timeout: '120000'
+          timeout: '180000'

@@ -1,0 +1,58 @@
+{
+  "name": "@repo/utils",
+  "version": "1.0.0",
+  "description": "Utilities for WebdriverIO Electron Service",
+  "private": true,
+  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "type": "module",
+  "exports": {
+    ".": [
+      {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "require": "./dist/cjs/index.js"
+      },
+      "./dist/cjs/index.js"
+    ],
+    "./log": [
+      {
+        "import": "./dist/log.js",
+        "types": "./dist/log.d.ts",
+        "require": "./dist/cjs/log.js"
+      },
+      "./dist/cjs/log.js"
+    ]
+  },
+  "typeScriptVersion": "5.2.2",
+  "engines": {
+    "node": ">=18 || >=20"
+  },
+  "scripts": {
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./src/cjs/*.ts",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "build": "pnpm build:esm && pnpm build:cjs",
+    "build:esm": "tsc --outDir dist",
+    "build:cjs": "tsc --build tsconfig.cjs.json",
+    "test:unit": "vitest --coverage --watch=false",
+    "test:dev": "vitest --coverage",
+    "test": "pnpm test:unit"
+  },
+  "dependencies": {
+    "@electron/packager": "^18.3.2",
+    "@wdio/logger": "9.0.0-alpha.351",
+    "debug": "^4.3.4",
+    "find-versions": "^6.0.0",
+    "read-package-up": "^11.0.0"
+  },
+  "devDependencies": {
+    "@repo/types": "workspace:*",
+    "@types/debug": "^4.1.10",
+    "@types/node": "^20.14.10",
+    "@vitest/coverage-v8": "^2.0.3",
+    "jsdom": "^24.0.0",
+    "shx": "^0.3.4",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
+  }
+}

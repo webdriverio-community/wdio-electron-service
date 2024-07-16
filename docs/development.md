@@ -2,25 +2,50 @@
 
 ## Prerequisites
 
-Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 16) with [PNPM](https://pnpm.io) as a package manager.
+Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 18) with [PNPM](https://pnpm.io) as a package manager.
 
 To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to install an appropriate version of NodeJS, then [install PNPM](https://pnpm.io/installation), check out the repo with git, and run the following command:
 
 ```bash
-pnpm init-dev
+pnpm init-repo
 ```
 
-This will initialise the repo for development, installing all sub-packages. [Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged).
+This will install all dependencies, initialising the repo for development.
 
-## Testing
+[Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged). \
+[Turborepo](https://turbo.build) is used to handle builds and testing.
 
-E2E / Integration tests can be run locally via:
+## Rebuilding on file changes
+
+During development it is helpful to rebuild the main package and dependencies when files change. To do this, run the dev script in a new terminal:
 
 ```bash
-pnpm test:integration-local
+pnpm dev
 ```
 
-And unit tests (using [Vitest](https://vitest.dev/)) can be run via:
+## Testing - E2Es
+
+E2E tests can be run locally via:
+
+```bash
+pnpm test:e2e-local
+```
+
+```bash
+pnpm test:e2e-mac-universal-local
+```
+
+Below are the task graphs for the E2Es:
+
+![E2E Task Graph](../.github/assets/e2e-graph.png 'E2E Task Graph')
+
+...and for the Mac-Universal E2Es:
+
+![Mac-Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac-Universal E2E Task Graph')
+
+## Testing - Units
+
+Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
 
 ```bash
 pnpm test:unit
@@ -40,6 +65,14 @@ Dependencies can be updated interactively via:
 
 ```bash
 pnpm update:all
+```
+
+## Updating E2E Task Graphs
+
+Task graphs can be updated by running:
+
+```bash
+pnpm graph
 ```
 
 ## Formatting
@@ -81,11 +114,11 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 
 ## Release
 
-Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub Workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release. The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
+Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release. The workflow uses [`release-it`](https://github.com/release-it/release-it?tab=readme-ov-file#release-it-) to do most of the work for us.
 
 ### Publish a Release
 
-To publish a release, run the Workflow with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
+To publish a release, run the release workflow on Github with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
 
 - Create a Git tag
 - Create a GitHub Release
@@ -93,7 +126,7 @@ To publish a release, run the Workflow with the defaults for **Branch** `main` a
 
 ### Publish a Pre-Release
 
-To publish a pre-release, also referred to as a test release, run the Workflow with the **NPM Tag** `next`. This will:
+To publish a pre-release, also referred to as a test release, run the workflow with the **NPM Tag** `next`. This will:
 
 - Create a Git tag with the `-next.0` suffix
 - Create a GitHub Pre-Release

@@ -1,153 +1,67 @@
 {
-  "name": "wdio-electron-service",
-  "version": "6.6.1",
-  "description": "WebdriverIO service to enable Electron testing",
-  "author": "Sam Maister <goosewobbler@protonmail.com>",
-  "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
-  "license": "MIT",
-  "main": "dist/cjs/index.js",
-  "module": "dist/index.js",
+  "name": "wdio-electron-service-monorepo",
+  "private": true,
   "type": "module",
-  "exports": {
-    ".": [
-      {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "require": "./dist/cjs/index.js"
-      },
-      "./dist/cjs/index.js"
-    ],
-    "./main": [
-      {
-        "import": "./dist/main.js",
-        "types": "./dist/main.d.ts",
-        "require": "./dist/cjs/main.js"
-      },
-      "./dist/cjs/main.js"
-    ],
-    "./preload": [
-      {
-        "import": "./dist/preload.js",
-        "types": "./dist/preload.d.ts",
-        "require": "./dist/cjs/preload.js"
-      },
-      "./dist/cjs/preload.js"
-    ]
-  },
-  "typeScriptVersion": "5.2.2",
-  "types": "./dist/index.d.ts",
   "engines": {
-    "node": "^16.13 || >=18 || >=20"
+    "node": ">=18 || >=20"
   },
   "scripts": {
-    "prepare": "husky",
-    "init-dev": "pnpm i --filter=\\!fixture-\\* -r",
-    "ci": "pnpm i && pnpm build && pnpm test && pnpm lint && pnpm format:check",
-    "clean": "pnpx rimraf ./node_modules pnpm-lock.yaml ./dist ./src/cjs/preload.ts ./src/cjs/main.ts ./src/cjs/constants.ts ./src/cjs/types.ts",
-    "clean:dist": "pnpx rimraf ./dist",
-    "clean:all": "pnpm clean && pnpm -r --reverse clean",
-    "build": "pnpm build:esm && pnpm build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
-    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts && cp -f ./src/types.ts ./src/cjs/types.ts",
-    "build:cjs:compile": "tsc --build --verbose tsconfig.cjs.json",
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
-    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
+    "build": "turbo run build --filter=wdio-electron-service",
+    "ci": "pnpm init-repo && turbo run build test:unit test:e2e lint format:check",
+    "ci:linux": "pnpm init-repo && turbo run build test:unit test:e2e:ci-linux lint format:check",
+    "ci:e2e-mac-universal": "turbo run clean:dist --filter=example* && turbo run test:e2e:mac-universal",
+    "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
+    "dev": "turbo watch wdio-electron-service#build",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
-    "release": "release-it --github.release",
-    "release:ci": "pnpm release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
-    "release:patch": "pnpm release patch",
-    "release:minor": "pnpm release minor",
-    "release:major": "pnpm release major",
-    "test:unit": "vitest --coverage --watch=false",
-    "test:dev": "vitest --coverage",
-    "test": "pnpm test:integration && pnpm test:unit",
-    "test:integration": "cross-env DEBUG=wdio-electron-service pnpm test:integration:esm && pnpm test:integration:electron-builder && pnpm test:integration:cjs",
-    "test:integration-local": "cross-env DEBUG=wdio-electron-service pnpm clean:all && pnpm i && pnpm build && pnpm test:integration",
-    "test:integration:cjs": "cd example-cjs && pnpm run ci",
-    "test:integration:esm": "cd example && pnpm run ci",
-    "test:integration:electron-builder": "cd example-electron-builder && pnpm run ci",
-    "test:integration:mac-universal": "cd example-electron-builder && pnpm run ci:mac-universal",
-    "update:all": "pnpm --filter=\\!fixture-\\* --filter=\\!{example*/out/**/*} up -iL",
-    "watch": "pnpm run build:esm --watch"
-  },
-  "keywords": [
-    "webdriverio",
-    "wdio",
-    "wdio-service",
-    "electron",
-    "chromedriver",
-    "tests"
-  ],
-  "peerDependencies": {
-    "electron": "*",
-    "webdriverio": ">8.15.0"
-  },
-  "peerDependenciesMeta": {
-    "electron": {
-      "optional": true
-    },
-    "webdriverio": {
-      "optional": false
-    }
-  },
-  "dependencies": {
-    "@electron/packager": "^18.3.2",
-    "@vitest/spy": "^1.2.0",
-    "@wdio/logger": "^8.16.17",
-    "compare-versions": "^6.1.0",
-    "debug": "^4.3.4",
-    "electron-to-chromium": "^1.4.630",
-    "fast-copy": "^3.0.1",
-    "find-versions": "^6.0.0",
-    "node-fetch": "^3.3.2",
-    "read-package-up": "^11.0.0"
+    "graph": "pnpm test:e2e:graph && pnpm test:e2e-mac-universal:graph",
+    "init-repo": "pnpm i --filter=!\"*forge*\"",
+    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
+    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
+    "prepare": "husky",
+    "release": "turbo run release",
+    "test": "turbo run test test:e2e",
+    "test:dev": "turbo run test:dev",
+    "test:e2e": "turbo run test:e2e:forge test:e2e:builder",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm init-repo && turbo run test:e2e && turbo run clean:package || turbo run clean:package",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm init-repo && turbo run test:e2e:mac-universal && turbo run clean:package || turbo run clean:package",
+    "test:e2e-mac-universal:graph": "turbo run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
+    "test:e2e:builder": "turbo run test:e2e:builder-cjs test:e2e:builder-esm",
+    "test:e2e:builder-cjs": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=builder-cjs turbo exec --filter=@repo/e2e",
+    "test:e2e:builder-esm": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=builder-esm turbo exec --filter=@repo/e2e",
+    "test:e2e:exec": "turbo exec --filter=@repo/e2e",
+    "test:e2e:forge": "turbo run test:e2e:forge-cjs test:e2e:forge-esm",
+    "test:e2e:forge-cjs": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=forge-cjs turbo exec --filter=@repo/e2e",
+    "test:e2e:forge-esm": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=forge-esm turbo exec --filter=@repo/e2e",
+    "test:e2e:graph": "turbo run build test:e2e --graph=./.github/assets/e2e-graph.png",
+    "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@electron-forge/shared-types": "^7.4.0",
-    "@eslint/js": "^9.0.0",
-    "@testing-library/webdriverio": "^3.2.1",
-    "@types/debug": "^4.1.10",
+    "@eslint/js": "^9.7.0",
     "@types/eslint-config-prettier": "^6.11.2",
-    "@types/mocha": "^10.0.5",
-    "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1",
-    "@vitest/coverage-v8": "^1.2.0",
-    "@wdio/cli": "^8.27.2",
-    "@wdio/globals": "^8.27.2",
-    "@wdio/types": "^8.27.2",
-    "builder-util": "25.0.0-alpha.10",
+    "@types/node": "^20.14.10",
+    "@types/shelljs": "^0.8.15",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
     "cross-env": "^7.0.3",
-    "electron": "^29.3.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-vitest": "^0.5.3",
     "eslint-plugin-wdio": "^8.20.0",
-    "expect": "^29.7.0",
-    "expect-webdriverio": "^4.11.7",
-    "globals": "^15.0.0",
+    "globals": "^15.8.0",
     "husky": "^9.0.10",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.0.2",
-    "nock": "^13.3.6",
-    "prettier": "^3.2.2",
-    "release-it": "^17.0.0",
-    "rimraf": "^5.0.5",
+    "prettier": "^3.3.3",
+    "read-package-up": "^11.0.0",
+    "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "typescript": "^5.3.2",
-    "vitest": "^1.2.0",
-    "webdriverio": "^8.27.2"
+    "turbo": "^2.0.6"
   },
-  "files": [
-    "bin/*",
-    "dist/*"
-  ],
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b"
+  "packageManager": "pnpm@9.4.0+sha256.b6fd0bfda555e7e584ad7e56b30c68b01d5a04f9ee93989f4b93ca8473c49c74"
 }

@@ -1,0 +1,68 @@
+---
+name: Manual Pre-Release Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      npmTag:
+        description: 'NPM tag.  Leave blank to use the default "next" tag.'
+        required: true
+        default: 'next'
+      preReleaseName:
+        description: 'Pre-Release Name, this is used in the version string, e.g. "beta" for `7.0.0-beta.0`.  Leave blank to use the default "next".'
+        required: true
+        default: 'next'
+      preReleaseVersion:
+        description: 'The new Pre-Release version to create.  Leave blank to increment an existing pre-release version.'
+        required: false
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dryRun:
+        description: 'Do not touch or write anything. Show the commands.'
+        required: true
+        default: false
+        type: boolean
+
+env:
+  DRY_RUN_ARG: ${{ inputs.dryRun && '--dry-run' || '' }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.4.0
+          run_install: false
+      - name: Package Manager Setup
+        run: |
+          pnpm set registry "https://registry.npmjs.org/"
+          pnpm set //registry.npmjs.org/:_authToken $NPM_TOKEN
+          pnpm whoami
+      - name: Git Setup
+        run: |
+          git config --global user.email "bot@webdriver.io"
+          git config --global user.name "WebdriverIO Release Bot"
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Publish Pre-Release
+        run: |
+          if [ "${{inputs.preReleaseVersion}}" == "" ]; then
+            pnpm run release:ci $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+          else
+            pnpm run release:ci ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

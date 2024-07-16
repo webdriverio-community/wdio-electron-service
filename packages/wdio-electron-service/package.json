@@ -1,0 +1,111 @@
+{
+  "name": "wdio-electron-service",
+  "version": "6.6.1",
+  "description": "WebdriverIO service to enable Electron testing",
+  "author": "Sam Maister <goosewobbler@protonmail.com>",
+  "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "exports": {
+    ".": [
+      {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "require": "./dist/cjs/index.js"
+      },
+      "./dist/cjs/index.js"
+    ],
+    "./main": [
+      {
+        "import": "./dist/main.js",
+        "types": "./dist/main.d.ts",
+        "require": "./dist/cjs/main.js"
+      },
+      "./dist/cjs/main.js"
+    ],
+    "./preload": [
+      {
+        "import": "./dist/preload.js",
+        "types": "./dist/preload.d.ts",
+        "require": "./dist/cjs/preload.js"
+      },
+      "./dist/cjs/preload.js"
+    ]
+  },
+  "typeScriptVersion": "5.2.2",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=18 || >=20"
+  },
+  "scripts": {
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "build": "pnpm build:esm && pnpm build:cjs",
+    "build:esm": "tsc --outDir dist",
+    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
+    "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
+    "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
+    "pack-for-forge-npm-install": "pnpm i @repo/types@file:../types @repo/utils@file:../utils && pnpm pack && pnpm i @repo/types@workspace:* @repo/utils@workspace:*",
+    "release": "release-it --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "test:unit": "vitest --coverage --watch=false",
+    "test:dev": "vitest --coverage",
+    "test": "pnpm test:unit",
+    "watch": "pnpm run build:esm --watch"
+  },
+  "keywords": [
+    "webdriverio",
+    "wdio",
+    "wdio-service",
+    "electron",
+    "chromedriver",
+    "tests"
+  ],
+  "peerDependencies": {
+    "electron": "*",
+    "webdriverio": "*"
+  },
+  "peerDependenciesMeta": {
+    "electron": {
+      "optional": true
+    },
+    "webdriverio": {
+      "optional": false
+    }
+  },
+  "dependencies": {
+    "@repo/types": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@vitest/spy": "^2.0.3",
+    "@wdio/logger": "9.0.0-alpha.351",
+    "compare-versions": "^6.1.1",
+    "debug": "^4.3.4",
+    "electron-to-chromium": "^1.4.828",
+    "fast-copy": "^3.0.1",
+    "read-package-up": "^11.0.0",
+    "tinyspy": "^3.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/shared-types": "^7.4.0",
+    "@testing-library/webdriverio": "^3.2.1",
+    "@types/debug": "^4.1.10",
+    "@types/node": "^20.14.10",
+    "@vitest/coverage-v8": "^2.0.3",
+    "@wdio/globals": "9.0.0-alpha.351",
+    "@wdio/types": "9.0.0-alpha.351",
+    "builder-util": "25.0.0-alpha.10",
+    "electron": "^29.4.1",
+    "jsdom": "^24.0.0",
+    "nock": "^13.3.6",
+    "release-it": "^17.6.0",
+    "shx": "^0.3.4",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3",
+    "webdriverio": "9.0.0-alpha.351"
+  },
+  "files": [
+    "bin/*",
+    "dist/*"
+  ]
+}
