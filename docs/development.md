@@ -31,6 +31,10 @@ E2E tests can be run locally via:
 pnpm test:e2e-local
 ```
 
+```bash
+pnpm test:e2e-mac-universal-local
+```
+
 Below are the task graphs for the E2Es:
 
 ![E2E Task Graph](../.github/assets/e2e-graph.png 'E2E Task Graph')
