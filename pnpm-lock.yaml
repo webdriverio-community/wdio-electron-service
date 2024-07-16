@@ -9,8 +9,19 @@ importers:
   .:
     devDependencies:
       '@eslint/js':
+<<<<<<< HEAD
         specifier: ^9.7.0
         version: 9.7.0
+=======
+        specifier: ^9.0.0
+        version: 9.7.0
+      '@testing-library/webdriverio':
+        specifier: ^3.2.1
+        version: 3.2.1(webdriverio@8.39.1(encoding@0.1.13)(typescript@5.5.3))
+      '@types/debug':
+        specifier: ^4.1.10
+        version: 4.1.12
+>>>>>>> origin/main
       '@types/eslint-config-prettier':
         specifier: ^6.11.2
         version: 6.11.3
