@@ -9,19 +9,8 @@ importers:
   .:
     devDependencies:
       '@eslint/js':
-<<<<<<< HEAD
         specifier: ^9.7.0
         version: 9.7.0
-=======
-        specifier: ^9.0.0
-        version: 9.7.0
-      '@testing-library/webdriverio':
-        specifier: ^3.2.1
-        version: 3.2.1(webdriverio@8.39.1(encoding@0.1.13)(typescript@5.5.3))
-      '@types/debug':
-        specifier: ^4.1.10
-        version: 4.1.12
->>>>>>> origin/main
       '@types/eslint-config-prettier':
         specifier: ^6.11.2
         version: 6.11.3
@@ -96,17 +85,17 @@ importers:
         specifier: ^20.14.10
         version: 20.14.10
       '@wdio/cli':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/local-runner':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       electron:
         specifier: ^29.4.1
         version: 29.4.2
@@ -132,8 +121,8 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
   apps/builder-esm:
     dependencies:
@@ -154,17 +143,17 @@ importers:
         specifier: ^20.14.10
         version: 20.14.10
       '@wdio/cli':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/local-runner':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       electron:
         specifier: ^29.4.1
         version: 29.4.2
@@ -190,8 +179,8 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
   apps/forge-cjs:
     devDependencies:
@@ -208,17 +197,17 @@ importers:
         specifier: ^20.14.10
         version: 20.14.10
       '@wdio/cli':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/local-runner':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       electron:
         specifier: ^29.4.1
         version: 29.4.2
@@ -241,8 +230,8 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
   apps/forge-esm:
     devDependencies:
@@ -259,17 +248,17 @@ importers:
         specifier: ^20.14.10
         version: 20.14.10
       '@wdio/cli':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/local-runner':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       electron:
         specifier: ^29.4.1
         version: 29.4.2
@@ -292,8 +281,8 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
   packages/e2e:
     dependencies:
@@ -302,19 +291,19 @@ importers:
         version: link:../utils
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@9.0.0-alpha.351)
+        version: 3.2.1(webdriverio@9.0.0-alpha.367)
       '@wdio/cli':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/local-runner':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       electron:
         specifier: ^29.4.1
         version: 29.4.2
@@ -322,8 +311,8 @@ importers:
         specifier: workspace:*
         version: link:../wdio-electron-service
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.2.0
@@ -338,8 +327,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@wdio/types':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)
@@ -371,11 +360,11 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/types':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       builder-util:
         specifier: 25.0.0-alpha.10
         version: 25.0.0-alpha.10
@@ -389,8 +378,8 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
   packages/utils:
     dependencies:
@@ -398,8 +387,8 @@ importers:
         specifier: ^18.3.2
         version: 18.3.3
       '@wdio/logger':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       debug:
         specifier: ^4.3.4
         version: 4.3.5
@@ -447,8 +436,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@wdio/logger':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -473,7 +462,7 @@ importers:
         version: 7.4.0
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@9.0.0-alpha.351)
+        version: 3.2.1(webdriverio@9.0.0-alpha.367)
       '@types/debug':
         specifier: ^4.1.10
         version: 4.1.12
@@ -484,11 +473,11 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3(vitest@2.0.3(@types/node@20.14.10)(jsdom@24.1.0)(terser@5.31.2))
       '@wdio/globals':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
       '@wdio/types':
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
       builder-util:
         specifier: 25.0.0-alpha.10
         version: 25.0.0-alpha.10
@@ -514,8 +503,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3(@types/node@20.14.10)(jsdom@24.1.0)(terser@5.31.2)
       webdriverio:
-        specifier: 9.0.0-alpha.351
-        version: 9.0.0-alpha.351
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
 
 packages:
 
@@ -1393,8 +1382,8 @@ packages:
   '@vitest/utils@2.0.3':
     resolution: {integrity: sha512-c/UdELMuHitQbbc/EVctlBaxoYAwQPQdSNwv7z/vHyBKy2edYZaFgptE27BRueZB7eW8po+cllotMNTDpL3HWg==}
 
-  '@wdio/cli@9.0.0-alpha.351':
-    resolution: {integrity: sha512-WmM1L9bSwhvsgbBm1AgTG3TB6KuRDwK2KAE5SlMrOJhLxb6SX95nfa8rkmYWV+E/VSr/SKZD0LXo1C+E1fqaVg==}
+  '@wdio/cli@9.0.0-alpha.367':
+    resolution: {integrity: sha512-mZW9QGmRo/70a180KcUomkN9/yvksyX9q631M7b9n7gtqDkQioxbXwAAKTg4h2O3nXL/F6W0fApILtEL8LiRfA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1402,66 +1391,66 @@ packages:
     resolution: {integrity: sha512-yNuGPMPibY91s936gnJCHWlStvIyDrwLwGfLC/NCdTin4F7HL4Gp5iJnHWkJFty1/DfFi8jjoIUBNLM8HEez+A==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/config@9.0.0-alpha.351':
-    resolution: {integrity: sha512-j+FbWWUUztcQuPMLDcfWqv3i8CD3Jaqw6n3JDQSJcWRyMtG+/KVydq1MWEKEM+sWwDfZqNRzBva9w8lbmnTr1A==}
+  '@wdio/config@9.0.0-alpha.367':
+    resolution: {integrity: sha512-jSLf5hQ+yw5y5W62LQq6qK1ZCUXW1YXwR1iOA+wboyIZqgms1sHDxPGDiODDY3a7fR9/5xWSZrETtd7z+QMncw==}
     engines: {node: '>=18'}
 
   '@wdio/globals@8.39.1':
     resolution: {integrity: sha512-kNb1TlxI8Le/tsOiw7CMQcG0+ZGyxk9ZDO/PQLxkJvjo/q2QmiBcgaNMPuf+j1ABETcQK4bI7QtiT5uZ+f2AGA==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/globals@9.0.0-alpha.351':
-    resolution: {integrity: sha512-HM/UsteOF6/aeobJC5a/LVQYpHh+odWLfFoP5uKSkhizQwlZyFQJrcz0iR3I/kfnbTfiHOD9ILXRsvZNE6imXg==}
+  '@wdio/globals@9.0.0-alpha.367':
+    resolution: {integrity: sha512-KlaEBOYu5mW3cZe4jDDCRQLrbfk+t7Bz/2tjS90goeJgr/DFNWnCNpYdYMAbq1nrcMgnYp1iTizzMUupoY9Fww==}
     engines: {node: '>=18'}
 
-  '@wdio/local-runner@9.0.0-alpha.351':
-    resolution: {integrity: sha512-Zs6Je8e1mhyJV8aRZItsdETqsjGNgFYchuUdSqYeXwbjVuEnLqyvUaWilwiuMqzUGBmSpqQu10l6qLR7l1/pdg==}
+  '@wdio/local-runner@9.0.0-alpha.367':
+    resolution: {integrity: sha512-M/eEUUUG4UOoecAwMy25RgsODaGQWH+mQpeXyTbkfFCkap/t+gaT+dIcPLX22vdeiN+1ZDbNs51PdA3ivWmUWQ==}
     engines: {node: '>=18'}
 
   '@wdio/logger@8.38.0':
     resolution: {integrity: sha512-kcHL86RmNbcQP+Gq/vQUGlArfU6IIcbbnNp32rRIraitomZow+iEoc519rdQmSVusDozMS5DZthkgDdxK+vz6Q==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/logger@9.0.0-alpha.351':
-    resolution: {integrity: sha512-ils95/MDBBUs64hegRuGMcjAQBKH6FHw0zPE+3w0X9A5GXqoCf1AMe/6oCh9oDJv55ZEoDXRt5kPc8ptEZ3oJA==}
+  '@wdio/logger@9.0.0-alpha.367':
+    resolution: {integrity: sha512-XkQ0qz5BNgkLHS4b1bLr8FHtZ+uiCt/KvnclZm4blCx2NmoXkKPDufEVV5jSTcwfGjdUb6ukBBBTnuwBp3jHRw==}
     engines: {node: '>=18'}
 
-  '@wdio/mocha-framework@9.0.0-alpha.351':
-    resolution: {integrity: sha512-NMAWtU08mUKnU8Iw8p4cdCb4Yu/8FPj2LXcAMKvTMjFISbB+lvtLtIjqiHWKvn1H8ubGMVYfAzy+YAs7H/QQvA==}
+  '@wdio/mocha-framework@9.0.0-alpha.367':
+    resolution: {integrity: sha512-Q0eENx4rqbsDlgmVGOIt7xb2P3Vu7Lx1f9eHeUWLZPynaHgsCNhkjvsn1T7OM4NVCcXqVutYKR5VFwyQXJy4lg==}
     engines: {node: '>=18'}
 
   '@wdio/protocols@8.38.0':
     resolution: {integrity: sha512-7BPi7aXwUtnXZPeWJRmnCNFjyDvGrXlBmN9D4Pi58nILkyjVRQKEY9/qv/pcdyB0cvmIvw++Kl/1Lg+RxG++UA==}
 
-  '@wdio/protocols@9.0.0-alpha.351':
-    resolution: {integrity: sha512-zE4gYiPihbwAaF+pujqNLNieHBMob6y6dRSlnw8Ky5gWOhkf5xHIoa0Mp/LbM3iWx8NX5ySJyTFCFUmR1mkNMw==}
+  '@wdio/protocols@9.0.0-alpha.367':
+    resolution: {integrity: sha512-3nT2UhX2ZTRryug2N8hjy80c/qj+zhfvORFqoHsGezL30jEvd51mBVo4LdM5tAsQkCrxsd/wthi8k0Kps1AWGg==}
 
   '@wdio/repl@8.24.12':
     resolution: {integrity: sha512-321F3sWafnlw93uRTSjEBVuvWCxTkWNDs7ektQS15drrroL3TMeFOynu4rDrIz0jXD9Vas0HCD2Tq/P0uxFLdw==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/repl@9.0.0-alpha.351':
-    resolution: {integrity: sha512-6R5xQGCZAzKT2T/bT+IdDsoTumOyx1UocPZKiRGPsE1mvyMljZeGYYiXsR3vDYUhua7oDJsbb/AsKouaIZ6WLg==}
+  '@wdio/repl@9.0.0-alpha.367':
+    resolution: {integrity: sha512-jBa6vOwRe4YPUAEoJCsPEm+Gg70uRf0T+BLi4vCQe4li/ueYyGH2WMssvruAbKl1j+2ZTtCZjF0xFVTjWIRjwA==}
     engines: {node: '>=18'}
 
-  '@wdio/runner@9.0.0-alpha.351':
-    resolution: {integrity: sha512-KgNBQwxIde3ABWkvwlQWi5FVdyx6CvTvCejEzEzwJNyGD4TG1PAdOlApUJ730r7Lhb2OwnOiIfjlL8BJTOLnTQ==}
+  '@wdio/runner@9.0.0-alpha.367':
+    resolution: {integrity: sha512-+g80GwW17IVaWBLaGphA8WnqHSrSmggh3D8EKBp8B0MZHmie3LqfQYgH4/WjnMNI7gowZOoYCXH9iCrwfDmnLA==}
     engines: {node: '>=18'}
 
   '@wdio/types@8.39.0':
     resolution: {integrity: sha512-86lcYROTapOJuFd9ouomFDfzDnv3Kn+jE0RmqfvN9frZAeLVJ5IKjX9M6HjplsyTZhjGO1uCaehmzx+HJus33Q==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/types@9.0.0-alpha.351':
-    resolution: {integrity: sha512-jL7nqweAMkzgNY/lrc7e0WnklE6+bNruc70x+0ToEkmeZFyMQZByGzARt5OjhZeabNWp8N62A8KhaQGyLbXn/w==}
+  '@wdio/types@9.0.0-alpha.367':
+    resolution: {integrity: sha512-1jIcJFujVdcCouHFPqkIZRxWuc6uPqTJtyCxRIipsr5qSEmQcGG2AWsOINsKTA8LmvjhJwf0MZ79lqAz2QDQOg==}
     engines: {node: '>=18'}
 
   '@wdio/utils@8.39.0':
     resolution: {integrity: sha512-jY+n6jlGeK+9Tx8T659PKLwMQTGpLW5H78CSEWgZLbjbVSr2LfGR8Lx0CRktNXxAtqEVZPj16Pi74OtAhvhE6Q==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/utils@9.0.0-alpha.351':
-    resolution: {integrity: sha512-TX8k2mlwUyN1plucYg0MTpzTNKxd15EYKiC2Zb4EUJXgHUaP+sDKVkqmzHte0sM33k9pIKbZjlBMYshdSn5GdQ==}
+  '@wdio/utils@9.0.0-alpha.367':
+    resolution: {integrity: sha512-Z4F7kQPnjRVfOrjuhalA5vMoW+OnfN3Vvun74oSNT2rbJge/0aRAYUTZvHE38zcs7NLu4aTceO6TtQ1EzhKx7Q==}
     engines: {node: '>=18'}
 
   '@webassemblyjs/ast@1.12.1':
@@ -2538,6 +2527,10 @@ packages:
 
   expect-webdriverio@4.15.1:
     resolution: {integrity: sha512-xtBSidt7Whs1fsUC+utxVzfmkmaStXWW17b+BcMCiCltx0Yku6l7BTv1Y14DEKX8L6rttaDQobYyRtBKbi4ssg==}
+    engines: {node: '>=16 || >=18 || >=20'}
+
+  expect-webdriverio@5.0.0-alpha.0:
+    resolution: {integrity: sha512-eKKjyHx3WXeIw+GRu5qaIFxNlwrMx2BcKQ0II1S/IY647jLLXAAWOTmn6Od2DBbwz8D3/UzGYjJpMGj0aSNG1A==}
     engines: {node: '>=16 || >=18 || >=20'}
 
   expect@29.7.0:
@@ -5199,8 +5192,8 @@ packages:
     resolution: {integrity: sha512-Kc3+SfiH4ufyrIht683VT2vnJocx0pfH8rYdyPvEh1b2OYewtFTHK36k9rBDHZiBmk6jcSXs4M2xeFgOuon9Lg==}
     engines: {node: ^16.13 || >=18}
 
-  webdriver@9.0.0-alpha.351:
-    resolution: {integrity: sha512-kw8WmI/B7pEsOgi4KDDVr9S3f8bGefmlQI2a+DgqiZt9e6juL0Kwyj60rgW154zDSKklAyzpgb0Sr8VnMGKz9A==}
+  webdriver@9.0.0-alpha.367:
+    resolution: {integrity: sha512-q16Wo1TMjw28/RJxDp98GF+SOXgEi43y3KltMbBHBSFt4mMHER522HZ5gLiCDhaK1vI4UfLLDajnIDU9z2ytRQ==}
     engines: {node: '>=18'}
 
   webdriverio@8.39.1:
@@ -5212,8 +5205,8 @@ packages:
       devtools:
         optional: true
 
-  webdriverio@9.0.0-alpha.351:
-    resolution: {integrity: sha512-merrOo5V8TmTgj346Ltf7GP/AxwCSeIWJ8BDNNBeg2l/orwjFmOllnDCrA55y8rbIAFMFirnwPTh4H1/QpMcqQ==}
+  webdriverio@9.0.0-alpha.367:
+    resolution: {integrity: sha512-x/f0xOoOfTi7U4fkqwN/xUmlZmSSbRhP67WQXdiQrTdFK5OgLsRNJZ3IEdUOZalvY9ihKpzu3R8BKlXNL5I0aw==}
     engines: {node: '>=18'}
     peerDependencies:
       puppeteer-core: ^22.3.0
@@ -6242,12 +6235,12 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/webdriverio@3.2.1(webdriverio@9.0.0-alpha.351)':
+  '@testing-library/webdriverio@3.2.1(webdriverio@9.0.0-alpha.367)':
     dependencies:
       '@babel/runtime': 7.24.7
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 9.0.0-alpha.351
+      webdriverio: 9.0.0-alpha.367
 
   '@tootallnate/once@2.0.0': {}
 
@@ -6537,16 +6530,16 @@ snapshots:
       loupe: 3.1.1
       tinyrainbow: 1.2.0
 
-  '@wdio/cli@9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)':
+  '@wdio/cli@9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@types/node': 20.14.10
       '@vitest/snapshot': 1.6.0
-      '@wdio/config': 9.0.0-alpha.351
-      '@wdio/globals': 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/protocols': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/config': 9.0.0-alpha.367
+      '@wdio/globals': 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/protocols': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       async-exit-hook: 2.0.1
       chalk: 5.3.0
       chokidar: 3.6.0
@@ -6562,7 +6555,7 @@ snapshots:
       read-pkg-up: 10.0.0
       recursive-readdir: 2.2.3
       tsx: 4.16.2
-      webdriverio: 9.0.0-alpha.351
+      webdriverio: 9.0.0-alpha.367
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -6586,11 +6579,11 @@ snapshots:
       - supports-color
     optional: true
 
-  '@wdio/config@9.0.0-alpha.351':
+  '@wdio/config@9.0.0-alpha.367':
     dependencies:
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       decamelize: 6.0.0
       deepmerge-ts: 7.0.3
       glob: 10.4.5
@@ -6611,10 +6604,10 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  '@wdio/globals@9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)':
+  '@wdio/globals@9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)':
     optionalDependencies:
-      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.5.3)
-      webdriverio: 9.0.0-alpha.351
+      expect-webdriverio: 5.0.0-alpha.0(encoding@0.1.13)(typescript@5.5.3)
+      webdriverio: 9.0.0-alpha.367
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -6624,13 +6617,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@wdio/local-runner@9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)':
+  '@wdio/local-runner@9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@types/node': 20.14.10
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/repl': 9.0.0-alpha.351
-      '@wdio/runner': 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
-      '@wdio/types': 9.0.0-alpha.351
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/repl': 9.0.0-alpha.367
+      '@wdio/runner': 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
+      '@wdio/types': 9.0.0-alpha.367
       async-exit-hook: 2.0.1
       split2: 4.2.0
       stream-buffers: 3.0.3
@@ -6650,20 +6643,20 @@ snapshots:
       loglevel-plugin-prefix: 0.8.4
       strip-ansi: 7.1.0
 
-  '@wdio/logger@9.0.0-alpha.351':
+  '@wdio/logger@9.0.0-alpha.367':
     dependencies:
       chalk: 5.3.0
       loglevel: 1.9.1
       loglevel-plugin-prefix: 0.8.4
       strip-ansi: 7.1.0
 
-  '@wdio/mocha-framework@9.0.0-alpha.351':
+  '@wdio/mocha-framework@9.0.0-alpha.367':
     dependencies:
       '@types/mocha': 10.0.7
       '@types/node': 20.14.10
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       mocha: 10.4.0
     transitivePeerDependencies:
       - supports-color
@@ -6671,30 +6664,30 @@ snapshots:
   '@wdio/protocols@8.38.0':
     optional: true
 
-  '@wdio/protocols@9.0.0-alpha.351': {}
+  '@wdio/protocols@9.0.0-alpha.367': {}
 
   '@wdio/repl@8.24.12':
     dependencies:
       '@types/node': 20.14.10
     optional: true
 
-  '@wdio/repl@9.0.0-alpha.351':
+  '@wdio/repl@9.0.0-alpha.367':
     dependencies:
       '@types/node': 20.14.10
 
-  '@wdio/runner@9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)':
+  '@wdio/runner@9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@types/node': 20.14.10
-      '@wdio/config': 9.0.0-alpha.351
-      '@wdio/globals': 9.0.0-alpha.351(encoding@0.1.13)(typescript@5.5.3)
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/config': 9.0.0-alpha.367
+      '@wdio/globals': 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.3)
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       deepmerge-ts: 7.0.3
-      expect-webdriverio: 4.15.1(encoding@0.1.13)(typescript@5.5.3)
+      expect-webdriverio: 5.0.0-alpha.0(encoding@0.1.13)(typescript@5.5.3)
       gaze: 1.1.3
-      webdriver: 9.0.0-alpha.351
-      webdriverio: 9.0.0-alpha.351
+      webdriver: 9.0.0-alpha.367
+      webdriverio: 9.0.0-alpha.367
     transitivePeerDependencies:
       - bufferutil
       - devtools
@@ -6709,7 +6702,7 @@ snapshots:
       '@types/node': 20.14.10
     optional: true
 
-  '@wdio/types@9.0.0-alpha.351':
+  '@wdio/types@9.0.0-alpha.367':
     dependencies:
       '@types/node': 20.14.10
 
@@ -6732,11 +6725,11 @@ snapshots:
       - supports-color
     optional: true
 
-  '@wdio/utils@9.0.0-alpha.351':
+  '@wdio/utils@9.0.0-alpha.367':
     dependencies:
       '@puppeteer/browsers': 2.2.3
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
       decamelize: 6.0.0
       deepmerge-ts: 7.0.3
       edgedriver: 5.6.0
@@ -8049,6 +8042,25 @@ snapshots:
       homedir-polyfill: 1.0.3
 
   expect-webdriverio@4.15.1(encoding@0.1.13)(typescript@5.5.3):
+    dependencies:
+      '@vitest/snapshot': 1.6.0
+      expect: 29.7.0
+      jest-matcher-utils: 29.7.0
+      lodash.isequal: 4.5.0
+    optionalDependencies:
+      '@wdio/globals': 8.39.1(encoding@0.1.13)(typescript@5.5.3)
+      '@wdio/logger': 8.38.0
+      webdriverio: 8.39.1(encoding@0.1.13)(typescript@5.5.3)
+    transitivePeerDependencies:
+      - bufferutil
+      - devtools
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+    optional: true
+
+  expect-webdriverio@5.0.0-alpha.0(encoding@0.1.13)(typescript@5.5.3):
     dependencies:
       '@vitest/snapshot': 1.6.0
       expect: 29.7.0
@@ -10938,15 +10950,15 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  webdriver@9.0.0-alpha.351:
+  webdriver@9.0.0-alpha.367:
     dependencies:
       '@types/node': 20.14.10
       '@types/ws': 8.5.10
-      '@wdio/config': 9.0.0-alpha.351
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/protocols': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/config': 9.0.0-alpha.367
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/protocols': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       deepmerge-ts: 7.0.3
       ws: 8.18.0
     transitivePeerDependencies:
@@ -10989,15 +11001,15 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  webdriverio@9.0.0-alpha.351:
+  webdriverio@9.0.0-alpha.367:
     dependencies:
       '@types/node': 20.14.10
-      '@wdio/config': 9.0.0-alpha.351
-      '@wdio/logger': 9.0.0-alpha.351
-      '@wdio/protocols': 9.0.0-alpha.351
-      '@wdio/repl': 9.0.0-alpha.351
-      '@wdio/types': 9.0.0-alpha.351
-      '@wdio/utils': 9.0.0-alpha.351
+      '@wdio/config': 9.0.0-alpha.367
+      '@wdio/logger': 9.0.0-alpha.367
+      '@wdio/protocols': 9.0.0-alpha.367
+      '@wdio/repl': 9.0.0-alpha.367
+      '@wdio/types': 9.0.0-alpha.367
+      '@wdio/utils': 9.0.0-alpha.367
       archiver: 7.0.1
       aria-query: 5.3.0
       cheerio: 1.0.0-rc.12
@@ -11016,7 +11028,7 @@ snapshots:
       rgb2hex: 0.2.5
       serialize-error: 11.0.3
       urlpattern-polyfill: 10.0.0
-      webdriver: 9.0.0-alpha.351
+      webdriver: 9.0.0-alpha.367
     transitivePeerDependencies:
       - bufferutil
       - supports-color
