@@ -26,8 +26,8 @@ const SupportedPlatform = {
 /**
  * Determine the path to the Electron application binary
  * @param packageJsonPath path to the nearest package.json
- * @param appName name of the application
- * @param buildToolConfig configuration for the detected build tool
+ * @param appBuildInfo build information about the Electron application
+ * @param electronVersion version of Electron to use
  * @param p   process object (used for testing purposes)
  * @returns   path to the Electron app binary
  */
@@ -155,7 +155,7 @@ const builderBuildInfo = (builderConfig: BuilderConfig, pkg: NormalizedReadResul
 
 /**
  * Determine build information about the Electron application
- * @param pkg path to the nearest package.json
+ * @param pkg normalized package.json
  * @returns   promise resolving to the app build information
  */
 export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBuildInfo> {
@@ -168,8 +168,8 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   let forgeConfig = forgePackageJsonConfig as ForgeConfig;
   let builderConfig: BuilderConfig = pkg.packageJson.build;
 
-  if (!forgePackageJsonConfig || forgeCustomConfigFile) {
-    // if no config or a linked file, attempt to read Forge JS-based config
+  if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
+    // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
     try {
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
       forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ForgeConfig }).default;
@@ -179,10 +179,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
     }
   }
 
-  const isForge = Boolean(forgeConfig) || forgeDependencyDetected;
-  const isBuilder = Boolean(builderConfig) || builderDependencyDetected;
-
-  if (isBuilder && !builderConfig) {
+  if (builderDependencyDetected && !builderConfig) {
     // if builder config is not found in the package.json, we attempt to read `electron-builder.json`
     try {
       log.info('Forge not detected, attempting to read `electron-builder.json`...');
@@ -190,10 +187,13 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
       log.info('Reading `electron-builder.json`...');
       builderConfig = JSON.parse(data);
     } catch (e) {
-      log.info('`electron-builder.json` not found or invalid');
+      log.warn('`electron-builder.json` not found or invalid');
       log.debug((e as Error).message);
     }
   }
+
+  const isForge = Boolean(forgeConfig);
+  const isBuilder = Boolean(builderConfig);
 
   if (isForge && isBuilder) {
     log.warn(

@@ -44,7 +44,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -65,7 +65,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -75,7 +75,7 @@ describe('getBinaryPath', () => {
     ).rejects.toThrow(`No executable binary found, checked: \n${binaryPaths.join(', \n')}`);
   });
 
-  it('should throw an error when no binary is found for a Builder setup on MacOS', async () => {
+  it('should throw an error when no binary is found for a builder setup on MacOS', async () => {
     const binaryPaths = [
       path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
       path.join('/foo', 'bar', 'dist', 'mac-armv7l', 'my-app.app', 'Contents', 'MacOS', 'my-app'),
@@ -89,7 +89,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/builder-config.js',
+          config: { productName: 'my-app' },
           isForge: false,
           isBuilder: true,
         },
@@ -107,7 +107,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/builder-config.js',
+          config: { productName: 'my-app' },
           isForge: false,
           isBuilder: true,
         },
@@ -135,7 +135,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for a Builder setup with multiple executable binaries', async () => {
+  it('should return the expected app path for a builder setup with multiple executable binaries', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app');
     (fs.access as Mock).mockImplementation(() => Promise.resolve());
     expect(
@@ -143,7 +143,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: { packagerConfig: { name: 'my-app' } },
+          config: { productName: 'my-app' },
           isForge: false,
           isBuilder: true,
         },
@@ -179,7 +179,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -206,7 +206,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -233,7 +233,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -251,7 +251,7 @@ describe('getBinaryPath', () => {
         pkgJSONPath,
         {
           appName: 'my-app',
-          config: 'path/to/forge-config.js',
+          config: { packagerConfig: { name: 'my-app' } },
           isForge: true,
           isBuilder: false,
         },
@@ -261,7 +261,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup with custom output directory', async () => {
+  it('should return the expected app path for a builder setup with custom output directory', async () => {
     const binaryPath = path.join('/foo', 'bar', 'custom-outdir', 'win-unpacked', 'my-app.exe');
     mockBinaryPath(binaryPath);
     expect(
@@ -279,7 +279,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup on Windows', async () => {
+  it('should return the expected app path for a builder setup on Windows', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'win-unpacked', 'my-app.exe');
     mockBinaryPath(binaryPath);
     expect(
@@ -297,7 +297,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup on Arm Mac', async () => {
+  it('should return the expected app path for a builder setup on Arm Mac', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-arm64', 'my-app.app', 'Contents', 'MacOS', 'my-app');
     mockBinaryPath(binaryPath);
     expect(
@@ -315,7 +315,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup on Intel Mac', async () => {
+  it('should return the expected app path for a builder setup on Intel Mac', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'mac', 'my-app.app', 'Contents', 'MacOS', 'my-app');
     mockBinaryPath(binaryPath);
     expect(
@@ -333,7 +333,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup on Mac (universal arch)', async () => {
+  it('should return the expected app path for a builder setup on Mac (universal arch)', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'mac-universal', 'my-app.app', 'Contents', 'MacOS', 'my-app');
     mockBinaryPath(binaryPath);
     expect(
@@ -351,7 +351,7 @@ describe('getBinaryPath', () => {
     ).toBe(binaryPath);
   });
 
-  it('should return the expected app path for an electron-builder setup on Linux', async () => {
+  it('should return the expected app path for a builder setup on Linux', async () => {
     const binaryPath = path.join('/foo', 'bar', 'dist', 'linux-unpacked', 'my-app');
     mockBinaryPath(binaryPath);
     expect(
@@ -370,7 +370,7 @@ describe('getBinaryPath', () => {
   });
 });
 
-describe('getBuildToolConfig', () => {
+describe('getAppBuildInfo', () => {
   it('should throw an error when no build tools are found', async () => {
     const packageJsonPath = getFixturePackagePath('no-build-tool');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
@@ -384,8 +384,8 @@ describe('getBuildToolConfig', () => {
     );
   });
 
-  it('should throw an error when configuration for multiple build tools are found', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-config');
+  it('should throw an error when dependencies for multiple build tools are found without configuration', async () => {
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-no-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(() =>
       getAppBuildInfo({
@@ -393,50 +393,11 @@ describe('getBuildToolConfig', () => {
         path: packageJsonPath,
       }),
     ).rejects.toThrow(
-      'Multiple build tools were detected, please remove configuration and dependencies for tools which are not being used to build your application.',
+      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
     );
   });
 
-  it('should throw an error when dependencies for multiple build tools are found', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-dependencies');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'Multiple build tools were detected, please remove configuration and dependencies for tools which are not being used to build your application.',
-    );
-  });
-
-  it('should throw an error when configuration for electron-builder is found alongside an Electron Forge dependency', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-1');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'Multiple build tools were detected, please remove configuration and dependencies for tools which are not being used to build your application.',
-    );
-  });
-
-  it('should throw an error when configuration for Electron Forge is found alongside an electron-builder dependency', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-2');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'Multiple build tools were detected, please remove configuration and dependencies for tools which are not being used to build your application.',
-    );
-  });
-
-  it('should throw an error when the app name is unable to be determined', async () => {
+  it('should throw an error when the Forge app name is unable to be determined', async () => {
     const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     delete packageJson.name;
@@ -451,8 +412,23 @@ describe('getBuildToolConfig', () => {
     );
   });
 
-  it('should return the expected config for a Forge dependency with inline config', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
+  it('should throw an error when the builder app name is unable to be determined', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-inline-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    delete packageJson.name;
+    delete packageJson.build.productName;
+    await expect(() =>
+      getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).rejects.toThrow(
+      'No application name was detected, please set name / productName in your package.json or build tool configuration.',
+    );
+  });
+
+  it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-1');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -460,8 +436,24 @@ describe('getBuildToolConfig', () => {
         path: packageJsonPath,
       }),
     ).toStrictEqual({
-      appName: 'forge-dependency-inline-config',
-      config: { packagerConfig: { name: 'forge-dependency-inline-config' } },
+      appName: 'multiple-build-tools-wrong-config-1',
+      config: { productName: 'multiple-build-tools-wrong-config-1' },
+      isBuilder: true,
+      isForge: false,
+    });
+  });
+
+  it('should return the expected config when configuration for Forge is found alongside a builder dependency', async () => {
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-2');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'multiple-build-tools-wrong-config-2',
+      config: { packagerConfig: { name: 'multiple-build-tools-wrong-config-2' } },
       isBuilder: false,
       isForge: true,
     });
@@ -499,7 +491,7 @@ describe('getBuildToolConfig', () => {
     });
   });
 
-  it('should return the expected config for an electron-builder dependency with inline config', async () => {
+  it('should return the expected config for a builder dependency with inline config', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-inline-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
@@ -515,7 +507,7 @@ describe('getBuildToolConfig', () => {
     });
   });
 
-  it('should return the expected config for an electron-builder dependency with JSON config', async () => {
+  it('should return the expected config for a builder dependency with JSON config', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-json-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
@@ -544,6 +536,38 @@ describe('getBuildToolConfig', () => {
       config: { appId: 'no-app-name-in-build-tool-config' },
       isBuilder: true,
       isForge: false,
+    });
+  });
+
+  it('should return the expected config for a Forge dependency with inline config', async () => {
+    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'forge-dependency-inline-config',
+      config: { packagerConfig: { name: 'forge-dependency-inline-config' } },
+      isBuilder: false,
+      isForge: true,
+    });
+  });
+
+  it('should return the expected config when configuration for multiple build tools are found', async () => {
+    const packageJsonPath = getFixturePackagePath('multiple-build-tools-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'multiple-build-tools-config',
+      config: { packagerConfig: { name: 'multiple-build-tools-config' } },
+      isBuilder: false,
+      isForge: true,
     });
   });
 });
