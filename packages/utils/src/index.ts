@@ -94,10 +94,12 @@ export async function getBinaryPath(
   const binaryPathsAccessResults = await Promise.all(
     binaryPaths.map(async (binaryPath) => {
       try {
-        log.info(`Checking binary path: ${binaryPath}...`);
+        log.debug(`Checking binary path: ${binaryPath}...`);
         await fs.access(binaryPath, fs.constants.X_OK);
+        log.debug(`'${binaryPath}' is executable.`);
         return true;
       } catch (e) {
+        log.debug(`'${binaryPath}' is not executable.`, (e as Error).message);
         return false;
       }
     }),
