@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 import findVersions from 'find-versions';
@@ -171,7 +172,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
     // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
     try {
-      const forgeConfigPath = path.join(rootDir, forgeConfigFile);
+      const forgeConfigPath = pathToFileURL(path.join(rootDir, forgeConfigFile)).toString();
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
       forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
     } catch (e) {
