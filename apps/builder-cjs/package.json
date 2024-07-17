@@ -10,9 +10,9 @@
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
-    "test:e2e": "cross-env EXAMPLE_DIR=builder-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-cjs DEBUG=wdio-electron-service turbo exec:ci-linux --filter=@repo/e2e",
-    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=builder-cjs DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
+    "test:e2e": "cross-env EXAMPLE_DIR=builder-cjs turbo exec --filter=@repo/e2e",
+    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-cjs turbo exec:ci-linux --filter=@repo/e2e",
+    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=builder-cjs turbo exec --filter=@repo/e2e"
   },
   "dependencies": {
     "wdio-electron-service": "workspace:*"
@@ -25,6 +25,7 @@
     "@wdio/globals": "9.0.0-alpha.367",
     "@wdio/local-runner": "9.0.0-alpha.367",
     "@wdio/mocha-framework": "9.0.0-alpha.367",
+    "cross-env": "^7.0.3",
     "electron": "^31.2.1",
     "electron-builder": "^24.13.3",
     "global-jsdom": "^24.0.0",
