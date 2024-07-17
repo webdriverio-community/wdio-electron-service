@@ -163,7 +163,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
   const forgePackageJsonConfig = pkg.packageJson.config?.forge;
   const forgeCustomConfigFile = typeof forgePackageJsonConfig === 'string';
-  const forgeConfigPath = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
+  const forgeConfigFile = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
   const rootDir = path.dirname(pkg.path);
   let forgeConfig = forgePackageJsonConfig as ForgeConfig;
   let builderConfig: BuilderConfig = pkg.packageJson.build;
@@ -171,8 +171,9 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
     // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
     try {
+      const forgeConfigPath = path.join(rootDir, forgeConfigFile);
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
-      forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ForgeConfig }).default;
+      forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
     } catch (e) {
       log.info('Forge config file not found or invalid.');
       log.debug((e as Error).message);
