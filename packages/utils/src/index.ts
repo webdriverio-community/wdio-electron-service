@@ -96,11 +96,8 @@ export async function getBinaryPath(
       try {
         log.info(`Checking binary path: ${binaryPath}...`);
         await fs.access(binaryPath, fs.constants.X_OK);
-        log.info('executable');
         return true;
       } catch (e) {
-        log.info('not executable');
-        log.debug((e as Error).message);
         return false;
       }
     }),
@@ -139,7 +136,7 @@ const forgeBuildInfo = (forgeConfig: ForgeConfig, pkg: NormalizedReadResult): Fo
 };
 
 const builderBuildInfo = (builderConfig: BuilderConfig, pkg: NormalizedReadResult): BuilderBuildInfo => {
-  log.debug(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
+  log.info(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
   const appName: string = pkg.packageJson.productName || builderConfig?.productName || pkg.packageJson.name;
 
   if (!appName) {
@@ -176,21 +173,20 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
       forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
     } catch (e) {
-      log.info('Forge config file not found or invalid.');
-      log.debug((e as Error).message);
+      log.warn('Forge config file not found or invalid.');
     }
   }
 
   if (builderDependencyDetected && !builderConfig) {
     // if builder config is not found in the package.json, we attempt to read `electron-builder.json`
+    const builderConfigFileName = 'electron-builder.json';
+    const builderConfigPath = path.join(rootDir, builderConfigFileName);
     try {
-      log.info('Forge not detected, attempting to read `electron-builder.json`...');
-      const data = await fs.readFile(path.join(rootDir, 'electron-builder.json'), 'utf-8');
-      log.info('Reading `electron-builder.json`...');
+      log.info(`Reading Builder config file: ${builderConfigPath}...`);
+      const data = await fs.readFile(builderConfigPath, 'utf-8');
       builderConfig = JSON.parse(data);
     } catch (e) {
-      log.warn('`electron-builder.json` not found or invalid');
-      log.debug((e as Error).message);
+      log.warn('Builder config file not found or invalid.');
     }
   }
 
