@@ -42,12 +42,13 @@
     "globals": "^15.8.0",
     "husky": "^9.1.0",
     "jsdom": "^24.0.0",
+    "lerna": "^8.1.6",
     "lint-staged": "^15.0.2",
+    "nx": "^19.5.0",
     "prettier": "^3.3.3",
     "read-package-up": "^11.0.0",
     "shelljs": "^0.8.5",
-    "shx": "^0.3.4",
-    "nx": "^19.5.0"
+    "shx": "^0.3.4"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [

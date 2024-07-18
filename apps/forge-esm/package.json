@@ -14,9 +14,9 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist",
     "clean:package": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-esm",
     "init": "tsx ../../scripts/init-forge-example.ts forge-esm",
-    "test:e2e": "cross-env EXAMPLE_DIR=forge-esm lerna run exec --filter=@repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-esm lerna run exec:ci-linux --filter=@repo/e2e --parallel=1",
-    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-esm lerna run exec --filter=@repo/e2e"
+    "test:e2e": "cross-env EXAMPLE_DIR=forge-esm nx run exec --filter=@repo/e2e",
+    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-esm nx run exec:ci-linux --filter=@repo/e2e --parallel=1",
+    "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-esm nx run exec --filter=@repo/e2e"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",

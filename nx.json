@@ -22,10 +22,6 @@
   "targets": {
     "//#lint": {},
     "//#format:check": {},
-    "@repo/types#build": {},
-    "@repo/utils#build": {
-      "dependsOn": ["@repo/types#build"]
-    },
     "build:mac-universal": {},
     "clean": {
       "cache": false
@@ -54,20 +50,8 @@
     "example-builder-cjs#build": {
       "dependsOn": ["^build"]
     },
-    "example-builder-cjs#test:e2e": {
-      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
-    },
     "example-builder-esm#build": {
       "dependsOn": ["^build", "example-builder-cjs#build"]
-    },
-    "example-builder-esm#test:e2e": {
-      "dependsOn": ["build", "example-builder-cjs#test:e2e"]
-    },
-    "example-forge-cjs#test:e2e": {
-      "dependsOn": ["build", "wdio-electron-service#build"]
-    },
-    "example-forge-esm#test:e2e": {
-      "dependsOn": ["build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"]
     },
     "release": {
       "dependsOn": ["wdio-electron-service#build"],
@@ -81,9 +65,6 @@
     },
     "test:e2e:mac-universal": {
       "dependsOn": ["build:mac-universal"]
-    },
-    "wdio-electron-service#build": {
-      "dependsOn": ["@repo/utils#build"]
     }
   }
 }
