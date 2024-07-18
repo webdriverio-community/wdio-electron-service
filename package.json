@@ -7,8 +7,8 @@
   },
   "scripts": {
     "build": "nx run build --scope wdio-electron-service",
-    "ci": "pnpm i && nx run-many -t build test:unit e2e lint format:check",
-    "ci:linux": "pnpm i && nx run-many -t build test:unit e2e:ci-linux lint format:check",
+    "ci": "pnpm i && nx run-many -t build test:unit test:e2e lint format:check",
+    "ci:linux": "pnpm i && nx run-many -t build test:unit test:e2e:ci-linux lint format:check",
     "ci:e2e-mac-universal": "nx run-many -t clean:dist -p example\\* && nx run-many -t \"test:e2e:mac-universal\" -p example\\*",
     "clean": "nx run-many -t clean:package -p example-forge\\* && nx run-many -t clean && rm -rf node_modules || shx rm -rf node_modules",
     "dev": "lerna watch wdio-electron-service#build",
@@ -55,5 +55,6 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.5.0+sha256.dbdf5961c32909fb030595a9daa1dae720162e658609a8f92f2fa99835510ca5"
+  "packageManager": "pnpm@9.5.0+sha256.dbdf5961c32909fb030595a9daa1dae720162e658609a8f92f2fa99835510ca5",
+  "nx": {}
 }
