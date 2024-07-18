@@ -9,6 +9,9 @@
     "test:e2e": {
       "dependsOn": ["build"]
     },
+    "test:e2e:ci-linux": {
+      "dependsOn": ["build"]
+    },
     "test:unit": {
       "dependsOn": ["^build"]
     }
@@ -25,9 +28,6 @@
       "cache": false
     },
     "clean:dist": {
-      "cache": false
-    },
-    "clean:package": {
       "cache": false
     },
     "example-forge-cjs#build:mac-universal": {
@@ -88,13 +88,8 @@
       "persistent": true,
       "cache": false
     },
-    "test:e2e": {},
-    "test:e2e:ci-linux": {},
     "test:e2e:mac-universal": {
       "dependsOn": ["build:mac-universal"]
-    },
-    "test:unit": {
-      "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
       "dependsOn": ["@repo/utils#build"]

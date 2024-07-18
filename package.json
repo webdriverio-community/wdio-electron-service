@@ -8,7 +8,7 @@
   "scripts": {
     "build": "lerna run build --scope wdio-electron-service",
     "ci": "pnpm i && nx run-many -t build test:unit test:e2e lint format:check",
-    "ci:linux": "pnpm i && lerna run build,test:unit,test:e2e:ci-linux,lint,format:check",
+    "ci:linux": "pnpm i && nx run-many -t build test:unit test:e2e:ci-linux lint format:check",
     "ci:e2e-mac-universal": "lerna run clean:dist --scope example* && lerna run test:e2e:mac-universal",
     "clean": "lerna run clean && rm -rf node_modules || shx rm -rf node_modules",
     "dev": "lerna watch wdio-electron-service#build",
