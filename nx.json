@@ -3,9 +3,6 @@
     "build": {
       "dependsOn": ["^build", "init"]
     },
-    "build:mac-universal": {
-      "dependsOn": ["^build", "init"]
-    },
     "init": {
       "dependsOn": ["^build", "^pack-for-forge-npm-install"]
     },
