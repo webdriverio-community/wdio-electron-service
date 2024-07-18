@@ -10,7 +10,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 // navigate to directory of target app
 shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
 
-// uninstall any dependencies installed with npm
+// remove any dependencies installed with npm from the package.json
 shell.exec('pnpm pkg delete dependencies');
 
 // install the correct workspace dependencies
