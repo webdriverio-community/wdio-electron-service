@@ -11,7 +11,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
 
 // remove any dependencies installed with npm from the package.json
-shell.exec('pnpm pkg delete dependencies');
+shell.exec('pnpm pkg delete dependencies.wdio-electron-service dependencies.@repo/types dependencies.@repo/utils');
 
 // install the correct workspace dependencies
-shell.exec('pnpm install wdio-electron-service@workspace:*');
+shell.exec('pnpm pkg set dependencies.wdio-electron-service=workspace:*');
