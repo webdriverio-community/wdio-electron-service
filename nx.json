@@ -3,6 +3,9 @@
     "build": {
       "dependsOn": ["^build", "init"]
     },
+    "build:mac-universal": {
+      "dependsOn": ["^build", "init"]
+    },
     "init": {
       "dependsOn": ["^build", "^pack-for-forge-npm-install"]
     },
@@ -15,56 +18,31 @@
     "test:e2e:ci-linux": {
       "dependsOn": ["build"]
     },
+    "test:e2e:mac-universal": {
+      "dependsOn": ["build:mac-universal"]
+    },
     "test:unit": {
       "dependsOn": ["^build"]
     }
   },
   "targets": {
-    "//#lint": {},
-    "//#format:check": {},
-    "build:mac-universal": {},
     "clean": {
       "cache": false
     },
     "clean:dist": {
       "cache": false
     },
-    "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["example-forge-esm#build:mac-universal"]
-    },
-    "exec": {
-      "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"]
-    },
-    "exec:ci-linux": {
-      "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"]
-    },
-    "example-forge-esm#init": {
-      "dependsOn": ["example-forge-cjs#init"]
-    },
-    "example-forge-cjs#build": {
-      "dependsOn": ["^build", "example-forge-cjs#init"]
-    },
-    "example-forge-esm#build": {
-      "dependsOn": ["^build", "example-forge-esm#init"]
-    },
-    "example-builder-cjs#build": {
-      "dependsOn": ["^build"]
-    },
-    "example-builder-esm#build": {
-      "dependsOn": ["^build", "example-builder-cjs#build"]
-    },
+    "exec": {},
+    "exec:ci-linux": {},
     "release": {
-      "dependsOn": ["wdio-electron-service#build"],
+      "dependsOn": ["build"],
       "cache": false
     },
     "test": {},
     "test:dev": {
-      "dependsOn": ["@repo/utils#build"],
+      "dependsOn": ["^build"],
       "persistent": true,
       "cache": false
-    },
-    "test:e2e:mac-universal": {
-      "dependsOn": ["build:mac-universal"]
     }
   }
 }

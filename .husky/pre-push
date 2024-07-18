@@ -1,1 +1,1 @@
-lerna run test:unit
+nx run-many -t test:unit clean:package

@@ -99,9 +99,6 @@ importers:
       '@wdio/mocha-framework':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       electron:
         specifier: ^31.2.1
         version: 31.2.1
@@ -160,9 +157,6 @@ importers:
       '@wdio/mocha-framework':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       electron:
         specifier: ^31.2.1
         version: 31.2.1
@@ -194,7 +188,7 @@ importers:
   apps/forge-cjs:
     dependencies:
       wdio-electron-service:
-        specifier: workspace:7.0.0-beta.0
+        specifier: workspace:*
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
@@ -221,9 +215,6 @@ importers:
       '@wdio/mocha-framework':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       electron:
         specifier: ^31.2.1
         version: 31.2.1
@@ -250,10 +241,6 @@ importers:
         version: 9.0.0-alpha.367
 
   apps/forge-esm:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:7.0.0-beta.0
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.4.0
@@ -279,9 +266,6 @@ importers:
       '@wdio/mocha-framework':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       electron:
         specifier: ^31.2.1
         version: 31.2.1
