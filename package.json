@@ -21,8 +21,8 @@
     "release": "lerna run release",
     "test": "nx run-many -t test,test:e2e",
     "test:dev": "lerna run test:dev",
-    "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e && lerna run clean:package || lerna run clean:package",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e:mac-universal && lerna run clean:package || lerna run clean:package",
+    "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e:mac-universal",
     "test:e2e-mac-universal:graph": "lerna run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
     "test:e2e:graph": "lerna run build test:e2e --graph=./.github/assets/e2e-graph.png",
     "update:all": "pnpm up -iLr"

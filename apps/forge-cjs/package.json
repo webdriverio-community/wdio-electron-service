@@ -9,9 +9,8 @@
     "build:package:mac-universal": "cp ./src/index.html ./dist && electron-forge package --platform=darwin --arch=universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
-    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
+    "clean": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-cjs && pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist",
-    "clean:package": "pnpm pkg delete dependencies",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec --scope @repo/e2e",
     "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec:ci-linux --scope @repo/e2e",
@@ -40,8 +39,6 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@repo/types": "file:../../packages/types",
-    "@repo/utils": "file:../../packages/utils",
-    "wdio-electron-service": "file:../../packages/wdio-electron-service/wdio-electron-service-7.0.0-beta.0.tgz"
+    "wdio-electron-service": "workspace:7.0.0-beta.0"
   }
 }

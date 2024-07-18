@@ -191,7 +191,7 @@ importers:
   apps/forge-cjs:
     dependencies:
       wdio-electron-service:
-        specifier: workspace:*
+        specifier: workspace:7.0.0-beta.0
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
@@ -249,7 +249,7 @@ importers:
   apps/forge-esm:
     dependencies:
       wdio-electron-service:
-        specifier: workspace:*
+        specifier: workspace:7.0.0-beta.0
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
