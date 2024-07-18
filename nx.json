@@ -6,6 +6,9 @@
     "init": {
       "dependsOn": ["^build", "^pack-for-forge-npm-install"]
     },
+    "pack-for-forge-npm-install": {
+      "dependsOn": ["build"]
+    },
     "test:e2e": {
       "dependsOn": ["build"]
     },
