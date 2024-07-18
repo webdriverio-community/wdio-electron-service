@@ -54,29 +54,17 @@
     "example-builder-cjs#test:e2e": {
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
     },
-    "example-builder-cjs#test:e2e:ci-linux": {
-      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e:ci-linux"]
-    },
     "example-builder-esm#build": {
       "dependsOn": ["^build", "example-builder-cjs#build"]
     },
     "example-builder-esm#test:e2e": {
       "dependsOn": ["build", "example-builder-cjs#test:e2e"]
     },
-    "example-builder-esm#test:e2e:ci-linux": {
-      "dependsOn": ["build", "wdio-electron-service#build", "example-builder-cjs#test:e2e:ci-linux"]
-    },
     "example-forge-cjs#test:e2e": {
-      "dependsOn": ["build", "wdio-electron-service#build"]
-    },
-    "example-forge-cjs#test:e2e:ci-linux": {
       "dependsOn": ["build", "wdio-electron-service#build"]
     },
     "example-forge-esm#test:e2e": {
       "dependsOn": ["build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"]
-    },
-    "example-forge-esm#test:e2e:ci-linux": {
-      "dependsOn": ["build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
     },
     "release": {
       "dependsOn": ["wdio-electron-service#build"],

@@ -11,7 +11,7 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
     "test:e2e": "cross-env EXAMPLE_DIR=builder-cjs lerna run exec --scope @repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-cjs lerna run exec:ci-linux --scope @repo/e2e",
+    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-cjs lerna run exec:ci-linux --scope @repo/e2e --parallel=1",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=builder-cjs lerna run exec --scope @repo/e2e"
   },
   "dependencies": {

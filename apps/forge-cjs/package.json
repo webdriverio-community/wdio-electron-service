@@ -14,7 +14,7 @@
     "clean:package": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-cjs",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec --scope @repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec:ci-linux --scope @repo/e2e",
+    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec:ci-linux --scope @repo/e2e --parallel=1",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs lerna run exec --scope @repo/e2e"
   },
   "devDependencies": {
