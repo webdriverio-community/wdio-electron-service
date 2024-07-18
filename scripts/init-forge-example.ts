@@ -20,6 +20,9 @@ shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
 // remove any dependencies installed with pnpm
 shell.exec('pnpm clean');
 
+// uninstall workspace dependencies
+shell.exec('npm uninstall wdio-electron-service');
+
 // install repo dependencies with npm
 shell.exec('npm install');
 shell.exec(

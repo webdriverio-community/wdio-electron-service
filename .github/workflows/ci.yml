@@ -8,9 +8,6 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+*
   pull_request:
 
-env:
-  TURBO_TELEMETRY_DISABLED: 1
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}

@@ -1,13 +1,25 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "tasks": {
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build", "init"]
+    },
+    "init": {
+      "dependsOn": ["^build", "^pack-for-forge-npm-install"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"]
+    },
+    "test:unit": {
+      "dependsOn": ["^build"]
+    }
+  },
+  "targets": {
     "//#lint": {},
     "//#format:check": {},
     "@repo/types#build": {},
     "@repo/utils#build": {
       "dependsOn": ["@repo/types#build"]
     },
-    "build": {},
     "build:mac-universal": {},
     "clean": {
       "cache": false
@@ -27,20 +39,17 @@
     "exec:ci-linux": {
       "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"]
     },
-    "example-forge-cjs#init": {
-      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
-    },
     "example-forge-esm#init": {
-      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install", "example-forge-cjs#init"]
-    },
-    "example-forge-cjs#build": {
       "dependsOn": ["example-forge-cjs#init"]
     },
+    "example-forge-cjs#build": {
+      "dependsOn": ["^build", "example-forge-cjs#init"]
+    },
     "example-forge-esm#build": {
-      "dependsOn": ["example-forge-esm#init"]
+      "dependsOn": ["^build", "example-forge-esm#init"]
     },
     "example-builder-cjs#build": {
-      "dependsOn": ["wdio-electron-service#build"]
+      "dependsOn": ["^build"]
     },
     "example-builder-cjs#test:e2e": {
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
@@ -49,27 +58,26 @@
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e:ci-linux"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["wdio-electron-service#build", "example-builder-cjs#build"]
+      "dependsOn": ["^build", "example-builder-cjs#build"]
     },
     "example-builder-esm#test:e2e": {
-      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "example-builder-cjs#test:e2e"]
+      "dependsOn": ["build", "example-builder-cjs#test:e2e"]
     },
     "example-builder-esm#test:e2e:ci-linux": {
-      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "example-builder-cjs#test:e2e:ci-linux"]
+      "dependsOn": ["build", "wdio-electron-service#build", "example-builder-cjs#test:e2e:ci-linux"]
     },
     "example-forge-cjs#test:e2e": {
-      "dependsOn": ["example-forge-cjs#build", "wdio-electron-service#build"]
+      "dependsOn": ["build", "wdio-electron-service#build"]
     },
     "example-forge-cjs#test:e2e:ci-linux": {
-      "dependsOn": ["example-forge-cjs#build", "wdio-electron-service#build"]
+      "dependsOn": ["build", "wdio-electron-service#build"]
     },
     "example-forge-esm#test:e2e": {
-      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"]
+      "dependsOn": ["build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"]
     },
     "example-forge-esm#test:e2e:ci-linux": {
-      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
+      "dependsOn": ["build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
     },
-    "init": {},
     "release": {
       "dependsOn": ["wdio-electron-service#build"],
       "cache": false
@@ -86,13 +94,10 @@
       "dependsOn": ["build:mac-universal"]
     },
     "test:unit": {
-      "dependsOn": ["@repo/utils#build"]
+      "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
       "dependsOn": ["@repo/utils#build"]
-    },
-    "wdio-electron-service#pack-for-forge-npm-install": {
-      "dependsOn": ["wdio-electron-service#build"]
     }
   }
 }

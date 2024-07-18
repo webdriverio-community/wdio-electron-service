@@ -6,25 +6,25 @@
     "node": ">=18 || >=20"
   },
   "scripts": {
-    "build": "turbo run build --filter=wdio-electron-service",
-    "ci": "pnpm i && turbo run build test:unit test:e2e lint format:check",
-    "ci:linux": "pnpm i && turbo run build test:unit test:e2e:ci-linux lint format:check",
-    "ci:e2e-mac-universal": "turbo run clean:dist --filter=example* && turbo run test:e2e:mac-universal",
-    "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
-    "dev": "turbo watch wdio-electron-service#build",
+    "build": "lerna run build --scope wdio-electron-service",
+    "ci": "pnpm i && nx run-many -t build test:unit test:e2e lint format:check",
+    "ci:linux": "pnpm i && lerna run build,test:unit,test:e2e:ci-linux,lint,format:check",
+    "ci:e2e-mac-universal": "lerna run clean:dist --scope example* && lerna run test:e2e:mac-universal",
+    "clean": "lerna run clean && rm -rf node_modules || shx rm -rf node_modules",
+    "dev": "lerna watch wdio-electron-service#build",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm test:e2e:graph && pnpm test:e2e-mac-universal:graph",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "prepare": "husky",
-    "release": "turbo run release",
-    "test": "turbo run test test:e2e",
-    "test:dev": "turbo run test:dev",
-    "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run test:e2e && turbo run clean:package || turbo run clean:package",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run test:e2e:mac-universal && turbo run clean:package || turbo run clean:package",
-    "test:e2e-mac-universal:graph": "turbo run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
-    "test:e2e:graph": "turbo run build test:e2e --graph=./.github/assets/e2e-graph.png",
+    "release": "lerna run release",
+    "test": "nx run-many -t test,test:e2e",
+    "test:dev": "lerna run test:dev",
+    "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e && lerna run clean:package || lerna run clean:package",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && lerna run test:e2e:mac-universal && lerna run clean:package || lerna run clean:package",
+    "test:e2e-mac-universal:graph": "lerna run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
+    "test:e2e:graph": "lerna run build test:e2e --graph=./.github/assets/e2e-graph.png",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
@@ -47,7 +47,7 @@
     "read-package-up": "^11.0.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "turbo": "^2.0.7"
+    "nx": "^19.5.0"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
