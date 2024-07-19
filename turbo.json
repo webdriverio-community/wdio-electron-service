@@ -21,7 +21,7 @@
       "cache": false
     },
     "example-forge-esm#init": {
-      "dependsOn": ["example-forge-cjs#init"]
+      "dependsOn": ["example-forge-cjs#test:e2e"]
     },
     "example-forge-cjs#build": {
       "dependsOn": ["^build", "example-forge-cjs#init"]
