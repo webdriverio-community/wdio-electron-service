@@ -65,6 +65,9 @@ importers:
       shx:
         specifier: ^0.3.4
         version: 0.3.4
+      tsx:
+        specifier: ^4.16.2
+        version: 4.16.2
       turbo:
         specifier: ^2.0.7
         version: 2.0.7
@@ -104,7 +107,7 @@ importers:
         version: 31.2.1
       electron-builder:
         specifier: ^24.13.3
-        version: 24.13.3(electron-builder-squirrel-windows@25.0.0(dmg-builder@25.0.0))
+        version: 24.13.3(electron-builder-squirrel-windows@25.0.0(dmg-builder@24.13.3))
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)
@@ -165,7 +168,7 @@ importers:
         version: 31.2.1
       electron-builder:
         specifier: ^24.13.3
-        version: 24.13.3(electron-builder-squirrel-windows@25.0.0(dmg-builder@24.13.3))
+        version: 24.13.3(electron-builder-squirrel-windows@25.0.0(dmg-builder@25.0.0))
       global-jsdom:
         specifier: ^24.0.0
         version: 24.0.0(jsdom@24.1.0)

@@ -1,8 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
   "tasks": {
-    "//#lint": {},
     "//#format:check": {},
+    "//#init-yarn-package-for-forge": {},
+    "//#lint": {},
     "@repo/types#build": {},
     "@repo/utils#build": {
       "dependsOn": ["@repo/types#build"]
@@ -44,9 +46,6 @@
     "example-forge-cjs#build:mac-universal": {
       "dependsOn": ["example-forge-esm#build:mac-universal"]
     },
-    "example-forge-cjs#init": {
-      "dependsOn": ["wdio-electron-service#pack-for-forge-npm-install"]
-    },
     "example-builder-cjs#test:e2e": {
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
     },
@@ -72,9 +71,9 @@
       "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
     },
     "init": {
-      "dependsOn": ["^build", "^pack-for-forge-npm-install", "wdio-electron-service#test:unit"]
+      "dependsOn": ["^build", "//#init-yarn-package-for-forge", "wdio-electron-service#test:unit"]
     },
-    "pack-for-forge-npm-install": {
+    "init-yarn-package-for-forge": {
       "dependsOn": ["build"]
     },
     "release": {
@@ -101,9 +100,6 @@
     },
     "wdio-electron-service#build": {
       "dependsOn": ["@repo/utils#build"]
-    },
-    "wdio-electron-service#pack-for-forge-npm-install": {
-      "dependsOn": ["wdio-electron-service#build"]
     }
   }
 }

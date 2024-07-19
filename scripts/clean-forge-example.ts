@@ -15,6 +15,5 @@ shell.exec(
   'pnpm pkg set dependencies.wdio-electron-service=workspace:* dependencies.@repo/types=workspace:* dependencies.@repo/utils=workspace:*',
 );
 
-// revert the node_modules directory
-shell.exec('rm -rf node_modules');
-shell.exec('mv node_modules_pnpm node_modules');
+// remove any yarn artifacts
+shell.exec('pnpm clean');

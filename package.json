@@ -15,6 +15,7 @@
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm test:e2e:graph && pnpm test:e2e-mac-universal:graph",
+    "init-yarn-package-for-forge": "tsx ./scripts/init-yarn-package-for-forge.ts",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "prepare": "husky",
@@ -47,6 +48,7 @@
     "read-package-up": "^11.0.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
+    "tsx": "^4.16.2",
     "turbo": "^2.0.7"
   },
   "lint-staged": {
