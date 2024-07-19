@@ -72,7 +72,7 @@
       "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e:ci-linux"]
     },
     "init": {
-      "dependsOn": ["^build", "^pack-for-forge-npm-install"]
+      "dependsOn": ["^build", "^pack-for-forge-npm-install", "wdio-electron-service#test:unit"]
     },
     "pack-for-forge-npm-install": {
       "dependsOn": ["build"]
