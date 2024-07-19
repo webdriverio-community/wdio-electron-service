@@ -30,10 +30,10 @@
       "dependsOn": ["^build", "example-forge-esm#init"]
     },
     "example-builder-cjs#build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "example-forge-esm#test:e2e"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build", "example-builder-cjs#build"]
+      "dependsOn": ["^build", "example-builder-cjs#test:e2e"]
     },
     "exec": {
       "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"]
