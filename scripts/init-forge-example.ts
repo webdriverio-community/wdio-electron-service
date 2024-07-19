@@ -17,7 +17,8 @@ const packageJson = JSON.parse(
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));
 
-// delete corepack setting
+// retrieve and delete corepack setting
+const packageManager = shell.exec('pnpm pkg get packageManager').stdout.trim();
 shell.exec('pnpm pkg delete packageManager');
 
 // navigate to directory of target app
@@ -28,7 +29,11 @@ shell.exec('pnpm clean');
 
 // install repo dependencies with yarn
 shell.exec('yarn');
-shell.exec(
-  `yarn add wdio-electron-service@file:../../packages/wdio-electron-service/wdio-electron-service-${packageJson.version}.tgz`,
-);
-shell.exec('yarn add @repo/types@file:../../packages/types @repo/utils@file:../../packages/utils');
+shell.exec('yarn add file:../../packages/types file:../../packages/utils');
+shell.exec(`yarn add file:../../packages/wdio-electron-service/wdio-electron-service-${packageJson.version}.tgz`);
+
+// navigate to root directory
+shell.cd(path.join(__dirname, '..'));
+
+// add corepack setting back
+shell.exec(`pnpm pkg set packageManager=${packageManager}`);
