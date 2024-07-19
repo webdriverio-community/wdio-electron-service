@@ -33,7 +33,7 @@ shell.exec('pnpm pkg delete dependencies.wdio-electron-service');
 // install repo dependencies with yarn
 shell.exec('yarn');
 shell.exec('yarn add file:../../packages/types file:../../packages/utils');
-shell.exec(`yarn add file:../../packages/wdio-electron-service-v${packageJson.version}.tgz`);
+shell.exec(`yarn add file:./wdio-electron-service-v${packageJson.version}.tgz`);
 
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));

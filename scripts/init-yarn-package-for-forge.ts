@@ -43,8 +43,10 @@ shell.exec('yarn pack');
 // navigate to the packages directory
 shell.cd(path.join(__dirname, '..', 'packages'));
 
-// move the tarball to the packages directory
-shell.exec(`mv wdio-electron-service/wdio-electron-service-v${packageJson.version}.tgz .`);
+// copy the tarball to the forge example dirs
+shell.exec(
+  `cp wdio-electron-service/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-esm ../apps/forge-cjs`,
+);
 
 // delete the yarn package directory
 shell.exec('rm -rf wdio-electron-service-yarn');
