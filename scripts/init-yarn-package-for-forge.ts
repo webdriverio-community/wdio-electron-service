@@ -14,6 +14,13 @@ const packageJson = JSON.parse(
   }),
 ) as PackageJson;
 
+// navigate to root directory
+shell.cd(path.join(__dirname, '..'));
+
+// retrieve and delete corepack setting
+const packageManager = shell.exec('pnpm pkg get packageManager').stdout.trim();
+shell.exec('pnpm pkg delete packageManager');
+
 // navigate to packages directory
 shell.cd(path.join(__dirname, '..', 'packages'));
 
@@ -45,8 +52,17 @@ shell.cd(path.join(__dirname, '..', 'packages'));
 
 // copy the tarball to the forge example dirs
 shell.exec(
-  `cp wdio-electron-service/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-esm ../apps/forge-cjs`,
+  `cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-esm/wdio-electron-service-v${packageJson.version}.tgz`,
+);
+shell.exec(
+  `cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-cjs/wdio-electron-service-v${packageJson.version}.tgz`,
 );
 
 // delete the yarn package directory
 shell.exec('rm -rf wdio-electron-service-yarn');
+
+// navigate to root directory
+shell.cd(path.join(__dirname, '..'));
+
+// add corepack setting back
+shell.exec(`pnpm pkg set packageManager=${packageManager}`);
