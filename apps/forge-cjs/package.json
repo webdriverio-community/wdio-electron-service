@@ -11,11 +11,14 @@
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist",
-    "clean:package": "pnpm pkg delete dependencies",
+    "clean:package": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-cjs",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs turbo exec --filter=@repo/e2e",
     "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-cjs turbo exec:ci-linux --filter=@repo/e2e",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs turbo exec --filter=@repo/e2e"
+  },
+  "dependencies": {
+    "wdio-electron-service": "workspace:*"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",

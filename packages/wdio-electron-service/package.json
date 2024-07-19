@@ -47,7 +47,6 @@
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
-    "pack-for-forge-npm-install": "pnpm i @repo/types@file:../types @repo/utils@file:../utils && pnpm pack && pnpm i @repo/types@workspace:* @repo/utils@workspace:*",
     "release": "release-it --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",

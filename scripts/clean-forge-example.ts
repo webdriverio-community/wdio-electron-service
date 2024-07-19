@@ -10,8 +10,11 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 // navigate to directory of target app
 shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
 
-// remove any dependencies installed with yarn from the package.json
-shell.exec('pnpm pkg delete dependencies.wdio-electron-service dependencies.@repo/types dependencies.@repo/utils');
+// reset the dependencies to the workspace links
+shell.exec(
+  'pnpm pkg set dependencies.wdio-electron-service=workspace:* dependencies.@repo/types=workspace:* dependencies.@repo/utils=workspace:*',
+);
 
-// install the correct workspace dependencies
-shell.exec('pnpm pkg set dependencies.wdio-electron-service=workspace:*');
+// revert the node_modules directory
+shell.exec('rm -rf node_modules');
+shell.exec('mv node_modules_pnpm node_modules');

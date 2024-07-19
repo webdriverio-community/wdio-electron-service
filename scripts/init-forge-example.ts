@@ -14,6 +14,19 @@ const packageJson = JSON.parse(
   }),
 ) as PackageJson;
 
+// navigate to main package directory
+shell.cd(path.join(__dirname, '..', 'packages', 'wdio-electron-service'));
+
+// rename node_modules
+shell.exec('mv node_modules node_modules_pnpm');
+
+// set the dependencies to the local packages instead of workspace links
+shell.exec('pnpm pkg set dependencies.@repo/types=file:../types dependencies.@repo/utils=file:../utils');
+
+// pack the package
+shell.exec('yarn');
+shell.exec('yarn pack');
+
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));
 
@@ -30,7 +43,7 @@ shell.exec('pnpm clean');
 // install repo dependencies with yarn
 shell.exec('yarn');
 shell.exec('yarn add file:../../packages/types file:../../packages/utils');
-shell.exec(`yarn add file:../../packages/wdio-electron-service/wdio-electron-service-${packageJson.version}.tgz`);
+shell.exec(`yarn add file:../../packages/wdio-electron-service/wdio-electron-service-v${packageJson.version}.tgz`);
 
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));
