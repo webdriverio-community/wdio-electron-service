@@ -14,7 +14,6 @@
     "clean:package": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-cjs",
     "init": "tsx ../../scripts/init-forge-example.ts forge-cjs",
     "test:e2e": "cross-env EXAMPLE_DIR=forge-cjs turbo exec --filter=@repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=forge-cjs turbo exec:ci-linux --filter=@repo/e2e",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=forge-cjs turbo exec --filter=@repo/e2e"
   },
   "dependencies": {

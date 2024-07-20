@@ -11,7 +11,6 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
     "test:e2e": "cross-env EXAMPLE_DIR=builder-cjs turbo exec --filter=@repo/e2e",
-    "test:e2e:ci-linux": "cross-env EXAMPLE_DIR=builder-cjs turbo exec:ci-linux --filter=@repo/e2e",
     "test:e2e:mac-universal": "cross-env EXAMPLE_DIR=builder-cjs turbo exec --filter=@repo/e2e"
   },
   "dependencies": {

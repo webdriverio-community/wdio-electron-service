@@ -44,11 +44,7 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Run Tests
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            pnpm run ci:linux
-          else
-            pnpm run ci
-          fi
+          pnpm run ci
         shell: bash
       - name: Run MacOS-specific Tests
         run: |
