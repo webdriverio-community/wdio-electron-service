@@ -12,7 +12,7 @@
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist",
-    "test:e2e": "cross-env EXAMPLE_DIR=builder-esm turbo exec --filter=@repo/e2e"
+    "test:e2e": "cross-env EXAMPLE_DIR=builder-esm tsx ../../scripts/exec-e2e.ts"
   },
   "dependencies": {
     "wdio-electron-service": "workspace:*"
