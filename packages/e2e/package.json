@@ -6,10 +6,14 @@
   "scripts": {
     "ci": "pnpm i && pnpm test",
     "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
-    "exec": "xvfb-maybe pnpm run exec:main && xvfb-maybe pnpm run exec:multiremote && xvfb-maybe pnpm run exec:standalone",
-    "exec:main": "wdio run ./wdio.conf.ts",
-    "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
-    "exec:standalone": "tsx ./standalone/api.spec.ts",
+    "test:e2e:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm run exec",
+    "test:e2e:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm run exec",
+    "test:e2e:builder-cjs": "cross-env EXAMPLE_DIR=builder-cjs pnpm run exec",
+    "test:e2e:builder-esm": "cross-env EXAMPLE_DIR=builder-esm pnpm run exec",
+    "exec": "pnpm run exec:main && pnpm run exec:multiremote && pnpm run exec:standalone",
+    "exec:main": "xvfb-maybe wdio run ./wdio.conf.ts",
+    "exec:multiremote": "xvfb-maybe wdio run ./wdio.multiremote.conf.ts",
+    "exec:standalone": "xvfb-maybe tsx ./standalone/api.spec.ts",
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
