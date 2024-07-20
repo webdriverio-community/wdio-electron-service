@@ -25,13 +25,13 @@ shell.exec('pnpm pkg delete packageManager');
 shell.cd(path.join(__dirname, '..', 'packages'));
 
 // create a copy of wdio-electron-service for yarn
-shell.exec('cp -r wdio-electron-service wdio-electron-service-yarn');
+shell.exec('pnpx shx cp -r wdio-electron-service wdio-electron-service-yarn');
 
 // navigate to new yarn package directory
 shell.cd(path.join(__dirname, '..', 'packages', 'wdio-electron-service-yarn'));
 
 // delete node_modules
-shell.exec('rm -rf node_modules');
+shell.exec('pnpx shx rm -rf node_modules');
 
 // replace workspace links with file links for deps
 shell.exec(
@@ -52,14 +52,14 @@ shell.cd(path.join(__dirname, '..', 'packages'));
 
 // copy the tarball to the forge example dirs
 shell.exec(
-  `cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-esm/wdio-electron-service-v${packageJson.version}.tgz`,
+  `pnpx shx cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-esm/wdio-electron-service-v${packageJson.version}.tgz`,
 );
 shell.exec(
-  `cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-cjs/wdio-electron-service-v${packageJson.version}.tgz`,
+  `pnpx shx cp ./wdio-electron-service-yarn/wdio-electron-service-v${packageJson.version}.tgz ../apps/forge-cjs/wdio-electron-service-v${packageJson.version}.tgz`,
 );
 
 // delete the yarn package directory
-shell.exec('rm -rf wdio-electron-service-yarn');
+shell.exec('pnpx shx rm -rf wdio-electron-service-yarn');
 
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));
