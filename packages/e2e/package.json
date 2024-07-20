@@ -6,6 +6,7 @@
   "scripts": {
     "ci": "pnpm i && pnpm test",
     "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "exec": "xvfb-maybe pnpm run exec:main && xvfb-maybe pnpm run exec:multiremote && xvfb-maybe pnpm run exec:standalone",
     "exec:main": "wdio run ./wdio.conf.ts",
     "exec:multiremote": "wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "tsx ./standalone/api.spec.ts",
@@ -19,8 +20,10 @@
     "@wdio/local-runner": "9.0.0-alpha.367",
     "@wdio/mocha-framework": "9.0.0-alpha.367",
     "electron": "^31.2.1",
+    "tsx": "^4.16.2",
     "wdio-electron-service": "workspace:*",
-    "webdriverio": "9.0.0-alpha.367"
+    "webdriverio": "9.0.0-alpha.367",
+    "xvfb-maybe": "^0.2.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",
@@ -32,7 +35,6 @@
     "jsdom": "^24.0.0",
     "read-package-up": "^11.0.0",
     "ts-loader": "^9.4.4",
-    "tsx": "^4.16.2",
     "typescript": "^5.5.3"
   }
 }

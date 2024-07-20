@@ -67,6 +67,10 @@
     "example-forge-esm#test:e2e": {
       "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "example-forge-cjs#test:e2e"]
     },
+    "exec": {
+      "env": ["DEBUG", "EXAMPLE_DIR"],
+      "cache": false
+    },
     "init": {
       "dependsOn": ["^build", "//#init-yarn-package-for-forge", "wdio-electron-service#test:unit"]
     },
