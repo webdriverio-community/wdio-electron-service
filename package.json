@@ -22,7 +22,7 @@
     "test": "turbo run test test:e2e",
     "test:dev": "turbo run test:dev",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run test:e2e && turbo run clean:package || turbo run clean:package",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run test:e2e:mac-universal && turbo run clean:package || turbo run clean:package",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && turbo run clean:package || turbo run clean:package",
     "test:e2e-mac-universal:graph": "turbo run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
     "test:e2e:graph": "turbo run build test:e2e --graph=./.github/assets/e2e-graph.png",
     "update:all": "pnpm up -iLr"

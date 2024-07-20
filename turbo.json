@@ -42,7 +42,8 @@
       "outputs": ["dist/**"]
     },
     "exec": {
-      "env": ["DEBUG", "EXAMPLE_DIR"]
+      "env": ["DEBUG", "EXAMPLE_DIR"],
+      "cache": false
     },
     "example-forge-cjs#build:mac-universal": {
       "dependsOn": ["example-forge-esm#build:mac-universal"],
