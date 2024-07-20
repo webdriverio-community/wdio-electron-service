@@ -8,7 +8,7 @@
   "scripts": {
     "build": "turbo run build --filter=wdio-electron-service",
     "ci": "pnpm i && turbo run build test:unit test:e2e lint format:check",
-    "ci:e2e-mac-universal": "DEBUG=wdio-electron-service turbo run clean:dist --filter=example* && DEBUG=wdio-electron-service turbo run test:e2e:mac-universal",
+    "ci:e2e-mac-universal": "turbo run clean:dist --filter=example* && turbo run build:mac-universal && turbo run test:e2e",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "dev": "turbo watch wdio-electron-service#build",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",

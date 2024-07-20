@@ -71,9 +71,6 @@
     "test:e2e": {
       "dependsOn": ["build"]
     },
-    "test:e2e:mac-universal": {
-      "dependsOn": ["build:mac-universal"]
-    },
     "test:unit": {
       "dependsOn": ["^build"]
     },
