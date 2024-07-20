@@ -26,25 +26,37 @@
       "dependsOn": ["example-forge-cjs#test:e2e"]
     },
     "example-forge-cjs#build": {
-      "dependsOn": ["^build", "example-forge-cjs#init"]
+      "dependsOn": ["^build", "example-forge-cjs#init"],
+      "outputs": ["out/**"]
     },
     "example-forge-esm#build": {
-      "dependsOn": ["^build", "example-forge-esm#init"]
+      "dependsOn": ["^build", "example-forge-esm#init"],
+      "outputs": ["out/**"]
     },
     "example-builder-cjs#build": {
-      "dependsOn": ["^build", "example-forge-esm#test:e2e"]
+      "dependsOn": ["^build", "example-forge-esm#test:e2e"],
+      "outputs": ["dist/**"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build", "example-builder-cjs#test:e2e"]
+      "dependsOn": ["^build", "example-builder-cjs#test:e2e"],
+      "outputs": ["dist/**"]
     },
     "exec": {
-      "passThroughEnv": ["DEBUG", "EXAMPLE_DIR"]
+      "env": ["DEBUG", "EXAMPLE_DIR"]
     },
     "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["example-forge-esm#build:mac-universal"]
+      "dependsOn": ["example-forge-esm#build:mac-universal"],
+      "outputs": ["out/**"]
+    },
+    "example-forge-esm#build:mac-universal": {
+      "outputs": ["out/**"]
     },
     "example-builder-cjs#build:mac-universal": {
-      "dependsOn": ["example-builder-esm#build:mac-universal"]
+      "dependsOn": ["example-builder-esm#build:mac-universal"],
+      "outputs": ["dist/**"]
+    },
+    "example-builder-esm#build:mac-universal": {
+      "outputs": ["dist/**"]
     },
     "example-builder-cjs#test:e2e": {
       "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "example-forge-esm#test:e2e"]
