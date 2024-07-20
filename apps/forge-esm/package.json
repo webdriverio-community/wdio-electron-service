@@ -14,7 +14,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist",
     "clean:package": "pnpm dlx tsx ../../scripts/clean-forge-example.ts forge-esm",
     "init": "tsx ../../scripts/init-forge-example.ts forge-esm",
-    "test:e2e": "cross-env EXAMPLE_DIR=forge-esm DEBUG=wdio-electron-service turbo exec --filter=@repo/e2e"
+    "test:e2e": "cross-env EXAMPLE_DIR=forge-esm turbo exec --filter=@repo/e2e"
   },
   "dependencies": {
     "wdio-electron-service": "workspace:*"
