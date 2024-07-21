@@ -10,7 +10,7 @@
       "dependsOn": ["@repo/types#build"]
     },
     "build": {
-      "dependsOn": ["^build", "init"]
+      "dependsOn": ["^build"]
     },
     "build:mac-universal": {},
     "clean": {
@@ -22,26 +22,20 @@
     "clean:package": {
       "cache": false
     },
-    "example-forge-esm#init": {
-      "dependsOn": ["@repo/e2e#test:e2e:forge-cjs"]
+    "example-builder-cjs#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
-    "example-forge-cjs#build": {
-      "dependsOn": ["^build", "example-forge-cjs#init"],
-      "outputs": ["out/**"]
+    "example-builder-esm#build": {
+      "dependsOn": ["^build", "@repo/e2e#test:e2e:builder-cjs"],
+      "outputs": ["dist/**"]
     },
-    "example-forge-esm#build": {
-      "dependsOn": ["^build", "example-forge-esm#init"],
-      "outputs": ["out/**"]
+    "example-builder-cjs#build:mac-universal": {
+      "dependsOn": ["example-builder-esm#build:mac-universal"],
+      "outputs": ["dist/**"]
     },
-    "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["example-forge-esm#build:mac-universal"],
-      "outputs": ["out/**"]
-    },
-    "example-forge-esm#build:mac-universal": {
-      "outputs": ["out/**"]
-    },
-    "init": {
-      "dependsOn": ["^build", "//#init-yarn-package-for-forge", "wdio-electron-service#test:unit"]
+    "example-builder-esm#build:mac-universal": {
+      "outputs": ["dist/**"]
     },
     "init-yarn-package-for-forge": {
       "dependsOn": ["build"]
@@ -56,11 +50,11 @@
       "persistent": true,
       "cache": false
     },
-    "@repo/e2e#test:e2e:forge-cjs": {
-      "dependsOn": ["example-forge-cjs#build", "wdio-electron-service#build"]
+    "@repo/e2e#test:e2e:builder-cjs": {
+      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build"]
     },
-    "@repo/e2e#test:e2e:forge-esm": {
-      "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:forge-cjs"]
+    "@repo/e2e#test:e2e:builder-esm": {
+      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:builder-cjs"]
     },
     "test:unit": {
       "dependsOn": ["^build"]
