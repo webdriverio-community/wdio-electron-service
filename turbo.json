@@ -33,27 +33,12 @@
       "dependsOn": ["^build", "example-forge-esm#init"],
       "outputs": ["out/**"]
     },
-    "example-builder-cjs#build": {
-      "dependsOn": ["^build", "@repo/e2e#test:e2e:forge-esm"],
-      "outputs": ["dist/**"]
-    },
-    "example-builder-esm#build": {
-      "dependsOn": ["^build", "@repo/e2e#test:e2e:builder-cjs"],
-      "outputs": ["dist/**"]
-    },
     "example-forge-cjs#build:mac-universal": {
       "dependsOn": ["example-forge-esm#build:mac-universal"],
       "outputs": ["out/**"]
     },
     "example-forge-esm#build:mac-universal": {
       "outputs": ["out/**"]
-    },
-    "example-builder-cjs#build:mac-universal": {
-      "dependsOn": ["example-builder-esm#build:mac-universal"],
-      "outputs": ["dist/**"]
-    },
-    "example-builder-esm#build:mac-universal": {
-      "outputs": ["dist/**"]
     },
     "init": {
       "dependsOn": ["^build", "//#init-yarn-package-for-forge", "wdio-electron-service#test:unit"]
@@ -76,12 +61,6 @@
     },
     "@repo/e2e#test:e2e:forge-esm": {
       "dependsOn": ["example-forge-esm#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:forge-cjs"]
-    },
-    "@repo/e2e#test:e2e:builder-cjs": {
-      "dependsOn": ["example-builder-cjs#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:forge-esm"]
-    },
-    "@repo/e2e#test:e2e:builder-esm": {
-      "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:builder-cjs"]
     },
     "test:unit": {
       "dependsOn": ["^build"]
