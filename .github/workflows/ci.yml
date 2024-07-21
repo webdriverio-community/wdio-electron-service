@@ -42,6 +42,14 @@ jobs:
       - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
+      - name: Package Manager Install
+        run: |
+          pnpm install
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            pnpm run ci:init-windows
+            pnpm install --no-frozen-lockfile
+          fi
+        shell: bash
       - name: Run Tests
         run: |
           pnpm run ci
