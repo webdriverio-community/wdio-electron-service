@@ -15,5 +15,8 @@ shell.exec(
   'pnpm pkg set dependencies.wdio-electron-service=workspace:* dependencies.@repo/types=workspace:* dependencies.@repo/utils=workspace:*',
 );
 
+// delete tgz file
+shell.rm('*.tgz');
+
 // remove any yarn artifacts
 shell.exec('pnpm clean');
