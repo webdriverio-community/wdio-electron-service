@@ -29,14 +29,14 @@
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build", "@repo/e2e#test:e2e:builder-cjs"],
+      "dependsOn": ["^build", "example-builder-cjs#build"],
       "outputs": ["dist/**"]
     },
     "example-builder-cjs#build:mac-universal": {
-      "dependsOn": ["example-builder-esm#build:mac-universal"],
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build:mac-universal": {
+      "dependsOn": ["example-builder-cjs#build:mac-universal"],
       "outputs": ["dist/**"]
     },
     "release": {
