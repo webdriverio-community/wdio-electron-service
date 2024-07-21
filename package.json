@@ -7,13 +7,13 @@
   },
   "scripts": {
     "build": "turbo run build --filter=wdio-electron-service",
-    "ci": "pnpm i && turbo run build test:unit test:e2e:forge-cjs test:e2e:builder-cjs test:e2e:builder-esm lint format:check",
+    "ci": "pnpm i && turbo run build test:unit test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm lint format:check",
     "ci:e2e-mac-universal": "turbo run clean:dist --filter=example* && turbo run build:mac-universal && turbo run test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm --only",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "dev": "turbo watch wdio-electron-service#build",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
-    "graph": "pnpm test:e2e:graph && pnpm test:e2e-mac-universal:graph",
+    "graph": "turbo run test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm --graph=./.github/assets/e2e-graph.png",
     "init-yarn-package-for-forge": "tsx ./scripts/init-yarn-package-for-forge.ts",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
@@ -23,8 +23,6 @@
     "test:dev": "turbo run test:dev",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run test:e2e && turbo run clean:package || turbo run clean:package",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && turbo run clean:package || turbo run clean:package",
-    "test:e2e-mac-universal:graph": "turbo run test:e2e:mac-universal --graph=./.github/assets/e2e-graph-mac-universal.png",
-    "test:e2e:graph": "turbo run build test:e2e --graph=./.github/assets/e2e-graph.png",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
