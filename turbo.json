@@ -51,6 +51,7 @@
       "outputs": ["out/**"]
     },
     "example-forge-esm#build:mac-universal": {
+      "dependsOn": ["example-builder-cjs#build:mac-universal"],
       "outputs": ["out/**"]
     },
     "example-builder-cjs#build:mac-universal": {
