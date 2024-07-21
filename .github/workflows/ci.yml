@@ -57,8 +57,7 @@ jobs:
       - name: Run OS-specific Tests
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run ci:e2e:clean
-            pnpm run ci:e2e:mac-universal
+            pnpm run ci:e2e:clean && pnpm run ci:e2e:mac-universal
           fi
         shell: bash
       - name: 🐛 Debug Build
