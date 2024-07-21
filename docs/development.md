@@ -33,10 +33,6 @@ Below are the task graphs for the E2Es:
 
 ![E2E Task Graph](../.github/assets/e2e-graph.png 'E2E Task Graph')
 
-...and for the Mac-Universal E2Es:
-
-![Mac-Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac-Universal E2E Task Graph')
-
 ## Testing - Units
 
 Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
