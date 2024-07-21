@@ -29,7 +29,7 @@
       "outputs": ["out/**"]
     },
     "example-forge-cjs#init": {
-      "dependsOn": ["//#init-yarn-package-for-forge"]
+      "dependsOn": ["//#init-yarn-package-for-forge", "example-forge-esm#init"]
     },
     "example-forge-esm#build": {
       "dependsOn": ["init", "^build"],
