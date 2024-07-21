@@ -3,7 +3,9 @@
   "ui": "tui",
   "tasks": {
     "//#format:check": {},
-    "//#init-yarn-package-for-forge": {},
+    "//#init-yarn-package-for-forge": {
+      "dependsOn": ["wdio-electron-service#build"]
+    },
     "//#lint": {},
     "@repo/types#build": {},
     "@repo/utils#build": {
@@ -36,9 +38,6 @@
     },
     "example-builder-esm#build:mac-universal": {
       "outputs": ["dist/**"]
-    },
-    "init-yarn-package-for-forge": {
-      "dependsOn": ["build"]
     },
     "release": {
       "dependsOn": ["build"],
