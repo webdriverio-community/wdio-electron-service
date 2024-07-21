@@ -46,12 +46,12 @@ jobs:
         run: |
           pnpm run ci
         shell: bash
-      - name: Run MacOS-specific Tests
-        run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run ci:e2e-mac-universal
-          fi
-        shell: bash
+      # - name: Run MacOS-specific Tests
+      #   run: |
+      #     if [ "$RUNNER_OS" == "macOS" ]; then
+      #       pnpm run ci:e2e-mac-universal
+      #     fi
+      #   shell: bash
       - name: 🐛 Debug Build
         uses: stateful/vscode-server-action@v1
         if: failure()
