@@ -4,7 +4,7 @@
   "tasks": {
     "//#format:check": {},
     "//#init-yarn-package-for-forge": {
-      "dependsOn": ["wdio-electron-service#build"]
+      "dependsOn": ["@repo/e2e#test:e2e:builder-esm", "@repo/e2e#test:e2e:builder-cjs"]
     },
     "//#lint": {},
     "@repo/types#build": {},
