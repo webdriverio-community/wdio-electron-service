@@ -193,15 +193,9 @@ importers:
 
   apps/forge-cjs:
     dependencies:
-      '@repo/types':
-        specifier: file:../../packages/types
-        version: link:../../packages/types
-      '@repo/utils':
-        specifier: file:../../packages/utils
-        version: link:../../packages/utils
       wdio-electron-service:
-        specifier: file:./wdio-electron-service-v7.0.0-beta.0.tgz
-        version: file:apps/forge-cjs/wdio-electron-service-v7.0.0-beta.0.tgz(electron@31.2.1)(webdriverio@9.0.0-alpha.367)
+        specifier: workspace:*
+        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.4.0
@@ -257,15 +251,9 @@ importers:
 
   apps/forge-esm:
     dependencies:
-      '@repo/types':
-        specifier: file:../../packages/types
-        version: link:../../packages/types
-      '@repo/utils':
-        specifier: file:../../packages/utils
-        version: link:../../packages/utils
       wdio-electron-service:
-        specifier: file:./wdio-electron-service-v7.0.0-beta.0.tgz
-        version: file:apps/forge-esm/wdio-electron-service-v7.0.0-beta.0.tgz(electron@31.2.1)(webdriverio@9.0.0-alpha.367)
+        specifier: workspace:*
+        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.4.0
@@ -1038,13 +1026,6 @@ packages:
     resolution: {integrity: sha512-bJ0UBsk0ESOs6RFcLXOt99a3yTDcOKlzfjad+rhFwdaG1Lu/Wzq58GHYCDTlZ9z6mldf4g+NTb+TXEfe0PpnsQ==}
     engines: {node: '>=18'}
     hasBin: true
-
-  '@repo/types@file:packages/types':
-    resolution: {directory: packages/types, type: directory}
-
-  '@repo/utils@file:packages/utils':
-    resolution: {directory: packages/utils, type: directory}
-    engines: {node: '>=18 || >=20'}
 
   '@rollup/plugin-commonjs@26.0.1':
     resolution: {integrity: sha512-UnsKoZK6/aGIH6AdkptXhNvhaqftcjq3zZdT+LY5Ftms6JR06nADcDsYp5hTU9E2lbJUEOhdlY5J4DNTneM+jQ==}
@@ -5255,28 +5236,6 @@ packages:
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
-  wdio-electron-service@file:apps/forge-cjs/wdio-electron-service-v7.0.0-beta.0.tgz:
-    resolution: {integrity: sha512-hX3AW9gsv/7V+i0/AT9UxTdklG1ShTzqTuqyhke+Gt79ACu2Q0wQJAQXl36sczPfTp5boqt2UK/ow8d5q+ZneA==, tarball: file:apps/forge-cjs/wdio-electron-service-v7.0.0-beta.0.tgz}
-    version: 7.0.0-beta.0
-    engines: {node: '>=18 || >=20'}
-    peerDependencies:
-      electron: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      electron:
-        optional: true
-
-  wdio-electron-service@file:apps/forge-esm/wdio-electron-service-v7.0.0-beta.0.tgz:
-    resolution: {integrity: sha512-hX3AW9gsv/7V+i0/AT9UxTdklG1ShTzqTuqyhke+Gt79ACu2Q0wQJAQXl36sczPfTp5boqt2UK/ow8d5q+ZneA==, tarball: file:apps/forge-esm/wdio-electron-service-v7.0.0-beta.0.tgz}
-    version: 7.0.0-beta.0
-    engines: {node: '>=18 || >=20'}
-    peerDependencies:
-      electron: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      electron:
-        optional: true
-
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -6182,18 +6141,6 @@ snapshots:
       tar-fs: 3.0.5
       unbzip2-stream: 1.4.3
       yargs: 17.7.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@repo/types@file:packages/types': {}
-
-  '@repo/utils@file:packages/utils':
-    dependencies:
-      '@electron/packager': 18.3.3
-      '@wdio/logger': 9.0.0-alpha.367
-      debug: 4.3.5
-      find-versions: 6.0.0
-      read-package-up: 11.0.0
     transitivePeerDependencies:
       - supports-color
 
@@ -11079,42 +11026,6 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
-
-  wdio-electron-service@file:apps/forge-cjs/wdio-electron-service-v7.0.0-beta.0.tgz(electron@31.2.1)(webdriverio@9.0.0-alpha.367):
-    dependencies:
-      '@repo/types': file:packages/types
-      '@repo/utils': file:packages/utils
-      '@vitest/spy': 2.0.3
-      '@wdio/logger': 9.0.0-alpha.367
-      compare-versions: 6.1.1
-      debug: 4.3.5
-      electron-to-chromium: 1.4.832
-      fast-copy: 3.0.2
-      read-package-up: 11.0.0
-      tinyspy: 3.0.0
-      webdriverio: 9.0.0-alpha.367
-    optionalDependencies:
-      electron: 31.2.1
-    transitivePeerDependencies:
-      - supports-color
-
-  wdio-electron-service@file:apps/forge-esm/wdio-electron-service-v7.0.0-beta.0.tgz(electron@31.2.1)(webdriverio@9.0.0-alpha.367):
-    dependencies:
-      '@repo/types': file:packages/types
-      '@repo/utils': file:packages/utils
-      '@vitest/spy': 2.0.3
-      '@wdio/logger': 9.0.0-alpha.367
-      compare-versions: 6.1.1
-      debug: 4.3.5
-      electron-to-chromium: 1.4.832
-      fast-copy: 3.0.2
-      read-package-up: 11.0.0
-      tinyspy: 3.0.0
-      webdriverio: 9.0.0-alpha.367
-    optionalDependencies:
-      electron: 31.2.1
-    transitivePeerDependencies:
-      - supports-color
 
   web-streams-polyfill@3.3.3: {}
 
