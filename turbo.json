@@ -2,19 +2,28 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
-    "//#format:check": {},
-    "//#init-yarn-package-for-forge": {
+    "//#format:check": {
+      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}"]
+    },
+    "//#init-forge:e2e": {
       "dependsOn": ["@repo/e2e#test:e2e:builder-esm", "@repo/e2e#test:e2e:builder-cjs"]
     },
-    "//#lint": {},
-    "@repo/types#build": {},
+    "//#init-forge:e2e-mac-universal": {
+      "dependsOn": ["@repo/e2e#test:e2e-mac-universal:builder-esm", "@repo/e2e#test:e2e-mac-universal:builder-cjs"]
+    },
+    "//#lint": {
+      "inputs": ["**/*.{j,mj,cj,t}s"]
+    },
+    "@repo/types#build": {
+      "outputs": ["dist/**"]
+    },
     "@repo/utils#build": {
-      "dependsOn": ["@repo/types#build"]
+      "dependsOn": ["@repo/types#build"],
+      "outputs": ["dist/**"]
     },
     "build": {
       "dependsOn": ["^build"]
     },
-    "build:mac-universal": {},
     "clean": {
       "cache": false
     },
@@ -29,14 +38,14 @@
       "outputs": ["out/**"]
     },
     "example-forge-cjs#init": {
-      "dependsOn": ["//#init-yarn-package-for-forge", "example-forge-esm#init"]
+      "dependsOn": ["//#init-forge:e2e", "example-forge-esm#init"]
     },
     "example-forge-esm#build": {
       "dependsOn": ["init", "^build"],
       "outputs": ["out/**"]
     },
     "example-forge-esm#init": {
-      "dependsOn": ["//#init-yarn-package-for-forge"]
+      "dependsOn": ["//#init-forge:e2e"]
     },
     "example-builder-cjs#build": {
       "dependsOn": ["^build", "example-builder-esm#build"],
@@ -46,20 +55,27 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["example-forge-esm#build:mac-universal"],
-      "outputs": ["out/**"]
-    },
-    "example-forge-esm#build:mac-universal": {
-      "dependsOn": ["example-builder-cjs#build:mac-universal"],
-      "outputs": ["out/**"]
-    },
     "example-builder-cjs#build:mac-universal": {
-      "dependsOn": ["example-builder-esm#build:mac-universal"],
+      "dependsOn": ["^build", "example-builder-esm#build:mac-universal"],
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build:mac-universal": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
+    },
+    "example-forge-cjs#build:mac-universal": {
+      "dependsOn": ["init:mac-universal", "^build", "example-forge-esm#build:mac-universal"],
+      "outputs": ["out/**"]
+    },
+    "example-forge-cjs#init:mac-universal": {
+      "dependsOn": ["//#init-forge:e2e-mac-universal", "example-forge-esm#init:mac-universal"]
+    },
+    "example-forge-esm#build:mac-universal": {
+      "dependsOn": ["init:mac-universal", "^build", "example-builder-cjs#build:mac-universal"],
+      "outputs": ["out/**"]
+    },
+    "example-forge-esm#init:mac-universal": {
+      "dependsOn": ["//#init-forge:e2e-mac-universal"]
     },
     "release": {
       "dependsOn": ["build"],
@@ -83,11 +99,32 @@
     "@repo/e2e#test:e2e:builder-esm": {
       "dependsOn": ["example-builder-esm#build", "wdio-electron-service#build"]
     },
+    "@repo/e2e#test:e2e-mac-universal:forge-cjs": {
+      "dependsOn": [
+        "example-forge-cjs#build:mac-universal",
+        "wdio-electron-service#build",
+        "@repo/e2e#test:e2e-mac-universal:forge-esm"
+      ]
+    },
+    "@repo/e2e#test:e2e-mac-universal:forge-esm": {
+      "dependsOn": ["example-forge-esm#build:mac-universal", "wdio-electron-service#build"]
+    },
+    "@repo/e2e#test:e2e-mac-universal:builder-cjs": {
+      "dependsOn": [
+        "example-builder-cjs#build:mac-universal",
+        "wdio-electron-service#build",
+        "@repo/e2e#test:e2e-mac-universal:builder-esm"
+      ]
+    },
+    "@repo/e2e#test:e2e-mac-universal:builder-esm": {
+      "dependsOn": ["example-builder-esm#build:mac-universal", "wdio-electron-service#build"]
+    },
     "test:unit": {
       "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
-      "dependsOn": ["@repo/utils#build"]
+      "dependsOn": ["@repo/utils#build"],
+      "outputs": ["dist/**"]
     }
   }
 }
