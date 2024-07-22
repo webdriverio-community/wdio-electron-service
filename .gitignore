@@ -136,5 +136,7 @@ packages/wdio-electron-service/src/cjs/preload.ts
 # Turbo files
 .turbo
 
-# NPM lockfiles
-package-lock.json
+# Yarn artifacts
+wdio-electron-service-yarn
+wdio-electron-service-*.tgz
+yarn.lock

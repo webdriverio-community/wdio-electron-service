@@ -2,15 +2,9 @@
 
 ## Prerequisites
 
-Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 18) with [PNPM](https://pnpm.io) as a package manager.
+Development and building the service locally requires [Node.JS](https://nodejs.org) (>= 18) with [PNPM](https://pnpm.io) as a package manager -- and Git, obviously.
 
-To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to install an appropriate version of NodeJS, then [install PNPM](https://pnpm.io/installation), check out the repo with git, and run the following command:
-
-```bash
-pnpm init-repo
-```
-
-This will install all dependencies, initialising the repo for development.
+To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to install an appropriate version of NodeJS, then [install PNPM](https://pnpm.io/installation). Once that is done you can check out the repo with git, and install the dependencies with PNPM.
 
 [Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged). \
 [Turborepo](https://turbo.build) is used to handle builds and testing.
@@ -39,9 +33,7 @@ Below are the task graphs for the E2Es:
 
 ![E2E Task Graph](../.github/assets/e2e-graph.png 'E2E Task Graph')
 
-...and for the Mac-Universal E2Es:
-
-![Mac-Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac-Universal E2E Task Graph')
+![Mac Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac Universal E2E Task Graph')
 
 ## Testing - Units
 

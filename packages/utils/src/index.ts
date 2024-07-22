@@ -1,13 +1,22 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 import findVersions from 'find-versions';
 import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
-import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR, MULTIPLE_BUILD_TOOLS_ERROR } from './constants.js';
-import type { AppBuildInfo, BuilderArch, BuilderConfig, ForgeConfig, ForgeArch } from '@repo/types';
+import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR } from './constants.js';
+import {
+  AppBuildInfo,
+  BuilderArch,
+  BuilderConfig,
+  ForgeConfig,
+  ForgeArch,
+  ForgeBuildInfo,
+  BuilderBuildInfo,
+} from '@repo/types';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -18,8 +27,8 @@ const SupportedPlatform = {
 /**
  * Determine the path to the Electron application binary
  * @param packageJsonPath path to the nearest package.json
- * @param appName name of the application
- * @param buildToolConfig configuration for the detected build tool
+ * @param appBuildInfo build information about the Electron application
+ * @param electronVersion version of Electron to use
  * @param p   process object (used for testing purposes)
  * @returns   path to the Electron app binary
  */
@@ -70,12 +79,14 @@ export async function getBinaryPath(
     }
   }
 
+  const executableName =
+    (appBuildInfo.isForge && appBuildInfo.config.packagerConfig?.executableName) || appBuildInfo.appName;
   const binaryPathMap = {
-    darwin: path.join(`${appBuildInfo.appName}.app`, 'Contents', 'MacOS', appBuildInfo.appName),
-    linux: appBuildInfo.appName,
-    win32: `${appBuildInfo.appName}.exe`,
+    darwin: () => path.join(`${appBuildInfo.appName}.app`, 'Contents', 'MacOS', executableName),
+    linux: () => executableName,
+    win32: () => `${executableName}.exe`,
   };
-  const electronBinaryPath = binaryPathMap[p.platform as keyof typeof SupportedPlatform];
+  const electronBinaryPath = binaryPathMap[p.platform as keyof typeof SupportedPlatform]();
 
   const binaryPaths = outDirs.map((outDir) => path.join(outDir, electronBinaryPath));
 
@@ -83,10 +94,12 @@ export async function getBinaryPath(
   const binaryPathsAccessResults = await Promise.all(
     binaryPaths.map(async (binaryPath) => {
       try {
+        log.debug(`Checking binary path: ${binaryPath}...`);
         await fs.access(binaryPath, fs.constants.X_OK);
+        log.debug(`'${binaryPath}' is executable.`);
         return true;
       } catch (e) {
-        log.debug(e);
+        log.debug(`'${binaryPath}' is not executable.`, (e as Error).message);
         return false;
       }
     }),
@@ -102,67 +115,15 @@ export async function getBinaryPath(
 
   // multiple executable binaries case
   if (executableBinaryPaths.length > 1) {
-    log.debug(`Detected multiple app binaries, using the first one: \n${executableBinaryPaths.join(', \n')}`);
+    log.info(`Detected multiple app binaries, using the first one: \n${executableBinaryPaths.join(', \n')}`);
   }
 
   return executableBinaryPaths[0];
 }
 
-/**
- * Determine build information about the Electron application
- * @param pkg path to the nearest package.json
- * @returns   promise resolving to the app build information
- */
-export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBuildInfo> {
-  const forgeDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli');
-  const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
-  const forgePackageJsonConfig = pkg.packageJson.config?.forge;
-  const forgeCustomConfigFile = typeof forgePackageJsonConfig === 'string';
-  const forgeConfigPath = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
-  const rootDir = path.dirname(pkg.path);
-  let forgeConfig = forgePackageJsonConfig as ForgeConfig;
-  let builderConfig: BuilderConfig = pkg.packageJson.build;
-
-  if (!forgePackageJsonConfig || forgeCustomConfigFile) {
-    // if no config or a linked file, attempt to read Forge JS-based config
-    try {
-      log.debug(`Reading Forge config file: ${forgeConfigPath}...`);
-      forgeConfig = ((await import(path.join(rootDir, forgeConfigPath))) as { default: ForgeConfig }).default;
-    } catch (e) {
-      log.debug(e);
-    }
-  }
-
-  const isForge = Boolean(forgeConfig || forgeDependencyDetected);
-
-  if (!isForge) {
-    // if no Forge config or dependency, attempt to read `electron-builder.json`
-    try {
-      log.debug('Forge not detected, reading `electron-builder.json`...');
-      const data = await fs.readFile(path.join(rootDir, 'electron-builder.json'), 'utf-8');
-      builderConfig = JSON.parse(data);
-    } catch (e) {
-      log.debug(e);
-    }
-  }
-
-  const isBuilder = Boolean(builderConfig || builderDependencyDetected);
-
-  if (isForge && isBuilder) {
-    throw new Error(MULTIPLE_BUILD_TOOLS_ERROR);
-  }
-  if (!isForge && !isBuilder) {
-    throw new Error(BUILD_TOOL_DETECTION_ERROR);
-  }
-
-  const config = isForge ? forgeConfig : builderConfig;
-  log.debug(`${isForge ? 'Forge' : 'Builder'} configuration detected: \n${JSON.stringify(config)}`);
-
-  const appName: string =
-    pkg.packageJson.productName ||
-    (isBuilder && (config as BuilderConfig)?.productName) ||
-    (isForge && (config as ForgeConfig)?.packagerConfig?.name) ||
-    pkg.packageJson.name;
+const forgeBuildInfo = (forgeConfig: ForgeConfig, pkg: NormalizedReadResult): ForgeBuildInfo => {
+  log.info(`Forge configuration detected: \n${JSON.stringify(forgeConfig)}`);
+  const appName: string = pkg.packageJson.productName || forgeConfig?.packagerConfig?.name || pkg.packageJson.name;
 
   if (!appName) {
     throw new Error(APP_NAME_DETECTION_ERROR);
@@ -170,10 +131,88 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
   return {
     appName,
-    config,
-    isForge,
-    isBuilder,
+    config: forgeConfig,
+    isForge: true,
+    isBuilder: false,
   };
+};
+
+const builderBuildInfo = (builderConfig: BuilderConfig, pkg: NormalizedReadResult): BuilderBuildInfo => {
+  log.info(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
+  const appName: string = pkg.packageJson.productName || builderConfig?.productName || pkg.packageJson.name;
+
+  if (!appName) {
+    throw new Error(APP_NAME_DETECTION_ERROR);
+  }
+
+  return {
+    appName,
+    config: builderConfig,
+    isForge: false,
+    isBuilder: true,
+  };
+};
+
+/**
+ * Determine build information about the Electron application
+ * @param pkg normalized package.json
+ * @returns   promise resolving to the app build information
+ */
+export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBuildInfo> {
+  const forgeDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('@electron-forge/cli');
+  const builderDependencyDetected = Object.keys(pkg.packageJson.devDependencies || {}).includes('electron-builder');
+  const forgePackageJsonConfig = pkg.packageJson.config?.forge;
+  const forgeCustomConfigFile = typeof forgePackageJsonConfig === 'string';
+  const forgeConfigFile = forgeCustomConfigFile ? forgePackageJsonConfig : 'forge.config.js';
+  const rootDir = path.dirname(pkg.path);
+  let forgeConfig = forgePackageJsonConfig as ForgeConfig;
+  let builderConfig: BuilderConfig = pkg.packageJson.build;
+
+  if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
+    // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
+    try {
+      const forgeConfigPath = pathToFileURL(path.join(rootDir, forgeConfigFile)).toString();
+      log.info(`Reading Forge config file: ${forgeConfigPath}...`);
+      forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
+    } catch (e) {
+      log.warn('Forge config file not found or invalid.');
+    }
+  }
+
+  if (builderDependencyDetected && !builderConfig) {
+    // if builder config is not found in the package.json, we attempt to read `electron-builder.json`
+    const builderConfigFileName = 'electron-builder.json';
+    const builderConfigPath = path.join(rootDir, builderConfigFileName);
+    try {
+      log.info(`Reading Builder config file: ${builderConfigPath}...`);
+      const data = await fs.readFile(builderConfigPath, 'utf-8');
+      builderConfig = JSON.parse(data);
+    } catch (e) {
+      log.warn('Builder config file not found or invalid.');
+    }
+  }
+
+  const isForge = Boolean(forgeConfig);
+  const isBuilder = Boolean(builderConfig);
+
+  if (isForge && isBuilder) {
+    log.warn(
+      'Detected both Forge and Builder configurations, the Forge configuration will be used to determine build information',
+    );
+    log.warn('You can override this by specifying the `appBinaryPath` option in your capabilities.');
+  }
+
+  if (isForge) {
+    log.info('Using Forge configuration to get app build information...');
+    return forgeBuildInfo(forgeConfig, pkg);
+  }
+
+  if (isBuilder) {
+    log.info('Using Builder configuration to get app build information...');
+    return builderBuildInfo(builderConfig, pkg);
+  }
+
+  throw new Error(BUILD_TOOL_DETECTION_ERROR);
 }
 
 export function getElectronVersion(pkg: NormalizedReadResult) {

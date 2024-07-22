@@ -8,13 +8,17 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+*
   pull_request:
 
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        node-version: [18.x]
+        node-version: [20.x]
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -33,23 +37,29 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.4.0
+          version: 9.5.0
           run_install: false
       - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
-      - name: Run Tests
+      - name: Install Dependencies
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            pnpm run ci:linux
-          else
-            pnpm run ci
+          pnpm install
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            pnpm run ci:init-windows
+            pnpm install --no-frozen-lockfile
           fi
         shell: bash
-      - name: Run MacOS-specific Tests
+      - name: Run Tests
+        run: |
+          pnpm run ci
+        shell: bash
+      - name: Run OS-specific Tests
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run ci:e2e-mac-universal
+            pnpm run ci:e2e:clean
+            pnpm install --no-frozen-lockfile
+            pnpm run ci:e2e:mac-universal
           fi
         shell: bash
       - name: 🐛 Debug Build

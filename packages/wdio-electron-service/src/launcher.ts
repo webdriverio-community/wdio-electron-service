@@ -48,18 +48,18 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion;
         const chromiumVersion = await getChromiumVersion(electronVersion);
-        log.debug(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+        log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        let { appBinaryPath, appArgs } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
+        let { appArgs, appBinaryPath } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
         if (!appBinaryPath) {
-          log.debug('No app binary found');
+          log.info('No app binary specified, attempting to detect one...');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
 
             try {
               appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-              log.debug(`Detected app binary at ${appBinaryPath}`);
+              log.info(`Detected app binary at ${appBinaryPath}`);
             } catch (e) {
               const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
               const suggestedCompileCommand = `npx ${
