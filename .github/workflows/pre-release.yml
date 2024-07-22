@@ -13,13 +13,14 @@ on:
         required: true
         default: 'next'
       preReleaseVersion:
-        description: 'The new Pre-Release version to create.  Leave blank to increment an existing pre-release version.'
-        required: false
+        description: 'The new Pre-Release version to create.  Choose "existing" to increment the latest pre-release.'
+        required: true
         type: choice
         options:
-          - patch
-          - minor
-          - major
+          - existing (increment an existing pre-release)
+          - patch (create a new patch pre-release)
+          - minor (create a new minor pre-release)
+          - major (create a new major pre-release)
       dryRun:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
@@ -58,7 +59,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Publish Pre-Release
         run: |
-          if [ "${{inputs.preReleaseVersion}}" == "" ]; then
+          if [ "${{inputs.preReleaseVersion}}" == "existing" ]; then
             pnpm run release -- $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           else
             pnpm run release -- ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
