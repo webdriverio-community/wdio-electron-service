@@ -58,7 +58,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
             pnpm run ci:e2e:clean
-            pnpm install
+            pnpm install --no-frozen-lockfile
             pnpm run ci:e2e:mac-universal
           fi
         shell: bash
