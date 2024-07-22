@@ -5,22 +5,22 @@ on:
   workflow_dispatch:
     inputs:
       npmTag:
-        description: 'NPM tag.  Leave blank to use the default "next" tag.'
+        description: 'NPM tag. Leave blank to use the default "next" tag.'
         required: true
         default: 'next'
       preReleaseName:
-        description: 'Pre-Release Name, this is used in the version string, e.g. "beta" for `7.0.0-beta.0`.  Leave blank to use the default "next".'
+        description: 'Pre-release name. This is used in the version string, e.g. "beta" for `7.0.0-beta.0`. Leave blank to use the default "next".'
         required: true
         default: 'next'
       preReleaseVersion:
-        description: 'The new Pre-Release version to create.  Choose "existing" to increment the latest pre-release.'
+        description: 'The new pre-release version to create. Choose "existing" to increment the latest pre-release.'
         required: true
         type: choice
         options:
-          - existing (increment an existing pre-release)
-          - patch (create a new patch pre-release)
-          - minor (create a new minor pre-release)
-          - major (create a new major pre-release)
+          - existing
+          - patch
+          - minor
+          - major
       dryRun:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
