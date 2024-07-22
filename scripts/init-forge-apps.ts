@@ -21,19 +21,21 @@ shell.cd(path.join(__dirname, '..'));
 const packageManager = shell.exec('pnpm pkg get packageManager').stdout.trim();
 shell.exec('pnpm pkg delete packageManager');
 
-// navigate to directory of target app
-shell.cd(path.join(__dirname, '..', 'apps', process.argv[2] || 'forge-esm'));
+for (const app of ['forge-esm', 'forge-cjs']) {
+  // navigate to directory of target app
+  shell.cd(path.join(__dirname, '..', 'apps', app));
 
-// remove any dependencies installed with pnpm
-shell.exec('pnpm clean');
+  // remove any dependencies installed with pnpm
+  shell.exec('pnpm clean');
 
-// delete workspace dependency
-shell.exec('pnpm pkg delete dependencies.wdio-electron-service');
+  // delete workspace dependency
+  shell.exec('pnpm pkg delete dependencies.wdio-electron-service');
 
-// install repo dependencies with yarn
-shell.exec('yarn');
-shell.exec('yarn add file:../../packages/types file:../../packages/utils');
-shell.exec(`yarn add file:./wdio-electron-service-v${packageJson.version}.tgz`);
+  // install repo dependencies with yarn
+  shell.exec('yarn');
+  shell.exec('yarn add file:../../packages/types file:../../packages/utils');
+  shell.exec(`yarn add file:./wdio-electron-service-v${packageJson.version}.tgz`);
+}
 
 // navigate to root directory
 shell.cd(path.join(__dirname, '..'));

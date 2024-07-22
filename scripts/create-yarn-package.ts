@@ -6,8 +6,9 @@ import fs from 'node:fs';
 import shell from 'shelljs';
 import type { PackageJson } from 'read-package-up';
 
-// read version from main package
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+// read package.json
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'packages', 'wdio-electron-service', 'package.json'), {
     encoding: 'utf-8',

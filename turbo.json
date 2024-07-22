@@ -5,10 +5,16 @@
     "//#format:check": {
       "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}"]
     },
-    "//#init-forge:e2e": {
+    "//#init-forge:apps": {
+      "dependsOn": ["//#init-forge:package"]
+    },
+    "//#init-forge:apps:mac-universal": {
+      "dependsOn": ["//#init-forge:package:mac-universal"]
+    },
+    "//#init-forge:package": {
       "dependsOn": ["@repo/e2e#test:e2e:builder-esm", "@repo/e2e#test:e2e:builder-cjs"]
     },
-    "//#init-forge:e2e-mac-universal": {
+    "//#init-forge:package:mac-universal": {
       "dependsOn": ["@repo/e2e#test:e2e-mac-universal:builder-esm", "@repo/e2e#test:e2e-mac-universal:builder-cjs"]
     },
     "//#lint": {
@@ -30,22 +36,13 @@
     "clean:dist": {
       "cache": false
     },
-    "clean:package": {
-      "cache": false
-    },
     "example-forge-cjs#build": {
-      "dependsOn": ["init", "^build", "example-forge-esm#build"],
+      "dependsOn": ["//#init-forge:apps", "^build", "example-forge-esm#build"],
       "outputs": ["out/**"]
-    },
-    "example-forge-cjs#init": {
-      "dependsOn": ["//#init-forge:e2e", "example-forge-esm#init"]
     },
     "example-forge-esm#build": {
-      "dependsOn": ["init", "^build"],
+      "dependsOn": ["//#init-forge:apps", "^build"],
       "outputs": ["out/**"]
-    },
-    "example-forge-esm#init": {
-      "dependsOn": ["//#init-forge:e2e"]
     },
     "example-builder-cjs#build": {
       "dependsOn": ["^build", "example-builder-esm#build"],
@@ -64,18 +61,12 @@
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["init:mac-universal", "^build", "example-forge-esm#build:mac-universal"],
+      "dependsOn": ["//#init-forge:apps:mac-universal", "^build", "example-forge-esm#build:mac-universal"],
       "outputs": ["out/**"]
-    },
-    "example-forge-cjs#init:mac-universal": {
-      "dependsOn": ["//#init-forge:e2e-mac-universal", "example-forge-esm#init:mac-universal"]
     },
     "example-forge-esm#build:mac-universal": {
-      "dependsOn": ["init:mac-universal", "^build", "example-builder-cjs#build:mac-universal"],
+      "dependsOn": ["//#init-forge:apps:mac-universal", "^build", "example-builder-cjs#build:mac-universal"],
       "outputs": ["out/**"]
-    },
-    "example-forge-esm#init:mac-universal": {
-      "dependsOn": ["//#init-forge:e2e-mac-universal"]
     },
     "release": {
       "dependsOn": ["build"],
