@@ -1,6 +1,6 @@
 import { browser as wdioBrowser } from '@wdio/globals';
 
-import type { ElectronServiceOptions } from '@wdio-electron/types';
+import type { ElectronServiceOptions } from '@wdio/electron-types';
 
 import { init as initSession } from './session.js';
 import { CJSElectronLauncher, CJSElectronService } from './classes.js';

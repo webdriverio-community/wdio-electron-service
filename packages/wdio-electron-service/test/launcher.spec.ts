@@ -5,7 +5,7 @@ import nock from 'nock';
 import type { Capabilities, Options } from '@wdio/types';
 
 import ElectronLaunchService from '../src/launcher.js';
-import { getAppBuildInfo, getBinaryPath } from '@wdio-electron/utils';
+import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 import type { ElectronServiceOptions } from '../src/index.js';
 
@@ -23,7 +23,7 @@ vi.mock('node:fs/promises', () => ({
   },
 }));
 
-vi.mock('@wdio-electron/utils', async (importOriginal: () => Promise<Record<string, unknown>>) => {
+vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<string, unknown>>) => {
   const actual = await importOriginal();
   return {
     ...actual,

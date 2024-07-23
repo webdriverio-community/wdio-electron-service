@@ -1,5 +1,5 @@
 {
-  "name": "@wdio-electron/utils",
+  "name": "@wdio/electron-utils",
   "version": "7.0.0-beta.4",
   "description": "Utilities for WebdriverIO Electron Service",
   "module": "dist/index.js",
@@ -50,7 +50,7 @@
     "@types/debug": "^4.1.10",
     "@types/node": "^20.14.11",
     "@vitest/coverage-v8": "^2.0.4",
-    "@wdio-electron/types": "workspace:*",
+    "@wdio/electron-types": "workspace:*",
     "jsdom": "^24.1.1",
     "release-it": "^17.6.0",
     "release-it-pnpm": "^4.6.3",
