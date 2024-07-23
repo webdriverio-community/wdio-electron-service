@@ -24,9 +24,17 @@
       "dependsOn": ["//#lint", "//#format:check", "test:unit"],
       "outputs": ["dist/**"]
     },
+    "@wdio-electron/types#release": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "@wdio-electron/utils#build": {
       "dependsOn": ["@wdio-electron/types#build", "test:unit"],
       "outputs": ["dist/**"]
+    },
+    "@wdio-electron/utils#release": {
+      "dependsOn": ["build"],
+      "cache": false
     },
     "clean": {
       "cache": false
@@ -65,10 +73,6 @@
     "example-forge-esm#build:mac-universal": {
       "dependsOn": ["//#init-forge:apps:mac-universal", "^build", "example-builder-cjs#build:mac-universal"],
       "outputs": ["out/**"]
-    },
-    "release": {
-      "dependsOn": ["build"],
-      "cache": false
     },
     "test": {},
     "test:dev": {
@@ -114,6 +118,10 @@
     "wdio-electron-service#build": {
       "dependsOn": ["@wdio-electron/utils#build", "test:unit"],
       "outputs": ["dist/**"]
+    },
+    "wdio-electron-service#release": {
+      "dependsOn": ["build"],
+      "cache": false
     }
   }
 }
