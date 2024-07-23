@@ -12,6 +12,7 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc",
+    "pack": "pnpm pack",
     "release": "release-it --config ../../release-it.json --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "devDependencies": {
@@ -24,7 +25,6 @@
     "electron": "^31.2.1",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
-    "release-it-pnpm": "^4.6.3",
     "typescript": "^5.5.4",
     "webdriverio": "9.0.0-alpha.369"
   },
