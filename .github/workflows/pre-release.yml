@@ -59,6 +59,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Publish Pre-Release
         run: |
+          pnpm run build
+          pnpm run package
           if [ "${{inputs.preReleaseVersion}}" == "existing" ]; then
             pnpm run release -- $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
           else
