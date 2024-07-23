@@ -1,9 +1,8 @@
 {
-  "npm": {
-    "publish": true,
-    "publishPath": "*.tgz"
+  "plugins": {
+    "release-it-pnpm": {}
   },
-  "hooks": {
-    "before:npm:release": "pnpm pack"
+  "git": {
+    "commitMessage": "chore: release v${version}"
   }
 }
