@@ -467,6 +467,12 @@ importers:
       '@vitest/spy':
         specifier: ^2.0.4
         version: 2.0.4
+      '@wdio-electron/types':
+        specifier: workspace:*
+        version: link:../@wdio-electron_types
+      '@wdio-electron/utils':
+        specifier: workspace:*
+        version: link:../@wdio-electron_utils
       '@wdio/logger':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
@@ -504,12 +510,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.4
         version: 2.0.4(vitest@2.0.4(@types/node@20.14.11)(jsdom@24.1.1)(terser@5.31.3))
-      '@wdio-electron/types':
-        specifier: workspace:*
-        version: link:../@wdio-electron_types
-      '@wdio-electron/utils':
-        specifier: workspace:*
-        version: link:../@wdio-electron_utils
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
