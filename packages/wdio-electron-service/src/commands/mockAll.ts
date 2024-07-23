@@ -1,5 +1,5 @@
 import { mock } from './mock.js';
-import type { ElectronMock, ExecuteOpts } from '@repo/types';
+import type { ElectronMock, ExecuteOpts } from '@wdio-electron/types';
 
 export async function mockAll(apiName: string) {
   const apiFnNames = await browser.electron.execute<string, [string, ExecuteOpts]>(

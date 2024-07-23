@@ -1,7 +1,7 @@
 packages:
   - 'packages/e2e'
-  - 'packages/types'
-  - 'packages/utils'
+  - 'packages/@wdio-electron_types'
+  - 'packages/@wdio-electron_utils'
   - 'packages/wdio-electron-service'
   - 'apps/builder-cjs'
   - 'apps/builder-esm'

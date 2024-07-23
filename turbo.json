@@ -20,12 +20,12 @@
     "//#lint": {
       "inputs": ["**/*.{j,mj,cj,t}s"]
     },
-    "@repo/types#build": {
+    "@wdio-electron/types#build": {
       "dependsOn": ["//#lint", "//#format:check", "test:unit"],
       "outputs": ["dist/**"]
     },
-    "@repo/utils#build": {
-      "dependsOn": ["@repo/types#build", "test:unit"],
+    "@wdio-electron/utils#build": {
+      "dependsOn": ["@wdio-electron/types#build", "test:unit"],
       "outputs": ["dist/**"]
     },
     "clean": {
@@ -67,7 +67,7 @@
       "outputs": ["out/**"]
     },
     "release": {
-      "dependsOn": ["wdio-electron-service#build"],
+      "dependsOn": ["build"],
       "cache": false
     },
     "test": {},
@@ -112,7 +112,7 @@
       "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
-      "dependsOn": ["@repo/utils#build", "test:unit"],
+      "dependsOn": ["@wdio-electron/utils#build", "test:unit"],
       "outputs": ["dist/**"]
     }
   }

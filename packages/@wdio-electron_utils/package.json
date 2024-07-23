@@ -1,8 +1,7 @@
 {
-  "name": "@repo/utils",
-  "version": "1.0.0",
+  "name": "@wdio-electron/utils",
+  "version": "7.0.0-beta.4",
   "description": "Utilities for WebdriverIO Electron Service",
-  "private": true,
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "type": "module",
@@ -34,6 +33,7 @@
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc --outDir dist",
     "build:cjs": "tsc --build tsconfig.cjs.json",
+    "release": "release-it --config ../../release-it.json --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit"
@@ -46,13 +46,13 @@
     "read-package-up": "^11.0.0"
   },
   "devDependencies": {
-    "@repo/types": "workspace:*",
     "@types/debug": "^4.1.10",
     "@types/node": "^20.14.11",
-    "@vitest/coverage-v8": "^2.0.3",
+    "@vitest/coverage-v8": "^2.0.4",
+    "@wdio-electron/types": "workspace:*",
     "jsdom": "^24.1.1",
     "shx": "^0.3.4",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "vitest": "^2.0.4"
   }
 }

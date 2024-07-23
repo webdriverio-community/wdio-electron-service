@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import type { NormalizedPackageJson } from 'read-package-up';
 import type { Options } from '@wdio/types';
 
-import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@repo/utils';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio-electron/utils';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

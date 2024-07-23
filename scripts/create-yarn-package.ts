@@ -35,9 +35,11 @@ shell.cd(path.join(__dirname, '..', 'packages', 'wdio-electron-service-yarn'));
 shell.exec('pnpx shx rm -rf node_modules');
 
 // replace workspace links with file links for deps
-const typesPath = path.join(__dirname, '..', 'packages', 'types');
-const utilsPath = path.join(__dirname, '..', 'packages', 'utils');
-shell.exec(`pnpm pkg set dependencies.@repo/types=file:${typesPath} dependencies.@repo/utils=file:${utilsPath}`);
+const typesPath = path.join(__dirname, '..', 'packages', '@wdio-electron_types');
+const utilsPath = path.join(__dirname, '..', 'packages', '@wdio-electron_utils');
+shell.exec(
+  `pnpm pkg set dependencies.@wdio-electron/types=file:${typesPath} dependencies.@wdio-electron/utils=file:${utilsPath}`,
+);
 
 // update build scripts for yarn
 shell.exec('pnpm pkg set scripts.build="yarn build:esm && yarn build:cjs"');

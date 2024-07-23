@@ -2,6 +2,7 @@
   "name": "example-forge-cjs",
   "version": "1.0.0",
   "main": "dist/main.bundle.js",
+  "private": true,
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
     "build:bundle": "tsc && rollup -c rollup.config.mjs",
@@ -31,7 +32,7 @@
     "rollup": "^4.19.0",
     "ts-loader": "^9.4.4",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "webdriverio": "9.0.0-alpha.369"
   },
   "peerDependencies": {

@@ -1,1 +1,1 @@
-turbo run test:unit --force
+turbo run test:unit --filter=wdio-electron-service --force
