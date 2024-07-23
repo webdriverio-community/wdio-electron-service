@@ -33,7 +33,6 @@
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc --outDir dist",
     "build:cjs": "tsc --build tsconfig.cjs.json",
-    "pack": "pnpm pack",
     "release": "release-it --config ../../release-it.json --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
