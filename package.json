@@ -6,7 +6,7 @@
     "node": ">=18 || >=20"
   },
   "scripts": {
-    "build": "turbo run build --filter=!example* --only",
+    "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only",
     "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:mac-universal": "turbo run test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm",
@@ -25,9 +25,9 @@
     "init-forge:apps:mac-universal": "tsx ./scripts/init-forge-apps.ts",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
-    "package": "turbo run pack --only",
+    "package": "turbo run pack --filter=@wdio* --filter=wdio-electron-service --only",
     "prepare": "husky",
-    "release": "turbo run release --only",
+    "release": "turbo run release --filter=@wdio* --filter=wdio-electron-service --only",
     "test": "turbo run test test:e2e",
     "test:dev": "turbo run test:dev",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
