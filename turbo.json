@@ -24,16 +24,24 @@
       "dependsOn": ["//#lint", "//#format:check", "test:unit"],
       "outputs": ["dist/**"]
     },
-    "@wdio-electron/types#release": {
+    "@wdio-electron/types#pack": {
       "dependsOn": ["build"],
+      "cache": false
+    },
+    "@wdio-electron/types#release": {
+      "dependsOn": ["pack"],
       "cache": false
     },
     "@wdio-electron/utils#build": {
       "dependsOn": ["@wdio-electron/types#build", "test:unit"],
       "outputs": ["dist/**"]
     },
-    "@wdio-electron/utils#release": {
+    "@wdio-electron/utils#pack": {
       "dependsOn": ["build"],
+      "cache": false
+    },
+    "@wdio-electron/utils#release": {
+      "dependsOn": ["pack"],
       "cache": false
     },
     "clean": {
@@ -119,8 +127,12 @@
       "dependsOn": ["@wdio-electron/utils#build", "test:unit"],
       "outputs": ["dist/**"]
     },
-    "wdio-electron-service#release": {
+    "wdio-electron-service#pack": {
       "dependsOn": ["build"],
+      "cache": false
+    },
+    "wdio-electron-service#release": {
+      "dependsOn": ["pack"],
       "cache": false
     }
   }
