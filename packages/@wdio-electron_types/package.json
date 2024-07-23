@@ -1,8 +1,7 @@
 {
-  "name": "@repo/types",
+  "name": "@wdio-electron/types",
   "version": "1.0.0",
   "description": "Types for WebdriverIO Electron Service",
-  "private": true,
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -23,7 +22,7 @@
     "builder-util": "25.0.0-alpha.10",
     "electron": "^31.2.1",
     "read-package-up": "^11.0.0",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "webdriverio": "9.0.0-alpha.369"
   },
   "files": [

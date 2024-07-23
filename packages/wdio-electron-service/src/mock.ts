@@ -6,7 +6,7 @@ import type {
   ElectronMock,
   ElectronType,
   ExecuteOpts,
-} from '@repo/types';
+} from '@wdio-electron/types';
 
 async function restoreElectronFunctionality(apiName: string, funcName: string) {
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(

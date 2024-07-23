@@ -16,7 +16,7 @@ import {
   ForgeArch,
   ForgeBuildInfo,
   BuilderBuildInfo,
-} from '@repo/types';
+} from '@wdio-electron/types';
 
 const SupportedPlatform = {
   darwin: 'darwin',

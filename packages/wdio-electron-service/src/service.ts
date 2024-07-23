@@ -1,6 +1,6 @@
 import type { Capabilities, Services } from '@wdio/types';
 
-import log from '@repo/utils/log';
+import log from '@wdio-electron/utils/log';
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { execute } from './commands/execute.js';

@@ -6,7 +6,7 @@ import process from 'node:process';
 import { startElectron } from 'wdio-electron-service';
 import type { NormalizedPackageJson } from 'read-package-up';
 
-import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@repo/utils';
+import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@wdio-electron/utils';
 
 process.env.TEST = 'true';
 

@@ -1,8 +1,7 @@
 {
-  "name": "@repo/utils",
+  "name": "@wdio-electron/utils",
   "version": "1.0.0",
   "description": "Utilities for WebdriverIO Electron Service",
-  "private": true,
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "type": "module",
@@ -46,13 +45,13 @@
     "read-package-up": "^11.0.0"
   },
   "devDependencies": {
-    "@repo/types": "workspace:*",
     "@types/debug": "^4.1.10",
     "@types/node": "^20.14.11",
-    "@vitest/coverage-v8": "^2.0.3",
+    "@vitest/coverage-v8": "^2.0.4",
+    "@wdio-electron/types": "workspace:*",
     "jsdom": "^24.1.1",
     "shx": "^0.3.4",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "vitest": "^2.0.4"
   }
 }

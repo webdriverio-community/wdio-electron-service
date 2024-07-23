@@ -21,8 +21,8 @@
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
-    "@repo/utils": "workspace:*",
     "@testing-library/webdriverio": "^3.2.1",
+    "@wdio-electron/utils": "workspace:*",
     "@wdio/cli": "9.0.0-alpha.369",
     "@wdio/globals": "9.0.0-alpha.369",
     "@wdio/local-runner": "9.0.0-alpha.367",
@@ -43,6 +43,6 @@
     "jsdom": "^24.1.1",
     "read-package-up": "^11.0.0",
     "ts-loader": "^9.4.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   }
 }

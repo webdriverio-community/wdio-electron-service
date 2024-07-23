@@ -74,13 +74,13 @@
     }
   },
   "dependencies": {
-    "@repo/types": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@vitest/spy": "^2.0.4",
+    "@wdio-electron/types": "workspace:*",
+    "@wdio-electron/utils": "workspace:*",
     "@wdio/logger": "9.0.0-alpha.369",
     "compare-versions": "^6.1.1",
     "debug": "^4.3.4",
-    "electron-to-chromium": "^1.4.832",
+    "electron-to-chromium": "^1.5.0",
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.0"
@@ -90,7 +90,7 @@
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
     "@types/node": "^20.14.11",
-    "@vitest/coverage-v8": "^2.0.3",
+    "@vitest/coverage-v8": "^2.0.4",
     "@wdio/globals": "9.0.0-alpha.369",
     "@wdio/types": "9.0.0-alpha.369",
     "builder-util": "25.0.0-alpha.10",
@@ -99,7 +99,7 @@
     "nock": "^13.3.6",
     "release-it": "^17.6.0",
     "shx": "^0.3.4",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "vitest": "^2.0.4",
     "webdriverio": "9.0.0-alpha.369"
   },

@@ -2,7 +2,7 @@ import electron, { app, ipcMain } from 'electron';
 import copy from 'fast-copy';
 
 import { Channel } from './constants.js';
-import type { ElectronInterface, ElectronType } from '@repo/types';
+import type { ElectronInterface, ElectronType } from '@wdio-electron/types';
 
 globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
 
