@@ -67,7 +67,7 @@
       "outputs": ["out/**"]
     },
     "release": {
-      "dependsOn": ["wdio-electron-service#build"],
+      "dependsOn": ["build"],
       "cache": false
     },
     "test": {},
