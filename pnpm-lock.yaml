@@ -307,7 +307,7 @@ importers:
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
 
-  packages/@wdio-electron_types:
+  packages/@wdio_electron-types:
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
@@ -346,7 +346,7 @@ importers:
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
 
-  packages/@wdio-electron_utils:
+  packages/@wdio_electron-utils:
     dependencies:
       '@electron/packager':
         specifier: ^18.3.2
@@ -373,9 +373,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.4
         version: 2.0.4(vitest@2.0.4(@types/node@20.14.11)(jsdom@24.1.1)(terser@5.31.3))
-      '@wdio-electron/types':
+      '@wdio/electron-types':
         specifier: workspace:*
-        version: link:../@wdio-electron_types
+        version: link:../@wdio_electron-types
       jsdom:
         specifier: ^24.1.1
         version: 24.1.1
@@ -400,12 +400,12 @@ importers:
       '@testing-library/webdriverio':
         specifier: ^3.2.1
         version: 3.2.1(webdriverio@9.0.0-alpha.369)
-      '@wdio-electron/utils':
-        specifier: workspace:*
-        version: link:../@wdio-electron_utils
       '@wdio/cli':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
+      '@wdio/electron-utils':
+        specifier: workspace:*
+        version: link:../@wdio_electron-utils
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
@@ -467,12 +467,12 @@ importers:
       '@vitest/spy':
         specifier: ^2.0.4
         version: 2.0.4
-      '@wdio-electron/types':
+      '@wdio/electron-types':
         specifier: workspace:*
-        version: link:../@wdio-electron_types
-      '@wdio-electron/utils':
+        version: link:../@wdio_electron-types
+      '@wdio/electron-utils':
         specifier: workspace:*
-        version: link:../@wdio-electron_utils
+        version: link:../@wdio_electron-utils
       '@wdio/logger':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369

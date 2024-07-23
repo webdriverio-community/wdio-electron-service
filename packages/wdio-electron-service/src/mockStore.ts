@@ -1,4 +1,4 @@
-import type { ElectronMock } from '@wdio-electron/types';
+import type { ElectronMock } from '@wdio/electron-types';
 
 export class ElectronServiceMockStore {
   #mockFns: Map<string, ElectronMock>;

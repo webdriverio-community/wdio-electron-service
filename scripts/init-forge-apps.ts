@@ -33,7 +33,7 @@ for (const app of ['forge-esm', 'forge-cjs']) {
 
   // install repo dependencies with yarn
   shell.exec('yarn');
-  shell.exec('yarn add file:../../packages/@wdio-electron_types file:../../packages/@wdio-electron_utils');
+  shell.exec('yarn add file:../../packages/@wdio_electron-types file:../../packages/@wdio_electron-utils');
   shell.exec(`yarn add file:./wdio-electron-service-v${packageJson.version}.tgz`);
 }
 

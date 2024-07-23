@@ -1,4 +1,4 @@
-import type { ElectronMockInstance } from '@wdio-electron/types';
+import type { ElectronMockInstance } from '@wdio/electron-types';
 
 export function isMockFunction(fn: unknown): fn is ElectronMockInstance {
   return (
