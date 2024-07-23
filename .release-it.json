@@ -1,0 +1,9 @@
+{
+  "npm": {
+    "publish": true,
+    "publishPath": "*.tgz"
+  },
+  "hooks": {
+    "before:npm:release": "pnpm pack"
+  }
+}
