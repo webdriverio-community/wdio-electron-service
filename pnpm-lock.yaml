@@ -334,7 +334,7 @@ importers:
         specifier: ^11.0.0
         version: 11.0.0
       release-it:
-        specifier: 17.6.0
+        specifier: ^17.6.0
         version: 17.6.0(typescript@5.5.4)
       typescript:
         specifier: ^5.5.4
@@ -377,7 +377,7 @@ importers:
         specifier: ^24.1.1
         version: 24.1.1
       release-it:
-        specifier: 17.6.0
+        specifier: ^17.6.0
         version: 17.6.0(typescript@5.5.4)
       shx:
         specifier: ^0.3.4
@@ -523,7 +523,7 @@ importers:
         specifier: ^13.3.6
         version: 13.5.4
       release-it:
-        specifier: 17.6.0
+        specifier: ^17.6.0
         version: 17.6.0(typescript@5.5.4)
       shx:
         specifier: ^0.3.4
@@ -8619,7 +8619,7 @@ snapshots:
       es6-error: 4.1.1
       matcher: 3.0.0
       roarr: 2.15.4
-      semver: 7.6.2
+      semver: 7.6.3
       serialize-error: 7.0.1
     optional: true
 
@@ -9896,7 +9896,7 @@ snapshots:
       ky: 1.4.0
       registry-auth-token: 5.0.2
       registry-url: 6.0.1
-      semver: 7.6.2
+      semver: 7.6.3
 
   pako@1.0.11: {}
 
@@ -10065,7 +10065,7 @@ snapshots:
   proxy-agent@6.3.0:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -10079,7 +10079,7 @@ snapshots:
   proxy-agent@6.3.1:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -10452,7 +10452,7 @@ snapshots:
 
   semver-diff@4.0.0:
     dependencies:
-      semver: 7.6.2
+      semver: 7.6.3
 
   semver-regex@4.0.5: {}
 
@@ -10998,7 +10998,7 @@ snapshots:
       is-npm: 6.0.0
       latest-version: 9.0.0
       pupa: 3.1.0
-      semver: 7.6.2
+      semver: 7.6.3
       semver-diff: 4.0.0
       xdg-basedir: 5.1.0
 
