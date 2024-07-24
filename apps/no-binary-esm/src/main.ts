@@ -6,8 +6,6 @@ if (isTest) {
 }
 
 const appPath = app.getAppPath();
-
-const appRootPath = `${appPath}/dist`;
 let mainWindow: BrowserWindow;
 
 app.on('ready', () => {
@@ -21,7 +19,7 @@ app.on('ready', () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.bundle.cjs`,
+      preload: `${appPath}/preload.bundle.cjs`,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,
@@ -31,7 +29,7 @@ app.on('ready', () => {
   mainWindow.on('closed', () => {
     mainWindow.destroy();
   });
-  mainWindow.loadFile(`${appRootPath}/index.html`);
+  mainWindow.loadFile(`${appPath}/index.html`);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.title = 'this is the title of the main window';
