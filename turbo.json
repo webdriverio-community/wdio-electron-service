@@ -55,7 +55,7 @@
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@repo/e2e#test:e2e:no-binary-cjs"],
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build": {
@@ -67,7 +67,7 @@
       "outputs": ["out/**"]
     },
     "example-no-binary-cjs#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "example-no-binary-esm#build"],
       "outputs": ["dist/**"]
     },
     "example-no-binary-esm#build": {
