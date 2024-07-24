@@ -602,6 +602,9 @@ importers:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
         version: 7.4.0
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.1
+        version: 15.2.3(rollup@4.19.0)
       '@testing-library/webdriverio':
         specifier: ^3.2.1
         version: 3.2.1(webdriverio@9.0.0-alpha.369)
@@ -635,6 +638,9 @@ importers:
       release-it:
         specifier: ^17.6.0
         version: 17.6.0(typescript@5.5.4)
+      rollup:
+        specifier: ^4.19.0
+        version: 4.19.0
       shx:
         specifier: ^0.3.4
         version: 0.3.4
