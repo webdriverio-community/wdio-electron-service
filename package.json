@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only",
-    "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm",
+    "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:mac-universal": "turbo run test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm",
     "ci:init-windows": "tsx ./scripts/init-windows-ci.ts",
@@ -17,7 +17,7 @@
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm graph:e2e && pnpm graph:e2e:mac-universal",
-    "graph:e2e": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph.png test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm",
+    "graph:e2e": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph.png test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "graph:e2e:mac-universal": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph-mac-universal.png test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm",
     "init-forge:package": "tsx ./scripts/create-yarn-package.ts",
     "init-forge:package:mac-universal": "tsx ./scripts/create-yarn-package.ts",
