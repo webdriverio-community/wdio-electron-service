@@ -307,6 +307,116 @@ importers:
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
 
+  apps/no-binary-cjs:
+    dependencies:
+      wdio-electron-service:
+        specifier: workspace:*
+        version: link:../../packages/wdio-electron-service
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^26.0.1
+        version: 26.0.1(rollup@4.19.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.1
+        version: 15.2.3(rollup@4.19.0)
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.14.12
+      '@wdio/cli':
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
+      '@wdio/globals':
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+      '@wdio/local-runner':
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
+      '@wdio/mocha-framework':
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      electron:
+        specifier: ^31.2.1
+        version: 31.2.1
+      global-jsdom:
+        specifier: ^24.0.0
+        version: 24.0.0(jsdom@24.1.1)
+      jsdom:
+        specifier: ^24.1.1
+        version: 24.1.1
+      rollup:
+        specifier: ^4.19.0
+        version: 4.19.0
+      ts-loader:
+        specifier: ^9.4.4
+        version: 9.5.1(typescript@5.5.4)(webpack@5.93.0)
+      tsx:
+        specifier: ^4.16.2
+        version: 4.16.2
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      webdriverio:
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
+
+  apps/no-binary-esm:
+    dependencies:
+      wdio-electron-service:
+        specifier: workspace:*
+        version: link:../../packages/wdio-electron-service
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^26.0.1
+        version: 26.0.1(rollup@4.19.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.1
+        version: 15.2.3(rollup@4.19.0)
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.14.12
+      '@wdio/cli':
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
+      '@wdio/globals':
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+      '@wdio/local-runner':
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
+      '@wdio/mocha-framework':
+        specifier: 9.0.0-alpha.367
+        version: 9.0.0-alpha.367
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      electron:
+        specifier: ^31.2.1
+        version: 31.2.1
+      global-jsdom:
+        specifier: ^24.0.0
+        version: 24.0.0(jsdom@24.1.1)
+      jsdom:
+        specifier: ^24.1.1
+        version: 24.1.1
+      rollup:
+        specifier: ^4.19.0
+        version: 4.19.0
+      ts-loader:
+        specifier: ^9.4.4
+        version: 9.5.1(typescript@5.5.4)(webpack@5.93.0)
+      tsx:
+        specifier: ^4.16.2
+        version: 4.16.2
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      webdriverio:
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
+
   packages/@wdio_electron-types:
     devDependencies:
       '@electron-forge/shared-types':
