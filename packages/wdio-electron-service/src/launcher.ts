@@ -58,7 +58,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
 
         if (appEntryPoint) {
-          const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
+          const electronBinary = process.platform === 'win32' ? 'electron.cmd' : 'electron';
           appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
