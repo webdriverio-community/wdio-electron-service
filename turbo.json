@@ -55,7 +55,7 @@
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build", "@repo/e2e#test:e2e:no-binary-cjs"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build": {
@@ -112,7 +112,7 @@
       "dependsOn": ["example-no-binary-cjs#build", "wdio-electron-service#build", "@repo/e2e#test:e2e:no-binary-esm"]
     },
     "@repo/e2e#test:e2e:no-binary-esm": {
-      "dependsOn": ["example-no-binary-esm#build", "wdio-electron-service#build"]
+      "dependsOn": ["example-no-binary-esm#build", "example-no-binary-cjs#build", "wdio-electron-service#build"]
     },
     "@repo/e2e#test:e2e-mac-universal:forge-cjs": {
       "dependsOn": [
