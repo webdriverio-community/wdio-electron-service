@@ -10,7 +10,7 @@
     "build:package:mac-universal": "cp ./src/index.html ./dist && electron-forge package --platform=darwin --arch=universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
-    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./package-lock.json ./wdio-logs ./out",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist"
   },
   "dependencies": {
