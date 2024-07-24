@@ -71,7 +71,7 @@
       "outputs": ["dist/**"]
     },
     "example-no-binary-esm#build": {
-      "dependsOn": ["^build", "@repo/e2e#test:e2e:forge-cjs"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "example-builder-cjs#build:mac-universal": {
