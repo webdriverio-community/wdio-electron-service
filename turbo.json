@@ -67,11 +67,11 @@
       "outputs": ["out/**"]
     },
     "example-no-binary-cjs#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@repo/e2e#test:e2e:forge-cjs"],
       "outputs": ["dist/**"]
     },
     "example-no-binary-esm#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@repo/e2e#test:e2e:forge-cjs"],
       "outputs": ["dist/**"]
     },
     "example-builder-cjs#build:mac-universal": {
