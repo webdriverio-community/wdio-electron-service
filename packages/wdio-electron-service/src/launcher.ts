@@ -51,19 +51,15 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        let { appBinaryPath, appEntryPoint, appArgs } = Object.assign(
-          {},
-          this.#globalOptions,
-          cap[CUSTOM_CAPABILITY_NAME],
-        );
+        let {
+          appBinaryPath,
+          appEntryPoint,
+          appArgs = [],
+        } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
 
         if (appEntryPoint) {
-          // appBinaryPath = path.join(this.#projectRoot, 'node_modules', 'wdio-electron-service', 'bin', 'electron.sh');
-          // appBinaryPath = path.join(this.#projectRoot, 'node_modules', 'electron', 'node_modules', '.bin', 'electron');
           appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', 'electron');
-          // appBinaryPath = path.join(this.#projectRoot, 'test.sh');
-          // appArgs = [];
-          appArgs = [`--app=${appEntryPoint}`]; // , ...(appArgs || [])
+          appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
         } else if (!appBinaryPath) {
           log.info('No app binary specified, attempting to detect one...');
