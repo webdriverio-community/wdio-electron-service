@@ -71,7 +71,7 @@
       "outputs": ["dist/**"]
     },
     "example-no-binary-esm#build": {
-      "dependsOn": ["^build", "no-binary-cjs#build"],
+      "dependsOn": ["^build", "example-no-binary-cjs#build"],
       "outputs": ["dist/**"]
     },
     "example-builder-cjs#build:mac-universal": {
