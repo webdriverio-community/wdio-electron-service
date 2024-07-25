@@ -55,7 +55,7 @@
       "outputs": ["dist/**"]
     },
     "example-builder-esm#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "example-no-binary-esm#build"],
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build": {
