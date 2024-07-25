@@ -6,6 +6,7 @@
   "scripts": {
     "ci": "pnpm i && pnpm test",
     "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "logs": "pnpm dlx shx cat ./wdio-logs*/*.log",
     "test:e2e:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm run exec",
     "test:e2e:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm run exec",
     "test:e2e:builder-cjs": "cross-env EXAMPLE_DIR=builder-cjs pnpm run exec",

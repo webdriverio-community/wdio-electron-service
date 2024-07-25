@@ -62,6 +62,10 @@ jobs:
             pnpm run ci:e2e:mac-universal
           fi
         shell: bash
+      - name: 🐛 Show logs
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
       - name: 🐛 Debug Build
         uses: stateful/vscode-server-action@v1.1.0
         if: failure()
