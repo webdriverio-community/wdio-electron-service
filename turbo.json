@@ -67,7 +67,7 @@
       "outputs": ["out/**"]
     },
     "example-no-binary-cjs#build": {
-      "dependsOn": ["^build", "example-no-binary-esm#build"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "example-no-binary-esm#build": {
