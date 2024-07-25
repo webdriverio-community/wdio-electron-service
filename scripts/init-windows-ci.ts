@@ -10,11 +10,13 @@ const electronVersion = '^29.4.5';
 // read dirname
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-for (const app of ['forge-esm', 'forge-cjs', 'builder-esm', 'builder-cjs']) {
-  // navigate to directory of target app
-  shell.cd(path.join(__dirname, '..', 'apps', app));
+// create an array of apps from the apps directory
+const appsDir = path.join(__dirname, '..', 'apps');
+const apps = shell.ls(appsDir);
 
-  // set the version of Electron
+// set the version of electron for each app
+for (const app of apps) {
+  shell.cd(path.join(__dirname, '..', 'apps', app));
   shell.exec(`pnpm pkg set devDependencies.electron=${electronVersion}`);
 }
 
