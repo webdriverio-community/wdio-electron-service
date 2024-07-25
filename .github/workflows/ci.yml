@@ -46,6 +46,7 @@ jobs:
         run: |
           pnpm install
           if [ "$RUNNER_OS" == "Windows" ]; then
+            # Windows needs to use Electron 29 because of https://github.com/webdriverio-community/wdio-electron-service/issues/600
             pnpm run ci:init-windows
             pnpm install --no-frozen-lockfile
           fi
