@@ -97,8 +97,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -158,8 +158,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -219,8 +219,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -277,8 +277,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -407,8 +407,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.369
+        version: 9.0.0-alpha.369
       electron:
         specifier: ^31.2.1
         version: 31.2.1
@@ -1439,8 +1439,8 @@ packages:
     resolution: {integrity: sha512-6+CfJY6B2Rl/g/8hXEaCq7mj3FroC2acW/BhFcZG3N4e4q60Dbz0NO/toyD97lfiA+AqjaCY5gYzpI66M4meVA==}
     engines: {node: '>=18'}
 
-  '@wdio/mocha-framework@9.0.0-alpha.367':
-    resolution: {integrity: sha512-Q0eENx4rqbsDlgmVGOIt7xb2P3Vu7Lx1f9eHeUWLZPynaHgsCNhkjvsn1T7OM4NVCcXqVutYKR5VFwyQXJy4lg==}
+  '@wdio/mocha-framework@9.0.0-alpha.369':
+    resolution: {integrity: sha512-YkO67k3KkFqWh5NLgB6uBScrW7A/ZGpBbIhAbgNJcuEUVq1mF9AEqnuhBmQaarvltUqVY8K9ezXptIuLs4nkCQ==}
     engines: {node: '>=18'}
 
   '@wdio/protocols@8.38.0':
@@ -6730,13 +6730,13 @@ snapshots:
       loglevel-plugin-prefix: 0.8.4
       strip-ansi: 7.1.0
 
-  '@wdio/mocha-framework@9.0.0-alpha.367':
+  '@wdio/mocha-framework@9.0.0-alpha.369':
     dependencies:
       '@types/mocha': 10.0.7
       '@types/node': 20.14.12
-      '@wdio/logger': 9.0.0-alpha.367
-      '@wdio/types': 9.0.0-alpha.367
-      '@wdio/utils': 9.0.0-alpha.367
+      '@wdio/logger': 9.0.0-alpha.369
+      '@wdio/types': 9.0.0-alpha.369
+      '@wdio/utils': 9.0.0-alpha.369
       mocha: 10.4.0
     transitivePeerDependencies:
       - supports-color
