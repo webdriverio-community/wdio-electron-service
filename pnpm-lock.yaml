@@ -477,8 +477,8 @@ importers:
         specifier: ^4.3.4
         version: 4.3.5
       electron-to-chromium:
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.5.3
+        version: 1.5.3
       fast-copy:
         specifier: ^3.0.1
         version: 3.0.2
@@ -2386,8 +2386,8 @@ packages:
   electron-publish@25.0.1:
     resolution: {integrity: sha512-9ADYaKARy9rfCgiaFt/q2YJxZdx26WAZbnq06LBaZEg48YnlyPBo2ZwcIVbt6+RszTOgKvaZY/KqT6GkDRiikw==}
 
-  electron-to-chromium@1.5.0:
-    resolution: {integrity: sha512-Vb3xHHYnLseK8vlMJQKJYXJ++t4u1/qJ3vykuVrVjvdiOEhYyT1AuP4x03G8EnPmYvYOhe9T+dADTmthjRQMkA==}
+  electron-to-chromium@1.5.3:
+    resolution: {integrity: sha512-QNdYSS5i8D9axWp/6XIezRObRHqaav/ur9z1VzCDUCH1XIFOr9WQk5xmgunhsTpjjgDy3oLxO/WMOVZlpUQrlA==}
 
   electron@31.2.1:
     resolution: {integrity: sha512-g3CLKjl4yuXt6VWm/KpgEjYYhFiCl19RgUn8lOC8zV/56ZXAS3+mqV4wWzicE/7vSYXs6GRO7vkYRwrwhX3Gaw==}
@@ -7254,7 +7254,7 @@ snapshots:
   browserslist@4.23.2:
     dependencies:
       caniuse-lite: 1.0.30001643
-      electron-to-chromium: 1.5.0
+      electron-to-chromium: 1.5.3
       node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
 
@@ -7944,7 +7944,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron-to-chromium@1.5.0: {}
+  electron-to-chromium@1.5.3: {}
 
   electron@31.2.1:
     dependencies:
