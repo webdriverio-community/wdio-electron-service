@@ -13,6 +13,7 @@ env:
 
 jobs:
   build:
+    name: Build & Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -78,10 +79,10 @@ jobs:
         with:
           timeout: '180000'
   build-windows:
-    runs-on: ${{ matrix.os }}
+    name: Build & Test Windows
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest, windows-latest, windows-latest, windows-latest]
         node-version: [20.x]
         test: [units, e2e:no-binary, e2e:builder, e2e:forge]
       fail-fast: false
