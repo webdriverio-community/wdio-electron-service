@@ -67,9 +67,10 @@ jobs:
           timeout: '180000'
   build-macos-universal:
     name: MacOS Universal Build & Test
-    runs-on: macOS-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [macOS-latest]
         node-version: [20.x]
       fail-fast: false
     steps:
@@ -100,7 +101,8 @@ jobs:
         shell: bash
       - name: Run Tests
         run: |
-          pnpm run ci:e2e:mac-universal
+          pnpm run build
+          pnpm run ci-mac:e2e:mac-universal
         shell: bash
       - name: 🐛 Show logs
         if: failure()
