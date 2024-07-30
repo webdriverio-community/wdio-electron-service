@@ -79,7 +79,7 @@ jobs:
         with:
           timeout: '180000'
   build-windows:
-    name: Build & Test Slow
+    name: Build & Test Split
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
