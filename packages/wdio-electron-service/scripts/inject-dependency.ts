@@ -7,6 +7,7 @@ import * as rollup from 'rollup';
 const templatePath = process.argv[2];
 const outputPath = process.argv[3];
 const packageName = process.argv[4];
+const importName = process.argv[5];
 
 async function bundlePackage(packageName: string): Promise<string> {
   // Resolve the entry point of the npm package
@@ -31,33 +32,35 @@ async function bundlePackage(packageName: string): Promise<string> {
   return bundledCode;
 }
 
-async function injectDependency(templatePath: string, outputPath: string, packageName: string): Promise<void> {
-  // try {
-  // Read the template file
-  const templateContent = await fs.promises.readFile(templatePath, 'utf-8');
+async function injectDependency(
+  templatePath: string,
+  outputPath: string,
+  packageName: string,
+  importName: string,
+): Promise<void> {
+  try {
+    // Read the template file
+    const templateContent = await fs.promises.readFile(templatePath, 'utf-8');
 
-  // Bundle the contents of the npm package
-  const bundledContents = await bundlePackage(packageName);
+    // Bundle the contents of the npm package
+    const bundledContents = await bundlePackage(packageName);
 
-  // const bundledContents = await fs.promises.readFile(import.meta.resolve(packageName), 'utf-8');
-  // const bundledContents = await fs.promises.readFile(
-  //   '/Users/sam/Workspace/wdio-electron-service/node_modules/.pnpm/@vitest+spy@2.0.4/node_modules/@vitest/spy/dist/index.js',
-  //   'utf-8',
-  // );
+    // Prepare the bundled contents for injection
+    const injectedContents = bundledContents.replace('export', `const ${importName} =`);
 
-  // Prepare the bundled contents for injection
-  const injectedContents = bundledContents.replace('export', 'const spy =');
+    // Replace instances of the dynamic import in the template with the bundled contents
+    const renderedContent = templateContent.replace(
+      `const ${importName} = await import('${packageName}');`,
+      injectedContents,
+    );
 
-  // Replace instances of the dynamic import in the template with the bundled contents
-  const renderedContent = templateContent.replace("const spy = await import('@vitest/spy');", injectedContents);
+    // Write the rendered content to a new file
+    await fs.promises.writeFile(outputPath, renderedContent, 'utf-8');
 
-  // Write the rendered content to a new file
-  await fs.promises.writeFile(outputPath, renderedContent, 'utf-8');
-
-  console.log(`Successfully bundled and injected ${packageName} into ${outputPath}`);
-  // } catch (error) {
-  //   console.error('Dependency injection failed:', error);
-  // }
+    console.log(`Successfully bundled and injected ${packageName} into ${outputPath}`);
+  } catch (error) {
+    console.error('Dependency injection failed:', error);
+  }
 }
 
-await injectDependency(templatePath, outputPath, packageName);
+await injectDependency(templatePath, outputPath, packageName, importName);
