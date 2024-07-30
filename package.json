@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only",
-    "ci": "turbo run test:e2e:no-binary-esm",
+    "ci": "turbo run test:e2e:no-binary-cjs",
     "ci-linux": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm --concurrency=1",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
