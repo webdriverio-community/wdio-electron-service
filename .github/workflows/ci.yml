@@ -46,11 +46,6 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
-          # if [ "$RUNNER_OS" == "Windows" ]; then
-            # Windows needs to use Electron 29 because of https://github.com/webdriverio-community/wdio-electron-service/issues/600
-            # pnpm run ci:init-windows
-            # pnpm install --no-frozen-lockfile
-          # fi
         shell: bash
       - name: Run Tests
         run: |
@@ -59,14 +54,6 @@ jobs:
             pnpm run ci-linux
           else
             pnpm run ci
-          fi
-        shell: bash
-      - name: Run OS-specific Tests
-        run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run ci:e2e:clean
-            pnpm install --no-frozen-lockfile
-            pnpm run ci:e2e:mac-universal
           fi
         shell: bash
       - name: 🐛 Show logs
@@ -78,8 +65,54 @@ jobs:
         if: failure()
         with:
           timeout: '180000'
+  build-macos-universal:
+    name: MacOS Universal Build & Test
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-pnpm-modules
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.6.0
+          run_install: false
+      - name: Set pnpm store path
+        run: |
+          pnpm config set store-dir ~/.pnpm-store --global
+      - name: Install Dependencies
+        run: |
+          pnpm install
+        shell: bash
+      - name: Run Tests
+        run: |
+          pnpm run ci:e2e:mac-universal
+        shell: bash
+      - name: 🐛 Show logs
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
   build-windows:
-    name: Build & Test Split
+    name: Windows Build & Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
