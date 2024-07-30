@@ -79,12 +79,13 @@ jobs:
         with:
           timeout: '180000'
   build-windows:
-    name: Build & Test Windows
-    runs-on: windows-latest
+    name: Build & Test Slow
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [windows-latest]
+        test: ['units', 'e2e:no-binary', 'e2e:builder-cjs', 'e2e:builder-esm', 'e2e:forge-cjs', 'e2e:forge-esm']
         node-version: [20.x]
-        test: ['units', 'e2e:no-binary', 'e2e:builder', 'e2e:forge']
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
