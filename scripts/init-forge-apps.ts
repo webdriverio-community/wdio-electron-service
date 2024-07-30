@@ -21,6 +21,7 @@ shell.cd(path.join(__dirname, '..'));
 const packageManager = shell.exec('pnpm pkg get packageManager').stdout.trim();
 shell.exec('pnpm pkg delete packageManager');
 
+// ascertain target apps
 const apps = process.argv[2] ? [`forge-${process.argv[2]}`] : ['forge-esm', 'forge-cjs'];
 
 for (const app of apps) {
