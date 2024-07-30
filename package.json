@@ -18,7 +18,6 @@
     "ci-windows:units": "turbo run lint format:check test:unit",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
-    "ci:init-windows": "tsx ./scripts/init-windows-ci.ts",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "clean:yarn-artifacts": "tsx ./scripts/clean-yarn-artifacts.ts",
     "dev": "turbo watch wdio-electron-service#build",
