@@ -446,7 +446,7 @@ describe('onPrepare', () => {
       'browserVersion': '116.0.5845.190',
       'goog:chromeOptions': {
         args: ['--app=path/to/main.bundle.js'],
-        binary: `${getFixtureDir('no-build-tool')}/node_modules/.bin/electron`,
+        binary: path.join(getFixtureDir('no-build-tool'), 'node_modules', '.bin', 'electron'),
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
