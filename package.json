@@ -37,8 +37,9 @@
     "package": "turbo run pack --filter=@wdio* --filter=wdio-electron-service --only",
     "prepare": "husky",
     "release": "turbo run release --filter=@wdio* --filter=wdio-electron-service --only --concurrency=1",
-    "test": "turbo run test test:e2e",
+    "test": "turbo run test:unit test:e2e",
     "test:dev": "turbo run test:dev",
+    "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
     "update:all": "pnpm up -iLr"
@@ -63,8 +64,8 @@
     "read-package-up": "^11.0.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "tsx": "^4.16.2",
-    "turbo": "^2.0.9"
+    "tsx": "^4.16.3",
+    "turbo": "^2.0.10"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
