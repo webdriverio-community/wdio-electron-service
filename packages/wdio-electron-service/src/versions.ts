@@ -26,6 +26,7 @@ export const getChromiumVersion = async (electronVersion?: string) => {
   } catch (e) {
     // fall back to the locally installed electron-to-chromium version map
     log.debug('Map update failed: ', e);
+    log.debug('Falling back to locally installed map...');
     return fullVersions[electronVersion as keyof typeof fullVersions];
   }
 };
