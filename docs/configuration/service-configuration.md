@@ -41,17 +41,23 @@ export const config = {
 
 The service supports the following configuration options:
 
+### `appArgs`:
+
+An array of string arguments to be passed through to the app on execution of the test run. Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches) and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be used here.
+
+Type: `string[]`
+
 ### `appBinaryPath`:
 
 The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically, but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
 Type: `string`
 
-### `appArgs`:
+### `appEntryPoint`:
 
-An array of string arguments to be passed through to the app on execution of the test run. Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches) and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be used here.
+The path to the unpackaged entry point of the app for testing, e.g. your `main.js`. You will need Electron installed to use this feature. The `appEntryPoint` value overrides `appBinaryPath` if both are set.
 
-Type: `string[]`
+Type: `string`
 
 ### `clearMocks`:
 
