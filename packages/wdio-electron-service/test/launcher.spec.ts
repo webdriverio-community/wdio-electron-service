@@ -423,6 +423,36 @@ describe('onPrepare', () => {
     });
   });
 
+  it('should set the expected capabilities when setting appEntryPoint', async () => {
+    delete options.appBinaryPath;
+    options.appEntryPoint = 'path/to/main.bundle.js';
+    instance = new LaunchService(
+      options,
+      [] as never,
+      {
+        services: [['electron', options]],
+        rootDir: getFixtureDir('no-build-tool'),
+      } as Options.Testrunner,
+    );
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        browserName: 'electron',
+        browserVersion: '26.2.2',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.190',
+      'goog:chromeOptions': {
+        args: ['--app=path/to/main.bundle.js'],
+        binary: `${getFixtureDir('no-build-tool')}/node_modules/.bin/electron`,
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:electronServiceOptions': {},
+    });
+  });
+
   it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
     instance = new LaunchService(
       options,
