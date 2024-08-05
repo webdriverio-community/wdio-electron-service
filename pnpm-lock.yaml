@@ -92,7 +92,7 @@ importers:
         version: 9.0.0-alpha.369
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/local-runner':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
@@ -153,7 +153,7 @@ importers:
         version: 9.0.0-alpha.369
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/local-runner':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
@@ -214,7 +214,7 @@ importers:
         version: 9.0.0-alpha.369
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/local-runner':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
@@ -272,7 +272,7 @@ importers:
         version: 9.0.0-alpha.369
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/local-runner':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
@@ -320,7 +320,7 @@ importers:
         version: 2.0.4
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/types':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
@@ -349,8 +349,8 @@ importers:
         specifier: ^18.3.2
         version: 18.3.3
       '@wdio/logger':
-        specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       debug:
         specifier: ^4.3.4
         version: 4.3.5
@@ -402,7 +402,7 @@ importers:
         version: link:../@wdio_electron-utils
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/local-runner':
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
@@ -468,8 +468,8 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-utils
       '@wdio/logger':
-        specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -506,7 +506,7 @@ importers:
         version: 2.0.4(vitest@2.0.4(@types/node@20.14.12)(jsdom@24.1.1)(terser@5.31.3))
       '@wdio/globals':
         specifier: 9.0.0-alpha.369
-        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
+        version: 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
       '@wdio/types':
         specifier: 9.0.0-alpha.369
         version: 9.0.0-alpha.369
@@ -1458,6 +1458,10 @@ packages:
 
   '@wdio/logger@9.0.0-alpha.369':
     resolution: {integrity: sha512-6+CfJY6B2Rl/g/8hXEaCq7mj3FroC2acW/BhFcZG3N4e4q60Dbz0NO/toyD97lfiA+AqjaCY5gYzpI66M4meVA==}
+    engines: {node: '>=18'}
+
+  '@wdio/logger@9.0.0-alpha.426':
+    resolution: {integrity: sha512-gliABH2GwqEFzyYr/S1bfV/1ZGj+GhT8RGgAWgWsY05oVafjPeXv3wwswbMogZqErTI/etONsgFKTch3oNyFrQ==}
     engines: {node: '>=18'}
 
   '@wdio/mocha-framework@9.0.0-alpha.367':
@@ -6738,6 +6742,17 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@wdio/globals@9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)':
+    optionalDependencies:
+      expect-webdriverio: 5.0.0-alpha.2(@wdio/globals@9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426))(@wdio/logger@9.0.0-alpha.426)(webdriverio@9.0.0-alpha.369)
+      webdriverio: 9.0.0-alpha.369
+    transitivePeerDependencies:
+      - '@wdio/logger'
+      - bufferutil
+      - puppeteer-core
+      - supports-color
+      - utf-8-validate
+
   '@wdio/local-runner@9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)':
     dependencies:
       '@types/node': 20.14.12
@@ -6772,6 +6787,13 @@ snapshots:
       strip-ansi: 7.1.0
 
   '@wdio/logger@9.0.0-alpha.369':
+    dependencies:
+      chalk: 5.3.0
+      loglevel: 1.9.1
+      loglevel-plugin-prefix: 0.8.4
+      strip-ansi: 7.1.0
+
+  '@wdio/logger@9.0.0-alpha.426':
     dependencies:
       chalk: 5.3.0
       loglevel: 1.9.1
@@ -8305,6 +8327,17 @@ snapshots:
       '@vitest/snapshot': 1.6.0
       '@wdio/globals': 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.369)
       '@wdio/logger': 9.0.0-alpha.369
+      expect: 29.7.0
+      jest-matcher-utils: 29.7.0
+      lodash.isequal: 4.5.0
+      webdriverio: 9.0.0-alpha.369
+    optional: true
+
+  expect-webdriverio@5.0.0-alpha.2(@wdio/globals@9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426))(@wdio/logger@9.0.0-alpha.426)(webdriverio@9.0.0-alpha.369):
+    dependencies:
+      '@vitest/snapshot': 1.6.0
+      '@wdio/globals': 9.0.0-alpha.369(@wdio/logger@9.0.0-alpha.426)
+      '@wdio/logger': 9.0.0-alpha.426
       expect: 29.7.0
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
