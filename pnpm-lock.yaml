@@ -97,8 +97,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -158,8 +158,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -219,8 +219,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -277,8 +277,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -407,8 +407,8 @@ importers:
         specifier: 9.0.0-alpha.367
         version: 9.0.0-alpha.367(encoding@0.1.13)(typescript@5.5.4)
       '@wdio/mocha-framework':
-        specifier: 9.0.0-alpha.367
-        version: 9.0.0-alpha.367
+        specifier: 9.0.0-alpha.426
+        version: 9.0.0-alpha.426
       electron:
         specifier: ^31.3.1
         version: 31.3.1
@@ -1464,8 +1464,8 @@ packages:
     resolution: {integrity: sha512-gliABH2GwqEFzyYr/S1bfV/1ZGj+GhT8RGgAWgWsY05oVafjPeXv3wwswbMogZqErTI/etONsgFKTch3oNyFrQ==}
     engines: {node: '>=18'}
 
-  '@wdio/mocha-framework@9.0.0-alpha.367':
-    resolution: {integrity: sha512-Q0eENx4rqbsDlgmVGOIt7xb2P3Vu7Lx1f9eHeUWLZPynaHgsCNhkjvsn1T7OM4NVCcXqVutYKR5VFwyQXJy4lg==}
+  '@wdio/mocha-framework@9.0.0-alpha.426':
+    resolution: {integrity: sha512-Gt5HjrB0lRII2VMpKGS+vFDKzB+OhM9pBK7PD50VXyJuC452MjjgJMCE78bYUZAEyEC7p6uQpSERF4WQwF5Fkw==}
     engines: {node: '>=18'}
 
   '@wdio/protocols@8.38.0':
@@ -1505,6 +1505,10 @@ packages:
     resolution: {integrity: sha512-08RBGMVEfaTqiwATPnLZoxdvNo6U8bhue6myvrZjEHPMdml0ajddmAi65g26GjmIymXFVKWIPW61XJEC4XJuPw==}
     engines: {node: '>=18'}
 
+  '@wdio/types@9.0.0-alpha.426':
+    resolution: {integrity: sha512-Zb9tJT5GjZp2DJNtvqvClmXcCxrBf/GicLdBzXyLGqQLfQZAfBnEkMLiOCLIRHIqWhSyHoHtXSks4fwwZODCtg==}
+    engines: {node: '>=18'}
+
   '@wdio/utils@8.39.0':
     resolution: {integrity: sha512-jY+n6jlGeK+9Tx8T659PKLwMQTGpLW5H78CSEWgZLbjbVSr2LfGR8Lx0CRktNXxAtqEVZPj16Pi74OtAhvhE6Q==}
     engines: {node: ^16.13 || >=18}
@@ -1515,6 +1519,10 @@ packages:
 
   '@wdio/utils@9.0.0-alpha.369':
     resolution: {integrity: sha512-1FwvNzSrTbEHt+fw0naWP6ixp2Zgkr939UxwfWibDAHPccHh8PngaGMf2+ZXxyvpGYVTXEqKQIUq7Hm8S/5/Ug==}
+    engines: {node: '>=18'}
+
+  '@wdio/utils@9.0.0-alpha.426':
+    resolution: {integrity: sha512-af39YN+68cFmTAvki9Pqr1rHwKNXDrSLwKu4QpL0sRZ1ir8ueN+wnX/FQeQN2P/bx8Yxq2r754mLYZk4aNOAeA==}
     engines: {node: '>=18'}
 
   '@webassemblyjs/ast@1.12.1':
@@ -1574,6 +1582,10 @@ packages:
 
   '@zip.js/zip.js@2.7.45':
     resolution: {integrity: sha512-Mm2EXF33DJQ/3GWWEWeP1UCqzpQ5+fiMvT3QWspsXY05DyqqxWu7a9awSzU4/spHMHVFrTjani1PR0vprgZpow==}
+    engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=16.5.0'}
+
+  '@zip.js/zip.js@2.7.48':
+    resolution: {integrity: sha512-J7cliimZ2snAbr0IhLx2U8BwfA1pKucahKzTpFtYq4hEgKxwvFJcIjCIVNPwQpfVab7iVP+AKmoH1gidBlyhiQ==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=16.5.0'}
 
   abbrev@1.1.1:
@@ -2395,6 +2407,10 @@ packages:
     resolution: {integrity: sha512-IeJXEczG+DNYBIa9gFgVYTqrawlxmc9SUqUsWU2E98jOsO/amA7wzabKOS8Bwgr/3xWoyXCJ6yGFrbFKrilyyQ==}
     hasBin: true
 
+  edgedriver@5.6.1:
+    resolution: {integrity: sha512-3Ve9cd5ziLByUdigw6zovVeWJjVs8QHVmqOB0sJ0WNeVPcwf4p18GnxMmVvlFmYRloUwf5suNuorea4QzwBIOA==}
+    hasBin: true
+
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
@@ -2666,6 +2682,10 @@ packages:
 
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
+
+  fast-xml-parser@4.4.1:
+    resolution: {integrity: sha512-xkjOecfnKGkSsOwtZ5Pz7Us/T6mrbPQrq0nh+aCO5V9nk5NLWmasAHumTKjiPJPWANe+kAZ84Jc8ooJkzZ88Sw==}
+    hasBin: true
 
   fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}
@@ -4886,6 +4906,9 @@ packages:
     resolution: {integrity: sha512-k55yxKHwaXnpYGsOzg4Vl8+tDrWylxDEpknGjhTiZB8dFRU5rTo9CAzeycivxV3s+zlTKwrs6WxMxR95n26kwg==}
     engines: {node: '>=0.10.0'}
 
+  strnum@1.0.5:
+    resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
+
   sudo-prompt@9.2.1:
     resolution: {integrity: sha512-Mu7R0g4ig9TUuGSxJavny5Rv0egCEtpZRNMrZaYS1vxkiIxGiGUwoezU3LazIQ+KE04hTrTfNPgxU5gzi7F5Pw==}
 
@@ -6800,13 +6823,13 @@ snapshots:
       loglevel-plugin-prefix: 0.8.4
       strip-ansi: 7.1.0
 
-  '@wdio/mocha-framework@9.0.0-alpha.367':
+  '@wdio/mocha-framework@9.0.0-alpha.426':
     dependencies:
       '@types/mocha': 10.0.7
       '@types/node': 20.14.12
-      '@wdio/logger': 9.0.0-alpha.367
-      '@wdio/types': 9.0.0-alpha.367
-      '@wdio/utils': 9.0.0-alpha.367
+      '@wdio/logger': 9.0.0-alpha.426
+      '@wdio/types': 9.0.0-alpha.426
+      '@wdio/utils': 9.0.0-alpha.426
       mocha: 10.4.0
     transitivePeerDependencies:
       - supports-color
@@ -6866,6 +6889,10 @@ snapshots:
     dependencies:
       '@types/node': 20.14.12
 
+  '@wdio/types@9.0.0-alpha.426':
+    dependencies:
+      '@types/node': 20.14.12
+
   '@wdio/utils@8.39.0':
     dependencies:
       '@puppeteer/browsers': 1.9.1
@@ -6873,7 +6900,7 @@ snapshots:
       '@wdio/types': 8.39.0
       decamelize: 6.0.0
       deepmerge-ts: 5.1.0
-      edgedriver: 5.6.0
+      edgedriver: 5.6.1
       geckodriver: 4.4.1
       get-port: 7.1.0
       import-meta-resolve: 4.1.0
@@ -6911,6 +6938,24 @@ snapshots:
       decamelize: 6.0.0
       deepmerge-ts: 7.0.3
       edgedriver: 5.6.0
+      geckodriver: 4.4.1
+      get-port: 7.1.0
+      import-meta-resolve: 4.1.0
+      locate-app: 2.4.19
+      safaridriver: 0.1.2
+      split2: 4.2.0
+      wait-port: 1.1.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@wdio/utils@9.0.0-alpha.426':
+    dependencies:
+      '@puppeteer/browsers': 2.2.3
+      '@wdio/logger': 9.0.0-alpha.426
+      '@wdio/types': 9.0.0-alpha.426
+      decamelize: 6.0.0
+      deepmerge-ts: 7.0.3
+      edgedriver: 5.6.1
       geckodriver: 4.4.1
       get-port: 7.1.0
       import-meta-resolve: 4.1.0
@@ -7004,6 +7049,8 @@ snapshots:
   '@xtuc/long@4.2.2': {}
 
   '@zip.js/zip.js@2.7.45': {}
+
+  '@zip.js/zip.js@2.7.48': {}
 
   abbrev@1.1.1: {}
 
@@ -7969,6 +8016,16 @@ snapshots:
       node-fetch: 3.3.2
       which: 4.0.0
 
+  edgedriver@5.6.1:
+    dependencies:
+      '@wdio/logger': 8.38.0
+      '@zip.js/zip.js': 2.7.48
+      decamelize: 6.0.0
+      edge-paths: 3.0.5
+      fast-xml-parser: 4.4.1
+      node-fetch: 3.3.2
+      which: 4.0.0
+
   ejs@3.1.10:
     dependencies:
       jake: 10.9.1
@@ -8392,6 +8449,10 @@ snapshots:
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
+
+  fast-xml-parser@4.4.1:
+    dependencies:
+      strnum: 1.0.5
 
   fastq@1.17.1:
     dependencies:
@@ -10792,6 +10853,8 @@ snapshots:
   strip-outer@1.0.1:
     dependencies:
       escape-string-regexp: 1.0.5
+
+  strnum@1.0.5: {}
 
   sudo-prompt@9.2.1: {}
 
