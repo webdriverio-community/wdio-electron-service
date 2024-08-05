@@ -41,20 +41,20 @@
   },
   "dependencies": {
     "@electron/packager": "^18.3.2",
-    "@wdio/logger": "9.0.0-alpha.369",
+    "@wdio/logger": "9.0.0-alpha.426",
     "debug": "^4.3.6",
     "find-versions": "^6.0.0",
     "read-package-up": "^11.0.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.10",
-    "@types/node": "^20.14.12",
-    "@vitest/coverage-v8": "^2.0.4",
+    "@types/node": "^20.14.14",
+    "@vitest/coverage-v8": "^2.0.5",
     "@wdio/electron-types": "workspace:*",
     "jsdom": "^24.1.1",
     "release-it": "^17.6.0",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.4"
+    "vitest": "^2.0.5"
   }
 }
