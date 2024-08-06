@@ -596,7 +596,7 @@ describe('onPrepare', () => {
   });
 
   it('should set the expected capabilities when parallel multiremote', async () => {
-    const capabilities: Capabilities.MultiRemoteCapabilities[] = [
+    const capabilities: Capabilities.RequestedMultiremoteCapabilities[] = [
       {
         firefox: {
           capabilities: {
