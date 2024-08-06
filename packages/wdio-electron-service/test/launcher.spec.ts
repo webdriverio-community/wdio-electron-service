@@ -188,6 +188,7 @@ describe('onPrepare', () => {
       'wdio:electronServiceOptions': {
         appBinaryPath: 'workspace/my-other-test-app/dist/my-other-test-app',
       },
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -208,6 +209,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -235,6 +237,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -262,6 +265,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -289,6 +293,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -316,6 +321,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -355,6 +361,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -385,6 +392,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -420,6 +428,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -450,6 +459,7 @@ describe('onPrepare', () => {
         windowTypes: ['app', 'webview'],
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -482,6 +492,7 @@ describe('onPrepare', () => {
         binary: '/path/to/chromedriver',
       },
       'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
     });
   });
 
@@ -507,6 +518,7 @@ describe('onPrepare', () => {
           windowTypes: ['app', 'webview'],
         },
         'wdio:electronServiceOptions': {},
+        'wdio:enforceWebDriverClassic': true,
       },
     });
   });
@@ -556,6 +568,7 @@ describe('onPrepare', () => {
             windowTypes: ['app', 'webview'],
           },
           'wdio:electronServiceOptions': {},
+          'wdio:enforceWebDriverClassic': true,
         },
       },
       chrome: {
@@ -575,6 +588,7 @@ describe('onPrepare', () => {
               windowTypes: ['app', 'webview'],
             },
             'wdio:electronServiceOptions': {},
+            'wdio:enforceWebDriverClassic': true,
           },
         },
       },
@@ -631,6 +645,7 @@ describe('onPrepare', () => {
               windowTypes: ['app', 'webview'],
             },
             'wdio:electronServiceOptions': {},
+            'wdio:enforceWebDriverClassic': true,
           },
         },
       },
@@ -652,6 +667,7 @@ describe('onPrepare', () => {
                 windowTypes: ['app', 'webview'],
               },
               'wdio:electronServiceOptions': {},
+              'wdio:enforceWebDriverClassic': true,
             },
           },
         },

@@ -90,6 +90,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         cap.browserName = 'chrome';
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
+        // disable WebDriver Bidi session
+        cap['wdio:enforceWebDriverClassic'] = true;
+
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {
           cap['wdio:chromedriverOptions'] = chromedriverOptions;
