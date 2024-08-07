@@ -35,10 +35,9 @@ jobs:
           running-workflow-name: dependencies # wait for all checks except this one
           allowed-conclusions: success # all other checks must pass, being skipped or cancelled is not sufficient
 
-      - name: Auto-merge dependabot PRs
-        # Don't merge updates to GitHub Actions versions automatically.
-        # (Some repos may wish to limit by version range (major/minor/patch), or scope (dep vs dev-dep), too.)
-        if: contains(steps.metadata.outputs.package-ecosystem, 'npm')
+      - name: Auto-merge Dependabot Security PRs
+        # Merge NPM security updates from Dependabot (ungrouped), but not version updates (grouped).
+        if: contains(steps.metadata.outputs.package-ecosystem, 'npm') && !contains(github.event.pull_request.title, 'chore(deps-dev)') && !contains(github.event.pull_request.title, 'chore(deps)')
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
