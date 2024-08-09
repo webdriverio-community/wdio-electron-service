@@ -140,16 +140,20 @@ export interface ElectronServiceAPI {
  */
 export interface ElectronServiceOptions {
   /**
-   * The path to the electron binary of the app for testing.
-   */
-  appBinaryPath?: string;
-  /**
    * An array of string arguments to be passed through to the app on execution of the test run.
    * Electron [command line switches](https://www.electronjs.org/docs/latest/api/command-line-switches)
    * and some [Chromium switches](https://peter.sh/experiments/chromium-command-line-switches) can be
    * used here.
    */
   appArgs?: string[];
+  /**
+   * The path to the electron binary of the app for testing.
+   */
+  appBinaryPath?: string;
+  /**
+   * The path to the electron entry point of the app for testing.
+   */
+  appEntryPoint?: string;
   /**
    * Calls .mockClear() on all mocked APIs before each test. This will clear mock history, but not reset its implementation.
    */

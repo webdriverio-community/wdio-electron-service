@@ -1,4 +1,5 @@
 import util from 'node:util';
+import path from 'node:path';
 
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
@@ -50,8 +51,21 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        let { appArgs, appBinaryPath } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
-        if (!appBinaryPath) {
+        let {
+          appBinaryPath,
+          appEntryPoint,
+          appArgs = [],
+        } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
+
+        if (appEntryPoint) {
+          if (appBinaryPath) {
+            log.warn('Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored');
+          }
+          const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
+          appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', electronBinary);
+          appArgs = [`--app=${appEntryPoint}`, ...appArgs];
+          log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
+        } else if (!appBinaryPath) {
           log.info('No app binary specified, attempting to detect one...');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
@@ -75,6 +89,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
         cap.browserName = 'chrome';
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
+
+        // disable WebDriver Bidi session
+        cap['wdio:enforceWebDriverClassic'] = true;
 
         const chromedriverOptions = getChromedriverOptions(cap);
         if (!chromiumVersion && Object.keys(chromedriverOptions).length > 0) {

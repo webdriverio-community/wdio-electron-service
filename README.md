@@ -67,7 +67,27 @@ export const config = {
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
-        appBinaryPath: './path/to/bundled/electron/app.exe',
+        appBinaryPath: './path/to/built/electron/app.exe',
+        appArgs: ['foo', 'bar=baz'],
+      },
+    },
+  ],
+  // ...
+};
+```
+
+Alternatively, you can point the service at an unpackaged app by providing the path to the `main.js` script. Electron will need to be installed in your `node_modules`. It is recommended to bundle unpackaged apps using a bundler such as Rollup, Parcel, Webpack, etc.
+
+_`wdio.conf.ts`_
+
+```ts
+export const config = {
+  // ...
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'wdio:electronServiceOptions': {
+        appEntryPoint: './path/to/bundled/electron/main.bundle.js',
         appArgs: ['foo', 'bar=baz'],
       },
     },
