@@ -75,13 +75,13 @@
     }
   },
   "dependencies": {
-    "@vitest/spy": "^2.0.4",
+    "@vitest/spy": "^2.0.5",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
     "@wdio/logger": "9.0.0-alpha.426",
     "compare-versions": "^6.1.1",
-    "debug": "^4.3.4",
-    "electron-to-chromium": "^1.5.3",
+    "debug": "^4.3.6",
+    "electron-to-chromium": "^1.5.6",
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.0"
@@ -102,7 +102,7 @@
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5",
-    "webdriverio": "9.0.0-alpha.369"
+    "webdriverio": "9.0.0-alpha.426"
   },
   "files": [
     "bin/*",
