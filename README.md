@@ -1,5 +1,12 @@
 # WDIO Electron Service
 
+<a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Version">
+  <img src="https://img.shields.io/npm/v/wdio-electron-service" /></a>
+<a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Downloads">
+  <img src="https://img.shields.io/npm/dw/wdio-electron-service" /></a>
+
+<br />
+
 **WebdriverIO service for testing Electron applications**
 
 Enables cross-platform E2E testing of Electron apps via the extensive WebdriverIO ecosystem.
@@ -8,10 +15,10 @@ Spiritual successor to [Spectron](https://github.com/electron-userland/spectron)
 
 ### Features
 
-Using the service makes testing Electron applications much easier:
+Makes testing Electron applications much easier via:
 
 - 🚗 auto-setup of required Chromedriver
-- 📦 automatic path detection of your Electron application - supports [Electron Forge](https://www.electronforge.io/) and [Electron Builder](https://www.electron.build/)
+- 📦 automatic path detection of your Electron application - supports [Electron Forge](https://www.electronforge.io/), [Electron Builder](https://www.electron.build/) and unpackaged apps
 - 🧩 access Electron APIs within your tests
 - 🕵️ mocking of Electron APIs via a Vitest-like API
 
@@ -118,7 +125,7 @@ Read the [development doc](./docs/development.md) if you are interested in contr
 
 ## Example Integrations
 
-Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./apps/) and [E2Es](./packages/e2e/) directories in this repository.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./apps/) and [E2Es](./e2e/) directories in this repository.
 
 ## Support
 
