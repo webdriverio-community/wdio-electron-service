@@ -96,6 +96,12 @@ export const config = {
 };
 ```
 
+## Chromedriver Configuration
+
+**If your app uses a version of Electron which is lower than v26 then you will need to [manually configure Chromedriver](./docs/configuration/chromedriver-configuration.md#user-managed).**
+
+This is because WDIO uses Chrome for Testing to download Chromedriver, which only provides Chromedriver versions of v115 or newer.
+
 ## Documentation
 
 **[Service Configuration](./docs/configuration/service-configuration.md)** \

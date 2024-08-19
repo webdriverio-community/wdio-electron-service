@@ -24,10 +24,6 @@ export const config = {
 
 ## User Managed
 
-**If your app uses a version of Electron which is lower than v26 then you will need to manually configure Chromedriver.**
-
-This is because WDIO uses Chrome for Testing to download Chromedriver, which only provides Chromedriver versions of v115 or newer.
-
 In order to manage Chromedriver yourself you can install it directly or via some other means like [`electron-chromedriver`](https://github.com/electron/chromedriver), in this case you will need to tell WebdriverIO where your Chromedriver binary is through its custom [`wdio:chromedriverOptions`](https://webdriver.io/docs/capabilities#webdriverio-capabilities-to-manage-browser-driver-options) capability.
 
 For example, in order to use WDIO with an Electron v19 app, you will have to download Chromedriver `102.0.5005.61` from https://chromedriver.chromium.org/downloads. You should then specify the binary path in the WDIO config as follows:
