@@ -110,7 +110,7 @@ Project maintainers can publish a release or pre-release of the npm package by m
 
 ### Publish a Release
 
-To publish a release, run the release workflow on Github with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
+To publish a release, run the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
 
 - Create a Git tag
 - Create a GitHub Release
@@ -118,7 +118,7 @@ To publish a release, run the release workflow on Github with the defaults for *
 
 ### Publish a Pre-Release
 
-To publish a pre-release, also referred to as a test release, run the workflow with the **NPM Tag** `next`. This will:
+To publish a pre-release, also referred to as a test release, run the [pre-release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/pre-release.yml) with the **NPM Tag** `next`. This will:
 
 - Create a Git tag with the `-next.0` suffix
 - Create a GitHub Pre-Release
@@ -126,11 +126,18 @@ To publish a pre-release, also referred to as a test release, run the workflow w
 
 Use the **Release Type** to control which version to increment for the pre-release. The following table provides examples for publishing a pre-release from the current version `6.3.1`:
 
-| Release Type  | Pre-Release Version |
-| ------------- | ------------------- |
-| `major`       | `7.0.0-next.0`      |
-| `minor`       | `6.4.0-next.0`      |
-| `patch`       | `6.3.2-next.0`      |
-| `pre-release` | `6.3.1-next.0`      |
+| Release Type | Pre-Release Version |
+| ------------ | ------------------- |
+| `major`      | `7.0.0-next.0`      |
+| `minor`      | `6.4.0-next.0`      |
+| `patch`      | `6.3.2-next.0`      |
+| `existing`   | `6.3.1-next.0`      |
 
-Consecutive pre-releases can increment the `pre-release` version in the suffix. For example, if the current version is `6.3.1-next.0`, the next `pre-release` will be `6.3.1-next.1`.
+To create consecutive pre-releases you can select `existing` which will increment the pre-release version in the suffix. For example, if the current version is `6.3.1-next.3`, the following will be published:
+
+| Release Type | Pre-Release Version |
+| ------------ | ------------------- |
+| `major`      | `7.0.0-next.0`      |
+| `minor`      | `6.4.0-next.0`      |
+| `patch`      | `6.3.2-next.0`      |
+| `existing`   | `6.3.1-next.4`      |
