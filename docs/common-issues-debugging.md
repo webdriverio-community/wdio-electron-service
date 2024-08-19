@@ -53,6 +53,12 @@ module.exports = {
 
 ### DevToolsActivePort file doesn't exist
 
-This is a Chromium error which may appear when using Docker or CI. Most of the "fixes" discussed online are based around passing different combinations of args to Chromium - you can set these via [`appArgs`](./configuration/service-configuration.md#appargs-string), though in most cases using xvfb has proven to be more effective; the service itself uses a [github action](https://github.com/coactions/setup-xvfb) to achieve this when running E2Es on CI.
+This is a Chromium error which may appear when using Docker or CI. Most of the "fixes" discussed online are based around passing different combinations of args to Chromium - you can set these via [`appArgs`](./configuration/service-configuration.md#appargs-string), though in most cases using xvfb has proven to be more effective; the service itself uses xvfb when running E2Es on Linux CI.
 
 See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/60) for more details.
+
+### Module not found: wdio-electron-service/preload
+
+This is a result of the preload script not being found when trying to access the electron APIs via `execute`. If you are loading extensions into Electron, you should do that at the end of the "ready" event handler. Otherwise, chromedriver will attach to the first extension's background page.
+
+See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/667) for more details.
