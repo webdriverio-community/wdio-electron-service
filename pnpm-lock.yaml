@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  expect-webdriverio: 5.0.1
+
 importers:
 
   .:
@@ -2843,8 +2846,8 @@ packages:
     resolution: {integrity: sha512-A5EmesHW6rfnZ9ysHQjPdJRni0SRar0tjtG5MNtm9n5TUvsYU8oozprtRD4AqHxcZWWlVuAmQo2nWKfN9oyjTw==}
     engines: {node: '>=0.10.0'}
 
-  expect-webdriverio@5.0.0-alpha.2:
-    resolution: {integrity: sha512-1T92DjZoY8oDpojGnSyf2WOEaS6uBrYTuzRJWqVE+wJAZATbeWgv8isl/3GM6MbQpDuN44F+fKLbgTZ18Bc4HA==}
+  expect-webdriverio@5.0.1:
+    resolution: {integrity: sha512-tYJaXtu5qQr/oEXzDKoVzyA/g2wyeE1YsuVJQC8/bKnp1lX3I4NQ2Yb9u1rJ9vdpFha6pki8PzHlTk5PVZBQWQ==}
     engines: {node: '>=18 || >=20 || >=22'}
     peerDependencies:
       '@wdio/globals': ^9.0.0-alpha.350
@@ -6992,7 +6995,7 @@ snapshots:
 
   '@wdio/globals@9.0.4(@wdio/logger@9.0.4)':
     optionalDependencies:
-      expect-webdriverio: 5.0.0-alpha.2(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4)
+      expect-webdriverio: 5.0.1(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4)
       webdriverio: 9.0.4
     transitivePeerDependencies:
       - '@wdio/logger'
@@ -7057,7 +7060,7 @@ snapshots:
       '@wdio/types': 9.0.4
       '@wdio/utils': 9.0.4
       deepmerge-ts: 7.1.0
-      expect-webdriverio: 5.0.0-alpha.2(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4)
+      expect-webdriverio: 5.0.1(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4)
       gaze: 1.1.3
       webdriver: 9.0.4
       webdriverio: 9.0.4
@@ -8457,9 +8460,9 @@ snapshots:
     dependencies:
       homedir-polyfill: 1.0.3
 
-  expect-webdriverio@5.0.0-alpha.2(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4):
+  expect-webdriverio@5.0.1(@wdio/globals@9.0.4(@wdio/logger@9.0.4))(@wdio/logger@9.0.4)(webdriverio@9.0.4):
     dependencies:
-      '@vitest/snapshot': 1.6.0
+      '@vitest/snapshot': 2.0.5
       '@wdio/globals': 9.0.4(@wdio/logger@9.0.4)
       '@wdio/logger': 9.0.4
       expect: 29.7.0
