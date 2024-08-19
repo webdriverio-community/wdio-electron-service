@@ -1,26 +1,20 @@
 {
-  "name": "example-forge-cjs",
+  "name": "example-no-binary-cjs",
   "version": "1.0.0",
   "main": "dist/main.bundle.js",
   "private": true,
   "scripts": {
-    "build": "pnpm build:bundle && pnpm build:package",
-    "build:bundle": "tsc && rollup -c rollup.config.mjs",
-    "build:package": "cp ./src/index.html ./dist && electron-forge package",
-    "build:package:mac-universal": "cp ./src/index.html ./dist && electron-forge package --platform=darwin --arch=universal",
-    "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
-    "ci": "pnpm i && pnpm build && pnpm test",
+    "build": "tsc && rollup -c rollup.config.mjs && cp ./src/index.html ./dist",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
-    "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist"
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
   },
   "dependencies": {
     "wdio-electron-service": "workspace:*"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.4.0",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.1",
-    "@types/node": "^20.14.14",
+    "@types/node": "^20.14.12",
     "@wdio/cli": "^9.0.4",
     "@wdio/globals": "^9.0.4",
     "@wdio/local-runner": "^9.0.4",

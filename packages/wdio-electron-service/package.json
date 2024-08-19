@@ -43,7 +43,10 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "pnpm build:esm && pnpm build:cjs",
-    "build:esm": "tsc --outDir dist",
+    "build:esm": "pnpm build:esm:compile && pnpm build:esm:bundle && pnpm build:esm:replace",
+    "build:esm:compile": "tsc --outDir dist",
+    "build:esm:bundle": "tsx ./scripts/inject-dependency.ts ./dist/mock.js ./dist/mock.bundle.js @vitest/spy spy",
+    "build:esm:replace": "shx rm ./dist/mock.js && shx mv ./dist/mock.bundle.js ./dist/mock.js",
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
@@ -75,37 +78,38 @@
     }
   },
   "dependencies": {
-    "@vitest/spy": "^2.0.4",
+    "@vitest/spy": "^2.0.5",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/logger": "9.0.0-alpha.426",
+    "@wdio/logger": "^9.0.4",
     "compare-versions": "^6.1.1",
-    "debug": "^4.3.4",
-    "electron-to-chromium": "^1.5.3",
+    "debug": "^4.3.6",
+    "electron-to-chromium": "^1.5.11",
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.0"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
+    "@rollup/plugin-node-resolve": "^15.2.1",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.10",
     "@types/node": "^20.14.14",
     "@vitest/coverage-v8": "^2.0.5",
-    "@wdio/globals": "9.0.0-alpha.426",
-    "@wdio/types": "9.0.0-alpha.426",
+    "@wdio/globals": "^9.0.4",
+    "@wdio/types": "^9.0.4",
     "builder-util": "25.0.0-alpha.10",
-    "electron": "^31.3.1",
+    "electron": "^31.4.0",
     "jsdom": "^24.1.1",
-    "nock": "^13.3.6",
+    "nock": "^14.0.0-beta.9",
     "release-it": "^17.6.0",
+    "rollup": "^4.21.0",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5",
-    "webdriverio": "9.0.0-alpha.369"
+    "webdriverio": "^9.0.4"
   },
   "files": [
-    "bin/*",
     "dist/*"
   ]
 }

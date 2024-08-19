@@ -13,10 +13,11 @@ env:
 
 jobs:
   build:
+    name: Build & Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest]
         node-version: [20.x]
       fail-fast: false
 
@@ -37,7 +38,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.5.0
+          version: 9.7.0
           run_install: false
       - name: Set pnpm store path
         run: |
@@ -45,25 +46,119 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            pnpm run ci:init-windows
-            pnpm install --no-frozen-lockfile
-          fi
         shell: bash
       - name: Run Tests
         run: |
-          pnpm run ci
-        shell: bash
-      - name: Run OS-specific Tests
-        run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            pnpm run ci:e2e:clean
-            pnpm install --no-frozen-lockfile
-            pnpm run ci:e2e:mac-universal
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            # Run tasks in serial on Ubuntu to avoid Xvfb issues
+            pnpm run ci-linux
+          else
+            pnpm run ci
           fi
         shell: bash
+      - name: 🐛 Show logs
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
       - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
+  build-macos-universal:
+    name: MacOS Universal Build & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest]
+        node-version: [20.x]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-pnpm-modules
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.7.0
+          run_install: false
+      - name: Set pnpm store path
+        run: |
+          pnpm config set store-dir ~/.pnpm-store --global
+      - name: Install Dependencies
+        run: |
+          pnpm install
+        shell: bash
+      - name: Run Tests
+        run: |
+          pnpm run build
+          pnpm run ci-mac:e2e:mac-universal
+        shell: bash
+      - name: 🐛 Show logs
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
+  build-windows:
+    name: Windows Build & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        test: ['units', 'e2e:no-binary', 'e2e:builder-cjs', 'e2e:builder-esm', 'e2e:forge-cjs', 'e2e:forge-esm']
+        node-version: [20.x]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-pnpm-modules
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.7.1
+          run_install: false
+      - name: Set pnpm store path
+        run: |
+          pnpm config set store-dir ~/.pnpm-store --global
+      - name: Install Dependencies
+        run: |
+          pnpm install
+        shell: bash
+      - name: Run Tests
+        run: |
+          pnpm run build
+          pnpm run ci-windows:${{ matrix.test }}
+        shell: bash
+      - name: 🐛 Show logs
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
         if: failure()
         with:
           timeout: '180000'

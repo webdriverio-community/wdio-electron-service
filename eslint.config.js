@@ -3,7 +3,7 @@ import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import vitest from 'eslint-plugin-vitest';
-import wdio from 'eslint-plugin-wdio';
+import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
 export default [
@@ -126,7 +126,7 @@ export default [
       wdio,
     },
     rules: {
-      ...wdio.configs.recommended.rules,
+      ...wdio.configs['flat/recommended'].rules,
       '@typescript-eslint/no-var-requires': 'off',
     },
   },
