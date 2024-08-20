@@ -18,8 +18,8 @@ importers:
         specifier: ^6.11.2
         version: 6.11.3
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@types/shelljs':
         specifier: ^0.8.15
         version: 0.8.15
@@ -40,7 +40,7 @@ importers:
         version: 9.1.0(eslint@8.57.0)
       eslint-plugin-vitest:
         specifier: ^0.5.3
-        version: 0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6))
+        version: 0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6))
       eslint-plugin-wdio:
         specifier: ^9.0.4
         version: 9.0.4
@@ -88,8 +88,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -149,8 +149,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -210,8 +210,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -268,8 +268,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -323,8 +323,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.12
-        version: 20.14.12
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -378,8 +378,8 @@ importers:
         specifier: ^15.2.1
         version: 15.2.3(rollup@4.21.0)
       '@types/node':
-        specifier: ^20.14.12
-        version: 20.14.12
+        specifier: ^20.16.1
+        version: 20.16.1
       '@wdio/cli':
         specifier: ^9.0.4
         version: 9.0.4
@@ -463,8 +463,8 @@ importers:
         specifier: ^10.0.6
         version: 10.0.7
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@vitest/spy':
         specifier: ^2.0.5
         version: 2.0.5
@@ -545,11 +545,11 @@ importers:
         specifier: ^4.1.10
         version: 4.1.12
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@vitest/coverage-v8':
         specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6))
+        version: 2.0.5(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6))
       '@wdio/electron-types':
         specifier: workspace:*
         version: link:../@wdio_electron-types
@@ -567,7 +567,7 @@ importers:
         version: 5.5.4
       vitest:
         specifier: ^2.0.5
-        version: 2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6)
+        version: 2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)
 
   packages/wdio-electron-service:
     dependencies:
@@ -615,11 +615,11 @@ importers:
         specifier: ^4.1.10
         version: 4.1.12
       '@types/node':
-        specifier: ^20.14.14
-        version: 20.14.14
+        specifier: ^20.16.1
+        version: 20.16.1
       '@vitest/coverage-v8':
         specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6))
+        version: 2.0.5(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6))
       '@wdio/globals':
         specifier: ^9.0.4
         version: 9.0.4(@wdio/logger@9.0.4)
@@ -636,8 +636,8 @@ importers:
         specifier: ^24.1.1
         version: 24.1.1
       nock:
-        specifier: ^14.0.0-beta.9
-        version: 14.0.0-beta.9
+        specifier: ^14.0.0-beta.11
+        version: 14.0.0-beta.11
       release-it:
         specifier: ^17.6.0
         version: 17.6.0(typescript@5.5.4)
@@ -652,7 +652,7 @@ importers:
         version: 5.5.4
       vitest:
         specifier: ^2.0.5
-        version: 2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6)
+        version: 2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)
       webdriverio:
         specifier: ^9.0.4
         version: 9.0.4
@@ -1224,8 +1224,8 @@ packages:
     resolution: {integrity: sha512-9QOtNffcOF/c1seMCDnjckb3R9WHcG34tky+FHpNKKCW0wc/scYLwMtO+ptyGUfMW0/b/n4qRiALlaFHc9Oj7Q==}
     engines: {node: '>= 10.0.0'}
 
-  '@mswjs/interceptors@0.33.2':
-    resolution: {integrity: sha512-uDB/51Sraq4lxT73Z1LXL75lE7rO4313zJEcvMFusMouqy/RrAXkToMhurbfl9CUHYMn77icAqCzhQYDBD34PQ==}
+  '@mswjs/interceptors@0.34.3':
+    resolution: {integrity: sha512-UPi1V51c4+PVVG1lhVK2i29aOyBqXvBF8WBvlXIp2Q0vTVKrm20x2voLfunVC3N5wzocxEoHJyOwAXNdoMqy3Q==}
     engines: {node: '>=18'}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -1552,12 +1552,6 @@ packages:
 
   '@types/mute-stream@0.0.4':
     resolution: {integrity: sha512-CPM9nzrCPPJHQNA9keH9CVkVI+WR5kMa+7XEs5jcGQ0VoAGnLv242w8lIVgwAEfmE4oufJRaTc9PNLQl0ioAow==}
-
-  '@types/node@20.14.12':
-    resolution: {integrity: sha512-r7wNXakLeSsGT0H1AU863vS2wa5wBOK4bWMjZz2wj+8nBx+m5PeIn0k8AloSLpRuiwdRQZwarZqHE4FNArPuJQ==}
-
-  '@types/node@20.14.14':
-    resolution: {integrity: sha512-d64f00982fS9YoOgJkAMolK7MN8Iq3TDdVjchbYHdEmjth/DHowx82GnoA+tVUAN+7vxfYUgAzi+JXbKNd2SDQ==}
 
   '@types/node@20.16.1':
     resolution: {integrity: sha512-zJDo7wEadFtSyNz5QITDfRcrhqDvQI1xQNQ0VoizPjM/dVAODqqIUWbJPkvsxmTI0MYRGRikcdjMPhOssnPejQ==}
@@ -4119,8 +4113,8 @@ packages:
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
 
-  nock@14.0.0-beta.9:
-    resolution: {integrity: sha512-ndEFjtOLDluzu/1srE2raRWlEyQHq4CWZ/eN6fc7AcbaXiXmprIkfvq3MvkFYR3rQW7Pylb+IHLkx7RITMUwTg==}
+  nock@14.0.0-beta.11:
+    resolution: {integrity: sha512-tmImk6btCUcCFHXkhqZnuSe4e/4M/YYs8qYaQGdjZSBloTXgQyuPrgjzn45zmFWpK2bDSEtIcF8olFdFxRaA1g==}
     engines: {node: '>= 18'}
 
   node-abi@3.65.0:
@@ -5339,9 +5333,6 @@ packages:
   unbzip2-stream@1.4.3:
     resolution: {integrity: sha512-mlExGW4w71ebDJviH16lQLtZS32VKqsSfk80GCfUlwT/4/hNRFsoscrF/c++9xinkMzECL1uL9DDwXqFWkruPg==}
 
-  undici-types@5.26.5:
-    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
-
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
@@ -6384,7 +6375,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mswjs/interceptors@0.33.2':
+  '@mswjs/interceptors@0.34.3':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
       '@open-draft/logger': 0.3.0
@@ -6709,14 +6700,6 @@ snapshots:
     dependencies:
       '@types/node': 20.16.1
 
-  '@types/node@20.14.12':
-    dependencies:
-      undici-types: 5.26.5
-
-  '@types/node@20.14.14':
-    dependencies:
-      undici-types: 5.26.5
-
   '@types/node@20.16.1':
     dependencies:
       undici-types: 6.19.8
@@ -6742,7 +6725,7 @@ snapshots:
   '@types/shelljs@0.8.15':
     dependencies:
       '@types/glob': 7.2.0
-      '@types/node': 20.14.14
+      '@types/node': 20.16.1
 
   '@types/sinonjs__fake-timers@8.1.5': {}
 
@@ -6891,7 +6874,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitest/coverage-v8@2.0.5(vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6))':
+  '@vitest/coverage-v8@2.0.5(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -6905,7 +6888,7 @@ snapshots:
       std-env: 3.7.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6)
+      vitest: 2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -8165,7 +8148,7 @@ snapshots:
   electron@31.4.0:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 20.14.14
+      '@types/node': 20.16.1
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -8305,13 +8288,13 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6)):
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)):
     dependencies:
       '@typescript-eslint/utils': 7.17.0(eslint@8.57.0)(typescript@5.5.4)
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
-      vitest: 2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6)
+      vitest: 2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9823,9 +9806,9 @@ snapshots:
 
   nice-try@1.0.5: {}
 
-  nock@14.0.0-beta.9:
+  nock@14.0.0-beta.11:
     dependencies:
-      '@mswjs/interceptors': 0.33.2
+      '@mswjs/interceptors': 0.34.3
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
 
@@ -11083,8 +11066,6 @@ snapshots:
       buffer: 5.7.1
       through: 2.3.8
 
-  undici-types@5.26.5: {}
-
   undici-types@6.19.8: {}
 
   undici@6.19.8: {}
@@ -11168,13 +11149,13 @@ snapshots:
       extsprintf: 1.4.1
     optional: true
 
-  vite-node@2.0.5(@types/node@20.14.14)(terser@5.31.6):
+  vite-node@2.0.5(@types/node@20.16.1)(terser@5.31.6):
     dependencies:
       cac: 6.7.14
       debug: 4.3.6(supports-color@8.1.1)
       pathe: 1.1.2
       tinyrainbow: 1.2.0
-      vite: 5.3.5(@types/node@20.14.14)(terser@5.31.6)
+      vite: 5.3.5(@types/node@20.16.1)(terser@5.31.6)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -11185,17 +11166,17 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.3.5(@types/node@20.14.14)(terser@5.31.6):
+  vite@5.3.5(@types/node@20.16.1)(terser@5.31.6):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.41
       rollup: 4.21.0
     optionalDependencies:
-      '@types/node': 20.14.14
+      '@types/node': 20.16.1
       fsevents: 2.3.3
       terser: 5.31.6
 
-  vitest@2.0.5(@types/node@20.14.14)(jsdom@24.1.1)(terser@5.31.6):
+  vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6):
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@vitest/expect': 2.0.5
@@ -11213,11 +11194,11 @@ snapshots:
       tinybench: 2.9.0
       tinypool: 1.0.0
       tinyrainbow: 1.2.0
-      vite: 5.3.5(@types/node@20.14.14)(terser@5.31.6)
-      vite-node: 2.0.5(@types/node@20.14.14)(terser@5.31.6)
+      vite: 5.3.5(@types/node@20.16.1)(terser@5.31.6)
+      vite-node: 2.0.5(@types/node@20.16.1)(terser@5.31.6)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.14.14
+      '@types/node': 20.16.1
       jsdom: 24.1.1
     transitivePeerDependencies:
       - less
