@@ -68,7 +68,8 @@
     },
     "@wdio/electron-types#release": {
       "dependsOn": ["pack"],
-      "cache": false
+      "cache": false,
+      "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-utils#build": {
       "dependsOn": ["@wdio/electron-types#build", "test:unit"],
@@ -80,7 +81,8 @@
     },
     "@wdio/electron-utils#release": {
       "dependsOn": ["pack"],
-      "cache": false
+      "cache": false,
+      "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "clean": {
       "cache": false
@@ -148,7 +150,8 @@
     },
     "wdio-electron-service#release": {
       "dependsOn": ["pack"],
-      "cache": false
+      "cache": false,
+      "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     }
   }
 }
