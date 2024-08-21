@@ -53,15 +53,19 @@
     "@wdio/electron-types": "workspace:*",
     "jsdom": "^24.1.1",
     "release-it": "^17.6.0",
+    "release-it-pnpm": "^4.6.3",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
   },
   "release-it": {
-    "git": false,
     "npm": {
-      "publish": true,
-      "publishPath": "*.tgz"
+      "publish": true
+    },
+    "plugins": {
+      "release-it-pnpm": {
+        "disableRelease": true
+      }
     }
   }
 }
