@@ -51,7 +51,7 @@
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
     "pack": "pnpm pack",
-    "release": "release-it --config ../../release-it.json --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "release": "release-it --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
@@ -111,5 +111,23 @@
   },
   "files": [
     "dist/*"
-  ]
+  ],
+  "release-it": {
+    "git": false,
+    "npm": {
+      "publish": true,
+      "publishPath": "*.tgz"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": {
+          "file": "package.json",
+          "path": [
+            "dependencies.@wdio/electron-types",
+            "dependencies.@wdio/electron-utils"
+          ]
+        }
+      }
+    }
+  }
 }
