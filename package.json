@@ -2,6 +2,7 @@
   "name": "wdio-electron-service-monorepo",
   "private": true,
   "type": "module",
+  "version": "7.0.0-beta.15",
   "engines": {
     "node": ">=18 || >=20"
   },
@@ -90,6 +91,5 @@
     "npm": {
       "publish": false
     }
-  },
-  "version": "7.0.0-beta.16"
+  }
 }
