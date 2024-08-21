@@ -62,16 +62,6 @@
     "npm": {
       "publish": true,
       "publishPath": "*.tgz"
-    },
-    "plugins": {
-      "@release-it/bumper": {
-        "out": {
-          "file": "package.json",
-          "path": [
-            "devDependencies.@wdio/electron-types"
-          ]
-        }
-      }
     }
   }
 }
