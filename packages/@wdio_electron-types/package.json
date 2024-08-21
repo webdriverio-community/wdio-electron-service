@@ -33,6 +33,7 @@
     "dist/*"
   ],
   "release-it": {
+    "git": false,
     "npm": {
       "publish": true
     },
