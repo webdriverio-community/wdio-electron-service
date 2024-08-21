@@ -36,7 +36,7 @@
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "package": "turbo run pack --filter=@wdio* --filter=wdio-electron-service --only",
     "prepare": "husky",
-    "release": "turbo run release --filter=@wdio* --filter=wdio-electron-service --only --concurrency=1",
+    "release": "turbo run release --filter=@wdio* --filter=wdio-electron-service --only --concurrency=1 && release-it",
     "test": "turbo run test:unit test:e2e",
     "test:dev": "turbo run test:dev",
     "test:unit": "turbo run test:unit",
@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@release-it/bumper": "^6.0.1",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^20.16.1",
     "@types/shelljs": "^0.8.15",
@@ -55,9 +56,9 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-vitest": "^0.5.3",
-    "eslint-plugin-wdio": "^9.0.4",
+    "eslint-plugin-wdio": "^9.0.5",
     "globals": "^15.9.0",
-    "husky": "^9.1.4",
+    "husky": "^9.1.5",
     "jsdom": "^24.1.1",
     "lint-staged": "^15.2.9",
     "prettier": "^3.3.3",
@@ -77,5 +78,16 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247"
+  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247",
+  "release-it": {
+    "git": {
+      "requireCleanWorkingDir": false
+    },
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": false
+    }
+  }
 }

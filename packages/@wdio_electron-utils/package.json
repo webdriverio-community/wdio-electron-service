@@ -34,13 +34,13 @@
     "build:esm": "tsc --outDir dist",
     "build:cjs": "tsc --build tsconfig.cjs.json",
     "pack": "pnpm pack",
-    "release": "release-it --config ../../release-it.json --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit"
   },
   "dependencies": {
-    "@electron/packager": "^18.3.2",
+    "@electron/packager": "^18.3.4",
     "@wdio/logger": "^9.0.4",
     "debug": "^4.3.6",
     "find-versions": "^6.0.0",
@@ -56,5 +56,22 @@
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
+  },
+  "release-it": {
+    "git": false,
+    "npm": {
+      "publish": true,
+      "publishPath": "*.tgz"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": {
+          "file": "package.json",
+          "path": [
+            "devDependencies.@wdio/electron-types"
+          ]
+        }
+      }
+    }
   }
 }
