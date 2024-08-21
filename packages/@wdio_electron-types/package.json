@@ -1,6 +1,6 @@
 {
   "name": "@wdio/electron-types",
-  "version": "7.0.0-beta.14",
+  "version": "7.0.0-beta.18",
   "description": "Types for WebdriverIO Electron Service",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -33,6 +33,7 @@
     "dist/*"
   ],
   "release-it": {
+    "git": false,
     "npm": {
       "publish": true
     },
