@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "7.0.0-beta.12",
+  "version": "7.0.0-beta.13",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -79,8 +79,8 @@
   },
   "dependencies": {
     "@vitest/spy": "^2.0.5",
-    "@wdio/electron-types": "workspace:*",
-    "@wdio/electron-utils": "workspace:*",
+    "@wdio/electron-types": "7.0.0-beta.13",
+    "@wdio/electron-utils": "7.0.0-beta.13",
     "@wdio/logger": "^9.0.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.3.6",
