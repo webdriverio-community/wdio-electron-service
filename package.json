@@ -2,7 +2,7 @@
   "name": "wdio-electron-service-monorepo",
   "private": true,
   "type": "module",
-  "version": "0.0.1-beta.4",
+  "version": "7.0.0-beta.19",
   "engines": {
     "node": ">=18 || >=20"
   },
@@ -47,7 +47,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@release-it/bumper": "^6.0.1",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^20.16.1",
     "@types/shelljs": "^0.8.15",
@@ -65,7 +64,6 @@
     "prettier": "^3.3.3",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
-    "release-it-pnpm": "^4.6.3",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.17.0",
@@ -83,9 +81,6 @@
   },
   "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247",
   "release-it": {
-    "plugins": {
-      "release-it-pnpm": {}
-    },
     "git": {
       "commitMessage": "chore: release v${version}",
       "tagName": "v${version}",
