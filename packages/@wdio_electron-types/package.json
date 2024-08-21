@@ -13,7 +13,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc",
     "pack": "pnpm pack",
-    "release": "release-it --github.release --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
+    "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
