@@ -115,7 +115,8 @@
   "release-it": {
     "git": false,
     "npm": {
-      "publish": true
+      "publish": true,
+      "publishPath": "*.tgz"
     }
   }
 }
