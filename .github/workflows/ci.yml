@@ -44,7 +44,7 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Install Dependencies
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
         shell: bash
       - name: Run Tests
         run: |
@@ -95,7 +95,7 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Install Dependencies
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
         shell: bash
       - name: Run Tests
         run: |
@@ -126,6 +126,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-pnpm-modules
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
@@ -134,7 +143,7 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Install Dependencies
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
         shell: bash
       - name: Run Tests
         run: |
