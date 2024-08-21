@@ -36,7 +36,7 @@
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "package": "turbo run pack --filter=@wdio* --filter=wdio-electron-service --only",
     "prepare": "husky",
-    "release": "turbo run release --filter=@wdio/electron-types --only && turbo run release --filter=@wdio/electron-utils --only && turbo run release --filter=wdio-electron-service --only && release-it",
+    "release": "turbo run release --filter=@wdio* --filter=wdio-electron-service --only",
     "test": "turbo run test:unit test:e2e",
     "test:dev": "turbo run test:dev",
     "test:unit": "turbo run test:unit",
