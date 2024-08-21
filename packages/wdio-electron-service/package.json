@@ -103,6 +103,7 @@
     "jsdom": "^24.1.1",
     "nock": "^14.0.0-beta.11",
     "release-it": "^17.6.0",
+    "release-it-pnpm": "^4.6.3",
     "rollup": "^4.21.0",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
@@ -113,10 +114,13 @@
     "dist/*"
   ],
   "release-it": {
-    "git": false,
     "npm": {
-      "publish": true,
-      "publishPath": "*.tgz"
+      "publish": true
+    },
+    "plugins": {
+      "release-it-pnpm": {
+        "disableRelease": true
+      }
     }
   }
 }
