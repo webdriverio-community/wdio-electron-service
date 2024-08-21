@@ -79,8 +79,8 @@
   },
   "dependencies": {
     "@vitest/spy": "^2.0.5",
-    "@wdio/electron-types": "7.0.0-beta.14",
-    "@wdio/electron-utils": "7.0.0-beta.14",
+    "@wdio/electron-types": "workspace:*",
+    "@wdio/electron-utils": "workspace:*",
     "@wdio/logger": "^9.0.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.3.6",
