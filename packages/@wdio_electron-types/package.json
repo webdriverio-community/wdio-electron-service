@@ -1,6 +1,6 @@
 {
   "name": "@wdio/electron-types",
-  "version": "7.0.1",
+  "version": "7.0.0",
   "description": "Types for WebdriverIO Electron Service",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -12,7 +12,6 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc",
-    "pack": "pnpm pack",
     "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "dependencies": {
@@ -34,6 +33,9 @@
     "dist/*"
   ],
   "release-it": {
+    "hooks": {
+      "after:bump": "pnpm pack"
+    },
     "git": false,
     "npm": {
       "publish": true,
