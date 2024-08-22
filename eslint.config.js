@@ -1,15 +1,20 @@
 import eslint from '@eslint/js';
 import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import prettier from 'eslint-config-prettier';
 import vitest from '@vitest/eslint-plugin';
+import prettier from 'eslint-config-prettier';
 import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
+import importX from 'eslint-plugin-import-x';
 
 export default [
   // Ignored dirs
   {
     ignores: ['**/dist/**/*', '@types/**/*'],
+  },
+  // Ignored files
+  {
+    ignores: ['**/*.config.js'],
   },
   // All files
   {
@@ -19,9 +24,20 @@ export default [
       globals: {
         ...globals.es2021,
       },
+      parserOptions: {
+        ...importX.configs.recommended.parserOptions,
+      },
+    },
+    plugins: {
+      'import-x': importX,
     },
     rules: {
       ...eslint.configs.recommended.rules,
+      ...importX.configs.recommended.rules,
+      'import-x/no-named-as-default': 'off',
+    },
+    settings: {
+      'import-x/ignore': [/@rollup\/.*/, /@typescript.*/, /eslint-plugin-wdio/, /shelljs/],
     },
   },
   // Node & Electron main process files and scripts
@@ -33,6 +49,9 @@ export default [
         ...globals.node,
       },
     },
+    settings: {
+      ...importX.configs.electron.settings,
+    },
   },
   // Electron renderer process files
   {
@@ -41,6 +60,9 @@ export default [
       globals: {
         ...globals.browser,
       },
+    },
+    settings: {
+      ...importX.configs.electron.settings,
     },
   },
   // TS files
@@ -56,12 +78,24 @@ export default [
     },
     plugins: {
       '@typescript-eslint': ts,
+      'import-x': importX,
+    },
+    settings: {
+      ...importX.configs.typescript.settings,
+      'import-x/resolver': {
+        typescript: true,
+        node: {
+          extensions: ['.ts', '.js'],
+        },
+      },
     },
     rules: {
       ...ts.configs['eslint-recommended'].rules,
       ...ts.configs.recommended.rules,
+      ...importX.configs.typescript.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
       'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
+      'import-x/export': 'off',
       '@typescript-eslint/no-empty-interface': [
         'error',
         {
@@ -96,7 +130,6 @@ export default [
   // Example app TS files
   {
     files: ['apps/builder-cjs/**/*.ts'],
-    //    ignores: ['apps/builder-cjs/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/builder-cjs/tsconfig.eslint.json',
@@ -108,7 +141,6 @@ export default [
   },
   {
     files: ['apps/builder-esm/**/*.ts'],
-    //    ignores: ['apps/builder-esm/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/builder-esm/tsconfig.eslint.json',
@@ -117,7 +149,6 @@ export default [
   },
   {
     files: ['apps/forge-cjs/**/*.ts'],
-    //    ignores: ['apps/forge-cjs/out/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/forge-cjs/tsconfig.eslint.json',
@@ -129,7 +160,6 @@ export default [
   },
   {
     files: ['apps/forge-esm/**/*.ts'],
-    //    ignores: ['apps/builder-cjs/**/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/forge-esm/tsconfig.eslint.json',
@@ -138,7 +168,6 @@ export default [
   },
   {
     files: ['apps/no-binary-cjs/**/*.ts'],
-    //    ignores: ['apps/builder-cjs/**/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/no-binary-cjs/tsconfig.eslint.json',
@@ -150,7 +179,6 @@ export default [
   },
   {
     files: ['apps/no-binary-esm/**/*.ts'],
-    //    ignores: ['apps/no-binary-esm/**/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: 'apps/no-binary-esm/tsconfig.eslint.json',
