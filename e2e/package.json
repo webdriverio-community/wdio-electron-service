@@ -29,15 +29,15 @@
   },
   "dependencies": {
     "@testing-library/webdriverio": "^3.2.1",
-    "@wdio/cli": "^9.0.6",
+    "@wdio/cli": "^9.0.7",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/globals": "^9.0.6",
-    "@wdio/local-runner": "^9.0.6",
+    "@wdio/globals": "^9.0.7",
+    "@wdio/local-runner": "^9.0.7",
     "@wdio/mocha-framework": "^9.0.6",
     "electron": "^32.0.1",
     "tsx": "^4.17.0",
     "wdio-electron-service": "workspace:*",
-    "webdriverio": "^9.0.6",
+    "webdriverio": "^9.0.7",
     "xvfb-maybe": "^0.2.1"
   },
   "devDependencies": {
