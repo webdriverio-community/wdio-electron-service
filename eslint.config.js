@@ -2,7 +2,7 @@ import eslint from '@eslint/js';
 import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
-import vitest from 'eslint-plugin-vitest';
+import vitest from '@vitest/eslint-plugin';
 import * as wdio from 'eslint-plugin-wdio';
 import globals from 'globals';
 
@@ -27,7 +27,7 @@ export default [
   // Node & Electron main process files and scripts
   {
     files: ['**/*.{js,mjs,ts}'],
-    ignores: ['example*/src/preload.ts', 'example*/src/util.ts'],
+    ignores: ['apps/**/src/preload.ts', 'apps/**/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -36,7 +36,7 @@ export default [
   },
   // Electron renderer process files
   {
-    files: ['example*/src/preload.ts', 'example*/src/util.ts'],
+    files: ['apps/**/src/preload.ts', 'apps/**/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -68,6 +68,12 @@ export default [
           allowSingleExtends: true,
         },
       ],
+      '@typescript-eslint/no-empty-object-type': [
+        'error',
+        {
+          allowInterfaces: 'with-single-extends',
+        },
+      ],
       '@typescript-eslint/no-namespace': [
         'error',
         {
@@ -81,6 +87,7 @@ export default [
           ignoreRestSiblings: true,
           argsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
       '@typescript-eslint/no-explicit-any': ['warn'],
@@ -88,35 +95,71 @@ export default [
   },
   // Example app TS files
   {
-    files: ['example/**/*.ts'],
-    ignores: ['example/out/**/*.ts'],
+    files: ['apps/builder-cjs/**/*.ts'],
+    //    ignores: ['apps/builder-cjs/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example/tsconfig.eslint.json',
+        project: 'apps/builder-cjs/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['apps/builder-esm/**/*.ts'],
+    //    ignores: ['apps/builder-esm/dist/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'apps/builder-esm/tsconfig.eslint.json',
       },
     },
   },
   {
-    files: ['example-cjs/**/*.ts'],
-    ignores: ['example-cjs/out/**/*.ts'],
+    files: ['apps/forge-cjs/**/*.ts'],
+    //    ignores: ['apps/forge-cjs/out/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example-cjs/tsconfig.eslint.json',
+        project: 'apps/forge-cjs/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['apps/forge-esm/**/*.ts'],
+    //    ignores: ['apps/builder-cjs/**/dist/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'apps/forge-esm/tsconfig.eslint.json',
       },
     },
   },
   {
-    files: ['example-electron-builder/**/*.ts'],
-    ignores: ['example-electron-builder/out/**/*.ts'],
+    files: ['apps/no-binary-cjs/**/*.ts'],
+    //    ignores: ['apps/builder-cjs/**/dist/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'example-electron-builder/tsconfig.eslint.json',
+        project: 'apps/no-binary-cjs/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['apps/no-binary-esm/**/*.ts'],
+    //    ignores: ['apps/no-binary-esm/**/dist/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'apps/no-binary-esm/tsconfig.eslint.json',
       },
     },
   },
   // Example E2E TS files
   {
-    files: ['example*/e2e/*.spec.ts'],
+    files: ['e2e/**/*.spec.ts'],
     languageOptions: {
       globals: {
         ...wdio.configs['flat/recommended'].globals,
@@ -132,7 +175,7 @@ export default [
   },
   // Test files
   {
-    files: ['test/**/*.spec.ts'],
+    files: ['packages/**/test/**/*.spec.ts'],
     plugins: {
       vitest,
     },
