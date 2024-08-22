@@ -47,9 +47,17 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     await Promise.all(
       caps.map(async (cap) => {
-        const electronVersion = cap.browserVersion || localElectronVersion;
+        const electronVersion = cap.browserVersion || localElectronVersion || '';
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
+
+        if (Number.parseInt(electronVersion.split('.')[0]) < 26 && !cap['wdio:chromedriverOptions']?.binary) {
+          const invalidElectronVersionError = new SevereServiceError(
+            'Electron version must be 26 or higher for auto-configuration of Chromedriver.  If you want to use an older version of Electron, you must configure Chromedriver manually using the wdio:chromedriverOptions capability',
+          );
+          log.error(invalidElectronVersionError.message);
+          throw invalidElectronVersionError;
+        }
 
         let {
           appBinaryPath,
