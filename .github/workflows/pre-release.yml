@@ -30,6 +30,7 @@ on:
 env:
   DRY_RUN_ARG: ${{ inputs.dryRun && '--dry-run' || '' }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  HUSKY: '0'
 
 jobs:
   release:
