@@ -17,8 +17,9 @@ Spiritual successor to [Spectron](https://github.com/electron-userland/spectron)
 
 Makes testing Electron applications much easier via:
 
-- 🚗 auto-setup of required Chromedriver
-- 📦 automatic path detection of your Electron application - supports [Electron Forge](https://www.electronforge.io/), [Electron Builder](https://www.electron.build/) and unpackaged apps
+- 🚗 auto-setup of required Chromedriver (for Electron v26 and above)
+- 📦 automatic path detection of your Electron application
+  - supports [Electron Forge](https://www.electronforge.io/), [Electron Builder](https://www.electron.build/) and unpackaged apps
 - 🧩 access Electron APIs within your tests
 - 🕵️ mocking of Electron APIs via a Vitest-like API
 
