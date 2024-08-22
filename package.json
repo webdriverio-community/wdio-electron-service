@@ -35,7 +35,6 @@
     "init-forge:apps:mac-universal": "tsx ./scripts/init-forge-apps.ts",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
-    "package": "turbo run pack --filter=wdio-electron-service --filter=@wdio* --only",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
     "test": "turbo run test:unit test:e2e",

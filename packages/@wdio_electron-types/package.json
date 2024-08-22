@@ -12,7 +12,6 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc",
-    "pack": "pnpm pack",
     "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "devDependencies": {
@@ -33,6 +32,9 @@
     "dist/*"
   ],
   "release-it": {
+    "hooks": {
+      "after:bump": "pnpm pack"
+    },
     "npm": {
       "publish": true
     },
