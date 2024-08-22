@@ -83,12 +83,6 @@ export default [
     },
     settings: {
       ...importX.configs.typescript.settings,
-      'import-x/resolver': {
-        typescript: true,
-        node: {
-          extensions: ['.ts', '.js'],
-        },
-      },
     },
     rules: {
       ...ts.configs['eslint-recommended'].rules,
@@ -96,7 +90,6 @@ export default [
       ...importX.configs.typescript.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
       'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
-      'import-x/export': 'off',
       '@typescript-eslint/no-empty-interface': [
         'error',
         {
@@ -126,6 +119,30 @@ export default [
         },
       ],
       '@typescript-eslint/no-explicit-any': ['warn'],
+    },
+  },
+  // Package TS files
+  {
+    files: ['packages/*/src/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'packages/*/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      'import-x/no-extraneous-dependencies': ['error', { devDependencies: false }],
+    },
+  },
+  // Package CJS TS files
+  {
+    files: ['packages/**/src/cjs/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'packages/*/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      'import-x/no-extraneous-dependencies': 'off',
     },
   },
   // Example app TS files
