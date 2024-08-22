@@ -55,7 +55,6 @@ jobs:
       - name: Release
         run: |
           pnpm run build
-          pnpm run package
           pnpx tsx scripts/release.ts ${{inputs.releaseVersion}} $DRY_RUN_ARG --npm.tag=${{inputs.npmTag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
