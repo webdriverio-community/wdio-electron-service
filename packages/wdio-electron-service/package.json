@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "7.0.0-beta.15",
+  "version": "7.0.1",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -102,7 +102,6 @@
     "jsdom": "^24.1.1",
     "nock": "^14.0.0-beta.11",
     "release-it": "^17.6.0",
-    "release-it-pnpm": "^4.6.3",
     "rollup": "^4.21.0",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
@@ -116,13 +115,10 @@
     "hooks": {
       "after:bump": "pnpm pack"
     },
+    "git": false,
     "npm": {
-      "publish": true
-    },
-    "plugins": {
-      "release-it-pnpm": {
-        "disableRelease": true
-      }
+      "publish": true,
+      "publishPath": "*.tgz"
     }
   }
 }

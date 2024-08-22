@@ -1,6 +1,6 @@
 {
   "name": "@wdio/electron-types",
-  "version": "7.0.0-beta.15",
+  "version": "7.0.1",
   "description": "Types for WebdriverIO Electron Service",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -24,7 +24,6 @@
     "electron": "^32.0.1",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
-    "release-it-pnpm": "^4.6.3",
     "typescript": "^5.5.4",
     "webdriverio": "^9.0.6"
   },
@@ -35,13 +34,10 @@
     "hooks": {
       "after:bump": "pnpm pack"
     },
+    "git": false,
     "npm": {
-      "publish": true
-    },
-    "plugins": {
-      "release-it-pnpm": {
-        "disableRelease": true
-      }
+      "publish": true,
+      "publishPath": "*.tgz"
     }
   }
 }
