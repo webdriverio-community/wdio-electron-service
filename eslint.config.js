@@ -35,9 +35,10 @@ export default [
       ...eslint.configs.recommended.rules,
       ...importX.configs.recommended.rules,
       'import-x/no-named-as-default': 'off',
+      'import-x/no-unresolved': 'off',
     },
     settings: {
-      'import-x/ignore': [/@rollup\/.*/, /@typescript.*/, /eslint-plugin-wdio/, /shelljs/],
+      'import-x/ignore': [/@rollup.*/, /shelljs/],
     },
   },
   // Node & Electron main process files and scripts
