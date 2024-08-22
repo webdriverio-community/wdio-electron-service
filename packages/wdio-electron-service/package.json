@@ -80,13 +80,15 @@
     "@vitest/spy": "^2.0.5",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
+    "@wdio/globals": "^9.0.7",
     "@wdio/logger": "^9.0.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.3.6",
     "electron-to-chromium": "^1.5.13",
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
-    "tinyspy": "^3.0.0"
+    "tinyspy": "^3.0.0",
+    "webdriverio": "^9.0.7"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
@@ -95,7 +97,6 @@
     "@types/debug": "^4.1.12",
     "@types/node": "^20.16.1",
     "@vitest/coverage-v8": "^2.0.5",
-    "@wdio/globals": "^9.0.6",
     "@wdio/types": "^9.0.4",
     "builder-util": "25.0.0-alpha.10",
     "electron": "^32.0.1",
@@ -105,8 +106,7 @@
     "rollup": "^4.21.0",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.5",
-    "webdriverio": "^9.0.6"
+    "vitest": "^2.0.5"
   },
   "files": [
     "dist/*"
