@@ -494,6 +494,10 @@ importers:
         version: 5.5.4
 
   packages/@wdio_electron-types:
+    dependencies:
+      '@vitest/spy':
+        specifier: ^2.0.5
+        version: 2.0.5
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
@@ -501,9 +505,6 @@ importers:
       '@electron/packager':
         specifier: ^18.3.4
         version: 18.3.4
-      '@vitest/spy':
-        specifier: ^2.0.5
-        version: 2.0.5
       '@wdio/globals':
         specifier: ^9.0.7
         version: 9.0.7(@wdio/logger@9.0.4)
@@ -531,6 +532,9 @@ importers:
 
   packages/@wdio_electron-utils:
     dependencies:
+      '@electron/packager':
+        specifier: ^18.3.4
+        version: 18.3.4
       '@wdio/logger':
         specifier: ^9.0.4
         version: 9.0.4
@@ -544,9 +548,6 @@ importers:
         specifier: ^11.0.0
         version: 11.0.0
     devDependencies:
-      '@electron/packager':
-        specifier: ^18.3.4
-        version: 18.3.4
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -586,6 +587,9 @@ importers:
       '@wdio/electron-utils':
         specifier: workspace:*
         version: link:../@wdio_electron-utils
+      '@wdio/globals':
+        specifier: ^9.0.7
+        version: 9.0.7(@wdio/logger@9.0.4)
       '@wdio/logger':
         specifier: ^9.0.4
         version: 9.0.4
@@ -607,6 +611,9 @@ importers:
       tinyspy:
         specifier: ^3.0.0
         version: 3.0.0
+      webdriverio:
+        specifier: ^9.0.7
+        version: 9.0.7
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
@@ -626,9 +633,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.0.5(vitest@2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6))
-      '@wdio/globals':
-        specifier: ^9.0.7
-        version: 9.0.7(@wdio/logger@9.0.4)
       '@wdio/types':
         specifier: ^9.0.4
         version: 9.0.4
@@ -659,9 +663,6 @@ importers:
       vitest:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@20.16.1)(jsdom@24.1.1)(terser@5.31.6)
-      webdriverio:
-        specifier: ^9.0.7
-        version: 9.0.7
 
 packages:
 
