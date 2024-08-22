@@ -174,7 +174,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
       const forgeConfigPath = pathToFileURL(path.join(rootDir, forgeConfigFile)).toString();
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
       forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
-    } catch (e) {
+    } catch (_e) {
       log.warn('Forge config file not found or invalid.');
     }
   }
@@ -187,7 +187,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
       log.info(`Reading Builder config file: ${builderConfigPath}...`);
       const data = await fs.readFile(builderConfigPath, 'utf-8');
       builderConfig = JSON.parse(data);
-    } catch (e) {
+    } catch (_e) {
       log.warn('Builder config file not found or invalid.');
     }
   }

@@ -33,8 +33,8 @@
     "init-forge:app-esm": "tsx ./scripts/init-forge-apps.ts esm",
     "init-forge:apps": "tsx ./scripts/init-forge-apps.ts",
     "init-forge:apps:mac-universal": "tsx ./scripts/init-forge-apps.ts",
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\"",
-    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint \"**/*.{j,mj,cj,t}s\" --fix",
+    "lint": "cross-env eslint \"**/*.{j,mj,cj,t}s\"",
+    "lint:fix": "cross-env eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "package": "turbo run pack --filter=wdio-electron-service --filter=@wdio* --only",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
@@ -50,12 +50,13 @@
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^20.16.1",
     "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "@vitest/eslint-plugin": "^1.0.3",
     "cross-env": "^7.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-vitest": "^0.5.3",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import-x": "^3.1.0",
     "eslint-plugin-wdio": "^9.0.5",
     "globals": "^15.9.0",
     "husky": "^9.1.5",
@@ -79,7 +80,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247",
+  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276",
   "release-it": {
     "git": {
       "commitMessage": "chore: release v${version}",

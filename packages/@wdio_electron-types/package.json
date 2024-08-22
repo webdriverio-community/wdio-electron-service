@@ -15,18 +15,20 @@
     "pack": "pnpm pack",
     "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
+  "dependencies": {
+    "@vitest/spy": "^2.0.5"
+  },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
     "@electron/packager": "^18.3.4",
-    "@vitest/spy": "^2.0.5",
-    "@wdio/globals": "^9.0.6",
+    "@wdio/globals": "^9.0.7",
     "@wdio/types": "^9.0.4",
     "builder-util": "25.0.0-alpha.10",
     "electron": "^32.0.1",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
     "typescript": "^5.5.4",
-    "webdriverio": "^9.0.6"
+    "webdriverio": "^9.0.7"
   },
   "files": [
     "dist/*"

@@ -74,7 +74,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
               appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
               log.info(`Detected app binary at ${appBinaryPath}`);
-            } catch (e) {
+            } catch (_e) {
               const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
               const suggestedCompileCommand = `npx ${
                 appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'

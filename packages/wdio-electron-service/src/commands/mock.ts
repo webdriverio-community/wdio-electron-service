@@ -8,7 +8,7 @@ export async function mock(apiName: string, funcName: string): Promise<ElectronM
     const existingMock = mockStore.getMock(`electron.${apiName}.${funcName}`);
     await existingMock.mockReset();
     return existingMock;
-  } catch (e) {
+  } catch (_e) {
     // mock doesn't exist, create a new one and store it
     const newMock = await createMock(apiName, funcName);
     mockStore.setMock(newMock);
