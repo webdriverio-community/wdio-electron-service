@@ -8,7 +8,7 @@ export function getChromeOptions(options: ElectronServiceOptions, cap: Webdriver
     binary: options.appBinaryPath,
     windowTypes: ['app', 'webview'],
     ...existingOptions,
-    args: [...(existingOptions.args || []), ...(options.appArgs || [])],
+    args: ['--remote-debugging-port=9222', ...(existingOptions.args || []), ...(options.appArgs || [])],
   };
 }
 

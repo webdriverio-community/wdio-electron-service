@@ -1,4 +1,5 @@
 import type { Capabilities, Services } from '@wdio/types';
+import type { CDPSession, Protocol, Browser as PuppeteerBrowser } from 'puppeteer-core';
 
 import log from '@wdio/electron-utils/log';
 import mockStore from './mockStore.js';
@@ -11,6 +12,7 @@ import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from './index.js';
+import { SevereServiceError } from 'webdriverio';
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
@@ -20,6 +22,8 @@ const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
+  #cdpSession?: CDPSession;
+  #puppeteerBrowser?: PuppeteerBrowser;
   #globalOptions: ElectronServiceOptions;
   #clearMocks = false;
   #resetMocks = false;
@@ -37,11 +41,12 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
   }
 
-  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
+  #getElectronAPI(executionContextId: number, browserInstance?: WebdriverIO.Browser) {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
     const api = {
       clearAllMocks: clearAllMocks.bind(this),
-      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
+      execute: (script: string | AbstractFn, ...args: unknown[]) =>
+        execute.apply(this, [browser, this.#cdpSession as CDPSession, executionContextId, script, ...args]),
       isMockFunction: isMockFunction.bind(this),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
@@ -49,6 +54,23 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       restoreAllMocks: restoreAllMocks.bind(this),
     };
     return Object.assign({}, api) as unknown as BrowserExtension['electron'];
+  }
+
+  #getExecutionContext() {
+    return new Promise<Protocol.Runtime.ExecutionContextDescription>(async (resolve) => {
+      this.#cdpSession?.on(
+        'Runtime.executionContextCreated',
+        (event: Protocol.Runtime.ExecutionContextCreatedEvent) => {
+          log.debug('Execution context created:', event, event.context.id);
+          resolve(event.context);
+        },
+      );
+
+      log.debug('Getting Execution Context');
+
+      await this.#cdpSession?.send('Runtime.disable');
+      await this.#cdpSession?.send('Runtime.enable');
+    });
   }
 
   async before(
@@ -68,11 +90,34 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#resetMocks = resetMocks ?? false;
     this.#restoreMocks = restoreMocks ?? false;
     this.#browser = browser;
+    this.#puppeteerBrowser = await browser.getPuppeteer();
+
+    const targets = this.#puppeteerBrowser.targets();
+    log.debug('Targets:', targets);
+    // const target = this.#puppeteerBrowser.target();
+
+    const backgroundPage = targets.find((target) => {
+      log.debug('Checking target type:', target.type());
+      return target.type() === 'background_page';
+    });
+
+    if (!backgroundPage) {
+      throw new SevereServiceError('Target could not be found');
+    }
+
+    this.#cdpSession = await backgroundPage.createCDPSession();
+    // this.#cdpSession = await target?.createCDPSession();
+
+    if (!this.#cdpSession) {
+      throw new SevereServiceError('CDP session could not be established');
+    }
+
+    const executionContextId = (await this.#getExecutionContext()).id;
 
     /**
      * add electron API to browser object
      */
-    browser.electron = this.#getElectronAPI();
+    browser.electron = this.#getElectronAPI(executionContextId);
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
@@ -85,7 +130,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         }
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
+        mrInstance.electron = this.#getElectronAPI(executionContextId, mrInstance);
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
