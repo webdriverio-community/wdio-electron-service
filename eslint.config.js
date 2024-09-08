@@ -25,7 +25,7 @@ export default [
         ...globals.es2021,
       },
       parserOptions: {
-        ...importX.configs.recommended.parserOptions,
+        ...importX.flatConfigs.recommended.parserOptions,
       },
     },
     plugins: {
@@ -33,7 +33,7 @@ export default [
     },
     rules: {
       ...eslint.configs.recommended.rules,
-      ...importX.configs.recommended.rules,
+      ...importX.flatConfigs.recommended.rules,
       'import-x/no-named-as-default': 'off',
       'import-x/no-unresolved': 'off',
     },
@@ -51,7 +51,7 @@ export default [
       },
     },
     settings: {
-      ...importX.configs.electron.settings,
+      ...importX.flatConfigs.electron.settings,
     },
   },
   // Electron renderer process files
@@ -63,7 +63,7 @@ export default [
       },
     },
     settings: {
-      ...importX.configs.electron.settings,
+      ...importX.flatConfigs.electron.settings,
     },
   },
   // TS files
@@ -87,7 +87,7 @@ export default [
     rules: {
       ...ts.configs['eslint-recommended'].rules,
       ...ts.configs.recommended.rules,
-      ...importX.configs.typescript.rules,
+      ...importX.flatConfigs.typescript.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
       'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
       '@typescript-eslint/no-empty-interface': [

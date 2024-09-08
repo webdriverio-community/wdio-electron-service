@@ -11,4 +11,3 @@ export default ElectronWorkerService;
 
 export const browser: WebdriverIO.Browser = wdioBrowser;
 export const startElectron: (opts: ElectronServiceOptions) => Promise<WebdriverIO.Browser> = initSession;
-export * from '@wdio/electron-types';
