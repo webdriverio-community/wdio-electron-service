@@ -284,6 +284,17 @@ describe('execute', () => {
   it('should handle executing a function which declares a function', async () => {
     expect(
       await browser.execute(() => {
+        function newFunc() {
+          return 'boom!';
+        }
+        return newFunc();
+      }),
+    ).toEqual('boom!');
+  });
+
+  it('should handle executing a function which declares a fat arrow function', async () => {
+    expect(
+      await browser.execute(() => {
         const newFunc = () => 'boom!';
         return newFunc();
       }),
