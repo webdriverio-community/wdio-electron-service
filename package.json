@@ -45,29 +45,30 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
+    "@eslint/js": "^9.10.0",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^20.16.1",
     "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^8.2.0",
-    "@typescript-eslint/parser": "^8.2.0",
-    "@vitest/eslint-plugin": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "@vitest/eslint-plugin": "^1.1.0",
     "cross-env": "^7.0.3",
-    "eslint": "^9.9.0",
+    "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import-x": "^3.1.0",
-    "eslint-plugin-wdio": "^9.0.5",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import-x": "^4.2.1",
+    "eslint-plugin-wdio": "^9.0.8",
     "globals": "^15.9.0",
     "husky": "^9.1.5",
     "jsdom": "^24.1.1",
-    "lint-staged": "^15.2.9",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "tsx": "^4.17.0",
-    "turbo": "^2.0.14"
+    "tsx": "^4.19.0",
+    "turbo": "^2.1.1"
   },
   "pnpm": {
     "overrides": {
@@ -79,7 +80,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276",
+  "packageManager": "pnpm@9.9.0+sha512.60c18acd138bff695d339be6ad13f7e936eea6745660d4cc4a776d5247c540d0edee1a563695c183a66eb917ef88f2b4feb1fc25f32a7adcadc7aaf3438e99c1",
   "release-it": {
     "git": {
       "commitMessage": "chore: release v${version}",
