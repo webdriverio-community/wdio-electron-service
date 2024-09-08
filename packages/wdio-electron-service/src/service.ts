@@ -1,7 +1,7 @@
-import type { Capabilities, Services } from '@wdio/types';
-import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from '@wdio/electron-types';
-
 import log from '@wdio/electron-utils/log';
+import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from '@wdio/electron-types';
+import type { Capabilities, Services } from '@wdio/types';
+
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { execute } from './commands/execute.js';
