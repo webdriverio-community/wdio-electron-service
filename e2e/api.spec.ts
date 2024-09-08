@@ -280,6 +280,15 @@ describe('execute', () => {
   it('should execute a string-based function in the electron main process', async () => {
     await expect(browser.electron.execute('return 1 + 2 + 3')).resolves.toEqual(6);
   });
+
+  it('should handle executing a function which declares a function', async () => {
+    expect(
+      await browser.execute(() => {
+        const newFunc = () => 'boom!';
+        return newFunc();
+      }),
+    ).toEqual('boom!');
+  });
 });
 
 describe('mock object functionality', () => {
