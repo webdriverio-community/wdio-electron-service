@@ -654,10 +654,10 @@ export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends
 }
 
 type $ = (
-  selector: any,
+  selector: unknown,
 ) => ChainablePromiseElementBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element> | WebdriverIO.Element;
 type $$ = (
-  selector: any,
+  selector: unknown,
 ) => ChainablePromiseArrayBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element[]> | WebdriverIO.Element[];
 type ChainablePromiseElementBase<T> = Promise<T> & {
   $: $;
@@ -668,9 +668,9 @@ type SelectorsBase = {
   $$: $$;
 };
 type BaseWithExecute = {
-  execute<T>(script: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
-  execute<T>(script: string | ((...args: any[]) => T), ...args: any[]): T;
-  executeAsync(script: string | ((...args: any[]) => void), ...args: any[]): any;
+  execute<T>(script: string | ((...args: unknown[]) => T), ...args: unknown[]): Promise<T>;
+  execute<T>(script: string | ((...args: unknown[]) => T), ...args: unknown[]): T;
+  executeAsync(script: string | ((...args: unknown[]) => void), ...args: unknown[]): unknown;
 };
 type ElementBase = SelectorsBase & {
   parent: ElementBase | BaseWithExecute;
@@ -678,9 +678,9 @@ type ElementBase = SelectorsBase & {
 type BrowserBase = SelectorsBase & {
   addCommand<T extends boolean>(
     queryName: string,
-    commandFn: (this: T extends true ? ElementBase : BrowserBase, ...args: any[]) => void,
+    commandFn: (this: T extends true ? ElementBase : BrowserBase, ...args: unknown[]) => void,
     isElementCommand?: T,
-  ): any;
+  ): unknown;
 };
 
 export interface BrowserExtension extends BrowserBase {
