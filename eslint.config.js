@@ -25,7 +25,7 @@ export default [
         ...globals.es2021,
       },
       parserOptions: {
-        ...importX.flatConfigs.recommended.parserOptions,
+        ...importX.configs.recommended.parserOptions,
       },
     },
     plugins: {
@@ -143,6 +143,13 @@ export default [
     },
     rules: {
       'import-x/no-extraneous-dependencies': 'off',
+    },
+  },
+  // CJS example app files
+  {
+    files: ['apps/*-cjs/**/*.{js,mjs}'], // already disabled for TS files
+    rules: {
+      'import-x/named': 'off',
     },
   },
   // Example app TS files
