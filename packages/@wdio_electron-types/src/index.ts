@@ -648,7 +648,7 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
   __isElectronMock: boolean;
 }
 
-export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends ElectronMockInstance {
+export interface ElectronMock<TArgs extends unknown[] = unknown[], TReturns = unknown> extends ElectronMockInstance {
   new (...args: TArgs): TReturns;
   (...args: TArgs): TReturns;
 }

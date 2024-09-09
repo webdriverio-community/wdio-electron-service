@@ -114,7 +114,7 @@ describe('beforeTest', () => {
 });
 
 describe('afterCommand', () => {
-  let mocks: [string, ElectronMock<any, any>][] = [];
+  let mocks: [string, ElectronMock][] = [];
 
   vi.mock('../src/mockStore', () => ({
     default: {
