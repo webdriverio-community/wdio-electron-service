@@ -1,9 +1,10 @@
 /// <reference types="../../../@types/vitest/index.d.ts" />
 import { isAsyncFunction } from 'node:util/types';
+
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import type { ElectronInterface, ElectronType } from '@wdio/electron-types';
 
 import { createMock } from '../src/mock.js';
-import type { ElectronInterface, ElectronType } from '@wdio/electron-types';
 
 let mockFn: Mock;
 
