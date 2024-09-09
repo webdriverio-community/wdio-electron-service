@@ -14,7 +14,7 @@ export default [
   },
   // Ignored files
   {
-    ignores: ['**/*.config.js'],
+    ignores: ['**/*.config.js', 'e2e/**/*.js'],
   },
   // All files
   {
