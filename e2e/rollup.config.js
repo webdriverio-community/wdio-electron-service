@@ -1,10 +1,38 @@
 import typescript from '@rollup/plugin-typescript';
 
-export default {
-  input: '*.spec.ts',
-  output: {
-    dir: 'js',
-    format: 'esm',
+const tsPlugin = typescript({ tsconfig: 'tsconfig.json' });
+
+export default [
+  {
+    input: 'api.spec.ts',
+    output: {
+      outDir: 'js',
+      format: 'esm',
+    },
+    plugins: [tsPlugin],
   },
-  plugins: [typescript()],
-};
+  {
+    input: 'application.spec.ts',
+    output: {
+      dir: 'js',
+      format: 'esm',
+    },
+    plugins: [tsPlugin],
+  },
+  {
+    input: 'dom.spec.ts',
+    output: {
+      dir: 'js',
+      format: 'esm',
+    },
+    plugins: [tsPlugin],
+  },
+  {
+    input: 'interaction.spec.ts',
+    output: {
+      dir: 'js',
+      format: 'esm',
+    },
+    plugins: [tsPlugin],
+  },
+];
