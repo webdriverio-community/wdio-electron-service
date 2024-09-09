@@ -6,7 +6,7 @@ export default [
   {
     input: 'api.spec.ts',
     output: {
-      outDir: 'js',
+      dir: 'js',
       format: 'esm',
     },
     plugins: [tsPlugin],
