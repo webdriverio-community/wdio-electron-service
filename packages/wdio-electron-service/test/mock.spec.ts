@@ -1,4 +1,4 @@
-/// <reference types="../@types/vitest" />
+/// <reference types="../../../@types/vitest/index.d.ts" />
 import { isAsyncFunction } from 'node:util/types';
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 
