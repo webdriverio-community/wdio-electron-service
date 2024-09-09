@@ -29,11 +29,11 @@ describe('application loading', () => {
         };
         expect(bounds.width).toEqual(200);
         expect(bounds.height).toEqual(300);
-        let biggerClickCount = await browser.$('.click-count .bigger').getText();
+        let biggerClickCount = await (await browser.$('.click-count .bigger')).getText();
         expect(biggerClickCount).toEqual('0');
         const elem = await browser.$('.make-bigger');
         await elem.click();
-        biggerClickCount = await browser.$('.click-count .bigger').getText();
+        biggerClickCount = await (await browser.$('.click-count .bigger')).getText();
         expect(biggerClickCount).toEqual('1');
         bounds = (await browser.electron.execute((electron) => {
           const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
