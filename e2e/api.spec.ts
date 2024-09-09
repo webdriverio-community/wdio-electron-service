@@ -421,7 +421,7 @@ describe('mock object functionality', () => {
 
       const fileIconError = await browser.electron.execute(async (electron) => {
         try {
-          await electron.app.getFileIcon('/path/to/icon');
+          return await electron.app.getFileIcon('/path/to/icon');
         } catch (e) {
           return e;
         }
@@ -443,7 +443,7 @@ describe('mock object functionality', () => {
       const getFileIcon = async () =>
         await browser.electron.execute(async (electron) => {
           try {
-            await electron.app.getFileIcon('/path/to/icon');
+            return await electron.app.getFileIcon('/path/to/icon');
           } catch (e) {
             return e;
           }

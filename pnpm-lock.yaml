@@ -465,6 +465,9 @@ importers:
       '@electron-forge/cli':
         specifier: ^7.2.0
         version: 7.4.0(encoding@0.1.13)
+      '@rollup/plugin-typescript':
+        specifier: ^11.1.6
+        version: 11.1.6(rollup@4.21.2)(tslib@2.7.0)(typescript@5.5.4)
       '@types/mocha':
         specifier: ^10.0.6
         version: 10.0.7
@@ -486,6 +489,9 @@ importers:
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
+      rollup:
+        specifier: ^4.21.2
+        version: 4.21.2
       ts-loader:
         specifier: ^9.4.4
         version: 9.5.1(typescript@5.5.4)(webpack@5.94.0)
@@ -1377,6 +1383,19 @@ packages:
       rollup: ^2.78.0||^3.0.0||^4.0.0
     peerDependenciesMeta:
       rollup:
+        optional: true
+
+  '@rollup/plugin-typescript@11.1.6':
+    resolution: {integrity: sha512-R92yOmIACgYdJ7dJ97p4K69I8gg6IEHt8M7dUBxN3W6nrO8uUxX5ixl0yU/N3aZTi8WhPuICvOHXQvF6FaykAA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^2.14.0||^3.0.0||^4.0.0
+      tslib: '*'
+      typescript: '>=3.7.0'
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+      tslib:
         optional: true
 
   '@rollup/pluginutils@5.1.0':
@@ -6583,6 +6602,15 @@ snapshots:
       resolve: 1.22.8
     optionalDependencies:
       rollup: 4.21.2
+
+  '@rollup/plugin-typescript@11.1.6(rollup@4.21.2)(tslib@2.7.0)(typescript@5.5.4)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@4.21.2)
+      resolve: 1.22.8
+      typescript: 5.5.4
+    optionalDependencies:
+      rollup: 4.21.2
+      tslib: 2.7.0
 
   '@rollup/pluginutils@5.1.0(rollup@4.21.2)':
     dependencies:

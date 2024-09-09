@@ -5,7 +5,8 @@
   "private": "true",
   "scripts": {
     "ci": "pnpm i && pnpm test",
-    "clean": "pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "clean": "pnpm dlx shx rm -rf ./js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "init": "pnpm dlx shx mkdir -p ./js && rollup -c",
     "logs": "pnpm dlx shx cat ./wdio-logs*/*.log",
     "test:e2e:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm run exec",
     "test:e2e:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm run exec",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.16.1",
     "@vitest/spy": "^2.0.5",
@@ -51,6 +53,7 @@
     "global-jsdom": "^24.0.0",
     "jsdom": "^24.1.1",
     "read-package-up": "^11.0.0",
+    "rollup": "^4.21.2",
     "ts-loader": "^9.4.4",
     "typescript": "^5.5.4"
   }
