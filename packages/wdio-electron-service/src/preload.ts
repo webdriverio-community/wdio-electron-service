@@ -6,3 +6,5 @@ const invoke = async (channel: Channel, ...data: unknown[]) => ipcRenderer.invok
 contextBridge.exposeInMainWorld('wdioElectron', {
   execute: (script: string, args: unknown[]) => invoke(Channel.Execute, script, args),
 });
+
+contextBridge.exposeInMainWorld('__name', (func: (...args: unknown[]) => unknown) => func);
