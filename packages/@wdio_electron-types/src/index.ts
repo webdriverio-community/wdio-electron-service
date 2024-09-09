@@ -653,7 +653,37 @@ export interface ElectronMock<TArgs extends any[] = any, TReturns = any> extends
   (...args: TArgs): TReturns;
 }
 
-export interface BrowserExtension {
+type $ = (
+  selector: any,
+) => ChainablePromiseElementBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element> | WebdriverIO.Element;
+type $$ = (
+  selector: any,
+) => ChainablePromiseArrayBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element[]> | WebdriverIO.Element[];
+type ChainablePromiseElementBase<T> = Promise<T> & {
+  $: $;
+};
+type ChainablePromiseArrayBase<T> = Promise<T>;
+type SelectorsBase = {
+  $: $;
+  $$: $$;
+};
+type BaseWithExecute = {
+  execute<T>(script: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
+  execute<T>(script: string | ((...args: any[]) => T), ...args: any[]): T;
+  executeAsync(script: string | ((...args: any[]) => void), ...args: any[]): any;
+};
+type ElementBase = SelectorsBase & {
+  parent: ElementBase | BaseWithExecute;
+};
+type BrowserBase = SelectorsBase & {
+  addCommand<T extends boolean>(
+    queryName: string,
+    commandFn: (this: T extends true ? ElementBase : BrowserBase, ...args: any[]) => void,
+    isElementCommand?: T,
+  ): any;
+};
+
+export interface BrowserExtension extends BrowserBase {
   /**
    * Access the WebdriverIO Electron Service API.
    *
@@ -674,6 +704,7 @@ declare global {
 
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
+    interface Element extends ElementBase {}
     interface MultiRemoteBrowser extends BrowserExtension {}
     interface Capabilities {
       /**
