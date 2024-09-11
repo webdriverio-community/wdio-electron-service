@@ -23,7 +23,6 @@
       "./dist/cjs/log.js"
     ]
   },
-  "typeScriptVersion": "5.2.2",
   "engines": {
     "node": ">=18 || >=20"
   },
@@ -39,9 +38,9 @@
     "test": "pnpm test:unit"
   },
   "dependencies": {
-    "@electron/packager": "^18.3.4",
-    "@wdio/logger": "^9.0.4",
-    "debug": "^4.3.6",
+    "@electron/packager": "^18.3.5",
+    "@wdio/logger": "^9.0.8",
+    "debug": "^4.3.7",
     "find-versions": "^6.0.0",
     "read-package-up": "^11.0.0"
   },
@@ -50,10 +49,9 @@
     "@types/node": "^20.16.1",
     "@vitest/coverage-v8": "^2.0.5",
     "@wdio/electron-types": "workspace:*",
-    "jsdom": "^24.1.1",
     "release-it": "^17.6.0",
     "shx": "^0.3.4",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.2",
     "vitest": "^2.0.5"
   },
   "release-it": {

@@ -280,6 +280,26 @@ describe('execute', () => {
   it('should execute a string-based function in the electron main process', async () => {
     await expect(browser.electron.execute('return 1 + 2 + 3')).resolves.toEqual(6);
   });
+
+  it('should handle executing a function which declares a function', async () => {
+    expect(
+      await browser.execute(() => {
+        function innerFunc() {
+          return 'executed inner function';
+        }
+        return innerFunc();
+      }),
+    ).toEqual('executed inner function');
+  });
+
+  it('should handle executing a function which declares an arrow function', async () => {
+    expect(
+      await browser.execute(() => {
+        const innerFunc = () => 'executed inner function';
+        return innerFunc();
+      }),
+    ).toEqual('executed inner function');
+  });
 });
 
 describe('mock object functionality', () => {
@@ -401,7 +421,7 @@ describe('mock object functionality', () => {
 
       const fileIconError = await browser.electron.execute(async (electron) => {
         try {
-          await electron.app.getFileIcon('/path/to/icon');
+          return await electron.app.getFileIcon('/path/to/icon');
         } catch (e) {
           return e;
         }
@@ -423,7 +443,7 @@ describe('mock object functionality', () => {
       const getFileIcon = async () =>
         await browser.electron.execute(async (electron) => {
           try {
-            await electron.app.getFileIcon('/path/to/icon');
+            return await electron.app.getFileIcon('/path/to/icon');
           } catch (e) {
             return e;
           }

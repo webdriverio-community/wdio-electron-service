@@ -10,12 +10,12 @@
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only",
     "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "ci-linux": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm --concurrency=1",
-    "ci-mac:e2e:mac-universal": "turbo run build:mac-universal test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm --only",
-    "ci-windows:e2e:builder-cjs": "turbo run build --filter=example-builder-cjs --only && turbo run test:e2e:builder-cjs --only",
-    "ci-windows:e2e:builder-esm": "turbo run build --filter=example-builder-esm --only && turbo run test:e2e:builder-esm --only",
-    "ci-windows:e2e:forge-cjs": "pnpm run init-forge:package && pnpm run init-forge:app-cjs && turbo run build --filter=example-forge-cjs --only && turbo run test:e2e:forge-cjs --only",
-    "ci-windows:e2e:forge-esm": "pnpm run init-forge:package && pnpm run init-forge:app-esm && turbo run build --filter=example-forge-esm --only && turbo run test:e2e:forge-esm --only",
-    "ci-windows:e2e:no-binary": "turbo run build --filter=example-no-binary* --only && turbo run test:e2e:no-binary-cjs test:e2e:no-binary-esm --only",
+    "ci-mac:e2e:mac-universal": "turbo run build:mac-universal init-e2es test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm --only",
+    "ci-windows:e2e:builder-cjs": "turbo run build --filter=example-builder-cjs --only && turbo run init-e2es test:e2e:builder-cjs --only",
+    "ci-windows:e2e:builder-esm": "turbo run build --filter=example-builder-esm --only && turbo run init-e2es test:e2e:builder-esm --only",
+    "ci-windows:e2e:forge-cjs": "pnpm run init-forge:package && pnpm run init-forge:app-cjs && turbo run build --filter=example-forge-cjs --only && turbo run init-e2es test:e2e:forge-cjs --only",
+    "ci-windows:e2e:forge-esm": "pnpm run init-forge:package && pnpm run init-forge:app-esm && turbo run build --filter=example-forge-esm --only && turbo run init-e2es test:e2e:forge-esm --only",
+    "ci-windows:e2e:no-binary": "turbo run build --filter=example-no-binary* --only && turbo run init-e2es test:e2e:no-binary-cjs test:e2e:no-binary-esm --only",
     "ci-windows:units": "turbo run lint format:check test:unit",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
@@ -45,41 +45,36 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
+    "@eslint/js": "^9.10.0",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^20.16.1",
     "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^8.2.0",
-    "@typescript-eslint/parser": "^8.2.0",
-    "@vitest/eslint-plugin": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "@vitest/eslint-plugin": "^1.1.0",
     "cross-env": "^7.0.3",
-    "eslint": "^9.9.0",
+    "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import-x": "^3.1.0",
-    "eslint-plugin-wdio": "^9.0.5",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import-x": "^4.2.1",
+    "eslint-plugin-wdio": "^9.0.8",
     "globals": "^15.9.0",
     "husky": "^9.1.5",
-    "jsdom": "^24.1.1",
-    "lint-staged": "^15.2.9",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "tsx": "^4.17.0",
-    "turbo": "^2.0.14"
-  },
-  "pnpm": {
-    "overrides": {
-      "expect-webdriverio": "^5.0.1"
-    }
+    "tsx": "^4.19.0",
+    "turbo": "^2.1.1"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276",
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
   "release-it": {
     "git": {
       "commitMessage": "chore: release v${version}",

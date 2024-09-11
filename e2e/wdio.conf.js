@@ -2,34 +2,31 @@ import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import type { NormalizedPackageJson } from 'read-package-up';
-import type { Options } from '@wdio/types';
-
-import { getElectronVersion } from '@wdio/electron-utils';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJsonPath = path.join(__dirname, '..', 'apps', exampleDir, 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
-const appEntryPoint = path.join(__dirname, '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
+const pkg = { packageJson, path: packageJsonPath };
+const electronVersion = getElectronVersion(pkg);
+const appBuildInfo = await getAppBuildInfo(pkg);
+const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
 
-globalThis.packageJson = {
-  name: 'Electron',
-  version: getElectronVersion({ packageJson, path: packageJsonPath }) as string,
-};
+globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
-export const config: Options.Testrunner = {
+export const config = {
   services: ['electron'],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
-        appEntryPoint,
+        appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
         restoreMocks: true,
       },
-    } as WebdriverIO.Capabilities,
+    },
   ],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
@@ -37,8 +34,7 @@ export const config: Options.Testrunner = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./*.spec.ts'],
-  tsConfigPath: path.join(__dirname, 'tsconfig.json'),
+  specs: ['./js/*.spec.js'],
   framework: 'mocha',
   mochaOpts: {
     ui: 'bdd',

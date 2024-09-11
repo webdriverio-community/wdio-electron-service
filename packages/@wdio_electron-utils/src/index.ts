@@ -8,7 +8,7 @@ import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR } from './constants.js';
-import {
+import type {
   AppBuildInfo,
   BuilderArch,
   BuilderConfig,

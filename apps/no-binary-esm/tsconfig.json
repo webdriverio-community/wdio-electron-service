@@ -1,11 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "types": ["node"],
+    "types": [],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../node_modules/@types", "../../@types"],
     "outDir": "dist"
   },
   "exclude": ["node_modules"],
-  "include": ["src/*.ts"]
+  "include": ["src/*.ts", "src/preload.cts"]
 }

@@ -1,15 +1,19 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { defineConfig } from 'rollup';
 
-export default [
+const nodeResolvePlugin = nodeResolve();
+const commonjsPlugin = commonjs();
+
+export default defineConfig([
   {
-    input: 'dist/preload.js',
+    input: 'dist/preload.cjs',
     output: {
       file: 'dist/preload.bundle.cjs',
       inlineDynamicImports: true,
       format: 'cjs',
     },
-    plugins: [nodeResolve(), commonjs()],
+    plugins: [nodeResolvePlugin, commonjsPlugin],
     external: ['electron'],
   },
   {
@@ -19,7 +23,7 @@ export default [
       inlineDynamicImports: true,
       format: 'esm',
     },
-    plugins: [nodeResolve()],
+    plugins: [nodeResolvePlugin],
     external: ['electron'],
   },
-];
+]);

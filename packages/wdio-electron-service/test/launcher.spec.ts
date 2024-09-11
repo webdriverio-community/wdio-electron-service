@@ -3,11 +3,11 @@ import path from 'node:path';
 import { describe, beforeEach, afterEach, it, expect, vi, Mock } from 'vitest';
 import nock from 'nock';
 import type { Capabilities, Options } from '@wdio/types';
+import type { ElectronServiceOptions } from '@wdio/electron-types';
 
 import ElectronLaunchService from '../src/launcher.js';
 import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
-import type { ElectronServiceOptions } from '../src/index.js';
 
 let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;

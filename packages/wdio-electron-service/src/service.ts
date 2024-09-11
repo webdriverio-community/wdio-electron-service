@@ -1,6 +1,7 @@
+import log from '@wdio/electron-utils/log';
+import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
 
-import log from '@wdio/electron-utils/log';
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { execute } from './commands/execute.js';
@@ -10,7 +11,6 @@ import { isMockFunction } from './commands/isMockFunction.js';
 import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
-import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from './index.js';
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {

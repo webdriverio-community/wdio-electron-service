@@ -2,24 +2,21 @@ import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import type { NormalizedPackageJson } from 'read-package-up';
-import type { Options } from '@wdio/types';
-
 import { getElectronVersion } from '@wdio/electron-utils';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJsonPath = path.join(__dirname, '..', 'apps', exampleDir, 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
 const appEntryPoint = path.join(__dirname, '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
 
 globalThis.packageJson = {
   name: 'Electron',
-  version: getElectronVersion({ packageJson, path: packageJsonPath }) as string,
+  version: getElectronVersion({ packageJson, path: packageJsonPath }),
 };
 process.env.TEST = 'true';
 
-export const config: Options.Testrunner = {
+export const config = {
   services: ['electron'],
   capabilities: [
     {
@@ -29,7 +26,7 @@ export const config: Options.Testrunner = {
         appArgs: ['foo', 'bar=baz'],
         restoreMocks: true,
       },
-    } as WebdriverIO.Capabilities,
+    },
   ],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
@@ -37,8 +34,7 @@ export const config: Options.Testrunner = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./*.spec.ts'],
-  tsConfigPath: path.join(__dirname, 'tsconfig.json'),
+  specs: ['./js/*.spec.js'],
   framework: 'mocha',
   mochaOpts: {
     ui: 'bdd',

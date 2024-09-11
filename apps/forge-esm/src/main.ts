@@ -2,11 +2,10 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { isTest } from './util.js';
 
 if (isTest) {
-  import('wdio-electron-service/main');
+  await import('wdio-electron-service/main');
 }
 
 const appPath = app.getAppPath();
-
 const appRootPath = `${appPath}/dist`;
 let mainWindow: BrowserWindow;
 

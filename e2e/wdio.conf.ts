@@ -37,7 +37,7 @@ export const config: Options.Testrunner = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: [`./*.spec.ts`],
+  specs: ['./*.spec.ts'],
   tsConfigPath: path.join(__dirname, 'tsconfig.json'),
   framework: 'mocha',
   mochaOpts: {

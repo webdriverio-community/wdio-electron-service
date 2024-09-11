@@ -3,10 +3,7 @@
   "include": ["src/**/*.ts"],
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "dist",
-    "target": "ES2022",
-    "noEmit": false,
     "types": [],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   }

@@ -1,12 +1,12 @@
 import { vi, describe, beforeEach, it, expect, Mock } from 'vitest';
+import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
 import { clearAllMocks } from '../src/commands/clearAllMocks.js';
 import { resetAllMocks } from '../src/commands/resetAllMocks.js';
 import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
-import type { BrowserExtension, ElectronMock } from '../src/index.js';
-import type ElectronWorkerService from '../src/service.js';
 import mockStore from '../src/mockStore.js';
+import type ElectronWorkerService from '../src/service.js';
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
@@ -41,7 +41,10 @@ describe('before', () => {
             requestedCapabilities: { 'wdio:electronServiceOptions': {} },
             waitUntil: vi.fn().mockResolvedValue(true),
           },
-          firefox: { requestedCapabilities: {}, waitUntil: vi.fn().mockResolvedValue(true) },
+          firefox: {
+            requestedCapabilities: {},
+            waitUntil: vi.fn().mockResolvedValue(true),
+          },
         },
         isMultiremote: true,
         instances: ['electron', 'firefox'],
@@ -111,7 +114,7 @@ describe('beforeTest', () => {
 });
 
 describe('afterCommand', () => {
-  let mocks: [string, ElectronMock<any, any>][] = [];
+  let mocks: [string, ElectronMock][] = [];
 
   vi.mock('../src/mockStore', () => ({
     default: {

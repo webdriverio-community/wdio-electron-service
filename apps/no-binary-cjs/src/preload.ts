@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { isTest } from './util';
+import { isTest } from './util.js';
 
 if (isTest) {
   require('wdio-electron-service/preload');
