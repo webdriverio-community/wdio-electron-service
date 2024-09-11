@@ -284,21 +284,21 @@ describe('execute', () => {
   it('should handle executing a function which declares a function', async () => {
     expect(
       await browser.execute(() => {
-        function newFunc() {
-          return 'boom!';
+        function innerFunc() {
+          return 'executed inner function';
         }
-        return newFunc();
+        return innerFunc();
       }),
-    ).toEqual('boom!');
+    ).toEqual('executed inner function');
   });
 
-  it('should handle executing a function which declares a fat arrow function', async () => {
+  it('should handle executing a function which declares an arrow function', async () => {
     expect(
       await browser.execute(() => {
-        const newFunc = () => 'boom!';
-        return newFunc();
+        const innerFunc = () => 'executed inner function';
+        return innerFunc();
       }),
-    ).toEqual('boom!');
+    ).toEqual('executed inner function');
   });
 });
 
