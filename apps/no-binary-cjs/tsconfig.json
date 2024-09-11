@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.cjs.json",
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2023",
     "baseUrl": ".",
     "types": [],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../node_modules/@types", "../../@types"],
