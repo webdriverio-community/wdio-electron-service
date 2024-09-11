@@ -6,8 +6,6 @@
     "sourceMap": false,
     "inlineSources": false,
     "noEmit": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "types": ["node", "@wdio/globals/types", "mocha"],
     "typeRoots": ["./node_modules", "./node_modules/@types"]
   },
