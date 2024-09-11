@@ -12,20 +12,17 @@ export default [
   {
     ignores: ['**/dist/**/*', '@types/**/*'],
   },
-  // Ignored files
-  {
-    ignores: ['**/*.config.js', 'e2e/**/*.js'],
-  },
   // All files
   {
     files: ['**/*.{js,mjs,ts}'],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: {
-        ...globals.es2021,
+        ...globals.es2023,
       },
       parserOptions: {
         ...importX.configs.recommended.parserOptions,
+        ecmaVersion: 2023,
       },
     },
     plugins: {
