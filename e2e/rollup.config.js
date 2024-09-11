@@ -1,7 +1,7 @@
-import typescript from '@rollup/plugin-typescript';
+import rollupTS from '@rollup/plugin-typescript';
 import { defineConfig } from 'rollup';
 
-const tsPlugin = typescript({ tsconfig: 'tsconfig.json' });
+const tsPlugin = rollupTS({ tsconfig: 'tsconfig.json' });
 
 export default defineConfig([
   {
