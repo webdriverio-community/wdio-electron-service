@@ -4,6 +4,6 @@
   "exclude": ["src/*.ts", "src/commands/*.ts", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
     "rootDir": "src/cjs",
-    "target": "ES2022"
+    "target": "ES2023"
   }
 }

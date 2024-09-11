@@ -3,6 +3,6 @@
   "include": ["./src/cjs/*.ts", "./src/cjs/package.json"],
   "compilerOptions": {
     "outDir": "./dist/cjs",
-    "target": "ES2022"
+    "target": "ES2023"
   }
 }
