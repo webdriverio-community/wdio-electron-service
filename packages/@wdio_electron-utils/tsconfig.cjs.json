@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.base.cjs.json",
   "include": ["./src/cjs/*.ts", "./src/cjs/package.json"],
   "compilerOptions": {
-    "outDir": "./dist/cjs",
-    "target": "ES2023"
+    "outDir": "./dist/cjs"
   }
 }

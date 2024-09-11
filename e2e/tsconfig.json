@@ -8,7 +8,6 @@
     "noEmit": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "baseUrl": ".",
     "types": ["node", "@wdio/globals/types", "mocha"],
     "typeRoots": ["./node_modules", "./node_modules/@types"]
   },

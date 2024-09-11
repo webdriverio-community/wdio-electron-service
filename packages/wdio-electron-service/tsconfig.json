@@ -1,18 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "src/**/*.ts",
-    "src/cjs/preload.ts",
-    "src/cjs/main.ts",
-    "src/cjs/classes.ts",
-    "src/cjs/session.ts",
-    "src/cjs/index.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "ES2023",
-    "noEmit": false,
     "types": ["node", "electron-to-chromium", "vitest/jsdom"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   }
