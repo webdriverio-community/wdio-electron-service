@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
-    "build:bundle": "tsc --outDir dist",
+    "build:bundle": "tsc",
     "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
     "build:package:mac-universal": "cp ./src/index.html ./dist && electron-builder -p never -m --universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
