@@ -4,9 +4,9 @@
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "ES2022",
+    "target": "ES2023",
     "noEmit": false,
-    "types": ["node"],
+    "types": ["node", "vitest/jsdom"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   }
 }
