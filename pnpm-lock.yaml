@@ -72,8 +72,8 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       turbo:
         specifier: ^2.1.1
         version: 2.1.1
@@ -100,14 +100,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       electron-builder:
         specifier: ^25.0.5
         version: 25.0.5(electron-builder-squirrel-windows@25.0.5(dmg-builder@25.0.5))
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -137,14 +137,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       electron-builder:
         specifier: ^25.0.5
         version: 25.0.5(electron-builder-squirrel-windows@25.0.5(dmg-builder@25.0.5))
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -186,14 +186,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       rollup:
         specifier: ^4.21.2
         version: 4.21.2
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -235,14 +235,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       rollup:
         specifier: ^4.21.2
         version: 4.21.2
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -281,14 +281,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       rollup:
         specifier: ^4.21.2
         version: 4.21.2
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -327,14 +327,14 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       rollup:
         specifier: ^4.21.2
         version: 4.21.2
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -363,11 +363,11 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       tsx:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.19.1
+        version: 4.19.1
       wdio-electron-service:
         specifier: workspace:*
         version: link:../packages/wdio-electron-service
@@ -391,8 +391,8 @@ importers:
         specifier: ^20.16.1
         version: 20.16.1
       '@vitest/spy':
-        specifier: ^2.0.5
-        version: 2.0.5
+        specifier: ^2.1.1
+        version: 2.1.1
       '@wdio/types':
         specifier: ^9.0.8
         version: 9.0.8
@@ -409,8 +409,8 @@ importers:
   packages/@wdio_electron-types:
     dependencies:
       '@vitest/spy':
-        specifier: ^2.0.5
-        version: 2.0.5
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.4.0
@@ -428,8 +428,8 @@ importers:
         specifier: 25.0.3
         version: 25.0.3
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -489,8 +489,8 @@ importers:
   packages/wdio-electron-service:
     dependencies:
       '@vitest/spy':
-        specifier: ^2.0.5
-        version: 2.0.5
+        specifier: ^2.1.1
+        version: 2.1.1
       '@wdio/electron-types':
         specifier: workspace:*
         version: link:../@wdio_electron-types
@@ -510,8 +510,8 @@ importers:
         specifier: ^4.3.7
         version: 4.3.7(supports-color@8.1.1)
       electron-to-chromium:
-        specifier: ^1.5.19
-        version: 1.5.19
+        specifier: ^1.5.24
+        version: 1.5.24
       fast-copy:
         specifier: ^3.0.1
         version: 3.0.2
@@ -550,8 +550,8 @@ importers:
         specifier: ^25.0.3
         version: 25.0.3
       electron:
-        specifier: ^32.0.2
-        version: 32.0.2
+        specifier: ^32.1.0
+        version: 32.1.0
       nock:
         specifier: ^14.0.0-beta.11
         version: 14.0.0-beta.11
@@ -1646,6 +1646,9 @@ packages:
   '@vitest/spy@2.0.5':
     resolution: {integrity: sha512-c/jdthAhvJdpfVuaexSrnawxZz6pywlTPe84LUB2m/4t3rl2fTo9NFGBG4oWgaD+FTgDDV8hJ/nibT7IfH3JfA==}
 
+  '@vitest/spy@2.1.1':
+    resolution: {integrity: sha512-ZM39BnZ9t/xZ/nF4UwRH5il0Sw93QnZXd9NAZGRpIgj0yvVwPpLd702s/Cx955rGaMlyBQkZJ2Ir7qyY48VZ+g==}
+
   '@vitest/utils@2.0.5':
     resolution: {integrity: sha512-d8HKbqIcya+GR67mkZbrzhS5kKhtp8dQLcmRZLGTscGVg7yImT82cIrhtn2L8+VujWcy6KZweApgNmPsTAO/UQ==}
 
@@ -2494,11 +2497,11 @@ packages:
   electron-publish@25.0.3:
     resolution: {integrity: sha512-wSGm+TFK2lArswIFBPLuIRHbo945s3MCvG5y1xVC57zL/PsrElUkaGH2ERtRrcKNpaDNq77rDA9JnMJhAFJjUg==}
 
-  electron-to-chromium@1.5.19:
-    resolution: {integrity: sha512-kpLJJi3zxTR1U828P+LIUDZ5ohixyo68/IcYOHLqnbTPr/wdgn4i1ECvmALN9E16JPA6cvCG5UG79gVwVdEK5w==}
+  electron-to-chromium@1.5.24:
+    resolution: {integrity: sha512-0x0wLCmpdKFCi9ulhvYZebgcPmHTkFVUfU2wzDykadkslKwT4oAmDTHEKLnlrDsMGZe4B+ksn8quZfZjYsBetA==}
 
-  electron@32.0.2:
-    resolution: {integrity: sha512-nmZblq8wW3HZ17MAyaUuiMI9Mb0Cgc7UR3To85h/rVopbfyF5s34NxtK4gvyRfYPxpDGP4k+HoQIPniPPrdE3w==}
+  electron@32.1.0:
+    resolution: {integrity: sha512-4etE3K6vPUkHihf7nvawngbB5+jLuUJgZh31f9ki1Gfveo0qwNDkLv/doabw+4zFFWKUXI+uFUpyOpL5+RwS+Q==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2980,6 +2983,9 @@ packages:
 
   get-tsconfig@4.8.0:
     resolution: {integrity: sha512-Pgba6TExTZ0FJAn1qkJAjIeKoDJ3CsI2ChuLohJnZl/tTU8MVrq3b+2t5UOPfRa4RMsorClBjJALkJUMjG1PAw==}
+
+  get-tsconfig@4.8.1:
+    resolution: {integrity: sha512-k9PN+cFBmaLWtVz29SkUoqU5O0slLuHJXt/2P+tMVFT+phsSGXGkp9t3rQIqdz0e+06EHNGs3oM6ZX1s2zHxRg==}
 
   get-uri@6.0.3:
     resolution: {integrity: sha512-BzUrJBS9EcUb4cFol8r4W3v1cPsSyajLSthNkz5BxbpDcHN5tIrM10E2eNvfnvBn3DaT3DUgx0OpsBKkaOpanw==}
@@ -5019,10 +5025,6 @@ packages:
     resolution: {integrity: sha512-weEDEq7Z5eTHPDh4xjX789+fHfF+P8boiFB+0vbWzpbnbsEr/GRaohi/uMKxg8RZMXnl1ItAi/IUHWMsjDV7kQ==}
     engines: {node: '>=14.0.0'}
 
-  tinyspy@3.0.0:
-    resolution: {integrity: sha512-q5nmENpTHgiPVd1cJDDc9cVoYN5x4vCvwT3FMilvKPKneCBZAxn2YWQjDF0UMcE9k0Cay1gBiDfTMU0g+mPMQA==}
-    engines: {node: '>=14.0.0'}
-
   tinyspy@3.0.2:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
     engines: {node: '>=14.0.0'}
@@ -5073,8 +5075,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsx@4.19.0:
-    resolution: {integrity: sha512-bV30kM7bsLZKZIOCHeMNVMJ32/LuJzLVajkQI/qf92J2Qr08ueLQvW00PUZGiuLPP760UINwupgUj8qrSCPUKg==}
+  tsx@4.19.1:
+    resolution: {integrity: sha512-0flMz1lh74BR4wOvBjuh9olbnwqCPc35OOlfyzHba0Dc+QNUeWX/Gq2YTbnwcWPO3BMd8fkzRVrHcsR+a7z7rA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -6484,7 +6486,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 20.16.1
+      '@types/node': 20.16.5
 
   '@types/http-cache-semantics@4.0.4': {}
 
@@ -6744,7 +6746,11 @@ snapshots:
 
   '@vitest/spy@2.0.5':
     dependencies:
-      tinyspy: 3.0.0
+      tinyspy: 3.0.2
+
+  '@vitest/spy@2.1.1':
+    dependencies:
+      tinyspy: 3.0.2
 
   '@vitest/utils@2.0.5':
     dependencies:
@@ -6777,7 +6783,7 @@ snapshots:
       lodash.union: 4.6.0
       read-pkg-up: 10.1.0
       recursive-readdir: 2.2.3
-      tsx: 4.19.0
+      tsx: 4.19.1
       webdriverio: 9.0.9
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -6854,11 +6860,11 @@ snapshots:
 
   '@wdio/repl@9.0.8':
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.5
 
   '@wdio/runner@9.0.9':
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.5
       '@wdio/config': 9.0.8
       '@wdio/globals': 9.0.9(@wdio/logger@9.0.8)
       '@wdio/logger': 9.0.8
@@ -7845,12 +7851,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron-to-chromium@1.5.19: {}
+  electron-to-chromium@1.5.24: {}
 
-  electron@32.0.2:
+  electron@32.1.0:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 20.16.1
+      '@types/node': 20.16.5
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -8205,7 +8211,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.6
+      debug: 4.3.7(supports-color@8.1.1)
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -8465,6 +8471,10 @@ snapshots:
       is-stream: 4.0.1
 
   get-tsconfig@4.8.0:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+
+  get-tsconfig@4.8.1:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -10640,8 +10650,6 @@ snapshots:
 
   tinyrainbow@1.2.0: {}
 
-  tinyspy@3.0.0: {}
-
   tinyspy@3.0.2: {}
 
   tmp-promise@3.0.3:
@@ -10689,10 +10697,10 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsx@4.19.0:
+  tsx@4.19.1:
     dependencies:
       esbuild: 0.23.1
-      get-tsconfig: 4.8.0
+      get-tsconfig: 4.8.1
     optionalDependencies:
       fsevents: 2.3.3
 
@@ -10917,7 +10925,7 @@ snapshots:
 
   webdriver@9.0.8:
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.5
       '@types/ws': 8.5.12
       '@wdio/config': 9.0.8
       '@wdio/logger': 9.0.8
