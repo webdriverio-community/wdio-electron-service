@@ -70,9 +70,18 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
 
     /**
-     * add electron API to browser object
+     * Add electron API to browser object
      */
     browser.electron = this.#getElectronAPI();
+
+    // Add __name global in the renderer to work around issue with function serialization
+    // https://github.com/privatenumber/tsx/issues/113
+    await browser.electron.execute(() => {
+      if (typeof window.__name === 'undefined') {
+        window.__name = (func: (...args: unknown[]) => unknown) => func;
+      }
+    });
+
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);

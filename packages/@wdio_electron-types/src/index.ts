@@ -700,6 +700,7 @@ export interface BrowserExtension extends BrowserBase {
 declare global {
   interface Window {
     wdioElectron: WdioElectronWindowObj;
+    __name: (func: Fn) => Fn;
   }
 
   namespace WebdriverIO {
