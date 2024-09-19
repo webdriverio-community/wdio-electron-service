@@ -74,11 +74,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      */
     browser.electron = this.#getElectronAPI();
 
-    // Add __name global in the renderer to work around issue with function serialization
+    // Add __name to the global object in the main process to work around issue with function serialization
     // https://github.com/privatenumber/tsx/issues/113
     await browser.electron.execute(() => {
-      if (typeof window.__name === 'undefined') {
-        window.__name = (func: (...args: unknown[]) => unknown) => func;
+      if (typeof globalThis.__name === 'undefined') {
+        globalThis.__name = (func: (...args: unknown[]) => unknown) => func;
       }
     });
 
