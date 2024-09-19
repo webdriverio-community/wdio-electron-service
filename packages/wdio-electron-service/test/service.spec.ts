@@ -17,12 +17,13 @@ beforeEach(async () => {
 });
 
 describe('before', () => {
-  it('should add commands to the browser object', () => {
+  it('should add commands to the browser object', async () => {
     instance = new WorkerService();
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
+      execute: vi.fn().mockResolvedValue(true),
     } as unknown as WebdriverIO.Browser;
-    instance.before({}, [], browser);
+    await instance.before({}, [], browser);
     const serviceApi = browser.electron as BrowserExtension['electron'];
     expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -33,7 +34,7 @@ describe('before', () => {
   });
 
   describe('when multiremote', () => {
-    it('should add commands to the browser object when multiremote', () => {
+    it('should add commands to the browser object when multiremote', async () => {
       instance = new WorkerService();
       const browser = {
         instanceMap: {
@@ -49,9 +50,10 @@ describe('before', () => {
         isMultiremote: true,
         instances: ['electron', 'firefox'],
         getInstance: (instanceName: string) => browser.instanceMap[instanceName as keyof typeof browser.instanceMap],
+        execute: vi.fn().mockResolvedValue(true),
       };
       instance.browser = browser as unknown as WebdriverIO.MultiRemoteBrowser;
-      instance.before({}, [], instance.browser);
+      await instance.before({}, [], instance.browser);
 
       const electronInstance = instance.browser.getInstance('electron');
       let serviceApi = electronInstance.electron;
@@ -83,8 +85,9 @@ describe('beforeTest', () => {
     instance = new WorkerService({ clearMocks: true });
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
+      execute: vi.fn().mockResolvedValue(true),
     } as unknown as WebdriverIO.Browser;
-    instance.before({}, [], browser);
+    await instance.before({}, [], browser);
     await instance.beforeTest();
 
     expect(clearAllMocks).toHaveBeenCalled();
@@ -94,8 +97,9 @@ describe('beforeTest', () => {
     instance = new WorkerService({ resetMocks: true });
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
+      execute: vi.fn().mockResolvedValue(true),
     } as unknown as WebdriverIO.Browser;
-    instance.before({}, [], browser);
+    await instance.before({}, [], browser);
     await instance.beforeTest();
 
     expect(resetAllMocks).toHaveBeenCalled();
@@ -105,8 +109,9 @@ describe('beforeTest', () => {
     instance = new WorkerService({ restoreMocks: true });
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
+      execute: vi.fn().mockResolvedValue(true),
     } as unknown as WebdriverIO.Browser;
-    instance.before({}, [], browser);
+    await instance.before({}, [], browser);
     await instance.beforeTest();
 
     expect(restoreAllMocks).toHaveBeenCalled();
