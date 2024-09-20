@@ -12,4 +12,4 @@ contextBridge.exposeInMainWorld('wdioElectron', {
 // This enables browser.electron.execute to work with scripts which declare functions (affects TS specs only)
 // https://github.com/webdriverio-community/wdio-electron-service/issues/756
 // https://github.com/privatenumber/tsx/issues/113
-contextBridge.exposeInMainWorld('__name', globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func));
+contextBridge.exposeInMainWorld('__name', (func: (...args: unknown[]) => unknown) => func);
