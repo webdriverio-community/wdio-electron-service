@@ -282,24 +282,29 @@ describe('browser.electron', () => {
       await expect(browser.electron.execute('return 1 + 2 + 3')).resolves.toEqual(6);
     });
 
-    it('should handle executing a function which declares a function', async () => {
-      expect(
-        await browser.electron.execute(() => {
-          function innerFunc() {
-            return 'executed inner function';
-          }
-          return innerFunc();
-        }),
-      ).toEqual('executed inner function');
-    });
+    describe('workaround for TSX issue', () => {
+      // Tests for the following issue - can be removed when the TSX issue is resolved
+      // https://github.com/webdriverio-community/wdio-electron-service/issues/756
+      // https://github.com/privatenumber/tsx/issues/113
+      it('should handle executing a function which declares a function', async () => {
+        expect(
+          await browser.electron.execute(() => {
+            function innerFunc() {
+              return 'executed inner function';
+            }
+            return innerFunc();
+          }),
+        ).toEqual('executed inner function');
+      });
 
-    it('should handle executing a function which declares an arrow function', async () => {
-      expect(
-        await browser.electron.execute(() => {
-          const innerFunc = () => 'executed inner function';
-          return innerFunc();
-        }),
-      ).toEqual('executed inner function');
+      it('should handle executing a function which declares an arrow function', async () => {
+        expect(
+          await browser.electron.execute(() => {
+            const innerFunc = () => 'executed inner function';
+            return innerFunc();
+          }),
+        ).toEqual('executed inner function');
+      });
     });
   });
 
@@ -752,10 +757,11 @@ describe('browser.electron', () => {
   });
 });
 
-// Tests for the following issue - can be removed when the TSX issue is resolved
-// https://github.com/webdriverio-community/wdio-electron-service/issues/756
-// https://github.com/privatenumber/tsx/issues/113
-describe('browser.execute', () => {
+describe('browser.execute - workaround for TSX issue', () => {
+  // Tests for the following issue - can be removed when the TSX issue is resolved
+  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
+  // https://github.com/privatenumber/tsx/issues/113
+
   it('should handle executing a function which declares a function', async () => {
     expect(
       await browser.execute(() => {
