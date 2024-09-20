@@ -81,6 +81,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     await browser.execute(() => {
       globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
     });
+    await browser.electron.execute(() => {
+      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+    });
 
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
