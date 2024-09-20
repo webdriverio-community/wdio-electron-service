@@ -283,7 +283,7 @@ describe('execute', () => {
 
   it('should handle executing a function which declares a function', async () => {
     expect(
-      await browser.execute(() => {
+      await browser.electron.execute(() => {
         function innerFunc() {
           return 'executed inner function';
         }
@@ -294,7 +294,7 @@ describe('execute', () => {
 
   it('should handle executing a function which declares an arrow function', async () => {
     expect(
-      await browser.execute(() => {
+      await browser.electron.execute(() => {
         const innerFunc = () => 'executed inner function';
         return innerFunc();
       }),
