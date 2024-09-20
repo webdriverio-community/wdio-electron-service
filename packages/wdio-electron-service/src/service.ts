@@ -74,12 +74,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      */
     browser.electron = this.#getElectronAPI();
 
-    // Add __name to the global object in the main process to work around issue with function serialization
+    // Add __name to the global object to work around issue with function serialization
+    // https://github.com/webdriverio-community/wdio-electron-service/issues/756
     // https://github.com/privatenumber/tsx/issues/113
-    await browser.electron.execute(() => {
-      if (typeof globalThis.__name === 'undefined') {
-        globalThis.__name = (func: (...args: unknown[]) => unknown) => func;
-      }
+    await browser.execute(() => {
+      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
     });
 
     if (this.#browser.isMultiremote) {
