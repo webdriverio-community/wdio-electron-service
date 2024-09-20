@@ -9,5 +9,5 @@ shell.cp(['LICENSE'], 'packages/@wdio_electron-utils');
 shell.cp(['LICENSE'], 'packages/@wdio_electron-types');
 
 shell.exec(`pnpm run release -- ${options}`);
-shell.exec('sleep 20');
+shell.exec('sleep 5');
 shell.exec(`release-it -VV ${options}`);
