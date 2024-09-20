@@ -59,6 +59,10 @@ See this [discussion](https://github.com/webdriverio-community/wdio-electron-ser
 
 ### Module not found: wdio-electron-service/preload
 
-This is a result of the preload script not being found when trying to access the electron APIs via `execute`. If you are loading extensions into Electron, you should do that at the end of the "ready" event handler. Otherwise, chromedriver will attach to the first extension's background page.
+This is a result of the preload script not being found when trying to access the electron APIs via `execute`.
+
+You should try disabling `sandbox` mode in your app as mentioned in the [accessing APIs](./electron-apis/accessing-apis.md#additional-steps-for-non-bundled-preload-scripts) documentation.
+
+Alternatively, if you are loading extensions into Electron, you should do that at the end of the "ready" event handler. Otherwise, chromedriver will attach to the first extension's background page.
 
 See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/667) for more details.
