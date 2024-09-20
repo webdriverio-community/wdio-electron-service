@@ -714,8 +714,9 @@ declare global {
     }
   }
 
+  var __name: (func: Fn) => Fn;
+  var browser: WebdriverIO.Browser;
   var fn: typeof vitestFn;
   var originalApi: Record<ElectronInterface, ElectronType[ElectronInterface]>;
-  var browser: WebdriverIO.Browser;
   var packageJson: PackageJson;
 }

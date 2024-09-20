@@ -70,9 +70,21 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
 
     /**
-     * add electron API to browser object
+     * Add electron API to browser object
      */
     browser.electron = this.#getElectronAPI();
+
+    // Add __name to the global object to work around issue with function serialization
+    // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
+    // https://github.com/webdriverio-community/wdio-electron-service/issues/756
+    // https://github.com/privatenumber/tsx/issues/113
+    await browser.execute(() => {
+      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+    });
+    await browser.electron.execute(() => {
+      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+    });
+
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
