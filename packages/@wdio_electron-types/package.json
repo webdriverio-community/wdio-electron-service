@@ -19,14 +19,14 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.4.0",
     "@electron/packager": "^18.3.5",
-    "@wdio/globals": "^9.0.9",
+    "@wdio/globals": "^9.1.2",
     "@wdio/types": "^9.0.8",
     "builder-util": "25.0.3",
     "electron": "^32.1.2",
     "read-package-up": "^11.0.0",
     "release-it": "^17.6.0",
     "typescript": "^5.6.2",
-    "webdriverio": "^9.0.9"
+    "webdriverio": "^9.1.2"
   },
   "files": [
     "dist/*"
