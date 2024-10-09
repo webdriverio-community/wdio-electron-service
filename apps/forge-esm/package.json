@@ -23,14 +23,14 @@
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-typescript": "^12.1.0",
     "@types/node": "^22.7.5",
-    "@wdio/cli": "^9.0.9",
-    "@wdio/globals": "^9.0.9",
-    "@wdio/local-runner": "^9.0.9",
+    "@wdio/cli": "9.1.2",
+    "@wdio/globals": "9.1.2",
+    "@wdio/local-runner": "9.1.2",
     "@wdio/mocha-framework": "^9.0.8",
     "electron": "^32.1.2",
     "rollup": "^4.24.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "webdriverio": "^9.0.9"
+    "webdriverio": "9.1.2"
   }
 }
