@@ -16,7 +16,7 @@
     "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "dependencies": {
-    "@vitest/spy": "^2.1.1"
+    "@vitest/spy": "^2.1.2"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.5.0",
@@ -27,7 +27,7 @@
     "electron": "^32.1.2",
     "read-package-up": "^11.0.0",
     "release-it": "^17.7.0",
-    "typescript": "^5.6.2",
+    "typescript": "^5.6.3",
     "webdriverio": "^9.0.9"
   },
   "files": [
