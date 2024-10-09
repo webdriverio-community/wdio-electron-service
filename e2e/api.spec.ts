@@ -702,29 +702,29 @@ describe('browser.electron', () => {
     });
 
     describe('mock.results', () => {
-      // it('should return the results of the mock execution', async () => {
-      //   const mockGetName = await browser.electron.mock('app', 'getName');
+      it('should return the results of the mock execution', async () => {
+        const mockGetName = await browser.electron.mock('app', 'getName');
 
-      //   // TODO: why does `mockReturnValueOnce` not work for returning 'result' here?
-      //   await mockGetName.mockImplementationOnce(() => 'result');
-      //   await mockGetName.mockImplementation(() => {
-      //     throw new Error('thrown error');
-      //   });
+        await mockGetName.mockImplementationOnce(() => {
+          throw new Error('thrown error');
+        });
+        // TODO: why does `mockReturnValueOnce` not work for returning 'result' here?
+        await mockGetName.mockImplementation(() => 'result');
 
-      //   await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
-      //   await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
+        await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
+        await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
 
-      //   expect(mockGetName.mock.results).toStrictEqual([
-      //     {
-      //       type: 'return',
-      //       value: 'result',
-      //     },
-      //     {
-      //       type: 'throw',
-      //       value: new Error('thrown error'),
-      //     },
-      //   ]);
-      // });
+        expect(mockGetName.mock.results).toStrictEqual([
+          {
+            type: 'throw',
+            value: new Error('thrown error'),
+          },
+          {
+            type: 'return',
+            value: 'result',
+          },
+        ]);
+      });
 
       it('should return an empty array when the mock was never invoked', async () => {
         const mockGetName = await browser.electron.mock('app', 'getName');
