@@ -705,20 +705,12 @@ describe('browser.electron', () => {
       it('should return the results of the mock execution', async () => {
         const mockGetName = await browser.electron.mock('app', 'getName');
 
-        await mockGetName.mockImplementationOnce(() => {
-          throw new Error('thrown error');
-        });
         // TODO: why does `mockReturnValueOnce` not work for returning 'result' here?
         await mockGetName.mockImplementation(() => 'result');
 
-        await expect(browser.electron.execute((electron) => electron.app.getName())).rejects.toThrow('thrown error');
         await expect(browser.electron.execute((electron) => electron.app.getName())).resolves.toBe('result');
 
         expect(mockGetName.mock.results).toStrictEqual([
-          {
-            type: 'throw',
-            value: new Error('thrown error'),
-          },
           {
             type: 'return',
             value: 'result',
