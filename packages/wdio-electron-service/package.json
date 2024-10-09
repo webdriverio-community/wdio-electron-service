@@ -94,7 +94,7 @@
     "@vitest/spy": "^2.1.2",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/globals": "^9.0.9",
+    "@wdio/globals": "9.1.2",
     "@wdio/logger": "^9.0.8",
     "compare-versions": "^6.1.1",
     "debug": "^4.3.7",
@@ -102,7 +102,7 @@
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.2",
-    "webdriverio": "^9.0.9"
+    "webdriverio": "9.1.2"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.5.0",
@@ -111,7 +111,7 @@
     "@types/debug": "^4.1.12",
     "@types/node": "^22.7.5",
     "@vitest/coverage-v8": "^2.1.2",
-    "@wdio/types": "^9.1.2",
+    "@wdio/types": "9.1.2",
     "builder-util": "^25.1.7",
     "electron": "^32.1.2",
     "nock": "^14.0.0-beta.15",
