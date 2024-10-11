@@ -31,7 +31,7 @@ describe('execute', () => {
   });
 
   it('should throw an error when the browser is not initialised', async () => {
-    await expect(() => execute(undefined, 'return 1 + 2 + 3')).rejects.toThrowError(
+    await expect(() => execute(undefined, '() => 1 + 2 + 3')).rejects.toThrowError(
       new Error('WDIO browser is not yet initialised'),
     );
   });
