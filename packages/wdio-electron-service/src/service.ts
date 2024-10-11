@@ -23,7 +23,7 @@ const isBridgeActive = async (browser: WebdriverIO.Browser) =>
     return window.wdioElectron !== undefined;
   });
 
-const serializationWorkaround = async (browser: WebdriverIO.Browser) => {
+const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
   // Add __name to the global object to work around issue with function serialization
   // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
   // https://github.com/webdriverio-community/wdio-electron-service/issues/756
@@ -92,11 +92,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      * Add electron API to browser object
      */
     this.#browser.electron = this.#getElectronAPI();
+    this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
-    const bridgeActive = await isBridgeActive(this.#browser);
-
-    if (bridgeActive) {
-      await serializationWorkaround(this.#browser);
+    if (this.#browser.electron.bridgeActive) {
+      await initSerializationWorkaround(this.#browser);
     }
 
     if (this.#browser.isMultiremote) {
@@ -112,11 +111,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
+        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
-        const bridgeActive = await isBridgeActive(mrInstance);
-
-        if (bridgeActive) {
-          await serializationWorkaround(mrInstance);
+        if (mrInstance.electron.bridgeActive) {
+          await initSerializationWorkaround(mrInstance);
         }
 
         // wait until an Electron BrowserWindow is available
