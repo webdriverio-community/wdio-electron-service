@@ -23,11 +23,6 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     throw new Error(errMessage);
   }
 
-  // TODO: ensure this can run in the Electron context (merge with block below)
-  if (typeof script === 'string') {
-    return (await browser.execute(script)) ?? undefined;
-  }
-
   const returnValue = await browser.execute(
     function executeWithinElectron(script: string, ...args) {
       return window.wdioElectron.execute(script, args);
