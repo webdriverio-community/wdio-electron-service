@@ -78,12 +78,16 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
     // https://github.com/webdriverio-community/wdio-electron-service/issues/756
     // https://github.com/privatenumber/tsx/issues/113
-    await browser.execute(() => {
-      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-    });
-    await browser.electron.execute(() => {
-      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-    });
+    try {
+      await browser.execute(() => {
+        globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+      });
+      await browser.electron.execute(() => {
+        globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+      });
+    } catch (error) {
+      log.debug('Failed to add __name to global object:', error);
+    }
 
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
