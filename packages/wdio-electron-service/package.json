@@ -64,7 +64,7 @@
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
-    "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "release": "release-it -VV --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",

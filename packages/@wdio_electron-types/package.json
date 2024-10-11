@@ -13,7 +13,7 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "tsc",
-    "release": "release-it --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
+    "release": "release-it -VV --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "dependencies": {
     "@vitest/spy": "^2.1.2"
