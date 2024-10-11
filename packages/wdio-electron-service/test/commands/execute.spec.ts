@@ -5,10 +5,13 @@ import { execute } from '../../src/commands/execute.js';
 describe('execute', () => {
   beforeEach(async () => {
     globalThis.browser = {
+      electron: {
+        bridgeActive: true,
+      },
       execute: vi.fn((fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
         typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
       ),
-    } as unknown as WebdriverIO.Browser;
+    };
     globalThis.wdioElectron = {
       execute: vi.fn(),
     };
@@ -28,14 +31,13 @@ describe('execute', () => {
   });
 
   it('should throw an error when the browser is not initialised', async () => {
-    // @ts-expect-error undefined browser argument
     await expect(() => execute(undefined, 'return 1 + 2 + 3')).rejects.toThrowError(
       new Error('WDIO browser is not yet initialised'),
     );
   });
 
   it('should throw an error when the context bridge is not available', async () => {
-    delete globalThis.wdioElectron;
+    globalThis.browser.electron.bridgeActive = false;
     await expect(() => execute(globalThis.browser, () => 1 + 2 + 3)).rejects.toThrowError(
       new Error(
         'Electron context bridge not available! ' +
@@ -54,7 +56,7 @@ describe('execute', () => {
 
   it('should execute a stringified function', async () => {
     await execute(globalThis.browser, '() => 1 + 2 + 3');
-    expect(globalThis.browser.execute).toHaveBeenCalledWith('() => 1 + 2 + 3');
-    expect(globalThis.wdioElectron.execute).not.toHaveBeenCalled();
+    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
+    expect(globalThis.wdioElectron.execute).toHaveBeenCalledWith('() => 1 + 2 + 3', []);
   });
 });
