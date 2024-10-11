@@ -47,6 +47,10 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+      - name: Configure SSH Agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
       - name: Package Manager Setup
         run: |
           pnpm set registry "https://registry.npmjs.org/"
