@@ -1,4 +1,4 @@
-import { vi, describe, beforeEach, it, expect, Mock } from 'vitest';
+import { vi, describe, beforeEach, it, expect, type Mock } from 'vitest';
 import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
@@ -41,6 +41,7 @@ describe('before', () => {
           electron: {
             requestedCapabilities: { 'wdio:electronServiceOptions': {} },
             waitUntil: vi.fn().mockResolvedValue(true),
+            execute: vi.fn().mockResolvedValue(true),
           },
           firefox: {
             requestedCapabilities: {},
@@ -56,7 +57,7 @@ describe('before', () => {
       await instance.before({}, [], instance.browser);
 
       const electronInstance = instance.browser.getInstance('electron');
-      let serviceApi = electronInstance.electron;
+      const serviceApi = electronInstance.electron;
       expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.execute).toEqual(expect.any(Function));
       expect(serviceApi.mock).toEqual(expect.any(Function));

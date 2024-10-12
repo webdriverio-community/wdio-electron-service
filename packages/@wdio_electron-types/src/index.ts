@@ -1,9 +1,8 @@
 import type * as Electron from 'electron';
-import type { Mock } from '@vitest/spy';
 import type { OfficialArch } from '@electron/packager';
 import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
+import { fn as vitestFn, type Mock } from '@vitest/spy';
 import type { ArchType } from 'builder-util';
-import { fn as vitestFn } from '@vitest/spy';
 import type { PackageJson } from 'read-package-up';
 
 export type Fn = (...args: unknown[]) => unknown;
@@ -12,6 +11,10 @@ export type AbstractFn = Fn | AsyncFn;
 export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[ElectronInterface]];
 
 export interface ElectronServiceAPI {
+  /**
+   * Whether the Electron bridge is active.
+   */
+  bridgeActive: boolean;
   /**
    * Mock a function from the Electron API.
    *

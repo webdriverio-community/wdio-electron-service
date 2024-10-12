@@ -264,7 +264,11 @@ describe('browser.electron', () => {
   });
 
   describe('execute', () => {
-    it('should execute an arbitrary function in the electron main process', async () => {
+    it('should execute a function', async () => {
+      expect(await browser.electron.execute(() => 1 + 2 + 3)).toEqual(6);
+    });
+
+    it('should execute a function in the electron main process', async () => {
       expect(
         await browser.electron.execute(
           (electron, a, b, c) => {
@@ -278,8 +282,12 @@ describe('browser.electron', () => {
       ).toEqual([pkgAppVersion, 6]);
     });
 
-    it('should execute a string-based function in the electron main process', async () => {
-      await expect(browser.electron.execute('return 1 + 2 + 3')).resolves.toEqual(6);
+    it('should execute a stringified function', async () => {
+      await expect(browser.electron.execute('() => 1 + 2 + 3')).resolves.toEqual(6);
+    });
+
+    it('should execute a stringified function in the electron main process', async () => {
+      await expect(browser.electron.execute('(electron) => electron.app.getVersion()')).resolves.toEqual(pkgAppVersion);
     });
 
     describe('workaround for TSX issue', () => {

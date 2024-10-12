@@ -18,6 +18,25 @@ const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
     return numWindows > 0;
   });
 
+const isBridgeActive = async (browser: WebdriverIO.Browser) =>
+  await browser.execute(function executeWithinElectron() {
+    return window.wdioElectron !== undefined;
+  });
+
+const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
+  // Add __name to the global object to work around issue with function serialization
+  // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
+  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
+  // https://github.com/privatenumber/tsx/issues/113
+
+  await browser.execute(() => {
+    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+  });
+  await browser.electron.execute(() => {
+    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
+  });
+};
+
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
   #globalOptions: ElectronServiceOptions;
@@ -72,18 +91,12 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     /**
      * Add electron API to browser object
      */
-    browser.electron = this.#getElectronAPI();
+    this.#browser.electron = this.#getElectronAPI();
+    this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
-    // Add __name to the global object to work around issue with function serialization
-    // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-    // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-    // https://github.com/privatenumber/tsx/issues/113
-    await browser.execute(() => {
-      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-    });
-    await browser.electron.execute(() => {
-      globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-    });
+    if (this.#browser.electron.bridgeActive) {
+      await initSerializationWorkaround(this.#browser);
+    }
 
     if (this.#browser.isMultiremote) {
       for (const instance of mrBrowser.instances) {
@@ -98,6 +111,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
+        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
+
+        if (mrInstance.electron.bridgeActive) {
+          await initSerializationWorkaround(mrInstance);
+        }
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
