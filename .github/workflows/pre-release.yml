@@ -60,6 +60,7 @@ jobs:
         run: |
           git config --global user.email "bot@webdriver.io"
           git config --global user.name "WebdriverIO Release Bot"
+          ssh -vT git@github.com
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Publish Pre-Release
