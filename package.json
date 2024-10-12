@@ -1,6 +1,7 @@
 {
   "name": "wdio-electron-service-monorepo",
   "private": true,
+  "version": "7.1.0-next.2",
   "type": "module",
   "engines": {
     "node": ">=18 || >=20"
@@ -86,6 +87,5 @@
     "npm": {
       "publish": false
     }
-  },
-  "version": "7.1.0-next.2"
+  }
 }
