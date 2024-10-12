@@ -36,17 +36,12 @@ jobs:
         with:
           ref: 'main'
           fetch-depth: 0
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
-      - name: Configure SSH Agent
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
       - name: Package Manager Setup
         run: |
           pnpm set registry "https://registry.npmjs.org/"
