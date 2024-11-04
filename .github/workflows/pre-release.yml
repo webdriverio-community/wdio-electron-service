@@ -4,12 +4,16 @@ name: Manual Pre-Release Publish
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch. Defaults to "main".'
+        required: true
+        default: 'main'
       npmTag:
-        description: 'NPM tag. Leave blank to use the default "next" tag.'
+        description: 'NPM tag. Defaults to "next".'
         required: true
         default: 'next'
       preReleaseName:
-        description: 'Pre-release name. This is used in the version string, e.g. "beta" for `7.0.0-beta.0`. Leave blank to use the default "next".'
+        description: 'Pre-release name. This is used in the version string, e.g. "beta" for `7.0.0-beta.0`. Defaults to "next".'
         required: true
         default: 'next'
       preReleaseVersion:
@@ -38,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 'main'
+          ref: ${{inputs.branch}}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
