@@ -3,7 +3,7 @@ import { browser } from 'wdio-electron-service';
 import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 import type { BrowserWindow } from 'electron';
 
-describe('application loading', () => {
+describe('interaction', () => {
   let screen: WebdriverIOQueries;
 
   before(() => {
