@@ -16,19 +16,19 @@
     "release": "release-it -VV --ci --npm.skipChecks --no-git.requireCleanWorkingDir"
   },
   "dependencies": {
-    "@vitest/spy": "^2.1.2"
+    "@vitest/spy": "^2.1.4"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.5.0",
     "@electron/packager": "^18.3.5",
-    "@wdio/globals": "9.1.5",
+    "@wdio/globals": "9.2.8",
     "@wdio/types": "9.2.2",
     "builder-util": "25.1.7",
-    "electron": "^32.2.0",
+    "electron": "^32.2.2",
     "read-package-up": "^11.0.0",
     "release-it": "^17.10.0",
     "typescript": "^5.6.3",
-    "webdriverio": "9.1.5"
+    "webdriverio": "9.2.8"
   },
   "files": [
     "dist/*"
