@@ -65,9 +65,9 @@ jobs:
         run: |
           pnpm run build
           if [ "${{inputs.preReleaseVersion}}" == "existing" ]; then
-            pnpx tsx scripts/release.ts $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+            pnpx tsx scripts/release.ts $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}} --no-git.requireupstream
           else
-            pnpx tsx scripts/release.ts ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}}
+            pnpx tsx scripts/release.ts ${{inputs.preReleaseVersion}} $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}} --no-git.requireupstream
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
