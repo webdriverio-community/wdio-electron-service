@@ -656,16 +656,12 @@ export interface ElectronMock<TArgs extends unknown[] = unknown[], TReturns = un
   (...args: TArgs): TReturns;
 }
 
-type $ = (
-  selector: unknown,
-) => ChainablePromiseElementBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element> | WebdriverIO.Element;
-type $$ = (
-  selector: unknown,
-) => ChainablePromiseArrayBase<Promise<WebdriverIO.Element>> | Promise<WebdriverIO.Element[]> | WebdriverIO.Element[];
-type ChainablePromiseElementBase<T> = Promise<T> & {
+type $ = (selector: unknown) => ChainableElementBase<WebdriverIO.Element> | WebdriverIO.Element;
+type $$ = (selector: unknown) => ChainableElementArrayBase<WebdriverIO.Element> | WebdriverIO.Element[];
+type ChainableElementBase<T> = T & {
   $: $;
 };
-type ChainablePromiseArrayBase<T> = Promise<T>;
+type ChainableElementArrayBase<T> = T;
 type SelectorsBase = {
   $: $;
   $$: $$;
