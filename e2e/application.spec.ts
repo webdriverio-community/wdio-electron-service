@@ -3,8 +3,7 @@ import { browser } from 'wdio-electron-service';
 
 describe('application', () => {
   it('should launch the application', async () => {
-    const title = await browser.getTitle();
-    expect(title).toEqual('Test');
+    await expect(browser).toHaveTitle('Test');
   });
 
   it('should pass args through to the launched application', async () => {
