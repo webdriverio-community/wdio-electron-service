@@ -41,6 +41,7 @@ beforeEach(async () => {
   LaunchService = (await import('../src/launcher.js')).default;
   options = {
     appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
+    appArgs: [],
   };
   nock('https://electronjs.org')
     .get('/headers/index.json')
@@ -414,6 +415,28 @@ describe('onPrepare', () => {
       'browserVersion': '116.0.5845.190',
       'goog:chromeOptions': {
         args: [],
+        binary: 'workspace/my-test-app/dist/my-test-app',
+        windowTypes: ['app', 'webview'],
+      },
+      'wdio:electronServiceOptions': {},
+      'wdio:enforceWebDriverClassic': true,
+    });
+  });
+
+  it('should apply `--no-sandbox` to the app when appArgs is not set', async () => {
+    delete options.appArgs;
+    const capabilities: WebdriverIO.Capabilities[] = [
+      {
+        browserName: 'electron',
+        browserVersion: '26.2.2',
+      },
+    ];
+    await instance?.onPrepare({} as never, capabilities);
+    expect(capabilities[0]).toEqual({
+      'browserName': 'chrome',
+      'browserVersion': '116.0.5845.190',
+      'goog:chromeOptions': {
+        args: ['--no-sandbox'],
         binary: 'workspace/my-test-app/dist/my-test-app',
         windowTypes: ['app', 'webview'],
       },
