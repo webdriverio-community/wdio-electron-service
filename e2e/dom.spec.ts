@@ -2,14 +2,14 @@ import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 
-describe('application loading', () => {
+describe('DOM', () => {
   let screen: WebdriverIOQueries;
 
   before(() => {
     screen = setupBrowser(browser);
   });
 
-  describe('DOM', () => {
+  describe('using testing-library', () => {
     it('should determine when an element is in the document', async () => {
       await expect(await screen.getByTestId('disabled-checkbox')).toExist();
     });
@@ -27,9 +27,21 @@ describe('application loading', () => {
     });
   });
 
-  describe('WDIO Matchers', () => {
-    it('should be able to use WebdriverIO matchers', async () => {
-      await expect(await $('#disabled-checkbox')).toBePresent();
+  describe('using $', () => {
+    it('should determine when an element is in the document', async () => {
+      await expect($('[data-testid="disabled-checkbox"]')).toExist();
+    });
+
+    it('should determine when an element is not in the document', async () => {
+      await expect($('not-there')).not.toExist();
+    });
+
+    it('should determine when an element is visible', async () => {
+      await expect($('[data-testid="disabled-checkbox"]')).toBeDisplayed();
+    });
+
+    it('should determine when an element is not visible', async () => {
+      await expect($('[data-testid="hidden-textarea"]')).not.toBeDisplayed();
     });
   });
 });
