@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       npmTag:
-        description: 'NPM tag.  Leave blank to use the default "latest" tag.'
+        description: 'NPM tag. Defaults to "latest".'
         required: true
         default: 'latest'
       releaseVersion:
