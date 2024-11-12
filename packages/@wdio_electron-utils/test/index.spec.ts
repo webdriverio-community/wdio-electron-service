@@ -426,6 +426,18 @@ describe('getAppBuildInfo', () => {
       'No application name was detected, please set name / productName in your package.json or build tool configuration.',
     );
   });
+  it('should throw an error when the builder dependency with no-config', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).rejects.toThrow(
+      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+    );
+  });
 
   it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
     const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-1');
@@ -518,6 +530,70 @@ describe('getAppBuildInfo', () => {
     ).toStrictEqual({
       appName: 'builder-dependency-json-config',
       config: { productName: 'builder-dependency-json-config' },
+      isBuilder: true,
+      isForge: false,
+    });
+  });
+
+  it('should return the expected config for a builder dependency with JSON5 config', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-json5-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'builder-dependency-json5-config',
+      config: { productName: 'builder-dependency-json5-config' },
+      isBuilder: true,
+      isForge: false,
+    });
+  });
+
+  it('should return the expected config for a builder dependency with YAML config(.yaml)', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-yaml-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'builder-dependency-yaml-config',
+      config: { productName: 'builder-dependency-yaml-config' },
+      isBuilder: true,
+      isForge: false,
+    });
+  });
+
+  it('should return the expected config for a builder dependency with YAML config(.yml)', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-yml-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'builder-dependency-yml-config',
+      config: { productName: 'builder-dependency-yml-config' },
+      isBuilder: true,
+      isForge: false,
+    });
+  });
+
+  it('should return the expected config for a builder dependency with TOML config', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-toml-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).toStrictEqual({
+      appName: 'builder-dependency-toml-config',
+      config: { productName: 'builder-dependency-toml-config' },
       isBuilder: true,
       isForge: false,
     });
