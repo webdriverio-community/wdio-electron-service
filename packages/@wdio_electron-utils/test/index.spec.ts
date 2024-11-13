@@ -426,6 +426,7 @@ describe('getAppBuildInfo', () => {
       'No application name was detected, please set name / productName in your package.json or build tool configuration.',
     );
   });
+
   it('should throw an error when the builder dependency with no-config', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
@@ -551,7 +552,7 @@ describe('getAppBuildInfo', () => {
     });
   });
 
-  it('should return the expected config for a builder dependency with YAML config(.yaml)', async () => {
+  it('should return the expected config for a builder dependency with YAML config (.yaml)', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-yaml-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
@@ -567,7 +568,7 @@ describe('getAppBuildInfo', () => {
     });
   });
 
-  it('should return the expected config for a builder dependency with YAML config(.yml)', async () => {
+  it('should return the expected config for a builder dependency with YAML config (.yml)', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-yml-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
