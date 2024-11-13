@@ -392,9 +392,7 @@ describe('getAppBuildInfo', () => {
         packageJson,
         path: packageJsonPath,
       }),
-    ).rejects.toThrow(
-      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
-    );
+    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
   });
 
   it('should throw an error when the Forge app name is unable to be determined', async () => {
@@ -436,7 +434,7 @@ describe('getAppBuildInfo', () => {
         path: packageJsonPath,
       }),
     ).rejects.toThrow(
-      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+      'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
     );
   });
 
@@ -448,9 +446,18 @@ describe('getAppBuildInfo', () => {
         packageJson,
         path: packageJsonPath,
       }),
-    ).rejects.toThrow(
-      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
-    );
+    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
+  });
+
+  it('should throw an error when Forge is detected with a linked JS config but the config file cannot be read', async () => {
+    const packageJsonPath = getFixturePackagePath('forge-dependency-linked-js-config-broken');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)custom-config.js'./);
   });
 
   it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {

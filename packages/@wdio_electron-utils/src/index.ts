@@ -202,12 +202,19 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
   if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
     // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
+    let forgeConfigPath;
+
     try {
-      const forgeConfigPath = pathToFileURL(path.join(rootDir, forgeConfigFile)).toString();
+      forgeConfigPath = path.join(rootDir, forgeConfigFile);
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
-      forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
+      forgeConfig = ((await import(pathToFileURL(forgeConfigPath).toString())) as { default: ForgeConfig }).default;
     } catch (_e) {
       log.warn('Forge config file not found or invalid.');
+
+      // only throw if there is no builder config
+      if (!builderConfig) {
+        throw new Error(`Forge was detected but no configuration was found at '${forgeConfigPath}'.`);
+      }
     }
   }
 
@@ -226,6 +233,13 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
       builderConfig = config.result as BuilderConfig;
     } catch (_e) {
       log.warn('Builder config file not found or invalid.');
+
+      // only throw if there is no forge config
+      if (!forgeConfig) {
+        throw new Error(
+          'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
+        );
+      }
     }
   }
 
