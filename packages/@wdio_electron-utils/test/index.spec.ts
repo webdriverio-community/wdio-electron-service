@@ -427,8 +427,21 @@ describe('getAppBuildInfo', () => {
     );
   });
 
-  it('should throw an error when the builder dependency with no-config', async () => {
+  it('should throw an error when builder is detected but has no config', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    await expect(
+      getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      }),
+    ).rejects.toThrow(
+      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+    );
+  });
+
+  it('should throw an error when Forge is detected but has no config', async () => {
+    const packageJsonPath = getFixturePackagePath('forge-dependency-no-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       getAppBuildInfo({
