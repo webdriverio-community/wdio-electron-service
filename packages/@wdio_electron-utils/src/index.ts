@@ -49,7 +49,7 @@ async function getConfig(configFileName: string, projectDir: string) {
     try {
       log.debug(`Attempting to read config file: ${configFile}...`);
       return await readConfig(configFile, projectDir);
-    } catch (e) {
+    } catch (_e) {
       log.debug('unsuccessful');
     }
   }
