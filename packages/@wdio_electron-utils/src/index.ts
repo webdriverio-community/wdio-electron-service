@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 import findVersions from 'find-versions';
 import type { NormalizedReadResult } from 'read-package-up';
+import { findAndReadConfig, type ReadConfigRequest } from 'app-builder-lib/out/util/config/load.js';
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR } from './constants.js';
@@ -17,6 +18,7 @@ import type {
   ForgeBuildInfo,
   BuilderBuildInfo,
 } from '@wdio/electron-types';
+import type { Configuration } from 'app-builder-lib';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -180,13 +182,28 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   }
 
   if (builderDependencyDetected && !builderConfig) {
-    // if builder config is not found in the package.json, we attempt to read `electron-builder.json`
-    const builderConfigFileName = 'electron-builder.json';
-    const builderConfigPath = path.join(rootDir, builderConfigFileName);
+    // if builder config is not found in the package.json,
+    // we attempt to read `electron-builder.{yaml, yml, json, json5, toml, js, cjs, mjs, ts}`
+    // See also https://www.electron.build/configuration.html
     try {
-      log.info(`Reading Builder config file: ${builderConfigPath}...`);
-      const data = await fs.readFile(builderConfigPath, 'utf-8');
-      builderConfig = JSON.parse(data);
+      const configRequest: ReadConfigRequest = {
+        packageKey: 'build',
+        configFilename: 'electron-builder',
+        projectDir: rootDir,
+        packageMetadata: null,
+      };
+      log.info(`Searching Builder config file...`);
+      const config = await findAndReadConfig<Configuration>(configRequest);
+
+      if (!config || !config.configFile) {
+        throw new Error(`NOT FOUND CONFIG FILE`);
+      }
+      log.info(`Detected config file: ${config.configFile}`);
+      const result = config.result;
+      // Handling null objects as key values when using toml format settings
+      const detectedConfig = Object.getPrototypeOf(result) === null ? JSON.parse(JSON.stringify(result)) : result;
+
+      builderConfig = detectedConfig as BuilderConfig;
     } catch (_e) {
       log.warn('Builder config file not found or invalid.');
     }
