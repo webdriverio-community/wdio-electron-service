@@ -49,7 +49,7 @@ Type: `string[]`
 
 ### `appBinaryPath`:
 
-The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-based-on-configuration-file), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
+The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-of-app-binary), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
 Type: `string`
 
@@ -77,20 +77,22 @@ Calls .mockRestore() on all mocked APIs before each test. This will restore the 
 
 Type: `boolean`
 
-## Automatic detection based on configuration file
+## Automatic detection of App binary
 
-This service will automatically determine the path to the Electron binary of your app based on the configuration file of following library. If determined it, you don't need to set service options `appBinaryPath` or `appEntryPoint`.
+The service will automatically determine the path to the Electron binary of your app based on the configuration of supported build tools.
 
-This service automatically determines the path to your app's Electron binaries based on the following library configuration files.
-If so, there is no need to set the service options `appBinaryPath` or `appEntryPoint`.
+If you want to manually set this value, you can specify the [`appBinaryPath`](#appbinarypath) option.
 
-- ### `electron-builder`
+### Supported config locations:
 
-  The configuration files that match the following rules are imported to determine the the path of your app.
+##### Electron Builder
 
-  - `electron-builder.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
-  - `electron-builder.config.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
+- `package.json` (config values are read from `build`)
+- `electron-builder.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
+- `electron-builder.config.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
 
-- ### `electron-forge`
-  The configuration files that match the following rules are imported to determine the the path of your app.
-  - `forge.config.js`
+##### Electron Forge
+
+- `package.json` (config values are read from `config.forge`)
+- `forge.config.js`
+- `custom.config.js` (e.g. when `"config": { "forge": "./custom-config.js" }` is specified in package.json)
