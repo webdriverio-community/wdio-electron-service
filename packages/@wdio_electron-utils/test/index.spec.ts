@@ -541,7 +541,7 @@ describe('getAppBuildInfo', () => {
       if (typeof call[0] === 'string') {
         return path.basename(call[0]);
       }
-      assert.fail('Unexpected call with parameter type of Buffer');
+      assert.fail(`fs.access called with a non-string value: ${call[0]}`);
     });
     const expected = [
       'electron-builder.json',
