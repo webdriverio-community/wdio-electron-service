@@ -49,6 +49,14 @@ async function readConfig(configFile: string, projectDir: string) {
       result = readResult;
     }
     result = await Promise.resolve(result);
+
+    // fix CTS case
+    const resultWithDefaultExport = result as { default: unknown };
+    if (resultWithDefaultExport.default) {
+      result = resultWithDefaultExport.default;
+    }
+
+    console.log('ZOMG', result);
   } else {
     const data = await fs.readFile(configFilePath, 'utf8');
     if (extRegex.json.test(ext)) {
