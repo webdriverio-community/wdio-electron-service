@@ -524,8 +524,15 @@ describe('getAppBuildInfo', () => {
     });
   });
 
-  it('should return the expected config for a builder dependency with inline config', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-inline-config');
+  it.each([
+    ['inline', 'inline'],
+    ['JSON', 'json'],
+    ['JSON5', 'json5'],
+    ['YAML (.yaml)', 'yaml'],
+    ['YAML (.yml)', 'yml'],
+    ['TOML', 'toml'],
+  ])('should return the expected config for a builder dependency with %s config', async (key, fixtureName) => {
+    const packageJsonPath = getFixturePackagePath(`builder-dependency-${fixtureName}-config`);
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -533,88 +540,8 @@ describe('getAppBuildInfo', () => {
         path: packageJsonPath,
       }),
     ).toStrictEqual({
-      appName: 'builder-dependency-inline-config',
-      config: { productName: 'builder-dependency-inline-config' },
-      isBuilder: true,
-      isForge: false,
-    });
-  });
-
-  it('should return the expected config for a builder dependency with JSON config', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-json-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'builder-dependency-json-config',
-      config: { productName: 'builder-dependency-json-config' },
-      isBuilder: true,
-      isForge: false,
-    });
-  });
-
-  it('should return the expected config for a builder dependency with JSON5 config', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-json5-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'builder-dependency-json5-config',
-      config: { productName: 'builder-dependency-json5-config' },
-      isBuilder: true,
-      isForge: false,
-    });
-  });
-
-  it('should return the expected config for a builder dependency with YAML config (.yaml)', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-yaml-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'builder-dependency-yaml-config',
-      config: { productName: 'builder-dependency-yaml-config' },
-      isBuilder: true,
-      isForge: false,
-    });
-  });
-
-  it('should return the expected config for a builder dependency with YAML config (.yml)', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-yml-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'builder-dependency-yml-config',
-      config: { productName: 'builder-dependency-yml-config' },
-      isBuilder: true,
-      isForge: false,
-    });
-  });
-
-  it('should return the expected config for a builder dependency with TOML config', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-toml-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'builder-dependency-toml-config',
-      config: { productName: 'builder-dependency-toml-config' },
+      appName: `builder-dependency-${fixtureName}-config`,
+      config: { productName: `builder-dependency-${fixtureName}-config` },
       isBuilder: true,
       isForge: false,
     });
