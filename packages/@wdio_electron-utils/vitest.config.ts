@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     include: ['test/*.spec.ts'],
     exclude: [...configDefaults.exclude],
-    environment: 'jsdom',
+    environment: 'node',
     coverage: {
       enabled: true,
       include: ['src/*.ts'],
