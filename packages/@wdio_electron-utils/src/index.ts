@@ -26,26 +26,43 @@ const SupportedPlatform = {
 
 async function readConfig(configFile: string, projectDir: string) {
   const configFilePath = path.join(projectDir, configFile);
-  const data = await fs.readFile(configFilePath, 'utf8');
+  await fs.access(configFilePath, fs.constants.R_OK);
+
+  const ext = path.parse(configFile).ext;
+  const extRegex = {
+    js: /\.(c|m)?(j|t)s$/,
+    json: /\.json(5)?$/,
+    toml: /\.toml$/,
+    yaml: /\.y(a)?ml$/,
+  };
+
   let result: unknown;
-  if (configFilePath.endsWith('.json5') || configFilePath.endsWith('.json')) {
-    result = (await import('json5')).parse(data);
-  } else if (configFilePath.endsWith('.toml')) {
-    result = (await import('smol-toml')).parse(data);
-  } else if (configFilePath.endsWith('.yaml') || configFilePath.endsWith('.yml')) {
-    result = (await import('yaml')).parse(data);
+
+  if (extRegex.js.test(ext)) {
+    const { tsImport } = await import('tsx/esm/api');
+    const readResult = (await tsImport(configFilePath, import.meta.url)).default;
+
+    if (typeof readResult === 'function') {
+      result = readResult();
+    } else {
+      result = readResult;
+    }
+    result = await Promise.resolve(result);
+  } else {
+    const data = await fs.readFile(configFilePath, 'utf8');
+    if (extRegex.json.test(ext)) {
+      result = (await import('json5')).parse(data);
+    } else if (extRegex.toml.test(ext)) {
+      result = (await import('smol-toml')).parse(data);
+    } else if (extRegex.yaml.test(ext)) {
+      result = (await import('yaml')).parse(data);
+    }
   }
   return { result, configFile };
 }
 
-async function getConfig(configFileName: string, projectDir: string) {
-  for (const configFile of [
-    `${configFileName}.yml`,
-    `${configFileName}.yaml`,
-    `${configFileName}.json`,
-    `${configFileName}.json5`,
-    `${configFileName}.toml`,
-  ]) {
+async function getConfig(fileCandidate: string[], projectDir: string) {
+  for (const configFile of fileCandidate) {
     try {
       log.debug(`Attempting to read config file: ${configFile}...`);
       return await readConfig(configFile, projectDir);
@@ -55,6 +72,14 @@ async function getConfig(configFileName: string, projectDir: string) {
   }
   return undefined;
 }
+
+const getBuilderConfigCandidates = (configFileName = 'electron-builder') => {
+  const exts = ['.yml', '.yaml', '.json', '.json5', '.toml', '.js', '.mjs', '.cjs', '.ts', '.mts', '.cts'];
+  return exts.reduce(
+    (acc: string[], ext: string) => acc.concat([`${configFileName}${ext}`, `${configFileName}.config${ext}`]),
+    [],
+  );
+};
 
 /**
  * Determine the path to the Electron application binary
@@ -223,7 +248,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
     // see also https://www.electron.build/configuration.html
     try {
       log.info('Locating builder config file...');
-      const config = await getConfig('electron-builder', rootDir);
+      const config = await getConfig(getBuilderConfigCandidates(), rootDir);
 
       if (!config) {
         throw new Error();
