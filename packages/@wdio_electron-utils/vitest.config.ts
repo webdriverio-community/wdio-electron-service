@@ -16,5 +16,6 @@ export default defineConfig({
         statements: 85,
       },
     },
+    restoreMocks: true,
   },
 });
