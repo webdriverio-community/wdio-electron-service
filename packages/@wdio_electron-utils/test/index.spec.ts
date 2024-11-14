@@ -524,7 +524,7 @@ describe('getAppBuildInfo', () => {
     });
   });
 
-  it('should find all patterns of filename of builder config files', async () => {
+  it('should try to access all variants of builder config files', async () => {
     const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     const spy = vi.spyOn(fs, 'access');
@@ -572,22 +572,25 @@ describe('getAppBuildInfo', () => {
   });
 
   it.each([
-    ['inline', 'inline'],
-    ['JSON', 'json'],
-    ['JSON5', 'json5'],
-    ['TS (ESM/Fuc)', 'ts-fn'], // .config.ts
-    ['TS (ESM/Obj)', 'ts-obj'], // .config.ts
-    ['JS (ESM/Fnc)', 'js-esm'], // .config.js
-    ['JS (ESM/Obj)', 'mjs'], // .config.mjs
-    ['JS (CJS/Obj)', 'js-cjs'], // .config.js
-    ['JS (CJS/Fnc)', 'cjs'], // .config.cjs
-    ['YAML (.yaml)', 'yaml'],
-    ['YAML (.yml)', 'yml'],
-    ['TOML', 'toml'],
-  ])('should return the expected config for a builder dependency with %s config', async (key, fixtureName) => {
+    ['CJS', 'cjs-config'], // .config.cjs (CJS, Function)
+    ['CTS', 'cts-config'], // .config.cts (CJS, Object)
+    ['Inline', 'inline-config'], // no config file
+    ['JS (CJS)', 'js-config-cjs'], // .config.js (CJS, Object)
+    ['JS (ESM)', 'js-config-esm'], // .config.js (ESM, Function)
+    ['MJS', 'mjs-config'], // .config.mjs (ESM, Object)
+    ['MTS', 'mts-config'], // .config.mts (ESM, Object)
+    ['JSON', 'json-config'], // .config.json
+    ['JSON5', 'json5-config'], // .config.json5
+    ['TOML', 'toml-config'], // .config.toml
+    ['TS', 'ts-fn-config'], // .config.ts (ESM, Function)
+    ['TS', 'ts-obj-config'], // .config.ts (ESM, Object)
+    ['YAML (.yaml)', 'yaml-config'], // .config.yaml
+    ['YAML (.yml)', 'yml-config'], // .config.yml
+  ])('should return the expected config for a builder dependency with %s config', async (_key, builderFixtureName) => {
+    const fixtureName = `builder-dependency-${builderFixtureName}`;
     vi.mocked(fs.access).mockRestore();
 
-    const packageJsonPath = getFixturePackagePath(`builder-dependency-${fixtureName}-config`);
+    const packageJsonPath = getFixturePackagePath(fixtureName);
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
       await getAppBuildInfo({
@@ -595,8 +598,8 @@ describe('getAppBuildInfo', () => {
         path: packageJsonPath,
       }),
     ).toStrictEqual({
-      appName: `builder-dependency-${fixtureName}-config`,
-      config: { productName: `builder-dependency-${fixtureName}-config` },
+      appName: fixtureName,
+      config: { productName: fixtureName },
       isBuilder: true,
       isForge: false,
     });
