@@ -62,7 +62,7 @@
       "dependsOn": ["example-builder-esm#build:mac-universal", "@repo/e2e#init-e2es"]
     },
     "@wdio/electron-types#build": {
-      "dependsOn": ["//#lint", "//#format:check", "test:unit"],
+      "dependsOn": ["test:unit"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-types#release": {
@@ -71,7 +71,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-utils#build": {
-      "dependsOn": ["@wdio/electron-types#build", "test:unit"],
+      "dependsOn": ["^build", "test:unit"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-utils#release": {
@@ -127,11 +127,6 @@
     },
     "logs": {},
     "test": {},
-    "test:dev": {
-      "dependsOn": ["^build"],
-      "persistent": true,
-      "cache": false
-    },
     "test:unit": {
       "dependsOn": ["^build"]
     },

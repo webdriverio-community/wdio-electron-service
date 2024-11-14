@@ -38,7 +38,6 @@
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
     "test": "turbo run test:unit test:e2e",
-    "test:dev": "turbo run test:dev",
     "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
