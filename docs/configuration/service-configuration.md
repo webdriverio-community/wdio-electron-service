@@ -49,7 +49,7 @@ Type: `string[]`
 
 ### `appBinaryPath`:
 
-The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically, but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
+The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-of-app-binary), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
 Type: `string`
 
@@ -76,3 +76,23 @@ Type: `boolean`
 Calls .mockRestore() on all mocked APIs before each test. This will restore the original API function, the mock will be removed.
 
 Type: `boolean`
+
+## Automatic detection of App binary
+
+The service will automatically determine the path to the Electron binary of your app based on the configuration of supported build tools.
+
+If you want to manually set this value, you can specify the [`appBinaryPath`](#appbinarypath) option.
+
+### Supported config locations:
+
+##### Electron Builder
+
+- `package.json` (config values are read from `build`)
+- `electron-builder.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
+- `electron-builder.config.{json,json5,yaml,yml,toml,js,ts,mjs,cjs,mts,cts}`
+
+##### Electron Forge
+
+- `package.json` (config values are read from `config.forge`)
+- `forge.config.js`
+- `custom.config.js` (e.g. when `"config": { "forge": "./custom-config.js" }` is specified in package.json)

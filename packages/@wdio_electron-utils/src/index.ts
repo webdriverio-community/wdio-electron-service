@@ -24,6 +24,64 @@ const SupportedPlatform = {
   win32: 'win32',
 };
 
+async function readConfig(configFile: string, projectDir: string) {
+  const configFilePath = path.join(projectDir, configFile);
+  await fs.access(configFilePath, fs.constants.R_OK);
+
+  const ext = path.parse(configFile).ext;
+  const extRegex = {
+    js: /\.(c|m)?(j|t)s$/,
+    json: /\.json(5)?$/,
+    toml: /\.toml$/,
+    yaml: /\.y(a)?ml$/,
+  };
+
+  let result: unknown;
+
+  if (extRegex.js.test(ext)) {
+    const { tsImport } = await import('tsx/esm/api');
+    const configFilePathUrl = pathToFileURL(configFilePath).toString();
+    const readResult = (await tsImport(configFilePathUrl, import.meta.url)).default;
+
+    if (typeof readResult === 'function') {
+      result = readResult();
+    } else {
+      result = readResult;
+    }
+    result = await Promise.resolve(result);
+  } else {
+    const data = await fs.readFile(configFilePath, 'utf8');
+    if (extRegex.json.test(ext)) {
+      result = (await import('json5')).parse(data);
+    } else if (extRegex.toml.test(ext)) {
+      result = (await import('smol-toml')).parse(data);
+    } else if (extRegex.yaml.test(ext)) {
+      result = (await import('yaml')).parse(data);
+    }
+  }
+  return { result, configFile };
+}
+
+async function getConfig(fileCandidate: string[], projectDir: string) {
+  for (const configFile of fileCandidate) {
+    try {
+      log.debug(`Attempting to read config file: ${configFile}...`);
+      return await readConfig(configFile, projectDir);
+    } catch (_e) {
+      log.debug('unsuccessful');
+    }
+  }
+  return undefined;
+}
+
+const getBuilderConfigCandidates = (configFileName = 'electron-builder') => {
+  const exts = ['.yml', '.yaml', '.json', '.json5', '.toml', '.js', '.mjs', '.cjs', '.ts', '.mts', '.cts'];
+  return exts.reduce(
+    (acc: string[], ext: string) => acc.concat([`${configFileName}${ext}`, `${configFileName}.config${ext}`]),
+    [],
+  );
+};
+
 /**
  * Determine the path to the Electron application binary
  * @param packageJsonPath path to the nearest package.json
@@ -170,25 +228,44 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
   if (forgeDependencyDetected && (!forgePackageJsonConfig || forgeCustomConfigFile)) {
     // if no forge config or a linked file is found in the package.json, attempt to read Forge JS-based config
+    let forgeConfigPath;
+
     try {
-      const forgeConfigPath = pathToFileURL(path.join(rootDir, forgeConfigFile)).toString();
+      forgeConfigPath = path.join(rootDir, forgeConfigFile);
       log.info(`Reading Forge config file: ${forgeConfigPath}...`);
-      forgeConfig = ((await import(forgeConfigPath)) as { default: ForgeConfig }).default;
+      forgeConfig = ((await import(pathToFileURL(forgeConfigPath).toString())) as { default: ForgeConfig }).default;
     } catch (_e) {
       log.warn('Forge config file not found or invalid.');
+
+      // only throw if there is no builder config
+      if (!builderConfig) {
+        throw new Error(`Forge was detected but no configuration was found at '${forgeConfigPath}'.`);
+      }
     }
   }
 
   if (builderDependencyDetected && !builderConfig) {
-    // if builder config is not found in the package.json, we attempt to read `electron-builder.json`
-    const builderConfigFileName = 'electron-builder.json';
-    const builderConfigPath = path.join(rootDir, builderConfigFileName);
+    // if builder config is not found in the package.json, attempt to read `electron-builder.{yaml, yml, json, json5, toml}`
+    // see also https://www.electron.build/configuration.html
     try {
-      log.info(`Reading Builder config file: ${builderConfigPath}...`);
-      const data = await fs.readFile(builderConfigPath, 'utf-8');
-      builderConfig = JSON.parse(data);
+      log.info('Locating builder config file...');
+      const config = await getConfig(getBuilderConfigCandidates(), rootDir);
+
+      if (!config) {
+        throw new Error();
+      }
+
+      log.info(`Detected config file: ${config.configFile}`);
+      builderConfig = config.result as BuilderConfig;
     } catch (_e) {
       log.warn('Builder config file not found or invalid.');
+
+      // only throw if there is no forge config
+      if (!forgeConfig) {
+        throw new Error(
+          'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
+        );
+      }
     }
   }
 
