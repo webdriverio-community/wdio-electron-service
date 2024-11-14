@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { describe, it, expect, vi, Mock } from 'vitest';
+import { assert, describe, it, expect, vi, Mock } from 'vitest';
 
 import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '../src/index.js';
 import { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
@@ -524,14 +524,69 @@ describe('getAppBuildInfo', () => {
     });
   });
 
+  it('should find all patterns of filename of builder config files', async () => {
+    const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const spy = vi.spyOn(fs, 'access');
+    try {
+      await getAppBuildInfo({
+        packageJson,
+        path: packageJsonPath,
+      });
+    } catch (_e) {
+      // An error will always occur because the configuration file does not exist.
+      // Ignore errors to test to ensure all expected filename patterns are covered
+    }
+    const accessedFilenames = spy.mock.calls.map((call) => {
+      if (typeof call[0] === 'string') {
+        return path.basename(call[0]);
+      }
+      assert.fail('Unexpected call with parameter type of Buffer');
+    });
+    const expected = [
+      'electron-builder.json',
+      'electron-builder.json5',
+      'electron-builder.yml',
+      'electron-builder.yaml',
+      'electron-builder.toml',
+      'electron-builder.js',
+      'electron-builder.ts',
+      'electron-builder.mjs',
+      'electron-builder.cjs',
+      'electron-builder.mts',
+      'electron-builder.cts',
+      'electron-builder.config.json',
+      'electron-builder.config.json5',
+      'electron-builder.config.yml',
+      'electron-builder.config.yaml',
+      'electron-builder.config.toml',
+      'electron-builder.config.js',
+      'electron-builder.config.ts',
+      'electron-builder.config.mjs',
+      'electron-builder.config.cjs',
+      'electron-builder.config.mts',
+      'electron-builder.config.cts',
+    ];
+    expect(spy).toHaveBeenCalledTimes(expected.length);
+    assert.deepEqual(accessedFilenames.sort(), expected.sort());
+  });
+
   it.each([
     ['inline', 'inline'],
     ['JSON', 'json'],
     ['JSON5', 'json5'],
+    ['TS (ESM/Fuc)', 'ts-fn'], // .config.ts
+    ['TS (ESM/Obj)', 'ts-obj'], // .config.ts
+    ['JS (ESM/Fnc)', 'js-esm'], // .config.js
+    ['JS (ESM/Obj)', 'mjs'], // .config.mjs
+    ['JS (CJS/Obj)', 'js-cjs'], // .config.js
+    ['JS (CJS/Fnc)', 'cjs'], // .config.cjs
     ['YAML (.yaml)', 'yaml'],
     ['YAML (.yml)', 'yml'],
     ['TOML', 'toml'],
   ])('should return the expected config for a builder dependency with %s config', async (key, fixtureName) => {
+    vi.mocked(fs.access).mockRestore();
+
     const packageJsonPath = getFixturePackagePath(`builder-dependency-${fixtureName}-config`);
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     await expect(
