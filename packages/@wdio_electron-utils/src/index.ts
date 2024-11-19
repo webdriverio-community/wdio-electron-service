@@ -52,7 +52,11 @@ async function readConfig(configFile: string, projectDir: string) {
   } else {
     const data = await fs.readFile(configFilePath, 'utf8');
     if (extRegex.json.test(ext)) {
-      result = (await import('json5')).parse(data);
+      const json5 = await import('json5');
+      // JSON5 exports parse as default in ESM, but as a named export in CJS
+      // https://github.com/json5/json5/issues/240
+      const parseJson = json5.parse || json5.default.parse;
+      result = parseJson(data);
     } else if (extRegex.toml.test(ext)) {
       result = (await import('smol-toml')).parse(data);
     } else if (extRegex.yaml.test(ext)) {
