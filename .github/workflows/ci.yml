@@ -97,7 +97,6 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Install Dependencies
         run: |
-          ssh -vT git@github.com
           pnpm install
         shell: bash
       - name: Run Tests
