@@ -76,8 +76,6 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -99,11 +97,12 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Install Dependencies
         run: |
+          ssh -vT git@github.com
           pnpm install
         shell: bash
       - name: Run Tests
         run: |
-          pnpm run build
+          pnpm build
           pnpm run ci-mac:e2e:mac-universal
         shell: bash
       - name: 🐛 Show logs
