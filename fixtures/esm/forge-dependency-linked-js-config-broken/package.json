@@ -1,0 +1,14 @@
+{
+  "name": "fixture-esm_forge-linked-js-config-broken",
+  "version": "1.0.0",
+  "description": "Forge found in dependencies with linked JS configuration which doesn't map to a config file in an ESM project",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.2"
+  },
+  "config": {
+    "forge": "./custom-config.js"
+  }
+}

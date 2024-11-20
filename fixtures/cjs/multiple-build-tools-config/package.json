@@ -1,0 +1,19 @@
+{
+  "name": "fixture-cjs_multiple-build-tools-config",
+  "version": "1.0.0",
+  "description": "Configuration for multiple build tools found in a CJS project",
+  "type": "commonjs",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {},
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "multiple-build-tools-config"
+      }
+    }
+  },
+  "build": {
+    "productName": "multiple-build-tools-config"
+  }
+}

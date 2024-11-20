@@ -1,0 +1,18 @@
+{
+  "name": "fixture-cjs_multiple-build-tools-wrong-config-2",
+  "version": "1.0.0",
+  "description": "Forge config found with a Builder dependency in a CJS project",
+  "type": "commonjs",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "electron-builder": "^24.6.4"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "multiple-build-tools-wrong-config-2"
+      }
+    }
+  }
+}
