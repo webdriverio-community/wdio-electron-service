@@ -60,11 +60,11 @@ jobs:
         run: |
           git config --global user.email "bot@webdriver.io"
           git config --global user.name "WebdriverIO Release Bot"
-      - name: SSH Agent
-        uses: cardoe/ssh-agent-deploy-key@v1
+      - name: SSH Setup
+        uses: kielabokkie/ssh-key-and-known-hosts-action@v1
         with:
-          ssh-private-key: |
-            ${{ secrets.DEPLOY_KEY }}
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          ssh-host: github.com
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Publish Pre-Release
