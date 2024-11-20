@@ -6,8 +6,8 @@ import { assert, describe, it, expect, vi, Mock } from 'vitest';
 import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '../src/index.js';
 import { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 
-function getFixturePackagePath(fixtureName: string) {
-  return path.join(process.cwd(), '..', '..', 'fixtures', fixtureName, 'package.json');
+function getFixturePackagePath(moduleType: string, fixtureName: string) {
+  return path.join(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
 }
 
 vi.mock('node:fs/promises', async (importOriginal) => {
@@ -371,285 +371,575 @@ describe('getBinaryPath', () => {
 });
 
 describe('getAppBuildInfo', () => {
-  it('should throw an error when no build tools are found', async () => {
-    const packageJsonPath = getFixturePackagePath('no-build-tool');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
-    );
-  });
-
-  it('should throw an error when dependencies for multiple build tools are found without configuration', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-no-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
-  });
-
-  it('should throw an error when the Forge app name is unable to be determined', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    delete packageJson.name;
-    delete packageJson.config.forge.packagerConfig;
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'No application name was detected, please set name / productName in your package.json or build tool configuration.',
-    );
-  });
-
-  it('should throw an error when the builder app name is unable to be determined', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-inline-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    delete packageJson.name;
-    delete packageJson.build.productName;
-    await expect(() =>
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'No application name was detected, please set name / productName in your package.json or build tool configuration.',
-    );
-  });
-
-  it('should throw an error when builder is detected but has no config', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(
-      'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
-    );
-  });
-
-  it('should throw an error when Forge is detected but has no config', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-no-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
-  });
-
-  it('should throw an error when Forge is detected with a linked JS config but the config file cannot be read', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-linked-js-config-broken');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)custom-config.js'./);
-  });
-
-  it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-1');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'multiple-build-tools-wrong-config-1',
-      config: { productName: 'multiple-build-tools-wrong-config-1' },
-      isBuilder: true,
-      isForge: false,
+  describe('ESM', () => {
+    it('should throw an error when no build tools are found', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'no-build-tool');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+      );
     });
-  });
 
-  it('should return the expected config when configuration for Forge is found alongside a builder dependency', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-wrong-config-2');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'multiple-build-tools-wrong-config-2',
-      config: { packagerConfig: { name: 'multiple-build-tools-wrong-config-2' } },
-      isBuilder: false,
-      isForge: true,
+    it('should throw an error when dependencies for multiple build tools are found without configuration', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
     });
-  });
 
-  it('should return the expected config for a Forge dependency with JS config', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-js-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'forge-dependency-js-config',
-      config: { packagerConfig: { name: 'forge-dependency-js-config' } },
-      isBuilder: false,
-      isForge: true,
+    it('should throw an error when the Forge app name is unable to be determined', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      delete packageJson.name;
+      delete packageJson.config.forge.packagerConfig;
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No application name was detected, please set name / productName in your package.json or build tool configuration.',
+      );
     });
-  });
 
-  it('should return the expected config for a Forge dependency with linked JS config', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-linked-js-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'forge-dependency-linked-js-config',
-      config: { packagerConfig: { name: 'forge-dependency-linked-js-config' } },
-      isBuilder: false,
-      isForge: true,
+    it('should throw an error when the builder app name is unable to be determined', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      delete packageJson.name;
+      delete packageJson.build.productName;
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No application name was detected, please set name / productName in your package.json or build tool configuration.',
+      );
     });
-  });
 
-  it('should try to access all variants of builder config files', async () => {
-    const packageJsonPath = getFixturePackagePath('builder-dependency-no-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    const spy = vi.spyOn(fs, 'access');
-    try {
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
+    it('should throw an error when builder is detected but has no config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
+      );
+    });
+
+    it('should throw an error when Forge is detected but has no config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
+    });
+
+    it('should throw an error when Forge is detected with a linked JS config but the config file cannot be read', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-linked-js-config-broken');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)custom-config.js'./);
+    });
+
+    it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-wrong-config-1');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-wrong-config-1',
+        config: { productName: 'multiple-build-tools-wrong-config-1' },
+        isBuilder: true,
+        isForge: false,
       });
-    } catch (_e) {
-      // An error will always occur because the configuration file does not exist.
-      // Ignore errors to test to ensure all expected filename patterns are covered
-    }
-    const accessedFilenames = spy.mock.calls.map((call) => {
-      if (typeof call[0] === 'string') {
-        return path.basename(call[0]);
+    });
+
+    it('should return the expected config when configuration for Forge is found alongside a builder dependency', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-wrong-config-2');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-wrong-config-2',
+        config: { packagerConfig: { name: 'multiple-build-tools-wrong-config-2' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with JS config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-js-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-js-config',
+        config: { packagerConfig: { name: 'forge-dependency-js-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with linked JS config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-linked-js-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-linked-js-config',
+        config: { packagerConfig: { name: 'forge-dependency-linked-js-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should try to access all variants of builder config files', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const spy = vi.spyOn(fs, 'access');
+      try {
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        });
+      } catch (_e) {
+        // An error will always occur because the configuration file does not exist.
+        // Ignore errors to test to ensure all expected filename patterns are covered
       }
-      assert.fail(`fs.access called with a non-string value: ${call[0]}`);
+      const accessedFilenames = spy.mock.calls.map((call) => {
+        if (typeof call[0] === 'string') {
+          return path.basename(call[0]);
+        }
+        assert.fail(`fs.access called with a non-string value: ${call[0]}`);
+      });
+      const expected = [
+        'electron-builder.json',
+        'electron-builder.json5',
+        'electron-builder.yml',
+        'electron-builder.yaml',
+        'electron-builder.toml',
+        'electron-builder.js',
+        'electron-builder.ts',
+        'electron-builder.mjs',
+        'electron-builder.cjs',
+        'electron-builder.mts',
+        'electron-builder.cts',
+        'electron-builder.config.json',
+        'electron-builder.config.json5',
+        'electron-builder.config.yml',
+        'electron-builder.config.yaml',
+        'electron-builder.config.toml',
+        'electron-builder.config.js',
+        'electron-builder.config.ts',
+        'electron-builder.config.mjs',
+        'electron-builder.config.cjs',
+        'electron-builder.config.mts',
+        'electron-builder.config.cts',
+      ];
+      expect(spy).toHaveBeenCalledTimes(expected.length);
+      assert.deepEqual(accessedFilenames.sort(), expected.sort());
     });
-    const expected = [
-      'electron-builder.json',
-      'electron-builder.json5',
-      'electron-builder.yml',
-      'electron-builder.yaml',
-      'electron-builder.toml',
-      'electron-builder.js',
-      'electron-builder.ts',
-      'electron-builder.mjs',
-      'electron-builder.cjs',
-      'electron-builder.mts',
-      'electron-builder.cts',
-      'electron-builder.config.json',
-      'electron-builder.config.json5',
-      'electron-builder.config.yml',
-      'electron-builder.config.yaml',
-      'electron-builder.config.toml',
-      'electron-builder.config.js',
-      'electron-builder.config.ts',
-      'electron-builder.config.mjs',
-      'electron-builder.config.cjs',
-      'electron-builder.config.mts',
-      'electron-builder.config.cts',
-    ];
-    expect(spy).toHaveBeenCalledTimes(expected.length);
-    assert.deepEqual(accessedFilenames.sort(), expected.sort());
+
+    it.each([
+      ['CJS', 'cjs-config'], // .config.cjs (Function)
+      ['CTS', 'cts-config'], // .config.cts (Object)
+      ['Inline', 'inline-config'], // no config file
+      ['JS', 'js-config'], // .config.js (Function)
+      ['MJS', 'mjs-config'], // .config.mjs (Object)
+      ['MTS', 'mts-config'], // .config.mts (Object)
+      ['JSON', 'json-config'], // .config.json
+      ['JSON5', 'json5-config'], // .config.json5
+      ['TOML', 'toml-config'], // .config.toml
+      ['TS', 'ts-fn-config'], // .config.ts (Function)
+      ['TS', 'ts-obj-config'], // .config.ts (Object)
+      ['YAML (.yaml)', 'yaml-config'], // .config.yaml
+      ['YAML (.yml)', 'yml-config'], // .config.yml
+    ])(
+      'should return the expected config for a builder dependency with %s config - ESM',
+      async (_key, builderFixtureName) => {
+        const fixtureName = `builder-dependency-${builderFixtureName}`;
+        vi.mocked(fs.access).mockRestore();
+
+        const packageJsonPath = getFixturePackagePath('esm', fixtureName);
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+        await expect(
+          await getAppBuildInfo({
+            packageJson,
+            path: packageJsonPath,
+          }),
+        ).toStrictEqual({
+          appName: fixtureName,
+          config: { productName: fixtureName },
+          isBuilder: true,
+          isForge: false,
+        });
+      },
+    );
+
+    it('should return the expected config when there is no app name in the build tool config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'no-app-name-in-build-tool-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'fixture-esm_no-app-name-in-build-tool-config',
+        config: { appId: 'no-app-name-in-build-tool-config' },
+        isBuilder: true,
+        isForge: false,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with inline config', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-inline-config',
+        config: { packagerConfig: { name: 'forge-dependency-inline-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config when configuration for multiple build tools are found', async () => {
+      const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-config',
+        config: { packagerConfig: { name: 'multiple-build-tools-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
   });
 
-  it.each([
-    ['CJS', 'cjs-config'], // .config.cjs (CJS, Function)
-    ['CTS', 'cts-config'], // .config.cts (CJS, Object)
-    ['Inline', 'inline-config'], // no config file
-    ['JS (CJS)', 'js-config-cjs'], // .config.js (CJS, Object)
-    ['JS (ESM)', 'js-config-esm'], // .config.js (ESM, Function)
-    ['MJS', 'mjs-config'], // .config.mjs (ESM, Object)
-    ['MTS', 'mts-config'], // .config.mts (ESM, Object)
-    ['JSON', 'json-config'], // .config.json
-    ['JSON5', 'json5-config'], // .config.json5
-    ['TOML', 'toml-config'], // .config.toml
-    ['TS', 'ts-fn-config'], // .config.ts (ESM, Function)
-    ['TS', 'ts-obj-config'], // .config.ts (ESM, Object)
-    ['YAML (.yaml)', 'yaml-config'], // .config.yaml
-    ['YAML (.yml)', 'yml-config'], // .config.yml
-  ])('should return the expected config for a builder dependency with %s config', async (_key, builderFixtureName) => {
-    const fixtureName = `builder-dependency-${builderFixtureName}`;
-    vi.mocked(fs.access).mockRestore();
-
-    const packageJsonPath = getFixturePackagePath(fixtureName);
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: fixtureName,
-      config: { productName: fixtureName },
-      isBuilder: true,
-      isForge: false,
+  describe('CJS', () => {
+    it('should throw an error when no build tools are found', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'no-build-tool');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
+      );
     });
-  });
 
-  it('should return the expected config when there is no app name in the build tool config', async () => {
-    const packageJsonPath = getFixturePackagePath('no-app-name-in-build-tool-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'fixture-no-app-name-in-build-tool-config',
-      config: { appId: 'no-app-name-in-build-tool-config' },
-      isBuilder: true,
-      isForge: false,
+    it('should throw an error when dependencies for multiple build tools are found without configuration', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'multiple-build-tools-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
     });
-  });
 
-  it('should return the expected config for a Forge dependency with inline config', async () => {
-    const packageJsonPath = getFixturePackagePath('forge-dependency-inline-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'forge-dependency-inline-config',
-      config: { packagerConfig: { name: 'forge-dependency-inline-config' } },
-      isBuilder: false,
-      isForge: true,
+    it('should throw an error when the Forge app name is unable to be determined', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      delete packageJson.name;
+      delete packageJson.config.forge.packagerConfig;
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No application name was detected, please set name / productName in your package.json or build tool configuration.',
+      );
     });
-  });
 
-  it('should return the expected config when configuration for multiple build tools are found', async () => {
-    const packageJsonPath = getFixturePackagePath('multiple-build-tools-config');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-    await expect(
-      await getAppBuildInfo({
-        packageJson,
-        path: packageJsonPath,
-      }),
-    ).toStrictEqual({
-      appName: 'multiple-build-tools-config',
-      config: { packagerConfig: { name: 'multiple-build-tools-config' } },
-      isBuilder: false,
-      isForge: true,
+    it('should throw an error when the builder app name is unable to be determined', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'builder-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      delete packageJson.name;
+      delete packageJson.build.productName;
+      await expect(() =>
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'No application name was detected, please set name / productName in your package.json or build tool configuration.',
+      );
+    });
+
+    it('should throw an error when builder is detected but has no config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'builder-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(
+        'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
+      );
+    });
+
+    it('should throw an error when Forge is detected but has no config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
+    });
+
+    it('should throw an error when Forge is detected with a linked JS config but the config file cannot be read', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-linked-js-config-broken');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)custom-config.js'./);
+    });
+
+    it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'multiple-build-tools-wrong-config-1');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-wrong-config-1',
+        config: { productName: 'multiple-build-tools-wrong-config-1' },
+        isBuilder: true,
+        isForge: false,
+      });
+    });
+
+    it('should return the expected config when configuration for Forge is found alongside a builder dependency', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'multiple-build-tools-wrong-config-2');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-wrong-config-2',
+        config: { packagerConfig: { name: 'multiple-build-tools-wrong-config-2' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with JS config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-js-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-js-config',
+        config: { packagerConfig: { name: 'forge-dependency-js-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with linked JS config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-linked-js-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-linked-js-config',
+        config: { packagerConfig: { name: 'forge-dependency-linked-js-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should try to access all variants of builder config files', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'builder-dependency-no-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const spy = vi.spyOn(fs, 'access');
+      try {
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        });
+      } catch (_e) {
+        // An error will always occur because the configuration file does not exist.
+        // Ignore errors to test to ensure all expected filename patterns are covered
+      }
+      const accessedFilenames = spy.mock.calls.map((call) => {
+        if (typeof call[0] === 'string') {
+          return path.basename(call[0]);
+        }
+        assert.fail(`fs.access called with a non-string value: ${call[0]}`);
+      });
+      const expected = [
+        'electron-builder.json',
+        'electron-builder.json5',
+        'electron-builder.yml',
+        'electron-builder.yaml',
+        'electron-builder.toml',
+        'electron-builder.js',
+        'electron-builder.ts',
+        'electron-builder.mjs',
+        'electron-builder.cjs',
+        'electron-builder.mts',
+        'electron-builder.cts',
+        'electron-builder.config.json',
+        'electron-builder.config.json5',
+        'electron-builder.config.yml',
+        'electron-builder.config.yaml',
+        'electron-builder.config.toml',
+        'electron-builder.config.js',
+        'electron-builder.config.ts',
+        'electron-builder.config.mjs',
+        'electron-builder.config.cjs',
+        'electron-builder.config.mts',
+        'electron-builder.config.cts',
+      ];
+      expect(spy).toHaveBeenCalledTimes(expected.length);
+      assert.deepEqual(accessedFilenames.sort(), expected.sort());
+    });
+
+    it.each([
+      ['CJS', 'cjs-config'], // .config.cjs (Function)
+      ['CTS', 'cts-config'], // .config.cts (Object)
+      ['Inline', 'inline-config'], // no config file
+      ['JS', 'js-config'], // .config.js (Function)
+      ['MJS', 'mjs-config'], // .config.mjs (Object)
+      ['MTS', 'mts-config'], // .config.mts (Object)
+      ['JSON', 'json-config'], // .config.json
+      ['JSON5', 'json5-config'], // .config.json5
+      ['TOML', 'toml-config'], // .config.toml
+      ['TS', 'ts-fn-config'], // .config.ts (Function)
+      ['TS', 'ts-obj-config'], // .config.ts (Object)
+      ['YAML (.yaml)', 'yaml-config'], // .config.yaml
+      ['YAML (.yml)', 'yml-config'], // .config.yml
+    ])(
+      'should return the expected config for a builder dependency with %s config',
+      async (_key, builderFixtureName) => {
+        const fixtureName = `builder-dependency-${builderFixtureName}`;
+        vi.mocked(fs.access).mockRestore();
+
+        const packageJsonPath = getFixturePackagePath('cjs', fixtureName);
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+        await expect(
+          await getAppBuildInfo({
+            packageJson,
+            path: packageJsonPath,
+          }),
+        ).toStrictEqual({
+          appName: fixtureName,
+          config: { productName: fixtureName },
+          isBuilder: true,
+          isForge: false,
+        });
+      },
+    );
+
+    it('should return the expected config when there is no app name in the build tool config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'no-app-name-in-build-tool-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'fixture-cjs_no-app-name-in-build-tool-config',
+        config: { appId: 'no-app-name-in-build-tool-config' },
+        isBuilder: true,
+        isForge: false,
+      });
+    });
+
+    it('should return the expected config for a Forge dependency with inline config', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'forge-dependency-inline-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'forge-dependency-inline-config',
+        config: { packagerConfig: { name: 'forge-dependency-inline-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
+    });
+
+    it('should return the expected config when configuration for multiple build tools are found', async () => {
+      const packageJsonPath = getFixturePackagePath('cjs', 'multiple-build-tools-config');
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      await expect(
+        await getAppBuildInfo({
+          packageJson,
+          path: packageJsonPath,
+        }),
+      ).toStrictEqual({
+        appName: 'multiple-build-tools-config',
+        config: { packagerConfig: { name: 'multiple-build-tools-config' } },
+        isBuilder: false,
+        isForge: true,
+      });
     });
   });
 });

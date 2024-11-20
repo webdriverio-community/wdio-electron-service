@@ -1,0 +1,14 @@
+{
+  "name": "fixture-cjs_no-app-name-in-build-tool-config",
+  "version": "1.0.0",
+  "description": "No app name found in the build tool configuration in a CJS project",
+  "type": "commonjs",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "electron-builder": "^24.6.4"
+  },
+  "build": {
+    "appId": "no-app-name-in-build-tool-config"
+  }
+}

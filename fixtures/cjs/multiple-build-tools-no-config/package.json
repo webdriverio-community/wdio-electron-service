@@ -1,0 +1,12 @@
+{
+  "name": "fixture-cjs_multiple-build-tools-no-config",
+  "version": "1.0.0",
+  "description": "Multiple build tools found in dependencies without any configuration in a CJS project",
+  "type": "commonjs",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.2",
+    "electron-builder": "^24.6.4"
+  }
+}

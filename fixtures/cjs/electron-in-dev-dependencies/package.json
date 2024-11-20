@@ -1,0 +1,11 @@
+{
+  "name": "fixture-cjs_electron-in-dev-dependencies",
+  "version": "1.0.0",
+  "description": "Electron found in devDependencies in a CJS project",
+  "type": "commonjs",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^26.0.0"
+  }
+}
