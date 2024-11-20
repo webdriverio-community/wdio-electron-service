@@ -69,6 +69,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Publish Pre-Release
         run: |
+          ls -la ~/.ssh
+          cat ~/.ssh/config
           pnpm run build
           if [ "${{inputs.preReleaseVersion}}" == "existing" ]; then
             pnpx tsx scripts/release.ts $DRY_RUN_ARG --preRelease=${{inputs.preReleaseName}} --npm.tag=${{inputs.npmTag}} --no-git.requireupstream
