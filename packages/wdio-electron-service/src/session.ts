@@ -7,10 +7,15 @@ import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import log from '@wdio/electron-utils/log';
 import type { ElectronServiceOptions } from '@wdio/electron-types';
 
-export async function init(opts: ElectronServiceOptions) {
+export interface InitSessionParams {
+  browserVersion?: string;
+}
+
+export async function init(opts: ElectronServiceOptions, params?: InitSessionParams) {
   const testRunnerOpts = opts as Options.Testrunner;
   let capabilities = {
     browserName: 'electron',
+    browserVersion: params?.browserVersion,
     [CUSTOM_CAPABILITY_NAME]: opts,
   };
 
