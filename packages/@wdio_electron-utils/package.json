@@ -52,13 +52,13 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@types/node": "^22.9.1",
-    "@vitest/coverage-v8": "^2.1.5",
+    "@types/node": "^22.10.1",
+    "@vitest/coverage-v8": "^2.1.8",
     "@wdio/electron-types": "workspace:*",
     "release-it": "^17.10.0",
     "shx": "^0.3.4",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.5"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "release-it": {
     "hooks": {
