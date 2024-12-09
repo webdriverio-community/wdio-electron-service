@@ -9,6 +9,7 @@ import type { ElectronServiceOptions } from '@wdio/electron-types';
 
 export interface InitSessionParams {
   browserVersion?: string;
+  logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent';
 }
 
 export async function init(opts: ElectronServiceOptions, params?: InitSessionParams) {
@@ -28,6 +29,7 @@ export async function init(opts: ElectronServiceOptions, params?: InitSessionPar
 
   // initialise session
   const browser = await remote({
+    logLevel: params?.logLevel,
     capabilities,
   });
 
