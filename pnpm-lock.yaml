@@ -88,20 +88,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
@@ -112,8 +112,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   apps/builder-esm:
     dependencies:
@@ -125,20 +125,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
@@ -149,8 +149,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   apps/forge-cjs:
     dependencies:
@@ -174,20 +174,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       rollup:
         specifier: ^4.27.3
         version: 4.27.3
@@ -198,8 +198,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   apps/forge-esm:
     dependencies:
@@ -223,20 +223,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       rollup:
         specifier: ^4.27.3
         version: 4.27.3
@@ -247,8 +247,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   apps/no-binary-cjs:
     dependencies:
@@ -269,20 +269,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       rollup:
         specifier: ^4.27.3
         version: 4.27.3
@@ -293,8 +293,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   apps/no-binary-esm:
     dependencies:
@@ -315,20 +315,20 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       rollup:
         specifier: ^4.27.3
         version: 4.27.3
@@ -339,32 +339,32 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   e2e:
     dependencies:
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@9.2.14)
+        version: 3.2.1(webdriverio@9.4.1)
       '@wdio/cli':
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/electron-utils':
         specifier: workspace:*
         version: link:../packages/@wdio_electron-utils
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/local-runner':
-        specifier: ^9.2.15
-        version: 9.2.15
+        specifier: ^9.4.1
+        version: 9.4.1
       '@wdio/mocha-framework':
         specifier: ^9.2.8
         version: 9.2.8
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -372,8 +372,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/wdio-electron-service
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
       xvfb-maybe:
         specifier: ^0.2.1
         version: 0.2.1
@@ -391,8 +391,8 @@ importers:
         specifier: ^22.9.1
         version: 22.9.1
       '@vitest/spy':
-        specifier: ^2.1.5
-        version: 2.1.5
+        specifier: ^2.1.8
+        version: 2.1.8
       '@wdio/types':
         specifier: ^9.2.2
         version: 9.2.2
@@ -409,8 +409,8 @@ importers:
   packages/@wdio_electron-types:
     dependencies:
       '@vitest/spy':
-        specifier: ^2.1.5
-        version: 2.1.5
+        specifier: ^2.1.8
+        version: 2.1.8
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.5.0
@@ -419,8 +419,8 @@ importers:
         specifier: ^18.3.6
         version: 18.3.6
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/types':
         specifier: ^9.2.2
         version: 9.2.2
@@ -428,8 +428,8 @@ importers:
         specifier: 25.1.7
         version: 25.1.7
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -440,8 +440,8 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
 
   packages/@wdio_electron-utils:
     dependencies:
@@ -452,8 +452,8 @@ importers:
         specifier: ^9.1.3
         version: 9.1.3
       debug:
-        specifier: ^4.3.7
-        version: 4.3.7(supports-color@8.1.1)
+        specifier: ^4.4.0
+        version: 4.4.0(supports-color@8.1.1)
       find-versions:
         specifier: ^6.0.0
         version: 6.0.0
@@ -501,8 +501,8 @@ importers:
   packages/wdio-electron-service:
     dependencies:
       '@vitest/spy':
-        specifier: ^2.1.5
-        version: 2.1.5
+        specifier: ^2.1.8
+        version: 2.1.8
       '@wdio/electron-types':
         specifier: workspace:*
         version: link:../@wdio_electron-types
@@ -510,8 +510,8 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-utils
       '@wdio/globals':
-        specifier: ^9.2.14
-        version: 9.2.14(@wdio/logger@9.1.3)
+        specifier: ^9.4.1
+        version: 9.4.1(@wdio/logger@9.1.3)
       '@wdio/logger':
         specifier: ^9.1.3
         version: 9.1.3
@@ -519,11 +519,11 @@ importers:
         specifier: ^6.1.1
         version: 6.1.1
       debug:
-        specifier: ^4.3.7
-        version: 4.3.7(supports-color@8.1.1)
+        specifier: ^4.4.0
+        version: 4.4.0(supports-color@8.1.1)
       electron-to-chromium:
-        specifier: ^1.5.63
-        version: 1.5.63
+        specifier: ^1.5.71
+        version: 1.5.71
       fast-copy:
         specifier: ^3.0.1
         version: 3.0.2
@@ -534,8 +534,8 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       webdriverio:
-        specifier: ^9.2.14
-        version: 9.2.14
+        specifier: ^9.4.1
+        version: 9.4.1
     devDependencies:
       '@electron-forge/shared-types':
         specifier: ^7.5.0
@@ -545,7 +545,7 @@ importers:
         version: 15.3.0(rollup@4.27.3)
       '@testing-library/webdriverio':
         specifier: ^3.2.1
-        version: 3.2.1(webdriverio@9.2.14)
+        version: 3.2.1(webdriverio@9.4.1)
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -562,8 +562,8 @@ importers:
         specifier: ^25.1.7
         version: 25.1.7
       electron:
-        specifier: ^33.2.0
-        version: 33.2.0
+        specifier: ^33.2.1
+        version: 33.2.1
       nock:
         specifier: ^14.0.0-beta.16
         version: 14.0.0-beta.16
@@ -703,8 +703,8 @@ packages:
     resolution: {integrity: sha512-F+nKc0xW+kVbBRhFzaMgPy3KwmuNTYX1fx6+FxxoSnNgwYX6LD7AKBTWkU0MQ6IBoe7dz069CNkR673sPAgkCQ==}
     engines: {node: '>=14'}
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
-    resolution: {tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
+  '@electron/node-gyp@git+https://git@github.com:electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
+    resolution: {commit: 06b29aafb7708acef8b3669835c8a7857ebc92d2, repo: git@github.com:electron/node-gyp.git, type: git}
     version: 10.2.0-electron.1
     engines: {node: '>=12.13.0'}
     hasBin: true
@@ -1698,11 +1698,14 @@ packages:
   '@vitest/spy@2.1.5':
     resolution: {integrity: sha512-aWZF3P0r3w6DiYTVskOYuhBc7EMc3jvn1TkBg8ttylFFRqNN2XGD7V5a4aQdk6QiUzZQ4klNBSpCLJgWNdIiNw==}
 
+  '@vitest/spy@2.1.8':
+    resolution: {integrity: sha512-5swjf2q95gXeYPevtW0BLk6H8+bPlMb4Vw/9Em4hFxDcaOxS+e0LOX4yqNxoHzMR2akEB2xfpnWUzkZokmgWDg==}
+
   '@vitest/utils@2.1.5':
     resolution: {integrity: sha512-yfj6Yrp0Vesw2cwJbP+cl04OC+IHFsuQsrsJBL9pyGeQXE56v1UAOQco+SR55Vf1nQzfV0QJg1Qum7AaWUwwYg==}
 
-  '@wdio/cli@9.2.14':
-    resolution: {integrity: sha512-nYNAuF5HPW8b+B21t83N6NGEUpszZZygTDMy+xemBQFrkp7qpDsaeaxv60rFf6AR1mapcnK4ghHJUqod0qL7cg==}
+  '@wdio/cli@9.4.1':
+    resolution: {integrity: sha512-GDyAer63WDsr2ckXmrpUyAcIZFd3pCRIpi85rL1ZjnWthRy/UtwY0EHPMDuSeUEJ28iYwW3esKgq2ZKlsdbMeA==}
     engines: {node: '>=18.20.0'}
     hasBin: true
 
@@ -1710,12 +1713,12 @@ packages:
     resolution: {integrity: sha512-EGMmBPGJbz6RmgMjebRWkWu3fGyeTIRcusF4UA4f2tiUEKY8nbzUO/ZyDjVQNR+YVB40q0jcqAqpszYRrIzzeg==}
     engines: {node: '>=18.20.0'}
 
-  '@wdio/globals@9.2.14':
-    resolution: {integrity: sha512-Hgi85bp5vpckK+k5iJ6zz8wUUL6IhCzywIG6uXzSgH/zkUOp5Til/NYyJmzSv6hRsfGaFia9WSaoqol93bfEIA==}
+  '@wdio/globals@9.4.1':
+    resolution: {integrity: sha512-CTVAVJ7iFyT54XF9iRmNvsDB+WSHoztJPG9XPL/mHzQ2LYfSyUR8E/j+3iHbTx3v/qRNucgPcGwhxiuY2RcaDg==}
     engines: {node: '>=18.20.0'}
 
-  '@wdio/local-runner@9.2.15':
-    resolution: {integrity: sha512-+qh/fkA362r+Wnu58BsC/O8xJ0TKPxdzdyHNsz5qgBdmromQIniWCC4xoKg7rBLv4aA5nkyJjXhC7lXcuWYkLQ==}
+  '@wdio/local-runner@9.4.1':
+    resolution: {integrity: sha512-MM5VM0V7zvajICr6eNROjkppRhGNpdV4nU5hrgSap92nou8G+zBgLxJ45P5BzLw67KQTOEa1E32b/zCBEkO+0g==}
     engines: {node: '>=18.20.0'}
 
   '@wdio/logger@8.38.0':
@@ -1737,8 +1740,8 @@ packages:
     resolution: {integrity: sha512-3iubjl4JX5zD21aFxZwQghqC3lgu+mSs8c3NaiYYNCC+IT5cI/8QuKlgh9s59bu+N3gG988jqMJeCYlKuUv/iw==}
     engines: {node: '>=18.20.0'}
 
-  '@wdio/runner@9.2.15':
-    resolution: {integrity: sha512-kVQ+YqVijkD2rJPgbJ7yEzzjOUoJ/HKqvBa3Y/kTJPLcSKQCn47GxqzXlOO6wPWLGWkf22Xn7CiTxFN1t+Zz0w==}
+  '@wdio/runner@9.4.1':
+    resolution: {integrity: sha512-WUpYamLafv+GUofGqvA2HO1kSVnwLyPO5ujq3TS/YaJLnUDOj4bjHiRo5+KDbKw1xhqjW0GjbfDupVU5LeL9iw==}
     engines: {node: '>=18.20.0'}
 
   '@wdio/types@9.2.2':
@@ -1780,6 +1783,10 @@ packages:
 
   agent-base@7.1.1:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
+    engines: {node: '>= 14'}
+
+  agent-base@7.1.3:
+    resolution: {integrity: sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==}
     engines: {node: '>= 14'}
 
   agentkeepalive@4.5.0:
@@ -2369,6 +2376,15 @@ packages:
       supports-color:
         optional: true
 
+  debug@4.4.0:
+    resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
   decamelize@4.0.0:
     resolution: {integrity: sha512-9iE1PgSik9HeIIw2JO94IidnE3eBoQrFJ3w7sFuzSX4DpmZ3v5sZpUiV5Swcf6mQEF+Y0ru8Neo+p+nyh2J+hQ==}
     engines: {node: '>=10'}
@@ -2534,11 +2550,11 @@ packages:
   electron-publish@25.1.7:
     resolution: {integrity: sha512-+jbTkR9m39eDBMP4gfbqglDd6UvBC7RLh5Y0MhFSsc6UkGHj9Vj9TWobxevHYMMqmoujL11ZLjfPpMX+Pt6YEg==}
 
-  electron-to-chromium@1.5.63:
-    resolution: {integrity: sha512-ddeXKuY9BHo/mw145axlyWjlJ1UBt4WK3AlvkT7W2AbqfRQoacVoRUCF6wL3uIx/8wT9oLKXzI+rFqHHscByaA==}
+  electron-to-chromium@1.5.71:
+    resolution: {integrity: sha512-dB68l59BI75W1BUGVTAEJy45CEVuEGy9qPVVQ8pnHyHMn36PLPPoE1mjLH+lo9rKulO3HC2OhbACI/8tCqJBcA==}
 
-  electron@33.2.0:
-    resolution: {integrity: sha512-PVw1ICAQDPsnnsmpNFX/b1i/49h67pbSPxuIENd9K9WpGO1tsRaQt+K2bmXqTuoMJsbzIc75Ce8zqtuwBPqawA==}
+  electron@33.2.1:
+    resolution: {integrity: sha512-SG/nmSsK9Qg1p6wAW+ZfqU+AV8cmXMTIklUL18NnOKfZLlum4ZsDoVdmmmlL39ZmeCaq27dr7CgslRPahfoVJg==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -3200,6 +3216,10 @@ packages:
 
   https-proxy-agent@7.0.5:
     resolution: {integrity: sha512-1e4Wqeblerz+tMKPIq2EMGiiWW1dIjZOksyHWSUm1rmuvw/how9hBHZ38lAGj5ID4Ik6EdkOw7NmWPy6LAwalw==}
+    engines: {node: '>= 14'}
+
+  https-proxy-agent@7.0.6:
+    resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
 
   human-signals@2.1.0:
@@ -4062,8 +4082,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nwsapi@2.2.13:
-    resolution: {integrity: sha512-cTGB9ptp9dY9A5VbMSe7fQBcl/tt22Vcqdq8+eN93rblOuE0aCFu4aZ2vMwct/2t+lFnosm8RkQW1I0Omb1UtQ==}
+  nwsapi@2.2.16:
+    resolution: {integrity: sha512-F1I/bimDpj3ncaNDhfyMWuFqmQDBwDB0Fogc2qpL3BWvkQteFD/8BzWuIRl83rq0DXfm8SGt/HFhLXZyljTXcQ==}
 
   object-inspect@1.13.2:
     resolution: {integrity: sha512-IRZSRuzJiynemAXPYtPe5BoI/RESNYR7TYm50MC5Mqbd3Jmw5y790sErYw3V6SryFJD64b74qQQs9wn5Bg/k3g==}
@@ -5024,11 +5044,11 @@ packages:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
     engines: {node: '>=14.0.0'}
 
-  tldts-core@6.1.61:
-    resolution: {integrity: sha512-In7VffkDWUPgwa+c9picLUxvb0RltVwTkSgMNFgvlGSWveCzGBemBqTsgJCL4EDFWZ6WH0fKTsot6yNhzy3ZzQ==}
+  tldts-core@6.1.66:
+    resolution: {integrity: sha512-s07jJruSwndD2X8bVjwioPfqpIc1pDTzszPe9pL1Skbh4bjytL85KNQ3tolqLbCvpQHawIsGfFi9dgerWjqW4g==}
 
-  tldts@6.1.61:
-    resolution: {integrity: sha512-rv8LUyez4Ygkopqn+M6OLItAOT9FF3REpPQDkdMx5ix8w4qkuE7Vo2o/vw1nxKQYmJDV8JpAMJQr1b+lTKf0FA==}
+  tldts@6.1.66:
+    resolution: {integrity: sha512-l3ciXsYFel/jSRfESbyKYud1nOw7WfhrBEF9I3UiarYk/qEaOOwu3qXNECHw4fHGHGTEOuhf/VdKgoDX5M/dhQ==}
     hasBin: true
 
   tmp-promise@3.0.3:
@@ -5142,10 +5162,6 @@ packages:
 
   type-fest@4.26.0:
     resolution: {integrity: sha512-OduNjVJsFbifKb57UqZ2EMP1i4u64Xwow3NYXUtBbD4vIwJdQd4+xl8YDou1dlm4DVrtwT/7Ky8z8WyCULVfxw==}
-    engines: {node: '>=16'}
-
-  type-fest@4.26.1:
-    resolution: {integrity: sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg==}
     engines: {node: '>=16'}
 
   type-fest@4.27.0:
@@ -5306,12 +5322,12 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
 
-  webdriver@9.2.8:
-    resolution: {integrity: sha512-40NtUC1zME9tPHNfZv6ETSE3+aE75qZuKjbVAA0gj02AkO1Nl3yJmf5RLdaLLfIQ2WlrbRP1g8KXlkiiVCmakg==}
+  webdriver@9.4.1:
+    resolution: {integrity: sha512-vFDdxMj/9W1+6jhpHSiRYfO8dix23HjAUtLx7aOv9ejEsntC0EzCIAftJ59YsF3Ppu184+FkdDVhnivpkZPTFw==}
     engines: {node: '>=18.20.0'}
 
-  webdriverio@9.2.14:
-    resolution: {integrity: sha512-85yEbwN3MwdrGzKZoGkLUf1J5cpfnc7knL4u/Y6XWd0gGwYjv60I5ZPsgSnXzNXAkq2kmtkammf1AM3ihqFM3A==}
+  webdriverio@9.4.1:
+    resolution: {integrity: sha512-XIPtRnxSES4CoxH2BfUY/6QzNgEgJEUjMYu7t7SJR8bVfbLRVXAA1ie9kM0MtdLs4oZ2Pr8rR8fqytsA1CjEWw==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       puppeteer-core: ^22.3.0
@@ -5334,8 +5350,8 @@ packages:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
     engines: {node: '>=18'}
 
-  whatwg-url@14.0.0:
-    resolution: {integrity: sha512-1lfMEm2IEr7RIV+f4lUNPOqfFL+pO+Xw3fJSqmjX9AbXcXcYOkCe1P6+9VBZB6n94af16NfZf+sSk0JCBZC9aw==}
+  whatwg-url@14.1.0:
+    resolution: {integrity: sha512-jlf/foYIKywAt3x/XWKZ/3rz8OSJPiWktjmk891alJUEjiVxKX9LEO92qH3hv4aJ0mN3MWPvGMCy8jQi95xK4w==}
     engines: {node: '>=18'}
 
   whatwg-url@5.0.0:
@@ -5572,7 +5588,7 @@ snapshots:
       '@electron/get': 3.1.0
       chalk: 4.1.2
       commander: 4.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 10.1.0
       listr2: 7.0.2
       semver: 7.6.3
@@ -5587,7 +5603,7 @@ snapshots:
       '@electron/rebuild': 3.7.0
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       find-up: 5.0.0
       fs-extra: 10.1.0
       log-symbols: 4.1.0
@@ -5615,7 +5631,7 @@ snapshots:
       '@electron/rebuild': 3.7.0
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fast-glob: 3.3.2
       filenamify: 4.3.0
       find-up: 5.0.0
@@ -5676,7 +5692,7 @@ snapshots:
     dependencies:
       '@electron-forge/shared-types': 7.5.0
       '@malept/cross-spawn-promise': 2.0.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 10.1.0
       username: 5.1.0
     transitivePeerDependencies:
@@ -5738,7 +5754,7 @@ snapshots:
 
   '@electron/get@2.0.3':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       env-paths: 2.2.1
       fs-extra: 8.1.0
       got: 11.8.6
@@ -5752,7 +5768,7 @@ snapshots:
 
   '@electron/get@3.1.0':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       env-paths: 2.2.1
       fs-extra: 8.1.0
       got: 11.8.6
@@ -5764,7 +5780,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
+  '@electron/node-gyp@git+https://git@github.com:electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.1
@@ -5782,7 +5798,7 @@ snapshots:
 
   '@electron/notarize@2.4.0':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 9.1.0
       promise-retry: 2.0.1
     transitivePeerDependencies:
@@ -5790,7 +5806,7 @@ snapshots:
 
   '@electron/notarize@2.5.0':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 9.1.0
       promise-retry: 2.0.1
     transitivePeerDependencies:
@@ -5799,7 +5815,7 @@ snapshots:
   '@electron/osx-sign@1.3.1':
     dependencies:
       compare-version: 0.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 10.1.0
       isbinaryfile: 4.0.10
       minimist: 1.2.8
@@ -5815,7 +5831,7 @@ snapshots:
       '@electron/osx-sign': 1.3.1
       '@electron/universal': 2.0.1
       '@electron/windows-sign': 1.1.3
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       extract-zip: 2.0.1
       filenamify: 4.3.0
       fs-extra: 11.2.0
@@ -5839,7 +5855,7 @@ snapshots:
       '@electron/osx-sign': 1.3.1
       '@electron/universal': 2.0.1
       '@electron/windows-sign': 1.2.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       extract-zip: 2.0.1
       filenamify: 4.3.0
       fs-extra: 11.2.0
@@ -5859,7 +5875,7 @@ snapshots:
     dependencies:
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       detect-libc: 2.0.3
       fs-extra: 10.1.0
       got: 11.8.6
@@ -5877,10 +5893,10 @@ snapshots:
 
   '@electron/rebuild@3.7.0':
     dependencies:
-      '@electron/node-gyp': https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2
+      '@electron/node-gyp': git+https://git@github.com:electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       detect-libc: 2.0.3
       fs-extra: 10.1.0
       got: 11.8.6
@@ -5899,7 +5915,7 @@ snapshots:
     dependencies:
       '@electron/asar': 3.2.13
       '@malept/cross-spawn-promise': 2.0.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       dir-compare: 4.2.0
       fs-extra: 11.2.0
       minimatch: 9.0.5
@@ -5910,7 +5926,7 @@ snapshots:
   '@electron/windows-sign@1.1.3':
     dependencies:
       cross-dirname: 0.1.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 11.2.0
       minimist: 1.2.8
       postject: 1.0.0-alpha.6
@@ -5920,7 +5936,7 @@ snapshots:
   '@electron/windows-sign@1.2.0':
     dependencies:
       cross-dirname: 0.1.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 11.2.0
       minimist: 1.2.8
       postject: 1.0.0-alpha.6
@@ -6078,7 +6094,7 @@ snapshots:
   '@eslint/config-array@0.19.0':
     dependencies:
       '@eslint/object-schema': 2.1.4
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -6088,7 +6104,7 @@ snapshots:
   '@eslint/eslintrc@3.2.0':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       espree: 10.3.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -6275,11 +6291,11 @@ snapshots:
 
   '@malept/cross-spawn-promise@2.0.0':
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
 
   '@malept/flatpak-bundler@0.4.0':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 9.1.0
       lodash: 4.17.21
       tmp-promise: 3.0.3
@@ -6412,7 +6428,7 @@ snapshots:
 
   '@puppeteer/browsers@2.4.1':
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.4.0
@@ -6541,12 +6557,12 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/webdriverio@3.2.1(webdriverio@9.2.14)':
+  '@testing-library/webdriverio@3.2.1(webdriverio@9.4.1)':
     dependencies:
       '@babel/runtime': 7.25.4
       '@testing-library/dom': 8.20.1
       simmerjs: 0.5.6
-      webdriverio: 9.2.14
+      webdriverio: 9.4.1
 
   '@tootallnate/once@2.0.0': {}
 
@@ -6683,7 +6699,7 @@ snapshots:
       '@typescript-eslint/types': 8.15.0
       '@typescript-eslint/typescript-estree': 8.15.0(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 8.15.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       eslint: 9.15.0
     optionalDependencies:
       typescript: 5.6.3
@@ -6699,7 +6715,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 8.15.0(typescript@5.6.3)
       '@typescript-eslint/utils': 8.15.0(eslint@9.15.0)(typescript@5.6.3)
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       eslint: 9.15.0
       ts-api-utils: 1.4.0(typescript@5.6.3)
     optionalDependencies:
@@ -6713,7 +6729,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.15.0
       '@typescript-eslint/visitor-keys': 8.15.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
@@ -6745,7 +6761,7 @@ snapshots:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
@@ -6801,18 +6817,22 @@ snapshots:
     dependencies:
       tinyspy: 3.0.2
 
+  '@vitest/spy@2.1.8':
+    dependencies:
+      tinyspy: 3.0.2
+
   '@vitest/utils@2.1.5':
     dependencies:
       '@vitest/pretty-format': 2.1.5
       loupe: 3.1.2
       tinyrainbow: 1.2.0
 
-  '@wdio/cli@9.2.14':
+  '@wdio/cli@9.4.1':
     dependencies:
       '@types/node': 20.17.6
       '@vitest/snapshot': 2.1.5
       '@wdio/config': 9.2.8
-      '@wdio/globals': 9.2.14(@wdio/logger@9.1.3)
+      '@wdio/globals': 9.4.1(@wdio/logger@9.1.3)
       '@wdio/logger': 9.1.3
       '@wdio/protocols': 9.2.2
       '@wdio/types': 9.2.2
@@ -6832,7 +6852,7 @@ snapshots:
       read-pkg-up: 10.1.0
       recursive-readdir: 2.2.3
       tsx: 4.19.2
-      webdriverio: 9.2.14
+      webdriverio: 9.4.1
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -6852,10 +6872,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wdio/globals@9.2.14(@wdio/logger@9.1.3)':
+  '@wdio/globals@9.4.1(@wdio/logger@9.1.3)':
     optionalDependencies:
-      expect-webdriverio: 5.0.4(@wdio/globals@9.2.14(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.2.14)
-      webdriverio: 9.2.14
+      expect-webdriverio: 5.0.4(@wdio/globals@9.4.1(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.4.1)
+      webdriverio: 9.4.1
     transitivePeerDependencies:
       - '@wdio/logger'
       - bufferutil
@@ -6863,12 +6883,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@wdio/local-runner@9.2.15':
+  '@wdio/local-runner@9.4.1':
     dependencies:
       '@types/node': 20.17.6
       '@wdio/logger': 9.1.3
       '@wdio/repl': 9.0.8
-      '@wdio/runner': 9.2.15
+      '@wdio/runner': 9.4.1
       '@wdio/types': 9.2.2
       async-exit-hook: 2.0.1
       split2: 4.2.0
@@ -6910,18 +6930,18 @@ snapshots:
     dependencies:
       '@types/node': 20.17.6
 
-  '@wdio/runner@9.2.15':
+  '@wdio/runner@9.4.1':
     dependencies:
       '@types/node': 20.17.6
       '@wdio/config': 9.2.8
-      '@wdio/globals': 9.2.14(@wdio/logger@9.1.3)
+      '@wdio/globals': 9.4.1(@wdio/logger@9.1.3)
       '@wdio/logger': 9.1.3
       '@wdio/types': 9.2.2
       '@wdio/utils': 9.2.8
       deepmerge-ts: 7.1.3
-      expect-webdriverio: 5.0.4(@wdio/globals@9.2.14(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.2.14)
-      webdriver: 9.2.8
-      webdriverio: 9.2.14
+      expect-webdriverio: 5.0.4(@wdio/globals@9.4.1(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.4.1)
+      webdriver: 9.4.1
+      webdriverio: 9.4.1
     transitivePeerDependencies:
       - bufferutil
       - puppeteer-core
@@ -6968,15 +6988,17 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
   agent-base@7.1.1:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
+
+  agent-base@7.1.3: {}
 
   agentkeepalive@4.5.0:
     dependencies:
@@ -7054,7 +7076,7 @@ snapshots:
       builder-util-runtime: 9.2.10
       chromium-pickle-js: 0.2.0
       config-file-ts: 0.2.8-rc1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       dmg-builder: 25.1.8(electron-builder-squirrel-windows@25.1.8)
       dotenv: 16.4.5
       dotenv-expand: 11.0.6
@@ -7249,7 +7271,7 @@ snapshots:
       chalk: 5.3.0
       cli-boxes: 3.0.0
       string-width: 7.2.0
-      type-fest: 4.26.1
+      type-fest: 4.27.0
       widest-line: 5.0.0
       wrap-ansi: 9.0.0
 
@@ -7286,7 +7308,7 @@ snapshots:
 
   builder-util-runtime@9.2.10:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       sax: 1.4.1
     transitivePeerDependencies:
       - supports-color
@@ -7300,7 +7322,7 @@ snapshots:
       builder-util-runtime: 9.2.10
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 10.1.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
@@ -7655,7 +7677,7 @@ snapshots:
   data-urls@5.0.0:
     dependencies:
       whatwg-mimetype: 4.0.0
-      whatwg-url: 14.0.0
+      whatwg-url: 14.1.0
     optional: true
 
   debug@2.6.9:
@@ -7666,7 +7688,11 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  debug@4.3.7(supports-color@8.1.1):
+  debug@4.3.7:
+    dependencies:
+      ms: 2.1.3
+
+  debug@4.4.0(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
     optionalDependencies:
@@ -7820,7 +7846,7 @@ snapshots:
 
   dot-prop@9.0.0:
     dependencies:
-      type-fest: 4.26.1
+      type-fest: 4.27.0
 
   dotenv-expand@11.0.6:
     dependencies:
@@ -7889,9 +7915,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron-to-chromium@1.5.63: {}
+  electron-to-chromium@1.5.71: {}
 
-  electron@33.2.0:
+  electron@33.2.1:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.17.6
@@ -8045,7 +8071,7 @@ snapshots:
   eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.15.0(eslint@9.15.0)(typescript@5.6.3))(eslint-plugin-import-x@4.4.3(eslint@9.15.0)(typescript@5.6.3))(eslint@9.15.0):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       enhanced-resolve: 5.17.1
       eslint: 9.15.0
       eslint-module-utils: 2.11.0(@typescript-eslint/parser@8.15.0(eslint@9.15.0)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.15.0(eslint@9.15.0)(typescript@5.6.3))(eslint-plugin-import-x@4.4.3(eslint@9.15.0)(typescript@5.6.3))(eslint@9.15.0))(eslint@9.15.0)
@@ -8074,7 +8100,7 @@ snapshots:
   eslint-plugin-import-x@4.4.3(eslint@9.15.0)(typescript@5.6.3):
     dependencies:
       '@typescript-eslint/utils': 8.15.0(eslint@9.15.0)(typescript@5.6.3)
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       doctrine: 3.0.0
       eslint: 9.15.0
       eslint-import-resolver-node: 0.3.9
@@ -8116,7 +8142,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       escape-string-regexp: 4.0.0
       eslint-scope: 8.2.0
       eslint-visitor-keys: 4.2.0
@@ -8182,7 +8208,7 @@ snapshots:
 
   execa@5.1.1:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       get-stream: 6.0.1
       human-signals: 2.1.0
       is-stream: 2.0.1
@@ -8237,15 +8263,15 @@ snapshots:
 
   expect-type@1.1.0: {}
 
-  expect-webdriverio@5.0.4(@wdio/globals@9.2.14(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.2.14):
+  expect-webdriverio@5.0.4(@wdio/globals@9.4.1(@wdio/logger@9.1.3))(@wdio/logger@9.1.3)(webdriverio@9.4.1):
     dependencies:
       '@vitest/snapshot': 2.1.5
-      '@wdio/globals': 9.2.14(@wdio/logger@9.1.3)
+      '@wdio/globals': 9.4.1(@wdio/logger@9.1.3)
       '@wdio/logger': 9.1.3
       expect: 29.7.0
       jest-matcher-utils: 29.7.0
       lodash.isequal: 4.5.0
-      webdriverio: 9.2.14
+      webdriverio: 9.4.1
 
   expect@29.7.0:
     dependencies:
@@ -8265,7 +8291,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -8378,7 +8404,7 @@ snapshots:
 
   flora-colossus@2.0.0:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 10.1.0
     transitivePeerDependencies:
       - supports-color
@@ -8389,7 +8415,7 @@ snapshots:
 
   foreground-child@3.3.0:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
   form-data@4.0.1:
@@ -8446,7 +8472,7 @@ snapshots:
 
   galactus@1.0.0:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       flora-colossus: 2.0.0
       fs-extra: 10.1.0
     transitivePeerDependencies:
@@ -8469,7 +8495,7 @@ snapshots:
       '@zip.js/zip.js': 2.7.53
       decamelize: 6.0.0
       http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
+      https-proxy-agent: 7.0.6
       node-fetch: 3.3.2
       tar-fs: 3.0.6
       which: 4.0.0
@@ -8532,7 +8558,7 @@ snapshots:
     dependencies:
       basic-ftp: 5.0.5
       data-uri-to-buffer: 6.0.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       fs-extra: 11.2.0
     transitivePeerDependencies:
       - supports-color
@@ -8715,14 +8741,14 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -8734,14 +8760,21 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.5:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  https-proxy-agent@7.0.6:
+    dependencies:
+      agent-base: 7.1.3
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -9028,7 +9061,7 @@ snapshots:
   istanbul-lib-source-maps@5.0.6:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
@@ -9104,9 +9137,9 @@ snapshots:
       form-data: 4.0.1
       html-encoding-sniffer: 4.0.0
       http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
+      https-proxy-agent: 7.0.6
       is-potential-custom-element-name: 1.0.1
-      nwsapi: 2.2.13
+      nwsapi: 2.2.16
       parse5: 7.2.1
       rrweb-cssom: 0.7.1
       saxes: 6.0.0
@@ -9116,7 +9149,7 @@ snapshots:
       webidl-conversions: 7.0.0
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
-      whatwg-url: 14.0.0
+      whatwg-url: 14.1.0
       ws: 8.18.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
@@ -9193,7 +9226,7 @@ snapshots:
     dependencies:
       chalk: 5.3.0
       commander: 12.1.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.3.7
       execa: 8.0.1
       lilconfig: 3.1.2
       listr2: 8.2.4
@@ -9484,7 +9517,7 @@ snapshots:
       ansi-colors: 4.1.3
       browser-stdout: 1.3.1
       chokidar: 3.6.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       diff: 5.2.0
       escape-string-regexp: 4.0.0
       find-up: 5.0.0
@@ -9619,7 +9652,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nwsapi@2.2.13:
+  nwsapi@2.2.16:
     optional: true
 
   object-inspect@1.13.2: {}
@@ -9755,7 +9788,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       get-uri: 6.0.3
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
@@ -9811,7 +9844,7 @@ snapshots:
     dependencies:
       '@babel/code-frame': 7.24.7
       index-to-position: 0.1.2
-      type-fest: 4.26.1
+      type-fest: 4.27.0
 
   parse-ms@4.0.0: {}
 
@@ -9953,7 +9986,7 @@ snapshots:
   proxy-agent@6.4.0:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -10001,7 +10034,7 @@ snapshots:
 
   read-binary-file-arch@1.0.6:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -10396,7 +10429,7 @@ snapshots:
   socks-proxy-agent@7.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       socks: 2.8.3
     transitivePeerDependencies:
       - supports-color
@@ -10404,7 +10437,7 @@ snapshots:
   socks-proxy-agent@8.0.4:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       socks: 2.8.3
     transitivePeerDependencies:
       - supports-color
@@ -10539,7 +10572,7 @@ snapshots:
 
   sumchecker@3.0.1:
     dependencies:
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -10635,12 +10668,12 @@ snapshots:
 
   tinyspy@3.0.2: {}
 
-  tldts-core@6.1.61:
+  tldts-core@6.1.66:
     optional: true
 
-  tldts@6.1.61:
+  tldts@6.1.66:
     dependencies:
-      tldts-core: 6.1.61
+      tldts-core: 6.1.66
     optional: true
 
   tmp-promise@3.0.3:
@@ -10659,7 +10692,7 @@ snapshots:
 
   tough-cookie@5.0.0:
     dependencies:
-      tldts: 6.1.61
+      tldts: 6.1.66
     optional: true
 
   tr46@0.0.3: {}
@@ -10735,8 +10768,6 @@ snapshots:
   type-fest@4.25.0: {}
 
   type-fest@4.26.0: {}
-
-  type-fest@4.26.1: {}
 
   type-fest@4.27.0: {}
 
@@ -10816,7 +10847,7 @@ snapshots:
   vite-node@2.1.5(@types/node@22.9.1)(terser@5.36.0):
     dependencies:
       cac: 6.7.14
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       es-module-lexer: 1.5.4
       pathe: 1.1.2
       vite: 5.4.11(@types/node@22.9.1)(terser@5.36.0)
@@ -10851,7 +10882,7 @@ snapshots:
       '@vitest/spy': 2.1.5
       '@vitest/utils': 2.1.5
       chai: 5.1.2
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
       expect-type: 1.1.0
       magic-string: 0.30.12
       pathe: 1.1.2
@@ -10886,7 +10917,7 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       commander: 9.5.0
-      debug: 4.3.7(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -10896,7 +10927,7 @@ snapshots:
 
   web-streams-polyfill@3.3.3: {}
 
-  webdriver@9.2.8:
+  webdriver@9.4.1:
     dependencies:
       '@types/node': 20.17.6
       '@types/ws': 8.5.13
@@ -10906,13 +10937,14 @@ snapshots:
       '@wdio/types': 9.2.2
       '@wdio/utils': 9.2.8
       deepmerge-ts: 7.1.3
+      undici: 6.21.0
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  webdriverio@9.2.14:
+  webdriverio@9.4.1:
     dependencies:
       '@types/node': 20.17.6
       '@types/sinonjs__fake-timers': 8.1.5
@@ -10940,7 +10972,7 @@ snapshots:
       rgb2hex: 0.2.5
       serialize-error: 11.0.3
       urlpattern-polyfill: 10.0.0
-      webdriver: 9.2.8
+      webdriver: 9.4.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -10957,7 +10989,7 @@ snapshots:
 
   whatwg-mimetype@4.0.0: {}
 
-  whatwg-url@14.0.0:
+  whatwg-url@14.1.0:
     dependencies:
       tr46: 5.0.0
       webidl-conversions: 7.0.0
