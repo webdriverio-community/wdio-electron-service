@@ -1,11 +1,11 @@
-import type { Options } from '@wdio/types';
+import type { WdioElectronConfig } from '@wdio/electron-types';
 
 import { config as baseConfig } from './wdio.no-binary.conf.js';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const baseServiceOptions = baseConfig.capabilities[0]['wdio:electronServiceOptions'];
 
-export const config: Options.Testrunner = {
+export const config: WdioElectronConfig = {
   ...baseConfig,
   outputDir: `wdio-logs-multiremote-${exampleDir}`,
   specs: ['./multiremote/*.spec.ts'],
@@ -17,7 +17,7 @@ export const config: Options.Testrunner = {
           ...baseServiceOptions,
           appArgs: ['browser=A'],
         },
-      } as WebdriverIO.Capabilities,
+      },
     },
     browserB: {
       capabilities: {
@@ -26,7 +26,7 @@ export const config: Options.Testrunner = {
           ...baseServiceOptions,
           appArgs: ['browser=B'],
         },
-      } as WebdriverIO.Capabilities,
+      },
     },
   },
 };

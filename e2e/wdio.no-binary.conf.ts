@@ -3,9 +3,9 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import type { NormalizedPackageJson } from 'read-package-up';
-import type { Options } from '@wdio/types';
 
 import { getElectronVersion } from '@wdio/electron-utils';
+import type { WdioElectronConfig } from '@wdio/electron-types';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -19,17 +19,16 @@ globalThis.packageJson = {
 };
 process.env.TEST = 'true';
 
-export const config: Options.Testrunner = {
-  services: ['electron'],
+export const config: WdioElectronConfig = {
+  services: [['electron', { restoreMocks: true }]],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appEntryPoint,
         appArgs: ['foo', 'bar=baz'],
-        restoreMocks: true,
       },
-    } as WebdriverIO.Capabilities,
+    },
   ],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
