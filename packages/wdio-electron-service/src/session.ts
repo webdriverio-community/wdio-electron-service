@@ -6,12 +6,9 @@ import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '
 import ElectronWorkerService from './service.js';
 import ElectronLaunchService from './launcher.js';
 
-export async function init(
-  capabilities: ElectronServiceCapabilities,
-  globalOptions: ElectronServiceGlobalOptions = {},
-) {
-  const testRunnerOpts: Options.Testrunner = globalOptions.rootDir ? { rootDir: globalOptions.rootDir } : {};
-  const launcher = new ElectronLaunchService(globalOptions, capabilities, testRunnerOpts);
+export async function init(capabilities: ElectronServiceCapabilities, globalOptions?: ElectronServiceGlobalOptions) {
+  const testRunnerOpts: Options.Testrunner = globalOptions?.rootDir ? { rootDir: globalOptions.rootDir } : {};
+  const launcher = new ElectronLaunchService(globalOptions || {}, capabilities, testRunnerOpts);
   const service = new ElectronWorkerService(globalOptions);
 
   await launcher.onPrepare(testRunnerOpts, capabilities);
