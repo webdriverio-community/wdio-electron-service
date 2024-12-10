@@ -2,6 +2,7 @@ import type * as Electron from 'electron';
 import type { OfficialArch } from '@electron/packager';
 import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
 import { fn as vitestFn, type Mock } from '@vitest/spy';
+import type { Capabilities, Options } from '@wdio/types';
 import type { ArchType } from 'builder-util';
 import type { PackageJson } from 'read-package-up';
 
@@ -170,6 +171,11 @@ export interface ElectronServiceOptions {
    */
   restoreMocks?: boolean;
 }
+
+export type ElectronServiceGlobalOptions = Pick<
+  ElectronServiceOptions,
+  'clearMocks' | 'resetMocks' | 'restoreMocks'
+> & { rootDir?: string };
 
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
@@ -695,6 +701,27 @@ export interface BrowserExtension extends BrowserBase {
   electron: ElectronServiceAPI;
 }
 
+type ElectronServiceCustomCapability = {
+  /**
+   * custom capabilities to configure the Electron service
+   */
+  'wdio:electronServiceOptions'?: ElectronServiceOptions;
+};
+
+type ElectronServiceRequestedStandaloneCapabilities = Capabilities.RequestedStandaloneCapabilities &
+  ElectronServiceCustomCapability;
+type ElectronServiceRequestedMultiremoteCapabilities = Capabilities.RequestedMultiremoteCapabilities &
+  ElectronServiceCustomCapability;
+
+export type ElectronServiceCapabilities =
+  | ElectronServiceRequestedStandaloneCapabilities[]
+  | ElectronServiceRequestedMultiremoteCapabilities
+  | ElectronServiceRequestedMultiremoteCapabilities[];
+
+export type WdioElectronConfig = Options.Testrunner & {
+  capabilities: ElectronServiceCapabilities | ElectronServiceCapabilities[];
+};
+
 declare global {
   interface Window {
     wdioElectron: WdioElectronWindowObj;
@@ -704,12 +731,8 @@ declare global {
     interface Browser extends BrowserExtension {}
     interface Element extends ElementBase {}
     interface MultiRemoteBrowser extends BrowserExtension {}
-    interface Capabilities {
-      /**
-       * custom capabilities to configure the Electron service
-       */
-      'wdio:electronServiceOptions'?: ElectronServiceOptions;
-    }
+    interface Capabilities extends ElectronServiceCustomCapability {}
+    interface ServiceOption extends ElectronServiceGlobalOptions {}
   }
 
   var __name: (func: Fn) => Fn;
