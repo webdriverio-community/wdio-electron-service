@@ -31,7 +31,7 @@ describe('init', () => {
   });
 
   it('should call onPrepare with the expected parameters', async () => {
-    await init({ appBinaryPath: '/path/to/binary' });
+    await init([{ 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }]);
     expect(onPrepareMock).toHaveBeenCalledWith(
       {
         appBinaryPath: '/path/to/binary',
@@ -48,16 +48,7 @@ describe('init', () => {
   });
 
   it('should call before with the expected parameters', async () => {
-    await init({ appBinaryPath: '/path/to/binary' });
-    expect(beforeMock).toHaveBeenCalledWith(
-      {
-        'browserName': 'electron',
-        'wdio:electronServiceOptions': {
-          appBinaryPath: '/path/to/binary',
-        },
-      },
-      [],
-      browserMock,
-    );
+    await init([{ 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }]);
+    expect(beforeMock).toHaveBeenCalledWith({}, [], browserMock);
   });
 });
