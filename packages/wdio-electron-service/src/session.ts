@@ -10,7 +10,7 @@ export async function init(
   capabilities: ElectronServiceCapabilities,
   globalOptions: ElectronServiceGlobalOptions = {},
 ) {
-  const testRunnerOpts: Options.Testrunner = { rootDir: globalOptions.rootDir };
+  const testRunnerOpts: Options.Testrunner = globalOptions.rootDir ? { rootDir: globalOptions.rootDir } : {};
   const launcher = new ElectronLaunchService(globalOptions, capabilities, testRunnerOpts);
   const service = new ElectronWorkerService(globalOptions);
 
