@@ -3,7 +3,7 @@ import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
 
-import { startElectron } from 'wdio-electron-service';
+import { startWdioSession } from 'wdio-electron-service';
 import type { NormalizedPackageJson } from 'read-package-up';
 
 import { getElectronVersion } from '@wdio/electron-utils';
@@ -18,7 +18,7 @@ const pkg = { packageJson, path: packageJsonPath };
 const appEntryPoint = path.join(__dirname, '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
 const electronVersion = getElectronVersion(pkg);
 
-const browser = await startElectron([
+const browser = await startWdioSession([
   {
     'browserName': 'electron',
     'wdio:electronServiceOptions': {
