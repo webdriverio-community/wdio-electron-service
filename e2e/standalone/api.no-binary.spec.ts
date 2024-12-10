@@ -18,10 +18,15 @@ const pkg = { packageJson, path: packageJsonPath };
 const appEntryPoint = path.join(__dirname, '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
 const electronVersion = getElectronVersion(pkg);
 
-const browser = await startElectron({
-  appEntryPoint,
-  appArgs: ['foo', 'bar=baz'],
-});
+const browser = await startElectron([
+  {
+    'browserName': 'electron',
+    'wdio:electronServiceOptions': {
+      appEntryPoint,
+      appArgs: ['foo', 'bar=baz'],
+    },
+  },
+]);
 
 const appName = await browser.electron.execute((electron) => electron.app.getName());
 if (appName !== 'Electron') {
