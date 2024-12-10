@@ -7,7 +7,7 @@ import ElectronWorkerService from './service.js';
 import ElectronLaunchService from './launcher.js';
 
 export async function init(
-  capabilities: ElectronServiceCapabilities = [{ browserName: 'electron' }],
+  capabilities: ElectronServiceCapabilities,
   globalOptions: ElectronServiceGlobalOptions = {},
 ) {
   const testRunnerOpts: Options.Testrunner = { rootDir: globalOptions.rootDir };
