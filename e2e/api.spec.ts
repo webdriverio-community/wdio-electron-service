@@ -216,19 +216,19 @@ describe('browser.electron', () => {
       });
     });
 
-    // it('should restore existing mocks', async () => {
-    //   const mockGetName = await browser.electron.mock('app', 'getName');
-    //   const mockReadText = await browser.electron.mock('clipboard', 'readText');
-    //   await mockGetName.mockReturnValue('mocked appName');
-    //   await mockReadText.mockReturnValue('mocked clipboardText');
+    it('should restore existing mocks', async () => {
+      const mockGetName = await browser.electron.mock('app', 'getName');
+      const mockReadText = await browser.electron.mock('clipboard', 'readText');
+      await mockGetName.mockReturnValue('mocked appName');
+      await mockReadText.mockReturnValue('mocked clipboardText');
 
-    //   await browser.electron.restoreAllMocks();
+      await browser.electron.restoreAllMocks();
 
-    //   const appName = await browser.electron.execute((electron) => electron.app.getName());
-    //   const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
-    //   expect(appName).toBe(pkgAppName);
-    //   expect(clipboardText).toBe('some real clipboard text');
-    // });
+      const appName = await browser.electron.execute((electron) => electron.app.getName());
+      const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText());
+      expect(appName).toBe(pkgAppName);
+      expect(clipboardText).toBe('some real clipboard text');
+    });
 
     it('should restore existing mocks on an API', async () => {
       const mockGetName = await browser.electron.mock('app', 'getName');
