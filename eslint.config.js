@@ -10,7 +10,7 @@ import importX from 'eslint-plugin-import-x';
 export default [
   // Ignored dirs
   {
-    ignores: ['**/dist/**/*', '@types/**/*'],
+    ignores: ['**/dist/**/*', '@types/**/*', 'e2e/js/*'],
   },
   // All files
   {
