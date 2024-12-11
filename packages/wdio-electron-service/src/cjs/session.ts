@@ -1,4 +1,5 @@
 import { remote } from 'webdriverio';
+// TODO: Fix CJS import of `log` from '@wdio/electron-utils/log'
 // import log from '@wdio/electron-utils/log';
 import type { Capabilities, Options } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';

@@ -1,5 +1,5 @@
 import { remote } from 'webdriverio';
-// import log from '@wdio/electron-utils/log';
+import log from '@wdio/electron-utils/log';
 import type { Options, Capabilities } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
@@ -13,7 +13,7 @@ export async function init(capabilities: ElectronServiceCapabilities, globalOpti
 
   await launcher.onPrepare(testRunnerOpts, capabilities);
 
-  // log.debug('Session capabilities:', capabilities);
+  log.debug('Session capabilities:', capabilities);
 
   // initialise session
   const browser = await remote({

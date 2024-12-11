@@ -10,17 +10,27 @@
   "exports": {
     ".": [
       {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "require": "./dist/cjs/index.js"
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/cjs/index.d.ts",
+          "default": "./dist/cjs/index.js"
+        }
       },
       "./dist/cjs/index.js"
     ],
     "./log": [
       {
-        "import": "./dist/log.js",
-        "types": "./dist/log.d.ts",
-        "require": "./dist/cjs/log.js"
+        "import": {
+          "types": "./dist/log.d.ts",
+          "default": "./dist/log.js"
+        },
+        "require": {
+          "types": "./dist/cjs/log.d.ts",
+          "default": "./dist/cjs/log.js"
+        }
       },
       "./dist/cjs/log.js"
     ]
