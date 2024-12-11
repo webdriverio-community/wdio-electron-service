@@ -1,6 +1,6 @@
 import { remote } from 'webdriverio';
 import log from '@wdio/electron-utils/log';
-import type { Capabilities, Options } from '@wdio/types';
+import type { Options, Capabilities } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
 import ElectronWorkerService from './service.js';
@@ -17,7 +17,9 @@ export async function init(capabilities: ElectronServiceCapabilities, globalOpti
 
   // initialise session
   const browser = await remote({
-    capabilities: capabilities as Capabilities.RequestedStandaloneCapabilities,
+    capabilities: (Array.isArray(capabilities)
+      ? capabilities[0]
+      : capabilities) as Capabilities.RequestedStandaloneCapabilities,
   });
 
   await service.before({}, [], browser);
