@@ -1,9 +1,5 @@
 {
   "extends": "../../tsconfig.base.cjs.json",
   "include": ["src/cjs/**/*", "src/cjs/package.json"],
-  "exclude": ["src/*.ts", "src/commands/*.ts", "node_modules", "coverage", "dist", "test"],
-  "compilerOptions": {
-    "module": "Preserve",
-    "moduleResolution": "bundler"
-  }
+  "exclude": ["src/*.ts", "src/commands/*.ts", "node_modules", "coverage", "dist", "test"]
 }
