@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { isTest } from './util.js';
+const isTest = process.env.TEST === 'true';
 
 if (isTest) {
   require('wdio-electron-service/preload');
