@@ -17,14 +17,13 @@ globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
 export const config = {
-  services: ['electron'],
+  services: [['electron', { restoreMocks: true }]],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
-        restoreMocks: true,
       },
     },
   ],
@@ -34,7 +33,7 @@ export const config = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./js/*.spec.js'],
+  specs: ['./test/js/*.spec.js'],
   framework: 'mocha',
   mochaOpts: {
     ui: 'bdd',

@@ -1,5 +1,5 @@
 import log from '@wdio/electron-utils/log';
-import type { AbstractFn, BrowserExtension, ElectronServiceOptions, ExecuteOpts } from '@wdio/electron-types';
+import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
 
 import mockStore from './mockStore.js';
@@ -39,12 +39,12 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
-  #globalOptions: ElectronServiceOptions;
+  #globalOptions: ElectronServiceGlobalOptions;
   #clearMocks = false;
   #resetMocks = false;
   #restoreMocks = false;
 
-  constructor(globalOptions: ElectronServiceOptions = {}) {
+  constructor(globalOptions: ElectronServiceGlobalOptions = {}) {
     this.#globalOptions = globalOptions;
   }
 
@@ -76,7 +76,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
     const browser = instance as WebdriverIO.Browser;
-    const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
     const { clearMocks, resetMocks, restoreMocks } = Object.assign(
       {},
       this.#globalOptions,
@@ -99,6 +98,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
 
     if (this.#browser.isMultiremote) {
+      const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
         const caps =

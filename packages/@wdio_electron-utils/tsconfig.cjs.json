@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.base.cjs.json",
   "include": ["./src/cjs/*.ts", "./src/cjs/package.json"],
+  "exclude": ["src/*.ts", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "Preserve",
+    "rootDir": "./src/cjs",
     "outDir": "./dist/cjs"
   }
 }

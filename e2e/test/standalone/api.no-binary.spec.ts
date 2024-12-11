@@ -3,7 +3,7 @@ import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
 
-import { startElectron } from 'wdio-electron-service';
+import { startWdioSession } from 'wdio-electron-service';
 import type { NormalizedPackageJson } from 'read-package-up';
 
 import { getElectronVersion } from '@wdio/electron-utils';
@@ -12,16 +12,21 @@ process.env.TEST = 'true';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJsonPath = path.join(__dirname, '..', '..', 'apps', exampleDir, 'package.json');
+const packageJsonPath = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
 const pkg = { packageJson, path: packageJsonPath };
-const appEntryPoint = path.join(__dirname, '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
+const appEntryPoint = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
 const electronVersion = getElectronVersion(pkg);
 
-const browser = await startElectron({
-  appEntryPoint,
-  appArgs: ['foo', 'bar=baz'],
-});
+const browser = await startWdioSession([
+  {
+    'browserName': 'electron',
+    'wdio:electronServiceOptions': {
+      appEntryPoint,
+      appArgs: ['foo', 'bar=baz'],
+    },
+  },
+]);
 
 const appName = await browser.electron.execute((electron) => electron.app.getName());
 if (appName !== 'Electron') {

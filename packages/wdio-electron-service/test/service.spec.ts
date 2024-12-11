@@ -117,6 +117,44 @@ describe('beforeTest', () => {
 
     expect(restoreAllMocks).toHaveBeenCalled();
   });
+
+  describe('when setting options in capabilities', () => {
+    it('should clear all mocks when `clearMocks` is set in capabilities', async () => {
+      instance = new WorkerService();
+      const browser = {
+        waitUntil: vi.fn().mockResolvedValue(true),
+        execute: vi.fn().mockResolvedValue(true),
+      } as unknown as WebdriverIO.Browser;
+      await instance.before({ 'wdio:electronServiceOptions': { clearMocks: true } }, [], browser);
+      await instance.beforeTest();
+
+      expect(clearAllMocks).toHaveBeenCalled();
+    });
+
+    it('should reset all mocks when `resetMocks` is set in capabilities', async () => {
+      instance = new WorkerService();
+      const browser = {
+        waitUntil: vi.fn().mockResolvedValue(true),
+        execute: vi.fn().mockResolvedValue(true),
+      } as unknown as WebdriverIO.Browser;
+      await instance.before({ 'wdio:electronServiceOptions': { resetMocks: true } }, [], browser);
+      await instance.beforeTest();
+
+      expect(resetAllMocks).toHaveBeenCalled();
+    });
+
+    it('should restore all mocks when `restoreMocks` is set in capabilities', async () => {
+      instance = new WorkerService();
+      const browser = {
+        waitUntil: vi.fn().mockResolvedValue(true),
+        execute: vi.fn().mockResolvedValue(true),
+      } as unknown as WebdriverIO.Browser;
+      await instance.before({ 'wdio:electronServiceOptions': { restoreMocks: true } }, [], browser);
+      await instance.beforeTest();
+
+      expect(restoreAllMocks).toHaveBeenCalled();
+    });
+  });
 });
 
 describe('afterCommand', () => {

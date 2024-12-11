@@ -3,9 +3,9 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import type { NormalizedPackageJson } from 'read-package-up';
-import type { Options } from '@wdio/types';
 
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import type { WdioElectronConfig } from '@wdio/electron-types';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -19,17 +19,16 @@ const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electro
 globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
-export const config: Options.Testrunner = {
-  services: ['electron'],
+export const config: WdioElectronConfig = {
+  services: [['electron', { restoreMocks: true }]],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
-        restoreMocks: true,
       },
-    } as WebdriverIO.Capabilities,
+    },
   ],
   waitforTimeout: 5000,
   connectionRetryCount: 10,
@@ -37,7 +36,7 @@ export const config: Options.Testrunner = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./*.spec.ts'],
+  specs: ['./test/*.spec.ts'],
   tsConfigPath: path.join(__dirname, 'tsconfig.json'),
   framework: 'mocha',
   mochaOpts: {

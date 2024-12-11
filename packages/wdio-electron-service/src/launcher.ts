@@ -3,26 +3,22 @@ import path from 'node:path';
 
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
-import type { Services, Options, Capabilities } from '@wdio/types';
-
 import log from '@wdio/electron-utils/log';
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import type { Services, Options, Capabilities } from '@wdio/types';
+import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
+
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import type { ElectronServiceOptions } from '@wdio/electron-types';
-
-export type ElectronServiceCapabilities = Capabilities.TestrunnerCapabilities & {
-  [CUSTOM_CAPABILITY_NAME]?: ElectronServiceOptions;
-};
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
-  #globalOptions: ElectronServiceOptions;
+  #globalOptions: ElectronServiceGlobalOptions;
   #projectRoot: string;
 
-  constructor(globalOptions: ElectronServiceOptions, _caps: unknown, config: Options.Testrunner) {
+  constructor(globalOptions: ElectronServiceGlobalOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
-    this.#projectRoot = config.rootDir || process.cwd();
+    this.#projectRoot = globalOptions.rootDir || config.rootDir || process.cwd();
   }
 
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {

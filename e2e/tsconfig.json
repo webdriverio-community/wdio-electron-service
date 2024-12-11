@@ -9,6 +9,6 @@
     "types": ["node", "@wdio/globals/types", "mocha"],
     "typeRoots": ["./node_modules", "./node_modules/@types"]
   },
-  "include": ["./**/*.spec.ts"],
+  "include": ["./test/**/*.spec.ts"],
   "exclude": []
 }

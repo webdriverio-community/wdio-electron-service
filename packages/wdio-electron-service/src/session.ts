@@ -1,32 +1,28 @@
 import { remote } from 'webdriverio';
-import type { Options } from '@wdio/types';
+import log from '@wdio/electron-utils/log';
+import type { Options, Capabilities } from '@wdio/types';
+import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
 import ElectronWorkerService from './service.js';
 import ElectronLaunchService from './launcher.js';
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import log from '@wdio/electron-utils/log';
-import type { ElectronServiceOptions } from '@wdio/electron-types';
 
-export async function init(opts: ElectronServiceOptions) {
-  const testRunnerOpts = opts as Options.Testrunner;
-  let capabilities = {
-    browserName: 'electron',
-    [CUSTOM_CAPABILITY_NAME]: opts,
-  };
+export async function init(capabilities: ElectronServiceCapabilities, globalOptions?: ElectronServiceGlobalOptions) {
+  const testRunnerOpts: Options.Testrunner = globalOptions?.rootDir ? { rootDir: globalOptions.rootDir } : {};
+  const launcher = new ElectronLaunchService(globalOptions || {}, capabilities, testRunnerOpts);
+  const service = new ElectronWorkerService(globalOptions);
 
-  const launcher = new ElectronLaunchService(opts, capabilities, testRunnerOpts);
-  const service = new ElectronWorkerService(opts);
-
-  await launcher.onPrepare(testRunnerOpts, [capabilities]);
+  await launcher.onPrepare(testRunnerOpts, capabilities);
 
   log.debug('Session capabilities:', capabilities);
 
   // initialise session
   const browser = await remote({
-    capabilities,
+    capabilities: (Array.isArray(capabilities)
+      ? capabilities[0]
+      : capabilities) as Capabilities.RequestedStandaloneCapabilities,
   });
 
-  await service.before(capabilities, [], browser);
+  await service.before({}, [], browser);
 
   return browser;
 }

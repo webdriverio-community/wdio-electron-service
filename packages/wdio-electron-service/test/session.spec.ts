@@ -1,4 +1,4 @@
-import { describe, it, vi, expect } from 'vitest';
+import { describe, it, vi, expect, beforeAll } from 'vitest';
 
 import { init } from '../src/session.js';
 
@@ -25,39 +25,63 @@ vi.mock('../src/launcher.js', () => ({
 vi.mock('webdriverio', () => ({ remote: async () => Promise.resolve(browserMock) }));
 
 describe('init', () => {
+  beforeAll(() => {
+    vi.clearAllMocks();
+  });
   it('should create a new browser session', async () => {
     const session = await init({});
     expect(session).toStrictEqual(browserMock);
   });
 
   it('should call onPrepare with the expected parameters', async () => {
-    await init({ appBinaryPath: '/path/to/binary' });
-    expect(onPrepareMock).toHaveBeenCalledWith(
+    await init([
       {
-        appBinaryPath: '/path/to/binary',
-      },
-      [
-        {
-          'browserName': 'electron',
-          'wdio:electronServiceOptions': {
-            appBinaryPath: '/path/to/binary',
-          },
+        'browserName': 'electron',
+        'browserVersion': '99.9.9',
+        'wdio:electronServiceOptions': {
+          appBinaryPath: '/path/to/binary',
         },
-      ],
-    );
+        'goog:chromeOptions': {
+          args: ['--disable-dev-shm-usage', '--disable-gpu', '--headless'],
+        },
+        'wdio:chromedriverOptions': {
+          binary: '/path/to/chromedriver',
+        },
+      },
+    ]);
+    expect(onPrepareMock).toHaveBeenCalledWith({}, [
+      {
+        'browserName': 'electron',
+        'browserVersion': '99.9.9',
+        'wdio:electronServiceOptions': {
+          appBinaryPath: '/path/to/binary',
+        },
+        'goog:chromeOptions': {
+          args: ['--disable-dev-shm-usage', '--disable-gpu', '--headless'],
+        },
+        'wdio:chromedriverOptions': {
+          binary: '/path/to/chromedriver',
+        },
+      },
+    ]);
   });
 
-  it('should call before with the expected parameters', async () => {
-    await init({ appBinaryPath: '/path/to/binary' });
-    expect(beforeMock).toHaveBeenCalledWith(
+  it('should call onPrepare with the expected parameters when a rootDir is specified', async () => {
+    await init([{ 'browserName': 'electron', 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }], {
+      rootDir: '/path/to/root',
+    });
+    expect(onPrepareMock).toHaveBeenCalledWith({ rootDir: '/path/to/root' }, [
       {
         'browserName': 'electron',
         'wdio:electronServiceOptions': {
           appBinaryPath: '/path/to/binary',
         },
       },
-      [],
-      browserMock,
-    );
+    ]);
+  });
+
+  it('should call before with the expected parameters', async () => {
+    await init([{ 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }]);
+    expect(beforeMock).toHaveBeenCalledWith({}, [], browserMock);
   });
 });

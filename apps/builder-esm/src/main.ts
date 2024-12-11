@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { isTest } from './util.js';
+const isTest = process.env.TEST === 'true';
 
 if (isTest) {
   import('wdio-electron-service/main');
