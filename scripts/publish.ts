@@ -1,5 +1,5 @@
-// Release script for the project - publishes the packages to the npm registry
-// Usage: tsx scripts/release.ts [option1] [option2] [...]
+// Publish script for the project - publishes the packages to the npm registry
+// Usage: tsx scripts/publish.ts [option1] [option2] [...]
 import shell from 'shelljs';
 
 const options = process.argv.slice(2);
