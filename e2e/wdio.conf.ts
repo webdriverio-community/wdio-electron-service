@@ -20,13 +20,14 @@ globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
 export const config: WdioElectronConfig = {
-  services: [['electron', { restoreMocks: true }]],
+  services: ['electron'],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
+        restoreMocks: true,
       },
     },
   ],

@@ -17,13 +17,14 @@ globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
 export const config = {
-  services: [['electron', { restoreMocks: true }]],
+  services: ['electron'],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
+        restoreMocks: true,
       },
     },
   ],
