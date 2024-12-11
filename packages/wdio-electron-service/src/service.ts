@@ -76,7 +76,11 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
     const browser = instance as WebdriverIO.Browser;
-    const { clearMocks, resetMocks, restoreMocks } = this.#globalOptions || capabilities[CUSTOM_CAPABILITY_NAME];
+    const { clearMocks, resetMocks, restoreMocks } = Object.assign(
+      {},
+      this.#globalOptions,
+      capabilities[CUSTOM_CAPABILITY_NAME],
+    );
 
     this.#clearMocks = clearMocks ?? false;
     this.#resetMocks = resetMocks ?? false;
