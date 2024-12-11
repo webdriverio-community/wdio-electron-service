@@ -6,36 +6,36 @@ const tsPlugin = rollupTS({ tsconfig: 'tsconfig.json', module: 'nodeNext' });
 
 export default defineConfig([
   {
-    input: 'api.spec.ts',
+    input: 'test/api.spec.ts',
     output: {
-      dir: 'js',
+      dir: 'test/js',
       format: 'esm',
     },
     plugins: [tsPlugin],
     external: ['@wdio/globals', '@vitest/spy', 'wdio-electron-service'],
   },
   {
-    input: 'application.spec.ts',
+    input: 'test/application.spec.ts',
     output: {
-      dir: 'js',
+      dir: 'test/js',
       format: 'esm',
     },
     plugins: [tsPlugin],
     external: ['@wdio/globals', 'wdio-electron-service'],
   },
   {
-    input: 'dom.spec.ts',
+    input: 'test/dom.spec.ts',
     output: {
-      dir: 'js',
+      dir: 'test/js',
       format: 'esm',
     },
     plugins: [tsPlugin],
     external: ['@testing-library/webdriverio', '@wdio/globals', 'wdio-electron-service'],
   },
   {
-    input: 'interaction.spec.ts',
+    input: 'test/interaction.spec.ts',
     output: {
-      dir: 'js',
+      dir: 'test/js',
       format: 'esm',
     },
     plugins: [tsPlugin],
