@@ -5,8 +5,8 @@
   "private": "true",
   "scripts": {
     "ci": "pnpm i && pnpm test",
-    "clean": "pnpm dlx shx rm -rf ./js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
-    "init-e2es": "pnpm dlx shx mkdir -p ./js && rollup -c rollup.config.js",
+    "clean": "pnpm dlx shx rm -rf ./test/js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "init-e2es": "pnpm dlx shx mkdir -p ./test/js && rollup -c rollup.config.js",
     "logs": "pnpm dlx shx cat ./wdio-logs*/*.log",
     "test:e2e:forge-cjs": "cross-env EXAMPLE_DIR=forge-cjs pnpm run exec",
     "test:e2e:forge-esm": "cross-env EXAMPLE_DIR=forge-esm pnpm run exec",

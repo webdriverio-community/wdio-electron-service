@@ -36,7 +36,7 @@ export const config: WdioElectronConfig = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./*.spec.ts'],
+  specs: ['./test/*.spec.ts'],
   tsConfigPath: path.join(__dirname, 'tsconfig.json'),
   framework: 'mocha',
   mochaOpts: {

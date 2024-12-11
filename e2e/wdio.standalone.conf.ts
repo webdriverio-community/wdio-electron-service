@@ -5,5 +5,5 @@ import { config as baseConfig } from './wdio.conf.js';
 export const config: WdioElectronConfig = {
   ...baseConfig,
   outputDir: 'wdio-standalone-logs',
-  specs: ['./standalone/*.spec.ts'],
+  specs: ['./test/standalone/*.spec.ts'],
 };
