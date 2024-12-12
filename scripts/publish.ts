@@ -8,7 +8,8 @@ shell.cp(['README.md', 'LICENSE'], 'packages/wdio-electron-service');
 shell.cp(['LICENSE'], 'packages/@wdio_electron-utils');
 shell.cp(['LICENSE'], 'packages/@wdio_electron-types');
 
-const publishCommand = `pnpm publish -r ${options.join(' ')}`;
+// --no-git-checks is used to skip the git checks - due to getting erroneous ERR_PNPM_GIT_UNCLEAN errors
+const publishCommand = `pnpm publish -r --no-git-checks ${options.join(' ')}`;
 
 console.log(`Publishing wdio-electron-service...`, publishCommand);
 
