@@ -83,7 +83,7 @@ jobs:
           # push tags and commits without running the pre-push hook
           git push --tags --no-verify && git push --no-verify
           # pass the release tag to the next step
-          echo "$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
