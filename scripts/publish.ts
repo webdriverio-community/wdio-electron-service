@@ -12,4 +12,4 @@ const publishCommand = `pnpm publish -r ${options.join(' ')}`;
 
 console.log(`Publishing wdio-electron-service...`, publishCommand);
 
-// shell.exec(publishCommand);
+shell.exec(publishCommand);
