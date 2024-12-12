@@ -10,4 +10,6 @@ shell.cp(['LICENSE'], 'packages/@wdio_electron-types');
 
 const publishCommand = `pnpm publish -r ${options.join(' ')}`;
 
-shell.exec(publishCommand);
+console.log(`Publishing wdio-electron-service...`, publishCommand);
+
+// shell.exec(publishCommand);
