@@ -33,8 +33,10 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "build": "pnpm build:esm && pnpm build:cjs",
     "build:esm": "tsc --outDir dist",
-    "build:cjs": "tsc --build tsconfig.cjs.json",
-    "release": "release-it -VV --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
+    "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:replace-import && pnpm build:cjs:compile",
+    "build:cjs:compile": "tsc --build tsconfig.cjs.json",
+    "build:cjs:copy": "cp -f src/*.ts src/cjs",
+    "build:cjs:replace-import": "shx sed -i \"s/tsx\\/esm\\/api/tsx\\/cjs\\/api/g\" \"./src/cjs/index.ts\" && shx sed -i \"s/{ tsImport }/{ require: tsImport }/g\" \"./src/cjs/index.ts\"",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit"
@@ -55,19 +57,8 @@
     "@types/node": "^22.9.1",
     "@vitest/coverage-v8": "^2.1.5",
     "@wdio/electron-types": "workspace:*",
-    "release-it": "^17.10.0",
     "shx": "^0.3.4",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.5"
-  },
-  "release-it": {
-    "hooks": {
-      "after:bump": "pnpm pack"
-    },
-    "git": false,
-    "npm": {
-      "publish": true,
-      "publishPath": "*.tgz"
-    }
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }

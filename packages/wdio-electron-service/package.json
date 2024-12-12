@@ -64,7 +64,6 @@
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:compile",
     "build:cjs:copy": "cp -f ./src/preload.ts ./src/cjs/preload.ts && cp -f ./src/main.ts ./src/cjs/main.ts && cp -f ./src/constants.ts ./src/cjs/constants.ts",
     "build:cjs:compile": "tsc --project tsconfig.cjs.json --outDir dist/cjs",
-    "release": "release-it -VV --ci --npm.skipChecks --no-git.requireCleanWorkingDir",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
@@ -115,8 +114,7 @@
     "builder-util": "^25.1.7",
     "electron": "^33.2.0",
     "nock": "^14.0.0-beta.16",
-    "release-it": "^17.10.0",
-    "rollup": "^4.27.3",
+    "rollup": "^4.28.1",
     "shx": "^0.3.4",
     "typescript": "^5.6.3",
     "vitest": "^2.1.5"
@@ -125,15 +123,5 @@
     "dist",
     "main",
     "preload"
-  ],
-  "release-it": {
-    "hooks": {
-      "after:bump": "pnpm pack"
-    },
-    "git": false,
-    "npm": {
-      "publish": true,
-      "publishPath": "*.tgz"
-    }
-  }
+  ]
 }

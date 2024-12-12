@@ -44,7 +44,8 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
+    "@eslint/js": "^9.16.0",
+    "@turbo-version/version": "^0.8.1",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^22.9.1",
     "@types/shelljs": "^0.8.15",
@@ -62,7 +63,6 @@
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "read-package-up": "^11.0.0",
-    "release-it": "^17.10.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.19.2",
@@ -73,18 +73,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.13.0+sha512.beb9e2a803db336c10c9af682b58ad7181ca0fbd0d4119f2b33d5f2582e96d6c0d93c85b23869295b765170fbdaa92890c0da6ada457415039769edf3c959efe",
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release v${version}",
-      "tagName": "v${version}",
-      "requireCleanWorkingDir": false
-    },
-    "github": {
-      "release": true
-    },
-    "npm": {
-      "publish": false
-    }
-  }
+  "packageManager": "pnpm@9.13.0+sha512.beb9e2a803db336c10c9af682b58ad7181ca0fbd0d4119f2b33d5f2582e96d6c0d93c85b23869295b765170fbdaa92890c0da6ada457415039769edf3c959efe"
 }
