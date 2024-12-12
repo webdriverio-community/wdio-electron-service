@@ -4,10 +4,6 @@ name: Manual Release Publish
 on:
   workflow_dispatch:
     inputs:
-      npmTag:
-        description: 'NPM tag. Defaults to "latest".'
-        required: true
-        default: 'latest'
       releaseVersion:
         description: 'The new version to create.'
         required: true
@@ -60,9 +56,34 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - name: Release
-        run: |
-          pnpx tsx scripts/release.ts ${{inputs.releaseVersion}} $DRY_RUN_ARG --npm.tag=${{inputs.npmTag}}
+      - name: Create Release and Tags
+        shell: bash
+        run: pnpm turbo-version -b ${{inputs.releaseVersion}}
+      - name: Publish to NPM
+        shell: bash
+        run: pnpx tsx scripts/publish.ts --tag latest ${{inputs.dryRun && '--dry-run' || ''}}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Log git changes
+        if: ${{inputs.dryRun}}
+        run: |
+          git diff ..origin/main
+          echo "DRY RUN: No changes were made."
+      - name: Push Tags and Commits
+        id: push-tags
+        shell: bash
+        if: ${{!inputs.dryRun}}
+        run: |
+          git push --tags && git push
+          echo "RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          prerelease: false
+          repository: goosewobbler/zutron
+          tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
