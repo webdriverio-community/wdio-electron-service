@@ -66,7 +66,9 @@ jobs:
         run: pnpm turbo-version -b ${{inputs.preReleaseVersion}}
       - name: Publish to NPM
         shell: bash
-        run: pnpx tsx scripts/publish.ts --no-git-checks --tag next ${{inputs.dryRun && '--dry-run' || ''}}
+        run: |
+          git log --oneline -n 4
+          pnpx tsx scripts/publish.ts --tag next ${{inputs.dryRun && '--dry-run' || ''}}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Log git changes
