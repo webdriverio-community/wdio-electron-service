@@ -25,7 +25,7 @@ on:
         type: boolean
 
 env:
-  DRY_RUN_ARG: ${{ inputs.dryRun && '--dry-run' || '' }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
@@ -58,21 +58,19 @@ jobs:
         run: pnpm build
       - name: Create Release and Tags
         shell: bash
-        run: pnpm turbo-version -b ${{inputs.preReleaseVersion}}
+        run: pnpm turbo-version -b ${{ inputs.preReleaseVersion }}
       - name: Publish to NPM
         shell: bash
-        run: pnpx tsx scripts/publish.ts --tag next ${{inputs.dryRun && '--dry-run' || ''}}
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpx tsx scripts/publish.ts --tag next ${{ inputs.dryRun && '--dry-run' || '' }}
       - name: Log git changes
-        if: ${{inputs.dryRun}}
+        if: ${{ inputs.dryRun }}
         run: |
           git diff ..origin/main
           echo "DRY RUN: No changes were made."
       - name: Push Tags and Commits
         id: push-tags
         shell: bash
-        if: ${{!inputs.dryRun}}
+        if: ${{ !inputs.dryRun }}
         run: |
           echo "Git log:"
           git log --oneline -n 5
@@ -84,8 +82,6 @@ jobs:
           git push --tags --no-verify && git push --no-verify
           # pass the release tag to the next step
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -94,4 +90,4 @@ jobs:
           prerelease: true
           repository: webdriverio-community/wdio-electron-service
           tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: $GITHUB_TOKEN
