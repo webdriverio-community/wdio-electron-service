@@ -67,8 +67,10 @@ jobs:
       - name: Publish to NPM
         shell: bash
         run: |
-          echo "Git Log:"
+          echo "Git log:"
           git log --oneline -n 5
+          echo "Git status:"
+          git status
           pnpx tsx scripts/publish.ts --tag next ${{inputs.dryRun && '--dry-run' || ''}}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
