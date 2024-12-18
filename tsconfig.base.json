@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "target": "ESNext",
     "esModuleInterop": true,
     "strict": true,
@@ -11,9 +11,7 @@
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "inlineSources": true,
     "skipLibCheck": true,
-    "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "stripInternal": true,
     "newLine": "lf",
