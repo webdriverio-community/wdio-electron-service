@@ -4,18 +4,18 @@
   "description": "Utilities for WebdriverIO Electron Service",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
-  "module": "dist/index.js",
+  "module": "dist/es/index.js",
   "main": "dist/cjs/index.js",
   "type": "module",
   "exports": {
     ".": [
       {
         "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/index.js"
+          "types": "./dist/es/types/index.d.ts",
+          "default": "./dist/es/index.js"
         },
         "require": {
-          "types": "./dist/cjs/index.d.ts",
+          "types": "./dist/cjs/types/index.d.ts",
           "default": "./dist/cjs/index.js"
         }
       },
@@ -24,24 +24,38 @@
     "./log": [
       {
         "import": {
-          "types": "./dist/log.d.ts",
-          "default": "./dist/log.js"
+          "types": "./dist/es/types/log.d.ts",
+          "default": "./dist/es/log.js"
         },
         "require": {
-          "types": "./dist/cjs/log.d.ts",
+          "types": "./dist/cjs/types/log.d.ts",
           "default": "./dist/cjs/log.js"
         }
       },
       "./dist/cjs/log.js"
+    ],
+    "./build": [
+      {
+        "import": {
+          "types": "./dist/es/types/build.d.ts",
+          "default": "./dist/es/build.js"
+        },
+        "require": {
+          "types": "./dist/cjs/types/build.d.ts",
+          "default": "./dist/cjs/build.js"
+        }
+      },
+      "./dist/cjs/build.js"
     ]
   },
+  "types": "./dist/es/types/index.d.ts",
   "engines": {
     "node": ">=18 || >=20"
   },
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./src/cjs/*.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
-    "build": "pnpm build:esm && pnpm build:cjs",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
     "build:esm": "tsc --outDir dist",
     "build:cjs": "pnpm build:cjs:copy && pnpm build:cjs:replace-import && pnpm build:cjs:compile",
     "build:cjs:compile": "tsc --build tsconfig.cjs.json",
@@ -53,11 +67,13 @@
   },
   "dependencies": {
     "@electron/packager": "^18.3.6",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@wdio/logger": "^9.1.3",
     "debug": "^4.4.0",
     "find-versions": "^6.0.0",
     "json5": "^2.2.3",
     "read-package-up": "^11.0.0",
+    "rollup-plugin-node-externals": "^8.0.0",
     "smol-toml": "^1.3.1",
     "tsx": "^4.19.2",
     "yaml": "^2.6.1"
