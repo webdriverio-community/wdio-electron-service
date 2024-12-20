@@ -1,3 +1,9 @@
+# [8.0.0-next.5](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.4...v8.0.0-next.5) (2024-12-20)
+
+### Bug Fixes
+
+- add typesVersions to package.json ([7fb86a1](https://github.com/webdriverio-community/wdio-electron-service/commit/7fb86a17a4d3962357b46d4384d12093d8d2006a))
+
 # [8.0.0-next.4](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.3...v8.0.0-next.4) (2024-12-12)
 
 # [8.0.0-next.3](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.2...v8.0.0-next.3) (2024-12-12)

@@ -1,3 +1,9 @@
+# [8.0.0-next.5](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.4...v8.0.0-next.5) (2024-12-20)
+
+### Bug Fixes
+
+- add log feature to session.ts for cjs ([9628b53](https://github.com/webdriverio-community/wdio-electron-service/commit/9628b53326d57c33328f8860a948cf4515fad3d9))
+
 # [8.0.0-next.4](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.3...v8.0.0-next.4) (2024-12-12)
 
 # [8.0.0-next.3](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.2...v8.0.0-next.3) (2024-12-12)
