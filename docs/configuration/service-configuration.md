@@ -51,6 +51,24 @@ Type: `string[]`
 
 The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-of-app-binary), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
+If you manually set the path to the Electron binary, make sure you set the path correctly for MacOS 
+
+```ts
+export const config = {
+  // ...
+  capabilities: [
+    {
+      // ...
+      'wdio:electronServiceOptions': {
+        appBinaryPath: '/foo/bar/myOtherApp.app/Contents/MacOS/myOtherApp',
+        // ...
+      },
+    },
+  ],
+  // ...
+};
+```
+
 Type: `string`
 
 ### `appEntryPoint`:
