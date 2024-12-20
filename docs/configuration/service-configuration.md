@@ -51,22 +51,29 @@ Type: `string[]`
 
 The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-of-app-binary), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
-If you manually set the path to the Electron binary, make sure you set the path correctly for MacOS 
+If you manually set the path to the Electron binary, the path will be in different formats depending on the build tool you are using, how that tool is configured, and which OS you are building the app on.
+
+Here are some examples of binary paths using default build configurations for a hypothetical app called `myApp` which is built in the `workspace/myApp` directory:
+
+#### MacOS
 
 ```ts
-export const config = {
-  // ...
-  capabilities: [
-    {
-      // ...
-      'wdio:electronServiceOptions': {
-        appBinaryPath: '/foo/bar/myOtherApp.app/Contents/MacOS/myOtherApp',
-        // ...
-      },
-    },
-  ],
-  // ...
-};
+'/workspace/myApp/dist/myApp.app/Contents/MacOS/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp.app/Contents/MacOS/myApp'; // Electron Forge
+```
+
+#### Linux
+
+```ts
+'/workspace/myApp/dist/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp'; // Electron Forge
+```
+
+#### Windows
+
+```ts
+'/workspace/myApp/dist/myApp.exe'; // Electron Builder
+'/workspace/myApp/out/myApp.exe'; // Electron Forge
 ```
 
 Type: `string`
