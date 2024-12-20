@@ -51,23 +51,49 @@ Type: `string[]`
 
 The path to the Electron binary of the app for testing. In most cases the service will determine the path to your app automatically [(check here)](#automatic-detection-of-app-binary), but if this fails for some reason, e.g. your app is in a different repository from your tests, then it is recommended to set this value manually.
 
-If you manually set the path to the Electron binary, make sure you set the path correctly for MacOS 
+If you manually set the path to the Electron binary, the path will be in different formats depending on the build tool you are using, how that tool is configured, and which OS you are building the app on.
+
+Here are some examples of binary paths using default build configurations for a hypothetical app called `myApp` which is built in the `workspace/myApp` directory:
+
+#### MacOS (Arm)
 
 ```ts
-export const config = {
-  // ...
-  capabilities: [
-    {
-      // ...
-      'wdio:electronServiceOptions': {
-        appBinaryPath: '/foo/bar/myOtherApp.app/Contents/MacOS/myOtherApp',
-        // ...
-      },
-    },
-  ],
-  // ...
-};
+'/workspace/myApp/dist/mac-arm64/myApp.app/Contents/MacOS/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp-darwin-arm64/myApp.app/Contents/MacOS/myApp'; // Electron Forge
 ```
+
+#### MacOS (Intel)
+
+```ts
+'/workspace/myApp/dist/mac-x64/myApp.app/Contents/MacOS/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp-darwin-x64/myApp.app/Contents/MacOS/myApp'; // Electron Forge
+```
+
+#### MacOS (Universal)
+
+```ts
+'/workspace/myApp/dist/mac-universal/myApp.app/Contents/MacOS/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp-darwin-universal/myApp.app/Contents/MacOS/myApp'; // Electron Forge
+```
+
+#### Linux
+
+```ts
+'/workspace/myApp/dist/linux-unpacked/myApp'; // Electron Builder
+'/workspace/myApp/out/myApp-linux-x64/myApp'; // Electron Forge
+```
+
+#### Windows
+
+```ts
+'C:\\workspace\\myApp\\dist\\win-unpacked\\myApp.exe'; // Electron Builder
+'C:\\workspace\\myApp\\out\\myApp-win32-x64\\myApp.exe'; // Electron Forge
+```
+
+Note:
+
+- The above examples are just to illustrate the format of your app binary path - the actual binary path of your app depends on your configuration.
+- Electron Forge uses a standardised output directory which is `out/{appName}-{OS}-{arch}`
 
 Type: `string`
 
