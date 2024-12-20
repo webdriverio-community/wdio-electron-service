@@ -84,25 +84,7 @@ export const config = {
 };
 ```
 
-If you manually set the path to the Electron binary, make sure you set the path correctly for MacOS 
-
-_`wdio.conf.ts`_
-
-```ts
-export const config = {
-  // ...
-  capabilities: [
-    {
-      // ...
-      'wdio:electronServiceOptions': {
-        appBinaryPath: './path/to/built/app.app/Contents/MacOS/app',
-        // ...
-      },
-    },
-  ],
-  // ...
-};
-```
+See the [configuration doc](./docs/configuration/service-configuration.md#appbinarypath) for how to find your `appBinaryPath` value for the different operating systems supported by Electron.
 
 Alternatively, you can point the service at an unpackaged app by providing the path to the `main.js` script. Electron will need to be installed in your `node_modules`. It is recommended to bundle unpackaged apps using a bundler such as Rollup, Parcel, Webpack, etc.
 
