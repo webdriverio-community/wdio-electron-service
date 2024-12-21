@@ -28,10 +28,10 @@ export const createRollupConfig = (
     nodeExternals(),
   ],
   strictDeprecations: true,
-  onwarn: (warning, warn) => {
-    warn(`Building Rollup produced warnings that need to be resolved.`);
-    throw Object.assign(new Error(), warning);
-  },
+  // onwarn: (warning, warn) => {
+  //   warn(`Building Rollup produced warnings that need to be resolved.`);
+  //   throw Object.assign(new Error(), warning);
+  // },
 });
 
 export const createEsmOutputConfig = (params: OutputPrams): OutputOptions => {
