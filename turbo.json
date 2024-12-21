@@ -80,7 +80,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-utils#build": {
-      "dependsOn": ["^build", "test:unit"],
+      "dependsOn": ["@wdio/electron-types#build", "test:unit", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-utils#release": {
@@ -135,12 +135,15 @@
       "outputs": ["out/**"]
     },
     "logs": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
     "test": {},
     "test:unit": {
       "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
-      "dependsOn": ["@wdio/electron-utils#build", "test:unit"],
+      "dependsOn": ["@wdio/electron-utils#build", "test:unit", "typecheck"],
       "outputs": ["dist/**"]
     },
     "wdio-electron-service#release": {

@@ -37,6 +37,7 @@
     "lint:fix": "cross-env eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit test:e2e",
     "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
