@@ -269,6 +269,7 @@ export async function createMock(apiName: string, funcName: string) {
       async (electron, apiName, funcName, implFnStr, callbackFnStr) => {
         const callback = eval?.(`"use strict"; ${callbackFnStr}`) as AbstractFn;
         const impl = eval?.(`"use strict"; ${implFnStr}`) as AbstractFn;
+
         let result: unknown | Promise<unknown>;
         (
           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock
