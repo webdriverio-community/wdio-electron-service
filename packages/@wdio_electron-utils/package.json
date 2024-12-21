@@ -1,6 +1,6 @@
 {
   "name": "@wdio/electron-utils",
-  "version": "8.0.0-next.4",
+  "version": "8.0.0-next.5",
   "description": "Utilities for WebdriverIO Electron Service",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
@@ -25,11 +25,11 @@
     "./log": [
       {
         "import": {
-          "types": "./dist/types/log.d.ts",
-          "default": "./dist/log.js"
+          "types": "./dist/esm/log.d.ts",
+          "default": "./dist/esm/log.js"
         },
         "require": {
-          "types": "./dist/types/log.d.ts",
+          "types": "./dist/cjs/log.d.ts",
           "default": "./dist/cjs/log.js"
         }
       },

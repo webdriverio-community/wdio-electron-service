@@ -84,6 +84,8 @@ export const config = {
 };
 ```
 
+See the [configuration doc](./docs/configuration/service-configuration.md#appbinarypath) for how to find your `appBinaryPath` value for the different operating systems supported by Electron.
+
 Alternatively, you can point the service at an unpackaged app by providing the path to the `main.js` script. Electron will need to be installed in your `node_modules`. It is recommended to bundle unpackaged apps using a bundler such as Rollup, Parcel, Webpack, etc.
 
 _`wdio.conf.ts`_
