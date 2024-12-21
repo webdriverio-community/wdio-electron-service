@@ -3,8 +3,8 @@
   "include": ["src/**/*.ts", "rollup.config.ts"],
   "exclude": ["src/cjs", "node_modules", "coverage", "dist", "test"],
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "types": [],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
