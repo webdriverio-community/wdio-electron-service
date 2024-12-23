@@ -56,7 +56,10 @@
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
-    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "pnpm build:compile && pnpm build:esm:bundle && pnpm build:esm:replace-file",
+    "build:compile": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build:esm:bundle": "tsx ./scripts/inject-dependency.ts ./dist/esm/index.js ./dist/esm/index.bundle.js @vitest/spy spy",
+    "build:esm:replace-file": "shx rm ./dist/esm/index.js && shx mv ./dist/esm/index.bundle.js ./dist/esm/index.js",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
