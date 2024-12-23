@@ -211,6 +211,7 @@ describe('getConfigPrams', () => {
       srcDir: 'src',
       rollupOptions: {},
       compilerOptions: {},
+      externalOptions: {},
     };
 
     const { inputConfig, outputParams } = getConfigPrams(fixture);
@@ -232,6 +233,7 @@ describe('resolveConfig', () => {
       srcDir: 'src',
       rollupOptions: {},
       compilerOptions: {},
+      externalOptions: {},
     });
   });
 
@@ -244,6 +246,9 @@ describe('resolveConfig', () => {
       },
       compilerOptions: {
         module: 'ESNext',
+      },
+      externalOptions: {
+        exclude: 'test',
       },
     } as const;
     expect(resolveConfig(fixture)).toStrictEqual(fixture);
