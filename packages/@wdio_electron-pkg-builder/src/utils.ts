@@ -21,7 +21,7 @@ const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
     const checkPath = join(rootDir, srcPath);
     debug(`Checking path: ${checkPath}`);
     if (existsSync(checkPath)) {
-      const posixPath = posix.join(...srcPath.split(sep));
+      const posixPath = normalizeToPosix(srcPath);
       debug(`Found entry point: ${posixPath}`);
       return posixPath;
     }
@@ -32,6 +32,8 @@ const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
 export const getFieldMissingErrorMessage = (field: string, path: string) => {
   return `"${field}" field which is required is not set: ${path}`;
 };
+
+const normalizeToPosix = (path: string) => posix.join(...path.split(sep));
 
 export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   debug(`Resolving entry points using exports field`);
@@ -44,7 +46,7 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   const config = Object.keys(exportsValue).reduce((acc: Record<string, string>, key) => {
     debug(`Resolving entry points using exports field value: ${key}`);
     const name = basename(key) === '.' ? 'index' : relative('./', key);
-    acc[name] = findEntryPoint(name, rootDir, srcDir);
+    acc[normalizeToPosix(name)] = findEntryPoint(name, rootDir, srcDir);
     return acc;
   }, {});
 
