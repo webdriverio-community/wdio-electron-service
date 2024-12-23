@@ -48,7 +48,6 @@ export const createCjsOutputConfig = (params: OutputPrams): OutputOptions => {
     format: MODULE_TYPE.CJS,
     dir: params.cjsDir,
     exports: 'named',
-    footer: 'module.exports = Object.assign(exports.default, exports);',
     dynamicImportInCjs: false,
     sourcemap: true,
     plugins: [emitPackageJsonPlugin(params.name, MODULE_TYPE.CJS)],
