@@ -39,11 +39,12 @@ There are 2 options.
 
 If the rollup parameters is necessary to customize depend on package requirements, use following parameters to change it.
 
-|    parameter    | default                                                                                               | overview                                  |
-| :-------------: | ----------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-|     rootDir     | `process.cwd()`                                                                                       | The root directory for the package.       |
-|     srcDir      | `src`                                                                                                 | The root directory for input source code. |
-|  rollupOptions  | The parameter for rollup. The parameter which is set by this library is override.                     |
-| compilerOptions | The parameter for Typescript compiler options. The parameter which is set by this library is override |
+|    parameter    | default         | overview                                                                                                        |
+| :-------------: | --------------- | --------------------------------------------------------------------------------------------------------------- |
+|     rootDir     | `process.cwd()` | The root directory for the package.                                                                             |
+|     srcDir      | `src`           | The root directory for input source code.                                                                       |
+|  rollupOptions  | `{}`            | The parameter for rollup. The parameter which is set by this library is override.                               |
+| compilerOptions | `{}`            | The parameter for Typescript compiler options. The parameter which is set by this library is override           |
+| externalOptions | `{}`            | The parameter for [`rollup-plugin-node-externals`](https://www.npmjs.com/package/rollup-plugin-node-externals). |
 
 **Types for the [WDIO Electron Service](https://github.com/webdriverio-community/wdio-electron-service)**
