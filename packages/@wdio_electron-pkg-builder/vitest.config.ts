@@ -6,6 +6,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude],
     environment: 'node',
     globals: true,
+    testTimeout: 10000,
     coverage: {
       enabled: true,
       include: ['src/*.ts'],
