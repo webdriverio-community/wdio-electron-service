@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join, posix, relative, sep } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
 import { type PartialCompilerOptions } from '@rollup/plugin-typescript';
 
@@ -10,19 +10,20 @@ const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
   debug(`Attempting to find entry point: ${name}`);
   const fileCandidates = [
     `${name}.ts`,
-    `${name}/index.ts`,
+    join(name, `index.ts`),
     `${name}.mts`,
-    `${name}/index.mts`,
+    join(name, `index.mts`),
     `${name}.cts`,
-    `${name}/index.cts`,
+    join(name, `index.cts`),
   ];
   for (const candidate of fileCandidates) {
     const srcPath = join(srcDir, candidate);
     const checkPath = join(rootDir, srcPath);
     debug(`Checking path: ${checkPath}`);
     if (existsSync(checkPath)) {
-      debug(`Found entry point: ${srcPath}`);
-      return srcPath;
+      const posixPath = posix.join(...srcPath.split(sep));
+      debug(`Found entry point: ${posixPath}`);
+      return posixPath;
     }
   }
   throw new Error(`entry point is not found: ${name}`);
