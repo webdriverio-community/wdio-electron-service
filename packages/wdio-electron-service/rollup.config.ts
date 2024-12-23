@@ -1,3 +1,16 @@
-import { createRollupConfig } from '@wdio/electron-pkg-builder';
+import { createEsmRollupOptions, createCjsRollupOptions } from '@wdio/electron-pkg-builder';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
-export default createRollupConfig();
+const esmConfig = createEsmRollupOptions();
+
+const cjsConfig = createCjsRollupOptions({
+  externalOptions: {
+    exclude: 'fast-copy',
+  },
+});
+
+if (typeof cjsConfig.plugins !== 'undefined' && Array.isArray(cjsConfig.plugins)) {
+  cjsConfig.plugins.push(nodeResolve());
+}
+
+export default [esmConfig, cjsConfig];
