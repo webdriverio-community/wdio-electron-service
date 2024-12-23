@@ -1,68 +1,53 @@
-import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 import { resolveCompilerOptions, getConfigPrams, getInputConfig, getOutputParams, resolveConfig } from '../src/utils';
 import { getFixturePackagePath } from './utils';
 
-const mocks = vi.hoisted(() => {
-  return {
-    existsSync: vi.fn(),
-  };
-});
-
-vi.mock('node:fs', () => {
-  return {
-    existsSync: mocks.existsSync,
-  };
-});
-
 describe(`getInputConfig`, () => {
   it('should resolved entry point', () => {
-    const pkgJsonPath = '/path/to/package.json';
-    const rootDir = dirname(pkgJsonPath);
-
-    vi.mocked(existsSync).mockImplementation((path) => {
-      return [
-        `${rootDir}/src/index.ts`,
-        `${rootDir}/src/cjs.ts`,
-        `${rootDir}/src/cjs/api.mts`,
-        `${rootDir}/src/esm/index.ts`,
-        `${rootDir}/src/esm/api/index.mts`,
-        `${rootDir}/src/esm/api1/index.cts`,
-      ].includes(path as string);
-    });
+    const pkgJsonPath = getFixturePackagePath('esm', 'build-test-esm');
     const exports = {
-      '.': './dist/loader.mjs',
-      './cjs': './dist/cjs/index.cjs',
-      './cjs/api': {
+      '.': './dist/loader.js',
+      './mod1': './dist/mod1.js',
+      './mod2': {
         import: {
-          types: './dist/cjs/api/index.d.mts',
-          default: './dist/cjs/api/index.mjs',
+          types: './dist/mod2/index.d.ts',
+          default: './dist/mod2/index.js',
         },
         require: {
-          types: './dist/cjs/api/index.d.cts',
-          default: './dist/cjs/api/index.cjs',
+          types: './dist/mod2/index.d.ts',
+          default: './dist/mod2/index.js',
         },
       },
-      './esm/api1': {
+      './mod3': {
         import: {
-          types: './dist/cjs/api/index.d.mts',
-          default: './dist/cjs/api/index.mjs',
+          types: './dist/mod3.d.mts',
+          default: './dist/mod3.mjs',
         },
         require: {
-          types: './dist/cjs/api/index.d.cts',
-          default: './dist/cjs/api/index.cjs',
+          types: './dist/mod3.d.cts',
+          default: './dist/mod3.cjs',
         },
       },
-      './esm': './dist/esm/index.mjs',
-      './esm/api': {
+      './mod4': './dist/mod4/index.mjs',
+      './mod5/api': {
         import: {
-          types: './dist/esm/api/index.d.mts',
-          default: './dist/esm/api/index.mjs',
+          types: './dist/mod5/api.d.mts',
+          default: './dist/mod5/api.mjs',
         },
         require: {
-          types: './dist/esm/api/index.d.cts',
-          default: './dist/esm/api/index.cjs',
+          types: './dist/mod5/api.d.cts',
+          default: './dist/mod5/api.cjs',
+        },
+      },
+      './mod6/api': {
+        import: {
+          types: './dist/mod6/api/index.d.cts',
+          default: './dist/mod6/api/index.cjs',
+        },
+        require: {
+          types: './dist/mod6/api/index.d.cts',
+          default: './dist/mod6/api/index.cjs',
         },
       },
     };
@@ -82,12 +67,13 @@ describe(`getInputConfig`, () => {
         'src',
       ),
     ).toEqual({
-      'cjs': 'src/cjs.ts',
-      'cjs/api': 'src/cjs/api.mts',
-      'esm': 'src/esm/index.ts',
-      'esm/api': 'src/esm/api/index.mts',
-      'esm/api1': 'src/esm/api1/index.cts',
       'index': 'src/index.ts',
+      'mod1': 'src/mod1.ts',
+      'mod2': 'src/mod2/index.ts',
+      'mod3': 'src/mod3.mts',
+      'mod4': 'src/mod4/index.mts',
+      'mod5/api': 'src/mod5/api.cts',
+      'mod6/api': 'src/mod6/api/index.cts',
     });
   });
 
@@ -109,7 +95,7 @@ describe(`getInputConfig`, () => {
   });
 
   it('should fail when entry point is not exist', () => {
-    vi.mocked(existsSync).mockImplementation(() => false);
+    // vi.mocked(existsSync).mockImplementation(() => false);
     const exports = {
       '.': {
         import: {
@@ -202,9 +188,6 @@ describe('resolveCompilerOptions', () => {
 
 describe('getConfigPrams', () => {
   it('should return input and output parameters', () => {
-    vi.mocked(existsSync).mockImplementation(() => {
-      return true;
-    });
     const fixturePkgPath = getFixturePackagePath('esm', 'build-success-esm');
     const fixture = {
       rootDir: dirname(fixturePkgPath),
