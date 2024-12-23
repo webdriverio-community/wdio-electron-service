@@ -1,7 +1,8 @@
 import typescript, { type PartialCompilerOptions } from '@rollup/plugin-typescript';
 import type { InputOption, OutputOptions, RollupOptions } from 'rollup';
 import { getOutputParams, resolveCompilerOptions } from './utils';
-import nodeExternals from 'rollup-plugin-node-externals';
+import nodeExternals, { type ExternalsOptions } from 'rollup-plugin-node-externals';
+
 import { emitPackageJsonPlugin, MODULE_TYPE } from './plugins';
 
 type OutputPrams = ReturnType<typeof getOutputParams>;
@@ -10,6 +11,7 @@ export const createRollupConfig = (
   input: InputOption,
   output: OutputOptions,
   compilerOptions: PartialCompilerOptions,
+  externalOptions: ExternalsOptions,
 ): RollupOptions => ({
   input,
   output,
@@ -25,7 +27,7 @@ export const createRollupConfig = (
         compilerOptions,
       ),
     }),
-    nodeExternals(),
+    nodeExternals(Object.assign({}, externalOptions)),
   ],
   strictDeprecations: true,
   onwarn: (warning, warn) => {

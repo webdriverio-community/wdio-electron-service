@@ -113,6 +113,7 @@ export const resolveConfig = (options: RollupWdioElectronServiceOptions) => {
     srcDir: 'src',
     rollupOptions: {},
     compilerOptions: {},
+    externalOptions: {},
   };
 
   return Object.assign({}, defaultOptions, options) as ResolvedRollupWdioElectronServiceOptions;
