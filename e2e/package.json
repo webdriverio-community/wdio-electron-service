@@ -45,13 +45,13 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",
-    "@rollup/plugin-typescript": "^12.1.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",
     "@vitest/spy": "^2.1.8",
     "@wdio/electron-types": "workspace:*",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.28.1",
+    "rollup": "^4.29.1",
     "typescript": "^5.7.2"
   }
 }
