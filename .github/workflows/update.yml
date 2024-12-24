@@ -34,6 +34,8 @@ jobs:
           wait-interval: 30 # seconds
           running-workflow-name: dependencies # wait for all checks except this one
           allowed-conclusions: success # all other checks must pass, being skipped or cancelled is not sufficient
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto-merge Dependabot Security PRs
         # Merge NPM security updates from Dependabot (ungrouped), but not version updates (grouped).
