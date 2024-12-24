@@ -80,7 +80,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-utils#build": {
-      "dependsOn": ["test:unit", "typecheck"],
+      "dependsOn": ["@wdio/electron-types#build", "test:unit", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-utils#release": {
