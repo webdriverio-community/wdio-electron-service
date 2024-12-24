@@ -43,7 +43,7 @@
           "default": "./dist/esm/preload.js"
         },
         "require": {
-          "types": "./dist//cjs/preload.d.ts",
+          "types": "./dist/cjs/preload.d.ts",
           "default": "./dist/cjs/preload.js"
         }
       },
@@ -56,6 +56,7 @@
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "pnpm build:compile && pnpm build:esm:bundle && pnpm build:esm:replace-file",
     "build:compile": "rollup --config rollup.config.ts --configPlugin typescript",
     "build:esm:bundle": "tsx ./scripts/inject-dependency.ts ./dist/esm/index.js ./dist/esm/index.bundle.js @vitest/spy spy",
@@ -63,7 +64,7 @@
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
-    "watch": "pnpm run build:esm --watch"
+    "watch": "pnpm run build:compile --watch"
   },
   "keywords": [
     "webdriverio",

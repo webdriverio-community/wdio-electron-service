@@ -26,6 +26,7 @@
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "rollup --config rollup.config.ts --configPlugin typescript",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
