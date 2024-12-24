@@ -1,7 +1,6 @@
 import { existsSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, sep } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
-import { type PartialCompilerOptions } from '@rollup/plugin-typescript';
 
 import debug from './log';
 import { type RollupWdioElectronServiceOptions } from '.';
@@ -45,7 +44,7 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   const rootDir = dirname(pkg.path);
   const config = Object.keys(exportsValue).reduce((acc: Record<string, string>, key) => {
     debug(`Resolving entry points using exports field value: ${key}`);
-    const name = basename(key) === '.' ? 'index' : relative('./', key);
+    const name = basename(key) === '.' ? 'index' : relative('.', key);
     acc[normalizeToPosix(name)] = findEntryPoint(name, rootDir, srcDir);
     return acc;
   }, {});
@@ -86,33 +85,10 @@ export const getOutputParams = (pkg: NormalizedReadResult) => {
   return params;
 };
 
-export const resolveCompilerOptions = (
-  defaultOptions: PartialCompilerOptions,
-  inputOptions: PartialCompilerOptions,
-) => {
-  const config = Object.assign({}, inputOptions, defaultOptions);
-
-  debug(`Generated typescript compiler options: ${JSON.stringify(config, null, 2)}`);
-  return config;
-};
-
 type ResolvedRollupWdioElectronServiceOptions = Required<RollupWdioElectronServiceOptions>;
-
-export const getConfigPrams = (options: ResolvedRollupWdioElectronServiceOptions) => {
-  const pkg = getPackageJson(options.rootDir);
-
-  const inputConfig = getInputConfig(pkg, options.srcDir);
-  const outputParams = getOutputParams(pkg);
-
-  return {
-    inputConfig,
-    outputParams,
-  };
-};
 
 export const resolveConfig = (options: RollupWdioElectronServiceOptions) => {
   const defaultOptions: ResolvedRollupWdioElectronServiceOptions = {
-    rootDir: process.cwd(),
     srcDir: 'src',
     rollupOptions: {},
     compilerOptions: {},

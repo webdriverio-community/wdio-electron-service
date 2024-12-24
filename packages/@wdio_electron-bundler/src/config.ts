@@ -1,40 +1,40 @@
-import typescript, { type PartialCompilerOptions } from '@rollup/plugin-typescript';
+import typescript from '@rollup/plugin-typescript';
 import type { InputOption, OutputOptions, RollupOptions } from 'rollup';
-import { getOutputParams, resolveCompilerOptions } from './utils';
-import nodeExternals, { type ExternalsOptions } from 'rollup-plugin-node-externals';
+import { getOutputParams } from './utils';
+import nodeExternals from 'rollup-plugin-node-externals';
 
 import { emitPackageJsonPlugin, MODULE_TYPE } from './plugins';
+import { type RollupWdioElectronServiceOptions } from '.';
 
 type OutputPrams = ReturnType<typeof getOutputParams>;
 
 export const createRollupConfig = (
   input: InputOption,
   output: OutputOptions,
-  compilerOptions: PartialCompilerOptions,
-  externalOptions: ExternalsOptions,
-): RollupOptions => ({
-  input,
-  output,
-  plugins: [
-    typescript({
-      exclude: ['rollup.config.ts'],
-      compilerOptions: resolveCompilerOptions(
-        {
+  options: Required<RollupWdioElectronServiceOptions>,
+): RollupOptions => {
+  const config: RollupOptions = {
+    input,
+    output,
+    plugins: [
+      typescript({
+        exclude: ['rollup.config.ts'],
+        compilerOptions: Object.assign({}, options.compilerOptions, {
           outDir: output.dir,
           declaration: true,
           declarationMap: true,
-        },
-        compilerOptions,
-      ),
-    }),
-    nodeExternals(Object.assign({}, externalOptions)),
-  ],
-  strictDeprecations: true,
-  onwarn: (warning, warn) => {
-    warn(`Building Rollup produced warnings that need to be resolved.`);
-    throw Object.assign(new Error(), warning);
-  },
-});
+        }),
+      }),
+      nodeExternals(Object.assign({}, options.externalOptions)),
+    ],
+    strictDeprecations: true,
+    onwarn: (warning, warn) => {
+      warn(`Building Rollup produced warnings that need to be resolved.`);
+      throw Object.assign(new Error(), warning);
+    },
+  };
+  return Object.assign({}, options.rollupOptions, config);
+};
 
 export const createEsmOutputConfig = (params: OutputPrams): OutputOptions => {
   return {

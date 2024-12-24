@@ -11,7 +11,7 @@ describe('RollupOptionCreator', () => {
     const cwd = dirname(fixture);
     const result = new RollupOptionCreator({ rootDir: cwd });
 
-    expect(result.getEsmCjsConfig().length).toBe(2);
+    expect(result.getConfigs().length).toBe(2);
     // @ts-ignore
     expect(result.esmRollupOptions.output!.format).toBe('esm');
     // @ts-ignore
@@ -29,8 +29,12 @@ describe('RollupOptionCreator', () => {
     const cwd = dirname(fixture);
     const config = new RollupOptionCreator({
       rootDir: cwd,
-      compilerOptions: {
-        sourceMap: true, // When Enable source maps, cose warnings at rollup-plugin-typescript
+      options: {
+        esm: {
+          compilerOptions: {
+            sourceMap: true, // When Enable source maps, cose warnings at rollup-plugin-typescript
+          },
+        },
       },
     });
 

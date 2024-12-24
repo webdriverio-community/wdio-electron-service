@@ -1,6 +1,4 @@
-import { dirname } from 'node:path';
-
-import { resolveCompilerOptions, getConfigPrams, getInputConfig, getOutputParams, resolveConfig } from '../src/utils';
+import { getInputConfig, getOutputParams, resolveConfig } from '../src/utils';
 import { getFixturePackagePath } from './utils';
 
 describe(`getInputConfig`, () => {
@@ -167,52 +165,9 @@ describe('getOutputParams', () => {
   );
 });
 
-describe('resolveCompilerOptions', () => {
-  it('should compilerOptions to be resolved', () => {
-    const defaultOptions = {
-      outDir: './dist',
-      declaration: true,
-      declarationMap: true,
-    };
-    const inputtedOptions = {
-      target: 'ESNext',
-    };
-    expect(resolveCompilerOptions(defaultOptions, inputtedOptions)).toStrictEqual({
-      outDir: './dist',
-      declaration: true,
-      declarationMap: true,
-      target: 'ESNext',
-    });
-  });
-});
-
-describe('getConfigPrams', () => {
-  it('should return input and output parameters', () => {
-    const fixturePkgPath = getFixturePackagePath('esm', 'build-success-esm');
-    const fixture = {
-      rootDir: dirname(fixturePkgPath),
-      srcDir: 'src',
-      rollupOptions: {},
-      compilerOptions: {},
-      externalOptions: {},
-    };
-
-    const { inputConfig, outputParams } = getConfigPrams(fixture);
-    expect(inputConfig).toStrictEqual({
-      index: 'src/index.ts',
-    });
-    expect(outputParams).toStrictEqual({
-      name: 'fixture-build-success-esm',
-      cjsDir: './dist/cjs',
-      esmDir: './dist/es',
-    });
-  });
-});
-
 describe('resolveConfig', () => {
   it('should return default options', () => {
     expect(resolveConfig({})).toStrictEqual({
-      rootDir: process.cwd(),
       srcDir: 'src',
       rollupOptions: {},
       compilerOptions: {},

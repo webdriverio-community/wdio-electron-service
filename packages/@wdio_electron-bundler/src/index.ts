@@ -1,57 +1,62 @@
 import { type PartialCompilerOptions } from '@rollup/plugin-typescript';
 import { type ExternalsOptions } from 'rollup-plugin-node-externals';
 
-import { getConfigPrams, resolveConfig } from './utils';
-import debug from './log';
+import { getInputConfig, getOutputParams, getPackageJson, resolveConfig } from './utils';
 
 import type { RollupOptions } from 'rollup';
 import { createRollupConfig as _createRollupConfig, createCjsOutputConfig, createEsmOutputConfig } from './config';
+import { type NormalizedReadResult } from 'read-package-up';
 
-export type RollupWdioElectronServiceOptions = {
+type InitPrams = {
   rootDir?: string;
   srcDir?: string;
+  options?: { esm?: BundlerOptions; cjs?: BundlerOptions };
+};
+
+type BundlerOptions = {
   rollupOptions?: RollupOptions;
   compilerOptions?: PartialCompilerOptions;
   externalOptions?: ExternalsOptions;
 };
 
-type Configs = ReturnType<typeof getConfigPrams>;
+export type RollupWdioElectronServiceOptions = Omit<InitPrams, 'rootDir' | 'options'> & BundlerOptions;
 
 export class RollupOptionCreator {
+  pkgJson: NormalizedReadResult;
   esmRollupOptions: RollupOptions = {};
   cjsRollupOptions: RollupOptions = {};
 
-  constructor(options: RollupWdioElectronServiceOptions = {}) {
-    debug('Prepare to generate the rollup configuration');
+  constructor(prams: InitPrams = {}) {
+    const a = Object.assign({ options: { esm: {}, cjs: {} } }, prams);
+    this.pkgJson = getPackageJson(a.rootDir || process.cwd());
+    this.createEsmConfig({ ...prams, ...a.options.esm });
+    this.createCjsConfig({ ...prams, ...a.options.cjs });
+  }
+
+  protected createEsmConfig(options: RollupWdioElectronServiceOptions = {}) {
     const resolvedOptions = resolveConfig(options);
 
-    const { inputConfig, outputParams } = getConfigPrams(resolvedOptions);
+    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolvedOptions);
+  }
 
-    debug('Start to generate the ESM rollup configuration');
-    this.esmRollupOptions = this.createRollupConfig(inputConfig, outputParams, createEsmOutputConfig, resolvedOptions);
-    debug(`Generated the ESM rollup configuration: ${JSON.stringify(this.esmRollupOptions, null, 2)}`);
+  protected createCjsConfig(options: RollupWdioElectronServiceOptions = {}) {
+    const resolvedOptions = resolveConfig(options);
 
-    debug('Start to generate the CJS rollup configuration');
-    this.cjsRollupOptions = this.createRollupConfig(inputConfig, outputParams, createCjsOutputConfig, resolvedOptions);
-    debug(`Generated the CJS rollup configuration: ${JSON.stringify(this.cjsRollupOptions, null, 2)}`);
+    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolvedOptions);
   }
 
   protected createRollupConfig(
-    inputConfig: Record<string, string>,
-    outputParams: Configs['outputParams'],
     callback: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
     resolvedOptions: Required<RollupWdioElectronServiceOptions>,
   ) {
-    const rollupOptions = _createRollupConfig(
-      inputConfig,
-      callback(outputParams),
-      resolvedOptions.compilerOptions,
-      resolvedOptions.externalOptions,
+    return _createRollupConfig(
+      getInputConfig(this.pkgJson, resolvedOptions.srcDir),
+      callback(getOutputParams(this.pkgJson)),
+      resolvedOptions,
     );
-    return Object.assign({}, resolvedOptions.rollupOptions, rollupOptions);
   }
 
-  public getEsmCjsConfig() {
+  public getConfigs() {
     return [this.esmRollupOptions, this.cjsRollupOptions];
   }
 }
