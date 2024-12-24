@@ -14,9 +14,7 @@ describe('createRollupConfig', () => {
       target: 'ESNext',
     } as const;
     const result = createRollupConfig(input, output, {
-      compilerOptions,
-      srcDir: '',
-      rollupOptions: {},
+      typescriptOptions: { compilerOptions },
       externalOptions: {},
     });
     expect(result.input).toStrictEqual(input);

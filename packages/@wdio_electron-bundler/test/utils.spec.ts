@@ -168,9 +168,7 @@ describe('getOutputParams', () => {
 describe('resolveConfig', () => {
   it('should return default options', () => {
     expect(resolveConfig({})).toStrictEqual({
-      srcDir: 'src',
-      rollupOptions: {},
-      compilerOptions: {},
+      typescriptOptions: {},
       externalOptions: {},
     });
   });
@@ -179,11 +177,10 @@ describe('resolveConfig', () => {
     const fixture = {
       rootDir: '/path/to/custom',
       srcDir: 'lib',
-      rollupOptions: {
-        logLevel: 'debug',
-      },
-      compilerOptions: {
-        module: 'ESNext',
+      typescriptOptions: {
+        compilerOptions: {
+          module: 'ESNext',
+        },
       },
       externalOptions: {
         exclude: 'test',

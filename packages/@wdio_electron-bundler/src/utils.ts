@@ -43,7 +43,7 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
 
   const rootDir = dirname(pkg.path);
   const config = Object.keys(exportsValue).reduce((acc: Record<string, string>, key) => {
-    debug(`Resolving entry points using exports field value: ${key}`);
+    debug(`Resolving the entry point: ${key}`);
     const name = basename(key) === '.' ? 'index' : relative('.', key);
     acc[normalizeToPosix(name)] = findEntryPoint(name, rootDir, srcDir);
     return acc;
@@ -85,15 +85,11 @@ export const getOutputParams = (pkg: NormalizedReadResult) => {
   return params;
 };
 
-type ResolvedRollupWdioElectronServiceOptions = Required<RollupWdioElectronServiceOptions>;
-
 export const resolveConfig = (options: RollupWdioElectronServiceOptions) => {
-  const defaultOptions: ResolvedRollupWdioElectronServiceOptions = {
-    srcDir: 'src',
-    rollupOptions: {},
-    compilerOptions: {},
+  const defaultOptions = {
+    typescriptOptions: {},
     externalOptions: {},
   };
 
-  return Object.assign({}, defaultOptions, options) as ResolvedRollupWdioElectronServiceOptions;
+  return Object.assign({}, defaultOptions, options) as Required<RollupWdioElectronServiceOptions>;
 };

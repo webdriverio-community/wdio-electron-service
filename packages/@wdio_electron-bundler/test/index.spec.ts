@@ -31,8 +31,10 @@ describe('RollupOptionCreator', () => {
       rootDir: cwd,
       options: {
         esm: {
-          compilerOptions: {
-            sourceMap: true, // When Enable source maps, cose warnings at rollup-plugin-typescript
+          typescriptOptions: {
+            compilerOptions: {
+              sourceMap: true, // When Enable source maps, cose warnings at rollup-plugin-typescript
+            },
           },
         },
       },

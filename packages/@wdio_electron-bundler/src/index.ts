@@ -1,59 +1,46 @@
-import { type PartialCompilerOptions } from '@rollup/plugin-typescript';
+import { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
 import { type ExternalsOptions } from 'rollup-plugin-node-externals';
 
 import { getInputConfig, getOutputParams, getPackageJson, resolveConfig } from './utils';
+import { createRollupConfig, createCjsOutputConfig, createEsmOutputConfig } from './config';
 
 import type { RollupOptions } from 'rollup';
-import { createRollupConfig as _createRollupConfig, createCjsOutputConfig, createEsmOutputConfig } from './config';
-import { type NormalizedReadResult } from 'read-package-up';
+import type { NormalizedReadResult } from 'read-package-up';
 
 type InitPrams = {
   rootDir?: string;
   srcDir?: string;
-  options?: { esm?: BundlerOptions; cjs?: BundlerOptions };
+  options?: {
+    esm?: RollupWdioElectronServiceOptions;
+    cjs?: RollupWdioElectronServiceOptions;
+  };
 };
 
-type BundlerOptions = {
-  rollupOptions?: RollupOptions;
-  compilerOptions?: PartialCompilerOptions;
+export type RollupWdioElectronServiceOptions = {
+  typescriptOptions?: RollupTypescriptOptions;
   externalOptions?: ExternalsOptions;
 };
 
-export type RollupWdioElectronServiceOptions = Omit<InitPrams, 'rootDir' | 'options'> & BundlerOptions;
-
 export class RollupOptionCreator {
-  pkgJson: NormalizedReadResult;
+  private pkgJson: NormalizedReadResult;
   esmRollupOptions: RollupOptions = {};
   cjsRollupOptions: RollupOptions = {};
+  private inputConfig: Record<string, string>;
 
   constructor(prams: InitPrams = {}) {
-    const a = Object.assign({ options: { esm: {}, cjs: {} } }, prams);
-    this.pkgJson = getPackageJson(a.rootDir || process.cwd());
-    this.createEsmConfig({ ...prams, ...a.options.esm });
-    this.createCjsConfig({ ...prams, ...a.options.cjs });
-  }
+    const options = Object.assign({ esm: {}, cjs: {} }, prams.options);
+    this.pkgJson = getPackageJson(prams.rootDir || process.cwd());
+    this.inputConfig = getInputConfig(this.pkgJson, prams.srcDir || `src`);
 
-  protected createEsmConfig(options: RollupWdioElectronServiceOptions = {}) {
-    const resolvedOptions = resolveConfig(options);
-
-    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolvedOptions);
-  }
-
-  protected createCjsConfig(options: RollupWdioElectronServiceOptions = {}) {
-    const resolvedOptions = resolveConfig(options);
-
-    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolvedOptions);
+    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolveConfig(options.esm));
+    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolveConfig(options.cjs));
   }
 
   protected createRollupConfig(
     callback: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
     resolvedOptions: Required<RollupWdioElectronServiceOptions>,
   ) {
-    return _createRollupConfig(
-      getInputConfig(this.pkgJson, resolvedOptions.srcDir),
-      callback(getOutputParams(this.pkgJson)),
-      resolvedOptions,
-    );
+    return createRollupConfig(this.inputConfig, callback(getOutputParams(this.pkgJson)), resolvedOptions);
   }
 
   public getConfigs() {

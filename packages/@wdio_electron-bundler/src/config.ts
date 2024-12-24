@@ -1,8 +1,9 @@
 import typescript from '@rollup/plugin-typescript';
 import type { InputOption, OutputOptions, RollupOptions } from 'rollup';
-import { getOutputParams } from './utils';
 import nodeExternals from 'rollup-plugin-node-externals';
 
+import debug from './log';
+import { getOutputParams } from './utils';
 import { emitPackageJsonPlugin, MODULE_TYPE } from './plugins';
 import { type RollupWdioElectronServiceOptions } from '.';
 
@@ -17,14 +18,16 @@ export const createRollupConfig = (
     input,
     output,
     plugins: [
-      typescript({
-        exclude: ['rollup.config.ts'],
-        compilerOptions: Object.assign({}, options.compilerOptions, {
-          outDir: output.dir,
-          declaration: true,
-          declarationMap: true,
+      typescript(
+        Object.assign({}, options.typescriptOptions, {
+          exclude: ['rollup.config.ts'],
+          compilerOptions: Object.assign({}, options.typescriptOptions.compilerOptions, {
+            outDir: output.dir,
+            declaration: true,
+            declarationMap: true,
+          }),
         }),
-      }),
+      ),
       nodeExternals(Object.assign({}, options.externalOptions)),
     ],
     strictDeprecations: true,
@@ -33,7 +36,8 @@ export const createRollupConfig = (
       throw Object.assign(new Error(), warning);
     },
   };
-  return Object.assign({}, options.rollupOptions, config);
+  debug(`Rollup config created: ${JSON.stringify(config, null, 2)}`);
+  return config;
 };
 
 export const createEsmOutputConfig = (params: OutputPrams): OutputOptions => {
