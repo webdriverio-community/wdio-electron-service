@@ -1,3 +1,5 @@
-import { createRollupConfig } from '@wdio/electron-bundler';
+import { RollupOptionCreator } from '@wdio/electron-bundler';
 
-export default createRollupConfig();
+const creator = new RollupOptionCreator();
+
+export default creator.getConfigs();
