@@ -1,3 +1,5 @@
-import { createRollupConfig } from './src/index';
+import { RollupOptionCreator } from './src/index';
 
-export default createRollupConfig();
+const creator = new RollupOptionCreator();
+
+export default creator.getEsmCjsConfig();

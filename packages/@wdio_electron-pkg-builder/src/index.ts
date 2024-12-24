@@ -15,68 +15,43 @@ export type RollupWdioElectronServiceOptions = {
   externalOptions?: ExternalsOptions;
 };
 
-export const createRollupConfig = (options: RollupWdioElectronServiceOptions = {}) => {
-  debug('Prepare to generate the rollup configuration');
-  const resolvedOptions = resolveConfig(options);
+type Configs = ReturnType<typeof getConfigPrams>;
 
-  const { inputConfig, outputParams } = getConfigPrams(resolvedOptions);
+export class RollupOptionCreator {
+  esmRollupOptions: RollupOptions = {};
+  cjsRollupOptions: RollupOptions = {};
 
-  debug('Start to generate the ESM rollup configuration');
-  const esmRollupOptions = _createRollupConfig(
-    inputConfig,
-    createEsmOutputConfig(outputParams),
-    resolvedOptions.compilerOptions,
-    resolvedOptions.externalOptions,
-  );
-  const esmConfig = Object.assign({}, resolvedOptions.rollupOptions, esmRollupOptions);
-  debug(`Generated the ESM rollup configuration: ${JSON.stringify(esmConfig, null, 2)}`);
+  constructor(options: RollupWdioElectronServiceOptions = {}) {
+    debug('Prepare to generate the rollup configuration');
+    const resolvedOptions = resolveConfig(options);
 
-  debug('Start to generate the CJS rollup configuration');
-  const cjsRollupOptions = _createRollupConfig(
-    inputConfig,
-    createCjsOutputConfig(outputParams),
-    resolvedOptions.compilerOptions,
-    resolvedOptions.externalOptions,
-  );
-  const cjsConfig = Object.assign({}, resolvedOptions.rollupOptions, cjsRollupOptions);
-  debug(`Generated the CJS rollup configuration: ${JSON.stringify(cjsConfig, null, 2)}`);
+    const { inputConfig, outputParams } = getConfigPrams(resolvedOptions);
 
-  debug('End to generate the rollup configuration');
-  return [esmConfig, cjsConfig];
-};
+    debug('Start to generate the ESM rollup configuration');
+    this.esmRollupOptions = this.createRollupConfig(inputConfig, outputParams, createEsmOutputConfig, resolvedOptions);
+    debug(`Generated the ESM rollup configuration: ${JSON.stringify(this.esmRollupOptions, null, 2)}`);
 
-export const createEsmRollupOptions = (options: RollupWdioElectronServiceOptions = {}) => {
-  debug('Prepare to generate the rollup configuration');
-  const resolvedOptions = resolveConfig(options);
+    debug('Start to generate the CJS rollup configuration');
+    this.cjsRollupOptions = this.createRollupConfig(inputConfig, outputParams, createCjsOutputConfig, resolvedOptions);
+    debug(`Generated the CJS rollup configuration: ${JSON.stringify(this.cjsRollupOptions, null, 2)}`);
+  }
 
-  const { inputConfig, outputParams } = getConfigPrams(resolvedOptions);
+  protected createRollupConfig(
+    inputConfig: Record<string, string>,
+    outputParams: Configs['outputParams'],
+    callback: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
+    resolvedOptions: Required<RollupWdioElectronServiceOptions>,
+  ) {
+    const rollupOptions = _createRollupConfig(
+      inputConfig,
+      callback(outputParams),
+      resolvedOptions.compilerOptions,
+      resolvedOptions.externalOptions,
+    );
+    return Object.assign({}, resolvedOptions.rollupOptions, rollupOptions);
+  }
 
-  debug('Start to generate the ESM rollup configuration');
-  const esmRollupOptions = _createRollupConfig(
-    inputConfig,
-    createEsmOutputConfig(outputParams),
-    resolvedOptions.compilerOptions,
-    resolvedOptions.externalOptions,
-  );
-  const esmConfig = Object.assign({}, resolvedOptions.rollupOptions, esmRollupOptions);
-  debug(`Generated the ESM rollup configuration: ${JSON.stringify(esmConfig, null, 2)}`);
-  return esmConfig;
-};
-
-export const createCjsRollupOptions = (options: RollupWdioElectronServiceOptions = {}) => {
-  debug('Prepare to generate the rollup configuration');
-  const resolvedOptions = resolveConfig(options);
-
-  const { inputConfig, outputParams } = getConfigPrams(resolvedOptions);
-
-  debug('Start to generate the CJS rollup configuration');
-  const cjsRollupOptions = _createRollupConfig(
-    inputConfig,
-    createCjsOutputConfig(outputParams),
-    resolvedOptions.compilerOptions,
-    resolvedOptions.externalOptions,
-  );
-  const cjsConfig = Object.assign({}, resolvedOptions.rollupOptions, cjsRollupOptions);
-  debug(`Generated the CJS rollup configuration: ${JSON.stringify(cjsConfig, null, 2)}`);
-  return cjsConfig;
-};
+  public getEsmCjsConfig() {
+    return [this.esmRollupOptions, this.cjsRollupOptions];
+  }
+}
