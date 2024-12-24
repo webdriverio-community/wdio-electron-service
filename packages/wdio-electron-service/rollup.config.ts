@@ -1,4 +1,4 @@
-import { createEsmRollupOptions, createCjsRollupOptions } from '@wdio/electron-pkg-builder';
+import { createEsmRollupOptions, createCjsRollupOptions } from '@wdio/electron-bundler';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 const esmConfig = createEsmRollupOptions();

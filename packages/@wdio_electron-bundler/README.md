@@ -1,9 +1,9 @@
 # WDIO Electron Package Builder
 
-<a href="https://www.npmjs.com/package/@wdio/electron-pkg-builder" alt="NPM Version">
-  <img src="https://img.shields.io/npm/v/@wdio/electron-pkg-builder" /></a>
-<a href="https://www.npmjs.com/package/@wdio/electron-pkg-builder" alt="NPM Downloads">
-  <img src="https://img.shields.io/npm/dw/@wdio/electron-pkg-builder" /></a>
+<a href="https://www.npmjs.com/package/@wdio/electron-bundler" alt="NPM Version">
+  <img src="https://img.shields.io/npm/v/@wdio/electron-bundler" /></a>
+<a href="https://www.npmjs.com/package/@wdio/electron-bundler" alt="NPM Downloads">
+  <img src="https://img.shields.io/npm/dw/@wdio/electron-bundler" /></a>
 
 <br />
 
