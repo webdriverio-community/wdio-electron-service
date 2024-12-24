@@ -93,7 +93,7 @@ Here are some examples of binary paths using default build configurations for a 
 Note:
 
 - The above examples are just to illustrate the format of your app binary path - the actual binary path of your app depends on your configuration.
-- Electron Forge uses a standardised output directory which is `out/{appName}-{OS}-{arch}`
+- Electron Forge uses a standardised output directory which can be represented as `out/{appName}-{OS}-{arch}`
 
 Type: `string`
 
