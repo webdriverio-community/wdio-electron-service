@@ -1,4 +1,4 @@
-import { getInputConfig, getOutputParams, resolveConfig } from '../src/utils';
+import { getInputConfig, getOutputParams, resolveOptions } from '../src/utils';
 import { getFixturePackagePath } from './utils';
 
 describe(`getInputConfig`, () => {
@@ -167,7 +167,7 @@ describe('getOutputParams', () => {
 
 describe('resolveConfig', () => {
   it('should return default options', () => {
-    expect(resolveConfig({})).toStrictEqual({
+    expect(resolveOptions({})).toStrictEqual({
       typescriptOptions: {},
       externalOptions: {},
     });
@@ -175,8 +175,6 @@ describe('resolveConfig', () => {
 
   it('should return inputted options', () => {
     const fixture = {
-      rootDir: '/path/to/custom',
-      srcDir: 'lib',
       typescriptOptions: {
         compilerOptions: {
           module: 'ESNext',
@@ -186,6 +184,6 @@ describe('resolveConfig', () => {
         exclude: 'test',
       },
     } as const;
-    expect(resolveConfig(fixture)).toStrictEqual(fixture);
+    expect(resolveOptions(fixture)).toStrictEqual(fixture);
   });
 });

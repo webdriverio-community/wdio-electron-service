@@ -1,7 +1,7 @@
 import { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
 import { type ExternalsOptions } from 'rollup-plugin-node-externals';
 
-import { getInputConfig, getOutputParams, getPackageJson, resolveConfig } from './utils';
+import { getInputConfig, getOutputParams, getPackageJson, resolveOptions } from './utils';
 import { createRollupConfig, createCjsOutputConfig, createEsmOutputConfig } from './config';
 
 import type { RollupOptions } from 'rollup';
@@ -32,15 +32,15 @@ export class RollupOptionCreator {
     this.pkgJson = getPackageJson(prams.rootDir || process.cwd());
     this.inputConfig = getInputConfig(this.pkgJson, prams.srcDir || `src`);
 
-    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolveConfig(options.esm));
-    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolveConfig(options.cjs));
+    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolveOptions(options.esm));
+    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolveOptions(options.cjs));
   }
 
   protected createRollupConfig(
-    callback: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
-    resolvedOptions: Required<RollupWdioElectronServiceOptions>,
+    createOutputConfig: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
+    options: Required<RollupWdioElectronServiceOptions>,
   ) {
-    return createRollupConfig(this.inputConfig, callback(getOutputParams(this.pkgJson)), resolvedOptions);
+    return createRollupConfig(this.inputConfig, createOutputConfig(getOutputParams(this.pkgJson)), options);
   }
 
   public getConfigs() {

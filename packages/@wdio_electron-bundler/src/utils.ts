@@ -85,11 +85,7 @@ export const getOutputParams = (pkg: NormalizedReadResult) => {
   return params;
 };
 
-export const resolveConfig = (options: RollupWdioElectronServiceOptions) => {
-  const defaultOptions = {
-    typescriptOptions: {},
-    externalOptions: {},
-  };
-
-  return Object.assign({}, defaultOptions, options) as Required<RollupWdioElectronServiceOptions>;
-};
+export const resolveOptions = (options: RollupWdioElectronServiceOptions) => ({
+  typescriptOptions: options.typescriptOptions || {},
+  externalOptions: options.externalOptions || {},
+});
