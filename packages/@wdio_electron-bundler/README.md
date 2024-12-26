@@ -1,4 +1,4 @@
-# WDIO Electron Package Builder
+# WDIO Electron Package Bundler
 
 <a href="https://www.npmjs.com/package/@wdio/electron-bundler" alt="NPM Version">
   <img src="https://img.shields.io/npm/v/@wdio/electron-bundler" /></a>
@@ -20,9 +20,11 @@ The `input` of Rollup option is auto detected based `exports` field of `package.
 1. Create the configuration file for rollup `rollup.config.ts`
 
    ```ts
-   import { createRollupConfig } from './src/index';
+   import { RollupOptionCreator } from '@wdio/electron-bundler';
 
-   export default createRollupConfig();
+   const creator = new RollupOptionCreator();
+
+   export default creator.getConfigs();
    ```
 
 ## How to maintain rollup configuration
