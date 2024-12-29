@@ -13,6 +13,10 @@ export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[E
 
 export interface ElectronServiceAPI {
   /**
+   * The window handle of the Electron window.
+   */
+  windowHandle: string | undefined;
+  /**
    * Whether the Electron bridge is active.
    */
   bridgeActive: boolean;
