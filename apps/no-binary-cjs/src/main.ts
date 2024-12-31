@@ -1,12 +1,18 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 const isTest = process.env.TEST === 'true';
-const enableSplashWindow = !!process.env.ENABLE_SPLASH_WINDOW;
+const isEnableSplash = !!process.env.ENABLE_SPLASH_WINDOW;
 
 if (isTest) {
   require('wdio-electron-service/main');
 }
 
 const appPath = app.getAppPath();
+const resourcePaths = {
+  preloadJs: `${appPath}/preload.bundle.js`,
+  splashHtml: `${appPath}/splash.html`,
+  indexHtml: `${appPath}/index.html`,
+} as const;
+
 let mainWindow: BrowserWindow;
 let splashWindow: BrowserWindow;
 
@@ -17,7 +23,7 @@ const createMainWindow = () => {
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appPath}/preload.bundle.js`,
+      preload: resourcePaths.preloadJs,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,
@@ -26,7 +32,7 @@ const createMainWindow = () => {
   mainWindow.on('closed', () => {
     mainWindow.destroy();
   });
-  mainWindow.loadFile(`${appPath}/index.html`);
+  mainWindow.loadFile(resourcePaths.indexHtml);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.title = 'this is the title of the main window';
@@ -42,13 +48,13 @@ const createSplashWindow = () => {
     height: 200,
     frame: false,
     webPreferences: {
-      preload: `${appPath}/preload.bundle.js`,
+      preload: resourcePaths.preloadJs,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
-  splashWindow.loadFile(`${appPath}/splash.html`);
+  splashWindow.loadFile(resourcePaths.splashHtml);
   splashWindow.once('ready-to-show', () => {
     splashWindow.show();
   });
@@ -59,7 +65,7 @@ app.on('ready', () => {
   console.warn('main warn');
   console.error('main error');
 
-  if (enableSplashWindow) {
+  if (isEnableSplash) {
     createSplashWindow();
   } else {
     createMainWindow();
