@@ -1,4 +1,5 @@
 import { multiremotebrowser, expect } from '@wdio/globals';
+
 describe('application with changing window', () => {
   it('should launch the application first screen', async () => {
     const browserA = multiremotebrowser.getInstance('browserA');
