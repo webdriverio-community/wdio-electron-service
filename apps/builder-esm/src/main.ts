@@ -9,7 +9,7 @@ if (isTest) {
 const appPath = app.getAppPath();
 const appRootPath = `${appPath}/dist`;
 const resourcePaths = {
-  preloadJs: `${appRootPath}/preload.bundle.cjs`,
+  preloadJs: `${appRootPath}/preload.cjs`,
   splashHtml: `${appRootPath}/splash.html`,
   indexHtml: `${appRootPath}/index.html`,
 } as const;
