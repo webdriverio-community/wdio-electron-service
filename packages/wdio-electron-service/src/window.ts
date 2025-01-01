@@ -2,13 +2,27 @@ import log from '@wdio/electron-utils/log';
 
 export const getWindowHandle = async (browser: WebdriverIO.Browser) => {
   if (browser.isMultiremote) {
-    return;
+    return undefined;
   }
+  log.debug(`Attempting to get window handle`);
   const handles = await browser.getWindowHandles();
-  if (handles.length === 1) {
-    return handles[0];
-  } else {
-    return;
+  switch (handles.length) {
+    case 0:
+      log.debug(`The application has no window`);
+      return undefined;
+    case 1:
+      log.debug(`The application has 1 window: ${handles[0]}`);
+      return handles[0];
+    default: {
+      const currentHandle = browser.electron.windowHandle;
+      if (!currentHandle || !handles.includes(currentHandle)) {
+        log.debug(`The application has multiple window, first one is used: ${handles[0]}`);
+        return handles[0];
+      } else {
+        log.debug(`Same window is detected: ${handles[0]}`);
+        return currentHandle;
+      }
+    }
   }
 };
 
