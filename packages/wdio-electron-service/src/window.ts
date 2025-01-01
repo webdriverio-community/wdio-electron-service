@@ -30,13 +30,11 @@ const followWindow = async (browser: WebdriverIO.Browser) => {
   const currentHandle = await getWindowHandle(browser);
 
   if (!!currentHandle && currentHandle !== browser.electron.windowHandle) {
-    if (browser.electron.windowHandle) {
-      log.debug(
-        'Window is changed.',
-        `New window handle: ${currentHandle}`,
-        `Old window handle: ${browser.electron.windowHandle}`,
-      );
-    }
+    log.debug(
+      'Window is changed. Switching to new window',
+      `New window handle: ${currentHandle}`,
+      `Old window handle: ${browser.electron.windowHandle}`,
+    );
     await browser.switchToWindow(currentHandle);
     browser.electron.windowHandle = currentHandle;
   }
@@ -50,6 +48,7 @@ export const executeWindowManagement = async (
   if (!browser || excludeCommands.includes(commandName)) {
     return;
   }
+  log.debug(`Start executing window management for command: ${commandName}`);
   if (browser.isMultiremote) {
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
@@ -59,4 +58,5 @@ export const executeWindowManagement = async (
   } else {
     await followWindow(browser);
   }
+  log.debug(`End executing window management for command: ${commandName}`);
 };
