@@ -93,10 +93,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      */
     this.#browser.electron = this.#getElectronAPI();
 
-    [this.#browser.electron.bridgeActive, this.#browser.electron.windowHandle] = await Promise.all([
-      isBridgeActive(this.#browser),
-      getWindowHandle(this.#browser),
-    ]);
+    this.#browser.electron.windowHandle = await getWindowHandle(this.#browser);
+    this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
     if (this.#browser.electron.bridgeActive) {
       await initSerializationWorkaround(this.#browser);
@@ -116,10 +114,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
-        [mrInstance.electron.bridgeActive, mrInstance.electron.windowHandle] = await Promise.all([
-          isBridgeActive(mrInstance),
-          getWindowHandle(mrInstance),
-        ]);
+
+        mrInstance.electron.windowHandle = await getWindowHandle(mrInstance);
+        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
         if (mrInstance.electron.bridgeActive) {
           await initSerializationWorkaround(mrInstance);
