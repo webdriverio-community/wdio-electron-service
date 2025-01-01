@@ -2,24 +2,57 @@ import { vi, describe, it, expect } from 'vitest';
 import { executeWindowManagement, getWindowHandle } from '../src/window.js';
 
 describe('getWindowHandle', () => {
-  it('should return the window handle', async () => {
-    const browser = {
-      isMultiremote: false,
-      getWindowHandles: vi.fn().mockResolvedValue(['window1']),
-    } as unknown as WebdriverIO.Browser;
+  describe('when no window', () => {
+    it('should return undefined', async () => {
+      const browser = {
+        isMultiremote: false,
+        getWindowHandles: vi.fn().mockResolvedValue([]),
+      } as unknown as WebdriverIO.Browser;
 
-    const handle = await getWindowHandle(browser);
-    expect(handle).toBe('window1');
+      const handle = await getWindowHandle(browser);
+      expect(handle).toBe(undefined);
+    });
   });
-  it('should not return the window handle when over 2 windows', async () => {
-    const browser = {
-      isMultiremote: false,
-      getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2']),
-    } as unknown as WebdriverIO.Browser;
 
-    const handle = await getWindowHandle(browser);
-    expect(handle).toBe(undefined);
+  describe('when 1 window', () => {
+    it('should return the window handle', async () => {
+      const browser = {
+        isMultiremote: false,
+        getWindowHandles: vi.fn().mockResolvedValue(['window1']),
+      } as unknown as WebdriverIO.Browser;
+
+      const handle = await getWindowHandle(browser);
+      expect(handle).toBe('window1');
+    });
   });
+
+  describe('when 2 or more windows', () => {
+    it('should return the handle of current window', async () => {
+      const browser = {
+        isMultiremote: false,
+        getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2', 'currentWindow']),
+        electron: {
+          windowHandle: 'currentWindow',
+        },
+      } as unknown as WebdriverIO.Browser;
+
+      const handle = await getWindowHandle(browser);
+      expect(handle).toBe('currentWindow');
+    });
+    it('should return the handle of first window', async () => {
+      const browser = {
+        isMultiremote: false,
+        getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2', 'window3']),
+        electron: {
+          windowHandle: 'currentWindow',
+        },
+      } as unknown as WebdriverIO.Browser;
+
+      const handle = await getWindowHandle(browser);
+      expect(handle).toBe('window1');
+    });
+  });
+
   it('should not return the window handle when MultiRemote', async () => {
     const browser = {
       isMultiremote: true,
