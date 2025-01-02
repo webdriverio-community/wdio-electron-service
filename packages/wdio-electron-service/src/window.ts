@@ -4,22 +4,22 @@ export const getWindowHandle = async (browser: WebdriverIO.Browser) => {
   if (browser.isMultiremote) {
     return undefined;
   }
-  log.debug(`Attempting to get window handle`);
+  log.trace(`Attempting to get window handle`);
   const handles = await browser.getWindowHandles();
   switch (handles.length) {
     case 0:
-      log.debug(`The application has no window`);
+      log.trace(`The application has no window`);
       return undefined;
     case 1:
-      log.debug(`The application has 1 window: ${handles[0]}`);
+      log.trace(`The application has 1 window: ${handles[0]}`);
       return handles[0];
     default: {
       const currentHandle = browser.electron.windowHandle;
       if (!currentHandle || !handles.includes(currentHandle)) {
-        log.debug(`The application has multiple window, first one is used: ${handles[0]}`);
+        log.trace(`The application has multiple window, first one is used: ${handles[0]}`);
         return handles[0];
       } else {
-        log.debug(`Same window is detected: ${handles[0]}`);
+        log.trace(`Same window is detected: ${handles[0]}`);
         return currentHandle;
       }
     }
@@ -48,7 +48,7 @@ export const executeWindowManagement = async (
   if (!browser || excludeCommands.includes(commandName)) {
     return;
   }
-  log.debug(`Start executing window management for command: ${commandName}`);
+  log.trace(`Start executing window management for command: ${commandName}`);
   if (browser.isMultiremote) {
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
@@ -58,5 +58,5 @@ export const executeWindowManagement = async (
   } else {
     await followWindow(browser);
   }
-  log.debug(`End executing window management for command: ${commandName}`);
+  log.trace(`End executing window management for command: ${commandName}`);
 };
