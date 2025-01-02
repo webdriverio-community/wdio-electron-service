@@ -6,7 +6,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc && rollup -c rollup.config.js && cp ./src/index.html ./dist",
+    "build": "tsc && rollup -c rollup.config.js && cp ./src/index.html ./dist && cp ./src/splash.html ./dist",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
   },

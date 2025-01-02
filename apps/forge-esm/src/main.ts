@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 const isTest = process.env.TEST === 'true';
+const isEnableSplash = !!process.env.ENABLE_SPLASH_WINDOW;
 
 if (isTest) {
   await import('wdio-electron-service/main');
@@ -7,35 +8,69 @@ if (isTest) {
 
 const appPath = app.getAppPath();
 const appRootPath = `${appPath}/dist`;
+const resourcePaths = {
+  preloadJs: `${appRootPath}/preload.bundle.cjs`,
+  splashHtml: `${appRootPath}/splash.html`,
+  indexHtml: `${appRootPath}/index.html`,
+} as const;
+
 let mainWindow: BrowserWindow;
+let splashWindow: BrowserWindow;
 
-app.on('ready', () => {
-  console.log('main log');
-  console.warn('main warn');
-  console.error('main error');
-
+const createMainWindow = () => {
   mainWindow = new BrowserWindow({
     x: 25,
     y: 35,
     width: 200,
     height: 300,
     webPreferences: {
-      preload: `${appRootPath}/preload.bundle.cjs`,
+      preload: resourcePaths.preloadJs,
       sandbox: !isTest,
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
-
   mainWindow.on('closed', () => {
     mainWindow.destroy();
   });
-  mainWindow.loadFile(`${appRootPath}/index.html`);
+  mainWindow.loadFile(resourcePaths.indexHtml);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.title = 'this is the title of the main window';
     // mainWindow.webContents.openDevTools();
   });
+};
+
+const createSplashWindow = () => {
+  splashWindow = new BrowserWindow({
+    x: 25,
+    y: 110,
+    width: 200,
+    height: 200,
+    frame: false,
+    webPreferences: {
+      preload: resourcePaths.preloadJs,
+      sandbox: !isTest,
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+  splashWindow.loadFile(resourcePaths.splashHtml);
+  splashWindow.once('ready-to-show', () => {
+    splashWindow.show();
+  });
+};
+
+app.on('ready', () => {
+  console.log('main log');
+  console.warn('main warn');
+  console.error('main error');
+
+  if (isEnableSplash) {
+    createSplashWindow();
+  } else {
+    createMainWindow();
+  }
 
   ipcMain.handle('increase-window-size', () => {
     const bounds = mainWindow.getBounds();
@@ -45,5 +80,12 @@ app.on('ready', () => {
   ipcMain.handle('decrease-window-size', () => {
     const bounds = mainWindow.getBounds();
     mainWindow.setBounds({ ...bounds, height: bounds.height - 10, width: bounds.width - 10 });
+  });
+
+  // to minimize the E2E test duration, we can switch to the main window programmatically
+  ipcMain.handle('switch-main-window', () => {
+    splashWindow.hide();
+    createMainWindow();
+    splashWindow.destroy();
   });
 });
