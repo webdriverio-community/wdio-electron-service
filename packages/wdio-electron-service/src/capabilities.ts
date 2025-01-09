@@ -18,6 +18,7 @@ export function getChromedriverOptions(cap: WebdriverIO.Capabilities) {
 }
 
 const isElectron = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserName?.toLowerCase() === 'electron';
+const isChrome = (cap: unknown) => (cap as WebdriverIO.Capabilities)?.browserName?.toLowerCase() === 'chrome';
 
 /**
  * Get capability independent of which type of capabilities is set
@@ -73,4 +74,60 @@ export function getElectronCapabilities(caps: Capabilities.RequestedStandaloneCa
         (options.capabilities as WebdriverIO.Capabilities),
     )
     .filter((caps) => isElectron(caps));
+}
+
+/**
+ * Get capability independent of which type of capabilities is set
+ */
+export function getChromeCapabilities(caps: Capabilities.RequestedStandaloneCapabilities) {
+  /**
+   * Standard capabilities, e.g.:
+   * ```
+   * {
+   *   browserName: 'chrome'
+   * }
+   * ```
+   */
+  const standardCaps = caps as WebdriverIO.Capabilities;
+  if (typeof standardCaps.browserName === 'string' && isChrome(standardCaps)) {
+    return [caps];
+  }
+  /**
+   * W3C specific capabilities, e.g.:
+   * ```
+   * {
+   *   alwaysMatch: {
+   *     browserName: 'chrome'
+   *   }
+   * }
+   * ```
+   */
+  const w3cCaps = (caps as Capabilities.W3CCapabilities).alwaysMatch;
+  if (w3cCaps && typeof w3cCaps.browserName === 'string' && isChrome(w3cCaps)) {
+    return [w3cCaps];
+  }
+  /**
+   * Multiremote capabilities, e.g.:
+   * ```
+   * {
+   *   instanceA: {
+   *     capabilities: {
+   *        browserName: 'chrome'
+   *     }
+   *   },
+   *   instanceB: {
+   *     capabilities: {
+   *        browserName: 'chrome'
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  return Object.values(caps as Capabilities.WithRequestedMultiremoteCapabilities['capabilities'])
+    .map(
+      (options) =>
+        (options.capabilities as Capabilities.W3CCapabilities)?.alwaysMatch ||
+        (options.capabilities as WebdriverIO.Capabilities),
+    )
+    .filter((caps) => isChrome(caps));
 }

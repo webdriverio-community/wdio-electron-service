@@ -8,17 +8,27 @@ import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electr
 import type { Services, Options, Capabilities } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
-import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
+import {
+  getChromeCapabilities,
+  getChromeOptions,
+  getChromedriverOptions,
+  getElectronCapabilities,
+} from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
+import getPort from 'get-port';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
   #projectRoot: string;
+  capabilities?: WebdriverIO.Capabilities | undefined;
+
+  #instanceId: string;
 
   constructor(globalOptions: ElectronServiceGlobalOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = globalOptions.rootDir || config.rootDir || process.cwd();
+    this.#instanceId = crypto.randomUUID(); // UUIDを生成
   }
 
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
@@ -91,6 +101,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           }
         }
 
+        const appArgInspect = `--inspect=ENDPOINT`;
+        appArgs = [...appArgs, appArgInspect];
+
         cap.browserName = 'chrome';
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
@@ -127,4 +140,53 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
+  async onWorkerStart(
+    // MEMO : Update following code to copy caps
+    // e2e/node_modules/@wdio/cli/build/index.js L2419 ~ L2438
+    _cid: string,
+    _capabilities: WebdriverIO.Capabilities,
+    _specs: string[],
+    _args: Options.Testrunner,
+    _execArgv: string[],
+  ) {
+    const capsList = Array.isArray(_capabilities) ? (_capabilities as WebdriverIO.Capabilities[]) : [_capabilities];
+
+    const hostname = 'localhost';
+    const caps = capsList.flatMap((cap) => getChromeCapabilities(cap) as WebdriverIO.Capabilities);
+
+    for (const cap of caps) {
+      const port = await getPort();
+      if (cap['goog:chromeOptions'] && cap['goog:chromeOptions'].args && hasInspect(cap['goog:chromeOptions'].args)) {
+        const args = cap['goog:chromeOptions'].args;
+        log.trace(`debug port:`, `--inspect=${hostname}:${port}`);
+        cap['goog:chromeOptions'].args = args.map((arg) =>
+          arg.startsWith(`--inspect=`) ? `--inspect=${hostname}:${port}` : arg,
+        );
+      }
+    }
+    // await Promise.all(
+    //   capsList.map((cap) => {
+    //     if (cap['goog:chromeOptions'] && cap['goog:chromeOptions'].args) {
+    //       const args = cap['goog:chromeOptions'].args;
+    //       if (args) {
+    //         cap['goog:chromeOptions'].args = args.map((arg) => {
+    //           if (arg.startsWith(`--inspect=`)) {
+    //             return arg.replace(/ENDPOINT/i, `${hostname}:${port}`);
+    //           }
+    //           return arg;
+    //         });
+    //       }
+    //     }
+    //   }),
+    // );
+    // log.debug(`========= onWorkerStart ${_cid}`, JSON.stringify(_capabilities, null, 2));
+  }
 }
+
+const hasInspect = (args: string[] | undefined) => {
+  if (!args || args.length === 0) {
+    return false;
+  }
+  const inspectArg = args.find((arg) => arg.startsWith(`--inspect=`));
+  return !!inspectArg;
+};

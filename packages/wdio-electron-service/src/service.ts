@@ -1,8 +1,15 @@
 import log from '@wdio/electron-utils/log';
-import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
+import type {
+  AbstractFn,
+  BrowserExtension,
+  ElectronInterface,
+  ElectronServiceGlobalOptions,
+  ElectronType,
+  ExecuteOpts,
+} from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
 
-import mockStore from './mockStore.js';
+// import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
@@ -11,6 +18,7 @@ import { isMockFunction } from './commands/isMockFunction.js';
 import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
+import { DebuggerClient } from './electron.js';
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
@@ -23,18 +31,22 @@ const isBridgeActive = async (browser: WebdriverIO.Browser) =>
     return window.wdioElectron !== undefined;
   });
 
-const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
-  // Add __name to the global object to work around issue with function serialization
-  // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-  // https://github.com/privatenumber/tsx/issues/113
-
-  await browser.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-  await browser.electron.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
+const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
+  await browser.electron.execute<void, [ExecuteOpts]>(
+    async (electron) => {
+      const { default: copy } = await import('fast-copy');
+      globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
+      for (const api in electron) {
+        const apiName = api as keyof ElectronType;
+        globalThis.originalApi[apiName] = {} as ElectronType[ElectronInterface];
+        for (const apiElement in electron[apiName]) {
+          const apiElementName = apiElement as keyof ElectronType[ElectronInterface];
+          globalThis.originalApi[apiName][apiElementName] = copy(electron[apiName][apiElementName]);
+        }
+      }
+    },
+    { internal: true },
+  );
 };
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
@@ -43,6 +55,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
   #clearMocks = false;
   #resetMocks = false;
   #restoreMocks = false;
+  #debuggerClient: DebuggerClient | undefined = undefined;
 
   constructor(globalOptions: ElectronServiceGlobalOptions = {}) {
     this.#globalOptions = globalOptions;
@@ -56,11 +69,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
   }
 
-  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
+  #getElectronAPI(browserInstance?: WebdriverIO.Browser, debuggerClient?: DebuggerClient) {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
+    const client = debuggerClient || this.#debuggerClient!;
     const api = {
       clearAllMocks: clearAllMocks.bind(this),
-      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
+      execute: (script: string | AbstractFn, ...args: unknown[]) =>
+        execute.apply(this, [browser, client, script, ...args]),
       isMockFunction: isMockFunction.bind(this),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
@@ -82,10 +97,16 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       capabilities[CUSTOM_CAPABILITY_NAME],
     );
 
+    const debugArg = capabilities['goog:chromeOptions']?.args?.find((item) => item.startsWith('--inspect='));
+    const debugUrl = debugArg ? debugArg.split('=')[1] : undefined;
+    const debugHost = debugUrl ? debugUrl.split(':')[0] : '';
+    const debugPort = debugUrl ? Number(debugUrl.split(':')[1]) : 0;
+
     this.#clearMocks = clearMocks ?? false;
     this.#resetMocks = resetMocks ?? false;
     this.#restoreMocks = restoreMocks ?? false;
     this.#browser = browser;
+    this.#debuggerClient = new DebuggerClient(debugHost, debugPort);
 
     /**
      * Add electron API to browser object
@@ -93,9 +114,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser.electron = this.#getElectronAPI();
     this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
-    if (this.#browser.electron.bridgeActive) {
-      await initSerializationWorkaround(this.#browser);
-    }
+    // if (this.#browser.electron.bridgeActive) {
+    //   await initSerializationWorkaround(this.#browser);
+    // }
 
     if (this.#browser.isMultiremote) {
       const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
@@ -108,21 +129,30 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         if (!caps[CUSTOM_CAPABILITY_NAME]) {
           continue;
         }
+        const debugArg = caps['goog:chromeOptions']?.args?.find((item) => item.startsWith('--inspect='));
+        const debugUrl = debugArg ? debugArg.split('=')[1] : undefined;
+        const debugHost = debugUrl ? debugUrl.split(':')[0] : '';
+        const debugPort = debugUrl ? Number(debugUrl.split(':')[1]) : 0;
+        const debugClient = new DebuggerClient(debugHost, debugPort);
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
+        mrInstance.electron = this.#getElectronAPI(mrInstance, debugClient);
         mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
-        if (mrInstance.electron.bridgeActive) {
-          await initSerializationWorkaround(mrInstance);
-        }
+        // if (mrInstance.electron.bridgeActive) {
+        //   await initSerializationWorkaround(mrInstance);
+        // }
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
+        await debugClient.waitDebugPort();
+        await copyOriginalApi(mrInstance);
       }
     } else {
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(browser);
+      await this.#debuggerClient.waitDebugPort();
+      await copyOriginalApi(this.#browser);
     }
   }
 
@@ -138,13 +168,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  async afterCommand(commandName: string, args: unknown[]) {
-    // ensure mocks are updated
-    const mocks = mockStore.getMocks();
-    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
+  // async afterCommand(commandName: string, args: unknown[]) {
+  //   // ensure mocks are updated
+  //   const mocks = mockStore.getMocks();
+  //   const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
-    if (commandName === 'execute' && mocks.length > 0 && !isInternalCommand()) {
-      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
-    }
-  }
+  //   if (commandName === 'execute' && mocks.length > 0 && !isInternalCommand()) {
+  //     await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
+  //   }
+  // }
 }
