@@ -90,6 +90,7 @@
     }
   },
   "dependencies": {
+    "@babel/parser": "^7.26.3",
     "@vitest/spy": "^2.1.8",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
@@ -99,9 +100,13 @@
     "debug": "^4.4.0",
     "electron-to-chromium": "^1.5.73",
     "fast-copy": "^3.0.1",
+    "get-port": "^7.1.0",
     "read-package-up": "^11.0.0",
+    "recast": "^0.23.9",
     "tinyspy": "^3.0.2",
-    "webdriverio": "^9.4.2"
+    "wait-port": "^1.1.0",
+    "webdriverio": "^9.4.2",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.6.0",
@@ -109,6 +114,7 @@
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.12",
     "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
     "@vitest/coverage-v8": "^2.1.8",
     "@wdio/types": "^9.4.2",
     "builder-util": "^25.1.7",
