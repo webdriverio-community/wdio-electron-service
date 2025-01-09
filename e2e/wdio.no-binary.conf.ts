@@ -17,7 +17,7 @@ globalThis.packageJson = {
   name: 'Electron',
   version: getElectronVersion({ packageJson, path: packageJsonPath }) as string,
 };
-process.env.TEST = 'true';
+// process.env.TEST = 'true';
 
 export const config: WdioElectronConfig = {
   services: [['electron', { restoreMocks: true }]],

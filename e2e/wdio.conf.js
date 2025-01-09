@@ -14,7 +14,7 @@ const appBuildInfo = await getAppBuildInfo(pkg);
 const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
 
 globalThis.packageJson = packageJson;
-process.env.TEST = 'true';
+// process.env.TEST = 'true';
 
 export const config = {
   services: [['electron', { restoreMocks: true }]],

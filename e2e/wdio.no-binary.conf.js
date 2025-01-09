@@ -14,7 +14,7 @@ globalThis.packageJson = {
   name: 'Electron',
   version: getElectronVersion({ packageJson, path: packageJsonPath }),
 };
-process.env.TEST = 'true';
+// process.env.TEST = 'true';
 
 export const config = {
   services: [['electron', { restoreMocks: true }]],
