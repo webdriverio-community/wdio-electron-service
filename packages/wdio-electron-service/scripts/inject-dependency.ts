@@ -46,7 +46,10 @@ async function injectDependency(
     const bundledContents = await bundlePackage(packageName);
 
     // Prepare the bundled contents for injection
-    const injectedContents = bundledContents.replace('export', `const ${importName} =`);
+    const injectedContents =
+      packageName === 'fast-copy'
+        ? bundledContents.replace(/export.*$/m, `const ${importName} = { default: index };`)
+        : bundledContents.replace('export', `const ${importName} =`);
 
     // Replace instances of the dynamic import in the template with the bundled contents
     const renderedContent = templateContent.replace(
