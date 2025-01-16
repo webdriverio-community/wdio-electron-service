@@ -6,11 +6,11 @@ import { ExecuteOpts } from '@wdio/electron-types';
 import mockStore from '../mockStore.js';
 
 export async function execute<ReturnValue, InnerArguments extends unknown[]>(
-  browser: WebdriverIO.Browser,
+  browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   debuggerClient: DebuggerClient,
-  script: string | ((...innerArgs: InnerArguments) => ReturnValue),
+  script: string | ((electron: typeof Electron.CrossProcessExports, ...innerArgs: InnerArguments) => ReturnValue),
   ...args: InnerArguments
-): Promise<ReturnValue | undefined> {
+): Promise<ReturnValue | ReturnValue[] | undefined> {
   /**
    * parameter check
    */
@@ -23,11 +23,16 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   }
 
   if (browser.isMultiremote) {
-    throw new Error('Multiremote browser is not support. please specify the browser');
+    const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
+    return await Promise.all(
+      mrBrowser.instances.map(async (instance) => {
+        const mrInstance = mrBrowser.getInstance(instance);
+        return mrInstance.electron.execute(script, ...args);
+      }),
+    );
   }
 
   const functionDeclaration = removeFirstArg(script.toString());
-
   const argsArray = args.map((arg) => ({ value: arg }));
 
   const result = await debuggerClient.sendMethod('Runtime.callFunctionOn', {
@@ -50,7 +55,7 @@ const syncMockStatus = async (args: unknown[]) => {
   }
 };
 
-//remove first arg `electron`. electron is added to global scope.
+//remove first arg `electron`. electron can be access as global scope.
 const removeFirstArg = (funcStr: string) => {
   // generate ATS
   const ast = parse(funcStr, {
