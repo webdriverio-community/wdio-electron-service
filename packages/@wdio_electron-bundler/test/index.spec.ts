@@ -1,46 +1,60 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { dirname } from 'node:path';
 
-import { RollupOptionCreator } from '../src/index';
+import { readPackageJson, typescript } from '../src/index';
 import { getFixturePackagePath } from './utils';
-import { rollup } from 'rollup';
+import typescriptPlugin from '@rollup/plugin-typescript';
 
-describe('RollupOptionCreator', () => {
+describe('readPackageJson', () => {
   it('should return 2 configuration objects', () => {
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
-    const result = new RollupOptionCreator({ rootDir: cwd });
+    const result = readPackageJson(cwd);
 
-    expect(result.getConfigs().length).toBe(2);
-    // @ts-ignore
-    expect(result.esmRollupOptions.output!.format).toBe('esm');
-    // @ts-ignore
-    expect(result.cjsRollupOptions.output!.format).toBe('cjs');
+    expect(result.input).toStrictEqual({ index: 'src/index.ts' });
+    expect(result.pkgName).toBe('fixture-build-success-esm');
+    expect(result.outDir).toStrictEqual({ esm: './dist/es', cjs: './dist/cjs' });
   });
+});
 
-  it('should fail to load package.json that is not existed', () => {
-    expect(() => new RollupOptionCreator({ rootDir: '/path/not/existed' })).toThrowError(
-      `Failed to load the package.json`,
-    );
-  });
-
-  it('should fail when warning occurred', async () => {
-    const fixture = getFixturePackagePath('esm', 'build-success-esm');
-    const cwd = dirname(fixture);
-    const config = new RollupOptionCreator({
-      rootDir: cwd,
-      options: {
-        esm: {
-          typescriptOptions: {
-            compilerOptions: {
-              sourceMap: true, // When Enable source maps, cose warnings at rollup-plugin-typescript
-            },
-          },
-        },
+describe('typescript', () => {
+  vi.mock('@rollup/plugin-typescript', () => ({
+    default: vi.fn(() => 'mocked-plugin'),
+  }));
+  it('should set default parameter', () => {
+    const plugin = typescript({
+      compilerOptions: {
+        outDir: 'path/to/out',
       },
     });
+    expect(plugin).toBe('mocked-plugin');
 
-    const bundle = await rollup(config.esmRollupOptions);
-    await expect(() => bundle.generate({})).rejects.toThrowError();
+    expect(typescriptPlugin).toHaveBeenCalledWith({
+      compilerOptions: {
+        outDir: 'path/to/out',
+        declaration: true,
+        declarationMap: true,
+      },
+      exclude: ['rollup.config.ts'],
+    });
+  });
+
+  it.each([
+    ['array', ['test.ts']],
+    ['single value', 'test.ts'],
+  ])('should join the exclude parameter: %s', (_title, exclude) => {
+    typescript({
+      compilerOptions: {
+        outDir: 'path/to/out',
+      },
+      exclude,
+    });
+    expect(typescriptPlugin).toHaveBeenCalledWith({
+      compilerOptions: {
+        outDir: 'path/to/out',
+        declaration: true,
+        declarationMap: true,
+      },
+      exclude: ['rollup.config.ts', 'test.ts'],
+    });
   });
 });

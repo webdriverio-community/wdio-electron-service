@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { join, dirname } from 'path';
-import { defineConfig, rollup, OutputAsset } from 'rollup';
-import { emitPackageJsonPlugin } from '../src/plugins';
+import { join, dirname } from 'node:path';
+import { defineConfig, rollup, OutputAsset, type RollupOptions } from 'rollup';
+import { emitPackageJsonPlugin, warnToErrorPlugin } from '../src/plugins';
 import { getFixturePackagePath } from './utils';
+import typescript from '@rollup/plugin-typescript';
 
 describe('emitPackageJsonPlugin', () => {
   it('esm', async () => {
@@ -50,5 +51,28 @@ describe('emitPackageJsonPlugin', () => {
         plugins: [emitPackageJsonPlugin('test-pkg', 'zzz')],
       }),
     ).toThrowError('Invalid type is specified');
+  });
+});
+
+describe('warnToErrorPlugin', () => {
+  it('should fail when warning occurred', async () => {
+    const fixture = getFixturePackagePath('esm', 'build-success-esm');
+    const cwd = dirname(fixture);
+    const config: RollupOptions = {
+      input: `${cwd}/src/index.ts`,
+      output: {
+        format: 'esm',
+      },
+      plugins: [
+        typescript({
+          compilerOptions: {
+            sourceMap: true,
+          },
+        }),
+        warnToErrorPlugin(),
+      ],
+    };
+    const bundle = await rollup(config);
+    await expect(() => bundle.generate({})).rejects.toThrowError();
   });
 });

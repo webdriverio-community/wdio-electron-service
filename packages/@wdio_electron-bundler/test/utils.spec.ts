@@ -1,4 +1,7 @@
-import { getInputConfig, getOutputParams, resolveOptions } from '../src/utils';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import fs from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { getInputConfig, getOutDirs, injectDependency } from '../src/utils';
 import { getFixturePackagePath } from './utils';
 
 describe(`getInputConfig`, () => {
@@ -124,66 +127,148 @@ describe(`getInputConfig`, () => {
   });
 });
 
-describe('getOutputParams', () => {
+describe('getOutDirs', () => {
   const fixturePkgJson = {
     name: 'test-pkg',
     version: '0.0.0',
     readme: 'readme.md',
     _id: '',
     main: './path/to/cjs/index.js',
-    module: './path/to/index.js',
+    module: './path/to/esm/index.js',
     types: './path/to/types/index.d.js',
   };
 
-  it('should get necessary parameters', () => {
+  it.each(['main', 'module'] as const)('should throw error when not exist field at package.json: %s', (fieldName) => {
+    const testPackageJson = Object.assign({}, fixturePkgJson);
+
+    delete testPackageJson[fieldName];
+
+    expect(() =>
+      getOutDirs({
+        packageJson: testPackageJson,
+        path: '/path/to/package.json',
+      }),
+    ).toThrowError(`"${fieldName}" field which is required is not set:`);
+  });
+
+  it('should return the directory path', () => {
     expect(
-      getOutputParams({
+      getOutDirs({
         packageJson: fixturePkgJson,
         path: '/path/to/package.json',
       }),
     ).toStrictEqual({
-      name: 'test-pkg',
-      cjsDir: './path/to/cjs',
-      esmDir: './path/to',
+      esm: './path/to/esm',
+      cjs: './path/to/cjs',
     });
   });
-
-  it.each(['name', 'main', 'module'] as const)(
-    'should throw error when not exist field at package.json: %s',
-    (fieldName) => {
-      const testPackageJson = Object.assign({}, fixturePkgJson);
-
-      delete testPackageJson[fieldName];
-
-      expect(() =>
-        getOutputParams({
-          packageJson: testPackageJson,
-          path: '/path/to/package.json',
-        }),
-      ).toThrowError(`"${fieldName}" field which is required is not set:`);
-    },
-  );
 });
 
-describe('resolveConfig', () => {
-  it('should return default options', () => {
-    expect(resolveOptions({})).toStrictEqual({
-      typescriptOptions: {},
-      externalOptions: {},
-    });
+describe('injectDependency', () => {
+  vi.mock('node:fs/promises', async (importOriginal) => {
+    const originalFs = await importOriginal<typeof import('node:fs/promises')>();
+
+    return {
+      default: {
+        ...originalFs,
+        writeFile: vi.fn(),
+      },
+    };
   });
 
-  it('should return inputted options', () => {
-    const fixture = {
-      typescriptOptions: {
-        compilerOptions: {
-          module: 'ESNext',
-        },
-      },
-      externalOptions: {
-        exclude: 'test',
-      },
-    } as const;
-    expect(resolveOptions(fixture)).toStrictEqual(fixture);
+  it('should inject dependency', async () => {
+    const fixture = getFixturePackagePath('esm', 'build-success-esm');
+    const cwd = dirname(fixture);
+    const context = {
+      resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
+      info: vi.fn(),
+    };
+    const templateContent = `const obj = await import('./test.js');`;
+
+    const param = {
+      packageName: './test.js',
+      targetFile: 'main.ts',
+      re: /export/,
+      importName: 'obj',
+      replace: (importName: string) => `const ${importName} =`,
+    };
+    // @ts-ignore
+    await injectDependency.call(context, 'src/test.js', param, templateContent);
+
+    expect(fs.writeFile).toHaveBeenLastCalledWith(
+      'src/test.js',
+      'const obj = {\n  a: 1,\n  b: 2,\n};\n\nconst obj = { obj };\n',
+      'utf-8',
+    );
+  });
+
+  it('should error when the package is not resolved', async () => {
+    const errorMock = vi.fn();
+    const context = {
+      resolve: vi.fn().mockResolvedValue(undefined),
+      info: vi.fn(),
+      error: errorMock,
+    };
+    const templateContent = `const obj = await import('./test.js');`;
+
+    const param = {
+      packageName: './test.js',
+      targetFile: 'main.ts',
+      re: /export/,
+      importName: 'obj',
+      replace: (importName: string) => `const ${importName} =`,
+    };
+    // @ts-ignore
+    await injectDependency.call(context, 'src/test.js', param, templateContent);
+
+    expect(errorMock).toHaveBeenCalled();
+  });
+
+  it('should error when the injectedContents could not generated', async () => {
+    const errorMock = vi.fn();
+    const fixture = getFixturePackagePath('esm', 'build-success-esm');
+    const cwd = dirname(fixture);
+    const context = {
+      resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
+      info: vi.fn(),
+      error: errorMock,
+    };
+    const templateContent = `const obj = await import('./test.js');`;
+
+    const param = {
+      packageName: './test.js',
+      targetFile: 'main.ts',
+      re: /xxxxx/,
+      importName: 'obj',
+      replace: (importName: string) => `const ${importName} =`,
+    };
+    // @ts-ignore
+    await injectDependency.call(context, 'src/test.js', param, templateContent);
+
+    expect(errorMock).toHaveBeenCalled();
+  });
+
+  it('should error when the renderedContent could not generated', async () => {
+    const errorMock = vi.fn();
+    const fixture = getFixturePackagePath('esm', 'build-success-esm');
+    const cwd = dirname(fixture);
+    const context = {
+      resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
+      info: vi.fn(),
+      error: errorMock,
+    };
+    const templateContent = `const obj = await import('./test.js');`;
+
+    const param = {
+      packageName: './test.js',
+      targetFile: 'main.ts',
+      re: /export/,
+      importName: 'xxxxx',
+      replace: (importName: string) => `const ${importName} =`,
+    };
+    // @ts-ignore
+    await injectDependency.call(context, 'src/test.js', param, templateContent);
+
+    expect(errorMock).toHaveBeenCalled();
   });
 });
