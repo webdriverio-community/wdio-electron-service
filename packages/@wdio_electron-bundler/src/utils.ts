@@ -3,7 +3,6 @@ import { basename, dirname, join, posix, relative, sep } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
 
 import debug from './log';
-import { type RollupWdioElectronServiceOptions } from '.';
 
 const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
   debug(`Attempting to find entry point: ${name}`);
@@ -63,9 +62,8 @@ export const getPackageJson = (cwd: string) => {
   return pkg;
 };
 
-export const getOutputParams = (pkg: NormalizedReadResult) => {
-  const requiredFields = ['name', 'main', 'module'] as const;
-
+export const getOutDirs = (pkg: NormalizedReadResult) => {
+  const requiredFields = ['main', 'module'] as const;
   debug(`Attempting to resolve output parameters`);
   debug(`Checking required fields of package.json: ${requiredFields.join(', ')}`);
   requiredFields.forEach((field) => {
@@ -75,17 +73,8 @@ export const getOutputParams = (pkg: NormalizedReadResult) => {
   });
   debug(`All required fields are set`);
 
-  const params = {
-    name: pkg.packageJson.name!,
-    cjsDir: dirname(pkg.packageJson.main!),
-    esmDir: dirname(pkg.packageJson.module!),
-  };
+  const esm = dirname(pkg.packageJson.module!);
+  const cjs = dirname(pkg.packageJson.main!);
 
-  debug(`Resolved output parameters: ${JSON.stringify(params)}`);
-  return params;
+  return { esm, cjs };
 };
-
-export const resolveOptions = (options: RollupWdioElectronServiceOptions) => ({
-  typescriptOptions: options.typescriptOptions || {},
-  externalOptions: options.externalOptions || {},
-});

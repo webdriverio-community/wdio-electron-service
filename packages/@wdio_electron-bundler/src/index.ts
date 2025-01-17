@@ -1,49 +1,28 @@
-import { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
-import { type ExternalsOptions } from 'rollup-plugin-node-externals';
+import typescriptPlugin, { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
+import { getInputConfig, getPackageJson, getOutDirs } from './utils';
 
-import { getInputConfig, getOutputParams, getPackageJson, resolveOptions } from './utils';
-import { createRollupConfig, createCjsOutputConfig, createEsmOutputConfig } from './config';
+export { nodeExternals } from 'rollup-plugin-node-externals';
+export { nodeResolve } from '@rollup/plugin-node-resolve';
+export { emitPackageJsonPlugin } from './plugins';
 
-import type { RollupOptions } from 'rollup';
-import type { NormalizedReadResult } from 'read-package-up';
+export const typescript = (options: RollupTypescriptOptions = {}) => {
+  return typescriptPlugin(
+    Object.assign({}, options, {
+      exclude: ['rollup.config.ts'],
+      compilerOptions: Object.assign({}, options.compilerOptions, {
+        declaration: true,
+        declarationMap: true,
+      }),
+    }),
+  );
+};
 
-type InitPrams = {
-  rootDir?: string;
-  srcDir?: string;
-  options?: {
-    esm?: RollupWdioElectronServiceOptions;
-    cjs?: RollupWdioElectronServiceOptions;
+export const readPackageJson = (cwd = process.cwd()) => {
+  const pkg = getPackageJson(cwd);
+  const input = getInputConfig(pkg, 'src');
+  return {
+    input,
+    pkgName: pkg.packageJson.name,
+    outDir: getOutDirs(pkg),
   };
 };
-
-export type RollupWdioElectronServiceOptions = {
-  typescriptOptions?: RollupTypescriptOptions;
-  externalOptions?: ExternalsOptions;
-};
-
-export class RollupOptionCreator {
-  private pkgJson: NormalizedReadResult;
-  esmRollupOptions: RollupOptions = {};
-  cjsRollupOptions: RollupOptions = {};
-  private inputConfig: Record<string, string>;
-
-  constructor(prams: InitPrams = {}) {
-    const options = Object.assign({ esm: {}, cjs: {} }, prams.options);
-    this.pkgJson = getPackageJson(prams.rootDir || process.cwd());
-    this.inputConfig = getInputConfig(this.pkgJson, prams.srcDir || `src`);
-
-    this.esmRollupOptions = this.createRollupConfig(createEsmOutputConfig, resolveOptions(options.esm));
-    this.cjsRollupOptions = this.createRollupConfig(createCjsOutputConfig, resolveOptions(options.cjs));
-  }
-
-  protected createRollupConfig(
-    createOutputConfig: typeof createEsmOutputConfig | typeof createCjsOutputConfig,
-    options: Required<RollupWdioElectronServiceOptions>,
-  ) {
-    return createRollupConfig(this.inputConfig, createOutputConfig(getOutputParams(this.pkgJson)), options);
-  }
-
-  public getConfigs() {
-    return [this.esmRollupOptions, this.cjsRollupOptions];
-  }
-}
