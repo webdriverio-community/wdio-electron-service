@@ -1,5 +1,7 @@
+import { join } from 'node:path';
 import type { NormalizedPackageJson } from 'read-package-up';
-import type { Plugin } from 'rollup';
+import { type Plugin } from 'rollup';
+import { injectDependency } from './utils';
 
 export const MODULE_TYPE = {
   CJS: 'cjs',
@@ -30,7 +32,7 @@ export const emitPackageJsonPlugin = (name: NormalizedPackageJson['name'], type:
   const source = JSON.stringify(getPackageJsonSource(name, type), null, '  ');
 
   return {
-    name: 'wdio-emit-package-json',
+    name: 'rollup-wdio-emit-package-json',
     generateBundle(options) {
       this.debug(`Emitting package.json for ${name}-${type} in ${options.dir}`);
       this.emitFile({
@@ -41,3 +43,48 @@ export const emitPackageJsonPlugin = (name: NormalizedPackageJson['name'], type:
     },
   };
 };
+
+export const warnToErrorPlugin = (): Plugin => {
+  return {
+    name: 'rollup-wdio-warn-to-error',
+    onLog(level, log) {
+      if (level === 'warn') {
+        this.warn(`Building Rollup produced warnings that need to be resolved.`);
+        this.error(log);
+      }
+    },
+  };
+};
+
+type InjectDependencyPluginOptions = {
+  packageName: string;
+  targetFile: string;
+  re: RegExp;
+  importName: string;
+  replace: (importName: string) => string;
+};
+/* v8 ignore start */
+export const injectDependencyPlugin = (
+  options: InjectDependencyPluginOptions | InjectDependencyPluginOptions[],
+): Plugin => {
+  const pluginOption = Array.isArray(options) ? options : [options];
+  return {
+    name: 'rollup-wdio-inject-dependency',
+    async writeBundle(options, bundle) {
+      pluginOption.forEach(async (item) => {
+        const contents = bundle[item.targetFile];
+        if (!contents) {
+          this.warn(`Injection target is not exist: ${item.targetFile}`);
+          return;
+        }
+        if (!(`code` in contents)) {
+          this.warn(`Injection target is not chunk file: ${item.targetFile}`);
+          return;
+        }
+
+        await injectDependency.call(this, join(options.dir!, item.targetFile), item, contents.code);
+      });
+    },
+  };
+};
+/* v8 ignore stop */
