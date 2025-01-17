@@ -56,7 +56,7 @@ export const warnToErrorPlugin = (): Plugin => {
   };
 };
 
-type InjectDependencyPluginOptions = {
+export type InjectDependencyPluginOptions = {
   packageName: string;
   targetFile: string;
   re: RegExp;

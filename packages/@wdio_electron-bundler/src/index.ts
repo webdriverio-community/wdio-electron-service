@@ -3,7 +3,12 @@ import { getInputConfig, getPackageJson, getOutDirs } from './utils';
 
 export { nodeExternals } from 'rollup-plugin-node-externals';
 export { nodeResolve } from '@rollup/plugin-node-resolve';
-export { emitPackageJsonPlugin, warnToErrorPlugin, injectDependencyPlugin } from './plugins';
+export {
+  emitPackageJsonPlugin,
+  warnToErrorPlugin,
+  injectDependencyPlugin,
+  type InjectDependencyPluginOptions,
+} from './plugins';
 
 export const typescript = (options: RollupTypescriptOptions = {}) => {
   const exclude = !options.exclude
