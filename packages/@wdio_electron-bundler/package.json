@@ -1,0 +1,55 @@
+{
+  "name": "@wdio/electron-bundler",
+  "version": "8.0.0-next.4",
+  "description": "Types for WebdriverIO Electron Service",
+  "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": [
+      {
+        "import": {
+          "types": "./dist/esm/index.d.ts",
+          "default": "./dist/esm/index.js"
+        },
+        "require": {
+          "types": "./dist/cjs/index.d.ts",
+          "default": "./dist/cjs/index.js"
+        }
+      },
+      "./dist/cjs/index.js"
+    ]
+  },
+  "scripts": {
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build:debug": "cross-env DEBUG=@wdio/electron-bundler pnpm build",
+    "test:unit": "vitest --coverage --watch=false",
+    "test:dev": "vitest --coverage",
+    "test": "pnpm test:unit"
+  },
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "debug": "^4.4.0",
+    "read-package-up": "^11.0.0",
+    "rollup": "^4.28.1",
+    "rollup-plugin-node-externals": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "shx": "^0.3.4",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "files": [
+    "dist/*"
+  ]
+}

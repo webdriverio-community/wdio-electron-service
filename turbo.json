@@ -61,8 +61,17 @@
     "@repo/e2e#test:e2e-mac-universal:builder-esm": {
       "dependsOn": ["example-builder-esm#build:mac-universal", "@repo/e2e#init-e2es"]
     },
+    "@wdio/electron-bundler#build": {
+      "dependsOn": ["test:unit", "typecheck"],
+      "outputs": ["dist/**"]
+    },
+    "@wdio/electron-bundler#release": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
+    },
     "@wdio/electron-types#build": {
-      "dependsOn": ["test:unit"],
+      "dependsOn": ["@wdio/electron-bundler#build", "test:unit", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-types#release": {
