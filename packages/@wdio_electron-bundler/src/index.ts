@@ -1,0 +1,28 @@
+import typescriptPlugin, { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
+import { getInputConfig, getPackageJson, getOutDirs } from './utils';
+
+export { nodeExternals } from 'rollup-plugin-node-externals';
+export { nodeResolve } from '@rollup/plugin-node-resolve';
+export { emitPackageJsonPlugin } from './plugins';
+
+export const typescript = (options: RollupTypescriptOptions = {}) => {
+  return typescriptPlugin(
+    Object.assign({}, options, {
+      exclude: ['rollup.config.ts'],
+      compilerOptions: Object.assign({}, options.compilerOptions, {
+        declaration: true,
+        declarationMap: true,
+      }),
+    }),
+  );
+};
+
+export const readPackageJson = (cwd = process.cwd()) => {
+  const pkg = getPackageJson(cwd);
+  const input = getInputConfig(pkg, 'src');
+  return {
+    input,
+    pkgName: pkg.packageJson.name,
+    outDir: getOutDirs(pkg),
+  };
+};
