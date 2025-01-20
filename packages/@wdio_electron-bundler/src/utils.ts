@@ -106,13 +106,14 @@ async function bundlePackage(this: PluginContext, packageName: string) {
   return bundledCode;
 }
 
-type InjectDependencyPluginOptions = {
+export type InjectDependencyPluginOptions = {
   packageName: string;
   targetFile: string;
-  re: RegExp;
   importName: string;
-  replace: (importName: string) => string;
+  bundleRegExp: RegExp;
+  bundleReplace: (importName: string) => string;
 };
+
 export async function injectDependency(
   this: PluginContext,
   templatePath: string,
@@ -121,8 +122,12 @@ export async function injectDependency(
 ): Promise<void> {
   try {
     const bundledContents = await bundlePackage.call(this, injectPrams.packageName);
+
     // Prepare the bundled contents for injection
-    const injectedContents = bundledContents.replace(injectPrams.re, injectPrams.replace(injectPrams.importName));
+    const injectedContents = bundledContents.replace(
+      injectPrams.bundleRegExp,
+      injectPrams.bundleReplace(injectPrams.importName),
+    );
 
     if (injectedContents === bundledContents) {
       throw new Error(`Failed to generate injected contents`);

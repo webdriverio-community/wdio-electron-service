@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import type { NormalizedPackageJson } from 'read-package-up';
 import { type Plugin } from 'rollup';
-import { injectDependency } from './utils';
+import { injectDependency, type InjectDependencyPluginOptions } from './utils';
 
 export const MODULE_TYPE = {
   CJS: 'cjs',
@@ -56,13 +56,7 @@ export const warnToErrorPlugin = (): Plugin => {
   };
 };
 
-export type InjectDependencyPluginOptions = {
-  packageName: string;
-  targetFile: string;
-  re: RegExp;
-  importName: string;
-  replace: (importName: string) => string;
-};
+// Exclude from Unit Test to check with build results of wdio-electron-service package
 /* v8 ignore start */
 export const injectDependencyPlugin = (
   options: InjectDependencyPluginOptions | InjectDependencyPluginOptions[],
@@ -87,4 +81,6 @@ export const injectDependencyPlugin = (
     },
   };
 };
+
+export { type InjectDependencyPluginOptions };
 /* v8 ignore stop */

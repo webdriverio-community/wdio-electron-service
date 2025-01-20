@@ -40,10 +40,10 @@ This package provides the common functions needed to configure `rollup` and the 
 1. `injectDependencyPlugin`
    When building with ESM, this plugin realize the process of inserting the source code of a dependent library into a specific part of a function.
 
-   |  parameter  | overview                                                                                           |
-   | :---------: | -------------------------------------------------------------------------------------------------- |
-   | packageName | Package name of the injected library                                                               |
-   | targetFile  | Name for the bundle file that is injected library                                                  |
-   | importName  | Variable name assigned to the imported library                                                     |
-   |     re      | Regular expression to identify substitutions for bundles of injected library                       |
-   |   replace   | A function that generates replaced code for a replacement target specified by a regular expression |
+   |   parameter   | overview                                                                                           |
+   | :-----------: | -------------------------------------------------------------------------------------------------- |
+   |  packageName  | Package name of the injected library                                                               |
+   |  targetFile   | Name for the bundle file that is injected library                                                  |
+   |  importName   | Variable name assigned to the imported library                                                     |
+   | bundleRegExp  | Regular expression to identify substitutions for bundles of injected library                       |
+   | bundleReplace | A function that generates replaced code for a replacement target specified by a regular expression |

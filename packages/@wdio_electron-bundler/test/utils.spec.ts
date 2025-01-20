@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import fs from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { getInputConfig, getOutDirs, injectDependency } from '../src/utils';
+import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../src/utils';
 import { getFixturePackagePath } from './utils';
+import { PluginContext } from 'rollup';
 
 describe(`getInputConfig`, () => {
   it('should resolved entry point', () => {
@@ -182,17 +182,17 @@ describe('injectDependency', () => {
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
-    };
+    } as unknown as PluginContext;
     const templateContent = `const obj = await import('./test.js');`;
 
-    const param = {
+    const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
-      re: /export/,
+      bundleRegExp: /export/,
       importName: 'obj',
-      replace: (importName: string) => `const ${importName} =`,
+      bundleReplace: (importName: string) => `const ${importName} =`,
     };
-    // @ts-ignore
+
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
     expect(fs.writeFile).toHaveBeenLastCalledWith(
@@ -208,17 +208,18 @@ describe('injectDependency', () => {
       resolve: vi.fn().mockResolvedValue(undefined),
       info: vi.fn(),
       error: errorMock,
-    };
+    } as unknown as PluginContext;
+
     const templateContent = `const obj = await import('./test.js');`;
 
-    const param = {
+    const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
-      re: /export/,
       importName: 'obj',
-      replace: (importName: string) => `const ${importName} =`,
+      bundleRegExp: /export/,
+      bundleReplace: (importName: string) => `const ${importName} =`,
     };
-    // @ts-ignore
+
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
     expect(errorMock).toHaveBeenCalled();
@@ -232,17 +233,18 @@ describe('injectDependency', () => {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
       error: errorMock,
-    };
+    } as unknown as PluginContext;
+
     const templateContent = `const obj = await import('./test.js');`;
 
-    const param = {
+    const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
-      re: /xxxxx/,
       importName: 'obj',
-      replace: (importName: string) => `const ${importName} =`,
+      bundleRegExp: /xxxxx/,
+      bundleReplace: (importName: string) => `const ${importName} =`,
     };
-    // @ts-ignore
+
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
     expect(errorMock).toHaveBeenCalled();
@@ -256,17 +258,18 @@ describe('injectDependency', () => {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
       error: errorMock,
-    };
+    } as unknown as PluginContext;
+
     const templateContent = `const obj = await import('./test.js');`;
 
-    const param = {
+    const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
-      re: /export/,
       importName: 'xxxxx',
-      replace: (importName: string) => `const ${importName} =`,
+      bundleRegExp: /export/,
+      bundleReplace: (importName: string) => `const ${importName} =`,
     };
-    // @ts-ignore
+
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
     expect(errorMock).toHaveBeenCalled();
