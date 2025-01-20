@@ -5,14 +5,28 @@
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": [
+      {
+        "import": {
+          "types": "./dist/esm/index.d.ts",
+          "default": "./dist/esm/index.js"
+        },
+        "require": {
+          "types": "./dist/cjs/index.d.ts",
+          "default": "./dist/cjs/index.js"
+        }
+      },
+      "./dist/cjs/index.js"
+    ]
   },
   "scripts": {
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
-    "build": "tsc"
+    "build": "rollup --config rollup.config.ts --configPlugin typescript"
   },
   "dependencies": {
     "@vitest/spy": "^2.1.8"
@@ -20,6 +34,7 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.6.0",
     "@electron/packager": "^18.3.6",
+    "@wdio/electron-bundler": "workspace:*",
     "@wdio/globals": "^9.4.2",
     "@wdio/types": "^9.4.2",
     "builder-util": "25.1.7",
