@@ -44,6 +44,14 @@ jobs:
       - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
+      - name: Set ssh configurations
+        shell: bash
+        run: |
+          echo "Setup ssh configurations"
+          # `core.sshCommand` is set by the `actions/checkout`
+          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
+          echo "${result}"
+          echo "${result}" >> "$GITHUB_ENV"
       - name: Install Dependencies
         run: |
           pnpm install
@@ -95,6 +103,14 @@ jobs:
       - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
+      - name: Set ssh configurations
+        shell: bash
+        run: |
+          echo "Setup ssh configurations"
+          # `core.sshCommand` is set by the `actions/checkout`
+          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
+          echo "${result}"
+          echo "${result}" >> "$GITHUB_ENV"
       - name: Install Dependencies
         run: |
           pnpm install
@@ -145,6 +161,14 @@ jobs:
       - name: Set pnpm store path
         run: |
           pnpm config set store-dir ~/.pnpm-store --global
+      - name: Set ssh configurations
+        shell: bash
+        run: |
+          echo "Setup ssh configurations"
+          # `core.sshCommand` is set by the `actions/checkout`
+          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
+          echo "${result}"
+          echo "${result}" >> "$GITHUB_ENV"
       - name: Install Dependencies
         run: |
           pnpm install
