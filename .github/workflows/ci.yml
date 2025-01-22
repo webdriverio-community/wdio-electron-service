@@ -46,12 +46,11 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Set ssh configurations
         shell: bash
+        # `core.sshCommand` is set by the `actions/checkout`
         run: |
-          echo "Setup ssh configurations"
-          # `core.sshCommand` is set by the `actions/checkout`
-          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
-          echo "${result}"
-          echo "${result}" >> "$GITHUB_ENV"
+          ssh_config="$(git config --local 'core.sshCommand')"
+          git config --global 'core.sshCommand' "${ssh_config}"
+
       - name: Install Dependencies
         run: |
           pnpm install
@@ -107,12 +106,10 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Set ssh configurations
         shell: bash
+        # `core.sshCommand` is set by the `actions/checkout`
         run: |
-          echo "Setup ssh configurations"
-          # `core.sshCommand` is set by the `actions/checkout`
-          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
-          echo "${result}"
-          echo "${result}" >> "$GITHUB_ENV"
+          ssh_config="$(git config --local 'core.sshCommand')"
+          git config --global 'core.sshCommand' "${ssh_config}"
       - name: Install Dependencies
         run: |
           pnpm install
@@ -165,12 +162,10 @@ jobs:
           pnpm config set store-dir ~/.pnpm-store --global
       - name: Set ssh configurations
         shell: bash
+        # `core.sshCommand` is set by the `actions/checkout`
         run: |
-          echo "Setup ssh configurations"
-          # `core.sshCommand` is set by the `actions/checkout`
-          result="GIT_SSH_COMMAND=$(git config --local 'core.sshCommand')"
-          echo "${result}"
-          echo "${result}" >> "$GITHUB_ENV"
+          ssh_config="$(git config --local 'core.sshCommand')"
+          git config --global 'core.sshCommand' "${ssh_config}"
       - name: Install Dependencies
         run: |
           pnpm install
