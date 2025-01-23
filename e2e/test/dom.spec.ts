@@ -45,3 +45,11 @@ describe('DOM', () => {
     });
   });
 });
+
+describe('using $$', () => {
+  it('should be able to call getElements to return values', async () => {
+    const result = await $$('[data-testid="disabled-checkbox"]');
+    const chainedResult = await result.getElements();
+    expect(chainedResult.length).toBe(1);
+  });
+});
