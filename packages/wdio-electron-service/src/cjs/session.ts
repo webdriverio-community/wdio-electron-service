@@ -1,4 +1,5 @@
 import { remote } from 'webdriverio';
+import log from '@wdio/electron-utils/log';
 import type { Options } from '@wdio/types';
 
 import { CJSElectronLauncher, CJSElectronService } from './classes.js';
@@ -17,6 +18,8 @@ export async function init(opts: ElectronServiceOptions) {
   const service = new CJSElectronService(opts);
 
   await launcher.onPrepare(testRunnerOpts, [capabilities]);
+
+  log.debug('Session capabilities:', capabilities);
 
   // initialise session
   const browser = await remote({
