@@ -8,7 +8,7 @@ const baseServiceOptions = baseConfig.capabilities[0]['wdio:electronServiceOptio
 export const config: Options.Testrunner = {
   ...baseConfig,
   outputDir: `wdio-logs-multiremote-${exampleDir}`,
-  specs: ['./multiremote/*.spec.ts'],
+  specs: ['./test/multiremote/*.spec.ts'],
   capabilities: {
     browserA: {
       capabilities: {

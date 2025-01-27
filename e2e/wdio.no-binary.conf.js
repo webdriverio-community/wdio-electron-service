@@ -34,7 +34,7 @@ export const config = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./js/*.spec.js'],
+  specs: ['./test/js/*.spec.js'],
   framework: 'mocha',
   mochaOpts: {
     ui: 'bdd',

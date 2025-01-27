@@ -868,8 +868,8 @@ describe('getAppBuildInfo', () => {
       ['JSON', 'json-config'], // .config.json
       ['JSON5', 'json5-config'], // .config.json5
       ['TOML', 'toml-config'], // .config.toml
-      ['TS', 'ts-fn-config'], // .config.ts (Function)
-      ['TS', 'ts-obj-config'], // .config.ts (Object)
+      ['TS (fn)', 'ts-fn-config'], // .config.ts (Function)
+      ['TS (obj)', 'ts-obj-config'], // .config.ts (Object)
       ['YAML (.yaml)', 'yaml-config'], // .config.yaml
       ['YAML (.yml)', 'yml-config'], // .config.yml
     ])(

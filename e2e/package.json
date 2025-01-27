@@ -5,8 +5,8 @@
   "private": "true",
   "scripts": {
     "ci": "pnpm i && pnpm test",
-    "clean": "pnpm dlx shx rm -rf ./js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
-    "init-e2es": "pnpm dlx shx mkdir -p ./js && rollup -c rollup.config.js",
+    "clean": "pnpm dlx shx rm -rf ./test/js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "init-e2es": "pnpm dlx shx mkdir -p ./test/js && rollup -c rollup.config.js",
     "logs": "pnpm dlx shx cat ./wdio-logs*/*.log",
     "test:e2e:forge-cjs": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=forge-cjs pnpm run exec",
     "test:e2e:forge-esm": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=forge-esm pnpm run exec",
@@ -23,11 +23,11 @@
     "exec-no-binary:js": "xvfb-maybe wdio run ./wdio.no-binary.conf.js",
     "exec-no-binary:main": "xvfb-maybe wdio run ./wdio.no-binary.conf.ts",
     "exec-no-binary:multiremote": "xvfb-maybe wdio run ./wdio.no-binary.multiremote.conf.ts",
-    "exec-no-binary:standalone": "xvfb-maybe tsx ./standalone/api.no-binary.spec.ts",
+    "exec-no-binary:standalone": "xvfb-maybe tsx ./test/standalone/api.no-binary.spec.ts",
     "exec:js": "xvfb-maybe wdio run ./wdio.conf.js",
     "exec:main": "xvfb-maybe wdio run ./wdio.conf.ts",
     "exec:multiremote": "xvfb-maybe wdio run ./wdio.multiremote.conf.ts",
-    "exec:standalone": "xvfb-maybe tsx ./standalone/api.spec.ts",
+    "exec:standalone": "xvfb-maybe tsx ./test/standalone/api.spec.ts",
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
