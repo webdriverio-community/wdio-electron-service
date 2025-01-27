@@ -46,10 +46,10 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.5.0",
     "@rollup/plugin-typescript": "^12.1.1",
-    "@types/mocha": "^10.0.9",
-    "@types/node": "^22.9.1",
-    "@vitest/spy": "^2.1.5",
-    "@wdio/types": "^9.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.2",
+    "@vitest/spy": "^2.1.8",
+    "@wdio/electron-types": "workspace:*",
     "read-package-up": "^11.0.0",
     "rollup": "^4.27.3",
     "typescript": "^5.6.3"
