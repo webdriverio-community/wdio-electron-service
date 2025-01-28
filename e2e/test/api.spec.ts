@@ -782,3 +782,14 @@ describe('browser.execute - workaround for TSX issue', () => {
     ).toEqual('executed inner function');
   });
 });
+
+describe('showOpenDialog with complex object', () => {
+  // Tests for the following issue
+  // https://github.com/webdriverio-community/wdio-electron-service/issues/895
+  it('should be mocked', async () => {
+    const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+    await browser.$('.show-dialog').click();
+
+    expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
+  });
+});

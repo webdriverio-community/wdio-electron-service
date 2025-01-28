@@ -60,7 +60,7 @@ export async function createMock(apiName: string, funcName: string) {
         const mockObj = electron[apiName as keyof typeof electron][
           funcName as keyof ElectronType[ElectronInterface]
         ] as ElectronMock;
-        return mockObj.mock?.calls || [];
+        return mockObj.mock?.calls ? JSON.parse(JSON.stringify(mockObj.mock?.calls)) : [];
       },
       apiName,
       funcName,
