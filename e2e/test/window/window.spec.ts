@@ -1,19 +1,15 @@
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 
-describe('application with changing window', () => {
-  it('should launch the application first screen', async () => {
-    const appName = await browser.electron.execute((electron) => electron.app.getName());
-    console.log(`appName: ${appName}`);
-    await expect(browser).toHaveTitle('Splash window');
+describe('application with multiple windows', () => {
+  it('should launch the application splash screen window', async () => {
+    await expect(browser).toHaveTitle('Splash Screen');
   });
 
-  it('should launch the application second screen', async () => {
+  it('should switch to the application main window', async () => {
     const elem = browser.$('.switch-main-window');
     await elem.click();
 
-    const appName = await browser.electron.execute((electron) => electron.app.getName());
-    console.log(`appName: ${appName}`);
     await expect(browser).toHaveTitle('Test');
   });
 });
