@@ -20,7 +20,7 @@ type MockBrowser = Omit<WebdriverIO.Browser, 'isMultiremote'> & {
 
 describe('getWindowHandle', () => {
   describe('when no window', () => {
-    it('should return undefined', async () => {
+    it('should return undefined when no windows are available', async () => {
       const browser = {
         isMultiremote: false,
         getWindowHandles: vi.fn().mockResolvedValue([]),
@@ -35,48 +35,49 @@ describe('getWindowHandle', () => {
   });
 
   describe('when 1 window', () => {
-    it('should return the window handle', async () => {
+    it('should return the active window handle', async () => {
       const browser = {
         isMultiremote: false,
-        getWindowHandles: vi.fn().mockResolvedValue(['window1']),
+        getWindowHandles: vi.fn().mockResolvedValue(['window-1']),
         electron: {
           windowHandle: undefined,
         },
       } as unknown as WebdriverIO.Browser;
 
       const handle = await getActiveWindowHandle(browser);
-      expect(handle).toBe('window1');
+      expect(handle).toBe('window-1');
     });
   });
 
   describe('when 2 or more windows', () => {
-    it('should return the handle of current window', async () => {
+    it('should return the current window handle when active', async () => {
       const browser = {
         isMultiremote: false,
-        getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2', 'currentWindow']),
+        getWindowHandles: vi.fn().mockResolvedValue(['window-1', 'window-2']),
         electron: {
-          windowHandle: 'currentWindow',
+          windowHandle: 'window-2',
         },
       } as unknown as WebdriverIO.Browser;
 
-      const handle = await getActiveWindowHandle(browser as unknown as WebdriverIO.Browser);
-      expect(handle).toBe('currentWindow');
+      const handle = await getActiveWindowHandle(browser);
+      expect(handle).toBe('window-2');
     });
-    it('should return the handle of first window', async () => {
+
+    it('should fallback to the first window handle when current is invalid', async () => {
       const browser = {
         isMultiremote: false,
-        getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2', 'window3']),
+        getWindowHandles: vi.fn().mockResolvedValue(['window-1', 'window-2']),
         electron: {
-          windowHandle: 'currentWindow',
+          windowHandle: 'invalid-window',
         },
       } as unknown as WebdriverIO.Browser;
 
-      const handle = await getActiveWindowHandle(browser as unknown as WebdriverIO.Browser);
-      expect(handle).toBe('window1');
+      const handle = await getActiveWindowHandle(browser);
+      expect(handle).toBe('window-1');
     });
   });
 
-  it('should not return the window handle when MultiRemote', async () => {
+  it('should return undefined when using MultiRemote', async () => {
     const browser = {
       isMultiremote: true,
       getWindowHandles: vi.fn().mockResolvedValue(['window1', 'window2']),
@@ -92,7 +93,7 @@ describe('ensureActiveWindowFocus', () => {
     vi.clearAllMocks();
   });
 
-  it('should call `switchToWindow` when window is changed', async () => {
+  it('should switch focus to the new window when it becomes active', async () => {
     const getWindowHandlesMock = vi.fn().mockResolvedValue(['window1']);
     const switchToWindowMock = vi.fn();
     const browser = {
@@ -108,7 +109,7 @@ describe('ensureActiveWindowFocus', () => {
     expect(browser.electron.windowHandle).toBe('window1');
   });
 
-  it('should not call `switchToWindow` when window is changed', async () => {
+  it('should maintain focus when staying on same window', async () => {
     const getWindowHandlesMock = vi.fn().mockResolvedValue(['currentWindow']);
     const switchToWindowMock = vi.fn();
     const browser = {
@@ -141,7 +142,7 @@ describe('ensureActiveWindowFocus', () => {
       return { browser, switchToWindowMock };
     };
 
-    it('should call `switchToWindow` when window is changed', async () => {
+    it('should switch focus to new windows in all browser instances', async () => {
       const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser();
       const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser();
       const mrBrowser = {
@@ -158,7 +159,7 @@ describe('ensureActiveWindowFocus', () => {
       expect(switchToWindowMock2).toHaveBeenCalled();
     });
 
-    it('should not call `switchToWindow` when window is changed', async () => {
+    it('should maintain focus when windows remain unchanged', async () => {
       const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser('currentWindow');
       const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser('currentWindow');
       const browser = {
@@ -203,7 +204,7 @@ describe('Window Management', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return current handle if valid', async () => {
+    it('should return the current handle if valid', async () => {
       const currentHandle = 'window1';
       browser.electron.windowHandle = currentHandle;
       browser.getWindowHandles.mockResolvedValue(['window1', 'window2']);
@@ -212,7 +213,7 @@ describe('Window Management', () => {
       expect(result).toBe(currentHandle);
     });
 
-    it('should return first handle if current is invalid', async () => {
+    it('should return the first handle if the current handle is invalid', async () => {
       browser.electron.windowHandle = 'invalid';
       browser.getWindowHandles.mockResolvedValue(['window1', 'window2']);
 
@@ -239,7 +240,7 @@ describe('Window Management', () => {
       expect(mrBrowser.getInstance).toHaveBeenCalledTimes(2);
     });
 
-    it('should switch window when handle changes', async () => {
+    it('should switch the window when the handle changes', async () => {
       browser.getWindowHandles.mockResolvedValue(['window1']);
       browser.electron.windowHandle = 'old-window';
 
@@ -249,7 +250,7 @@ describe('Window Management', () => {
       expect(browser.electron.windowHandle).toBe('window1');
     });
 
-    it('should not switch window when handle remains same', async () => {
+    it('should not switch the window when the handle has not changed', async () => {
       const currentHandle = 'window1';
       browser.electron.windowHandle = currentHandle;
       browser.getWindowHandles.mockResolvedValue([currentHandle]);
