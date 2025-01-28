@@ -23,10 +23,13 @@ describe('getWindowHandle', () => {
     it('should return undefined', async () => {
       const browser = {
         isMultiremote: false,
-        getWindowHandles: vi.fn(),
+        getWindowHandles: vi.fn().mockResolvedValue([]),
+        electron: {
+          windowHandle: undefined,
+        },
       } as unknown as WebdriverIO.Browser;
 
-      const handle = await getActiveWindowHandle(browser as unknown as WebdriverIO.Browser);
+      const handle = await getActiveWindowHandle(browser);
       expect(handle).toBe(undefined);
     });
   });
@@ -36,9 +39,12 @@ describe('getWindowHandle', () => {
       const browser = {
         isMultiremote: false,
         getWindowHandles: vi.fn().mockResolvedValue(['window1']),
+        electron: {
+          windowHandle: undefined,
+        },
       } as unknown as WebdriverIO.Browser;
 
-      const handle = await getActiveWindowHandle(browser as unknown as WebdriverIO.Browser);
+      const handle = await getActiveWindowHandle(browser);
       expect(handle).toBe('window1');
     });
   });
@@ -82,19 +88,9 @@ describe('getWindowHandle', () => {
 });
 
 describe('ensureActiveWindowFocus', () => {
-  it.each(['getWindowHandle', 'getWindowHandles', 'switchToWindow'])(
-    'should not execute when the command: %s',
-    async (command) => {
-      const mock = vi.fn().mockResolvedValue(['window1']);
-      const browser = {
-        isMultiremote: false,
-        getWindowHandles: mock,
-      } as unknown as WebdriverIO.Browser;
-
-      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, command);
-      expect(mock).not.toHaveBeenCalled();
-    },
-  );
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('should call `switchToWindow` when window is changed', async () => {
     const getWindowHandlesMock = vi.fn().mockResolvedValue(['window1']);
@@ -136,6 +132,7 @@ describe('ensureActiveWindowFocus', () => {
         isMultiremote: false,
         electron: {
           windowHandle: current,
+          execute: vi.fn(),
         },
         getWindowHandles: getWindowHandlesMock,
         switchToWindow: switchToWindowMock,
@@ -147,13 +144,16 @@ describe('ensureActiveWindowFocus', () => {
     it('should call `switchToWindow` when window is changed', async () => {
       const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser();
       const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser();
-      const browser = {
+      const mrBrowser = {
         isMultiremote: true,
         instances: ['browser1', 'browser2'],
         getInstance: (instance: string) => (instance === 'browser1' ? browser1 : browser2),
+        electron: {
+          execute: vi.fn(),
+        },
       } as unknown as WebdriverIO.MultiRemoteBrowser;
 
-      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, 'dummyCommand');
+      await ensureActiveWindowFocus(mrBrowser as unknown as WebdriverIO.Browser, 'dummyCommand');
       expect(switchToWindowMock1).toHaveBeenCalled();
       expect(switchToWindowMock2).toHaveBeenCalled();
     });

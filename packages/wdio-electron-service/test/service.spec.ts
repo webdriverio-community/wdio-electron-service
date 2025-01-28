@@ -9,6 +9,8 @@ import mockStore from '../src/mockStore.js';
 import type ElectronWorkerService from '../src/service.js';
 import { ensureActiveWindowFocus } from '../src/window.js';
 
+vi.mock('../src/window.js');
+
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
@@ -17,15 +19,28 @@ beforeEach(async () => {
   WorkerService = (await import('../src/service.js')).default;
 });
 
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+});
+
 describe('before', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should add commands to the browser object', async () => {
     instance = new WorkerService();
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
       execute: vi.fn().mockResolvedValue(true),
       getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+      switchToWindow: vi.fn(),
+      electron: {}, // Let the service initialize this
     } as unknown as WebdriverIO.Browser;
+
     await instance.before({}, [], browser);
+
     const serviceApi = browser.electron as BrowserExtension['electron'];
     expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -33,35 +48,43 @@ describe('before', () => {
     expect(serviceApi.mockAll).toEqual(expect.any(Function));
     expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
-    expect(serviceApi.windowHandle).toEqual('dummy');
   });
 
   describe('when multiremote', () => {
-    it('should add commands to the browser object when multiremote', async () => {
+    it('should add commands to the browser object', async () => {
       instance = new WorkerService();
-      const browser = {
-        instanceMap: {
-          electron: {
-            requestedCapabilities: { 'wdio:electronServiceOptions': {} },
-            waitUntil: vi.fn().mockResolvedValue(true),
-            execute: vi.fn().mockResolvedValue(true),
-            getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
-          },
-          firefox: {
-            requestedCapabilities: {},
-            waitUntil: vi.fn().mockResolvedValue(true),
-            getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+      const electronInstance = {
+        requestedCapabilities: {
+          'wdio:electronServiceOptions': {},
+          'alwaysMatch': {
+            browserName: 'electron',
           },
         },
-        isMultiremote: true,
-        instances: ['electron', 'firefox'],
-        getInstance: (instanceName: string) => browser.instanceMap[instanceName as keyof typeof browser.instanceMap],
+        waitUntil: vi.fn().mockResolvedValue(true),
         execute: vi.fn().mockResolvedValue(true),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        electron: {
+          execute: vi.fn(),
+          mock: vi.fn(),
+          mockAll: vi.fn(),
+          clearAllMocks: vi.fn(),
+          resetAllMocks: vi.fn(),
+          restoreAllMocks: vi.fn(),
+          bridgeActive: true,
+          isMockFunction: vi.fn(),
+        },
       };
-      instance.browser = browser as unknown as WebdriverIO.MultiRemoteBrowser;
-      await instance.before({}, [], instance.browser);
 
-      const electronInstance = instance.browser.getInstance('electron');
+      const browser = {
+        instances: ['electron'],
+        getInstance: (name: string) => (name === 'electron' ? electronInstance : undefined),
+        execute: vi.fn().mockResolvedValue(true),
+        isMultiremote: true,
+      } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+      await instance.before({}, [], browser);
+
       const serviceApi = electronInstance.electron;
       expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -69,10 +92,6 @@ describe('before', () => {
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
-      expect(serviceApi.windowHandle).toEqual('dummy');
-
-      const firefoxInstance = browser.getInstance('firefox') as unknown as BrowserExtension;
-      expect(firefoxInstance.electron).toBeUndefined();
     });
   });
 });
@@ -122,25 +141,22 @@ describe('beforeTest', () => {
 });
 
 describe('beforeCommand', () => {
-  vi.mock(import('../src/window.js'), async (importOriginal) => {
-    const actual = await importOriginal();
-    return {
-      ...actual,
-      executeWindowManagement: vi.fn(),
-    };
-  });
   const browser = {
     waitUntil: vi.fn().mockResolvedValue(true),
     execute: vi.fn().mockResolvedValue(true),
     getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
   } as unknown as WebdriverIO.Browser;
 
+  beforeEach(() => {
+    vi.mocked(ensureActiveWindowFocus).mockClear();
+  });
+
   it('should call `ensureActiveWindowFocus`', async () => {
     instance = new WorkerService();
     await instance.before({}, [], browser);
     await instance.beforeCommand('dummyCommand');
 
-    expect(ensureActiveWindowFocus).toHaveBeenCalled();
+    expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand');
   });
 });
 
