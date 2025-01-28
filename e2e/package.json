@@ -23,15 +23,13 @@
     "exec-no-binary:js": "xvfb-maybe wdio run ./wdio.no-binary.conf.js",
     "exec-no-binary:main": "xvfb-maybe wdio run ./wdio.no-binary.conf.ts",
     "exec-no-binary:multiremote": "xvfb-maybe wdio run ./wdio.no-binary.multiremote.conf.ts",
-    "exec-no-binary:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec-no-binary:window:exec",
-    "exec-no-binary:window:exec": "pnpm run exec-no-binary:main && pnpm run exec-no-binary:multiremote",
+    "exec-no-binary:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec-no-binary:main && pnpm run exec-no-binary:multiremote",
     "exec-no-binary:standalone": "xvfb-maybe tsx ./test/standalone/api.no-binary.spec.ts",
     "exec:js": "xvfb-maybe wdio run ./wdio.conf.js",
     "exec:main": "xvfb-maybe wdio run ./wdio.conf.ts",
     "exec:multiremote": "xvfb-maybe wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "xvfb-maybe tsx ./test/standalone/api.spec.ts",
-    "exec:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec:window:exec",
-    "exec:window:exec": "pnpm run exec:main && pnpm run exec:multiremote",
+    "exec:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec:main && pnpm run exec:multiremote",
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {

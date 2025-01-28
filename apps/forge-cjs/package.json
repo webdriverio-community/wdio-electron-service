@@ -6,8 +6,8 @@
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
     "build:bundle": "tsc && rollup -c rollup.config.mjs",
-    "build:package": "cp ./src/index.html ./dist && cp ./src/splash.html ./dist && electron-forge package",
-    "build:package:mac-universal": "cp ./src/index.html ./dist && cp ./src/splash.html ./dist && electron-forge package --platform=darwin --arch=universal",
+    "build:package": "cp ./src/*.html ./dist && electron-forge package",
+    "build:package:mac-universal": "cp ./src/*.html ./dist && electron-forge package --platform=darwin --arch=universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "ci": "pnpm i && pnpm build && pnpm test",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
