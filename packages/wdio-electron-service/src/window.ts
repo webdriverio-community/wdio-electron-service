@@ -30,7 +30,7 @@ export const getActiveWindowHandle = async (browser: WebdriverIO.Browser) => {
 const switchToActiveWindow = async (browser: WebdriverIO.Browser) => {
   const activeHandle = await getActiveWindowHandle(browser);
 
-  if (Boolean(activeHandle) && activeHandle !== browser.electron.windowHandle) {
+  if (activeHandle && activeHandle !== browser.electron.windowHandle) {
     log.debug(
       'The active window has changed. Switching...',
       `New window handle: ${activeHandle}`,
