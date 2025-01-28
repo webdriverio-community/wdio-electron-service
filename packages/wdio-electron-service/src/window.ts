@@ -1,62 +1,59 @@
 import log from '@wdio/electron-utils/log';
 
-export const getWindowHandle = async (browser: WebdriverIO.Browser) => {
+export const getActiveWindowHandle = async (browser: WebdriverIO.Browser) => {
   if (browser.isMultiremote) {
     return undefined;
   }
-  log.trace(`Attempting to get window handle`);
+
+  log.trace('Getting active window handle');
   const handles = await browser.getWindowHandles();
-  switch (handles.length) {
-    case 0:
-      log.trace(`The application has no window`);
-      return undefined;
-    case 1:
-      log.trace(`The application has 1 window: ${handles[0]}`);
-      return handles[0];
-    default: {
-      const currentHandle = browser.electron.windowHandle;
-      if (!currentHandle || !handles.includes(currentHandle)) {
-        log.trace(`The application has multiple window, first one is used: ${handles[0]}`);
-        return handles[0];
-      } else {
-        log.trace(`Same window is detected: ${handles[0]}`);
-        return currentHandle;
-      }
-    }
+
+  // No windows available
+  if (handles.length === 0) {
+    log.trace('No windows found');
+    return undefined;
   }
+
+  const currentHandle = browser.electron.windowHandle;
+
+  // If we have a current window handle and it's still valid, keep using it
+  if (currentHandle && handles.includes(currentHandle)) {
+    log.trace(`Keeping current window handle: ${currentHandle}`);
+    return currentHandle;
+  }
+
+  // Otherwise return first available window handle
+  log.trace(`Selecting first available window handle: ${handles[0]}`);
+  return handles[0];
 };
 
-const followWindow = async (browser: WebdriverIO.Browser) => {
-  const currentHandle = await getWindowHandle(browser);
+const switchToActiveWindow = async (browser: WebdriverIO.Browser) => {
+  const activeHandle = await getActiveWindowHandle(browser);
 
-  if (!!currentHandle && currentHandle !== browser.electron.windowHandle) {
+  if (Boolean(activeHandle) && activeHandle !== browser.electron.windowHandle) {
     log.debug(
-      'Window is changed. Switching to new window',
-      `New window handle: ${currentHandle}`,
-      `Old window handle: ${browser.electron.windowHandle}`,
+      'The active window has changed. Switching...',
+      `New window handle: ${activeHandle}`,
+      `Previous window handle: ${browser.electron.windowHandle}`,
     );
-    await browser.switchToWindow(currentHandle);
-    browser.electron.windowHandle = currentHandle;
+    await browser.switchToWindow(activeHandle);
+    browser.electron.windowHandle = activeHandle;
   }
 };
 
-export const executeWindowManagement = async (
-  browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser | undefined,
+export const ensureActiveWindowFocus = async (
+  browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   commandName: string,
 ) => {
-  const excludeCommands = ['getWindowHandle', 'getWindowHandles', 'switchToWindow', 'execute'];
-  if (!browser || excludeCommands.includes(commandName)) {
-    return;
-  }
-  log.trace(`Start executing window management for command: ${commandName}`);
+  log.trace(`Ensuring active window focus before command: ${commandName}`);
   if (browser.isMultiremote) {
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
       const mrInstance = mrBrowser.getInstance(instance);
-      await followWindow(mrInstance);
+      await switchToActiveWindow(mrInstance);
     }
   } else {
-    await followWindow(browser);
+    await switchToActiveWindow(browser);
   }
-  log.trace(`End executing window management for command: ${commandName}`);
+  log.trace(`Window focus check completed for command: ${commandName}`);
 };
