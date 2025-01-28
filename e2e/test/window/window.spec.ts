@@ -7,7 +7,7 @@ describe('application with multiple windows', () => {
   });
 
   it('should switch to the application main window', async () => {
-    const elem = browser.$('.switch-main-window');
+    const elem = await browser.$('.switch-main-window');
     await elem.click();
 
     await expect(browser).toHaveTitle('Test');

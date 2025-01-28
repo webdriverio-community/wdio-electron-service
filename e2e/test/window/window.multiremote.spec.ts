@@ -11,8 +11,8 @@ describe('application with changing window', () => {
   it('should switch to the application main window', async () => {
     const browserA = multiremotebrowser.getInstance('browserA');
     const browserB = multiremotebrowser.getInstance('browserB');
-    browserA.$('.switch-main-window').click();
-    browserB.$('.switch-main-window').click();
+    await (await browserA.$('.switch-main-window')).click();
+    await (await browserB.$('.switch-main-window')).click();
     await expect(browserA).toHaveTitle('Test');
     await expect(browserB).toHaveTitle('Test');
   });
