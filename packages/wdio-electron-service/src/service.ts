@@ -4,6 +4,7 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { executeWindowManagement, getWindowHandle } from './window.js';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
 import { clearAllMocks } from './commands/clearAllMocks.js';
@@ -91,6 +92,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      * Add electron API to browser object
      */
     this.#browser.electron = this.#getElectronAPI();
+
+    this.#browser.electron.windowHandle = await getWindowHandle(this.#browser);
     this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
     if (this.#browser.electron.bridgeActive) {
@@ -111,6 +114,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
+
+        mrInstance.electron.windowHandle = await getWindowHandle(mrInstance);
         mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
         if (mrInstance.electron.bridgeActive) {
@@ -136,6 +141,10 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     if (this.#restoreMocks) {
       await restoreAllMocks();
     }
+  }
+
+  async beforeCommand(commandName: string) {
+    await executeWindowManagement(this.#browser, commandName);
   }
 
   async afterCommand(commandName: string, args: unknown[]) {
