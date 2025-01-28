@@ -66,3 +66,11 @@ You should try disabling `sandbox` mode in your app as mentioned in the [accessi
 Alternatively, if you are loading extensions into Electron, you should do that at the end of the "ready" event handler. Otherwise, chromedriver will attach to the first extension's background page.
 
 See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/667) for more details.
+
+### All versions of Electron fail to open on Ubuntu 24.04+
+
+See [this issue](https://github.com/electron/electron/issues/41066) for more details. The solution is to set the `appArgs` capability to include `--no-sandbox`.
+
+Since it is useful for this and other issues, the service automatically adds `--no-sandbox` to the `appArgs` whenever a custom `appArgs` is not provided. If you need to override this, you can do so by setting the `appArgs` capability to an empty array.
+
+Another workaround is to run `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
