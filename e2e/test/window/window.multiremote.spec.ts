@@ -1,14 +1,14 @@
 import { multiremotebrowser, expect } from '@wdio/globals';
 
 describe('application with changing window', () => {
-  it('should launch the application first screen', async () => {
+  it('should launch the application splash screen window', async () => {
     const browserA = multiremotebrowser.getInstance('browserA');
     const browserB = multiremotebrowser.getInstance('browserB');
-    await expect(browserA).toHaveTitle('Splash window');
-    await expect(browserB).toHaveTitle('Splash window');
+    await expect(browserA).toHaveTitle('Splash Screen');
+    await expect(browserB).toHaveTitle('Splash Screen');
   });
 
-  it('should launch the application second screen', async () => {
+  it('should switch to the application main window', async () => {
     const browserA = multiremotebrowser.getInstance('browserA');
     const browserB = multiremotebrowser.getInstance('browserB');
     browserA.$('.switch-main-window').click();
