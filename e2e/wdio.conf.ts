@@ -26,7 +26,7 @@ export const config: WdioElectronConfig = {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
         appBinaryPath,
-        appArgs: ['foo', 'bar=baz'],
+        appArgs: ['foo', 'bar=baz', '--no-sandbox'],
       },
     },
   ],
