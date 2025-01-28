@@ -7,7 +7,7 @@ import { resetAllMocks } from '../src/commands/resetAllMocks.js';
 import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
 import mockStore from '../src/mockStore.js';
 import type ElectronWorkerService from '../src/service.js';
-import { executeWindowManagement } from '../src/window.js';
+import { ensureActiveWindowFocus } from '../src/window.js';
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
@@ -135,12 +135,12 @@ describe('beforeCommand', () => {
     getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
   } as unknown as WebdriverIO.Browser;
 
-  it('should call `executeWindowManagement`', async () => {
+  it('should call `ensureActiveWindowFocus`', async () => {
     instance = new WorkerService();
     await instance.before({}, [], browser);
     await instance.beforeCommand('dummyCommand');
 
-    expect(executeWindowManagement).toHaveBeenCalled();
+    expect(ensureActiveWindowFocus).toHaveBeenCalled();
   });
 });
 
