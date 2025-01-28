@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 const isTest = process.env.TEST === 'true';
-const isEnableSplash = !!process.env.ENABLE_SPLASH_WINDOW;
+const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
 
 if (isTest) {
   await import('wdio-electron-service/main');
@@ -65,8 +65,15 @@ app.on('ready', () => {
   console.warn('main warn');
   console.error('main error');
 
-  if (isEnableSplash) {
+  if (isSplashEnabled) {
     createSplashWindow();
+
+    // to minimize the E2E test duration, we can switch to the main window programmatically
+    ipcMain.handle('switch-main-window', () => {
+      splashWindow.hide();
+      createMainWindow();
+      splashWindow.destroy();
+    });
   } else {
     createMainWindow();
   }
@@ -79,12 +86,5 @@ app.on('ready', () => {
   ipcMain.handle('decrease-window-size', () => {
     const bounds = mainWindow.getBounds();
     mainWindow.setBounds({ ...bounds, height: bounds.height - 10, width: bounds.width - 10 });
-  });
-
-  // to minimize the E2E test duration, we can switch to the main window programmatically
-  ipcMain.handle('switch-main-window', () => {
-    splashWindow.hide();
-    createMainWindow();
-    splashWindow.destroy();
   });
 });

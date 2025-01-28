@@ -19,8 +19,8 @@ const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electro
 globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
-const isEnableSplashWindow = !!process.env.ENABLE_SPLASH_WINDOW;
-const specs = isEnableSplashWindow ? ['./test/window/window.spec.ts'] : ['./test/*.spec.ts'];
+const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
+const specs = isSplashEnabled ? ['./test/window/*.spec.ts'] : ['./test/*.spec.ts'];
 
 export const config: WdioElectronConfig = {
   services: [['electron', { restoreMocks: true }]],

@@ -5,8 +5,8 @@ import { config as baseConfig } from './wdio.no-binary.conf.js';
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const baseServiceOptions = baseConfig.capabilities[0]['wdio:electronServiceOptions'];
 
-const isEnableSplashWindow = !!process.env.ENABLE_SPLASH_WINDOW;
-const specs = isEnableSplashWindow ? ['./test/window/window-multiremote.spec.ts'] : ['./test/multiremote/*.spec.ts'];
+const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
+const specs = isSplashEnabled ? ['./test/window/window.multiremote.spec.ts'] : ['./test/multiremote/*.spec.ts'];
 
 export const config: WdioElectronConfig = {
   ...baseConfig,
