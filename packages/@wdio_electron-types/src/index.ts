@@ -15,7 +15,7 @@ export interface ElectronServiceAPI {
   /**
    * The window handle of the Electron window.
    */
-  windowHandle: string | undefined;
+  windowHandle?: string;
   /**
    * Whether the Electron bridge is active.
    */
