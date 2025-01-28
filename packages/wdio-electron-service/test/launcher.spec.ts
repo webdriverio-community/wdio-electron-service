@@ -135,7 +135,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '114.0.5735.45',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -240,7 +240,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-other-test-app/dist/my-other-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -263,7 +263,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': 'some-version',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -291,7 +291,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -319,7 +319,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -347,7 +347,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -375,7 +375,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -415,7 +415,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -468,7 +468,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/out/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -504,7 +504,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -535,7 +535,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: ['--app=path/to/main.bundle.js'],
+          args: ['--app=path/to/main.bundle.js', '--no-sandbox'],
           binary: path.join(getFixtureDir('esm', 'no-build-tool'), 'node_modules', '.bin', 'electron'),
           windowTypes: ['app', 'webview'],
         },
@@ -565,7 +565,7 @@ describe('onPrepare', () => {
       expect(capabilities[0]).toEqual({
         'browserName': 'chrome',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -594,7 +594,7 @@ describe('onPrepare', () => {
           'browserName': 'chrome',
           'browserVersion': '116.0.5845.190',
           'goog:chromeOptions': {
-            args: [],
+            args: ['--no-sandbox'],
             binary: 'workspace/my-test-app/dist/my-test-app',
             windowTypes: ['app', 'webview'],
           },
@@ -644,7 +644,7 @@ describe('onPrepare', () => {
             'browserName': 'chrome',
             'browserVersion': '128.0.6613.36',
             'goog:chromeOptions': {
-              args: [],
+              args: ['--no-sandbox'],
               binary: 'workspace/my-test-app/dist/my-test-app',
               windowTypes: ['app', 'webview'],
             },
@@ -664,7 +664,7 @@ describe('onPrepare', () => {
               'browserName': 'chrome',
               'browserVersion': '116.0.5845.190',
               'goog:chromeOptions': {
-                args: [],
+                args: ['--no-sandbox'],
                 binary: 'workspace/my-test-app/dist/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
@@ -721,7 +721,7 @@ describe('onPrepare', () => {
               'browserName': 'chrome',
               'browserVersion': '128.0.6613.36',
               'goog:chromeOptions': {
-                args: [],
+                args: ['--no-sandbox'],
                 binary: 'workspace/my-test-app/dist/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
@@ -743,7 +743,7 @@ describe('onPrepare', () => {
                 'browserName': 'chrome',
                 'browserVersion': '116.0.5845.190',
                 'goog:chromeOptions': {
-                  args: [],
+                  args: ['--no-sandbox'],
                   binary: 'workspace/my-test-app/dist/my-test-app',
                   windowTypes: ['app', 'webview'],
                 },
@@ -799,7 +799,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '114.0.5735.45',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -904,7 +904,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-other-test-app/dist/my-other-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -927,7 +927,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': 'some-version',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -955,7 +955,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -983,7 +983,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1011,7 +1011,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1039,7 +1039,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.82',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1079,7 +1079,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1132,7 +1132,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/out/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1168,7 +1168,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1199,7 +1199,7 @@ describe('onPrepare', () => {
         'browserName': 'chrome',
         'browserVersion': '116.0.5845.190',
         'goog:chromeOptions': {
-          args: ['--app=path/to/main.bundle.js'],
+          args: ['--app=path/to/main.bundle.js', '--no-sandbox'],
           binary: path.join(getFixtureDir('cjs', 'no-build-tool'), 'node_modules', '.bin', 'electron'),
           windowTypes: ['app', 'webview'],
         },
@@ -1229,7 +1229,7 @@ describe('onPrepare', () => {
       expect(capabilities[0]).toEqual({
         'browserName': 'chrome',
         'goog:chromeOptions': {
-          args: [],
+          args: ['--no-sandbox'],
           binary: 'workspace/my-test-app/dist/my-test-app',
           windowTypes: ['app', 'webview'],
         },
@@ -1258,7 +1258,7 @@ describe('onPrepare', () => {
           'browserName': 'chrome',
           'browserVersion': '116.0.5845.190',
           'goog:chromeOptions': {
-            args: [],
+            args: ['--no-sandbox'],
             binary: 'workspace/my-test-app/dist/my-test-app',
             windowTypes: ['app', 'webview'],
           },
@@ -1308,7 +1308,7 @@ describe('onPrepare', () => {
             'browserName': 'chrome',
             'browserVersion': '128.0.6613.36',
             'goog:chromeOptions': {
-              args: [],
+              args: ['--no-sandbox'],
               binary: 'workspace/my-test-app/dist/my-test-app',
               windowTypes: ['app', 'webview'],
             },
@@ -1328,7 +1328,7 @@ describe('onPrepare', () => {
               'browserName': 'chrome',
               'browserVersion': '116.0.5845.190',
               'goog:chromeOptions': {
-                args: [],
+                args: ['--no-sandbox'],
                 binary: 'workspace/my-test-app/dist/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
@@ -1385,7 +1385,7 @@ describe('onPrepare', () => {
               'browserName': 'chrome',
               'browserVersion': '128.0.6613.36',
               'goog:chromeOptions': {
-                args: [],
+                args: ['--no-sandbox'],
                 binary: 'workspace/my-test-app/dist/my-test-app',
                 windowTypes: ['app', 'webview'],
               },
@@ -1407,7 +1407,7 @@ describe('onPrepare', () => {
                 'browserName': 'chrome',
                 'browserVersion': '116.0.5845.190',
                 'goog:chromeOptions': {
-                  args: [],
+                  args: ['--no-sandbox'],
                   binary: 'workspace/my-test-app/dist/my-test-app',
                   windowTypes: ['app', 'webview'],
                 },

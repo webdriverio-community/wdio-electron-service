@@ -58,8 +58,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         let {
           appBinaryPath,
           appEntryPoint,
-          appArgs = ['--no-sandbox'],
+          appArgs = [],
         } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
+
+        const noSandbox = '--no-sandbox';
+        if (!appArgs.includes(noSandbox)) {
+          appArgs.push(noSandbox);
+        }
 
         if (appEntryPoint) {
           if (appBinaryPath) {
