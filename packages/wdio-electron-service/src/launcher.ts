@@ -61,8 +61,10 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           appArgs = [],
         } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
 
+        // --no-sandbox fixes many issues - users can override this by specifying appArgs
         const noSandbox = '--no-sandbox';
-        if (!appArgs.includes(noSandbox)) {
+        if (!appArgs.length) {
+          // apply when no custom appArgs provided
           appArgs.push(noSandbox);
         }
 
