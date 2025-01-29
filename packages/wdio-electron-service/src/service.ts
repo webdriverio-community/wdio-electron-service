@@ -143,8 +143,31 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const mocks = mockStore.getMocks();
     const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
-    const excludeCommand = ['deleteSession'];
-    if (!excludeCommand.includes(commandName) && mocks.length > 0 && !isInternalCommand()) {
+    const inputCommands = [
+      'addValue',
+      'clearValue',
+      'click',
+      'doubleClick',
+      'dragAndDrop',
+      'execute',
+      'executeAsync',
+      'moveTo',
+      'scrollIntoView',
+      'selectByAttribute',
+      'selectByIndex',
+      'selectByVisibleText',
+      'setValue',
+      'touchAction',
+      'action',
+      'actions',
+      'emulate',
+      'keys',
+      'scroll',
+      'setWindowSize',
+      'uploadFile',
+    ];
+
+    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand()) {
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }
