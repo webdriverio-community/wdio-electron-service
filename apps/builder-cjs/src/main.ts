@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 const isTest = process.env.TEST === 'true';
 const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
 
@@ -87,5 +87,16 @@ app.on('ready', () => {
   ipcMain.handle('decrease-window-size', () => {
     const bounds = mainWindow.getBounds();
     mainWindow.setBounds({ ...bounds, height: bounds.height - 10, width: bounds.width - 10 });
+  });
+
+  ipcMain.handle('show-open-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select txt',
+      filters: [
+        { name: 'TXT', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    });
+    console.log(result);
   });
 });

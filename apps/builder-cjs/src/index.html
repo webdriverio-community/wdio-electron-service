@@ -25,6 +25,7 @@
     <div class="occurrences-2">word5 word6</div>
     <button type="button" class="make-bigger">make larger</button>
     <button type="button" class="make-smaller">make smaller</button>
+    <button type="button" class="show-dialog">show dialog</button>
     <label for="disabled-checkbox">
       Disabled checkbox
       <input id="disabled-checkbox" type="checkbox" data-testid="disabled-checkbox" disabled />
@@ -50,6 +51,11 @@
         const smallerClickCount = parseInt(document.querySelector('.smaller').innerText);
         document.querySelector('.smaller').innerText = smallerClickCount + 1;
         window.api.invoke('decrease-window-size');
+      });
+      // Add E2E scenario related to following issue
+      // https://github.com/webdriverio-community/wdio-electron-service/issues/895
+      document.querySelector('.show-dialog').addEventListener('click', () => {
+        window.api.invoke('show-open-dialog');
       });
     });
   </script>
