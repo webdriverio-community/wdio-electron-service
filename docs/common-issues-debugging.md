@@ -73,4 +73,4 @@ See [this issue](https://github.com/electron/electron/issues/41066) for more det
 
 Since it is useful for this and other issues, the service automatically adds `--no-sandbox` to the `appArgs` whenever a custom `appArgs` is not provided. If you need to override this, you can do so by setting the `appArgs` capability to an empty array.
 
-Another workaround is to run `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
+Another workaround is to run `sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
