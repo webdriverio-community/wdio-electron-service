@@ -101,7 +101,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
@@ -138,7 +138,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
@@ -187,7 +187,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       rollup:
         specifier: ^4.28.1
         version: 4.32.0
@@ -236,7 +236,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       rollup:
         specifier: ^4.28.1
         version: 4.32.0
@@ -282,7 +282,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       rollup:
         specifier: ^4.28.1
         version: 4.32.0
@@ -328,7 +328,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       rollup:
         specifier: ^4.28.1
         version: 4.32.0
@@ -364,7 +364,7 @@ importers:
         version: 9.6.4
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -429,7 +429,7 @@ importers:
         version: 25.1.7
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -557,7 +557,7 @@ importers:
         version: 25.1.7
       electron:
         specifier: ^33.2.1
-        version: 33.3.2
+        version: 33.2.1
       nock:
         specifier: ^14.0.0-beta.19
         version: 14.0.0
@@ -2710,8 +2710,8 @@ packages:
   electron-to-chromium@1.5.88:
     resolution: {integrity: sha512-K3C2qf1o+bGzbilTDCTBhTQcMS9KW60yTAaTeeXsfvQuTDDwlokLam/AdqlqcSy9u4UainDgsHV23ksXAOgamw==}
 
-  electron@33.3.2:
-    resolution: {integrity: sha512-2pWr0frM9UrZGX1d7eoFdMROw10h2vXIWJmXdjwlKnSWWUm18GCrEOUeDUr+IMgz5EjO7JM7FQDHDMApeMgHyg==}
+  electron@33.2.1:
+    resolution: {integrity: sha512-SG/nmSsK9Qg1p6wAW+ZfqU+AV8cmXMTIklUL18NnOKfZLlum4ZsDoVdmmmlL39ZmeCaq27dr7CgslRPahfoVJg==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -8346,7 +8346,7 @@ snapshots:
 
   electron-to-chromium@1.5.88: {}
 
-  electron@33.3.2:
+  electron@33.2.1:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.17.6
