@@ -41,7 +41,6 @@ beforeEach(async () => {
   LaunchService = (await import('../src/launcher.js')).default;
   options = {
     appBinaryPath: 'workspace/my-test-app/dist/my-test-app',
-    appArgs: [],
   };
   nock('https://electronjs.org')
     .get('/headers/index.json')
