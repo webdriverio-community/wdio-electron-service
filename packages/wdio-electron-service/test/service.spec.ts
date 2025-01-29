@@ -170,13 +170,13 @@ describe('afterCommand', () => {
     (mockStore.getMocks as Mock).mockImplementation(() => mocks);
   });
 
-  it('should not update mocks when the command is not `execute`', async () => {
+  it.each(['deleteSession'])('should not update mocks when the command is %s', async (commandName: string) => {
     instance = new WorkerService();
     mocks = [
       ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
       ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
     ];
-    await instance.afterCommand('someCommand', [['look', 'some', 'args']]);
+    await instance.afterCommand(commandName, [['look', 'some', 'args']]);
 
     expect(mocks[0][1].update).not.toHaveBeenCalled();
     expect(mocks[1][1].update).not.toHaveBeenCalled();
