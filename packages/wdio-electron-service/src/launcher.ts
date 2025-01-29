@@ -119,7 +119,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
          */
         cap[CUSTOM_CAPABILITY_NAME] = cap[CUSTOM_CAPABILITY_NAME] || {};
 
-        log.debug('setting capability', cap);
+        log.debug('setting capability', JSON.stringify(cap));
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
