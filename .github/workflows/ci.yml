@@ -51,10 +51,6 @@ jobs:
       - name: Run Tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            # Workaround for linux CI
-            # https://github.com/electron/electron/issues/41066
-            sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
-
             # Run tasks in serial on Ubuntu to avoid Xvfb issues
             pnpm run ci-linux
           else
