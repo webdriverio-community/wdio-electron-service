@@ -15,7 +15,7 @@ export const config: WdioElectronConfig = {
         'browserName': 'electron',
         'wdio:electronServiceOptions': {
           ...baseServiceOptions,
-          appArgs: ['browser=A'],
+          appArgs: ['browser=A', '--no-sandbox'],
         },
       },
     },
@@ -24,7 +24,7 @@ export const config: WdioElectronConfig = {
         'browserName': 'electron',
         'wdio:electronServiceOptions': {
           ...baseServiceOptions,
-          appArgs: ['browser=B'],
+          appArgs: ['browser=B', '--no-sandbox'],
         },
       },
     },
