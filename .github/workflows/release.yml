@@ -4,6 +4,13 @@ name: Manual Release Publish
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch. Defaults to "main".'
+        required: true
+        type: choice
+        options:
+          - main
+          - v7
       releaseVersion:
         description: 'The new version to create.'
         required: true
@@ -30,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
-          ref: 'main'
+          ref: ${{ inputs.branch }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -56,7 +63,11 @@ jobs:
         run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
       - name: Publish to NPM
         shell: bash
-        run: pnpx tsx scripts/publish.ts --tag latest ${{ inputs.dryRun && '--dry-run' || '' }}
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch }}
+        run: |
+          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="${RELEASE_BRANCH}"
+          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
       - name: Log git changes
         if: ${{ inputs.dryRun }}
         run: |
@@ -83,6 +94,6 @@ jobs:
           draft: true
           generate_release_notes: true
           prerelease: false
-          repository: goosewobbler/zutron
+          repository: webdriverio-community/wdio-electron-service
           tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
           token: $GITHUB_TOKEN
