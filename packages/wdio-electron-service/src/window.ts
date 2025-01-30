@@ -1,20 +1,18 @@
 import log from '@wdio/electron-utils/log';
+import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
-export const getActiveWindowHandle = async (browser: WebdriverIO.Browser) => {
-  if (browser.isMultiremote) {
-    return undefined;
-  }
-
+export const getActiveWindowHandle = async (puppeteerBrowser: PuppeteerBrowser, currentHandle?: string) => {
   log.trace('Getting active window handle');
-  const handles = await browser.getWindowHandles();
+  const handles = puppeteerBrowser
+    .targets()
+    .filter((target) => target.type() === 'page')
+    .map((target) => (target as unknown as { _targetId: string })._targetId);
 
   // No windows available
   if (handles.length === 0) {
     log.trace('No windows found');
     return undefined;
   }
-
-  const currentHandle = browser.electron.windowHandle;
 
   // If we have a current window handle and it's still valid, keep using it
   if (currentHandle && handles.includes(currentHandle)) {
@@ -27,8 +25,8 @@ export const getActiveWindowHandle = async (browser: WebdriverIO.Browser) => {
   return handles[0];
 };
 
-const switchToActiveWindow = async (browser: WebdriverIO.Browser) => {
-  const activeHandle = await getActiveWindowHandle(browser);
+const switchToActiveWindow = async (browser: WebdriverIO.Browser, puppeteerBrowser: PuppeteerBrowser) => {
+  const activeHandle = await getActiveWindowHandle(puppeteerBrowser, browser.electron.windowHandle);
 
   if (activeHandle && activeHandle !== browser.electron.windowHandle) {
     log.debug(
@@ -44,16 +42,18 @@ const switchToActiveWindow = async (browser: WebdriverIO.Browser) => {
 export const ensureActiveWindowFocus = async (
   browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   commandName: string,
+  puppeteerBrowser?: PuppeteerBrowser,
 ) => {
   log.trace(`Ensuring active window focus before command: ${commandName}`);
   if (browser.isMultiremote) {
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
       const mrInstance = mrBrowser.getInstance(instance);
-      await switchToActiveWindow(mrInstance);
+      const mrPuppeteer = await mrInstance.getPuppeteer();
+      await switchToActiveWindow(mrInstance, mrPuppeteer);
     }
   } else {
-    await switchToActiveWindow(browser);
+    await switchToActiveWindow(browser, puppeteerBrowser!);
   }
   log.trace(`Window focus check completed for command: ${commandName}`);
 };

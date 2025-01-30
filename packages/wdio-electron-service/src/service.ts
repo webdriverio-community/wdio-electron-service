@@ -1,6 +1,7 @@
 import log from '@wdio/electron-utils/log';
 import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
+import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
@@ -40,6 +41,7 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
+  #puppeteerBrowser?: PuppeteerBrowser;
   #globalOptions: ElectronServiceGlobalOptions;
   #clearMocks = false;
   #resetMocks = false;
@@ -93,7 +95,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      */
     this.#browser.electron = this.#getElectronAPI();
 
-    this.#browser.electron.windowHandle = await getActiveWindowHandle(this.#browser);
     this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
     if (this.#browser.electron.bridgeActive) {
@@ -115,7 +116,8 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
 
-        mrInstance.electron.windowHandle = await getActiveWindowHandle(mrInstance);
+        const mrPuppeteer = await mrInstance.getPuppeteer();
+        mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
         mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
         if (mrInstance.electron.bridgeActive) {
@@ -126,6 +128,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         await waitUntilWindowAvailable(mrInstance);
       }
     } else {
+      const puppeteer = await browser.getPuppeteer();
+      this.#puppeteerBrowser = puppeteer;
+      this.#browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(browser);
     }
@@ -143,12 +148,15 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
-  async beforeCommand(commandName: string) {
+  async beforeCommand(commandName: string, args: unknown[]) {
     const excludeCommands = ['getWindowHandle', 'getWindowHandles', 'switchToWindow', 'execute'];
-    if (!this.#browser || excludeCommands.includes(commandName)) {
+
+    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
+    if (!this.#browser || excludeCommands.includes(commandName) || isInternalCommand()) {
       return;
     }
-    await ensureActiveWindowFocus(this.#browser, commandName);
+
+    await ensureActiveWindowFocus(this.#browser, commandName, this.#puppeteerBrowser);
   }
 
   async afterCommand(commandName: string, args: unknown[]) {
@@ -156,6 +164,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     const mocks = mockStore.getMocks();
     const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
+    // White list of command which will input user actions to electron app.
     const inputCommands = [
       'addValue',
       'clearValue',
