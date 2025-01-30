@@ -36,6 +36,7 @@ describe('before', () => {
       execute: vi.fn().mockResolvedValue(true),
       getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
       switchToWindow: vi.fn(),
+      getPuppeteer: vi.fn(),
       electron: {}, // Let the service initialize this
     } as unknown as WebdriverIO.Browser;
 
@@ -110,6 +111,7 @@ describe('beforeTest', () => {
   const browser = {
     waitUntil: vi.fn().mockResolvedValue(true),
     execute: vi.fn().mockResolvedValue(true),
+    getPuppeteer: vi.fn(),
     getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
   } as unknown as WebdriverIO.Browser;
 
@@ -144,6 +146,7 @@ describe('beforeCommand', () => {
   const browser = {
     waitUntil: vi.fn().mockResolvedValue(true),
     execute: vi.fn().mockResolvedValue(true),
+    getPuppeteer: vi.fn(),
     getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
   } as unknown as WebdriverIO.Browser;
 
@@ -154,9 +157,9 @@ describe('beforeCommand', () => {
   it('should call `ensureActiveWindowFocus`', async () => {
     instance = new WorkerService();
     await instance.before({}, [], browser);
-    await instance.beforeCommand('dummyCommand');
+    await instance.beforeCommand('dummyCommand', []);
 
-    expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand');
+    expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand', undefined);
   });
 });
 
