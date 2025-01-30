@@ -30,7 +30,6 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
   // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
   // https://github.com/webdriverio-community/wdio-electron-service/issues/756
   // https://github.com/privatenumber/tsx/issues/113
-
   await browser.execute(() => {
     globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
   });
@@ -38,6 +37,8 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
     globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
   });
 };
+
+const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
@@ -150,19 +151,15 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
   async beforeCommand(commandName: string, args: unknown[]) {
     const excludeCommands = ['getWindowHandle', 'getWindowHandles', 'switchToWindow', 'execute'];
-
-    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
-    if (!this.#browser || excludeCommands.includes(commandName) || isInternalCommand()) {
+    if (!this.#browser || excludeCommands.includes(commandName) || isInternalCommand(args)) {
       return;
     }
-
     await ensureActiveWindowFocus(this.#browser, commandName, this.#puppeteerBrowser);
   }
 
   async afterCommand(commandName: string, args: unknown[]) {
     // ensure mocks are updated
     const mocks = mockStore.getMocks();
-    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
     // White list of command which will input user actions to electron app.
     const inputCommands = [
@@ -189,7 +186,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       'uploadFile',
     ];
 
-    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand()) {
+    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }
