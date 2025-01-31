@@ -4,7 +4,7 @@ The service automatically handles window management in your Electron application
 
 ## What It Does
 
-- Automatically detects and switches to the active window
+- Automatically detects and switches to the active window when window was switched
 - Handles multiple windows seamlessly
 - Works with both single and multi-remote browser instances
 - Supports common scenarios like splash screens and popups
@@ -12,14 +12,18 @@ The service automatically handles window management in your Electron application
 ## Example
 
 ```ts
-// The service automatically handles window focus
-await browser.click('#button-in-main-window');
+// At the test script, the service automatically handles window focus
+await expect(browser).toHaveTitle('Splash Screen');
 
-// Opening a new window
-await browser.newWindow('https://example.com');
+// At the main process of electron, switching a new window
+splashWindow.hide();
+const mainWindow = new BrowserWindow({
+  /* some options */
+});
+splashWindow.destroy();
 
-// The service automatically switches to the new window
-await browser.click('#element-in-new-window');
+// At the test script, the service automatically switches to the new window
+await expect(browser).toHaveTitle('Main Window');
 ```
 
 ## Manual Window Control
