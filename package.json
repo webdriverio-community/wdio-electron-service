@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only --force",
+    "backport": "tsx ./scripts/backport.ts",
     "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "ci-linux": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm --concurrency=1",
     "ci-mac:e2e:mac-universal": "turbo run build:mac-universal init-e2es test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm --only",
