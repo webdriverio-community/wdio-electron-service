@@ -12,17 +12,17 @@ The service automatically handles window management in your Electron application
 ## Example
 
 ```ts
-// At the test script, the service automatically handles window focus
+// Test script - the service automatically handles window focus
 await expect(browser).toHaveTitle('Splash Screen');
 
-// At the main process of electron, switching a new window
+// Electron main process - switching a new window
 splashWindow.hide();
 const mainWindow = new BrowserWindow({
   /* some options */
 });
 splashWindow.destroy();
 
-// At the test script, the service automatically switches to the new window
+// Test script - the service automatically switches to the new window
 await expect(browser).toHaveTitle('Main Window');
 ```
 
