@@ -1,3 +1,9 @@
+# [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
+
+### Features
+
+- add the field for windowHandle to ElectronServiceAPI ([05bd5e0](https://github.com/webdriverio-community/wdio-electron-service/commit/05bd5e05cc2260601f8781e8b12b6f7eb4a3db6a))
+
 # [8.0.0-next.6](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.5...v8.0.0-next.6) (2025-01-29)
 
 ### Bug Fixes

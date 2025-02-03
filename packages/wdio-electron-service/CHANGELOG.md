@@ -1,3 +1,17 @@
+# [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
+
+### Bug Fixes
+
+- add check for not initialised the puppeteer ([b6e4acc](https://github.com/webdriverio-community/wdio-electron-service/commit/b6e4acc7b5af539a30abb7f4513327188215ea50))
+- add processing to parse into serializable objects ([6eeb977](https://github.com/webdriverio-community/wdio-electron-service/commit/6eeb977ddc9c0cc0fd0ff2439233053a5184ffb1))
+- add type guard ([dbb4919](https://github.com/webdriverio-community/wdio-electron-service/commit/dbb49190c63a701f468b9efab710cca3edf626c8))
+- fix mock update to be performed after command execution ([2282092](https://github.com/webdriverio-community/wdio-electron-service/commit/2282092b36143be881dab8f59ea2740c76b322fd))
+
+### Features
+
+- support window management ([e0620ad](https://github.com/webdriverio-community/wdio-electron-service/commit/e0620add7fa2f8b223ba4a947bc59d9aaa1ef624))
+- update window management to support multi window ([2ebf5d2](https://github.com/webdriverio-community/wdio-electron-service/commit/2ebf5d2149e2bf5201db764e0dba55731d0021e3))
+
 # [8.0.0-next.6](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.5...v8.0.0-next.6) (2025-01-29)
 
 # [8.0.0-next.5](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.4...v8.0.0-next.5) (2024-12-20)
