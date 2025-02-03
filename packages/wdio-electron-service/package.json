@@ -90,10 +90,10 @@
     }
   },
   "dependencies": {
-    "@vitest/spy": "^2.1.8",
+    "@vitest/spy": "^2.1.9",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/globals": "^9.7.1",
+    "@wdio/globals": "^9.7.2",
     "@wdio/logger": "^9.4.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
@@ -102,7 +102,7 @@
     "puppeteer-core": "^22.3.0",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.2",
-    "webdriverio": "^9.7.1"
+    "webdriverio": "^9.7.2"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.6.1",
@@ -113,7 +113,7 @@
     "@vitest/coverage-v8": "^2.1.8",
     "@wdio/types": "^9.6.3",
     "builder-util": "^25.1.7",
-    "electron": "^33.2.1",
+    "electron": "^33.3.2",
     "nock": "^14.0.0-beta.19",
     "rollup": "^4.32.1",
     "shx": "^0.3.4",
