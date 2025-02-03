@@ -118,6 +118,7 @@ This is because WDIO uses Chrome for Testing to download Chromedriver, which onl
 **[Chromedriver Configuration](./docs/configuration/chromedriver-configuration.md)** \
 **[Accessing Electron APIs](./docs/electron-apis/accessing-apis.md)** \
 **[Mocking Electron APIs](./docs/electron-apis/mocking-apis.md)** \
+**[Window Management](./docs/window-management.md)** \
 **[Standalone Mode](./docs/standalone-mode.md)** \
 **[Development](./docs/development.md)** \
 **[Common Issues & Debugging](./docs/common-issues-debugging.md)**

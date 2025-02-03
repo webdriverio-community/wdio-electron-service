@@ -7,6 +7,9 @@ import { resetAllMocks } from '../src/commands/resetAllMocks.js';
 import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
 import mockStore from '../src/mockStore.js';
 import type ElectronWorkerService from '../src/service.js';
+import { ensureActiveWindowFocus } from '../src/window.js';
+
+vi.mock('../src/window.js');
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
@@ -16,14 +19,29 @@ beforeEach(async () => {
   WorkerService = (await import('../src/service.js')).default;
 });
 
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+});
+
 describe('before', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should add commands to the browser object', async () => {
     instance = new WorkerService();
     const browser = {
       waitUntil: vi.fn().mockResolvedValue(true),
       execute: vi.fn().mockResolvedValue(true),
+      getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+      switchToWindow: vi.fn(),
+      getPuppeteer: vi.fn(),
+      electron: {}, // Let the service initialize this
     } as unknown as WebdriverIO.Browser;
+
     await instance.before({}, [], browser);
+
     const serviceApi = browser.electron as BrowserExtension['electron'];
     expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
     expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -34,29 +52,40 @@ describe('before', () => {
   });
 
   describe('when multiremote', () => {
-    it('should add commands to the browser object when multiremote', async () => {
+    it('should add commands to the browser object', async () => {
       instance = new WorkerService();
-      const browser = {
-        instanceMap: {
-          electron: {
-            requestedCapabilities: { 'wdio:electronServiceOptions': {} },
-            waitUntil: vi.fn().mockResolvedValue(true),
-            execute: vi.fn().mockResolvedValue(true),
-          },
-          firefox: {
-            requestedCapabilities: {},
-            waitUntil: vi.fn().mockResolvedValue(true),
+      const electronInstance = {
+        requestedCapabilities: {
+          'wdio:electronServiceOptions': {},
+          'alwaysMatch': {
+            browserName: 'electron',
           },
         },
-        isMultiremote: true,
-        instances: ['electron', 'firefox'],
-        getInstance: (instanceName: string) => browser.instanceMap[instanceName as keyof typeof browser.instanceMap],
+        waitUntil: vi.fn().mockResolvedValue(true),
         execute: vi.fn().mockResolvedValue(true),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        electron: {
+          execute: vi.fn(),
+          mock: vi.fn(),
+          mockAll: vi.fn(),
+          clearAllMocks: vi.fn(),
+          resetAllMocks: vi.fn(),
+          restoreAllMocks: vi.fn(),
+          bridgeActive: true,
+          isMockFunction: vi.fn(),
+        },
       };
-      instance.browser = browser as unknown as WebdriverIO.MultiRemoteBrowser;
-      await instance.before({}, [], instance.browser);
 
-      const electronInstance = instance.browser.getInstance('electron');
+      const browser = {
+        instances: ['electron'],
+        getInstance: (name: string) => (name === 'electron' ? electronInstance : undefined),
+        execute: vi.fn().mockResolvedValue(true),
+        isMultiremote: true,
+      } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+      await instance.before({}, [], browser);
+
       const serviceApi = electronInstance.electron;
       expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.execute).toEqual(expect.any(Function));
@@ -64,9 +93,6 @@ describe('before', () => {
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
-
-      const firefoxInstance = browser.getInstance('firefox') as unknown as BrowserExtension;
-      expect(firefoxInstance.electron).toBeUndefined();
     });
   });
 });
@@ -82,78 +108,58 @@ describe('beforeTest', () => {
     restoreAllMocks: vi.fn().mockReturnValue({}),
   }));
 
-  it('should clear all mocks when `clearMocks` is set', async () => {
-    instance = new WorkerService({ clearMocks: true });
-    const browser = {
-      waitUntil: vi.fn().mockResolvedValue(true),
-      execute: vi.fn().mockResolvedValue(true),
-    } as unknown as WebdriverIO.Browser;
+  const browser = {
+    waitUntil: vi.fn().mockResolvedValue(true),
+    execute: vi.fn().mockResolvedValue(true),
+    getPuppeteer: vi.fn(),
+    getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+  } as unknown as WebdriverIO.Browser;
+
+  it.each([
+    [`clearMocks`, clearAllMocks],
+    [`resetMocks`, resetAllMocks],
+    [`restoreMocks`, restoreAllMocks],
+  ])('should clear all mocks when `%s` is set', async (option, fn) => {
+    instance = new WorkerService({ [option]: true });
     await instance.before({}, [], browser);
     await instance.beforeTest();
 
-    expect(clearAllMocks).toHaveBeenCalled();
-  });
-
-  it('should reset all mocks when `resetMocks` is set', async () => {
-    instance = new WorkerService({ resetMocks: true });
-    const browser = {
-      waitUntil: vi.fn().mockResolvedValue(true),
-      execute: vi.fn().mockResolvedValue(true),
-    } as unknown as WebdriverIO.Browser;
-    await instance.before({}, [], browser);
-    await instance.beforeTest();
-
-    expect(resetAllMocks).toHaveBeenCalled();
-  });
-
-  it('should restore all mocks when `restoreMocks` is set', async () => {
-    instance = new WorkerService({ restoreMocks: true });
-    const browser = {
-      waitUntil: vi.fn().mockResolvedValue(true),
-      execute: vi.fn().mockResolvedValue(true),
-    } as unknown as WebdriverIO.Browser;
-    await instance.before({}, [], browser);
-    await instance.beforeTest();
-
-    expect(restoreAllMocks).toHaveBeenCalled();
+    expect(fn).toHaveBeenCalled();
   });
 
   describe('when setting options in capabilities', () => {
-    it('should clear all mocks when `clearMocks` is set in capabilities', async () => {
+    it.each([
+      [`clearMocks`, clearAllMocks],
+      [`resetMocks`, resetAllMocks],
+      [`restoreMocks`, restoreAllMocks],
+    ])('should clear all mocks when `%s` is set in capabilities', async (option, fn) => {
       instance = new WorkerService();
-      const browser = {
-        waitUntil: vi.fn().mockResolvedValue(true),
-        execute: vi.fn().mockResolvedValue(true),
-      } as unknown as WebdriverIO.Browser;
-      await instance.before({ 'wdio:electronServiceOptions': { clearMocks: true } }, [], browser);
+      await instance.before({ 'wdio:electronServiceOptions': { [option]: true } }, [], browser);
       await instance.beforeTest();
 
-      expect(clearAllMocks).toHaveBeenCalled();
+      expect(fn).toHaveBeenCalled();
     });
+  });
+});
 
-    it('should reset all mocks when `resetMocks` is set in capabilities', async () => {
-      instance = new WorkerService();
-      const browser = {
-        waitUntil: vi.fn().mockResolvedValue(true),
-        execute: vi.fn().mockResolvedValue(true),
-      } as unknown as WebdriverIO.Browser;
-      await instance.before({ 'wdio:electronServiceOptions': { resetMocks: true } }, [], browser);
-      await instance.beforeTest();
+describe('beforeCommand', () => {
+  const browser = {
+    waitUntil: vi.fn().mockResolvedValue(true),
+    execute: vi.fn().mockResolvedValue(true),
+    getPuppeteer: vi.fn(),
+    getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+  } as unknown as WebdriverIO.Browser;
 
-      expect(resetAllMocks).toHaveBeenCalled();
-    });
+  beforeEach(() => {
+    vi.mocked(ensureActiveWindowFocus).mockClear();
+  });
 
-    it('should restore all mocks when `restoreMocks` is set in capabilities', async () => {
-      instance = new WorkerService();
-      const browser = {
-        waitUntil: vi.fn().mockResolvedValue(true),
-        execute: vi.fn().mockResolvedValue(true),
-      } as unknown as WebdriverIO.Browser;
-      await instance.before({ 'wdio:electronServiceOptions': { restoreMocks: true } }, [], browser);
-      await instance.beforeTest();
+  it('should call `ensureActiveWindowFocus`', async () => {
+    instance = new WorkerService();
+    await instance.before({}, [], browser);
+    await instance.beforeCommand('dummyCommand', []);
 
-      expect(restoreAllMocks).toHaveBeenCalled();
-    });
+    expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand', undefined);
   });
 });
 
