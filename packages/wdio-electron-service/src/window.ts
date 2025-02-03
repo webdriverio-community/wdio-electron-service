@@ -3,6 +3,12 @@ import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
 export const getActiveWindowHandle = async (puppeteerBrowser: PuppeteerBrowser, currentHandle?: string) => {
   log.trace('Getting active window handle');
+
+  if (!puppeteerBrowser) {
+    log.trace('Puppeteer is not initialized.');
+    return undefined;
+  }
+
   const handles = puppeteerBrowser
     .targets()
     .filter((target) => target.type() === 'page')
