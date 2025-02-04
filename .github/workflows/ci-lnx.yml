@@ -1,0 +1,64 @@
+name: E2E Tests - Linux
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      node-version:
+        required: true
+        type: string
+jobs:
+  e2e:
+    name: E2E ${{ matrix.e2e-scenario }} tests (linux.${{ inputs.node-version }})
+    runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        e2e-scenario: ['builder', 'forge', 'no-binary']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Download Build Archive
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: .
+          filename: wdio-electron-service-build.zip
+      # Workaround for linux CI
+      # https://github.com/electron/electron/issues/41066
+      - run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - run: pnpm run init-forge:package
+        if: ${{ contains(matrix.e2e-scenario, 'forge') }}
+        shell: bash
+
+      - run: pnpm run init-forge:apps
+        if: ${{ contains(matrix.e2e-scenario, 'forge') }}
+        shell: bash
+
+      - run: pnpm exec turbo run build --filter=example-${{ matrix.e2e-scenario }}* --only
+        shell: bash
+      - run: pnpm exec turbo run init-e2es test:e2e:${{ matrix.e2e-scenario }}-esm test:e2e:${{ matrix.e2e-scenario }}-cjs --only --concurrency=1
+        shell: bash
+      - name: 🐛 Show logs
+        shell: bash
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
+      - name: 🐛 Upload logs
+        uses: ./.github/workflows/actions/upload-archive
+        if: failure()
+        with:
+          name: linux-e2e-${{ matrix.e2e-scenario }}-logs
+          output: linux-e2e-${{ matrix.e2e-scenario }}-logs.zip
+          paths: e2e/*/*.log
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'

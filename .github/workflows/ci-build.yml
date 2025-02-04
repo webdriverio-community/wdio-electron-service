@@ -1,0 +1,29 @@
+name: Lint
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
+jobs:
+  build:
+    name: Build
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: '20'
+
+      - name: 👷 Build Packages
+        run: pnpm run build
+        shell: bash
+
+      - name: ⬆️ Upload Build Artifacts
+        uses: ./.github/workflows/actions/upload-archive
+        with:
+          name: wdio-electron-service
+          output: wdio-electron-service-build.zip
+          paths: packages/*/dist packages/*/cjs
