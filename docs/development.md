@@ -141,3 +141,7 @@ To create consecutive pre-releases you can select `existing` which will incremen
 | `minor`      | `6.4.0-next.0`      |
 | `patch`      | `6.3.2-next.0`      |
 | `existing`   | `6.3.1-next.4`      |
+
+## Maintenance policy
+
+Starting from v8 the team tries to backport all features that would be still backwards compatible with older versions. With a new major version update (e.g. v8) we continue to maintain the last version (e.g. v7) and deprecate the previous maintained version (e.g. v6 and lower).
