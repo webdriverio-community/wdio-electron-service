@@ -145,3 +145,66 @@ To create consecutive pre-releases you can select `existing` which will incremen
 ## Maintenance policy
 
 Starting from v8 the team tries to backport all features that would be still backwards compatible with older versions. With a new major version update (e.g. v8) we continue to maintain the last version (e.g. v7) and deprecate the previous maintained version (e.g. v6 and lower).
+
+## Back-Porting Bug Fixes
+
+In accordance with the maintenance policy, do the following to ensure that backward-compatible fixes are reflected in the maintenance version.
+
+### As a Triager
+
+Everyone who make a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered to be ported back. If a change relies on features or code pieces that are only available in the current version, then a back port can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to back port code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
+
+### As a Merger
+
+Once a PR with a `backport-requested` label got merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
+
+```sh
+git pull
+$ git fetch --all
+$ git checkout v7
+```
+
+Before you can start, Please create the file `.env` at project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only having the `public_repo` field enabled. Then write down it to `.env` file and run the backport script. It fetches all commits connected with PRs that are labeled with `backport-requested` and cherry-picks them into the maintenance branch. Via an interactive console you can get the chance to review the PR again and whether you want to backport it or not. To start the process, just execute:
+
+```sh
+pnpm run backport
+```
+
+If during the process a cherry-pick fails, you can always abort and manually troubleshoot. If you are not able to resolve the problem, create an issue in the repo and include the author of that PR. A successful backport of two PRs will look like this:
+
+```
+$ pnpm run backport
+
+> webdriverio-monorepo@ backport /path/to/webdriverio/webdriverio
+> node ./scripts/backport.js
+
+Welcome to the backport script for v7! 🚀
+
+================================================================================
+PR: #904 - ci: workaround for CI on linux
+Author: mato533
+URL: https://github.com/webdriverio-community/wdio-electron-service/pull/904
+--------------------------------------------------------------------------------
+✔ Do you want to backport this PR? Yes, I want to backport this PR.
+Backporting sha 94bb9daa9ff24fce172f3fdf6d99ede98984a91e from v8 to v7
+> git cherry-pick -x -m 1 94bb9daa9ff24fce172f3fdf6d99ede98984a91e
+[v7 f5b1393] Merge pull request #904 from webdriverio-community/sm/ci-fix-linux
+ Date: Fri Jan 24 10:24:30 2025 +0900
+ 1 file changed, 3 insertions(+)
+
+================================================================================
+PR: #908 - ci: add support to release multiple versions
+Author: mato533
+URL: https://github.com/webdriverio-community/wdio-electron-service/pull/908
+--------------------------------------------------------------------------------
+✔ Do you want to backport this PR? Yes, I want to backport this PR.
+Backporting sha 7976224f74bd57ebafa38819d05ac4f937c957fe from v8 to v7
+> git cherry-pick -x -m 1 7976224f74bd57ebafa38819d05ac4f937c957fe
+[v7 bef1b08] Merge pull request #908 from webdriverio-community/sm/ci-release
+ Author: goosewobbler <432005+goosewobbler@users.noreply.github.com>
+ Date: Wed Jan 29 00:13:14 2025 +0000
+ 2 files changed, 15 insertions(+), 3 deletions(-)
+
+Successfully backported 2 PRs 👏!
+Please now push them to v7 and make a new v7.x release!
+```
