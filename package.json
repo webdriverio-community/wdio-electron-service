@@ -47,14 +47,14 @@
     "@eslint/js": "^9.19.0",
     "@turbo-version/version": "^0.8.1",
     "@types/eslint-config-prettier": "^6.11.2",
-    "@types/node": "^22.12.0",
+    "@types/node": "^22.13.0",
     "@types/shelljs": "^0.8.15",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vitest/eslint-plugin": "^1.1.25",
     "cross-env": "^7.0.3",
     "eslint": "^9.19.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import-x": "^4.6.1",
     "eslint-plugin-wdio": "^9.6.0",
@@ -66,7 +66,7 @@
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.19.2",
-    "turbo": "^2.3.4"
+    "turbo": "^2.4.0"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [

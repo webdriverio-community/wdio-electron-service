@@ -607,7 +607,7 @@ describe('browser.electron', () => {
         const mockGetName = await browser.electron.mock('app', 'getName');
         const mockImpl = mockGetName.getMockImplementation() as () => undefined;
 
-        expect(mockImpl()).toBeUndefined();
+        expect(mockImpl).toBeUndefined();
       });
     });
 
