@@ -28,17 +28,17 @@ const QUESTIONS = {
         value: 'continue',
       },
       {
-        name: 'No, Skip this PR and proceed to next PR.',
+        name: 'No, skip this PR and proceed to next PR.',
         value: 'skip',
       },
       {
-        name: 'No, Abort this script.',
+        name: 'No, abort this script.',
         value: 'abort',
       },
     ],
   },
   BACKPORT_CONFLICT: {
-    message: `Conflicts are detected. How you treat this error?`,
+    message: `Conflicts are detected. How you want to handle this error?`,
     choices: [
       {
         name: 'Continue',
@@ -55,19 +55,19 @@ const QUESTIONS = {
     ],
   },
   BACKPORT_ERROR: {
-    message: `Error was occurred. How you treat this error?`,
+    message: `An Error occurred. How do you want to handle this error?`,
     choices: [
       {
         name: 'Continue',
         value: 'continue',
         description:
-          `I will fix error and continue to backport process.\n` +
+          `I will fix the error and continue the backport process.\n` +
           `(Please resolve the error BEFORE selecting this option.)`,
       },
       {
         name: 'Skip and Continue',
         value: 'skip',
-        description: `Ignore this PR and continue to backport process.`,
+        description: `Ignore this PR and continue the backport process.`,
       },
       {
         name: 'Abort',
@@ -109,7 +109,7 @@ if (!GITHUB_TOKEN) {
 const { stdout: branch } = shell.exec('git rev-parse --abbrev-ref HEAD', { silent: true });
 if (branch.trim() !== maintenanceLTSVersion) {
   throw new Error(
-    'In order to start backport process witch to the maintenance LTS branch via:\n' +
+    'In order to start the backport process switch to the maintenance LTS branch via:\n' +
       `$ git checkout ${maintenanceLTSVersion}`,
   );
 }
@@ -135,7 +135,7 @@ const answerHandler = (answer: string, question: string): BackportResult | undef
         isError: true,
       };
     default:
-      throw `Unknown answer is received: ${question}`;
+      throw `Received unknown answer: ${question}`;
   }
 };
 /**
