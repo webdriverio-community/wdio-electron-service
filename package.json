@@ -22,7 +22,7 @@
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "clean:yarn-artifacts": "tsx ./scripts/clean-yarn-artifacts.ts",
-    "dev": "turbo watch wdio-electron-service#build",
+    "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm graph:e2e && pnpm graph:e2e:mac-universal",

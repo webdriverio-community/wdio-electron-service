@@ -138,6 +138,9 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "dev": {
+      "persistent": true
+    },
     "test": {},
     "test:unit": {
       "dependsOn": ["^build"]
