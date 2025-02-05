@@ -21,3 +21,28 @@ updates:
       # For `electron-builder`, ignore all updates (they break things)
       - dependency-name: 'electron-builder'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+
+  - package-ecosystem: npm
+    directory: '/'
+    target-branch: v7
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'maintenance-version-dependencies'
+    groups:
+      production-dependencies:
+        dependency-type: 'production'
+        patterns:
+          - '*'
+      development-dependencies:
+        dependency-type: 'development'
+        patterns:
+          - '*'
+    ignore:
+      # For all packages, ignore major updates
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+      # For `electron-builder`, ignore all updates (they break things)
+      - dependency-name: 'electron-builder'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
