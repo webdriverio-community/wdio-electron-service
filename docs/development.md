@@ -142,6 +142,15 @@ To create consecutive pre-releases you can select `existing` which will incremen
 | `patch`      | `6.3.2-next.0`      |
 | `existing`   | `6.3.1-next.4`      |
 
+### When update the major version
+
+The following tasks must be performed when upgrading to a major version.
+
+1. Update the release workflow  
+   Update the part of the CI workflow(`.github/workflows/release.yml`) where `on.workflow_dispatch.inputs.branch.options` field.
+1. Update the `depeandabot` configuration for the maintenance version
+   Update the part of the configuration file(`.github/dependabot.yml`) where target-branch is not `main` (e.g. v7).
+
 ## Maintenance policy
 
 Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
