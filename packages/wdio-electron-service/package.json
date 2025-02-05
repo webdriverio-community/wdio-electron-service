@@ -90,14 +90,14 @@
     }
   },
   "dependencies": {
-    "@vitest/spy": "^3.0.4",
+    "@vitest/spy": "^3.0.5",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
     "@wdio/globals": "^9.7.2",
     "@wdio/logger": "^9.4.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
-    "electron-to-chromium": "^1.5.90",
+    "electron-to-chromium": "^1.5.92",
     "fast-copy": "^3.0.1",
     "puppeteer-core": "^22.3.0",
     "read-package-up": "^11.0.0",
