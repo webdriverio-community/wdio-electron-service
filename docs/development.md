@@ -146,7 +146,7 @@ To create consecutive pre-releases you can select `existing` which will incremen
 
 Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
 
-## Back-Porting Bug Fixes
+## Backporting Bug Fixes
 
 In accordance with the maintenance policy, do the following to ensure that backwards-compatible fixes are reflected in the maintenance version.
 
