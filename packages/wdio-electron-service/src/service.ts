@@ -1,9 +1,11 @@
 import log from '@wdio/electron-utils/log';
 import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
+import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { ensureActiveWindowFocus, getActiveWindowHandle } from './window.js';
 import { execute } from './commands/execute.js';
 import { mock } from './commands/mock.js';
 import { clearAllMocks } from './commands/clearAllMocks.js';
@@ -28,7 +30,6 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
   // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
   // https://github.com/webdriverio-community/wdio-electron-service/issues/756
   // https://github.com/privatenumber/tsx/issues/113
-
   await browser.execute(() => {
     globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
   });
@@ -37,8 +38,11 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
   });
 };
 
+const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
+
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
+  #puppeteerBrowser?: PuppeteerBrowser;
   #globalOptions: ElectronServiceGlobalOptions;
   #clearMocks = false;
   #resetMocks = false;
@@ -91,6 +95,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
      * Add electron API to browser object
      */
     this.#browser.electron = this.#getElectronAPI();
+
     this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
 
     if (this.#browser.electron.bridgeActive) {
@@ -111,6 +116,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
+
+        const mrPuppeteer = await mrInstance.getPuppeteer();
+        mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
         mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
         if (mrInstance.electron.bridgeActive) {
@@ -121,6 +129,9 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         await waitUntilWindowAvailable(mrInstance);
       }
     } else {
+      const puppeteer = await browser.getPuppeteer();
+      this.#puppeteerBrowser = puppeteer;
+      this.#browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(browser);
     }
@@ -138,12 +149,44 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     }
   }
 
+  async beforeCommand(commandName: string, args: unknown[]) {
+    const excludeCommands = ['getWindowHandle', 'getWindowHandles', 'switchToWindow', 'execute'];
+    if (!this.#browser || excludeCommands.includes(commandName) || isInternalCommand(args)) {
+      return;
+    }
+    await ensureActiveWindowFocus(this.#browser, commandName, this.#puppeteerBrowser);
+  }
+
   async afterCommand(commandName: string, args: unknown[]) {
     // ensure mocks are updated
     const mocks = mockStore.getMocks();
-    const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
-    if (commandName === 'execute' && mocks.length > 0 && !isInternalCommand()) {
+    // White list of command which will input user actions to electron app.
+    const inputCommands = [
+      'addValue',
+      'clearValue',
+      'click',
+      'doubleClick',
+      'dragAndDrop',
+      'execute',
+      'executeAsync',
+      'moveTo',
+      'scrollIntoView',
+      'selectByAttribute',
+      'selectByIndex',
+      'selectByVisibleText',
+      'setValue',
+      'touchAction',
+      'action',
+      'actions',
+      'emulate',
+      'keys',
+      'scroll',
+      'setWindowSize',
+      'uploadFile',
+    ];
+
+    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }

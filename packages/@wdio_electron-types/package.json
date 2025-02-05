@@ -1,6 +1,6 @@
 {
   "name": "@wdio/electron-types",
-  "version": "8.0.0-next.5",
+  "version": "8.0.0-next.7",
   "description": "Types for WebdriverIO Electron Service",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
   "license": "MIT",
@@ -33,16 +33,16 @@
     "@vitest/spy": "^2.1.8"
   },
   "devDependencies": {
-    "@electron-forge/shared-types": "^7.6.0",
+    "@electron-forge/shared-types": "^7.6.1",
     "@electron/packager": "^18.3.6",
     "@wdio/electron-bundler": "workspace:*",
-    "@wdio/globals": "^9.4.2",
-    "@wdio/types": "^9.4.2",
+    "@wdio/globals": "^9.7.1",
+    "@wdio/types": "^9.6.3",
     "builder-util": "25.1.7",
     "electron": "^33.2.1",
     "read-package-up": "^11.0.0",
-    "typescript": "^5.7.2",
-    "webdriverio": "^9.4.2"
+    "typescript": "^5.7.3",
+    "webdriverio": "^9.7.1"
   },
   "files": [
     "dist/*"

@@ -1,3 +1,15 @@
+# [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
+
+### Features
+
+- add the field for windowHandle to ElectronServiceAPI ([05bd5e0](https://github.com/webdriverio-community/wdio-electron-service/commit/05bd5e05cc2260601f8781e8b12b6f7eb4a3db6a))
+
+# [8.0.0-next.6](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.5...v8.0.0-next.6) (2025-01-29)
+
+### Bug Fixes
+
+- update type definition of the `$$` and `$` ([5c6a8c7](https://github.com/webdriverio-community/wdio-electron-service/commit/5c6a8c7b76022335d0f707eb272e40ff3a4df943)), closes [#899](https://github.com/webdriverio-community/wdio-electron-service/issues/899)
+
 # [8.0.0-next.5](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.4...v8.0.0-next.5) (2024-12-20)
 
 # [8.0.0-next.4](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.3...v8.0.0-next.4) (2024-12-12)

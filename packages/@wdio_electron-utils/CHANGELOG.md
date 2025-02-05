@@ -1,3 +1,7 @@
+# [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
+
+# [8.0.0-next.6](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.5...v8.0.0-next.6) (2025-01-29)
+
 # [8.0.0-next.5](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.4...v8.0.0-next.5) (2024-12-20)
 
 ### Bug Fixes

@@ -13,6 +13,10 @@ export type ElectronApiFn = ElectronType[ElectronInterface][keyof ElectronType[E
 
 export interface ElectronServiceAPI {
   /**
+   * The window handle of the Electron window.
+   */
+  windowHandle?: string;
+  /**
    * Whether the Electron bridge is active.
    */
   bridgeActive: boolean;
@@ -662,11 +666,17 @@ export interface ElectronMock<TArgs extends unknown[] = unknown[], TReturns = un
   (...args: TArgs): TReturns;
 }
 
-type $ = (selector: unknown) => ChainableElementBase<WebdriverIO.Element> | WebdriverIO.Element;
-type $$ = (selector: unknown) => WebdriverIO.Element[];
+type $ = (selector: unknown) => Promise<ChainableElementBase<WebdriverIO.Element> | WebdriverIO.Element>;
+type $$ = (selector: unknown) => Promise<ChainableElementArrayBase<WebdriverIO.Element[]>>;
 type ChainableElementBase<T> = T & {
   $: $;
 };
+type ChainableElementArrayBase<T> = T & {
+  parent: Promise<WebdriverIO.Browser | WebdriverIO.Element>;
+  foundWith: string;
+  getElements: () => Promise<T>;
+};
+
 type SelectorsBase = {
   $: $;
   $$: $$;
@@ -697,6 +707,7 @@ export interface BrowserExtension extends BrowserBase {
    * - {@link ElectronServiceAPI.mockAll `browser.electron.mockAll`} - Mock an entire API object of the Electron API, e.g. `app` or `dialog`
    * - {@link ElectronServiceAPI.resetAllMocks `browser.electron.resetAllMocks`} - Reset the Electron API mock functions
    * - {@link ElectronServiceAPI.restoreAllMocks `browser.electron.restoreAllMocks`} - Restore the original Electron API functionality
+   * - {@link ElectronServiceAPI.windowHandle `browser.electron.windowHandle`} - Get the current window handle
    */
   electron: ElectronServiceAPI;
 }
