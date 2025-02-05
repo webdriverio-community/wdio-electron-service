@@ -144,19 +144,19 @@ To create consecutive pre-releases you can select `existing` which will incremen
 
 ## Maintenance policy
 
-Starting from v8 the team tries to backport all features that would be still backwards compatible with older versions. With a new major version update (e.g. v8) we continue to maintain the last version (e.g. v7) and deprecate the previous maintained version (e.g. v6 and lower).
+Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
 
 ## Back-Porting Bug Fixes
 
-In accordance with the maintenance policy, do the following to ensure that backward-compatible fixes are reflected in the maintenance version.
+In accordance with the maintenance policy, do the following to ensure that backwards-compatible fixes are reflected in the maintenance version.
 
 ### As a Triager
 
-Everyone who make a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered to be ported back. If a change relies on features or code pieces that are only available in the current version, then a back port can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to back port code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
+Anyone making a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
 
 ### As a Merger
 
-Once a PR with a `backport-requested` label got merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
+Once a PR with a `backport-requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
 
 ```sh
 git pull
@@ -164,7 +164,7 @@ $ git fetch --all
 $ git checkout v7
 ```
 
-Before you can start, Please create the file `.env` at project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only having the `public_repo` field enabled. Then write down it to `.env` file and run the backport script. It fetches all commits connected with PRs that are labeled with `backport-requested` and cherry-picks them into the maintenance branch. Via an interactive console you can get the chance to review the PR again and whether you want to backport it or not. To start the process, just execute:
+Before you can start, you will need to create the file `.env` in the project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only the `public_repo` field enabled. Then copy the token to the `.env` file and run the backport script. It fetches all commits connected with PRs that are labeled with `backport-requested` and cherry-picks them into the maintenance branch. Via an interactive console you can get the chance to review the PR again and whether you want to backport it or not. To start the process, just execute:
 
 ```sh
 pnpm run backport
