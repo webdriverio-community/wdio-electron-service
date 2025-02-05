@@ -57,12 +57,11 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "pnpm build:compile ",
-    "build:compile": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
-    "watch": "pnpm run build:compile --watch"
+    "dev": "pnpm run build --watch"
   },
   "keywords": [
     "webdriverio",
