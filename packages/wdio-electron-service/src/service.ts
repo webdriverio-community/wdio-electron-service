@@ -10,7 +10,7 @@ import type {
 import type { Capabilities, Services } from '@wdio/types';
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
-// import mockStore from './mockStore.js';
+import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { ensureActiveWindowFocus, getActiveWindowHandle } from './window.js';
 import { execute } from './commands/execute.js';
@@ -188,13 +188,37 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     await ensureActiveWindowFocus(this.#browser, commandName, this.#puppeteerBrowser);
   }
 
-  // async afterCommand(commandName: string, args: unknown[]) {
-  //   // ensure mocks are updated
-  //   const mocks = mockStore.getMocks();
-  //   const isInternalCommand = () => Boolean((args.at(-1) as ExecuteOpts)?.internal);
+  async afterCommand(commandName: string, args: unknown[]) {
+    // ensure mocks are updated
+    const mocks = mockStore.getMocks();
 
-  //   if (commandName === 'execute' && mocks.length > 0 && !isInternalCommand()) {
-  //     await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
-  //   }
-  // }
+    // White list of command which will input user actions to electron app.
+    const inputCommands = [
+      'addValue',
+      'clearValue',
+      'click',
+      'doubleClick',
+      'dragAndDrop',
+      'execute',
+      'executeAsync',
+      'moveTo',
+      'scrollIntoView',
+      'selectByAttribute',
+      'selectByIndex',
+      'selectByVisibleText',
+      'setValue',
+      'touchAction',
+      'action',
+      'actions',
+      'emulate',
+      'keys',
+      'scroll',
+      'setWindowSize',
+      'uploadFile',
+    ];
+
+    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
+      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
+    }
+  }
 }
