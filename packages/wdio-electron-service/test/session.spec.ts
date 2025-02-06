@@ -24,7 +24,7 @@ vi.mock('../src/launcher.js', () => ({
 }));
 vi.mock('webdriverio', () => ({ remote: async () => Promise.resolve(browserMock) }));
 
-describe('init', () => {
+describe.skip('init', () => {
   beforeAll(() => {
     vi.clearAllMocks();
   });

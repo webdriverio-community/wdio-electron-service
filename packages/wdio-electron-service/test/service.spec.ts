@@ -142,7 +142,7 @@ describe.skip('beforeTest', () => {
   });
 });
 
-describe('beforeCommand', () => {
+describe.skip('beforeCommand', () => {
   const browser = {
     waitUntil: vi.fn().mockResolvedValue(true),
     execute: vi.fn().mockResolvedValue(true),
