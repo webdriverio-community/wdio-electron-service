@@ -1,3 +1,5 @@
+# [8.0.0-next.8](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.7...v8.0.0-next.8) (2025-02-05)
+
 # [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
 
 # [8.0.0-next.6](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.5...v8.0.0-next.6) (2025-01-29)

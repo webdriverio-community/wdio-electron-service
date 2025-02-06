@@ -2,6 +2,8 @@
 
 <a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Version">
   <img src="https://img.shields.io/npm/v/wdio-electron-service" /></a>
+<a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Version">
+  <img src="https://img.shields.io/npm/v/wdio-electron-service/next" /></a>
 <a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Downloads">
   <img src="https://img.shields.io/npm/dw/wdio-electron-service" /></a>
 

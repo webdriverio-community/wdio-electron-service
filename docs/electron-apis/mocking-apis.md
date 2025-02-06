@@ -2,6 +2,11 @@
 
 The service allows for mocking of Electron API functionality via a [Vitest](https://vitest.dev/)-like interface.
 
+## Limitations
+
+You can only mock Electron APIs available in the main process, no other mocking is supported.
+Due to the internal use of an IPC bridge, the service does not currently support mocking of Electron APIs that manage IPC channels, e.g. `ipcMain`.
+
 ## Browser Utility Methods
 
 ### `mock`
