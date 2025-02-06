@@ -60,7 +60,7 @@ export async function createMock(apiName: string, funcName: string) {
         const mockObj = electron[apiName as keyof typeof electron][
           funcName as keyof ElectronType[ElectronInterface]
         ] as ElectronMock;
-        return mockObj.mock?.calls || [];
+        return mockObj.mock?.calls ? JSON.parse(JSON.stringify(mockObj.mock?.calls)) : [];
       },
       apiName,
       funcName,
@@ -83,7 +83,7 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        const mockImpl = new Function(`return ${mockImplementationStr}`)() as AbstractFn;
         (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(mockImpl);
       },
       apiName,
@@ -100,7 +100,7 @@ export async function createMock(apiName: string, funcName: string) {
     await browser.electron.execute<void, [string, string, string, ExecuteOpts]>(
       (electron, apiName, funcName, mockImplementationStr) => {
         const electronApi = electron[apiName as keyof typeof electron];
-        const mockImpl = eval?.(`"use strict"; ${mockImplementationStr}`) as AbstractFn;
+        const mockImpl = new Function(`return ${mockImplementationStr}`)() as AbstractFn;
         (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementationOnce(mockImpl);
       },
       apiName,
@@ -267,8 +267,8 @@ export async function createMock(apiName: string, funcName: string) {
   mock.withImplementation = async (implFn, callbackFn) => {
     return await browser.electron.execute<unknown, [string, string, string, string, ExecuteOpts]>(
       async (electron, apiName, funcName, implFnStr, callbackFnStr) => {
-        const callback = eval?.(`"use strict"; ${callbackFnStr}`) as AbstractFn;
-        const impl = eval?.(`"use strict"; ${implFnStr}`) as AbstractFn;
+        const callback = new Function(`return ${callbackFnStr}`)() as AbstractFn;
+        const impl = new Function(`return ${implFnStr}`)() as AbstractFn;
         let result: unknown | Promise<unknown>;
         (
           electron[apiName as keyof typeof electron][funcName as keyof ElectronType[ElectronInterface]] as Mock

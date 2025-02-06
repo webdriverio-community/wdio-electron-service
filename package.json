@@ -21,7 +21,7 @@
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
     "clean:yarn-artifacts": "tsx ./scripts/clean-yarn-artifacts.ts",
-    "dev": "turbo watch wdio-electron-service#build",
+    "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm graph:e2e && pnpm graph:e2e:mac-universal",
@@ -37,6 +37,7 @@
     "lint:fix": "cross-env eslint \"**/*.{j,mj,cj,t}s\" --fix",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit test:e2e",
     "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
@@ -44,6 +45,7 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
     "@eslint/js": "^9.19.0",
     "@turbo-version/version": "^0.8.1",
     "@types/eslint-config-prettier": "^6.11.2",
@@ -59,10 +61,15 @@
     "eslint-plugin-import-x": "^4.6.1",
     "eslint-plugin-wdio": "^9.6.0",
     "globals": "^15.14.0",
+    "eslint-plugin-import-x": "^4.6.1",
+    "eslint-plugin-wdio": "^9.6.0",
+    "globals": "^15.14.0",
     "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "read-package-up": "^11.0.0",
+    "rollup": "^4.32.1",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.19.2",
@@ -73,5 +80,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
+  "packageManager": "pnpm@9.15.5+sha512.845196026aab1cc3f098a0474b64dfbab2afe7a1b4e91dd86895d8e4aa32a7a6d03049e2d0ad770bbe4de023a7122fb68c1a1d6e0d033c7076085f9d5d4800d4"
 }

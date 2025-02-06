@@ -19,6 +19,9 @@ globalThis.packageJson = {
 };
 // process.env.TEST = 'true';
 
+const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
+const specs = isSplashEnabled ? ['./test/window/window.spec.ts'] : ['./test/*.spec.ts'];
+
 export const config: WdioElectronConfig = {
   services: [['electron', { restoreMocks: true }]],
   capabilities: [
@@ -36,7 +39,7 @@ export const config: WdioElectronConfig = {
   logLevel: 'debug',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
-  specs: ['./test/*.spec.ts'],
+  specs,
   tsConfigPath: path.join(__dirname, 'tsconfig.json'),
   framework: 'mocha',
   mochaOpts: {

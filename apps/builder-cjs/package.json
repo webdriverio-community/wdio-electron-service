@@ -6,8 +6,8 @@
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
     "build:bundle": "tsc",
-    "build:package": "cp ./src/index.html ./dist && electron-builder -p never",
-    "build:package:mac-universal": "cp ./src/index.html ./dist && electron-builder -p never -m --universal",
+    "build:package": "cp ./src/*.html ./dist && electron-builder -p never",
+    "build:package:mac-universal": "cp ./src/*.html ./dist && electron-builder -p never -m --universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
