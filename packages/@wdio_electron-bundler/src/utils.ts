@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, sep } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
@@ -119,7 +118,7 @@ export async function injectDependency(
   templatePath: string,
   injectPrams: InjectDependencyPluginOptions,
   templateContent: string,
-): Promise<void> {
+): Promise<string> {
   try {
     const bundledContents = await bundlePackage.call(this, injectPrams.packageName);
 
@@ -138,15 +137,12 @@ export async function injectDependency(
       `const ${injectPrams.importName} = await import('${injectPrams.packageName}');`,
       injectedContents,
     );
-
     if (renderedContent === templateContent) {
       throw new Error(`Failed to inject contents (${templatePath})`);
     }
 
-    // Write the rendered content to a new file
-    await fs.writeFile(templatePath, renderedContent, 'utf-8');
-
     this.info(`Successfully bundled and injected ${injectPrams.packageName} into ${templatePath}`);
+    return renderedContent;
   } catch (error) {
     this.error(`Dependency injection failed: ${(error as Error).message}`);
   }
