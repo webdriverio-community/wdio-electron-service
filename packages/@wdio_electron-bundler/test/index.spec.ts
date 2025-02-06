@@ -1,7 +1,7 @@
 import { dirname } from 'node:path';
 
 import { readPackageJson, typescript } from '../src/index';
-import { getFixturePackagePath } from './testUtils';
+import { getFixturePackagePath } from './utils';
 import typescriptPlugin from '@rollup/plugin-typescript';
 
 describe('readPackageJson', () => {

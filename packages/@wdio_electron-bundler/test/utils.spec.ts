@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../src/utils';
-import { getFixturePackagePath } from './testUtils';
+import { getFixturePackagePath } from './utils';
 import { PluginContext } from 'rollup';
 
 describe(`getInputConfig`, () => {
