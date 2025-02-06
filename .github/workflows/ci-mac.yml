@@ -1,0 +1,66 @@
+name: E2E Tests - Mac
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      node-version:
+        required: true
+        type: string
+
+jobs:
+  e2e:
+    name: E2E ${{ matrix.e2e-scenario }}${{ contains(matrix.app-build-command, 'mac-universal') && ' for Mac-Universal' || '' }} tests (macos.${{ inputs.node-version }})
+    runs-on: 'macos-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        e2e-scenario: ['builder', 'forge', 'no-binary']
+        app-build-command: ['build', 'build:mac-universal']
+        exclude:
+          - e2e-scenario: 'no-binary'
+            app-build-command: 'build:mac-universal'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Download Build Archive
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: .
+          filename: wdio-electron-service-build.zip
+
+      - run: pnpm run init-forge:package
+        if: ${{ contains(matrix.e2e-scenario, 'forge') }}
+        shell: bash
+
+      - run: pnpm run init-forge:apps
+        if: ${{ contains(matrix.e2e-scenario, 'forge') }}
+        shell: bash
+
+      - run: pnpm exec turbo run ${{ matrix.app-build-command }} --filter=example-${{ matrix.e2e-scenario }}* --only
+        shell: bash
+      - run: pnpm exec turbo run init-e2es test:e2e:${{ matrix.e2e-scenario }}-esm test:e2e:${{ matrix.e2e-scenario }}-cjs --only
+        shell: bash
+      - name: 🐛 Show logs
+        shell: bash
+        if: failure()
+        run: |
+          pnpm run ci:e2e:logs
+      - name: 🐛 Upload logs
+        uses: ./.github/workflows/actions/upload-archive
+        if: failure()
+        with:
+          name: ${{ contains(matrix.app-build-command, 'mac-universal') && 'mac-universal' || 'mac' }}-e2e-${{ matrix.e2e-scenario }}-logs
+          output: ${{ contains(matrix.app-build-command, 'mac-universal') && 'mac-universal' || 'mac' }}-e2e-${{ matrix.e2e-scenario }}-logs.zip
+          paths: e2e/*/*.log
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'

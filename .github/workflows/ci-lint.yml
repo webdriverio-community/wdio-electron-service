@@ -1,0 +1,34 @@
+name: Lint
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
+jobs:
+  lint:
+    name: Unit Tests (${{ matrix.os }}.${{ matrix.node-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # node-version: ['18', '20', '22']
+        node-version: ['20']
+        os: ['ubuntu-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Download Build Archive
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: .
+          filename: wdio-electron-service-build.zip
+
+      - run: pnpm run lint
+        shell: bash
