@@ -13,7 +13,9 @@ export async function init(capabilities: ElectronServiceCapabilities, globalOpti
 
   await launcher.onPrepare(testRunnerOpts, capabilities);
 
-  log.debug('Session capabilities:', capabilities);
+  await launcher.onWorkerStart('', capabilities as WebdriverIO.Capabilities);
+
+  log.debug('Session capabilities:', JSON.stringify(capabilities, null, 2));
 
   // initialise session
   const browser = await remote({
@@ -21,8 +23,10 @@ export async function init(capabilities: ElectronServiceCapabilities, globalOpti
       ? capabilities[0]
       : capabilities) as Capabilities.RequestedStandaloneCapabilities,
   });
-
-  await service.before({}, [], browser);
+  const cap = (
+    Array.isArray(capabilities) ? capabilities[0] : capabilities
+  ) as Capabilities.RequestedStandaloneCapabilities;
+  await service.before(cap as WebdriverIO.Capabilities, [], browser);
 
   return browser;
 }

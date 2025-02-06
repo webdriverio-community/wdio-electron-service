@@ -129,7 +129,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
          */
         cap[CUSTOM_CAPABILITY_NAME] = cap[CUSTOM_CAPABILITY_NAME] || {};
 
-        log.debug('setting capability', cap);
+        log.debug('setting capability', JSON.stringify(cap, null, 2));
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
@@ -137,13 +137,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
-  async onWorkerStart(
-    _cid: string,
-    _capabilities: WebdriverIO.Capabilities,
-    _specs: string[],
-    _args: Options.Testrunner,
-    _execArgv: string[],
-  ) {
+  async onWorkerStart(_cid: string, _capabilities: WebdriverIO.Capabilities) {
     const capsList = Array.isArray(_capabilities) ? (_capabilities as WebdriverIO.Capabilities[]) : [_capabilities];
 
     const hostname = 'localhost';
