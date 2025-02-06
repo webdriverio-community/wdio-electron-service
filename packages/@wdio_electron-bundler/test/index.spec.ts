@@ -1,17 +1,17 @@
 import { dirname } from 'node:path';
 
 import { readPackageJson, typescript } from '../src/index';
-import { getFixturePackagePath } from './utils';
+import { getFixturePackagePath } from './testUtils';
 import typescriptPlugin from '@rollup/plugin-typescript';
 
 describe('readPackageJson', () => {
   it('should return 2 configuration objects', () => {
-    const fixture = getFixturePackagePath('esm', 'build-success-esm');
+    const fixture = getFixturePackagePath('esm', 'build-test-esm');
     const cwd = dirname(fixture);
     const result = readPackageJson(cwd);
 
     expect(result.input).toStrictEqual({ index: 'src/index.ts' });
-    expect(result.pkgName).toBe('fixture-build-success-esm');
+    expect(result.pkgName).toBe('fixture-esm_builder-dependency-cjs-config');
     expect(result.outDir).toStrictEqual({ esm: './dist/es', cjs: './dist/cjs' });
   });
 });
