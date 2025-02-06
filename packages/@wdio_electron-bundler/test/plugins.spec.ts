@@ -9,6 +9,7 @@ import type {
   RollupLog,
 } from 'rollup';
 import { emitPackageJsonPlugin, injectDependencyPlugin, warnToErrorPlugin } from '../src/plugins';
+import { join } from 'node:path';
 
 type WriteBundle = (this: PluginContext, options: NormalizedOutputOptions, bundle: OutputBundle) => Promise<void>;
 
@@ -120,7 +121,7 @@ describe('injectDependencyPlugin', () => {
 
     expect(writeFile).toHaveBeenCalledTimes(1);
     expect(writeFile).toHaveBeenCalledWith(
-      'dist/index.js',
+      join('dir', 'index.js'),
       'const a = 1\nconst spy = 1\nconst { default: copy } = 2',
       'utf-8',
     );
