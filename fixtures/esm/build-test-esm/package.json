@@ -1,0 +1,29 @@
+{
+  "name": "fixture-esm_builder-dependency-cjs-config",
+  "version": "1.0.0",
+  "description": "Builder found in dependencies with CJS configuration in an ESM project",
+  "type": "module",
+  "readme": "README.md",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "exports": {
+    ".": [
+      {
+        "import": {
+          "types": "./dist/es/types/index.d.ts",
+          "default": "./dist/es/index.js"
+        },
+        "require": {
+          "types": "./dist/cjs/types/index.d.ts",
+          "default": "./dist/cjs/index.js"
+        }
+      },
+      "./dist/cjs/index.js"
+    ]
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "electron-builder": "^24.6.4"
+  }
+}

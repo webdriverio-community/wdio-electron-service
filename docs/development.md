@@ -11,10 +11,17 @@ To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to inst
 
 ## Rebuilding on file changes
 
-During development it is helpful to rebuild the main package and dependencies when files change. To do this, run the dev script in a new terminal:
+During development, it is helpful to rebuild files as they change, with respect to all packages. To do this, run the dev script in a new terminal:
 
 ```bash
 pnpm dev
+```
+
+Alternatively, you can run it for each individual package.
+For example, run the dev script for `@wdio/electron-utils` in a new terminal:
+
+```bash
+pnpm dev --filter "@wdio/electron-utils"
 ```
 
 ## Testing - E2Es
