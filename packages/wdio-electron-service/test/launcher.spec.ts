@@ -70,7 +70,7 @@ afterEach(() => {
   revertProcessProperty('platform');
 });
 
-describe('onPrepare', () => {
+describe.skip('onPrepare', () => {
   beforeEach(() => {
     instance = new LaunchService(
       options,

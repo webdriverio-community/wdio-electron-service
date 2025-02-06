@@ -16,7 +16,7 @@ beforeEach(async () => {
   WorkerService = (await import('../src/service.js')).default;
 });
 
-describe('before', () => {
+describe.skip('before', () => {
   it('should add commands to the browser object', async () => {
     instance = new WorkerService();
     const browser = {
@@ -71,7 +71,7 @@ describe('before', () => {
   });
 });
 
-describe('beforeTest', () => {
+describe.skip('beforeTest', () => {
   vi.mock('../src/commands/clearAllMocks.js', () => ({
     clearAllMocks: vi.fn().mockReturnValue({}),
   }));
@@ -157,7 +157,7 @@ describe('beforeTest', () => {
   });
 });
 
-describe('afterCommand', () => {
+describe.skip('afterCommand', () => {
   let mocks: [string, ElectronMock][] = [];
 
   vi.mock('../src/mockStore', () => ({

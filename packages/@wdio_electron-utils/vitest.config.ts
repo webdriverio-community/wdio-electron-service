@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['test/*.spec.ts'],
     exclude: [...configDefaults.exclude],
     environment: 'node',
+    silent: true,
     coverage: {
       enabled: true,
       include: ['src/*.ts'],
