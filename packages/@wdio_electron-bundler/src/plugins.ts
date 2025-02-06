@@ -58,7 +58,6 @@ export const warnToErrorPlugin = (): Plugin => {
 };
 
 // Exclude from Unit Test to check with build results of wdio-electron-service package
-/* v8 ignore start */
 export const injectDependencyPlugin = (
   options: InjectDependencyPluginOptions | InjectDependencyPluginOptions[],
 ): Plugin => {
@@ -97,4 +96,3 @@ export const injectDependencyPlugin = (
 };
 
 export { type InjectDependencyPluginOptions };
-/* v8 ignore stop */

@@ -1,6 +1,6 @@
 {
   "name": "wdio-electron-service",
-  "version": "8.0.0-next.7",
+  "version": "8.0.0-next.8",
   "description": "WebdriverIO service to enable Electron testing",
   "author": "Sam Maister <goosewobbler@protonmail.com>",
   "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
@@ -116,7 +116,6 @@
     "builder-util": "^25.1.7",
     "electron": "^34.1.0",
     "nock": "^14.0.0",
-    "rollup": "^4.34.4",
     "shx": "^0.3.4",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"

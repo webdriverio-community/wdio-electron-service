@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only --force",
+    "backport": "tsx ./scripts/backport.ts",
     "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "ci-linux": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm --concurrency=1",
     "ci-mac:e2e:mac-universal": "turbo run build:mac-universal init-e2es test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm --only",
@@ -46,7 +47,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
-    "@eslint/js": "^9.19.0",
+    "@inquirer/prompts": "^7.2.3",
+    "@octokit/rest": "^21.1.0",
+    "@octokit/types": "^13.7.0",
     "@turbo-version/version": "^0.8.1",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^22.13.1",
@@ -55,6 +58,7 @@
     "@typescript-eslint/parser": "^8.23.0",
     "@vitest/eslint-plugin": "^1.1.25",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
     "eslint": "^9.19.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
