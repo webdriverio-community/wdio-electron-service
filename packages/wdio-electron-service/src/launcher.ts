@@ -138,38 +138,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
     });
   }
   async onWorkerStart(
-    // MEMO : Update following code to copy caps
-    // e2e/node_modules/@wdio/cli/build/index.js L2419 ~ L2438
-    //
-    // log3.info("Run onWorkerStart hook");
-    // // ---- start insert
-    // // copy capability
-    // const capsForWorker = JSON.parse(JSON.stringify(caps))
-    // // ---- end insert
-    // // ---- start update to onWorkerStart from caps following 2lines
-    // await runLauncherHook(config.onWorkerStart, runnerId, capsForWorker, specs, this._args, execArgv).catch((error) => this._workerHookError(error));
-    // await runServiceHook(this._launcher, "onWorkerStart", runnerId, capsForWorker, specs, this._args, execArgv).catch((error) => this._workerHookError(error));
-
-    // const worker = await this.runner.run({
-    //   cid: runnerId,
-    //   command: "run",
-    //   configFile: this._configFilePath,
-    //   args: {
-    //     ...this._args,
-    //     /**
-    //      * Pass on user and key values to ensure they are available in the worker process when using
-    //      * environment variables that were locally exported but not part of the environment.
-    //      */
-    //     user: config.user,
-    //     key: config.key
-    //   },
-    //   caps: capsForWorker, // update
-    //   specs,
-    //   execArgv,
-    //   retries
-    // });
-    // // ---- end update
-    // ===== END of MEMO
     _cid: string,
     _capabilities: WebdriverIO.Capabilities,
     _specs: string[],
