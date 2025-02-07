@@ -10,7 +10,7 @@ on:
         type: choice
         options:
           - main
-          - v7
+          - v7 # current maintenance branch
       releaseVersion:
         description: 'The new version to create.'
         required: true

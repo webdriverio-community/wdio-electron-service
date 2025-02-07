@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # For main branch
   - package-ecosystem: npm
     directory: '/'
     schedule:
@@ -22,6 +23,7 @@ updates:
       - dependency-name: 'electron-builder'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
 
+  # For maintenance branch
   - package-ecosystem: npm
     directory: '/'
     target-branch: v7
