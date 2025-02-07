@@ -1,5 +1,5 @@
 import { DebuggerClient } from '../electron.js';
-// import log from '@wdio/electron-utils/log';
+import log from '@wdio/electron-utils/log';
 import * as babelParser from '@babel/parser';
 import { print, parse } from 'recast';
 import { ExecuteOpts } from '@wdio/electron-types';
@@ -35,12 +35,15 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   const functionDeclaration = removeFirstArg(script.toString());
   const argsArray = args.map((arg) => ({ value: arg }));
 
+  log.debug('Script in execute', functionDeclaration);
+
   const result = await debuggerClient.sendMethod('Runtime.callFunctionOn', {
     functionDeclaration,
     arguments: argsArray,
     awaitPromise: true,
     returnByValue: true,
   });
+  log.debug('Return of script', result);
 
   await syncMockStatus(args);
 

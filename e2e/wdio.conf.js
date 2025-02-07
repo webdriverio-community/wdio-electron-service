@@ -30,7 +30,7 @@ export const config = {
   waitforTimeout: 5000,
   connectionRetryCount: 10,
   connectionRetryTimeout: 30000,
-  logLevel: 'debug',
+  logLevel: 'trace',
   runner: 'local',
   outputDir: `wdio-logs-${exampleDir}`,
   specs: ['./test/js/application.spec.js'],
