@@ -1,9 +1,11 @@
 import type { ElectronMock } from '@wdio/electron-types';
 
+console.log('===mockStore.ts==> is executed');
 export class ElectronServiceMockStore {
   #mockFns: Map<string, ElectronMock>;
 
   constructor() {
+    console.log('===ElectronServiceMockStore constructor==>');
     this.#mockFns = new Map<string, ElectronMock>();
   }
 
@@ -22,6 +24,7 @@ export class ElectronServiceMockStore {
   }
 
   getMocks() {
+    console.log('===ElectronServiceMockStore getMocks==>', this.#mockFns.entries());
     return Array.from(this.#mockFns.entries());
   }
 }
