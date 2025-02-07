@@ -9,7 +9,6 @@ inputs:
     description: 'name of the archive to upload'
 runs:
   using: 'composite'
-  env:
   steps:
     - name: 🤐 Create Archive
       run: zip -q -r ${{ inputs.output }} ${{ inputs.paths }}
@@ -18,7 +17,7 @@ runs:
 
     - name: 🤐 Create Archive
       run: Compress-Archive -Path ${{ inputs.paths }} -Destination ${{ inputs.output }}
-      shell: bash
+      shell: powershell
       if: ${{ runner.os == 'Windows' }}
 
     - name: ⬆️ Upload Archive
