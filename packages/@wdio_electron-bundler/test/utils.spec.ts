@@ -3,8 +3,8 @@ import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPlug
 import { getFixturePackagePath } from './utils';
 import { PluginContext } from 'rollup';
 
-describe(`getInputConfig`, () => {
-  it('should resolved entry point', () => {
+describe('getInputConfig', () => {
+  it('should resolve entry points from exports field', () => {
     const pkgJsonPath = getFixturePackagePath('esm', 'build-test-esm');
     const exports = {
       '.': './dist/loader.js',
@@ -77,7 +77,7 @@ describe(`getInputConfig`, () => {
     });
   });
 
-  it('should fail when exports is not exist', () => {
+  it('should throw an error when exports field is missing', () => {
     expect(() =>
       getInputConfig(
         {
@@ -94,7 +94,7 @@ describe(`getInputConfig`, () => {
     ).toThrowError(`"exports" field which is required is not set:`);
   });
 
-  it('should fail when entry point is not exist', () => {
+  it('should throw an error when entry point is not found', () => {
     const exports = {
       '.': {
         import: {
@@ -136,9 +136,8 @@ describe('getOutDirs', () => {
     types: './path/to/types/index.d.js',
   };
 
-  it.each(['main', 'module'] as const)('should throw error when not exist field at package.json: %s', (fieldName) => {
+  it.each(['main', 'module'] as const)('should throw an error when the %s field is missing', (fieldName) => {
     const testPackageJson = Object.assign({}, fixturePkgJson);
-
     delete testPackageJson[fieldName];
 
     expect(() =>
@@ -149,7 +148,7 @@ describe('getOutDirs', () => {
     ).toThrowError(`"${fieldName}" field which is required is not set:`);
   });
 
-  it('should return the directory path', () => {
+  it('should return correct output directory paths', () => {
     expect(
       getOutDirs({
         packageJson: fixturePkgJson,
@@ -179,7 +178,7 @@ describe('injectDependency', () => {
     };
   });
 
-  it('should inject dependency', async () => {
+  it('should successfully inject dependency code', async () => {
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
@@ -198,11 +197,10 @@ describe('injectDependency', () => {
     };
 
     const code = await injectDependency.call(context, 'src/test.js', param, templateContent);
-
     expect(code).toBe('const obj = {\n  a: 1,\n  b: 2,\n};\n\nconst obj = { obj };\n');
   });
 
-  it('should error when the package is not resolved', async () => {
+  it('should error when the package cannot be resolved', async () => {
     const context = {
       resolve: vi.fn().mockResolvedValue(undefined),
       info: vi.fn(),
@@ -210,7 +208,6 @@ describe('injectDependency', () => {
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
-
     const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
@@ -220,11 +217,10 @@ describe('injectDependency', () => {
     };
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
-
     expect(context.error).toHaveBeenCalled();
   });
 
-  it('should error when the injectedContents could not generated', async () => {
+  it('should error when injected contents cannot be generated', async () => {
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
@@ -234,7 +230,6 @@ describe('injectDependency', () => {
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
-
     const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
@@ -244,11 +239,10 @@ describe('injectDependency', () => {
     };
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
-
     expect(context.error).toHaveBeenCalled();
   });
 
-  it('should error when the renderedContent could not generated', async () => {
+  it('should error when rendered content cannot be generated', async () => {
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
@@ -258,7 +252,6 @@ describe('injectDependency', () => {
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
-
     const param: InjectDependencyPluginOptions = {
       packageName: './test.js',
       targetFile: 'main.ts',
@@ -268,7 +261,6 @@ describe('injectDependency', () => {
     };
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
-
     expect(context.error).toHaveBeenCalled();
   });
 });

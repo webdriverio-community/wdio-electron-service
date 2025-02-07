@@ -37,9 +37,9 @@ describe('emitPackageJsonPlugin', () => {
   it.each([
     ['esm', 'module'],
     ['cjs', 'commonjs'],
-  ])('should emit package.json of %s type', async (type, typeValue) => {
+  ])('should emit package.json with correct type for %s format', async (format, moduleType) => {
     // @ts-expect-error
-    const plugin = emitPackageJsonPlugin('test-pkg', type);
+    const plugin = emitPackageJsonPlugin('test-pkg', format);
 
     await (plugin.generateBundle! as unknown as GenerateBundle).call(context, {
       dir: 'dist',
@@ -49,13 +49,13 @@ describe('emitPackageJsonPlugin', () => {
     expect(context.emitFile).toHaveBeenCalledWith({
       type: 'asset',
       fileName: 'package.json',
-      source: `{\n  "name": "test-pkg-${type}",\n  "type": "${typeValue}",\n  "private": true\n}`,
+      source: `{\n  "name": "test-pkg-${format}",\n  "type": "${moduleType}",\n  "private": true\n}`,
     });
   });
 
-  it('should throw the error when input invalid package type', async () => {
+  it('should throw an error for invalid package type', async () => {
     // @ts-expect-error
-    expect(() => emitPackageJsonPlugin('test-pkg', 'zzz')).toThrowError('Invalid type is specified');
+    expect(() => emitPackageJsonPlugin('test-pkg', 'invalid')).toThrowError('Invalid type is specified');
   });
 });
 
@@ -65,7 +65,7 @@ describe('warnToErrorPlugin', () => {
     error: vi.fn(),
   } as unknown as PluginContext;
 
-  it('should this.error is called when warning occurred', async () => {
+  it('should escalate warnings to errors', async () => {
     const plugin = warnToErrorPlugin();
     (plugin.onLog! as unknown as OnLog).call(context, 'warn', { message: 'message' });
     expect(context.warn).toHaveBeenCalledTimes(1);
@@ -84,7 +84,7 @@ describe('injectDependencyPlugin', () => {
     error: vi.fn(),
   } as unknown as PluginContext;
 
-  it('should success injection', async () => {
+  it('should successfully inject dependencies', async () => {
     const plugin = injectDependencyPlugin([
       {
         packageName: '@vitest/spy',
@@ -116,7 +116,7 @@ describe('injectDependencyPlugin', () => {
     );
   });
 
-  it('should cause warning when target file is not bundled', async () => {
+  it('should warn when target file is missing from bundle', async () => {
     const plugin = injectDependencyPlugin([
       {
         packageName: '@vitest/spy',
@@ -135,7 +135,7 @@ describe('injectDependencyPlugin', () => {
     expect(context.warn).toHaveBeenCalledTimes(1);
   });
 
-  it('should cause warning when target file is not chunk file', async () => {
+  it('should warn when target is not a chunk file', async () => {
     const plugin = injectDependencyPlugin({
       packageName: '@vitest/spy',
       targetFile: 'index.js',

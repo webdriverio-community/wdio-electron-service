@@ -5,7 +5,7 @@ import { getFixturePackagePath } from './utils';
 import typescriptPlugin from '@rollup/plugin-typescript';
 
 describe('readPackageJson', () => {
-  it('should return 2 configuration objects', () => {
+  it('should return input configuration and output directories', () => {
     const fixture = getFixturePackagePath('esm', 'build-test-esm');
     const cwd = dirname(fixture);
     const result = readPackageJson(cwd);
@@ -20,7 +20,8 @@ describe('typescript', () => {
   vi.mock('@rollup/plugin-typescript', () => ({
     default: vi.fn(() => 'mocked-plugin'),
   }));
-  it('should set default parameter', () => {
+
+  it('should apply default TypeScript configuration', () => {
     const plugin = typescript({
       compilerOptions: {
         outDir: 'path/to/out',
@@ -39,9 +40,9 @@ describe('typescript', () => {
   });
 
   it.each([
-    ['array', ['test.ts']],
-    ['single value', 'test.ts'],
-  ])('should join the exclude parameter: %s', (_title, exclude) => {
+    ['array of files', ['test.ts']],
+    ['single file', 'test.ts'],
+  ])('should merge exclude patterns when given %s', (_type, exclude) => {
     typescript({
       compilerOptions: {
         outDir: 'path/to/out',
