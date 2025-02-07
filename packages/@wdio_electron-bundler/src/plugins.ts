@@ -65,10 +65,16 @@ export const injectDependencyPlugin = (
   const injectedMap = new Map();
   return {
     name: 'rollup-wdio-inject-dependency',
-    async writeBundle(options, bundle) {
+    async writeBundle(bundleOptions, bundle) {
+      if (!bundleOptions.dir) {
+        this.error(new Error('Bundle directory is required for injectDependencyPlugin'));
+        return;
+      }
+
       for (const pluginOption of pluginOptions) {
-        const filePath = join(options.dir!, pluginOption.targetFile);
+        const filePath = join(bundleOptions.dir, pluginOption.targetFile);
         const contents = injectedMap.has(filePath) ? injectedMap.get(filePath) : bundle[pluginOption.targetFile];
+
         if (!contents) {
           this.warn(`Injection target does not exist: ${pluginOption.targetFile}`);
           return;
@@ -77,9 +83,10 @@ export const injectDependencyPlugin = (
           this.warn(`Injection target is not a chunk file: ${pluginOption.targetFile}`);
           return;
         }
+
         const code = await injectDependency.call(
           this,
-          join(options.dir!, pluginOption.targetFile),
+          join(bundleOptions.dir, pluginOption.targetFile),
           pluginOption,
           contents.code,
         );
