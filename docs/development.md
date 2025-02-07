@@ -142,6 +142,21 @@ To create consecutive pre-releases you can select `existing` which will incremen
 | `patch`      | `6.3.2-next.0`      |
 | `existing`   | `6.3.1-next.4`      |
 
+### Major Version Maintenance Tasks
+
+When releasing a new major version, update the maintenance branch references in the following files:
+
+1. Update the release workflow
+
+   - Edit `.github/workflows/release.yml`
+   - In the `on.workflow_dispatch.inputs.branch.options` field, update the maintenance branch name
+   - Example: When releasing v8, change `v6` to `v7` in the branch options
+
+2. Update the Dependabot configuration
+   - Edit `.github/dependabot.yml`
+   - Update the existing maintenance branch configuration's `target-branch`
+   - Example: When releasing v8, change `v6` to `v7` in the non-main branch configuration
+
 ## Maintenance policy
 
 Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
