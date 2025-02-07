@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../src/utils';
 import { getFixturePackagePath } from './utils';
@@ -96,7 +95,6 @@ describe(`getInputConfig`, () => {
   });
 
   it('should fail when entry point is not exist', () => {
-    // vi.mocked(existsSync).mockImplementation(() => false);
     const exports = {
       '.': {
         import: {
@@ -165,14 +163,19 @@ describe('getOutDirs', () => {
 });
 
 describe('injectDependency', () => {
-  vi.mock('node:fs/promises', async (importOriginal) => {
-    const originalFs = await importOriginal<typeof import('node:fs/promises')>();
-
+  vi.mock('rollup', async (importOriginal) => {
+    const actualRollup = await importOriginal<typeof import('rollup')>();
     return {
-      default: {
-        ...originalFs,
-        writeFile: vi.fn(),
-      },
+      ...actualRollup,
+      rollup: vi.fn(async () => ({
+        generate: vi.fn(async () => ({
+          output: [
+            {
+              code: 'const obj = {\n  a: 1,\n  b: 2,\n};\n\nexport { obj };\n',
+            },
+          ],
+        })),
+      })),
     };
   });
 
@@ -182,6 +185,7 @@ describe('injectDependency', () => {
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
+      error: vi.fn(),
     } as unknown as PluginContext;
     const templateContent = `const obj = await import('./test.js');`;
 
@@ -193,21 +197,16 @@ describe('injectDependency', () => {
       bundleReplace: (importName: string) => `const ${importName} =`,
     };
 
-    await injectDependency.call(context, 'src/test.js', param, templateContent);
+    const code = await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(fs.writeFile).toHaveBeenLastCalledWith(
-      'src/test.js',
-      'const obj = {\n  a: 1,\n  b: 2,\n};\n\nconst obj = { obj };\n',
-      'utf-8',
-    );
+    expect(code).toBe('const obj = {\n  a: 1,\n  b: 2,\n};\n\nconst obj = { obj };\n');
   });
 
   it('should error when the package is not resolved', async () => {
-    const errorMock = vi.fn();
     const context = {
       resolve: vi.fn().mockResolvedValue(undefined),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -222,17 +221,16 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 
   it('should error when the injectedContents could not generated', async () => {
-    const errorMock = vi.fn();
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -247,17 +245,16 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 
   it('should error when the renderedContent could not generated', async () => {
-    const errorMock = vi.fn();
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -272,6 +269,6 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 });
