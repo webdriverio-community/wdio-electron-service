@@ -70,11 +70,11 @@ export const injectDependencyPlugin = (
         const filePath = join(options.dir!, pluginOption.targetFile);
         const contents = injectedMap.has(filePath) ? injectedMap.get(filePath) : bundle[pluginOption.targetFile];
         if (!contents) {
-          this.warn(`Injection target is not exist: ${pluginOption.targetFile}`);
+          this.warn(`Injection target does not exist: ${pluginOption.targetFile}`);
           return;
         }
         if (!(`code` in contents)) {
-          this.warn(`Injection target is not chunk file: ${pluginOption.targetFile}`);
+          this.warn(`Injection target is not a chunk file: ${pluginOption.targetFile}`);
           return;
         }
         const code = await injectDependency.call(
@@ -89,7 +89,7 @@ export const injectDependencyPlugin = (
       // Write the rendered content to a file
       for (const [filePath, contents] of injectedMap.entries()) {
         await writeFile(filePath, contents.code, 'utf-8');
-        this.info(`Successfully wrote the bundle file: ${filePath}`);
+        this.info(`Successfully wrote bundle file: ${filePath}`);
       }
     },
   };
