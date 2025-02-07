@@ -36,11 +36,11 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.6.1",
     "@electron/packager": "^18.3.6",
+    "@wdio/electron-bundler": "workspace:*",
     "@wdio/globals": "^9.7.3",
     "@wdio/types": "^9.6.3",
     "builder-util": "25.1.7",
     "electron": "^34.1.0",
-    "@wdio/electron-bundler": "workspace:*",
     "read-package-up": "^11.0.0",
     "typescript": "^5.7.3",
     "webdriverio": "^9.7.3"

@@ -95,7 +95,6 @@ describe(`getInputConfig`, () => {
   });
 
   it('should fail when entry point is not exist', () => {
-    // vi.mocked(existsSync).mockImplementation(() => false);
     const exports = {
       '.': {
         import: {
@@ -204,11 +203,10 @@ describe('injectDependency', () => {
   });
 
   it('should error when the package is not resolved', async () => {
-    const errorMock = vi.fn();
     const context = {
       resolve: vi.fn().mockResolvedValue(undefined),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -223,17 +221,16 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 
   it('should error when the injectedContents could not generated', async () => {
-    const errorMock = vi.fn();
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -248,17 +245,16 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 
   it('should error when the renderedContent could not generated', async () => {
-    const errorMock = vi.fn();
     const fixture = getFixturePackagePath('esm', 'build-success-esm');
     const cwd = dirname(fixture);
     const context = {
       resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
       info: vi.fn(),
-      error: errorMock,
+      error: vi.fn(),
     } as unknown as PluginContext;
 
     const templateContent = `const obj = await import('./test.js');`;
@@ -273,6 +269,6 @@ describe('injectDependency', () => {
 
     await injectDependency.call(context, 'src/test.js', param, templateContent);
 
-    expect(errorMock).toHaveBeenCalled();
+    expect(context.error).toHaveBeenCalled();
   });
 });

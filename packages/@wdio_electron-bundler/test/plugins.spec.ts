@@ -34,8 +34,12 @@ describe('emitPackageJsonPlugin', () => {
     emitFile: vi.fn(),
   } as unknown as PluginContext;
 
-  it('esm', async () => {
-    const plugin = emitPackageJsonPlugin('test-pkg', 'esm');
+  it.each([
+    ['esm', 'module'],
+    ['cjs', 'commonjs'],
+  ])('should emit package.json of %s type', async (type, typeValue) => {
+    // @ts-expect-error
+    const plugin = emitPackageJsonPlugin('test-pkg', type);
 
     await (plugin.generateBundle! as unknown as GenerateBundle).call(context, {
       dir: 'dist',
@@ -45,26 +49,11 @@ describe('emitPackageJsonPlugin', () => {
     expect(context.emitFile).toHaveBeenCalledWith({
       type: 'asset',
       fileName: 'package.json',
-      source: '{\n  "name": "test-pkg-esm",\n  "type": "module",\n  "private": true\n}',
+      source: `{\n  "name": "test-pkg-${type}",\n  "type": "${typeValue}",\n  "private": true\n}`,
     });
   });
 
-  it('cjs', async () => {
-    const plugin = emitPackageJsonPlugin('test-pkg', 'cjs');
-
-    await (plugin.generateBundle! as unknown as GenerateBundle).call(context, {
-      dir: 'dist',
-    } as NormalizedOutputOptions);
-
-    expect(context.emitFile).toHaveBeenCalledTimes(1);
-    expect(context.emitFile).toHaveBeenCalledWith({
-      type: 'asset',
-      fileName: 'package.json',
-      source: '{\n  "name": "test-pkg-cjs",\n  "type": "commonjs",\n  "private": true\n}',
-    });
-  });
-
-  it('should fail', async () => {
+  it('should throw the error when input invalid package type', async () => {
     // @ts-expect-error
     expect(() => emitPackageJsonPlugin('test-pkg', 'zzz')).toThrowError('Invalid type is specified');
   });
@@ -76,7 +65,7 @@ describe('warnToErrorPlugin', () => {
     error: vi.fn(),
   } as unknown as PluginContext;
 
-  it('should fail when warning occurred', async () => {
+  it('should this.error is called when warning occurred', async () => {
     const plugin = warnToErrorPlugin();
     (plugin.onLog! as unknown as OnLog).call(context, 'warn', { message: 'message' });
     expect(context.warn).toHaveBeenCalledTimes(1);
@@ -121,7 +110,7 @@ describe('injectDependencyPlugin', () => {
 
     expect(writeFile).toHaveBeenCalledTimes(1);
     expect(writeFile).toHaveBeenCalledWith(
-      join('dir', 'index.js'),
+      join('dist', 'index.js'),
       'const a = 1\nconst spy = 1\nconst { default: copy } = 2',
       'utf-8',
     );
@@ -145,6 +134,7 @@ describe('injectDependencyPlugin', () => {
     );
     expect(context.warn).toHaveBeenCalledTimes(1);
   });
+
   it('should cause warning when target file is not chunk file', async () => {
     const plugin = injectDependencyPlugin({
       packageName: '@vitest/spy',
