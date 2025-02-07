@@ -192,9 +192,6 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     // ensure mocks are updated
     const mocks = mockStore.getMocks();
 
-    console.log('======= afterCommand commandName> ', commandName);
-    console.log('======= afterCommand mocks > ', mocks);
-
     // White list of command which will input user actions to electron app.
     const inputCommands = [
       'addValue',
