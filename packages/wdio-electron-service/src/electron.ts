@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import os from 'node:os';
 import http from 'node:http';
 import log from '@wdio/electron-utils/log';
 import waitPort from 'wait-port';
@@ -129,6 +130,10 @@ export class DebuggerClient {
       // Add electron to the global object
       `globalThis.electron = require('electron');`,
     ];
+    // add because windows
+    if (os.type().match('Windows')) {
+      scripts.push(`globalThis.process = require('node:process');`);
+    }
 
     await this.sendMethod('Runtime.evaluate', {
       expression: scripts.join('\n'),
