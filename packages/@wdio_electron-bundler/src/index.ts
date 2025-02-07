@@ -11,11 +11,12 @@ export {
 } from './plugins';
 
 export const typescript = (options: RollupTypescriptOptions = {}) => {
-  const exclude = !options.exclude
-    ? []
-    : !Array.isArray(options.exclude)
-      ? ([options.exclude] as const)
-      : options.exclude;
+  let exclude: string[] = [];
+
+  if (options.exclude) {
+    exclude = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+  }
+
   return typescriptPlugin(
     Object.assign({}, options, {
       exclude: ['rollup.config.ts', ...exclude],
