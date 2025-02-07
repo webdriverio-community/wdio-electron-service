@@ -217,7 +217,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       'uploadFile',
     ];
 
-    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
+    if (inputCommands.includes(commandName) && Boolean(mocks) && mocks.length > 0 && !isInternalCommand(args)) {
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }
