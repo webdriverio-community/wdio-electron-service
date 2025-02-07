@@ -121,6 +121,12 @@ export class DebuggerClient {
   }
 
   async #initialiseContext() {
+    const result = await this.sendMethod('Runtime.enable');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.#contextId = result.params.context.id as number;
+    await this.sendMethod('Runtime.disable');
+
     const scripts = [
       // Add __name to the global object to work around issue with function serialization
       // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
@@ -139,14 +145,9 @@ export class DebuggerClient {
       expression: scripts.join('\n'),
       includeCommandLineAPI: true,
       replMode: true,
+      contextId: this.#contextId,
       // throwOnSideEffect: true,
     });
-
-    const result = await this.sendMethod('Runtime.enable');
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.#contextId = result.params.context.id as number;
-    await this.sendMethod('Runtime.disable');
   }
 
   async sendMethod(method: string, params = {}) {
