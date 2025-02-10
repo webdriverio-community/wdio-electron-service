@@ -150,13 +150,13 @@ describe('getConvertedElectronCapabilities', () => {
     },
     'wdio:electronServiceOptions': {},
   };
-  describe.each([
-    ['Standard capabilities', expectedCap, [expectedCap]],
+  describe.each<[string, RequestedCapabilities, Array<typeof expectedCap>]>([
+    ['Standard capabilities', expectedCap as Capabilities.RequestedStandaloneCapabilities, [expectedCap]],
     [
       'W3C specific capabilities',
       {
         alwaysMatch: expectedCap,
-      },
+      } as Capabilities.W3CCapabilities,
       [expectedCap],
     ],
     [
@@ -170,19 +170,17 @@ describe('getConvertedElectronCapabilities', () => {
             alwaysMatch: expectedCap,
           },
         },
-      },
+      } as Capabilities.RequestedMultiremoteCapabilities,
       [expectedCap, expectedCap],
     ],
   ])('%s', (_title, inputCap, expectedCaps) => {
     it('should return capabilities when input electron capabilities', () => {
-      // @ts-expect-error
       const caps = getConvertedElectronCapabilities(inputCap);
       expect(caps).toStrictEqual(expectedCaps);
     });
 
     it('should not return capabilities when not input electron capabilities', () => {
       removeProperty(inputCap, 'wdio:electronServiceOptions');
-      // @ts-expect-error
       const caps = getElectronCapabilities(inputCap);
       expect(caps).toStrictEqual([]);
     });
