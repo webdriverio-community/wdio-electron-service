@@ -1,7 +1,8 @@
 import path from 'node:path';
 
-import { describe, beforeEach, afterEach, it, expect, vi, Mock } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect, vi, type Mock } from 'vitest';
 import nock from 'nock';
+import getPort from 'get-port';
 import type { Capabilities, Options } from '@wdio/types';
 import type { ElectronServiceOptions } from '@wdio/electron-types';
 
@@ -763,6 +764,158 @@ describe('onPrepare', () => {
           },
         },
       ]);
+    });
+  });
+});
+
+describe('onWorkerStart', () => {
+  vi.mock('get-port', async (importOriginal) => {
+    const actualGetPort = await importOriginal<typeof import('get-port')>();
+
+    return {
+      ...actualGetPort,
+      default: vi.fn(),
+    };
+  });
+  let counter = 0;
+
+  beforeEach(() => {
+    counter = 0;
+    (getPort as Mock).mockImplementation(() => {
+      return 50000 + counter++;
+    });
+  });
+
+  const baseCapability = {
+    'browserName': 'chrome',
+    'browserVersion': '116.0.5845.190',
+    'goog:chromeOptions': {
+      args: ['foo=bar'],
+      binary: 'workspace/my-test-app/out/my-test-app',
+      windowTypes: ['app', 'webview'],
+    },
+    'wdio:electronServiceOptions': {},
+    'wdio:enforceWebDriverClassic': true,
+  };
+
+  describe('Standard', () => {
+    it('should apply `--inspect` to the args of `goog:chromeOptions`', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      const capabilities = baseCapability;
+      const expectedCaps = structuredClone(capabilities);
+      expectedCaps['goog:chromeOptions'].args.push('--inspect=localhost:50000');
+
+      await instance?.onWorkerStart('0', capabilities);
+      expect(capabilities).toStrictEqual(expectedCaps);
+    });
+
+    it('should apply `--inspect` if `goog:chromeOptions` is not set to capability', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      const capabilities = {
+        'browserName': 'chrome',
+        'browserVersion': '116.0.5845.190',
+        'wdio:electronServiceOptions': {},
+        'wdio:enforceWebDriverClassic': true,
+      };
+      const expectedCaps = Object.assign({}, capabilities, {
+        ['goog:chromeOptions']: {
+          args: ['--inspect=localhost:50000'],
+        },
+      });
+      await instance?.onWorkerStart('0', capabilities);
+      expect(capabilities).toStrictEqual(expectedCaps);
+    });
+
+    it('should apply `--inspect` if `args` is not set to `goog:chromeOptions`', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      const capabilities = {
+        'browserName': 'chrome',
+        'browserVersion': '116.0.5845.190',
+        'goog:chromeOptions': {
+          binary: 'workspace/my-test-app/out/my-test-app',
+          windowTypes: ['app', 'webview'],
+        },
+        'wdio:electronServiceOptions': {},
+        'wdio:enforceWebDriverClassic': true,
+      };
+      const expectedCaps = Object.assign({}, capabilities, {
+        ['goog:chromeOptions']: {
+          args: ['--inspect=localhost:50000'],
+          binary: 'workspace/my-test-app/out/my-test-app',
+          windowTypes: ['app', 'webview'],
+        },
+      });
+      await instance?.onWorkerStart('0', capabilities);
+      expect(capabilities).toStrictEqual(expectedCaps);
+    });
+
+    it('should throw error when error occurred', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      (getPort as Mock).mockRejectedValue('Some error');
+      await expect(() => instance?.onWorkerStart('0', baseCapability)).rejects.toThrowError();
+    });
+  });
+
+  describe('W3C-specific', () => {
+    it('should apply `--inspect` to the args of `goog:chromeOptions`', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      const capabilities = [
+        {
+          firstMatch: [],
+          alwaysMatch: {
+            'browserName': 'chrome',
+            'browserVersion': '116.0.5845.190',
+            'goog:chromeOptions': {
+              args: ['foo=bar'],
+              binary: 'workspace/my-test-app/dist/my-test-app',
+              windowTypes: ['app', 'webview'],
+            },
+            'wdio:electronServiceOptions': {},
+            'wdio:enforceWebDriverClassic': true,
+          },
+        },
+      ];
+      const expectedCaps = structuredClone(capabilities);
+      expectedCaps[0].alwaysMatch['goog:chromeOptions'].args.push('--inspect=localhost:50000');
+
+      await instance?.onWorkerStart('0', capabilities as WebdriverIO.Capabilities);
+      expect(capabilities).toStrictEqual(expectedCaps);
+    });
+  });
+
+  describe('Multiremote', async () => {
+    it('should apply `--inspect` to the args of `goog:chromeOptions` for the electron', async () => {
+      instance = new ElectronLaunchService({}, {}, {});
+      const capabilities = {
+        firefox: {
+          capabilities: {
+            browserName: 'firefox',
+          },
+        },
+        myElectronProject: {
+          capabilities: baseCapability,
+        },
+        chrome: {
+          capabilities: {
+            browserName: 'chrome',
+          },
+        },
+        myOtherElectronProject: {
+          capabilities: {
+            firstMatch: [],
+            alwaysMatch: baseCapability,
+          },
+        },
+      };
+
+      const expectedCaps = structuredClone(capabilities);
+      expectedCaps.myElectronProject.capabilities['goog:chromeOptions'].args.push('--inspect=localhost:50000');
+      expectedCaps.myOtherElectronProject.capabilities.alwaysMatch['goog:chromeOptions'].args.push(
+        '--inspect=localhost:50001',
+      );
+
+      await instance?.onWorkerStart('0', capabilities as WebdriverIO.Capabilities);
+      expect(capabilities).toStrictEqual(expectedCaps);
     });
   });
 });
