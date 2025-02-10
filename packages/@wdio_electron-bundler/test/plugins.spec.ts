@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { writeFile } from 'node:fs/promises';
 import type {
   NormalizedOutputOptions,
-  OutputBundle,
   PluginContext,
   MinimalPluginContext,
   LogLevel,
   RollupLog,
+  TransformPluginContext,
 } from 'rollup';
 import { emitPackageJsonPlugin, injectDependencyPlugin, warnToErrorPlugin } from '../src/plugins';
-import { join } from 'node:path';
 
-type WriteBundle = (this: PluginContext, options: NormalizedOutputOptions, bundle: OutputBundle) => Promise<void>;
+type Transform = (this: TransformPluginContext, code: string, id: string) => Promise<void>;
 
 type GenerateBundle = (this: PluginContext, options: NormalizedOutputOptions) => Promise<void>;
 
@@ -22,7 +20,7 @@ vi.mock('../src/utils', async () => {
   let counter = 0;
   return {
     ...actualUtils,
-    injectDependency: vi.fn(async (_templatePath, injectPrams, templateContent) => {
+    injectDependency: vi.fn(async (injectPrams, templateContent) => {
       return `${templateContent}\nconst ${injectPrams.importName} = ${++counter}`;
     }),
   };
@@ -74,81 +72,59 @@ describe('warnToErrorPlugin', () => {
 });
 
 describe('injectDependencyPlugin', () => {
-  vi.mock('node:fs/promises', () => ({
-    writeFile: vi.fn(async () => Promise.resolve()),
-  }));
-
   const context = {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-  } as unknown as PluginContext;
+  } as unknown as TransformPluginContext;
 
   it('should successfully inject dependencies', async () => {
     const plugin = injectDependencyPlugin([
       {
         packageName: '@vitest/spy',
-        targetFile: 'index.js',
+        targetFile: 'src/mock.ts',
         bundleRegExp: /export/,
         importName: 'spy',
         bundleReplace: (importName: string) => `const ${importName} =`,
       },
       {
         packageName: 'fast-copy',
-        targetFile: 'index.js',
+        targetFile: 'src/service.ts',
         bundleRegExp: /export.*$/m,
         importName: '{ default: copy }',
         bundleReplace: (importName: string) => `const ${importName} = { default: index };`,
       },
     ]);
 
-    await (plugin.writeBundle! as unknown as WriteBundle).call(
+    const result1 = await (plugin.transform as unknown as Transform).call(
       context,
-      { dir: 'dist' } as NormalizedOutputOptions,
-      { 'index.js': { code: `const a = 1` } } as unknown as OutputBundle,
+      `const a = 1`,
+      '/path/to/src/mock.ts',
     );
+    expect(result1).toStrictEqual({ code: 'const a = 1\nconst spy = 1', map: null });
 
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(
-      join('dist', 'index.js'),
-      'const a = 1\nconst spy = 1\nconst { default: copy } = 2',
-      'utf-8',
+    const result2 = await (plugin.transform as unknown as Transform).call(
+      context,
+      `const a = 1`,
+      '/path/to/src/src/service.ts',
     );
+    expect(result2).toStrictEqual({ code: 'const a = 1\nconst { default: copy } = 2', map: null });
   });
 
-  it('should warn when target file is missing from bundle', async () => {
-    const plugin = injectDependencyPlugin([
-      {
-        packageName: '@vitest/spy',
-        targetFile: 'index.js',
-        bundleRegExp: /export/,
-        importName: 'spy',
-        bundleReplace: (importName: string) => `const ${importName} =`,
-      },
-    ]);
-
-    await (plugin.writeBundle! as unknown as WriteBundle).call(
-      context,
-      { dir: 'dist' } as NormalizedOutputOptions,
-      { 'notFound.js': { code: `const a = 1` } } as unknown as OutputBundle,
-    );
-    expect(context.warn).toHaveBeenCalledTimes(1);
-  });
-
-  it('should warn when target is not a chunk file', async () => {
+  it('should return null when input id is not injection target', async () => {
     const plugin = injectDependencyPlugin({
       packageName: '@vitest/spy',
-      targetFile: 'index.js',
+      targetFile: 'src/mock.ts',
       bundleRegExp: /export/,
       importName: 'spy',
       bundleReplace: (importName: string) => `const ${importName} =`,
     });
 
-    await (plugin.writeBundle! as unknown as WriteBundle).call(
+    const result1 = await (plugin.transform as unknown as Transform).call(
       context,
-      { dir: 'dist' } as NormalizedOutputOptions,
-      { 'index.js': {} } as unknown as OutputBundle,
+      `const a = 1`,
+      '/path/to/src/notfound.ts',
     );
-    expect(context.warn).toHaveBeenCalledTimes(1);
+    expect(result1).toBeNull();
   });
 });

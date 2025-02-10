@@ -1,5 +1,3 @@
-import { writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import type { NormalizedPackageJson } from 'read-package-up';
 import { type Plugin } from 'rollup';
 import { injectDependency, type InjectDependencyPluginOptions } from './utils';
@@ -57,47 +55,27 @@ export const warnToErrorPlugin = (): Plugin => {
   };
 };
 
-// Exclude from Unit Test to check with build results of wdio-electron-service package
 export const injectDependencyPlugin = (
   options: InjectDependencyPluginOptions | InjectDependencyPluginOptions[],
 ): Plugin => {
   const pluginOptions = Array.isArray(options) ? options : [options];
-  const injectedMap = new Map();
+  const targetFiles = [...new Set(pluginOptions.map((item) => item.targetFile))];
+
   return {
     name: 'rollup-wdio-inject-dependency',
-    async writeBundle(bundleOptions, bundle) {
-      if (!bundleOptions.dir) {
-        this.error(new Error('Bundle directory is required for injectDependencyPlugin'));
-        return;
+    async transform(code, id) {
+      const targetFile = targetFiles.find((targetFile) => id.endsWith(targetFile));
+      if (!targetFile) {
+        return null;
       }
 
-      for (const pluginOption of pluginOptions) {
-        const filePath = join(bundleOptions.dir, pluginOption.targetFile);
-        const contents = injectedMap.has(filePath) ? injectedMap.get(filePath) : bundle[pluginOption.targetFile];
+      const targetOptions = pluginOptions.filter((pluginOption) => pluginOption.targetFile === targetFile);
 
-        if (!contents) {
-          this.warn(`Injection target does not exist: ${pluginOption.targetFile}`);
-          return;
-        }
-        if (!(`code` in contents)) {
-          this.warn(`Injection target is not a chunk file: ${pluginOption.targetFile}`);
-          return;
-        }
-
-        const code = await injectDependency.call(
-          this,
-          join(bundleOptions.dir, pluginOption.targetFile),
-          pluginOption,
-          contents.code,
-        );
-        injectedMap.set(filePath, { code });
+      let newCode = code;
+      for (const targetOption of targetOptions) {
+        newCode = await injectDependency.call(this, targetOption, newCode);
       }
-
-      // Write the rendered content to a file
-      for (const [filePath, contents] of injectedMap.entries()) {
-        await writeFile(filePath, contents.code, 'utf-8');
-        this.info(`Successfully wrote bundle file: ${filePath}`);
-      }
+      return { code: newCode, map: null };
     },
   };
 };

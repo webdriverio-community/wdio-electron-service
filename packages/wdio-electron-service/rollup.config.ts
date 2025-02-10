@@ -30,7 +30,7 @@ const configEsm: RollupOptions = {
     nodeResolve(),
     injectDependencyPlugin({
       packageName: '@vitest/spy',
-      targetFile: 'index.js',
+      targetFile: 'src/mock.ts',
       bundleRegExp: /export/,
       importName: 'spy',
       bundleReplace: (importName: string) => `const ${importName} =`,

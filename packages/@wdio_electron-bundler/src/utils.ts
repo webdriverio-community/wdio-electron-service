@@ -115,7 +115,6 @@ export type InjectDependencyPluginOptions = {
 
 export async function injectDependency(
   this: PluginContext,
-  templatePath: string,
   injectPrams: InjectDependencyPluginOptions,
   templateContent: string,
 ): Promise<string> {
@@ -138,10 +137,10 @@ export async function injectDependency(
       injectedContents,
     );
     if (renderedContent === templateContent) {
-      throw new Error(`Failed to inject contents (${templatePath})`);
+      throw new Error(`Failed to inject contents of "${injectPrams.packageName}"`);
     }
 
-    this.info(`Successfully bundled and injected ${injectPrams.packageName} into ${templatePath}`);
+    this.info(`Successfully bundled and injected "${injectPrams.packageName}" into ${injectPrams.targetFile}`);
     return renderedContent;
   } catch (error) {
     this.error(`Dependency injection failed: ${(error as Error).message}`);
