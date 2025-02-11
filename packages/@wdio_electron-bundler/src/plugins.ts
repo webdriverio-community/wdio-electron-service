@@ -1,6 +1,7 @@
-import type { NormalizedPackageJson } from 'read-package-up';
-import { type Plugin } from 'rollup';
+import { normalize } from 'node:path';
 import { injectDependency, type InjectDependencyPluginOptions } from './utils';
+import type { NormalizedPackageJson } from 'read-package-up';
+import type { Plugin } from 'rollup';
 
 export const MODULE_TYPE = {
   CJS: 'cjs',
@@ -60,11 +61,12 @@ export const injectDependencyPlugin = (
 ): Plugin => {
   const pluginOptions = Array.isArray(options) ? options : [options];
   const targetFiles = [...new Set(pluginOptions.map((item) => item.targetFile))];
+  const determineTarget = (id: string, target: string) => normalize(id).endsWith(normalize(target));
 
   return {
     name: 'rollup-wdio-inject-dependency',
     async transform(code, id) {
-      const targetFile = targetFiles.find((targetFile) => id.endsWith(targetFile));
+      const targetFile = targetFiles.find((targetFile) => determineTarget(id, targetFile));
       if (!targetFile) {
         return null;
       }
