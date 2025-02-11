@@ -46,7 +46,7 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@eslint/js": "^9.20.0",
     "@inquirer/prompts": "^7.2.3",
     "@octokit/rest": "^21.1.0",
     "@octokit/types": "^13.7.0",
@@ -54,12 +54,12 @@
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^22.13.1",
     "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^8.23.0",
-    "@typescript-eslint/parser": "^8.23.0",
-    "@vitest/eslint-plugin": "^1.1.25",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "@vitest/eslint-plugin": "^1.1.28",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
-    "eslint": "^9.19.0",
+    "eslint": "^9.20.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import-x": "^4.6.1",
@@ -67,13 +67,13 @@
     "globals": "^15.14.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
-    "prettier": "^3.4.2",
+    "prettier": "^3.5.0",
     "read-package-up": "^11.0.0",
     "rollup": "^4.32.1",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.19.2",
-    "turbo": "^2.4.0"
+    "turbo": "^2.4.1"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
