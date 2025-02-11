@@ -7,7 +7,14 @@ const l = logger('electron-service');
 const log: Logger = {
   ...l,
   debug: (...args) => {
-    d(args);
+    if (typeof args.at(-1) === 'object') {
+      if (args.length > 1) {
+        d(args.slice(0, -1));
+      }
+      d('%O', args.at(-1));
+    } else {
+      d(args);
+    }
     l.debug(...args);
   },
 };
