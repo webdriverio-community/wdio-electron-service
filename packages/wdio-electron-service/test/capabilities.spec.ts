@@ -1,9 +1,15 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { describe, it, expect } from 'vitest';
 import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from '../src/capabilities.js';
 
+import type { Capabilities } from '@wdio/types';
+
+type RequestedCapabilities =
+  | Capabilities.RequestedStandaloneCapabilities
+  | Capabilities.W3CCapabilities
+  | Capabilities.RequestedMultiremoteCapabilities;
+
 describe('getChromeOptions', () => {
-  it('should return the combination value of the input parameters', () => {
+  it('should combine app arguments with chrome options and override the binary path', () => {
     const options = {
       appArgs: ['foo=bar'],
       appBinaryPath: '/path/to/apps',
@@ -24,7 +30,7 @@ describe('getChromeOptions', () => {
     });
   });
 
-  it('should return default values when no input parameters are set', () => {
+  it('should return default values when app arguments are not provided', () => {
     const options = {
       appBinaryPath: '/path/to/apps',
     };
@@ -42,7 +48,7 @@ describe('getChromeOptions', () => {
 });
 
 describe('getChromedriverOptions', () => {
-  it('should return the set value of wdio:chromedriverOptions', () => {
+  it('should return the configured wdio:chromedriverOptions', () => {
     const expectedOption = {
       binary: '/path/to/chromdriver',
     };
@@ -53,7 +59,7 @@ describe('getChromedriverOptions', () => {
     ).toStrictEqual(expectedOption);
   });
 
-  it('should return the empty object when wdio:chromedriverOptions is not set', () => {
+  it('should return an empty object when wdio:chromedriverOptions is absent', () => {
     expect(
       getChromedriverOptions({
         'goog:chromeOptions': {
@@ -68,26 +74,25 @@ describe('getElectronCapabilities', () => {
   const expectedCap = {
     browserName: 'electron',
   };
-  describe.each([
+  describe.each<[string, (browserName: string) => RequestedCapabilities, Array<typeof expectedCap>]>([
     [
       'Standard capabilities',
-      (browserName: string) => ({
+      (browserName: string): Capabilities.RequestedStandaloneCapabilities => ({
         browserName,
       }),
       [expectedCap],
     ],
     [
       'W3C specific capabilities',
-      (browserName: string) => ({
-        alwaysMatch: {
-          browserName,
-        },
+      (browserName: string): Capabilities.W3CCapabilities => ({
+        alwaysMatch: { browserName },
+        firstMatch: [{}],
       }),
       [expectedCap],
     ],
     [
       'Multiremote capabilities',
-      (browserName: string) => ({
+      (browserName: string): Capabilities.RequestedMultiremoteCapabilities => ({
         instanceA: {
           capabilities: {
             browserName,
@@ -98,22 +103,21 @@ describe('getElectronCapabilities', () => {
             alwaysMatch: {
               browserName,
             },
+            firstMatch: [{}],
           },
         },
       }),
       [expectedCap, expectedCap],
     ],
   ])('%s', (_title, generateCap, expectedCaps) => {
-    it('should return capabilities when input electron capabilities', () => {
+    it('should return electron capabilities when browserName is "electron"', () => {
       const cap = generateCap('electron');
-      //@ts-expect-error
       const caps = getElectronCapabilities(cap);
       expect(caps).toStrictEqual(expectedCaps);
     });
 
-    it('should not return capabilities when not input electron capabilities', () => {
+    it('should return an empty array when browserName is not "electron"', () => {
       const cap = generateCap('chrome');
-      //@ts-expect-error
       const caps = getElectronCapabilities(cap);
       expect(caps).toStrictEqual([]);
     });
