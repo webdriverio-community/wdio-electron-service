@@ -56,12 +56,13 @@ export const warnToErrorPlugin = (): Plugin => {
   };
 };
 
+const determineTarget = (id: string, target: string) => normalize(id).endsWith(normalize(target));
+
 export const injectDependencyPlugin = (
   options: InjectDependencyPluginOptions | InjectDependencyPluginOptions[],
 ): Plugin => {
   const pluginOptions = Array.isArray(options) ? options : [options];
   const targetFiles = [...new Set(pluginOptions.map((item) => item.targetFile))];
-  const determineTarget = (id: string, target: string) => normalize(id).endsWith(normalize(target));
 
   return {
     name: 'rollup-wdio-inject-dependency',
@@ -76,6 +77,44 @@ export const injectDependencyPlugin = (
       let newCode = code;
       for (const targetOption of targetOptions) {
         newCode = await injectDependency.call(this, targetOption, newCode);
+      }
+      return { code: newCode, map: null };
+    },
+  };
+};
+
+export type CodeReplacePluginOption = {
+  id: string;
+  searchValue: string | RegExp;
+  replaceValue: string;
+};
+
+// This plugin is used to fix the CJS issue.
+// @wdio/logger is only support ESM, so we have to use `import` even if CJS format.
+// The reason of not supporting ESM is that the `chalk5` is only support ESM
+// https://github.com/webdriverio-community/wdio-electron-service/issues/944
+export const codeReplacePlugin = (options: CodeReplacePluginOption | CodeReplacePluginOption[]): Plugin => {
+  const pluginOptions = Array.isArray(options) ? options : [options];
+  const targetFiles = [...new Set(pluginOptions.map((item) => item.id))];
+  return {
+    name: 'rollup-wdio-code-replacer',
+    async renderChunk(code, chunk) {
+      const targetFile = targetFiles.find((targetFile) => determineTarget(chunk.facadeModuleId!, targetFile));
+      if (!targetFile) {
+        return null;
+      }
+      const targetOptions = pluginOptions.filter((pluginOption) => pluginOption.id === targetFile);
+
+      let newCode = code;
+      for (const targetOption of targetOptions) {
+        const oldCode = newCode;
+        newCode = oldCode.replace(targetOption.searchValue, targetOption.replaceValue);
+        if (newCode === oldCode) {
+          this.warn(`Failed to replace the code: ${targetOption.id}`);
+          return null;
+        } else {
+          this.info(`Success to replace the code: ${targetOption.id}`);
+        }
       }
       return { code: newCode, map: null };
     },

@@ -6,10 +6,12 @@ import type {
   LogLevel,
   RollupLog,
   TransformPluginContext,
+  RenderedChunk,
 } from 'rollup';
-import { emitPackageJsonPlugin, injectDependencyPlugin, warnToErrorPlugin } from '../src/plugins';
+import { codeReplacePlugin, emitPackageJsonPlugin, injectDependencyPlugin, warnToErrorPlugin } from '../src/plugins';
 
 type Transform = (this: TransformPluginContext, code: string, id: string) => Promise<void>;
+type RenderChunk = (this: PluginContext, code: string, chunk: RenderedChunk) => Promise<void>;
 
 type GenerateBundle = (this: PluginContext, options: NormalizedOutputOptions) => Promise<void>;
 
@@ -126,5 +128,65 @@ describe('injectDependencyPlugin', () => {
       '/path/to/src/notfound.ts',
     );
     expect(result1).toBeNull();
+  });
+});
+
+describe('codeReplacePlugin', () => {
+  const context = {
+    info: vi.fn(),
+    warn: vi.fn(),
+  } as unknown as TransformPluginContext;
+
+  it('should successfully replace the code', async () => {
+    const plugin = codeReplacePlugin([
+      {
+        id: 'src/log.ts',
+        searchValue: "const test = require('test-lib');",
+        replaceValue: "import test from 'test-lib';",
+      },
+      {
+        id: 'src/log.ts',
+        searchValue: "const sample = require('sample-lib');",
+        replaceValue: "import sample from 'sample-lib';",
+      },
+    ]);
+    const result = await (plugin.renderChunk as unknown as RenderChunk).call(
+      context,
+      ["const test = require('test-lib');", "const sample = require('sample-lib');"].join('\n'),
+      { facadeModuleId: '/path/to/src/log.ts' } as RenderedChunk,
+    );
+    expect(result).toStrictEqual({
+      code: ["import test from 'test-lib';", "import sample from 'sample-lib';"].join('\n'),
+      map: null,
+    });
+  });
+  it('should call warn when failed to replace the code', async () => {
+    const plugin = codeReplacePlugin({
+      id: 'src/log.ts',
+      searchValue: "const test = require('test-lib');",
+      replaceValue: "import test from 'test-lib';",
+    });
+    const result = await (plugin.renderChunk as unknown as RenderChunk).call(
+      context,
+      ["const xxx = require('test-lib');", "const yyy = require('sample-lib');"].join('\n'),
+      { facadeModuleId: '/path/to/src/log.ts' } as RenderedChunk,
+    );
+    expect(context.warn).toHaveBeenCalledTimes(1);
+    expect(result).toBeNull();
+  });
+  it('should return null when not match id and configuration of plugin', async () => {
+    const plugin = codeReplacePlugin({
+      id: 'src/log.ts',
+      searchValue: "const test = require('test-lib');",
+      replaceValue: "import test from 'test-lib';",
+    });
+    const result = await (plugin.renderChunk as unknown as RenderChunk).call(
+      context,
+      ["const xxx = require('test-lib');", "const yyy = require('sample-lib');"].join('\n'),
+      { facadeModuleId: '/path/to/src/index.ts' } as RenderedChunk,
+    );
+    expect(context.warn).toHaveBeenCalledTimes(0);
+    expect(context.info).toHaveBeenCalledTimes(0);
+    expect(result).toBeNull();
   });
 });

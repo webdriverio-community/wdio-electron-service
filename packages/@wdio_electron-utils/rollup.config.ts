@@ -4,6 +4,7 @@ import {
   emitPackageJsonPlugin,
   readPackageJson,
   warnToErrorPlugin,
+  codeReplacePlugin,
 } from '@wdio/electron-bundler';
 
 import type { RollupOptions } from 'rollup';
@@ -48,6 +49,13 @@ const configCjs: RollupOptions = {
     }),
     nodeExternals(),
     warnToErrorPlugin(),
+    // @wdio/logger is only support ESM, so we have to use `import` even if CJS format.
+    // https://github.com/webdriverio-community/wdio-electron-service/issues/944
+    codeReplacePlugin({
+      id: 'src/log.ts',
+      searchValue: "var logger = require('@wdio/logger');",
+      replaceValue: "import logger from '@wdio/logger';",
+    }),
   ],
   strictDeprecations: true,
 };
