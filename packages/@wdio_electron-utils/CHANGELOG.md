@@ -1,3 +1,9 @@
+# [8.0.0-next.9](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.8...v8.0.0-next.9) (2025-02-12)
+
+### Features
+
+- support object inspection at debug log ([21a3281](https://github.com/webdriverio-community/wdio-electron-service/commit/21a32816bd1b52ec3a1d118607f44fdf8c25f247))
+
 # [8.0.0-next.8](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.7...v8.0.0-next.8) (2025-02-05)
 
 # [8.0.0-next.7](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.6...v8.0.0-next.7) (2025-02-03)
