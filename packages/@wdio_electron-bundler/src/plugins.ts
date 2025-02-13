@@ -9,7 +9,7 @@ export const MODULE_TYPE = {
 } as const;
 
 type UnionizeValue<T> = T[keyof T];
-type SourceCodeType = UnionizeValue<typeof MODULE_TYPE>;
+export type SourceCodeType = UnionizeValue<typeof MODULE_TYPE>;
 
 const getTypeValue = (type: SourceCodeType) => {
   switch (type) {
@@ -89,33 +89,42 @@ export type CodeReplacePluginOption = {
   replaceValue: string;
 };
 
-// This plugin is used to fix the CJS issue.
-// @wdio/logger is only support ESM, so we have to use `import` even if CJS format.
-// The reason of not supporting ESM is that the `chalk5` is only support ESM
-// https://github.com/webdriverio-community/wdio-electron-service/issues/944
+/**
+ * Plugin to handle ESM/CJS compatibility issues with certain dependencies.
+ * Specifically used to handle @wdio/logger which only supports ESM imports
+ * due to its dependency on chalk v5.
+ *
+ * @see https://github.com/webdriverio-community/wdio-electron-service/issues/944
+ */
 export const codeReplacePlugin = (options: CodeReplacePluginOption | CodeReplacePluginOption[]): Plugin => {
   const pluginOptions = Array.isArray(options) ? options : [options];
   const targetFiles = [...new Set(pluginOptions.map((item) => item.id))];
+
   return {
     name: 'rollup-wdio-code-replacer',
     async renderChunk(code, chunk) {
-      const targetFile = targetFiles.find((targetFile) => determineTarget(chunk.facadeModuleId!, targetFile));
+      const facadeModuleId = chunk.facadeModuleId || '';
+
+      const targetFile = targetFiles.find((targetFile) => determineTarget(facadeModuleId, targetFile));
       if (!targetFile) {
         return null;
       }
-      const targetOptions = pluginOptions.filter((pluginOption) => pluginOption.id === targetFile);
 
+      const targetOptions = pluginOptions.filter((pluginOption) => pluginOption.id === targetFile);
       let newCode = code;
+
       for (const targetOption of targetOptions) {
         const oldCode = newCode;
         newCode = oldCode.replace(targetOption.searchValue, targetOption.replaceValue);
+
         if (newCode === oldCode) {
-          this.warn(`Failed to replace the code: ${targetOption.id}`);
+          this.warn(`No replacements made for pattern in ${targetOption.id}`);
           return null;
-        } else {
-          this.info(`Success to replace the code: ${targetOption.id}`);
         }
+
+        this.info(`Successfully replaced code pattern in ${targetOption.id}`);
       }
+
       return { code: newCode, map: null };
     },
   };
