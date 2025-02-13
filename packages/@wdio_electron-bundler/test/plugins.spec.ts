@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type {
   NormalizedOutputOptions,
   PluginContext,
@@ -8,7 +7,14 @@ import type {
   TransformPluginContext,
   RenderedChunk,
 } from 'rollup';
-import { codeReplacePlugin, emitPackageJsonPlugin, injectDependencyPlugin, warnToErrorPlugin } from '../src/plugins';
+import {
+  codeReplacePlugin,
+  emitPackageJsonPlugin,
+  injectDependencyPlugin,
+  warnToErrorPlugin,
+  MODULE_TYPE,
+  type SourceCodeType,
+} from '../src/plugins';
 
 type Transform = (this: TransformPluginContext, code: string, id: string) => Promise<void>;
 type RenderChunk = (this: PluginContext, code: string, chunk: RenderedChunk) => Promise<void>;
@@ -35,10 +41,9 @@ describe('emitPackageJsonPlugin', () => {
   } as unknown as PluginContext;
 
   it.each([
-    ['esm', 'module'],
-    ['cjs', 'commonjs'],
+    [MODULE_TYPE.ESM, 'module'],
+    [MODULE_TYPE.CJS, 'commonjs'],
   ])('should emit package.json with correct type for %s format', async (format, moduleType) => {
-    // @ts-expect-error
     const plugin = emitPackageJsonPlugin('test-pkg', format);
 
     await (plugin.generateBundle! as unknown as GenerateBundle).call(context, {
@@ -54,8 +59,9 @@ describe('emitPackageJsonPlugin', () => {
   });
 
   it('should throw an error for invalid package type', async () => {
-    // @ts-expect-error
-    expect(() => emitPackageJsonPlugin('test-pkg', 'invalid')).toThrowError('Invalid type is specified');
+    expect(() => emitPackageJsonPlugin('test-pkg', 'invalid' as SourceCodeType)).toThrowError(
+      'Invalid type is specified',
+    );
   });
 });
 
@@ -135,9 +141,9 @@ describe('codeReplacePlugin', () => {
   const context = {
     info: vi.fn(),
     warn: vi.fn(),
-  } as unknown as TransformPluginContext;
+  } as unknown as PluginContext;
 
-  it('should successfully replace the code', async () => {
+  it('should successfully replace multiple code patterns', async () => {
     const plugin = codeReplacePlugin([
       {
         id: 'src/log.ts',
@@ -150,43 +156,72 @@ describe('codeReplacePlugin', () => {
         replaceValue: "import sample from 'sample-lib';",
       },
     ]);
+
     const result = await (plugin.renderChunk as unknown as RenderChunk).call(
       context,
       ["const test = require('test-lib');", "const sample = require('sample-lib');"].join('\n'),
       { facadeModuleId: '/path/to/src/log.ts' } as RenderedChunk,
     );
+
     expect(result).toStrictEqual({
       code: ["import test from 'test-lib';", "import sample from 'sample-lib';"].join('\n'),
       map: null,
     });
+    expect(context.info).toHaveBeenCalledTimes(2);
+    expect(context.warn).not.toHaveBeenCalled();
   });
-  it('should call warn when failed to replace the code', async () => {
+
+  it('should warn and return null when pattern is not found', async () => {
     const plugin = codeReplacePlugin({
       id: 'src/log.ts',
       searchValue: "const test = require('test-lib');",
       replaceValue: "import test from 'test-lib';",
     });
+
     const result = await (plugin.renderChunk as unknown as RenderChunk).call(
       context,
-      ["const xxx = require('test-lib');", "const yyy = require('sample-lib');"].join('\n'),
+      "const differentPattern = require('test-lib');",
       { facadeModuleId: '/path/to/src/log.ts' } as RenderedChunk,
     );
-    expect(context.warn).toHaveBeenCalledTimes(1);
+
     expect(result).toBeNull();
+    expect(context.warn).toHaveBeenCalledWith('No replacements made for pattern in src/log.ts');
+    expect(context.info).not.toHaveBeenCalled();
   });
-  it('should return null when not match id and configuration of plugin', async () => {
+
+  it('should return null when facadeModuleId does not match target', async () => {
     const plugin = codeReplacePlugin({
       id: 'src/log.ts',
       searchValue: "const test = require('test-lib');",
       replaceValue: "import test from 'test-lib';",
     });
+
     const result = await (plugin.renderChunk as unknown as RenderChunk).call(
       context,
-      ["const xxx = require('test-lib');", "const yyy = require('sample-lib');"].join('\n'),
-      { facadeModuleId: '/path/to/src/index.ts' } as RenderedChunk,
+      "const test = require('test-lib');",
+      { facadeModuleId: '/path/to/src/different.ts' } as RenderedChunk,
     );
-    expect(context.warn).toHaveBeenCalledTimes(0);
-    expect(context.info).toHaveBeenCalledTimes(0);
+
     expect(result).toBeNull();
+    expect(context.warn).not.toHaveBeenCalled();
+    expect(context.info).not.toHaveBeenCalled();
+  });
+
+  it('should return null when facadeModuleId is missing', async () => {
+    const plugin = codeReplacePlugin({
+      id: 'src/log.ts',
+      searchValue: "const test = require('test-lib');",
+      replaceValue: "import test from 'test-lib';",
+    });
+
+    const result = await (plugin.renderChunk as unknown as RenderChunk).call(
+      context,
+      "const test = require('test-lib');",
+      { facadeModuleId: '' } as RenderedChunk,
+    );
+
+    expect(result).toBeNull();
+    expect(context.warn).not.toHaveBeenCalled();
+    expect(context.info).not.toHaveBeenCalled();
   });
 });

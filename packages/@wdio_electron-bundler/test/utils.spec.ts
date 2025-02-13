@@ -2,9 +2,30 @@ import { dirname } from 'node:path';
 import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../src/utils';
 import { getFixturePackagePath } from './utils';
 import { PluginContext } from 'rollup';
+import { existsSync, PathLike } from 'node:fs';
+
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn(),
+}));
 
 describe('getInputConfig', () => {
+  beforeEach(() => {
+    vi.mocked(existsSync).mockReset();
+  });
+
   it('should resolve entry points from exports field', () => {
+    vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      return (
+        path.toString().endsWith('src/index.ts') ||
+        path.toString().endsWith('src/mod1.ts') ||
+        path.toString().endsWith('src/mod2/index.ts') ||
+        path.toString().endsWith('src/mod3.mts') ||
+        path.toString().endsWith('src/mod4/index.mts') ||
+        path.toString().endsWith('src/mod5/api.cts') ||
+        path.toString().endsWith('src/mod6/api/index.cts')
+      );
+    });
+
     const pkgJsonPath = getFixturePackagePath('esm', 'build-test-esm');
     const exports = {
       '.': './dist/loader.js',
@@ -122,6 +143,102 @@ describe('getInputConfig', () => {
         'src',
       ),
     ).toThrowError(`entry point is not found: `);
+  });
+
+  it('should resolve entry points from nested import/require fields', () => {
+    vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      return (
+        path.toString().endsWith('src/nested.ts') ||
+        path.toString().endsWith('src/deep.ts') ||
+        path.toString().endsWith('src/index.ts')
+      );
+    });
+
+    const exports = {
+      '.': './dist/loader.js',
+      './nested': './dist/nested.js',
+      './deep': './dist/deep.js',
+    };
+
+    expect(
+      getInputConfig(
+        {
+          path: '/path/to/package.json',
+          packageJson: {
+            name: 'test',
+            version: '0.0.0',
+            readme: 'readme.md',
+            _id: '',
+            exports,
+          },
+        },
+        'src',
+      ),
+    ).toEqual({
+      index: 'src/index.ts',
+      nested: 'src/nested.ts',
+      deep: 'src/deep.ts',
+    });
+  });
+
+  it('should handle entry points with only import field', () => {
+    vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      return path.toString().endsWith('src/importOnly.ts') || path.toString().endsWith('src/index.ts');
+    });
+
+    const exports = {
+      '.': './dist/loader.js',
+      './importOnly': './dist/importOnly.js',
+    };
+
+    expect(
+      getInputConfig(
+        {
+          path: '/path/to/package.json',
+          packageJson: {
+            name: 'test',
+            version: '0.0.0',
+            readme: 'readme.md',
+            _id: '',
+            exports,
+          },
+        },
+        'src',
+      ),
+    ).toEqual({
+      index: 'src/index.ts',
+      importOnly: 'src/importOnly.ts',
+    });
+  });
+
+  it('should handle entry points with only require field', () => {
+    vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      return path.toString().endsWith('src/requireOnly.ts') || path.toString().endsWith('src/index.ts');
+    });
+
+    const exports = {
+      '.': './dist/loader.js',
+      './requireOnly': './dist/requireOnly.js',
+    };
+
+    expect(
+      getInputConfig(
+        {
+          path: '/path/to/package.json',
+          packageJson: {
+            name: 'test',
+            version: '0.0.0',
+            readme: 'readme.md',
+            _id: '',
+            exports,
+          },
+        },
+        'src',
+      ),
+    ).toEqual({
+      index: 'src/index.ts',
+      requireOnly: 'src/requireOnly.ts',
+    });
   });
 });
 
