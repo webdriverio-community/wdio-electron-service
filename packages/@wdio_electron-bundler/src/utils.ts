@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { basename, dirname, join, posix, relative, sep } from 'node:path';
+import { basename, dirname, join, posix, relative } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
 
 import debug from './log';
