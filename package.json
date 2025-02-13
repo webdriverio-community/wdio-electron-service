@@ -51,11 +51,11 @@
     "@octokit/types": "^13.7.0",
     "@turbo-version/version": "^0.8.1",
     "@types/eslint-config-prettier": "^6.11.2",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.4",
     "@types/shelljs": "^0.8.15",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
-    "@vitest/eslint-plugin": "^1.1.28",
+    "@vitest/eslint-plugin": "^1.1.31",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "eslint": "^9.20.0",
@@ -63,16 +63,16 @@
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import-x": "^4.6.1",
     "eslint-plugin-wdio": "^9.6.0",
-    "globals": "^15.14.0",
+    "globals": "^15.15.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.5.0",
+    "prettier": "^3.5.1",
     "read-package-up": "^11.0.0",
     "rollup": "^4.32.1",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "tsx": "^4.19.2",
-    "turbo": "^2.4.1"
+    "turbo": "^2.4.2"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [

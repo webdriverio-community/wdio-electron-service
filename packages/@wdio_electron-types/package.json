@@ -37,13 +37,13 @@
     "@electron-forge/shared-types": "^7.5.0",
     "@electron/packager": "^18.3.6",
     "@wdio/electron-bundler": "workspace:*",
-    "@wdio/globals": "^9.7.2",
-    "@wdio/types": "^9.6.3",
+    "@wdio/globals": "^9.9.0",
+    "@wdio/types": "^9.9.0",
     "builder-util": "^25.1.7",
-    "electron": "^34.1.0",
+    "electron": "^34.2.0",
     "read-package-up": "^11.0.0",
     "typescript": "^5.7.2",
-    "webdriverio": "^9.8.0"
+    "webdriverio": "^9.9.0"
   },
   "files": [
     "dist/*"
