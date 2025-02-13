@@ -15,14 +15,15 @@ describe('getInputConfig', () => {
 
   it('should resolve entry points from exports field', () => {
     vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      const normalizedPath = path.toString().replace(/\\/g, '/');
       return (
-        path.toString().endsWith('src/index.ts') ||
-        path.toString().endsWith('src/mod1.ts') ||
-        path.toString().endsWith('src/mod2/index.ts') ||
-        path.toString().endsWith('src/mod3.mts') ||
-        path.toString().endsWith('src/mod4/index.mts') ||
-        path.toString().endsWith('src/mod5/api.cts') ||
-        path.toString().endsWith('src/mod6/api/index.cts')
+        normalizedPath.endsWith('src/index.ts') ||
+        normalizedPath.endsWith('src/mod1.ts') ||
+        normalizedPath.endsWith('src/mod2/index.ts') ||
+        normalizedPath.endsWith('src/mod3.mts') ||
+        normalizedPath.endsWith('src/mod4/index.mts') ||
+        normalizedPath.endsWith('src/mod5/api.cts') ||
+        normalizedPath.endsWith('src/mod6/api/index.cts')
       );
     });
 
@@ -184,7 +185,8 @@ describe('getInputConfig', () => {
 
   it('should handle entry points with only import field', () => {
     vi.mocked(existsSync).mockImplementation((path: PathLike) => {
-      return path.toString().endsWith('src/importOnly.ts') || path.toString().endsWith('src/index.ts');
+      const normalizedPath = path.toString().replace(/\\/g, '/');
+      return normalizedPath.endsWith('src/importOnly.ts') || normalizedPath.endsWith('src/index.ts');
     });
 
     const exports = {
@@ -214,7 +216,8 @@ describe('getInputConfig', () => {
 
   it('should handle entry points with only require field', () => {
     vi.mocked(existsSync).mockImplementation((path: PathLike) => {
-      return path.toString().endsWith('src/requireOnly.ts') || path.toString().endsWith('src/index.ts');
+      const normalizedPath = path.toString().replace(/\\/g, '/');
+      return normalizedPath.endsWith('src/requireOnly.ts') || normalizedPath.endsWith('src/index.ts');
     });
 
     const exports = {
