@@ -1,3 +1,10 @@
+# [8.0.0-next.11](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.10...v8.0.0-next.11) (2025-02-13)
+
+### Bug Fixes
+
+- windows paths ([af0677e](https://github.com/webdriverio-community/wdio-electron-service/commit/af0677e1c1d21d823e8375a0d59550c19b56680b))
+- windows paths ([3f4ce44](https://github.com/webdriverio-community/wdio-electron-service/commit/3f4ce444233a48542b73ba8728492695576af623))
+
 # [8.0.0-next.10](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.9...v8.0.0-next.10) (2025-02-12)
 
 # [8.0.0-next.9](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.8...v8.0.0-next.9) (2025-02-12)
