@@ -49,8 +49,12 @@ const configCjs: RollupOptions = {
     }),
     nodeExternals(),
     warnToErrorPlugin(),
-    // @wdio/logger is only support ESM, so we have to use `import` even if CJS format.
-    // https://github.com/webdriverio-community/wdio-electron-service/issues/944
+    /**
+     * Plugin to handle ESM/CJS compatibility issues with @wdio/logger.
+     * The logger only supports ESM imports due to its dependency on chalk v5.
+     *
+     * @see https://github.com/webdriverio-community/wdio-electron-service/issues/944
+     */
     codeReplacePlugin({
       id: 'src/log.ts',
       searchValue: "var logger = require('@wdio/logger');",
