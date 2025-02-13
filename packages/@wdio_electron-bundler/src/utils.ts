@@ -6,24 +6,34 @@ import debug from './log';
 import { PluginContext, rollup } from 'rollup';
 import nodeResolve from '@rollup/plugin-node-resolve';
 
+const normalizeToPosix = (path: string) => {
+  // Handle both forward and backslashes
+  const normalized = path.replace(/\\/g, '/');
+  return posix.normalize(normalized);
+};
+
 const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
   debug(`Attempting to find entry point: ${name}`);
+  // Normalize name to handle Windows paths
+  const normalizedName = normalizeToPosix(name);
+
   const fileCandidates = [
-    `${name}.ts`,
-    join(name, `index.ts`),
-    `${name}.mts`,
-    join(name, `index.mts`),
-    `${name}.cts`,
-    join(name, `index.cts`),
+    `${normalizedName}.ts`,
+    posix.join(normalizedName, 'index.ts'),
+    `${normalizedName}.mts`,
+    posix.join(normalizedName, 'index.mts'),
+    `${normalizedName}.cts`,
+    posix.join(normalizedName, 'index.cts'),
   ];
+
   for (const candidate of fileCandidates) {
-    const srcPath = join(srcDir, candidate);
+    // Use normalized paths for consistency
+    const srcPath = posix.join(srcDir, candidate);
+    // Convert to system-specific path for existsSync
     const checkPath = join(rootDir, srcPath);
     debug(`Checking path: ${checkPath}`);
     if (existsSync(checkPath)) {
-      const posixPath = normalizeToPosix(srcPath);
-      debug(`Found entry point: ${posixPath}`);
-      return posixPath;
+      return normalizeToPosix(srcPath);
     }
   }
   throw new Error(`entry point is not found: ${name}`);
@@ -33,8 +43,6 @@ export const getFieldMissingErrorMessage = (field: string, path: string) => {
   return `"${field}" field which is required is not set: ${path}`;
 };
 
-const normalizeToPosix = (path: string) => posix.join(...path.split(sep));
-
 export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   debug(`Resolving entry points using exports field`);
   const exportsValue = pkg.packageJson.exports;
@@ -43,10 +51,13 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   }
 
   const rootDir = dirname(pkg.path);
+  const normalizedSrcDir = normalizeToPosix(srcDir);
+
   const config = Object.keys(exportsValue).reduce((acc: Record<string, string>, key) => {
     debug(`Resolving the entry point: ${key}`);
     const name = basename(key) === '.' ? 'index' : relative('.', key);
-    acc[normalizeToPosix(name)] = findEntryPoint(name, rootDir, srcDir);
+    const normalizedName = normalizeToPosix(name);
+    acc[normalizedName] = findEntryPoint(normalizedName, rootDir, normalizedSrcDir);
     return acc;
   }, {});
 

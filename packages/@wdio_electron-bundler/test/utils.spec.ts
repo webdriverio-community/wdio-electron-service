@@ -147,10 +147,11 @@ describe('getInputConfig', () => {
 
   it('should resolve entry points from nested import/require fields', () => {
     vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+      const normalizedPath = path.toString().replace(/\\/g, '/');
       return (
-        path.toString().endsWith('src/nested.ts') ||
-        path.toString().endsWith('src/deep.ts') ||
-        path.toString().endsWith('src/index.ts')
+        normalizedPath.endsWith('src/nested.ts') ||
+        normalizedPath.endsWith('src/deep.ts') ||
+        normalizedPath.endsWith('src/index.ts')
       );
     });
 
