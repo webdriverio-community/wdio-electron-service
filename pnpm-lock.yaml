@@ -503,6 +503,46 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.14)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0)
 
+  packages/@wdio_electron-cdp-bridge:
+    dependencies:
+      '@wdio/electron-utils':
+        specifier: workspace:*
+        version: link:../@wdio_electron-utils
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.1
+        version: 22.13.1
+      '@types/ws':
+        specifier: ^8.5.14
+        version: 8.5.14
+      '@vitest/coverage-v8':
+        specifier: ^3.0.5
+        version: 3.0.5(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@26.0.0)(tsx@4.19.2)(yaml@2.7.0))
+      '@wdio/electron-bundler':
+        specifier: workspace:*
+        version: link:../@wdio_electron-bundler
+      devtools-protocol:
+        specifier: ^0.0.1419694
+        version: 0.0.1419694
+      get-port:
+        specifier: ^7.1.0
+        version: 7.1.0
+      nock:
+        specifier: ^14.0.1
+        version: 14.0.1
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@26.0.0)(tsx@4.19.2)(yaml@2.7.0)
+      wait-port:
+        specifier: ^1.1.0
+        version: 1.1.0
+
   packages/@wdio_electron-types:
     dependencies:
       '@vitest/spy':
@@ -2704,6 +2744,9 @@ packages:
 
   devtools-protocol@0.0.1312386:
     resolution: {integrity: sha512-DPnhUXvmvKT2dFA/j7B+riVLUt9Q6RKJlcppojL5CoRywJJKLDYnRlw0gTFKfgDPHP5E04UoB71SxoJlVZy8FA==}
+
+  devtools-protocol@0.0.1419694:
+    resolution: {integrity: sha512-z1RQ1PwV9/XAIYSRnyLxjnj7MZhEqY/SUYgFrPRa1o4DAI0XIcNHxc82SQ7F7+gZPo6NlIgUtn7cdDYxsuwmFg==}
 
   diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
@@ -8111,6 +8154,8 @@ snapshots:
     optional: true
 
   devtools-protocol@0.0.1312386: {}
+
+  devtools-protocol@0.0.1419694: {}
 
   diff-sequences@29.6.3: {}
 

@@ -1,0 +1,56 @@
+{
+  "name": "@wdio/electron-cdp-bridge",
+  "version": "8.0.0",
+  "description": "CDP Bridge for WebdriverIO Electron Service",
+  "homepage": "https://github.com/webdriverio-community/wdio-electron-service",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": [
+      {
+        "import": {
+          "types": "./dist/esm/index.d.ts",
+          "default": "./dist/esm/index.js"
+        },
+        "require": {
+          "types": "./dist/cjs/index.d.ts",
+          "default": "./dist/cjs/index.js"
+        }
+      },
+      "./dist/cjs/index.js"
+    ]
+  },
+  "scripts": {
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist",
+    "dev": "pnpm run build --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "test:unit": "vitest --coverage --watch=false",
+    "test:e2e": "cross-env RUN_E2E=1 pnpm exec vitest --run --coverage=false",
+    "test:dev": "vitest --coverage",
+    "test": "pnpm test:unit"
+  },
+  "dependencies": {
+    "@wdio/electron-utils": "workspace:*",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/ws": "^8.5.14",
+    "@vitest/coverage-v8": "^3.0.5",
+    "@wdio/electron-bundler": "workspace:*",
+    "devtools-protocol": "^0.0.1419694",
+    "get-port": "^7.1.0",
+    "nock": "^14.0.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5",
+    "wait-port": "^1.1.0"
+  },
+  "files": [
+    "dist/*"
+  ]
+}
