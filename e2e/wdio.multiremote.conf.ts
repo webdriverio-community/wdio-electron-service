@@ -1,8 +1,17 @@
 import type { WdioElectronConfig } from '@wdio/electron-types';
 
+import type { Options, Capabilities } from '@wdio/types';
 import { config as baseConfig } from './wdio.conf.js';
 
-const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
+type WdioConfig = Options.Testrunner & {
+  capabilities: Capabilities.RequestedMultiremoteCapabilities;
+};
+
+const exampleDir = process.env.EXAMPLE_DIR;
+if (!exampleDir) {
+  throw new Error('EXAMPLE_DIR environment variable must be set');
+}
+
 const baseServiceOptions = baseConfig.capabilities[0]['wdio:electronServiceOptions'];
 
 const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);

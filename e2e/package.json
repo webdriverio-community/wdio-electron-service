@@ -5,7 +5,7 @@
   "private": "true",
   "scripts": {
     "ci": "pnpm i && pnpm test",
-    "clean": "pnpm dlx shx rm -rf ./test/js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out",
+    "clean": "pnpm dlx shx rm -rf ./test/js ./node_modules pnpm-lock.yaml ./wdio-logs* ./out && tsx ../scripts/clean-test-apps.ts",
     "init-e2es": "pnpm dlx shx mkdir -p ./test/js && rollup -c rollup.config.js",
     "logs": "pnpm dlx shx cat ./wdio-logs*/*.log",
     "test:e2e:forge-cjs": "cross-env DEBUG=wdio-electron-service EXAMPLE_DIR=forge-cjs pnpm run exec",
@@ -25,12 +25,16 @@
     "exec-no-binary:multiremote": "xvfb-maybe wdio run ./wdio.no-binary.multiremote.conf.ts",
     "exec-no-binary:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec-no-binary:main && pnpm run exec-no-binary:multiremote",
     "exec-no-binary:standalone": "xvfb-maybe tsx ./test/standalone/api.no-binary.spec.ts",
-    "exec:js": "xvfb-maybe wdio run ./wdio.conf.js",
+    "exec:js": "xvfb-maybe wdio run ./dist/wdio.conf.js",
     "exec:main": "xvfb-maybe wdio run ./wdio.conf.ts",
     "exec:multiremote": "xvfb-maybe wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "xvfb-maybe tsx ./test/standalone/api.spec.ts",
     "exec:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec:main && pnpm run exec:multiremote",
-    "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
+    "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone",
+    "build": "tsc -p tsconfig.build.json",
+    "test:js": "wdio run ./dist/wdio.conf.js",
+    "test:js:no-binary": "wdio run ./dist/wdio.no-binary.conf.js",
+    "pretest": "npm run build"
   },
   "dependencies": {
     "@testing-library/webdriverio": "^3.2.1",
@@ -52,6 +56,7 @@
     "@types/node": "^22.13.1",
     "@vitest/spy": "^3.0.5",
     "@wdio/electron-types": "workspace:*",
+    "@wdio/types": "^9.9.0",
     "read-package-up": "^11.0.0",
     "rollup": "^4.34.6",
     "typescript": "^5.7.3"

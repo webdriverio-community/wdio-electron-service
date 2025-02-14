@@ -70,6 +70,9 @@ jobs:
         if: failure()
         with:
           timeout: '180000'
+      - name: 🧹 Cleanup Test Apps
+        if: always()
+        run: pnpm tsx scripts/clean-test-apps.ts
   build-macos-universal:
     name: MacOS Universal Build & Test
     runs-on: ${{ matrix.os }}
@@ -117,6 +120,9 @@ jobs:
         if: failure()
         with:
           timeout: '180000'
+      - name: 🧹 Cleanup Test Apps
+        if: always()
+        run: pnpm tsx scripts/clean-test-apps.ts
   build-windows:
     name: Windows Build & Test
     runs-on: ${{ matrix.os }}
@@ -167,3 +173,6 @@ jobs:
         if: failure()
         with:
           timeout: '180000'
+      - name: 🧹 Cleanup Test Apps
+        if: always()
+        run: pnpm tsx scripts/clean-test-apps.ts
