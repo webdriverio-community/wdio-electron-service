@@ -19,7 +19,7 @@
     "ci-windows:units": "turbo run lint format:check test:unit",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
-    "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
+    "clean": "turbo run clean && rm -rf node_modules .turbo || shx rm -rf node_modules .turbo",
     "clean:yarn-artifacts": "tsx ./scripts/clean-yarn-artifacts.ts",
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
@@ -42,7 +42,12 @@
     "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
-    "update:all": "pnpm up -iLr"
+    "update:all": "pnpm up -iLr",
+    "build:e2e": "tsc -p e2e/tsconfig.json",
+    "pretest:e2e:js": "pnpm run build:e2e",
+    "test:e2e:js": "wdio run e2e/dist/wdio.conf.js",
+    "pretest:e2e:js:no-binary": "pnpm run build:e2e",
+    "test:e2e:js:no-binary": "wdio run e2e/dist/wdio.no-binary.conf.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
