@@ -508,6 +508,9 @@ importers:
       '@wdio/electron-utils':
         specifier: workspace:*
         version: link:../@wdio_electron-utils
+      wait-port:
+        specifier: ^1.1.0
+        version: 1.1.0
       ws:
         specifier: ^8.18.0
         version: 8.18.0
@@ -539,9 +542,6 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@26.0.0)(tsx@4.19.2)(yaml@2.7.0)
-      wait-port:
-        specifier: ^1.1.0
-        version: 1.1.0
 
   packages/@wdio_electron-types:
     dependencies:

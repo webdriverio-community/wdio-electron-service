@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@wdio/electron-utils": "workspace:*",
+    "wait-port": "^1.1.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
@@ -47,8 +48,7 @@
     "get-port": "^7.1.0",
     "nock": "^14.0.1",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5",
-    "wait-port": "^1.1.0"
+    "vitest": "^3.0.5"
   },
   "files": [
     "dist/*"

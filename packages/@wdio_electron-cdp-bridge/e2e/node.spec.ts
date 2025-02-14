@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
 import getPort from 'get-port';
-import waitPort from 'wait-port';
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { CdpBridge } from '../src/bridge';
@@ -11,7 +10,7 @@ describe('E2E test for CdpBridge', () => {
   let child: ReturnType<typeof spawn>;
   let client: CdpBridge;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     child = spawn('node', [
       `--inspect-brk=localhost:${port}`,
       '-e',
@@ -21,7 +20,6 @@ describe('E2E test for CdpBridge', () => {
                   debugger;
                   console.log("end");`,
     ]);
-    await waitPort({ port });
     client = new CdpBridge({
       port: port,
       timeout: 10000,

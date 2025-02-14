@@ -1,10 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import nock from 'nock';
+import waitPort from 'wait-port';
 
 import { DevTool } from '../src/dev-tool';
 import { ERROR_MESSAGE } from '../src/constants';
 
+vi.mock('wait-port', () => ({
+  default: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('DevTool', () => {
+  beforeEach(() => {
+    (waitPort as Mock).mockResolvedValue(undefined);
+  });
   describe('Version', () => {
     const expected = {
       browser: 'Node',
@@ -63,6 +71,31 @@ describe('DevTool', () => {
       nock('http://localhost:9229').get('/json/version').delay(500).reply(200, JSON.stringify(expected));
       const devtool = new DevTool({ timeout: 100 });
       await expect(() => devtool.version()).rejects.toThrowError(ERROR_MESSAGE.TIMEOUT_CONNECTION);
+    });
+  });
+
+  describe('waitPort', () => {
+    it('should throw error when wait port timeout', async () => {
+      nock('http://localhost:9229').get('/json/version').reply(200, JSON.stringify({}));
+      (waitPort as Mock).mockRejectedValue(undefined);
+      const devtool = new DevTool();
+
+      await expect(() => devtool.version()).rejects.toThrowError(ERROR_MESSAGE.TIMEOUT_WAIT_PORT);
+      expect(waitPort).toHaveBeenCalled();
+    });
+
+    it('should called once multiple request ware executed', async () => {
+      nock('http://localhost:9229')
+        .get('/json/version')
+        .reply(200, JSON.stringify({}))
+        .get('/json/version')
+        .reply(200, JSON.stringify({}));
+      const devtool = new DevTool();
+
+      await devtool.version();
+      expect(waitPort).toHaveBeenCalledTimes(1);
+      await devtool.version();
+      expect(waitPort).toHaveBeenCalledTimes(1);
     });
   });
 
