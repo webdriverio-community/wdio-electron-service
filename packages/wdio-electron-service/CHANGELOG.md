@@ -1,3 +1,9 @@
+# [7.4.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.3...v7.4.0-next.0) (2025-02-14)
+
+## [7.3.2-next.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.0...v7.3.2-next.1) (2024-11-20)
+
+## [7.3.2-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.1...v7.3.2-next.0) (2024-11-20)
+
 # [7.2.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.1.1-next.7...v7.2.0) (2024-11-04)
 
 ### Features

@@ -1,3 +1,9 @@
+# [7.4.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.3...v7.4.0-next.0) (2025-02-14)
+
+### Bug Fixes
+
+- JSON5 exports parse under the default key in ESM ([de398b4](https://github.com/webdriverio-community/wdio-electron-service/commit/de398b44cc2f7e417e2c7f1f403b796a8d5db748))
+
 # [7.3.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.1.1...v7.3.0) (2024-11-14)
 
 ### Bug Fixes
