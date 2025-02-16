@@ -61,7 +61,9 @@ jobs:
         run: pnpm turbo-version -b ${{ inputs.preReleaseVersion }}
       - name: Publish to NPM
         shell: bash
-        run: pnpx tsx scripts/publish.ts --tag next ${{ inputs.dryRun && '--dry-run' || '' }}
+        run: |
+          test "${RELEASE_BRANCH}" == "main" && TAG="next" || TAG="lts-next"
+          pnpx tsx scripts/publish.ts --tag $TAG ${{ inputs.dryRun && '--dry-run' || '' }}
       - name: Log git changes
         if: ${{ inputs.dryRun }}
         run: |
