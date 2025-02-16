@@ -5,6 +5,8 @@ import { fn as vitestFn, type Mock } from '@vitest/spy';
 import type { ArchType } from 'builder-util';
 import type { PackageJson } from 'read-package-up';
 
+import type { ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio';
+
 export type Fn = (...args: unknown[]) => unknown;
 export type AsyncFn = (...args: unknown[]) => Promise<unknown>;
 export type AbstractFn = Fn | AsyncFn;
@@ -656,16 +658,8 @@ export interface ElectronMock<TArgs extends unknown[] = unknown[], TReturns = un
   (...args: TArgs): TReturns;
 }
 
-type $ = (selector: unknown) => Promise<ChainableElementBase<WebdriverIO.Element> | WebdriverIO.Element>;
-type $$ = (selector: unknown) => Promise<ChainableElementArrayBase<WebdriverIO.Element[]>>;
-type ChainableElementBase<T> = T & {
-  $: $;
-};
-type ChainableElementArrayBase<T> = T & {
-  parent: Promise<WebdriverIO.Browser | WebdriverIO.Element>;
-  foundWith: string;
-  getElements: () => Promise<T>;
-};
+type $ = (selector: unknown) => ChainablePromiseElement;
+type $$ = (selector: unknown) => ChainablePromiseArray;
 
 type SelectorsBase = {
   $: $;
