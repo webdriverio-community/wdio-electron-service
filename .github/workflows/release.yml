@@ -5,21 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch. Defaults to "main".'
+        description: 'Branch to release from (lts = current maintenance branch)'
         required: true
         type: choice
-        options:
-          - main
-          - v7 # current maintenance branch
+        options: ['main', 'lts']
       releaseVersion:
-        description: 'The new version to create.'
+        description: 'Release type - patch, minor, or major'
         required: true
-        default: 'patch'
         type: choice
-        options:
-          - patch
-          - minor
-          - major
+        options: ['patch', 'minor', 'major']
       dryRun:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
@@ -36,9 +30,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-          ref: ${{ inputs.branch }}
-          fetch-depth: 0
+          ref: main
+      - name: Calculate Target Branch
+        id: get_branch
+        run: |
+          VERSION=$(node -p "require('./packages/service/package.json').version")
+          MAJOR_VERSION=$(node -p "require('semver').major('$VERSION')")
+          PREV_MAJOR=$((MAJOR_VERSION - 1))
+          if [[ "${{ inputs.branch }}" == "lts" ]]; then
+            echo "branch=v${PREV_MAJOR}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ inputs.branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Switch to Target Branch
+        if: inputs.branch == 'lts'
+        run: |
+          git fetch --all
+          git checkout ${{ steps.get_branch.outputs.branch }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
