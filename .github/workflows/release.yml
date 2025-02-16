@@ -66,7 +66,7 @@ jobs:
         env:
           RELEASE_BRANCH: ${{ inputs.branch }}
         run: |
-          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="${RELEASE_BRANCH}"
+          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
           pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
       - name: Log git changes
         if: ${{ inputs.dryRun }}
