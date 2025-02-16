@@ -151,15 +151,9 @@ To create consecutive pre-releases you can select `existing` which will incremen
 
 ### Major Version Maintenance Tasks
 
-When releasing a new major version, update the maintenance branch references in the following files:
+When releasing a new major version, update the maintenance branch references in the following file:
 
-1. Update the release workflow
-
-   - Edit `.github/workflows/release.yml`
-   - In the `on.workflow_dispatch.inputs.branch.options` field, update the maintenance branch name
-   - Example: When releasing v8, change `v6` to `v7` in the branch options
-
-2. Update the Dependabot configuration
+1. Dependabot configuration
    - Edit `.github/dependabot.yml`
    - Update the existing maintenance branch configuration's `target-branch`
    - Example: When releasing v8, change `v6` to `v7` in the non-main branch configuration
