@@ -17,15 +17,15 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
-    "@wdio/cli": "^9.9.0",
-    "@wdio/globals": "^9.9.0",
-    "@wdio/local-runner": "^9.9.0",
+    "@wdio/cli": "^9.9.1",
+    "@wdio/globals": "^9.9.1",
+    "@wdio/local-runner": "^9.9.1",
     "@wdio/mocha-framework": "^9.9.0",
     "electron": "^34.2.0",
     "electron-builder": "^25.1.8",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "webdriverio": "^9.9.0"
+    "webdriverio": "^9.9.1"
   },
   "build": {
     "asar": true,
