@@ -43,6 +43,7 @@ console.log(list);
 
 ```ts
 const cdp = new CdpBridge({ host: 'localhost', port: 9229 });
+await cdp.connect();
 
 const events = [];
 const callback = (event) => {
