@@ -84,7 +84,9 @@
     }
   },
   "dependencies": {
+    "@babel/parser": "^7.26.9",
     "@vitest/spy": "^3.0.9",
+    "@wdio/cdp-bridge": "workspace:*",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
     "@wdio/globals": "catalog:default",
@@ -95,6 +97,7 @@
     "fast-copy": "^3.0.2",
     "puppeteer-core": "^22.15.0",
     "read-package-up": "^11.0.0",
+    "recast": "^0.23.9",
     "tinyspy": "^4.0.0",
     "webdriverio": "catalog:default"
   },
