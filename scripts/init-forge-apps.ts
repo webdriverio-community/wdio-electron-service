@@ -21,6 +21,25 @@ shell.cd(path.join(__dirname, '..'));
 const packageManager = shell.exec('pnpm pkg get packageManager').stdout.trim();
 shell.exec('pnpm pkg delete packageManager');
 
+// navigate to package directory (@wdio_electron-cdp-bridge)
+shell.cd(path.join(__dirname, '..', 'packages', '@wdio_electron-cdp-bridge'));
+
+// define path for the file links for deps
+const bundlerPath = path.join(__dirname, '..', 'packages', '@wdio_electron-bundler');
+const utilsPath = path.join(__dirname, '..', 'packages', '@wdio_electron-utils');
+
+// replace workspace links with file links for deps
+shell.exec(
+  [
+    `pnpm pkg set`,
+    `devDependencies.@wdio/electron-bundler=file:${bundlerPath}`,
+    `dependencies.@wdio/electron-utils=file:${utilsPath}`,
+  ].join(' '),
+);
+
+// navigate to root directory
+shell.cd(path.join(__dirname, '..'));
+
 // ascertain target apps
 const apps = process.argv[2] ? [`forge-${process.argv[2]}`] : ['forge-esm', 'forge-cjs'];
 
@@ -36,7 +55,9 @@ for (const app of apps) {
 
   // install repo dependencies with yarn
   shell.exec('yarn');
-  shell.exec('yarn add file:../../packages/@wdio_electron-types file:../../packages/@wdio_electron-utils');
+  shell.exec(
+    'yarn add file:../../packages/@wdio_electron-types file:../../packages/@wdio_electron-utils  file:../../packages/@wdio_electron-cdp-bridge',
+  );
   shell.exec(`yarn add file:./wdio-electron-service-v${packageJson.version}.tgz`);
 }
 

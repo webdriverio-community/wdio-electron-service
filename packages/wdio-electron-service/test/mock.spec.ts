@@ -7,10 +7,16 @@ import type { ElectronInterface, ElectronType } from '@wdio/electron-types';
 import { createMock } from '../src/mock.js';
 
 let mockFn: Mock;
+let mockExecute: Mock;
 
 vi.doMock('@vitest/spy', () => ({
   fn: () => mockFn,
 }));
+vi.mock('../src/commands/execute', () => {
+  return {
+    execute: vi.fn(),
+  };
+});
 
 type ElectronMockExecuteFn = (
   electron: Partial<ElectronType>,
@@ -52,9 +58,10 @@ async function processExecuteCalls(electron: ElectronObj) {
 
 beforeEach(() => {
   mockFn = vi.fn();
+  mockExecute = vi.fn();
   globalThis.browser = {
     electron: {
-      execute: vi.fn(),
+      execute: mockExecute,
     },
   } as unknown as WebdriverIO.Browser;
 });
@@ -89,6 +96,51 @@ describe('createMock', () => {
     await processExecuteCalls(electron);
 
     expect(electron.app.getName).toStrictEqual(expect.anyMockFunction());
+  });
+
+  describe('update', () => {
+    it('should update according to the status of the inner mock', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      mockExecute.mockImplementation((fn, apiName, funcName) => {
+        return fn(
+          {
+            app: {
+              getFileIcon: {
+                mock: {
+                  calls: [['/path/to/another/icon', { size: 'small' }]],
+                },
+              },
+            },
+          },
+          apiName,
+          funcName,
+        );
+      });
+      await mock.update();
+      const returnedMock = mock as unknown as Mock;
+
+      expect(returnedMock).toHaveBeenCalledTimes(1);
+      expect(returnedMock).toHaveBeenCalledWith('/path/to/another/icon', { size: 'small' });
+    });
+
+    it('should update according to the empty calls', async () => {
+      const mock = await createMock('app', 'getFileIcon');
+      mockExecute.mockImplementation((fn, apiName, funcName) => {
+        return fn(
+          {
+            app: {
+              getFileIcon: {},
+            },
+          },
+          apiName,
+          funcName,
+        );
+      });
+      await mock.update();
+      const returnedMock = mock as unknown as Mock;
+
+      expect(returnedMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('mockImplementation', () => {
@@ -302,7 +354,7 @@ describe('createMock', () => {
   });
 
   describe('withImplementation', () => {
-    it('should temporarily override mock implementation', async () => {
+    it('should temporarily override mock implementation with sync callback', async () => {
       const mock = await createMock('app', 'getName');
       const electron = {
         app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
@@ -316,7 +368,20 @@ describe('createMock', () => {
 
       expect(executeResults).toStrictEqual(['temporary name']);
     });
-  });
 
-  // TODO: update
+    it('should temporarily override mock implementation with async callback', async () => {
+      const mock = await createMock('app', 'getName');
+      const electron = {
+        app: { getName: () => 'actual name' } as unknown as Omit<ElectronType['app'], 'on'>,
+      };
+      await processExecuteCalls(electron);
+      await mock.withImplementation(
+        () => 'temporary name',
+        async (electron) => electron.app.getName(),
+      );
+      const executeResults = await processExecuteCalls(electron);
+
+      expect(executeResults).toStrictEqual(['temporary name']);
+    });
+  });
 });

@@ -1,3 +1,4 @@
+// TODO: This file should be remove at V9
 import { vi, beforeEach, afterEach, it, expect } from 'vitest';
 import { IpcMainInvokeEvent } from 'electron';
 
@@ -35,11 +36,5 @@ it('should call ipcMain.handle with the expected parameters', () => {
 });
 
 it('should execute a script', () => {
-  expect(
-    ipcMain.handle.mock.calls[0][1](
-      undefined,
-      (electron: typeof electronMock, a: number, b: number, c: number) => electron.app.getName() + a + b + c,
-      [1, 2, 3],
-    ),
-  ).toBe('test123');
+  expect(ipcMain.handle.mock.calls[0][1](undefined)).toBe(true);
 });
