@@ -88,7 +88,7 @@ export class CdpBridge extends EventEmitter {
   }
 
   get state() {
-    return !this.#ws ? null : this.#ws.readyState;
+    return !this.#ws ? undefined : this.#ws.readyState;
   }
 
   on<T extends Events>(event: T, listener: (param: ProtocolMapping.Events[T][number]) => void): this {
@@ -137,13 +137,13 @@ export class CdpBridge extends EventEmitter {
         this.#messageHandler(rowMessage.toString());
       } catch (error) {
         log.error('Message handling error.');
-        await this.#errorHandler(error);
+        return await this.#errorHandler(error);
       }
     });
 
     ws.on('error', async (error) => {
       log.error('WebSocket error.');
-      await this.#errorHandler(error);
+      return await this.#errorHandler(error);
     });
 
     ws.on('close', () => {
@@ -187,7 +187,7 @@ export class CdpBridge extends EventEmitter {
 
   async #errorHandler(error: unknown) {
     log.error((error as Error).message);
-    await this.#close(error);
+    return await this.#close(error);
   }
 
   async #getWsUrl() {

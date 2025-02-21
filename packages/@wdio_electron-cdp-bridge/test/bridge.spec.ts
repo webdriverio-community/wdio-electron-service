@@ -211,6 +211,13 @@ describe('CdpBridge', () => {
       await client.connect();
       expect(client.state).toBe(1);
     });
+
+    it('should return undefined when before connect', async () => {
+      debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
+      const client = new CdpBridge();
+      expect(client.state).toBe(undefined);
+    });
+
     it('should resolved when call `close` before `connect`', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
