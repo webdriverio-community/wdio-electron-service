@@ -218,7 +218,7 @@ export type ExecuteOpts = {
 };
 
 export type WdioElectronWindowObj = {
-  execute: (script: string, args?: unknown[]) => unknown;
+  execute: () => boolean;
 };
 
 enum ElectronMockResultType {

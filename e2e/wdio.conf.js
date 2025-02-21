@@ -15,6 +15,8 @@ const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electro
 
 globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
+// TODO: Remove at v9. Only this test is enabled the IPC till v9
+process.env.ENABLE_IPC_BRIDGE = 'true';
 
 export const config = {
   services: [['electron', { restoreMocks: true }]],

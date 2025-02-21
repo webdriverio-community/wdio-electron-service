@@ -2,6 +2,7 @@ import { vi, describe, beforeEach, it, expect, type Mock } from 'vitest';
 import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
+import { execute } from '../src/commands/execute';
 import { clearAllMocks } from '../src/commands/clearAllMocks.js';
 import { resetAllMocks } from '../src/commands/resetAllMocks.js';
 import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
@@ -10,6 +11,35 @@ import type ElectronWorkerService from '../src/service.js';
 import { ensureActiveWindowFocus } from '../src/window.js';
 
 vi.mock('../src/window.js');
+vi.mock('../src/commands/execute', () => {
+  return {
+    execute: vi.fn(),
+  };
+});
+
+vi.mock('../src/bridge', () => {
+  const ElectronCdpBridge = vi.fn();
+  ElectronCdpBridge.prototype.connect = vi.fn();
+  ElectronCdpBridge.prototype.send = vi.fn();
+  ElectronCdpBridge.prototype.on = vi.fn();
+  return {
+    getDebuggerEndpoint: vi.fn(),
+    ElectronCdpBridge,
+  };
+});
+
+// TODO: Start: This section could be remove at V9
+vi.mock('@wdio/electron-utils/log', () => ({
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+global.console.log = vi.fn();
+// TODO: End: This section could be remove at V9
 
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
@@ -58,13 +88,15 @@ describe('before', () => {
         requestedCapabilities: {
           'wdio:electronServiceOptions': {},
           'alwaysMatch': {
-            browserName: 'electron',
+            'browserName': 'electron',
+            'wdio:electronServiceOptions': {},
           },
         },
         waitUntil: vi.fn().mockResolvedValue(true),
         execute: vi.fn().mockResolvedValue(true),
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
         electron: {
           execute: vi.fn(),
           mock: vi.fn(),
@@ -72,7 +104,6 @@ describe('before', () => {
           clearAllMocks: vi.fn(),
           resetAllMocks: vi.fn(),
           restoreAllMocks: vi.fn(),
-          bridgeActive: true,
           isMockFunction: vi.fn(),
         },
       };
@@ -93,6 +124,58 @@ describe('before', () => {
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+    });
+
+    it('should continue when not electron Capabilities was passed', async () => {
+      instance = new WorkerService();
+      const electronInstance = {
+        requestedCapabilities: {
+          browserName: 'chrome',
+        },
+      };
+
+      const browser = {
+        instances: ['electron'],
+        getInstance: (name: string) => (name === 'electron' ? electronInstance : undefined),
+        execute: vi.fn().mockResolvedValue(true),
+        isMultiremote: true,
+      } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+      await instance.before({}, [], browser);
+
+      // check to not call `copyOriginalApi` because skipped due to `continue`
+      expect(execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('copyOriginalApi', () => {
+    it('aa', async () => {
+      instance = new WorkerService();
+      const browser = {
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockResolvedValue(true),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {}, // Let the service initialize this
+      } as unknown as WebdriverIO.Browser;
+
+      await instance.before({}, [], browser);
+
+      const serviceApi = browser.electron as BrowserExtension['electron'];
+      expect(serviceApi.execute).toEqual(expect.any(Function));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const internalCopyOriginalApi = vi.mocked(execute).mock.calls[0][2] as any;
+      const dummyElectron = {
+        dialog: {
+          showOpenDialog: vi.fn(),
+        },
+      };
+      await internalCopyOriginalApi(dummyElectron);
+
+      expect(globalThis.originalApi).toMatchObject(dummyElectron);
     });
   });
 });
@@ -160,6 +243,14 @@ describe('beforeCommand', () => {
     await instance.beforeCommand('dummyCommand', []);
 
     expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand', undefined);
+  });
+
+  it('should not call `ensureActiveWindowFocus` when excluded command', async () => {
+    instance = new WorkerService();
+    await instance.before({}, [], browser);
+    await instance.beforeCommand('getWindowHandles', []);
+
+    expect(ensureActiveWindowFocus).toHaveBeenCalledTimes(0);
   });
 });
 
