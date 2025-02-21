@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 
 import log from '@wdio/electron-utils/log';
 import { DevTool } from './dev-tool';
-import { ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants';
+import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants';
 
 import type { DevToolOptions } from './dev-tool';
 import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
@@ -40,25 +40,32 @@ type MethodReturnValue = {
   };
 };
 
+export type CdpBridgeOptions = DevToolOptions;
+
 const CONNECT_PROMISE_ID = 0;
 
 export class CdpBridge extends EventEmitter {
-  #devToolOptions: DevToolOptions;
+  protected options: Required<CdpBridgeOptions>;
   #wsUrl: string | undefined = undefined;
   #ws: WebSocket | null = null;
   #promises = new Map<number, PromiseHandlers>();
   #commandId = 1;
-  #timeout;
 
-  constructor(options?: DevToolOptions) {
+  constructor(options?: CdpBridgeOptions) {
     super();
-    this.#devToolOptions = Object.assign({}, { timeout: REQUEST_TIMEOUT }, options);
-    this.#timeout = this.#devToolOptions.timeout;
+    this.options = Object.assign(
+      {
+        host: DEFAULT_HOSTNAME,
+        port: DEFAULT_PORT,
+        timeout: REQUEST_TIMEOUT,
+      },
+      options,
+    );
   }
 
   async connect(): Promise<void> {
     this.#wsUrl = await this.#getWsUrl();
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (!this.#wsUrl) {
         reject(new Error(ERROR_MESSAGE.DEBUGGER_NOT_FOUND));
         return;
@@ -110,7 +117,7 @@ export class CdpBridge extends EventEmitter {
           this.#promises.delete(message.id);
           reject(new Error(`${ERROR_MESSAGE.TIMEOUT_CONNECTION} ${message.id}`));
         }
-      }, this.#timeout);
+      }, this.options.timeout);
     });
   }
 
@@ -184,7 +191,7 @@ export class CdpBridge extends EventEmitter {
   }
 
   async #getWsUrl() {
-    const devtool = new DevTool(this.#devToolOptions);
+    const devtool = new DevTool(this.options);
     const list = await devtool.list();
     if (list.length < 1) {
       log.error(ERROR_MESSAGE.DEBUGGER_NOT_FOUND);
