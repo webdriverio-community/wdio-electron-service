@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import { describe, beforeEach, afterEach, it, expect, vi, Mock } from 'vitest';
 import nock from 'nock';
+import log from '@wdio/electron-utils/log';
 import type { Capabilities, Options } from '@wdio/types';
 import type { ElectronServiceOptions } from '@wdio/electron-types';
 
@@ -177,6 +178,31 @@ describe('onPrepare', () => {
         },
       ];
       await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow('b0rk - no build tool found');
+    });
+
+    it('should warn when appEntryPoint and appBinaryPath are set', async () => {
+      options.appEntryPoint = './path/to/bundled/electron/main.bundle.js';
+      instance = new LaunchService(
+        options,
+        [] as never,
+        {
+          services: [['electron', options]],
+          rootDir: getFixtureDir(type, 'no-build-tool'),
+        } as Options.Testrunner,
+      );
+      const capabilities: WebdriverIO.Capabilities[] = [
+        {
+          'browserName': 'electron',
+          'browserVersion': '26.2.2',
+          'wdio:electronServiceOptions': {
+            appArgs: ['some', 'args'],
+          },
+        },
+      ];
+      await instance?.onPrepare({} as never, capabilities);
+      expect(log.warn).toHaveBeenLastCalledWith(
+        'Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored',
+      );
     });
 
     it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
