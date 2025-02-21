@@ -3,6 +3,16 @@
 This service provides access to the main process of Electron.
 You can do this simply using `browser.electron.execute` method at test suites.
 
+## Importing main and preload scripts provided by this service　(Only relevant　user)
+
+If you are using from an older version of this service, you should have imported following scripts in your apps when you were testing.
+
+- `wdio-electron-service/main` (at the main script)
+- `wdio-electron-service/preload` (at the preload script)
+
+You can remove importing these scripts because this service is no longer required the IPC-Bridge.
+The scripts will be completely removed at `wdio-electron-service@v9`.
+
 ## Execute Scripts
 
 Arbitrary scripts can be executed within the context of your Electron application main process using `browser.electron.execute(...)`. This allows Electron APIs to be accessed in a fluid way, in case you wish to manipulate your application at runtime or trigger certain events.
