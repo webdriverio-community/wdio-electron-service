@@ -6,10 +6,21 @@ import type { NormalizedPackageJson } from 'read-package-up';
 
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
 import type { WdioElectronConfig } from '@wdio/electron-types';
+import { testAppsManager } from './setup/testAppsManager.js';
+import { Capabilities, Options } from '@wdio/types';
 
-const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
+type WdioConfig = Options.Testrunner & {
+  capabilities: Capabilities.ResolvedTestrunnerCapabilities[];
+};
+
+const exampleDir = process.env.EXAMPLE_DIR;
+if (!exampleDir) {
+  throw new Error('EXAMPLE_DIR environment variable must be set');
+}
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJsonPath = path.join(__dirname, '..', 'apps', exampleDir, 'package.json');
+
+const tmpDir = await testAppsManager.prepareTestApps();
+const packageJsonPath = path.join(tmpDir, 'apps', exampleDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
 const pkg = { packageJson, path: packageJsonPath };
 const electronVersion = getElectronVersion(pkg);
@@ -45,5 +56,8 @@ export const config: WdioElectronConfig = {
   mochaOpts: {
     ui: 'bdd',
     timeout: 30000,
+  },
+  onComplete: async () => {
+    await testAppsManager.cleanup();
   },
 };
