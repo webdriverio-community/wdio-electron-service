@@ -34,16 +34,20 @@ shell.cd(path.join(__dirname, '..', 'packages', 'wdio-electron-service-yarn'));
 // delete node_modules
 shell.exec('pnpx shx rm -rf node_modules');
 
-// replace workspace links with file links for deps
+// define path for the file links for deps
+const bundlerPath = path.join(__dirname, '..', 'packages', '@wdio_electron-bundler');
 const typesPath = path.join(__dirname, '..', 'packages', '@wdio_electron-types');
 const utilsPath = path.join(__dirname, '..', 'packages', '@wdio_electron-utils');
-shell.exec(
-  `pnpm pkg set dependencies.@wdio/electron-types=file:${typesPath} dependencies.@wdio/electron-utils=file:${utilsPath}`,
-);
 
-// update build scripts for yarn
-shell.exec('pnpm pkg set scripts.build="yarn build:esm && yarn build:cjs"');
-shell.exec('pnpm pkg set scripts.build:cjs="yarn build:cjs:copy && yarn build:cjs:compile"');
+// replace workspace links with file links for deps
+shell.exec(
+  [
+    `pnpm pkg set`,
+    `devDependencies.@wdio/electron-bundler=file:${bundlerPath}`,
+    `dependencies.@wdio/electron-types=file:${typesPath}`,
+    `dependencies.@wdio/electron-utils=file:${utilsPath}`,
+  ].join(' '),
+);
 
 // install, build, and pack the package
 shell.exec('yarn');
