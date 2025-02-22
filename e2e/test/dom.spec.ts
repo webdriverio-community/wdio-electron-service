@@ -35,10 +35,6 @@ describe('DOM', () => {
   });
 
   describe('using $', () => {
-    /**
-     * This test is to check if return value of `$` has `getAttribute` or another attributes
-     * @see https://github.com/webdriverio-community/wdio-electron-service/issues/957
-     */
     it('should determine when an element is in the document', async () => {
       const checkbox = $('[data-testid="disabled-checkbox"]');
       const type = await checkbox.getAttribute('type');
@@ -62,10 +58,6 @@ describe('DOM', () => {
 });
 
 describe('using $$', () => {
-  /**
-   * This test is to check if return value of `$$` has `getElements` or another attributes
-   * @see https://github.com/webdriverio-community/wdio-electron-service/issues/899
-   */
   it('should be able to call getElements to return values', async () => {
     const result = $$('[data-testid="disabled-checkbox"]');
     const chainedResult = await result.getElements();
