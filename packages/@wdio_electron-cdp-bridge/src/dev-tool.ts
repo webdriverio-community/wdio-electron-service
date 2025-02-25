@@ -21,6 +21,8 @@ type VersionReturnValue = {
   'Protocol-Version': string;
 };
 
+type WaitOptions = Parameters<typeof waitPort>[0];
+
 export class DevTool {
   #options: Required<DevToolOptions>;
   #isPortOpened = false;
@@ -57,7 +59,11 @@ export class DevTool {
   #waitDebuggerPort() {
     return new Promise<void>((resolve, reject) => {
       if (!this.#isPortOpened) {
-        waitPort(this.#options)
+        const waitOptions: WaitOptions = {
+          ...this.#options,
+          output: 'silent',
+        };
+        waitPort(waitOptions)
           .then(() => {
             this.#isPortOpened = true;
             resolve();
