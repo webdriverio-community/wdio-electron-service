@@ -40,8 +40,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit test:e2e",
     "test:unit": "turbo run test:unit",
-    "test:e2e-local": "pnpm dlx cross-env pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal && pnpm run clean:yarn-artifacts || pnpm run clean:yarn-artifacts",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
