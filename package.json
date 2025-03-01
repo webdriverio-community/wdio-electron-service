@@ -9,14 +9,7 @@
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only --force",
     "backport": "tsx ./scripts/backport.ts",
     "ci": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
-    "ci-linux": "turbo run lint format:check test:unit test:e2e:builder-cjs test:e2e:builder-esm test:e2e:forge-cjs test:e2e:forge-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm --concurrency=1",
     "ci-mac:e2e:mac-universal": "turbo run build:mac-universal init-e2es test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm --only",
-    "ci-windows:e2e:builder-cjs": "turbo run build --filter=example-builder-cjs --only && turbo run init-e2es test:e2e:builder-cjs --only",
-    "ci-windows:e2e:builder-esm": "turbo run build --filter=example-builder-esm --only && turbo run init-e2es test:e2e:builder-esm --only",
-    "ci-windows:e2e:forge-cjs": "pnpm run init-forge:package && pnpm run init-forge:app-cjs && turbo run build --filter=example-forge-cjs --only && turbo run init-e2es test:e2e:forge-cjs --only",
-    "ci-windows:e2e:forge-esm": "pnpm run init-forge:package && pnpm run init-forge:app-esm && turbo run build --filter=example-forge-esm --only && turbo run init-e2es test:e2e:forge-esm --only",
-    "ci-windows:e2e:no-binary": "turbo run build --filter=example-no-binary* --only && turbo run init-e2es test:e2e:no-binary-cjs test:e2e:no-binary-esm --only",
-    "ci-windows:units": "turbo run lint format:check test:unit",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
     "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
@@ -45,34 +38,34 @@
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@inquirer/prompts": "^7.2.3",
-    "@octokit/rest": "^21.1.0",
+    "@eslint/js": "^9.21.0",
+    "@inquirer/prompts": "^7.3.2",
+    "@octokit/rest": "^21.1.1",
     "@octokit/types": "^13.7.0",
-    "@turbo-version/version": "^0.8.1",
+    "@turbo-version/version": "^0.8.3",
     "@types/eslint-config-prettier": "^6.11.2",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.7",
     "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^8.24.0",
-    "@typescript-eslint/parser": "^8.24.0",
-    "@vitest/eslint-plugin": "^1.1.28",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "@vitest/eslint-plugin": "^1.1.36",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
-    "eslint": "^9.20.1",
-    "eslint-config-prettier": "^10.0.1",
-    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-import-resolver-typescript": "^3.8.3",
     "eslint-plugin-import-x": "^4.6.1",
-    "eslint-plugin-wdio": "^9.6.0",
-    "globals": "^15.14.0",
+    "eslint-plugin-wdio": "^9.9.1",
+    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
-    "prettier": "^3.5.0",
+    "prettier": "^3.5.2",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.34.6",
+    "rollup": "^4.34.8",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
-    "tsx": "^4.19.2",
-    "turbo": "^2.4.1"
+    "tsx": "^4.19.3",
+    "turbo": "^2.4.4"
   },
   "lint-staged": {
     "**/*.{yml,json,md,ts,js}": [
@@ -81,7 +74,10 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "electron"
+      "edgedriver",
+      "electron",
+      "esbuild",
+      "geckodriver"
     ]
   },
   "packageManager": "pnpm@10.3.0+sha512.ee592eda8815a8a293c206bb0917c4bb0ff274c50def7cbc17be05ec641fc2d1b02490ce660061356bd0d126a4d7eb2ec8830e6959fb8a447571c631d5a2442d"

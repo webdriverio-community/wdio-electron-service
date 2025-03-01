@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@babel/parser": "^7.26.9",
-    "@vitest/spy": "^3.0.5",
+    "@vitest/spy": "^3.0.7",
     "@wdio/cdp-bridge": "workspace:*",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
@@ -93,7 +93,7 @@
     "@wdio/logger": "^9.4.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
-    "electron-to-chromium": "^1.5.97",
+    "electron-to-chromium": "^1.5.109",
     "fast-copy": "^3.0.1",
     "get-port": "^7.1.0",
     "puppeteer-core": "^22.15.0",
@@ -103,20 +103,20 @@
     "webdriverio": "^9.8.0"
   },
   "devDependencies": {
-    "@electron-forge/shared-types": "^7.6.1",
+    "@electron-forge/shared-types": "^7.7.0",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/debug": "^4.1.12",
-    "@types/node": "^22.13.1",
-    "@vitest/coverage-v8": "^3.0.5",
+    "@types/node": "^22.13.7",
+    "@vitest/coverage-v8": "^3.0.7",
     "@wdio/electron-bundler": "workspace:*",
-    "@wdio/types": "^9.6.3",
+    "@wdio/types": "^9.10.1",
     "builder-util": "^25.1.7",
-    "electron": "^34.1.1",
+    "electron": "^34.3.0",
     "jsdom": "^26.0.0",
     "nock": "^14.0.1",
     "shx": "^0.3.4",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.7"
   },
   "files": [
     "dist",
