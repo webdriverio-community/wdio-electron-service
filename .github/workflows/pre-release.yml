@@ -1,0 +1,41 @@
+name: Manual Pre-Release Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch (lts = current maintenance branch)'
+        required: true
+        default: 'main'
+        type: choice
+        options:
+          - main
+          - lts
+      prereleaseVersion:
+        description: 'The new prerelease version to create.'
+        required: true
+        default: 'prerelease'
+        type: choice
+        options:
+          - prepatch
+          - preminor
+          - premajor
+          - prerelease
+      dryRun:
+        description: 'Do not touch or write anything. Show the commands.'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  pre-release:
+    name: Pre-release
+    uses: ./.github/workflows/release-main.yml
+    with:
+      branch: ${{ inputs.branch }}
+      releaseVersion: ${{ inputs.prereleaseVersion }}
+      dryRun: ${{ inputs.dryRun }}
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      npm-token: ${{ secrets.NPM_TOKEN }}
+      deploy-key: ${{ secrets.DEPLOY_KEY }}
