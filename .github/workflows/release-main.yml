@@ -34,11 +34,25 @@ env:
   NPM_TOKEN: ${{ secrets.npm-token }}
 
 jobs:
+  check:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Check releaseVersion of LTS
+        env:
+          IS_MAJOR: ${{ contains(inputs.releaseVersion, 'major') }}
+          IS_LTS: ${{ contains(inputs.branch, 'lts') }}
+        run: |
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_LTS}" == 'true' ]; then
+            echo "ERROR: The LTS version is not allow to release the new major version"
+            exit 1
+          fi
+
   calculate:
     runs-on: 'ubuntu-latest'
     outputs:
       target-branch: ${{ steps.define.outputs.target-branch }}
       next-lts-branch: ${{ steps.define.outputs.next-lts-branch }}
+    needs: ['check']
     steps:
       - name: 👷 Checkout
         uses: actions/checkout@v4
