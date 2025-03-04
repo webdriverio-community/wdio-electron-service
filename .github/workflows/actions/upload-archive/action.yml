@@ -1,0 +1,27 @@
+name: 'wdio-electron-service Archive Upload'
+description: 'compresses and uploads an archive to be reused across jobs'
+inputs:
+  paths:
+    description: 'paths to files or directories to archive (recursive)'
+  output:
+    description: 'output file name'
+  name:
+    description: 'name of the archive to upload'
+runs:
+  using: 'composite'
+  steps:
+    - name: 🤐 Create Archive (Linux or Mac)
+      run: zip -q -r ${{ inputs.output }} ${{ inputs.paths }}
+      shell: bash
+      if: ${{ runner.os != 'Windows' }}
+
+    - name: 🤐 Create Archive (Windows)
+      run: 7z a -tzip -r ${{ inputs.output }} ${{ inputs.paths }}
+      shell: bash
+      if: ${{ runner.os == 'Windows' }}
+
+    - name: ⬆️ Upload Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.output }}

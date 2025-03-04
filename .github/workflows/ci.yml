@@ -13,157 +13,92 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  # Due to limit of number of MacOS, run first.
   build:
-    name: Build & Test
-    runs-on: ${{ matrix.os }}
+    name: Build
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        node-version: [20.x]
-      fail-fast: false
+        os: ['ubuntu-latest', 'macos-latest']
+    uses: ./.github/workflows/ci-build.yml
+    with:
+      os: ${{ matrix.os }}
+  lint:
+    name: Lint
+    needs: [build]
+    uses: ./.github/workflows/ci-lint.yml
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            # Workaround for linux CI
-            # https://github.com/electron/electron/issues/41066
-            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-            # Run tasks in serial on Ubuntu to avoid Xvfb issues
-            pnpm run ci-linux
-          else
-            pnpm run ci
-          fi
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
-  build-macos-universal:
-    name: MacOS Universal Build & Test
-    runs-on: ${{ matrix.os }}
+  unit:
+    name: Unit
+    needs: [build, lint]
+    uses: ./.github/workflows/ci-unit.yml
+
+  # Due to low performance, execute separately
+  build-win:
+    name: Build (windows-latest)
+    needs: [build, lint]
+    uses: ./.github/workflows/ci-build.yml
+    with:
+      os: 'windows-latest'
+
+  e2e:
+    name: E2E (${{ matrix.os }})
+    needs: [build]
     strategy:
       matrix:
-        os: [macOS-latest]
-        node-version: [20.x]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          pnpm build
-          pnpm run ci-mac:e2e:mac-universal
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
-  build-windows:
-    name: Windows Build & Test
-    runs-on: ${{ matrix.os }}
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        scenario: ['builder', 'forge', 'no-binary']
+        type: ['esm', 'cjs', '*']
+        exclude:
+          # E2E on the Linux/Mac runs as scenario-by-scenario (excludes specific type).
+          - os: 'ubuntu-latest'
+            type: 'esm'
+          - os: 'ubuntu-latest'
+            type: 'cjs'
+          - os: 'macos-latest'
+            type: 'esm'
+          - os: 'macos-latest'
+            type: 'cjs'
+          # Due to limitation of number of parallel job on MacOS, execute custom unit. (exclude forge and no-binary)
+          # https://docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration#usage-limits
+          - os: 'macos-latest'
+            scenario: 'forge'
+          - os: 'macos-latest'
+            scenario: 'no-binary'
+          # E2E on the Windows runs as type-by-type (excludes wildcard type).
+          - os: 'windows-latest'
+            type: '*'
+        include:
+          # Due to limitation of number of parallel job on MacOS, add custom unit.
+          - os: 'macos-latest'
+            scenario: 'no-binary, forge'
+            type: '*'
+    uses: ./.github/workflows/ci-e2e.yml
+    with:
+      os: ${{ matrix.os }}
+      node-version: '20'
+      scenario: ${{ matrix.scenario }}
+      type: ${{ matrix.type }}
+
+  e2e-mac-universal:
+    name: E2E for Mac Universal
+    needs: [build]
     strategy:
       matrix:
-        os: [windows-latest]
-        test: ['units', 'e2e:no-binary', 'e2e:builder-cjs', 'e2e:builder-esm', 'e2e:forge-cjs', 'e2e:forge-esm']
-        node-version: [20.x]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          pnpm run build
-          pnpm run ci-windows:${{ matrix.test }}
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
+        scenario: ['forge', 'builder']
+        type: ['esm', 'cjs', '*']
+        exclude:
+          #  Forge E2E runs as scenario-by-scenario (excludes specific type).
+          - scenario: 'forge'
+            type: 'esm'
+          - scenario: 'forge'
+            type: 'cjs'
+          #  Bundler E2E runs as type-by-type (excludes wildcard type).
+          - scenario: 'builder'
+            type: '*'
+    uses: ./.github/workflows/ci-e2e.yml
+    with:
+      os: 'macos-latest'
+      node-version: '20'
+      build-command: 'build:mac-universal'
+      scenario: ${{ matrix.scenario }}
+      type: ${{ matrix.type }}
