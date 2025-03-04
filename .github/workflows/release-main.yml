@@ -130,27 +130,29 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Replace dependabot config
-        if: ${{ contains(inputs.releaseVersion, 'major') }}
-        uses: mikefarah/yq@v4
-        with:
-          cmd: >-
-            yq e '(.. | select(has("target-branch")) 
-                      | select(.["target-branch"] 
-                      | test("^v[0-9]+$"))).target-branch = "${{ needs.calculate.outputs.next-lts-branch }}"' -i '.github/dependabot.yml'
-
-      - name: Commit dependabot config
+      - name: Update dependabot config
         if: ${{ contains(inputs.releaseVersion, 'major') }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ needs.calculate.outputs.next-lts-branch }}
           CONFIG_DEPENDABOT: '.github/dependabot.yml'
         run: |
+          echo '::group::Updating the configuration of dependabot'
+          yq e "(.. | select(has(\"target-branch\")) 
+                    | select(.[\"target-branch\"] 
+                    | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
+            -i "${CONFIG_DEPENDABOT}"
+
           if git diff --exit-code --quiet "${CONFIG_DEPENDABOT}"; then
             echo "No changes detected."
             exit 0
           fi
+
           echo "Update branch name for LTS(New value: ${NEW_LTS_BRANCH})."
+          git diff "${CONFIG_DEPENDABOT}"
+          echo '::endgroup::'
+
+          echo '::group::Committing changes'
           git add "${CONFIG_DEPENDABOT}"
           git commit -F-<<EOF
           chore: update the dependabot.yml
@@ -158,6 +160,7 @@ jobs:
           Update branch name for LTS(New value: ${NEW_LTS_BRANCH}).
           [skip ci]
           EOF
+          echo '::endgroup::'
 
       - name: Create Release and Tags
         run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
