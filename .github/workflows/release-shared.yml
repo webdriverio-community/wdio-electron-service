@@ -1,16 +1,18 @@
 name: Publish & Release
 
+# This is a reusable workflow that handles both regular releases and pre-releases
+# It's called by both release.yml and pre-release.yml workflows
+# See: https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
 on:
   workflow_call:
-    # Make this a reusable workflow, no value needed
-    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
     inputs:
       branch:
         description: 'Branch to release from (lts = current maintenance branch)'
         required: true
         type: string
       releaseVersion:
-        description: 'Release type'
+        description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
         required: true
         type: string
       dryRun:
@@ -20,13 +22,13 @@ on:
         type: boolean
     secrets:
       github-token:
-        description: 'A token of the GitHub'
+        description: 'GitHub token for authentication'
         required: true
       npm-token:
-        description: 'A token of the NPM'
+        description: 'NPM token for publishing packages'
         required: true
       deploy-key:
-        description: 'A deploy key'
+        description: 'SSH deploy key for pushing to the repository'
         required: true
 
 env:
@@ -34,19 +36,22 @@ env:
   NPM_TOKEN: ${{ secrets.npm-token }}
 
 jobs:
+  # Validate release parameters
   check:
     runs-on: 'ubuntu-latest'
     steps:
       - name: Check releaseVersion of LTS
+        # Prevent major version releases on LTS branches
         env:
           IS_MAJOR: ${{ contains(inputs.releaseVersion, 'major') }}
           IS_LTS: ${{ contains(inputs.branch, 'lts') }}
         run: |
           if [ "${IS_MAJOR}" == 'true' -a "${IS_LTS}" == 'true' ]; then
-            echo "ERROR: The LTS version is not allow to release the new major version"
+            echo "ERROR: The LTS version is not allowed to release a new major version"
             exit 1
           fi
 
+  # Calculate version numbers and determine target branches
   calculate:
     runs-on: 'ubuntu-latest'
     outputs:
@@ -54,24 +59,27 @@ jobs:
       next-lts-branch: ${{ steps.define.outputs.next-lts-branch }}
     needs: ['check']
     steps:
-      - name: 👷 Checkout
+      - name: 👷 Checkout repository
         uses: actions/checkout@v4
         with:
           # Always checkout main first to calculate the target branch
           ref: 'main'
 
-      - name: 🧮 Calculate the version
+      - name: 🧮 Calculate version numbers
         id: calculate
         shell: bash
         run: |
+          # Extract the current major version from package.json
           PKG_JSON='packages/wdio-electron-service/package.json'
           CURRENT_MAJOR_VERSION="$(cat ${PKG_JSON} |jq -r '.version' |grep -o -E "([0-9]+){1})?" |head -n1)"
           echo "current-major-version=${CURRENT_MAJOR_VERSION}"
           echo "current-major-version=${CURRENT_MAJOR_VERSION}" >>"${GITHUB_OUTPUT}"
+
+          # LTS is the previous major version
           echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))"
           echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))" >>"${GITHUB_OUTPUT}"
 
-      - name: ✏️ Define the name of target branch
+      - name: ✏️ Define target branch names
         id: define
         env:
           TARGET_VERSION: ${{ inputs.branch }}
@@ -79,58 +87,131 @@ jobs:
           CURRENT_VERSION: ${{ steps.calculate.outputs.current-major-version }}
         shell: bash
         run: |
+          # Determine which branch to release from
           if [ "${TARGET_VERSION}" == "main" ]; then
             echo "target-branch=main"
             echo "target-branch=main" >>"${GITHUB_OUTPUT}"
           else
+            # For LTS releases, use the vX branch (e.g., v1)
             echo "target-branch=v${MAINTENANCE_VERSION}"
             echo "target-branch=v${MAINTENANCE_VERSION}" >>"${GITHUB_OUTPUT}"
           fi
+
+          # The next LTS branch will be the current major version
           echo "next-lts-branch=v${CURRENT_VERSION}"
           echo "next-lts-branch=v${CURRENT_VERSION}" >>"${GITHUB_OUTPUT}"
 
+  # Main release process
   release:
     runs-on: ubuntu-latest
     needs: ['calculate']
     steps:
-      - name: 👷 Checkout
+      - name: 👷 Checkout target branch
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.deploy-key }}
           ref: ${{ needs.calculate.outputs.target-branch }}
-          fetch-depth: 0
+          fetch-depth: 0 # Full history needed for versioning
 
-      - name: 🧰 Setup PNPM
+      - name: 🧰 Setup PNPM package manager
         uses: pnpm/action-setup@v4
         with:
           run_install: false
 
-      - name: 🛠️ Setup Node.js
+      - name: 🛠️ Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'pnpm' # Enable caching for faster builds
 
       - name: ⚙️ Install Dependencies
         shell: bash
         run: pnpm install --frozen-lockfile
 
-      - name: Package Manager Setup
+      - name: 📦 Configure NPM registry
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         run: |
+          # Set up NPM authentication for publishing
           pnpm set registry "https://registry.npmjs.org/"
           pnpm set //registry.npmjs.org/:_authToken $NPM_TOKEN
           pnpm whoami
 
-      - name: Git Setup
+      - name: 🔧 Configure Git identity
         run: |
           git config --global user.email "bot@webdriver.io"
           git config --global user.name "WebdriverIO Release Bot"
 
-      - name: Build
+      - name: 🏗️ Build packages
         run: pnpm build
 
-      - name: Update dependabot config
+      # Verify the integrity of built packages
+      - name: 🔍 Verify package integrity
+        shell: bash
+        run: |
+          echo "::group::Verifying package integrity"
+
+          # Dynamically find all package directories
+          EXPECTED_PACKAGES=()
+          while IFS= read -r pkg_dir; do
+            if [[ -d "$pkg_dir/dist" ]]; then
+              EXPECTED_PACKAGES+=("$pkg_dir/dist")
+            fi
+          done < <(find packages -type d -maxdepth 2 -not -path "*/node_modules/*" -not -path "*/test/*")
+
+          echo "Found packages to verify: ${EXPECTED_PACKAGES[*]}"
+
+          for pkg in "${EXPECTED_PACKAGES[@]}"; do
+            if [ ! -d "$pkg" ]; then
+              echo "::error::Package directory not found: $pkg"
+              exit 1
+            fi
+
+            # Check for expected files in each package
+            if [ ! "$(find "$pkg" -name "*.js" | wc -l)" -gt 0 ]; then
+              echo "::error::No JavaScript files found in $pkg"
+              exit 1
+            fi
+
+            if [ ! "$(find "$pkg" -name "*.d.ts" | wc -l)" -gt 0 ]; then
+              echo "::error::No TypeScript declaration files found in $pkg"
+              exit 1
+            fi
+          done
+
+          # Dynamically find all package.json files
+          PACKAGE_JSONS=()
+          while IFS= read -r pkg_json; do
+            if [[ "$pkg_json" != *"node_modules"* ]]; then
+              PACKAGE_JSONS+=("$pkg_json")
+            fi
+          done < <(find packages -name "package.json" -not -path "*/node_modules/*")
+
+          echo "Found package.json files to verify: ${PACKAGE_JSONS[*]}"
+
+          for pkg_json in "${PACKAGE_JSONS[@]}"; do
+            # Check that package.json has required fields
+            for field in "name" "version" "main" "types"; do
+              if ! jq -e ".$field" "$pkg_json" > /dev/null; then
+                echo "::error::Missing required field '$field' in $pkg_json"
+                exit 1
+              fi
+            done
+          done
+
+          # Verify that no unexpected files are included
+          for pkg in "${EXPECTED_PACKAGES[@]}"; do
+            if find "$pkg" -name "*.spec.js" -o -name "*.spec.ts" -o -name "*.test.js" -o -name "*.test.ts" | grep -q .; then
+              echo "::error::Test files found in distribution package: $pkg"
+              find "$pkg" -name "*.spec.js" -o -name "*.spec.ts" -o -name "*.test.js" -o -name "*.test.ts"
+              exit 1
+            fi
+          done
+
+          echo "✅ All packages verified successfully"
+          echo "::endgroup::"
+
+      - name: 🔄 Update dependabot configuration
+        # Only update dependabot config for major releases
         if: ${{ contains(inputs.releaseVersion, 'major') }}
         shell: bash
         env:
@@ -138,6 +219,7 @@ jobs:
           CONFIG_DEPENDABOT: '.github/dependabot.yml'
         run: |
           echo '::group::Updating the configuration of dependabot'
+          # Update the target-branch in dependabot.yml to point to the new LTS branch
           yq e "(.. | select(has(\"target-branch\"))
                     | select(.[\"target-branch\"]
                     | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
@@ -162,19 +244,65 @@ jobs:
           EOF
           echo '::endgroup::'
 
-      - name: Create Release and Tags
+      - name: 🏷️ Create Release and Tags
+        # Uses turbo-version to bump versions and create git tags
         run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
 
-      - name: Publish to NPM
+      - name: 📢 Publish to NPM
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         shell: bash
         env:
           RELEASE_BRANCH: ${{ needs.calculate.outputs.target-branch }}
         run: |
+          # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
           test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
           pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
 
-      - name: Log git changes
+      # Verify the published packages
+      - name: 🔍 Verify published packages
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dryRun }}
+        shell: bash
+        run: |
+          echo "::group::Verifying published packages"
+
+          # Get the version that was just published
+          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+          echo "Published version: $VERSION"
+
+          # Dynamically get package names from package.json files
+          PACKAGES=()
+          while IFS= read -r pkg_json; do
+            if [[ "$pkg_json" != *"node_modules"* ]]; then
+              PKG_NAME=$(jq -r '.name' "$pkg_json")
+              if [[ "$PKG_NAME" == @wdio/* ]]; then
+                PACKAGES+=("$PKG_NAME")
+              fi
+            fi
+          done < <(find packages -name "package.json" -not -path "*/node_modules/*")
+
+          echo "Found packages to verify: ${PACKAGES[*]}"
+
+          # Wait a moment for NPM to index the packages
+          echo "Waiting for NPM to index the packages..."
+          sleep 10
+
+          # Verify each package was published correctly
+          for pkg in "${PACKAGES[@]}"; do
+            echo "Verifying $pkg@$VERSION..."
+
+            # Check if the package exists on NPM with the expected version
+            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
+              echo "::error::Package $pkg@$VERSION not found on NPM"
+              exit 1
+            fi
+
+            echo "✅ $pkg@$VERSION verified"
+          done
+
+          echo "All packages verified successfully"
+          echo "::endgroup::"
+
+      - name: 📋 Log changes (dry run only)
         if: ${{ inputs.dryRun }}
         env:
           RELEASE_BRANCH: ${{ needs.calculate.outputs.target-branch }}
@@ -182,27 +310,30 @@ jobs:
           git diff "origin/${RELEASE_BRANCH}"
           echo "DRY RUN: No changes were made."
 
-      - name: Push Tags and Commits
+      - name: 🚀 Push Tags and Commits
         id: push-tags
         shell: bash
         if: ${{ !inputs.dryRun }}
         run: |
           echo "Git log:"
           git log --oneline -n 5
-          # get release tag
+
+          # Get the most recent tag (the one we just created)
           RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           echo "Release tag: $RELEASE_TAG"
+
           echo "Pushing tags and commits..."
-          # push tags and commits without running the pre-push hook
+          # Push tags and commits without running the pre-push hook
           git push --tags --no-verify && git push --no-verify
-          # pass the release tag to the next step
+
+          # Pass the release tag to the next step
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
+      - name: 📝 Create GitHub Release
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          draft: true # Create as draft for manual review
           generate_release_notes: true
           prerelease: ${{ contains(inputs.releaseVersion, 'pre') }}
           repository: webdriverio-community/wdio-electron-service
