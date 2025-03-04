@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'Branch to release from (lts = current maintenance branch)'
+        description: 'Branch type to release from (feature/main/maintenance - will be automatically resolved)'
         required: true
         type: string
       releaseVersion:
@@ -242,9 +242,9 @@ jobs:
           echo '::group::Committing changes'
           git add "${CONFIG_DEPENDABOT}"
           git commit -F-<<EOF
-          chore: update the dependabot.yml
+          chore: update dependabot.yml
 
-          Update branch name for LTS(New value: ${NEW_LTS_BRANCH}).
+          Update branch name for LTS (new value: ${NEW_LTS_BRANCH})
           [skip ci]
           EOF
           echo '::endgroup::'
