@@ -178,23 +178,38 @@ feature/v9 (development) → main (v9.x) → v9.x (maintenance)
 
 ### Backporting Changes
 
-In accordance with the maintenance policy, do the following to ensure that backwards-compatible fixes are reflected in the maintenance version.
+In accordance with the maintenance policy, changes should be backported from the current stable version to the maintenance version. This ensures that critical fixes are available in both versions.
 
-### As a Triager
+#### Backporting Process Overview
+
+1. **Identify PRs for backporting**: PRs that contain fixes applicable to the maintenance version should be labeled with `backport-requested`
+2. **Run the backport script**: After merging such PRs, run the backport script to cherry-pick changes to the maintenance branch
+3. **Release backported changes**: Create a patch release from the maintenance branch using the release workflow
+
+#### As a Triager
 
 Anyone making a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
 
-### As a Merger
+#### As a Merger
 
 Once a PR with a `backport-requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
 
 ```sh
 git pull
-$ git fetch --all
-$ git checkout v7
+git fetch --all
+git checkout v7  # Replace with current maintenance branch (e.g., v8.x for v9 active)
 ```
 
-Before you can start, you will need to create the file `.env` in the project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only the `public_repo` field enabled. Then copy the token to the `.env` file and run the backport script. It fetches all commits connected with PRs that are labeled with `backport-requested` and cherry-picks them into the maintenance branch. Via an interactive console you can get the chance to review the PR again and whether you want to backport it or not. To start the process, just execute:
+Before you can start, you will need to create the file `.env` in the project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only the `public_repo` field enabled. Then copy the token to the `.env` file and run the backport script.
+
+The script will:
+
+1. Automatically determine the active and maintenance versions from package.json
+2. If version detection fails, it will interactively ask you to confirm the versions
+3. Fetch all commits connected with PRs labeled with `backport-requested`
+4. Cherry-pick them into the maintenance branch
+
+To start the process, just execute:
 
 ```sh
 pnpm run backport
@@ -209,6 +224,7 @@ $ pnpm run backport
 > node ./scripts/backport.js
 
 Welcome to the backport script for v7! 🚀
+Will backport changes from v8 to v7
 
 ================================================================================
 PR: #904 - ci: workaround for CI on linux
@@ -238,3 +254,20 @@ Backporting sha 7976224f74bd57ebafa38819d05ac4f937c957fe from v8 to v7
 Successfully backported 2 PRs 👏!
 Please now push them to v7 and make a new v7.x release!
 ```
+
+#### Creating a Backport Release
+
+After successfully backporting changes:
+
+1. Push the changes to the maintenance branch
+
+   ```sh
+   git push origin v7  # Replace with current maintenance branch
+   ```
+
+2. Create a patch release using the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml):
+   - Select `maintenance` as the branch type
+   - Choose `patch` as the release type
+   - The workflow will automatically detect the current maintenance branch
+
+This ensures that backported changes are properly versioned and released according to the project's maintenance policy.
