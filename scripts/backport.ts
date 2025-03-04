@@ -4,10 +4,46 @@ import 'dotenv/config';
 import { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
 import { Octokit } from '@octokit/rest';
 import shell from 'shelljs';
-import { select } from '@inquirer/prompts';
+import { select, input } from '@inquirer/prompts';
+import fs from 'fs';
+import path from 'path';
 
-const activeLTSVersion = 'v8';
-const maintenanceLTSVersion = 'v7';
+// Dynamically determine versions from package.json
+const determineVersions = async () => {
+  try {
+    const pkgPath = path.join(process.cwd(), 'packages/wdio-electron-service/package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    const currentMajorVersion = parseInt(pkg.version.split('.')[0], 10);
+    const maintenanceMajorVersion = currentMajorVersion - 1;
+
+    return {
+      activeLTSVersion: `v${currentMajorVersion}`,
+      maintenanceLTSVersion: `v${maintenanceMajorVersion}`,
+    };
+  } catch (_error) {
+    console.warn('Could not determine versions automatically from package.json');
+
+    // Ask the user to provide the versions
+    console.log('Please provide the version information:');
+    const activeMajor = await input({
+      message: 'What is the current active major version? (e.g., 8 for v8)',
+      default: '8',
+    });
+
+    const maintenanceMajor = await input({
+      message: 'What is the maintenance major version? (e.g., 7 for v7)',
+      default: String(parseInt(activeMajor, 10) - 1),
+    });
+
+    return {
+      activeLTSVersion: `v${activeMajor}`,
+      maintenanceLTSVersion: `v${maintenanceMajor}`,
+    };
+  }
+};
+
+// Using top-level await to get versions
+const { activeLTSVersion, maintenanceLTSVersion } = await determineVersions();
 
 const TARGET_REPO = {
   OWNER: 'webdriverio-community',
@@ -82,6 +118,8 @@ type PullRequest =
 type BackportResult = { exit: boolean; isError: boolean };
 
 console.log(`Welcome to the backport script for ${maintenanceLTSVersion}! 🚀`);
+console.log(`Will backport changes from ${activeLTSVersion} to ${maintenanceLTSVersion}`);
+
 /**
  * Global error handling
  */
@@ -97,10 +135,10 @@ process.on('uncaughtException', (error) => {
 });
 
 /**
- * check if `GITHUB_AUTH` environment variable is set to interact with GitHub API
+ * check if `GITHUB_TOKEN` environment variable is set to interact with GitHub API
  */
 if (!GITHUB_TOKEN) {
-  throw new Error('Please create the file ".env" at project root with the access token set as “GITHUB_AUTH”.');
+  throw new Error('Please create the file ".env" in the project root with the access token set as "GITHUB_TOKEN".');
 }
 
 /**
@@ -243,12 +281,17 @@ const getBackportPRs = async (): Promise<PullRequest[]> => {
 /**
  * execute the main process
  */
-const prsToBackport = await getBackportPRs();
+try {
+  const prsToBackport = await getBackportPRs();
+  const backportedPrs = await backportRun(prsToBackport);
 
-const backportedPrs = await backportRun(prsToBackport);
-console.log(
-  backportedPrs
-    ? `\nSuccessfully backported ${backportedPrs} PRs 👏!\n` +
-        `Please now push them to ${maintenanceLTSVersion} and make a new ${maintenanceLTSVersion}.x release!`
-    : '\nNothing to backport! Bye 👏!',
-);
+  console.log(
+    backportedPrs
+      ? `\nSuccessfully backported ${backportedPrs} PRs 👏!\n` +
+          `Please now push them to ${maintenanceLTSVersion} and make a new ${maintenanceLTSVersion}.x release!`
+      : '\nNothing to backport! Bye 👏!',
+  );
+} catch (error) {
+  console.error('Error in backport script:', error);
+  process.exit(1);
+}
