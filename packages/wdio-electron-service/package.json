@@ -87,16 +87,16 @@
     "@vitest/spy": "^3.0.7",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/globals": "^9.8.0",
+    "@wdio/globals": "^9.10.0",
     "@wdio/logger": "^9.4.4",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
-    "electron-to-chromium": "^1.5.109",
+    "electron-to-chromium": "^1.5.112",
     "fast-copy": "^3.0.1",
     "puppeteer-core": "^22.15.0",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.2",
-    "webdriverio": "^9.8.0"
+    "webdriverio": "^9.10.1"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.7.0",
