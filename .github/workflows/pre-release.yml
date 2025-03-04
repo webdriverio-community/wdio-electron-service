@@ -30,7 +30,7 @@ on:
 jobs:
   pre-release:
     name: Pre-release
-    uses: ./.github/workflows/release-main.yml
+    uses: ./.github/workflows/release-shared.yml
     with:
       branch: ${{ inputs.branch }}
       releaseVersion: ${{ inputs.prereleaseVersion }}

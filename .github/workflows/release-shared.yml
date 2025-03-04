@@ -82,7 +82,7 @@ jobs:
           if [ "${TARGET_VERSION}" == "main" ]; then
             echo "target-branch=main"
             echo "target-branch=main" >>"${GITHUB_OUTPUT}"
-          else 
+          else
             echo "target-branch=v${MAINTENANCE_VERSION}"
             echo "target-branch=v${MAINTENANCE_VERSION}" >>"${GITHUB_OUTPUT}"
           fi
@@ -138,8 +138,8 @@ jobs:
           CONFIG_DEPENDABOT: '.github/dependabot.yml'
         run: |
           echo '::group::Updating the configuration of dependabot'
-          yq e "(.. | select(has(\"target-branch\")) 
-                    | select(.[\"target-branch\"] 
+          yq e "(.. | select(has(\"target-branch\"))
+                    | select(.[\"target-branch\"]
                     | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
             -i "${CONFIG_DEPENDABOT}"
 
