@@ -111,58 +111,72 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 **[Help Wanted Issues](https://github.com/webdriverio-community/wdio-electron-service/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22)**
 **[Good First Issues](https://github.com/webdriverio-community/wdio-electron-service/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)**
 
-## Release
+## Release Process
 
-Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release.
+Project maintainers can publish releases using GitHub Actions workflows. The project follows a feature branch strategy with three main branch types:
 
-### Publish a Release
+- `main` - current stable version (e.g., v8.x)
+- `feature/v9` - next major version development (e.g. v9.0.0-next.0)
+- `v7.x` - maintenance/LTS branch
 
-To publish a release, run the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
+### Publishing Pre-releases
 
-- Create a Git tag
-- Create a GitHub Release
-- Publish to npm
+To publish a pre-release, run the [pre-release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/pre-release.yml):
 
-### Publish a Pre-Release
+1. Select the branch:
+   - `feature` for next major (automatically resolves to current feature branch, e.g., feature/v9)
+   - `main` for current version pre-releases
+2. Choose the pre-release type:
+   - `prepatch` - e.g., 8.2.4-alpha.0
+   - `preminor` - e.g., 8.3.0-alpha.0
+   - `premajor` - e.g., 9.0.0-alpha.0
+   - `prerelease` - increment alpha/beta number
+3. Optionally enable dry-run mode to preview the changes
 
-To publish a pre-release, also referred to as a test release, run the [pre-release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/pre-release.yml) with the **NPM Tag** `next`. This will:
+### Publishing Releases
 
-- Create a Git tag with the `-next.0` suffix
-- Create a GitHub Pre-Release
-- Publish to npm
+To publish a release, run the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml):
 
-Use the **Release Type** to control which version to increment for the pre-release. The following table provides examples for publishing a pre-release from the current version `6.3.1`:
+1. Select the branch:
+   - `main` for current stable releases
+   - `feature` for major version releases (automatically resolves to current feature branch)
+   - `maintenance` for LTS releases (automatically resolves to current maintenance branch)
+2. Choose the release type:
+   - `patch` for bug fixes
+   - `minor` for new features
+   - `major` for breaking changes (only allowed from feature branch)
+3. Optionally enable dry-run mode to preview the changes
 
-| Release Type | Pre-Release Version |
-| ------------ | ------------------- |
-| `major`      | `7.0.0-next.0`      |
-| `minor`      | `6.4.0-next.0`      |
-| `patch`      | `6.3.2-next.0`      |
-| `existing`   | `6.3.1-next.0`      |
+### Major Version Releases
 
-To create consecutive pre-releases you can select `existing` which will increment the pre-release version in the suffix. For example, if the current version is `6.3.1-next.3`, the following will be published:
+When releasing a new major version (e.g., v9.0.0):
 
-| Release Type | Pre-Release Version |
-| ------------ | ------------------- |
-| `major`      | `7.0.0-next.0`      |
-| `minor`      | `6.4.0-next.0`      |
-| `patch`      | `6.3.2-next.0`      |
-| `existing`   | `6.3.1-next.4`      |
+1. Ensure all changes are ready in the feature branch
+2. Run the release workflow with:
+   - Branch: `feature`
+   - Release type: `major`
+3. This will automatically:
+   - Create maintenance branch for current version (e.g., `v8.x`)
+   - Update dependabot configuration
+   - Archive old maintenance branch
+   - Merge feature branch to main
+   - Create GitHub release
 
-### Major Version Maintenance Tasks
+### Maintenance Policy
 
-When releasing a new major version, update the maintenance branch references in the following file:
+- Current version (e.g., v8.x) receives all updates
+- Previous version (e.g., v7.x) receives security updates and critical fixes
+- Older versions are not maintained
 
-1. Dependabot configuration
-   - Edit `.github/dependabot.yml`
-   - Update the existing maintenance branch configuration's `target-branch`
-   - Example: When releasing v8, change `v6` to `v7` in the non-main branch configuration
+### Branch Lifecycle
 
-## Maintenance policy
+```
+feature/v9 (development) → main (v9.x) → v9.x (maintenance)
+                          main (v8.x) → v8.x (maintenance) → archived
+                                       v7.x (maintenance) → archived
+```
 
-Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
-
-## Backporting Bug Fixes
+### Backporting Changes
 
 In accordance with the maintenance policy, do the following to ensure that backwards-compatible fixes are reflected in the maintenance version.
 
