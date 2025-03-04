@@ -6,11 +6,11 @@ on:
       branch:
         description: 'Branch for pre-release'
         required: true
-        default: 'feature/v9'
+        default: 'feature'
         type: choice
         options:
-          - feature/v9 # Next major development
-          - main # Current stable pre-releases
+          - feature
+          - main
       prereleaseVersion:
         description: 'The new prerelease version to create.'
         required: true

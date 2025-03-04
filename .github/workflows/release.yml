@@ -7,14 +7,16 @@ on:
       branch:
         description: 'Branch to release from'
         required: true
+        default: 'main' # Default to main for most common case
         type: choice
         options:
-          - main # Current stable (v8.x)
-          - feature/v9 # Next major (v9.0.0-alpha)
-          - v7.x # Maintenance
+          - main # Current stable
+          - feature # Next major development
+          - maintenance # LTS/maintenance
       releaseVersion:
         description: 'Release type - patch, minor, or major'
         required: true
+        default: 'patch' # Default to patch for most common case
         type: choice
         options: ['patch', 'minor', 'major']
       dryRun:
