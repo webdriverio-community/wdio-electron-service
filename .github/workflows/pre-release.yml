@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch (lts = current maintenance branch)'
+        description: 'Branch for pre-release'
         required: true
-        default: 'main'
+        default: 'feature/v9'
         type: choice
         options:
-          - main
-          - lts
+          - feature/v9 # Next major development
+          - main # Current stable pre-releases
       prereleaseVersion:
         description: 'The new prerelease version to create.'
         required: true

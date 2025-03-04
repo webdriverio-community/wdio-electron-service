@@ -5,10 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to release from (lts = current maintenance branch)'
+        description: 'Branch to release from'
         required: true
         type: choice
-        options: ['main', 'lts']
+        options:
+          - main # Current stable (v8.x)
+          - feature/v9 # Next major (v9.0.0-alpha)
+          - v7.x # Maintenance
       releaseVersion:
         description: 'Release type - patch, minor, or major'
         required: true

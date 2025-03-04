@@ -40,14 +40,21 @@ jobs:
   check:
     runs-on: 'ubuntu-latest'
     steps:
-      - name: Check releaseVersion of LTS
-        # Prevent major version releases on LTS branches
+      - name: Check Release Parameters
         env:
           IS_MAJOR: ${{ contains(inputs.releaseVersion, 'major') }}
-          IS_LTS: ${{ contains(inputs.branch, 'lts') }}
+          IS_FEATURE: ${{ contains(inputs.branch, 'feature') }}
+          IS_MAINTENANCE: ${{ contains(inputs.branch, '.x') }}
         run: |
-          if [ "${IS_MAJOR}" == 'true' -a "${IS_LTS}" == 'true' ]; then
-            echo "ERROR: The LTS version is not allowed to release a new major version"
+          # Prevent major releases on maintenance branches
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_MAINTENANCE}" == 'true' ]; then
+            echo "ERROR: Maintenance branches cannot have major releases"
+            exit 1
+          fi
+
+          # Ensure major releases only happen from feature branches
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_FEATURE}" == 'false' ]; then
+            echo "ERROR: Major releases must come from feature branches"
             exit 1
           fi
 
@@ -82,24 +89,22 @@ jobs:
       - name: ✏️ Define target branch names
         id: define
         env:
-          TARGET_VERSION: ${{ inputs.branch }}
-          MAINTENANCE_VERSION: ${{ steps.calculate.outputs.lts-major-version }}
-          CURRENT_VERSION: ${{ steps.calculate.outputs.current-major-version }}
-        shell: bash
+          TARGET_BRANCH: ${{ inputs.branch }}
         run: |
-          # Determine which branch to release from
-          if [ "${TARGET_VERSION}" == "main" ]; then
-            echo "target-branch=main"
-            echo "target-branch=main" >>"${GITHUB_OUTPUT}"
+          if [[ "${TARGET_BRANCH}" == "feature/"* ]]; then
+            # For feature branches, use as-is
+            echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+          elif [[ "${TARGET_BRANCH}" == "v"*".x" ]]; then
+            # For maintenance branches, use as-is
+            echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
           else
-            # For LTS releases, use the vX branch (e.g., v1)
-            echo "target-branch=v${MAINTENANCE_VERSION}"
-            echo "target-branch=v${MAINTENANCE_VERSION}" >>"${GITHUB_OUTPUT}"
+            # For main, use as-is
+            echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
           fi
 
           # The next LTS branch will be the current major version
-          echo "next-lts-branch=v${CURRENT_VERSION}"
-          echo "next-lts-branch=v${CURRENT_VERSION}" >>"${GITHUB_OUTPUT}"
+          echo "next-lts-branch=v${CURRENT_MAJOR_VERSION}"
+          echo "next-lts-branch=v${CURRENT_MAJOR_VERSION}" >>"${GITHUB_OUTPUT}"
 
   # Main release process
   release:
