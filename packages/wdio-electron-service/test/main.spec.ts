@@ -1,4 +1,4 @@
-import { vi, beforeEach, afterEach, it, expect } from 'vitest';
+import { vi, beforeEach, afterEach, it, expect, describe } from 'vitest';
 import { IpcMainInvokeEvent } from 'electron';
 
 const ipcMain = {
@@ -30,16 +30,18 @@ afterEach(() => {
   listeners = {};
 });
 
-it('should call ipcMain.handle with the expected parameters', () => {
-  expect(ipcMain.handle.mock.calls).toEqual([['wdio-electron.execute', expect.any(Function)]]);
-});
+describe('Main Process Integration', () => {
+  it('should call ipcMain.handle with the expected parameters', () => {
+    expect(ipcMain.handle.mock.calls).toEqual([['wdio-electron.execute', expect.any(Function)]]);
+  });
 
-it('should execute a script', () => {
-  expect(
-    ipcMain.handle.mock.calls[0][1](
-      undefined,
-      (electron: typeof electronMock, a: number, b: number, c: number) => electron.app.getName() + a + b + c,
-      [1, 2, 3],
-    ),
-  ).toBe('test123');
+  it('should execute a script', () => {
+    expect(
+      ipcMain.handle.mock.calls[0][1](
+        undefined,
+        (electron: typeof electronMock, a: number, b: number, c: number) => electron.app.getName() + a + b + c,
+        [1, 2, 3],
+      ),
+    ).toBe('test123');
+  });
 });

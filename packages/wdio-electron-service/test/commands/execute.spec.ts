@@ -2,7 +2,7 @@ import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { execute } from '../../src/commands/execute.js';
 
-describe('execute', () => {
+describe('execute Command', () => {
   beforeEach(async () => {
     globalThis.browser = {
       electron: {

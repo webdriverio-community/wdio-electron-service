@@ -13,7 +13,7 @@ vi.mock('electron', () => ({
   ipcRenderer: { invoke: ipcRendererInvokeMock },
 }));
 
-describe('preload', () => {
+describe('Preload Script', () => {
   beforeEach(async () => {
     await import('../src/preload.js');
   });
