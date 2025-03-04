@@ -20,88 +20,15 @@ on:
         default: false
         type: boolean
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Calculate Target Branch
-        id: get_branch
-        run: |
-          VERSION=$(node -p "require('./packages/service/package.json').version")
-          MAJOR_VERSION=$(node -p "require('semver').major('$VERSION')")
-          PREV_MAJOR=$((MAJOR_VERSION - 1))
-          if [[ "${{ inputs.branch }}" == "lts" ]]; then
-            echo "branch=v${PREV_MAJOR}" >> $GITHUB_OUTPUT
-          else
-            echo "branch=${{ inputs.branch }}" >> $GITHUB_OUTPUT
-          fi
-      - name: Switch to Target Branch
-        if: inputs.branch == 'lts'
-        run: |
-          git fetch --all
-          git checkout ${{ steps.get_branch.outputs.branch }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Package Manager Setup
-        run: |
-          pnpm set registry "https://registry.npmjs.org/"
-          pnpm set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          pnpm whoami
-      - name: Git Setup
-        run: |
-          git config --global user.email "bot@webdriver.io"
-          git config --global user.name "WebdriverIO Release Bot"
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build
-        run: pnpm build
-      - name: Create Release and Tags
-        shell: bash
-        run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
-      - name: Publish to NPM
-        shell: bash
-        env:
-          RELEASE_BRANCH: ${{ inputs.branch }}
-        run: |
-          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
-          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
-      - name: Log git changes
-        if: ${{ inputs.dryRun }}
-        run: |
-          git diff ..origin/main
-          echo "DRY RUN: No changes were made."
-      - name: Push Tags and Commits
-        id: push-tags
-        shell: bash
-        if: ${{ !inputs.dryRun }}
-        run: |
-          echo "Git log:"
-          git log --oneline -n 5
-          # get release tag
-          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "Release tag: $RELEASE_TAG"
-          echo "Pushing tags and commits..."
-          # push tags and commits without running the pre-push hook
-          git push --tags --no-verify && git push --no-verify
-          # pass the release tag to the next step
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          generate_release_notes: true
-          prerelease: false
-          repository: webdriverio-community/wdio-electron-service
-          tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
-          token: $GITHUB_TOKEN
+    name: Release
+    uses: ./.github/workflows/release-main.yml
+    with:
+      branch: ${{ inputs.branch }}
+      releaseVersion: ${{ inputs.releaseVersion }}
+      dryRun: ${{ inputs.dryRun }}
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      npm-token: ${{ secrets.NPM_TOKEN }}
+      deploy-key: ${{ secrets.DEPLOY_KEY }}
