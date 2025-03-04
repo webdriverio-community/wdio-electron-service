@@ -3,7 +3,7 @@ import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 
 import { mockAll } from '../../src/commands/mockAll.js';
 
-describe('mockAll', () => {
+describe('mockAll Command', () => {
   beforeEach(async () => {
     globalThis.browser = {
       electron: {

@@ -4,7 +4,7 @@ import { vi, beforeEach, afterEach, describe, it, expect } from 'vitest';
 import { createMock } from '../../src/mock.js';
 import { isMockFunction } from '../../src/commands/isMockFunction.js';
 
-describe('isMockFunction', () => {
+describe('isMockFunction Command', () => {
   beforeEach(async () => {
     globalThis.browser = {
       electron: {

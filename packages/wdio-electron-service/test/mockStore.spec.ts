@@ -12,7 +12,7 @@ afterEach(() => {
   vi.resetModules();
 });
 
-describe('get/setMock', () => {
+describe('Mock Store', () => {
   const testMock = { getMockName: () => 'test mock' } as unknown as ElectronMock;
 
   it('should set and get a specific mock', () => {

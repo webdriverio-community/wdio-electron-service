@@ -9,7 +9,7 @@ vi.mock('../../src/mockStore.js', () => ({
   },
 }));
 
-describe('clearAllMocks', () => {
+describe('clearAllMocks Command', () => {
   let mockedGetName, mockedShowOpenDialog;
 
   beforeEach(async () => {

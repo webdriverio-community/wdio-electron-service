@@ -23,7 +23,7 @@ afterEach(() => {
   vi.resetModules();
 });
 
-describe('mock', () => {
+describe('mock Command', () => {
   let mockedGetName;
 
   beforeEach(async () => {
