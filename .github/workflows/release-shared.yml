@@ -91,7 +91,7 @@ jobs:
         env:
           TARGET_BRANCH: ${{ inputs.branch }}
         run: |
-          if [[ "${TARGET_BRANCH}" == "feature/"* ]]; then
+          if [ "${TARGET_BRANCH}" == 'feature' ]; then
             # For feature branches, use as-is
             echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
           elif [[ "${TARGET_BRANCH}" == "v"*".x" ]]; then
