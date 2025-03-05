@@ -362,4 +362,3 @@ jobs:
           repository: webdriverio-community/wdio-electron-service
           tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
           token: $GITHUB_TOKEN
-
