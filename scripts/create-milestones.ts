@@ -14,8 +14,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Configuration
-const REPO_OWNER = 'webdriverio-community';
-const REPO_NAME = 'wdio-electron-service';
+const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
+if (!GITHUB_REPOSITORY) {
+  console.error('❌ GITHUB_REPOSITORY environment variable is required.');
+  process.exit(1);
+}
+const [REPO_OWNER, REPO_NAME] = GITHUB_REPOSITORY.split('/');
 
 // Get the GitHub token from environment
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
