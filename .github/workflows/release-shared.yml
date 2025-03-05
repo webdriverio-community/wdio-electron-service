@@ -43,8 +43,8 @@ jobs:
       - name: Check Release Parameters
         env:
           IS_MAJOR: ${{ contains(inputs.releaseVersion, 'major') }}
-          IS_FEATURE: ${{ contains(inputs.branch, 'feature') }}
-          IS_MAINTENANCE: ${{ contains(inputs.branch, '.x') }}
+          IS_FEATURE: ${{ inputs.branch == 'feature' }}
+          IS_MAINTENANCE: ${{ inputs.branch == 'maintenance' }}
         run: |
           # Prevent major releases on maintenance branches
           if [ "${IS_MAJOR}" == 'true' -a "${IS_MAINTENANCE}" == 'true' ]; then
