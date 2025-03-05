@@ -50,8 +50,8 @@ const TARGET_REPO = {
   NAME: 'wdio-electron-service',
 };
 const PR_LABEL = {
-  REQUESTED: 'backport-requested',
-  BACKPORTED: 'backported',
+  REQUESTED: 'backport:requested',
+  COMPLETED: 'backport:completed',
 };
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -232,7 +232,7 @@ const backport = async (pr: PullRequest): Promise<BackportResult> => {
       owner: TARGET_REPO.OWNER,
       repo: TARGET_REPO.NAME,
       issue_number: pr.number,
-      labels: [PR_LABEL.BACKPORTED],
+      labels: [PR_LABEL.COMPLETED],
     }),
   ]);
 
