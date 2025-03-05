@@ -115,6 +115,28 @@ jobs:
           echo "next-lts-branch=v${CURRENT_MAJOR_VERSION}"
           echo "next-lts-branch=v${CURRENT_MAJOR_VERSION}" >>"${GITHUB_OUTPUT}"
 
+      - name: 🔍 Verify branch exists
+        shell: bash
+        run: |
+          TARGET_BRANCH="${{ steps.define.outputs.target-branch }}"
+          echo "Verifying branch: ${TARGET_BRANCH}"
+
+          # Check if branch exists remotely
+          if ! git ls-remote --heads origin "${TARGET_BRANCH}" | grep -q "${TARGET_BRANCH}"; then
+            if [ "${{ inputs.branch }}" == "feature" ]; then
+              echo "::error::Feature branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
+              echo "::error::Expected branch naming convention: feature/v{next_major_version} (e.g., feature/v9)"
+            elif [ "${{ inputs.branch }}" == "maintenance" ]; then
+              echo "::error::Maintenance branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
+              echo "::error::Expected branch naming convention: v{previous_major_version} (e.g., v8)"
+            else
+              echo "::error::Branch '${TARGET_BRANCH}' does not exist."
+            fi
+            exit 1
+          fi
+
+          echo "✅ Branch '${TARGET_BRANCH}' exists and is valid"
+
   # Main release process
   release:
     runs-on: ubuntu-latest
