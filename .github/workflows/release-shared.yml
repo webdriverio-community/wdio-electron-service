@@ -95,8 +95,8 @@ jobs:
         run: |
           if [ "${TARGET_BRANCH}" == 'feature' ]; then
             # For feature branches, use as-is
-            echo "target-branch=${TARGET_BRANCH}"
-            echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+            echo "target-branch=feature/v${FEATURE_MAJOR_VERSION}"
+            echo "target-branch=feature/v${FEATURE_MAJOR_VERSION}" >> $GITHUB_OUTPUT
           elif [ "${TARGET_BRANCH}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
             echo "target-branch=v${LTS_MAJOR_VERSION}"
