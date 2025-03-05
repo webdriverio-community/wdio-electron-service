@@ -99,7 +99,8 @@ jobs:
             echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
           elif [ "${TARGET_BRANCH}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
-            echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+            echo "target-branch=v${LTS_MAJOR_VERSION}"
+            echo "target-branch=v${LTS_MAJOR_VERSION}" >> $GITHUB_OUTPUT
           else
             # For main, use as-is
             echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
