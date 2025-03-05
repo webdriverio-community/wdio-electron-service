@@ -61,8 +61,8 @@ jobs:
           pnpm whoami
 
       - name: 🔄 Update dependabot configuration
-        # Only update dependabot config for major releases
-        if: ${{ contains(inputs.releaseVersion, 'major') }}
+        # Update dependabot config for major releases, but not for prereleases
+        if: ${{ contains(inputs.releaseVersion, 'major') && !contains(inputs.releaseVersion, 'pre') }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
@@ -95,7 +95,7 @@ jobs:
           echo '::endgroup::'
 
       - name: 🚧 Create new LTS branch
-        if: ${{ contains(inputs.releaseVersion, 'major') && !inputs.dryRun }}
+        if: ${{ contains(inputs.releaseVersion, 'major') && !contains(inputs.releaseVersion, 'pre') && !inputs.dryRun }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}

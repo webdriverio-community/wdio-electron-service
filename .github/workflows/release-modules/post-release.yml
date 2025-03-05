@@ -27,8 +27,8 @@ jobs:
     steps:
       # Create appropriate milestones based on the release type
       - name: 🏷️ Create GitHub Milestones
-        # Only skip during dry runs (which should be read-only)
-        if: ${{ !inputs.dryRun }}
+        # Skip during dry runs and prereleases
+        if: ${{ !inputs.dryRun && !contains(inputs.releaseVersion, 'pre') }}
         env:
           GITHUB_TOKEN: ${{ secrets.github-token }}
           RELEASE_TYPE: ${{ inputs.releaseVersion }}
