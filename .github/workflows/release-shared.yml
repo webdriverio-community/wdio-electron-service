@@ -257,7 +257,7 @@ jobs:
         run: |
 
           if git rev-parse --verify --quiet "origin/${NEW_LTS_BRANCH}" >/dev/null; then
-            echo "The maintenance branch is existed."
+            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists."
             exit 0
           fi
 
