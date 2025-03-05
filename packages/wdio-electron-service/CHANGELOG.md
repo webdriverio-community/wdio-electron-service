@@ -1,3 +1,5 @@
+## [8.0.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0...v8.0.1) (2025-03-05)
+
 # [8.0.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.11...v8.0.0) (2025-02-13)
 
 # [8.0.0-next.11](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.10...v8.0.0-next.11) (2025-02-13)
@@ -38,9 +40,7 @@
 
 # [8.0.0-next.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0-next.0...v8.0.0-next.1) (2024-12-12)
 
-# [8.0.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.4.0-next.2...v8.0.0-next.0) (2024-12-12)
-
-# [7.4.0-next.2](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.4.0-next.1...v7.4.0-next.2) (2024-12-11)
+# [8.0.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.1...v8.0.0-next.0) (2024-12-12)
 
 ### Bug Fixes
 
@@ -55,10 +55,6 @@
 
 - improve interface for `startElectron` ([9cf6f5b](https://github.com/webdriverio-community/wdio-electron-service/commit/9cf6f5b39adc4b60aa7eb10bd823098cf4fb7daf))
 - support both options and capabilities ([d38e1f1](https://github.com/webdriverio-community/wdio-electron-service/commit/d38e1f1e4b23421a34c5b05cd61ee30cd8cbfbda))
-
-## [7.3.2-next.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.0...v7.3.2-next.1) (2024-11-20)
-
-## [7.3.2-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.1...v7.3.2-next.0) (2024-11-20)
 
 # [7.2.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.1.1-next.7...v7.2.0) (2024-11-04)
 
