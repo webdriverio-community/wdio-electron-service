@@ -118,40 +118,14 @@ jobs:
             # Switch to the new branch to add documentation
             git checkout ${NEW_LTS_BRANCH}
 
-            # Create a README file for the maintenance branch
-            if [ ! -f "MAINTENANCE.md" ]; then
-              cat > MAINTENANCE.md << EOF
-              # Maintenance Branch for ${NEW_LTS_BRANCH}
+            # Use the TypeScript script to update documentation
+            pnpx tsx scripts/update-maintenance-docs.ts maintenance ${NEW_LTS_BRANCH}
 
-              This is a maintenance branch for the ${NEW_LTS_BRANCH}.x.y releases of WebdriverIO Electron Service.
+            # Stage and commit the changes
+            git add MAINTENANCE.md README.md
+            git commit -m "docs: add maintenance branch information to README.md and MAINTENANCE.md [skip ci]"
 
-              ## Purpose
-
-              This branch receives:
-              - Bug fixes
-              - Security updates
-              - Documentation improvements
-              - Minor enhancements that don't break compatibility
-
-              ## Release Process
-
-              To create a release from this branch:
-              1. Use the GitHub Actions workflow "Manual Release Publish"
-              2. Select "maintenance" as the branch
-              3. Select "patch" or "minor" as the release type
-
-              ## Labeling
-
-              PRs targeting this branch should use:
-              - \`track:maintenance\` - To indicate this is for the maintenance track
-              - \`release:next\` or \`release:future\` - To indicate release timing
-              - \`semver:patch\` or \`semver:minor\` - To indicate change type
-              EOF
-
-              git add MAINTENANCE.md
-              git commit -m "docs: add maintenance branch information [skip ci]"
-              echo "Added documentation for maintenance branch"
-            fi
+            echo "✅ Added maintenance information to README.md and created MAINTENANCE.md"
 
             # Return to the original branch
             git checkout ${{ inputs.target_branch }}
@@ -189,32 +163,12 @@ jobs:
             # Create a local copy of the branch
             git checkout -b archive-temp origin/${OLD_LTS_BRANCH}
 
-            # Create an ARCHIVED.md file
-            cat > ARCHIVED.md << EOF
-            # ARCHIVED: This Branch Is No Longer Maintained
-
-            This branch (${OLD_LTS_BRANCH}) has been archived and is no longer actively maintained.
-
-            ## Status
-
-            - ❌ No longer receiving updates
-            - ❌ No longer receiving bug fixes
-            - ❌ No longer receiving security patches
-
-            ## Recommended Action
-
-            Please upgrade to a newer version of the library. The current maintained versions are:
-            - \`main\` branch - Latest stable version
-            - \`${NEW_LTS_BRANCH}\` branch - Current maintenance version
-
-            ## Archival Date
-
-            This branch was archived on $(date +"%Y-%m-%d") as part of the release process for a new major version.
-            EOF
+            # Use the TypeScript script to update documentation for archiving
+            pnpx tsx scripts/update-maintenance-docs.ts archive ${NEW_LTS_BRANCH} ${OLD_LTS_BRANCH}
 
             # Commit and push the change
-            git add ARCHIVED.md
-            git commit -m "docs: mark branch as archived [skip ci]"
+            git add ARCHIVED.md README.md
+            git commit -m "docs: mark branch as archived in README.md and ARCHIVED.md [skip ci]"
             git push origin archive-temp:${OLD_LTS_BRANCH}
 
             echo "✅ Successfully archived ${OLD_LTS_BRANCH}"
