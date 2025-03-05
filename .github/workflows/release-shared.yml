@@ -94,7 +94,7 @@ jobs:
           if [ "${TARGET_BRANCH}" == 'feature' ]; then
             # For feature branches, use as-is
             echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
-          elif [[ "${TARGET_BRANCH}" == "v"*".x" ]]; then
+          elif [ "${TARGET_BRANCH}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
             echo "target-branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
           else
