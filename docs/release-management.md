@@ -32,22 +32,24 @@ This automation ensures consistency in milestone naming and descriptions, and el
 
 To provide more granular control over which PRs go into specific releases, we use a comprehensive labeling system:
 
-### Release Type Labels
+### Release Timing Labels
 
-- `release:next` - Will be included in the next release (patch or minor) of the current milestone
-- `release:future` - Targeted for a future release (not the immediate next one) of the current milestone
+- `release:next` - Will be included in the next release within its track
+- `release:future` - Targeted for a future release (not the immediate next one) within its track
 
 ### Version Track Labels (For Multi-Track Development)
 
-When working on multiple version tracks simultaneously (e.g., v8.x.y maintenance and v9.0.0 development):
+When working on multiple version tracks simultaneously:
 
-- `track:current` - For the current major version track (e.g., v8.x.y)
-- `track:next` - For the next major version track (e.g., v9.0.0)
+- `track:main` - For the current stable version track (e.g., v8.x.y)
+- `track:feature` - For the next major version track (e.g., v9.0.0)
 - `track:maintenance` - For the maintenance version track (e.g., v7.x.y)
 
-### Version Increment Labels (Optional)
+> **Important**: The combination of track and timing labels eliminates ambiguity. For example, a PR with `track:feature` + `release:next` is clearly targeted for the next major release, while `track:main` + `release:next` is for the next patch/minor release of the current stable version.
 
-When you need to be more specific about the type of version change:
+### Version Increment Labels
+
+When you need to be specific about the type of version change:
 
 - `semver:patch` - Changes that don't affect the API (bug fixes)
 - `semver:minor` - Backward-compatible new features
@@ -90,12 +92,12 @@ The power of this system comes from combining labels:
 
 #### For Multi-Track Development:
 
-- `track:current` + `release:next` = Next release in current major version
-- `track:next` + `release:next` = Next release in upcoming major version
+- `track:main` + `release:next` = Next release in current stable version
+- `track:feature` + `release:next` = Next release in upcoming major version
 - `track:maintenance` + `release:next` = Next release in maintenance version
-- `track:current` + `release:future` + `semver:minor` = Future minor release in current version
+- `track:main` + `release:future` + `semver:minor` = Future minor release in current version
 
-This approach allows for precise targeting of changes across multiple development tracks.
+This approach allows for precise targeting of changes across multiple development tracks and eliminates ambiguity about which release a PR is intended for.
 
 ## End-to-End Workflow
 
