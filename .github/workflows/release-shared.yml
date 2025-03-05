@@ -86,6 +86,10 @@ jobs:
           echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))"
           echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))" >>"${GITHUB_OUTPUT}"
 
+          # Feature is the next major version
+          echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))"
+          echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))" >>"${GITHUB_OUTPUT}"
+          
       - name: ✏️ Define target branch names
         id: define
         env:
