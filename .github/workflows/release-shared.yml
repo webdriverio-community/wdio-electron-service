@@ -352,7 +352,7 @@ jobs:
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
           if [ "$(git branch |grep -c "${NEW_LTS_BRANCH}")" -gt 0 ]; then
-            echo "Pushing the new maintenance branch"
+            echo "Pushing the new maintenance branch: ${NEW_LTS_BRANCH}..."
             git push --no-verify --set-upstream origin "${NEW_LTS_BRANCH}"
           fi
 
