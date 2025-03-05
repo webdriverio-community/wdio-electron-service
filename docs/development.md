@@ -190,17 +190,17 @@ In accordance with the maintenance policy, changes should be backported from the
 
 #### Backporting Process Overview
 
-1. **Identify PRs for backporting**: PRs that contain fixes applicable to the maintenance version should be labeled with `backport-requested`
+1. **Identify PRs for backporting**: PRs that contain fixes applicable to the maintenance version should be labeled with `backport:requested`
 2. **Run the backport script**: After merging such PRs, run the backport script to cherry-pick changes to the maintenance branch
 3. **Release backported changes**: Create a patch release from the maintenance branch using the release workflow
 
 #### As a Triager
 
-Anyone making a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
+Anyone making a triage or reviewing a PR should label it with `backport:requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
 
 #### As a Merger
 
-Once a PR with a `backport-requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
+Once a PR with a `backport:requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
 
 ```sh
 git pull
@@ -214,7 +214,7 @@ The script will:
 
 1. Automatically determine the active and maintenance versions from package.json
 2. If version detection fails, it will interactively ask you to confirm the versions
-3. Fetch all commits connected with PRs labeled with `backport-requested`
+3. Fetch all commits connected with PRs labeled with `backport:requested`
 4. Cherry-pick them into the maintenance branch
 
 To start the process, just execute:
