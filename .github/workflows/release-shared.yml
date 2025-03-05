@@ -48,7 +48,7 @@ jobs:
         run: |
           # Prevent major releases on maintenance branches
           if [ "${IS_MAJOR}" == 'true' -a "${IS_MAINTENANCE}" == 'true' ]; then
-            echo "ERROR: Maintenance branches cannot have major releases"
+            echo "::error::Maintenance branches cannot have major releases"
             exit 1
           fi
 
