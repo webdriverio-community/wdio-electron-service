@@ -254,19 +254,70 @@ jobs:
           echo '::endgroup::'
 
       - name: 🚧 Create new LTS branch
-        if: ${{ contains(inputs.releaseVersion, 'major') }}
+        if: ${{ contains(inputs.releaseVersion, 'major') && github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dryRun }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ needs.calculate.outputs.next-lts-branch }}
         run: |
+          echo "::group::Creating maintenance branch"
 
-          if git rev-parse --verify --quiet "origin/${NEW_LTS_BRANCH}" >/dev/null; then
-            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists."
+          # Check if branch already exists remotely
+          if git ls-remote --heads origin ${NEW_LTS_BRANCH} | grep -q ${NEW_LTS_BRANCH}; then
+            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists remotely."
             exit 0
           fi
 
-          echo "Create the maintenance branch"
-          git branch ${NEW_LTS_BRANCH}
+          # Check if branch exists locally
+          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists locally."
+          else
+            echo "Creating the maintenance branch ${NEW_LTS_BRANCH}..."
+            git branch ${NEW_LTS_BRANCH}
+
+            # Switch to the new branch to add documentation
+            git checkout ${NEW_LTS_BRANCH}
+
+            # Create a README file for the maintenance branch
+            if [ ! -f "MAINTENANCE.md" ]; then
+              cat > MAINTENANCE.md << EOF
+              # Maintenance Branch for ${NEW_LTS_BRANCH}
+
+              This is a maintenance branch for the ${NEW_LTS_BRANCH}.x.y releases of WebdriverIO Electron Service.
+
+              ## Purpose
+
+              This branch receives:
+              - Bug fixes
+              - Security updates
+              - Documentation improvements
+              - Minor enhancements that don't break compatibility
+
+              ## Release Process
+
+              To create a release from this branch:
+              1. Use the GitHub Actions workflow "Manual Release Publish"
+              2. Select "maintenance" as the branch
+              3. Select "patch" or "minor" as the release type
+
+              ## Labeling
+
+              PRs targeting this branch should use:
+              - \`track:maintenance\` - To indicate this is for the maintenance track
+              - \`release:next\` or \`release:future\` - To indicate release timing
+              - \`semver:patch\` or \`semver:minor\` - To indicate change type
+              EOF
+
+              git add MAINTENANCE.md
+              git commit -m "docs: add maintenance branch information [skip ci]"
+              echo "Added documentation for maintenance branch"
+            fi
+
+            # Return to the original branch
+            git checkout ${{ needs.calculate.outputs.target-branch }}
+          fi
+
+          echo "✅ Maintenance branch ${NEW_LTS_BRANCH} is ready"
+          echo "::endgroup::"
 
       - name: 🏷️ Create Release and Tags
         # Uses turbo-version to bump versions and create git tags
@@ -355,9 +406,11 @@ jobs:
           # Pass the release tag to the next step
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
-          if [ "$(git branch |grep -c "${NEW_LTS_BRANCH}")" -gt 0 ]; then
-            echo "Pushing the new maintenance branch: ${NEW_LTS_BRANCH}..."
+          # Push the maintenance branch if it exists locally
+          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+            echo "Pushing the maintenance branch: ${NEW_LTS_BRANCH}..."
             git push --no-verify --set-upstream origin "${NEW_LTS_BRANCH}"
+            echo "✅ Successfully pushed maintenance branch ${NEW_LTS_BRANCH}"
           fi
 
       # Create appropriate milestones based on the release type
