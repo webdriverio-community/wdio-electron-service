@@ -54,7 +54,7 @@ jobs:
 
           # Ensure major releases only happen from feature branches
           if [ "${IS_MAJOR}" == 'true' -a "${IS_FEATURE}" == 'false' ]; then
-            echo "ERROR: Major releases must come from feature branches"
+            echo "::error::Major releases must come from feature branches"
             exit 1
           fi
 
