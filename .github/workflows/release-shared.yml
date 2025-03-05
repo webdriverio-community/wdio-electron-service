@@ -334,6 +334,20 @@ jobs:
           # Pass the release tag to the next step
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
+      # Create appropriate milestones based on the release type
+      - name: 🏷️ Create GitHub Milestones
+        # Only run in the official repository and not during dry runs
+        # This prevents milestone creation in forks (which would fail due to permissions)
+        # and ensures no milestones are created during dry runs (which should be read-only)
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dryRun }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.github-token }}
+          RELEASE_TYPE: ${{ inputs.releaseVersion }}
+        run: |
+          echo "::group::Creating GitHub milestones"
+          pnpx tsx scripts/create-milestones.ts
+          echo "::endgroup::"
+
       - name: 📝 Create GitHub Release
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         uses: softprops/action-gh-release@v2
