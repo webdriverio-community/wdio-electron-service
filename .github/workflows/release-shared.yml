@@ -363,12 +363,3 @@ jobs:
           tag_name: ${{ steps.push-tags.outputs.RELEASE_TAG }}
           token: $GITHUB_TOKEN
 
-      # Update branch protection rules for new branches during major releases
-      - name: 🔒 Update branch protection rules
-        if: ${{ contains(inputs.releaseVersion, 'major') && !inputs.dryRun }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.github-token }}
-          NEXT_LTS_BRANCH: ${{ needs.calculate.outputs.next-lts-branch }}
-          REPO_OWNER: webdriverio-community
-          REPO_NAME: wdio-electron-service
-        run: pnpx tsx scripts/update-branch-protection.ts
