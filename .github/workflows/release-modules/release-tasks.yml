@@ -1,0 +1,254 @@
+name: Release Tasks
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        description: 'Target branch to release from'
+        required: true
+        type: string
+      next_lts_branch:
+        description: 'Next LTS branch name'
+        required: true
+        type: string
+      package_version:
+        description: 'Current package version from setup job'
+        required: false
+        type: string
+      releaseVersion:
+        description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+      dryRun:
+        description: 'Do not touch or write anything. Show the commands.'
+        required: true
+        default: false
+        type: boolean
+    secrets:
+      github-token:
+        description: 'GitHub token for authentication'
+        required: true
+      npm-token:
+        description: 'NPM token for publishing packages'
+        required: true
+      deploy-key:
+        description: 'SSH deploy key for pushing to the repository'
+        required: true
+    outputs:
+      release_tag:
+        description: 'The created release tag'
+        value: ${{ jobs.release.outputs.release_tag }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.push-tags.outputs.RELEASE_TAG }}
+    steps:
+      - name: 👷 Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.deploy-key }}
+          ref: ${{ inputs.target_branch }}
+          fetch-depth: 0 # Full history needed for versioning
+
+      - name: 📦 Configure NPM registry
+        shell: bash
+        run: |
+          # Set up NPM authentication for publishing
+          pnpm set registry "https://registry.npmjs.org/"
+          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm-token }}
+          pnpm whoami
+
+      - name: 🔄 Update dependabot configuration
+        # Only update dependabot config for major releases
+        if: ${{ contains(inputs.releaseVersion, 'major') }}
+        shell: bash
+        env:
+          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
+          CONFIG_DEPENDABOT: '.github/dependabot.yml'
+        run: |
+          echo '::group::Updating the configuration of dependabot'
+          # Update the target-branch in dependabot.yml to point to the new LTS branch
+          yq e "(.. | select(has(\"target-branch\"))
+                    | select(.[\"target-branch\"]
+                    | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
+            -i "${CONFIG_DEPENDABOT}"
+
+          if git diff --exit-code --quiet "${CONFIG_DEPENDABOT}"; then
+            echo "No changes detected."
+            exit 0
+          fi
+
+          echo "Update branch name for LTS(New value: ${NEW_LTS_BRANCH})."
+          git diff "${CONFIG_DEPENDABOT}"
+          echo '::endgroup::'
+
+          echo '::group::Committing changes'
+          git add "${CONFIG_DEPENDABOT}"
+          git commit -F-<<EOF
+          chore: update dependabot.yml
+
+          Update branch name for LTS (new value: ${NEW_LTS_BRANCH})
+          [skip ci]
+          EOF
+          echo '::endgroup::'
+
+      - name: 🚧 Create new LTS branch
+        if: ${{ contains(inputs.releaseVersion, 'major') && !inputs.dryRun }}
+        shell: bash
+        env:
+          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
+        run: |
+          echo "::group::Creating maintenance branch"
+
+          # Check if branch already exists remotely
+          if git ls-remote --heads origin ${NEW_LTS_BRANCH} | grep -q ${NEW_LTS_BRANCH}; then
+            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists remotely."
+            exit 0
+          fi
+
+          # Check if branch exists locally
+          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists locally."
+          else
+            echo "Creating the maintenance branch ${NEW_LTS_BRANCH}..."
+            git branch ${NEW_LTS_BRANCH}
+
+            # Switch to the new branch to add documentation
+            git checkout ${NEW_LTS_BRANCH}
+
+            # Create a README file for the maintenance branch
+            if [ ! -f "MAINTENANCE.md" ]; then
+              cat > MAINTENANCE.md << EOF
+              # Maintenance Branch for ${NEW_LTS_BRANCH}
+
+              This is a maintenance branch for the ${NEW_LTS_BRANCH}.x.y releases of WebdriverIO Electron Service.
+
+              ## Purpose
+
+              This branch receives:
+              - Bug fixes
+              - Security updates
+              - Documentation improvements
+              - Minor enhancements that don't break compatibility
+
+              ## Release Process
+
+              To create a release from this branch:
+              1. Use the GitHub Actions workflow "Manual Release Publish"
+              2. Select "maintenance" as the branch
+              3. Select "patch" or "minor" as the release type
+
+              ## Labeling
+
+              PRs targeting this branch should use:
+              - \`track:maintenance\` - To indicate this is for the maintenance track
+              - \`release:next\` or \`release:future\` - To indicate release timing
+              - \`semver:patch\` or \`semver:minor\` - To indicate change type
+              EOF
+
+              git add MAINTENANCE.md
+              git commit -m "docs: add maintenance branch information [skip ci]"
+              echo "Added documentation for maintenance branch"
+            fi
+
+            # Return to the original branch
+            git checkout ${{ inputs.target_branch }}
+          fi
+
+          echo "✅ Maintenance branch ${NEW_LTS_BRANCH} is ready"
+          echo "::endgroup::"
+
+      - name: 🏷️ Create Release and Tags
+        # Uses turbo-version to bump versions and create git tags
+        run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
+
+      - name: 📢 Publish to NPM
+        shell: bash
+        env:
+          RELEASE_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
+          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
+          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
+
+      # Verify the published packages
+      - name: 🔍 Verify published packages
+        if: ${{ !inputs.dryRun }}
+        shell: bash
+        run: |
+          echo "::group::Verifying published packages"
+
+          # Get the version that was just published
+          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+          echo "Published version: $VERSION"
+
+          # Dynamically get package names from package.json files
+          PACKAGES=()
+          while IFS= read -r pkg_json; do
+            if [[ "$pkg_json" != *"node_modules"* ]]; then
+              PKG_NAME=$(jq -r '.name' "$pkg_json")
+              if [[ "$PKG_NAME" == @wdio/* ]]; then
+                PACKAGES+=("$PKG_NAME")
+              fi
+            fi
+          done < <(find packages -name "package.json" -not -path "*/node_modules/*")
+
+          echo "Found packages to verify: ${PACKAGES[*]}"
+
+          # Wait a moment for NPM to index the packages
+          echo "Waiting for NPM to index the packages..."
+          sleep 10
+
+          # Verify each package was published correctly
+          for pkg in "${PACKAGES[@]}"; do
+            echo "Verifying $pkg@$VERSION..."
+
+            # Check if the package exists on NPM with the expected version
+            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
+              echo "::error::Package $pkg@$VERSION not found on NPM"
+              exit 1
+            fi
+
+            echo "✅ $pkg@$VERSION verified"
+          done
+
+          echo "All packages verified successfully"
+          echo "::endgroup::"
+
+      - name: 📋 Log changes (dry run only)
+        if: ${{ inputs.dryRun }}
+        env:
+          RELEASE_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          git diff "origin/${RELEASE_BRANCH}"
+          echo "DRY RUN: No changes were made."
+
+      - name: 🚀 Push Tags and Commits
+        id: push-tags
+        shell: bash
+        if: ${{ !inputs.dryRun }}
+        env:
+          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
+        run: |
+          echo "Git log:"
+          git log --oneline -n 5
+
+          # Get the most recent tag (the one we just created)
+          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Release tag: $RELEASE_TAG"
+
+          echo "Pushing tags and commits..."
+          # Push tags and commits without running the pre-push hook
+          git push --tags --no-verify && git push --no-verify
+
+          # Pass the release tag to the next step
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
+
+          # Push the maintenance branch if it exists locally
+          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+            echo "Pushing the maintenance branch: ${NEW_LTS_BRANCH}..."
+            git push --no-verify --set-upstream origin "${NEW_LTS_BRANCH}"
+            echo "✅ Successfully pushed maintenance branch ${NEW_LTS_BRANCH}"
+          fi

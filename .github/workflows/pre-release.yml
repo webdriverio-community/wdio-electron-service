@@ -28,8 +28,20 @@ on:
         type: boolean
 
 jobs:
+  # Check if this is the main repository
+  check-repo:
+    name: Check Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Official Repository
+        if: ${{ github.repository != 'webdriverio-community/wdio-electron-service' }}
+        run: |
+          echo "::error::This workflow can only be run in the official repository (webdriverio-community/wdio-electron-service)"
+          exit 1
+
   pre-release:
     name: Pre-release
+    needs: [check-repo]
     uses: ./.github/workflows/release-shared.yml
     with:
       branch: ${{ inputs.branch }}
