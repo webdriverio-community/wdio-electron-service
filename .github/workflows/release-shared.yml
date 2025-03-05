@@ -193,7 +193,7 @@ jobs:
             if [[ "$pkg_json" != *"node_modules"* ]]; then
               PACKAGE_JSONS+=("$pkg_json")
             fi
-          done < <(find packages -name "package.json" -not -path "*/node_modules/*")
+          done < <(find packages -name "package.json" -depth 2)
 
           echo "Found package.json files to verify: ${PACKAGE_JSONS[*]}"
 
