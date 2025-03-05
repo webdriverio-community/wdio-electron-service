@@ -46,8 +46,8 @@ jobs:
   calculate:
     runs-on: 'ubuntu-latest'
     outputs:
-      target_branch: ${{ steps.define.outputs.target_branch }}
-      next_lts_branch: ${{ steps.define.outputs.next_lts_branch }}
+      target_branch: ${{ steps.calculate_versions.outputs.target_branch }}
+      next_lts_branch: ${{ steps.calculate_versions.outputs.next_lts_branch }}
     needs: ['check']
     steps:
       - name: 👷 Checkout repository
@@ -57,8 +57,11 @@ jobs:
           ref: 'main'
 
       - name: 🧮 Calculate version numbers
-        id: calculate
+        id: calculate_versions
         shell: bash
+        env:
+          BRANCH_TYPE: ${{ inputs.branch }}
+          RELEASE_TYPE: ${{ inputs.release_version }}
         run: |
           # Extract the current major version from package.json
           PKG_JSON='packages/wdio-electron-service/package.json'
@@ -74,25 +77,26 @@ jobs:
           echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))"
           echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))" >>"${GITHUB_OUTPUT}"
 
-      - name: ✏️ Define target branch names
-        id: define
+      - name: 🎯 Define target branch names
+        id: define_branches
+        shell: bash
         env:
-          TARGET_BRANCH: ${{ inputs.branch }}
-          LTS_MAJOR_VERSION: ${{ steps.calculate.outputs.lts-major-version}}
-          CURRENT_MAJOR_VERSION: ${{ steps.calculate.outputs.current-major-version}}
-          FEATURE_MAJOR_VERSION: ${{ steps.calculate.outputs.feature-major-version}}
+          BRANCH_TYPE: ${{ inputs.branch }}
+          LTS_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.lts-major-version}}
+          CURRENT_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.current-major-version}}
+          FEATURE_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.feature-major-version}}
         run: |
-          if [ "${TARGET_BRANCH}" == 'feature' ]; then
+          if [ "${BRANCH_TYPE}" == 'feature' ]; then
             # For feature branches, use as-is
             echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}"
             echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}" >> $GITHUB_OUTPUT
-          elif [ "${TARGET_BRANCH}" == 'maintenance' ]; then
+          elif [ "${BRANCH_TYPE}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
             echo "target_branch=v${LTS_MAJOR_VERSION}"
             echo "target_branch=v${LTS_MAJOR_VERSION}" >> $GITHUB_OUTPUT
           else
             # For main, use as-is
-            echo "target_branch=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+            echo "target_branch=${BRANCH_TYPE}" >> $GITHUB_OUTPUT
           fi
 
           # The next LTS branch will be the current major version
@@ -102,7 +106,7 @@ jobs:
       - name: 🔍 Verify branch exists
         shell: bash
         run: |
-          TARGET_BRANCH="${{ steps.define.outputs.target_branch }}"
+          TARGET_BRANCH="${{ steps.define_branches.outputs.target_branch }}"
           echo "Verifying branch: ${TARGET_BRANCH}"
 
           # Check if branch exists remotely

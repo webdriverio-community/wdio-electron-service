@@ -20,7 +20,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      package_version: ${{ steps.get-version.outputs.version }}
+      package_version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: 👷 Checkout repository
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
           git config --global user.name "WebdriverIO Release Bot"
 
       - name: 📦 Get package version
-        id: get-version
+        id: get_version
         shell: bash
         run: |
           PKG_JSON='packages/wdio-electron-service/package.json'

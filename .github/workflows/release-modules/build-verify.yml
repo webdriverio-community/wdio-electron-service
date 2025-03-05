@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      success: ${{ steps.verify.outputs.success }}
+      success: ${{ steps.verify_build.outputs.success }}
     steps:
       - name: 👷 Checkout repository
         uses: actions/checkout@v4
@@ -42,8 +42,8 @@ jobs:
         run: pnpm build
 
       # Verify the integrity of built packages
-      - name: 🔍 Verify package integrity
-        id: verify
+      - name: 🔍 Verify build
+        id: verify_build
         shell: bash
         run: |
           echo "::group::Verifying package integrity"

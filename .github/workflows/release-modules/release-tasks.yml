@@ -43,7 +43,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     outputs:
-      release_tag: ${{ steps.push-tags.outputs.RELEASE_TAG }}
+      release_tag: ${{ steps.push_tags.outputs.RELEASE_TAG }}
     steps:
       - name: 👷 Checkout target branch
         uses: actions/checkout@v4
@@ -226,7 +226,7 @@ jobs:
           echo "DRY RUN: No changes were made."
 
       - name: 🚀 Push Tags and Commits
-        id: push-tags
+        id: push_tags
         shell: bash
         if: ${{ !inputs.dry_run }}
         env:
