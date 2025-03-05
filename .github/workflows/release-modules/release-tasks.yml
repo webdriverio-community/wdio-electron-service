@@ -15,23 +15,23 @@ on:
         description: 'Current package version from setup job'
         required: false
         type: string
-      releaseVersion:
+      release_version:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
         required: true
         type: string
-      dryRun:
+      dry_run:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
         default: false
         type: boolean
     secrets:
-      github-token:
+      github_token:
         description: 'GitHub token for authentication'
         required: true
-      npm-token:
+      npm_token:
         description: 'NPM token for publishing packages'
         required: true
-      deploy-key:
+      deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
     outputs:
@@ -48,7 +48,7 @@ jobs:
       - name: 👷 Checkout target branch
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.deploy-key }}
+          ssh-key: ${{ secrets.deploy_key }}
           ref: ${{ inputs.target_branch }}
           fetch-depth: 0 # Full history needed for versioning
 
@@ -57,12 +57,12 @@ jobs:
         run: |
           # Set up NPM authentication for publishing
           pnpm set registry "https://registry.npmjs.org/"
-          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm-token }}
+          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
           pnpm whoami
 
       - name: 🔄 Update dependabot configuration
         # Update dependabot config for major releases, but not for prereleases
-        if: ${{ contains(inputs.releaseVersion, 'major') && !contains(inputs.releaseVersion, 'pre') }}
+        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
@@ -95,7 +95,7 @@ jobs:
           echo '::endgroup::'
 
       - name: 🚧 Create new LTS branch
-        if: ${{ contains(inputs.releaseVersion, 'major') && !contains(inputs.releaseVersion, 'pre') && !inputs.dryRun }}
+        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
@@ -162,7 +162,7 @@ jobs:
 
       - name: 🏷️ Create Release and Tags
         # Uses turbo-version to bump versions and create git tags
-        run: pnpm turbo-version -b ${{ inputs.releaseVersion }}
+        run: pnpm turbo-version -b ${{ inputs.release_version }}
 
       - name: 📢 Publish to NPM
         shell: bash
@@ -171,11 +171,11 @@ jobs:
         run: |
           # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
           test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
-          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dryRun && '--dry-run' || '' }}
+          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dry_run && '--dry-run' || '' }}
 
       # Verify the published packages
       - name: 🔍 Verify published packages
-        if: ${{ !inputs.dryRun }}
+        if: ${{ !inputs.dry_run }}
         shell: bash
         run: |
           echo "::group::Verifying published packages"
@@ -218,7 +218,7 @@ jobs:
           echo "::endgroup::"
 
       - name: 📋 Log changes (dry run only)
-        if: ${{ inputs.dryRun }}
+        if: ${{ inputs.dry_run }}
         env:
           RELEASE_BRANCH: ${{ inputs.target_branch }}
         run: |
@@ -228,7 +228,7 @@ jobs:
       - name: 🚀 Push Tags and Commits
         id: push-tags
         shell: bash
-        if: ${{ !inputs.dryRun }}
+        if: ${{ !inputs.dry_run }}
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
         run: |

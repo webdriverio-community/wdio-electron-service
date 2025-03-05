@@ -11,29 +11,29 @@ on:
         description: 'Branch type to release from (feature/main/maintenance - will be automatically resolved)'
         required: true
         type: string
-      releaseVersion:
+      release_version:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
         required: true
         type: string
-      dryRun:
+      dry_run:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
         default: false
         type: boolean
     secrets:
-      github-token:
+      github_token:
         description: 'GitHub token for authentication'
         required: true
-      npm-token:
+      npm_token:
         description: 'NPM token for publishing packages'
         required: true
-      deploy-key:
+      deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
 
 env:
-  GITHUB_TOKEN: ${{ secrets.github-token }}
-  NPM_TOKEN: ${{ secrets.npm-token }}
+  GITHUB_TOKEN: ${{ secrets.github_token }}
+  NPM_TOKEN: ${{ secrets.npm_token }}
 
 jobs:
   # Verify this is the official repository
@@ -52,7 +52,7 @@ jobs:
     uses: ./.github/workflows/release-modules/calculate-branches.yml
     with:
       branch: ${{ inputs.branch }}
-      releaseVersion: ${{ inputs.releaseVersion }}
+      release_version: ${{ inputs.release_version }}
 
   # Set up the environment for release
   setup:
@@ -61,7 +61,7 @@ jobs:
     with:
       ref: ${{ needs.calculate_branches.outputs.target_branch }}
     secrets:
-      deploy-key: ${{ secrets.deploy-key }}
+      deploy_key: ${{ secrets.deploy_key }}
 
   # Build and verify packages
   build_verify:
@@ -78,12 +78,12 @@ jobs:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
       package_version: ${{ needs.setup.outputs.package_version }}
-      releaseVersion: ${{ inputs.releaseVersion }}
-      dryRun: ${{ inputs.dryRun }}
+      release_version: ${{ inputs.release_version }}
+      dry_run: ${{ inputs.dry_run }}
     secrets:
-      github-token: ${{ secrets.github-token }}
-      npm-token: ${{ secrets.npm-token }}
-      deploy-key: ${{ secrets.deploy-key }}
+      github_token: ${{ secrets.github_token }}
+      npm_token: ${{ secrets.npm_token }}
+      deploy_key: ${{ secrets.deploy_key }}
 
   # Post-release tasks
   post_release:
@@ -91,7 +91,7 @@ jobs:
     uses: ./.github/workflows/release-modules/post-release.yml
     with:
       release_tag: ${{ needs.release_tasks.outputs.release_tag }}
-      releaseVersion: ${{ inputs.releaseVersion }}
-      dryRun: ${{ inputs.dryRun }}
+      release_version: ${{ inputs.release_version }}
+      dry_run: ${{ inputs.dry_run }}
     secrets:
-      github-token: ${{ secrets.github-token }}
+      github_token: ${{ secrets.github_token }}

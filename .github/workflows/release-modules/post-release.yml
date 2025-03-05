@@ -7,17 +7,17 @@ on:
         description: 'The created release tag'
         required: true
         type: string
-      releaseVersion:
+      release_version:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
         required: true
         type: string
-      dryRun:
+      dry_run:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
         default: false
         type: boolean
     secrets:
-      github-token:
+      github_token:
         description: 'GitHub token for authentication'
         required: true
 
@@ -28,10 +28,10 @@ jobs:
       # Create appropriate milestones based on the release type
       - name: 🏷️ Create GitHub Milestones
         # Skip during dry runs and prereleases
-        if: ${{ !inputs.dryRun && !contains(inputs.releaseVersion, 'pre') }}
+        if: ${{ !inputs.dry_run && !contains(inputs.release_version, 'pre') }}
         env:
-          GITHUB_TOKEN: ${{ secrets.github-token }}
-          RELEASE_TYPE: ${{ inputs.releaseVersion }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+          RELEASE_TYPE: ${{ inputs.release_version }}
         run: |
           echo "::group::Creating GitHub milestones"
           pnpx tsx scripts/create-milestones.ts
@@ -42,7 +42,7 @@ jobs:
         with:
           draft: true # Create as draft for manual review
           generate_release_notes: true
-          prerelease: ${{ contains(inputs.releaseVersion, 'pre') }}
+          prerelease: ${{ contains(inputs.release_version, 'pre') }}
           repository: webdriverio-community/wdio-electron-service
           tag_name: ${{ inputs.release_tag }}
-          token: ${{ secrets.github-token }}
+          token: ${{ secrets.github_token }}

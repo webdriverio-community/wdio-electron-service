@@ -8,7 +8,7 @@ on:
         required: true
         type: string
     secrets:
-      deploy-key:
+      deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
     outputs:
@@ -25,7 +25,7 @@ jobs:
       - name: 👷 Checkout repository
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.deploy-key }}
+          ssh-key: ${{ secrets.deploy_key }}
           ref: ${{ inputs.ref }}
           fetch-depth: 0 # Full history needed for versioning
 

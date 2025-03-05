@@ -11,7 +11,7 @@ on:
         options:
           - feature
           - main
-      prereleaseVersion:
+      prerelease_version:
         description: 'The new prerelease version to create.'
         required: true
         default: 'prerelease'
@@ -21,7 +21,7 @@ on:
           - preminor
           - premajor
           - prerelease
-      dryRun:
+      dry_run:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
         default: false
@@ -33,9 +33,9 @@ jobs:
     uses: ./.github/workflows/release-shared.yml
     with:
       branch: ${{ inputs.branch }}
-      releaseVersion: ${{ inputs.prereleaseVersion }}
-      dryRun: ${{ inputs.dryRun }}
+      release_version: ${{ inputs.prerelease_version }}
+      dry_run: ${{ inputs.dry_run }}
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-      npm-token: ${{ secrets.NPM_TOKEN }}
-      deploy-key: ${{ secrets.DEPLOY_KEY }}
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      npm_token: ${{ secrets.NPM_TOKEN }}
+      deploy_key: ${{ secrets.DEPLOY_KEY }}
