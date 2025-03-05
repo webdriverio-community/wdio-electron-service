@@ -96,6 +96,7 @@ jobs:
           TARGET_BRANCH: ${{ inputs.branch }}
           LTS_MAJOR_VERSION: ${{ steps.calculate.outputs.lts-major-version}}
           CURRENT_MAJOR_VERSION: ${{ steps.calculate.outputs.current-major-version}}
+          FEATURE_MAJOR_VERSION: ${{ steps.calculate.outputs.feature-major-version}}
         run: |
           if [ "${TARGET_BRANCH}" == 'feature' ]; then
             # For feature branches, use as-is
