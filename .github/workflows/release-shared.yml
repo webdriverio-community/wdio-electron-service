@@ -36,8 +36,19 @@ env:
   NPM_TOKEN: ${{ secrets.npm-token }}
 
 jobs:
+  # Verify this is the official repository
+  verify_repository:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Official Repository
+        if: ${{ github.repository != 'webdriverio-community/wdio-electron-service' }}
+        run: |
+          echo "::error::This workflow can only be run in the official repository (webdriverio-community/wdio-electron-service)"
+          exit 1
+
   # Calculate branch names and validate parameters
   calculate_branches:
+    needs: [verify_repository]
     uses: ./.github/workflows/release-modules/calculate-branches.yml
     with:
       branch: ${{ inputs.branch }}
