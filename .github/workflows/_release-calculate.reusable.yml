@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'Branch type to release from (feature/main/maintenance)'
+        description: 'Branch type to release from (feature, main, maintenance)'
         required: true
         type: string
       release_version:

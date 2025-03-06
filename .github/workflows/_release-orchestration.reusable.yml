@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'Branch type to release from (feature/main/maintenance - will be automatically resolved)'
+        description: 'Branch type to release from (feature, main, maintenance - will be automatically resolved)'
         required: true
         type: string
       release_version:
