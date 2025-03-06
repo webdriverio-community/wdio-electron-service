@@ -28,7 +28,7 @@ on:
 jobs:
   release:
     name: Release
-    uses: ./.github/workflows/release-shared.yml
+    uses: ./.github/workflows/@release-shared.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
