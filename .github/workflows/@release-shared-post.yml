@@ -143,7 +143,7 @@ jobs:
           echo "::endgroup::"
 
       - name: 🌱 Create new feature branch for next major version
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && inputs.target_branch == 'main' }}
+        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && inputs.branch_type == 'feature' }}
         shell: bash
         run: |
           echo "::group::Creating feature branch for next major version"

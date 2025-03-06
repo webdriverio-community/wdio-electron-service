@@ -58,6 +58,7 @@ jobs:
 
       - name: 📦 Configure NPM registry
         shell: bash
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         run: |
           # Set up NPM authentication for publishing
           pnpm set registry "https://registry.npmjs.org/"
@@ -105,6 +106,7 @@ jobs:
 
       - name: 📢 Publish to NPM
         shell: bash
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
         env:
           RELEASE_BRANCH: ${{ inputs.target_branch }}
         run: |
@@ -114,7 +116,7 @@ jobs:
 
       # Verify the published packages
       - name: 🔍 Verify published packages
-        if: ${{ !inputs.dry_run }}
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         shell: bash
         run: |
           echo "::group::Verifying published packages"
