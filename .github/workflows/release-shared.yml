@@ -80,6 +80,7 @@ jobs:
       package_version: ${{ needs.setup.outputs.package_version }}
       release_version: ${{ inputs.release_version }}
       dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
     secrets:
       github_token: ${{ secrets.github_token }}
       npm_token: ${{ secrets.npm_token }}
@@ -93,5 +94,6 @@ jobs:
       release_tag: ${{ needs.release_tasks.outputs.release_tag }}
       release_version: ${{ inputs.release_version }}
       dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
     secrets:
       github_token: ${{ secrets.github_token }}

@@ -16,6 +16,10 @@ on:
         required: true
         default: false
         type: boolean
+      branch_type:
+        description: 'Branch type (main, feature, maintenance)'
+        required: true
+        type: string
     secrets:
       github_token:
         description: 'GitHub token for authentication'
@@ -35,6 +39,29 @@ jobs:
         run: |
           echo "::group::Creating GitHub milestones"
           pnpx tsx scripts/create-milestones.ts
+          echo "::endgroup::"
+
+      # Prepare for updating labels from release:future to release:next
+      - name: 🔄 Prepare Release Label Updates
+        # Skip during dry runs and prereleases
+        if: ${{ !inputs.dry_run && !contains(inputs.release_version, 'pre') }}
+        env:
+          # Use the branch_type input to determine which track to update
+          TRACK: ${{ inputs.branch_type }}
+        run: |
+          echo "::group::Preparing release label updates"
+          echo "After the release is complete, you should manually run the label update script:"
+          echo ""
+          echo "  GITHUB_TOKEN=<your-token> TRACK=$TRACK pnpx tsx scripts/update-release-labels.ts"
+          echo ""
+          echo "To create a GitHub token:"
+          echo "1. Go to https://github.com/settings/tokens"
+          echo "2. Click 'Generate new token' > 'Generate new token (classic)'"
+          echo "3. Give it a name like 'Label Update Script'"
+          echo "4. Select the 'repo' scope (to manage repository labels)"
+          echo "5. Click 'Generate token' and copy the token"
+          echo ""
+          echo "This will help you review and update issues/PRs from 'release:future' to 'release:next'"
           echo "::endgroup::"
 
       - name: 📝 Create GitHub Release
