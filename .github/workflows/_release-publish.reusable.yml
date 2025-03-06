@@ -11,10 +11,6 @@ on:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
         required: true
         type: string
-      version:
-        description: 'Version number to publish'
-        required: true
-        type: string
       dry_run:
         description: 'Do not touch or write anything. Show the commands.'
         required: true
@@ -43,7 +39,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     outputs:
-      release_tag: ${{ steps.create_tag.outputs.release_tag }}
+      release_tag: ${{ steps.push_tags.outputs.release_tag }}
     steps:
       - name: 👷 Checkout branch for tagging
         uses: actions/checkout@v4
@@ -68,29 +64,15 @@ jobs:
           pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
           pnpm whoami
 
-      - name: 🏷️ Create Release Tag
-        id: create_tag
-        if: ${{ !inputs.dry_run }}
-        shell: bash
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          # Create the tag
-          RELEASE_TAG="v${VERSION}"
-          git tag -a "${RELEASE_TAG}" -m "Release ${RELEASE_TAG}"
-
-          # Push the tag
-          git push origin "${RELEASE_TAG}"
-
-          echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
-          echo "Created and pushed tag: ${RELEASE_TAG}"
+      - name: 🏷️ Create Release and Tags
+        # Uses turbo-version to bump versions and create git tags
+        run: pnpm turbo-version -b ${{ inputs.release_version }}
 
       - name: 📢 Publish to NPM
         shell: bash
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         env:
           RELEASE_BRANCH: ${{ inputs.branch_type }}
-          VERSION: ${{ inputs.version }}
         run: |
           # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
           test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
@@ -98,13 +80,13 @@ jobs:
 
       # Verify the published packages
       - name: 🔍 Verify published packages
-        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
+        if: ${{ !inputs.dry_run }}
         shell: bash
-        env:
-          VERSION: ${{ inputs.version }}
         run: |
           echo "::group::Verifying published packages"
-
+          # Get the version that was just published
+          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+          echo "Published version: $VERSION"
           # Dynamically get package names from package.json files
           PACKAGES=()
           while IFS= read -r pkg_json; do
@@ -115,28 +97,38 @@ jobs:
               fi
             fi
           done < <(find packages -name "package.json" -not -depth 2)
-
           echo "Found packages to verify: ${PACKAGES[*]}"
-
           # Wait a moment for NPM to index the packages
           echo "Waiting for NPM to index the packages..."
           sleep 10
-
           # Verify each package was published correctly
           for pkg in "${PACKAGES[@]}"; do
-            echo "Verifying $pkg@${VERSION}..."
-
+            echo "Verifying $pkg@$VERSION..."
             # Check if the package exists on NPM with the expected version
-            if ! npm view "$pkg@${VERSION}" version &>/dev/null; then
-              echo "::error::Package $pkg@${VERSION} not found on NPM"
+            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
+              echo "::error::Package $pkg@$VERSION not found on NPM"
               exit 1
             fi
-
-            echo "✅ $pkg@${VERSION} verified"
+            echo "✅ $pkg@$VERSION verified"
           done
-
           echo "All packages verified successfully"
           echo "::endgroup::"
+
+      - name: 🚀 Push Tags and Commits
+        id: push_tags
+        shell: bash
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "Git log:"
+          git log --oneline -n 5
+          # Get the most recent tag (the one we just created)
+          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Release tag: ${RELEASE_TAG}"
+          echo "Pushing tags and commits..."
+          # Push tags and commits without running the pre-push hook
+          git push --tags --no-verify && git push --no-verify
+          # Pass the release tag to the next step
+          echo "release_tag=${RELEASE_TAG}" >>"${GITHUB_OUTPUT}"
 
       - name: 📝 Create GitHub Release
         if: ${{ !inputs.dry_run }}
@@ -146,7 +138,7 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(inputs.release_version, 'pre') }}
           repository: ${{ github.repository }}
-          tag_name: ${{ steps.create_tag.outputs.release_tag }}
+          tag_name: ${{ steps.push_tags.outputs.release_tag }}
           token: ${{ secrets.github_bot_token }}
 
       - name: 📋 Log changes (dry run only)

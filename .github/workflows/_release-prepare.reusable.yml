@@ -31,16 +31,10 @@ on:
       deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
-    outputs:
-      version:
-        description: 'The new version number'
-        value: ${{ jobs.prepare.outputs.version }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version_bump.outputs.version }}
     steps:
       - name: 👷 Checkout target branch
         uses: actions/checkout@v4
@@ -92,24 +86,6 @@ jobs:
           git show
           echo '::endgroup::'
 
-      - name: 🏷️ Bump Version
-        id: version_bump
-        # Uses turbo-version to bump versions but don't create git tags yet
-        run: |
-          # Bump version but don't create tag yet
-          pnpm turbo-version -b ${{ inputs.release_version }} --no-tag
-
-          # Get the new version
-          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "New version: ${VERSION}"
-
-      - name: 📝 Commit version changes
-        shell: bash
-        run: |
-          git add .
-          git commit -m "chore: bump version to ${{ steps.version_bump.outputs.version }} [skip ci]"
-
       - name: 🔀 Push changes to original branch
         if: ${{ !inputs.dry_run }}
         shell: bash
@@ -117,11 +93,10 @@ jobs:
           git push origin ${{ inputs.target_branch }}
 
       - name: 🔀 Merge to Main (if needed)
-        if: ${{ !inputs.dry_run && inputs.branch_type != 'main' && inputs.branch_type != 'maintenance' }}
+        if: ${{ !inputs.dry_run && inputs.branch_type == 'feature' }}
         shell: bash
         env:
           TARGET_BRANCH: ${{ inputs.target_branch }}
-          VERSION: ${{ steps.version_bump.outputs.version }}
         run: |
           echo "::group::Merging to main for release"
 
@@ -131,7 +106,7 @@ jobs:
 
           # Try to merge the target branch into main
           echo "Merging ${TARGET_BRANCH} into main..."
-          if ! git merge --no-ff ${TARGET_BRANCH} -m "chore: merge ${TARGET_BRANCH} for v${VERSION} release [skip ci]"; then
+          if ! git merge --no-ff ${TARGET_BRANCH} -m "chore: merge ${TARGET_BRANCH} for ${TARGET_BRANCH##*/} release [skip ci]"; then
             echo "::error::Merge conflict detected when merging ${TARGET_BRANCH} to main"
             git merge --abort
             echo "Please resolve conflicts manually and try again"
