@@ -251,7 +251,7 @@ jobs:
 
           echo "::endgroup::"
 
-      - name: 🚀 Push Branches
+      - name: 🚀 Push Tags & Branches
         id: push_tags
         shell: bash
         if: ${{ !inputs.dry_run }}
