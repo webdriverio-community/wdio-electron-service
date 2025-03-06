@@ -42,7 +42,6 @@ const determineVersions = async () => {
   }
 };
 
-// Using top-level await to get versions
 const { activeLTSVersion, maintenanceLTSVersion } = await determineVersions();
 
 const TARGET_REPO = {

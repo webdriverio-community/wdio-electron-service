@@ -78,6 +78,7 @@ jobs:
       release_version: ${{ inputs.release_version }}
       release_tag: ${{ needs.release_tasks.outputs.release_tag }}
       dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
     secrets:
       github_bot_token: ${{ secrets.github_bot_token }}
       deploy_key: ${{ secrets.deploy_key }}
