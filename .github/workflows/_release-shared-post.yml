@@ -1,8 +1,12 @@
-name: Release Tasks
+name: Shared release tasks (Post Release Tasks)
 
 on:
   workflow_call:
     inputs:
+      branch_type:
+        description: 'Branch type (main, feature, maintenance)'
+        required: true
+        type: string
       target_branch:
         description: 'Target branch to release from'
         required: true
@@ -11,12 +15,12 @@ on:
         description: 'Next LTS branch name'
         required: true
         type: string
-      package_version:
-        description: 'Current package version from setup job'
-        required: false
-        type: string
       release_version:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+      release_tag:
+        description: 'Release tag (e.g. v8.1.1)'
         required: true
         type: string
       dry_run:
@@ -25,25 +29,16 @@ on:
         default: false
         type: boolean
     secrets:
-      github_token:
+      github_bot_token:
         description: 'GitHub token for authentication'
-        required: true
-      npm_token:
-        description: 'NPM token for publishing packages'
         required: true
       deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
-    outputs:
-      release_tag:
-        description: 'The created release tag'
-        value: ${{ jobs.release.outputs.release_tag }}
 
 jobs:
-  release:
+  post-release:
     runs-on: ubuntu-latest
-    outputs:
-      release_tag: ${{ steps.push_tags.outputs.RELEASE_TAG }}
     steps:
       - name: 👷 Checkout target branch
         uses: actions/checkout@v4
@@ -52,56 +47,19 @@ jobs:
           ref: ${{ inputs.target_branch }}
           fetch-depth: 0 # Full history needed for versioning
 
-      - name: 📦 Configure NPM registry
-        shell: bash
-        run: |
-          # Set up NPM authentication for publishing
-          pnpm set registry "https://registry.npmjs.org/"
-          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
-          pnpm whoami
-
-      - name: 🔄 Update dependabot configuration
-        # Update dependabot config for major releases, but not for prereleases
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}
-        shell: bash
-        env:
-          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
-          CONFIG_DEPENDABOT: '.github/dependabot.yml'
-        run: |
-          echo '::group::Updating the configuration of dependabot'
-          # Update the target-branch in dependabot.yml to point to the new LTS branch
-          yq e "(.. | select(has(\"target-branch\"))
-                    | select(.[\"target-branch\"]
-                    | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
-            -i "${CONFIG_DEPENDABOT}"
-
-          if git diff --exit-code --quiet "${CONFIG_DEPENDABOT}"; then
-            echo "No changes detected."
-            exit 0
-          fi
-
-          echo "Update branch name for LTS(New value: ${NEW_LTS_BRANCH})."
-          git diff "${CONFIG_DEPENDABOT}"
-          echo '::endgroup::'
-
-          echo '::group::Committing changes'
-          git add "${CONFIG_DEPENDABOT}"
-          git commit -F-<<EOF
-          chore: update dependabot.yml
-
-          Update branch name for LTS (new value: ${NEW_LTS_BRANCH})
-          [skip ci]
-          EOF
-          echo '::endgroup::'
+      - name: 🛠️ Setup workspace
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: '20'
 
       - name: 🚧 Create new LTS branch
         if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run }}
         shell: bash
         env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
         run: |
           echo "::group::Creating maintenance branch"
-
           # Check if branch already exists remotely
           if git ls-remote --heads origin ${NEW_LTS_BRANCH} | grep -q ${NEW_LTS_BRANCH}; then
             echo "The maintenance branch ${NEW_LTS_BRANCH} already exists remotely."
@@ -113,7 +71,9 @@ jobs:
             echo "The maintenance branch ${NEW_LTS_BRANCH} already exists locally."
           else
             echo "Creating the maintenance branch ${NEW_LTS_BRANCH}..."
-            git branch ${NEW_LTS_BRANCH}
+            RELEASE_TAG_COMMIT="$(git rev-parse ${RELEASE_TAG}^{commit})"
+            LTS_BRANCH_PARENT_COMMIT="$(git rev-parse ${RELEASE_TAG_COMMIT}^1)"
+            git branch ${NEW_LTS_BRANCH} ${LTS_BRANCH_PARENT_COMMIT}
 
             # Switch to the new branch to add documentation
             git checkout ${NEW_LTS_BRANCH}
@@ -183,7 +143,7 @@ jobs:
           echo "::endgroup::"
 
       - name: 🌱 Create new feature branch for next major version
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && inputs.target_branch == 'main' }}
+        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && inputs.branch_type == 'feature' }}
         shell: bash
         run: |
           echo "::group::Creating feature branch for next major version"
@@ -291,72 +251,7 @@ jobs:
 
           echo "::endgroup::"
 
-      - name: 🏷️ Create Release and Tags
-        # Uses turbo-version to bump versions and create git tags
-        run: pnpm turbo-version -b ${{ inputs.release_version }}
-
-      - name: 📢 Publish to NPM
-        shell: bash
-        env:
-          RELEASE_BRANCH: ${{ inputs.target_branch }}
-        run: |
-          # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
-          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
-          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dry_run && '--dry-run' || '' }}
-
-      # Verify the published packages
-      - name: 🔍 Verify published packages
-        if: ${{ !inputs.dry_run }}
-        shell: bash
-        run: |
-          echo "::group::Verifying published packages"
-
-          # Get the version that was just published
-          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          echo "Published version: $VERSION"
-
-          # Dynamically get package names from package.json files
-          PACKAGES=()
-          while IFS= read -r pkg_json; do
-            if [[ "$pkg_json" != *"node_modules"* ]]; then
-              PKG_NAME=$(jq -r '.name' "$pkg_json")
-              if [[ "$PKG_NAME" == @wdio/* ]]; then
-                PACKAGES+=("$PKG_NAME")
-              fi
-            fi
-          done < <(find packages -name "package.json" -not -path "*/node_modules/*")
-
-          echo "Found packages to verify: ${PACKAGES[*]}"
-
-          # Wait a moment for NPM to index the packages
-          echo "Waiting for NPM to index the packages..."
-          sleep 10
-
-          # Verify each package was published correctly
-          for pkg in "${PACKAGES[@]}"; do
-            echo "Verifying $pkg@$VERSION..."
-
-            # Check if the package exists on NPM with the expected version
-            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
-              echo "::error::Package $pkg@$VERSION not found on NPM"
-              exit 1
-            fi
-
-            echo "✅ $pkg@$VERSION verified"
-          done
-
-          echo "All packages verified successfully"
-          echo "::endgroup::"
-
-      - name: 📋 Log changes (dry run only)
-        if: ${{ inputs.dry_run }}
-        env:
-          RELEASE_BRANCH: ${{ inputs.target_branch }}
-        run: |
-          git diff "origin/${RELEASE_BRANCH}"
-          echo "DRY RUN: No changes were made."
-
-      - name: 🚀 Push Tags and Commits
+      - name: 🚀 Push Branches
         id: push_tags
         shell: bash
         if: ${{ !inputs.dry_run }}
@@ -407,3 +302,38 @@ jobs:
             # Return to the original branch
             git checkout ${{ inputs.target_branch }}
           fi
+
+      # Create appropriate milestones based on the release type
+      - name: 🏷️ Create GitHub Milestones
+        # Skip during dry runs and prereleases
+        if: ${{ !inputs.dry_run && !contains(inputs.release_version, 'pre') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_bot_token }}
+          RELEASE_TYPE: ${{ inputs.release_version }}
+        run: |
+          echo "::group::Creating GitHub milestones"
+          pnpx tsx scripts/create-milestones.ts
+          echo "::endgroup::"
+
+      # Prepare for updating labels from release:future to release:next
+      - name: 🔄 Prepare Release Label Updates
+        # Skip during dry runs and prereleases
+        if: ${{ !inputs.dry_run && !contains(inputs.release_version, 'pre') }}
+        env:
+          # Use the branch_type input to determine which track to update
+          TRACK: ${{ inputs.branch_type }}
+        run: |
+          echo "::group::Preparing release label updates"
+          echo "After the release is complete, you should manually run the label update script:"
+          echo ""
+          echo "  GITHUB_TOKEN=<your-token> TRACK=$TRACK pnpx tsx scripts/update-release-labels.ts"
+          echo ""
+          echo "To create a GitHub token:"
+          echo "1. Go to https://github.com/settings/tokens"
+          echo "2. Click 'Generate new token' > 'Generate new token (classic)'"
+          echo "3. Give it a name like 'Label Update Script'"
+          echo "4. Select the 'repo' scope (to manage repository labels)"
+          echo "5. Click 'Generate token' and copy the token"
+          echo ""
+          echo "This will help you review and update issues/PRs from 'release:future' to 'release:next'"
+          echo "::endgroup::"

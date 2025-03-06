@@ -28,12 +28,12 @@ on:
 jobs:
   release:
     name: Release
-    uses: ./.github/workflows/release-shared.yml
+    uses: ./.github/workflows/_release-shared.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
       dry_run: ${{ inputs.dry_run }}
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      github_bot_token: ${{ secrets.GITHUB_TOKEN }}
       npm_token: ${{ secrets.NPM_TOKEN }}
       deploy_key: ${{ secrets.DEPLOY_KEY }}
