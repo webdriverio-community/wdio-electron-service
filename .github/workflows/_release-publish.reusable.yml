@@ -41,13 +41,28 @@ jobs:
     outputs:
       release_tag: ${{ steps.push_tags.outputs.release_tag }}
     steps:
+      - name: ⚖️ Define target branch
+        id: define
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+          IS_MAJOR: ${{ contains(inputs.release_version, 'major') }}
+          IS_PRE_RELEASE: ${{ contains(inputs.release_version, 'pre') }}
+        run: |
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_PRE_RELEASE}" == 'false' ]; then
+            echo "target_branch=main"
+            echo "target_branch=main" >>"${GITHUB_OUTPUT}"
+          else
+            echo "target_branch=${TARGET_BRANCH}"
+            echo "target_branch=${TARGET_BRANCH}" >>"${GITHUB_OUTPUT}"
+          fi
+
       - name: 👷 Checkout branch for tagging
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.deploy_key }}
           # For maintenance releases, we tag directly on the maintenance branch
           # For all other releases, we tag on main
-          ref: ${{ inputs.branch_type == 'maintenance' && inputs.target_branch || 'main' }}
+          ref: ${{steps.define.outputs.target_branch }}
           fetch-depth: 0 # Full history needed for versioning
 
       - name: 🛠️ Setup workspace
