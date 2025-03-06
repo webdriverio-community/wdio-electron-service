@@ -49,7 +49,7 @@ jobs:
   # Calculate branch names and validate parameters
   calculate_branches:
     needs: [verify_repository]
-    uses: ./.github/workflows/@release-shared-calculate.yml
+    uses: ./.github/workflows/_release-shared-calculate.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
@@ -57,7 +57,7 @@ jobs:
   # Main release process
   release_tasks:
     needs: ['calculate_branches', 'calculate_branches']
-    uses: ./.github/workflows/@release-shared-publish.yml
+    uses: ./.github/workflows/_release-shared-publish.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
@@ -71,7 +71,7 @@ jobs:
   # Post-release tasks
   post_release:
     needs: ['calculate_branches', 'calculate_branches', 'release_tasks']
-    uses: ./.github/workflows/@release-shared-post.yml
+    uses: ./.github/workflows/_release-shared-post.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
