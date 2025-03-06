@@ -93,7 +93,7 @@ jobs:
           git push origin ${{ inputs.target_branch }}
 
       - name: 🔀 Merge to Main (if needed)
-        if: ${{ !inputs.dry_run && inputs.branch_type == 'feature' }}
+        if: ${{ !inputs.dry_run && contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && startsWith(inputs.target_branch, 'feature/') }}
         shell: bash
         env:
           TARGET_BRANCH: ${{ inputs.target_branch }}
