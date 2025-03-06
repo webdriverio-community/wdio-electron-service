@@ -31,16 +31,10 @@ on:
       deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
-    outputs:
-      version:
-        description: 'The new version number'
-        value: ${{ jobs.prepare.outputs.version }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version_bump.outputs.version }}
     steps:
       - name: 👷 Checkout target branch
         uses: actions/checkout@v4
@@ -53,9 +47,6 @@ jobs:
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: '20'
-
-      - name: 🏗️ Build packages
-        uses: ./.github/workflows/actions/build-verify
 
       - name: 🔄 Update dependabot configuration
         # Update dependabot config for major releases, but not for prereleases
@@ -90,58 +81,97 @@ jobs:
           [skip ci]
           EOF
           git show
+          git push --no-verify
           echo '::endgroup::'
 
-      - name: 🏷️ Bump Version
-        id: version_bump
-        # Uses turbo-version to bump versions but don't create git tags yet
-        run: |
-          # Bump version but don't create tag yet
-          pnpm turbo-version -b ${{ inputs.release_version }} --no-tag
-
-          # Get the new version
-          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "New version: ${VERSION}"
-
-      - name: 📝 Commit version changes
+      - name: 🔄 Merge feature branch to main
+        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && startsWith(inputs.target_branch, 'feature/') }}
         shell: bash
         run: |
-          git add .
-          git commit -m "chore: bump version to ${{ steps.version_bump.outputs.version }} [skip ci]"
+          echo "::group::Merging feature branch to main"
 
-      - name: 🔀 Push changes to original branch
-        if: ${{ !inputs.dry_run }}
-        shell: bash
-        run: |
-          git push origin ${{ inputs.target_branch }}
+          # Ensure we have the latest main branch
+          git fetch origin main
 
-      - name: 🔀 Merge to Main (if needed)
-        if: ${{ !inputs.dry_run && inputs.branch_type != 'main' && inputs.branch_type != 'maintenance' }}
-        shell: bash
-        env:
-          TARGET_BRANCH: ${{ inputs.target_branch }}
-          VERSION: ${{ steps.version_bump.outputs.version }}
-        run: |
-          echo "::group::Merging to main for release"
+          # Check if we're on a feature branch
+          if [[ "${{ inputs.target_branch }}" == feature/* ]]; then
+            echo "We are on feature branch ${{ inputs.target_branch }}, preparing to merge to main"
 
-          # Checkout main
-          git checkout main
-          git pull origin main
+            # Create a temporary branch from main to merge into
+            git checkout origin/main -b temp-main-for-merge
 
-          # Try to merge the target branch into main
-          echo "Merging ${TARGET_BRANCH} into main..."
-          if ! git merge --no-ff ${TARGET_BRANCH} -m "chore: merge ${TARGET_BRANCH} for v${VERSION} release [skip ci]"; then
-            echo "::error::Merge conflict detected when merging ${TARGET_BRANCH} to main"
-            git merge --abort
-            echo "Please resolve conflicts manually and try again"
-            exit 1
+            # Set git identity for potential conflict resolution commits
+            git config user.email "bot@webdriver.io"
+            git config user.name "WebdriverIO Release Bot"
+
+            # Try to merge the feature branch into the temp branch
+            # Using --no-ff to ensure a merge commit is created
+            if ! git merge --no-ff ${{ inputs.target_branch }} -m "feat: merge ${{ inputs.target_branch }} to main for v$(jq -r '.version' packages/wdio-electron-service/package.json) release [skip ci]"; then
+              echo "::error::Merge conflict detected when merging ${{ inputs.target_branch }} to main"
+
+              # Abort the merge
+              git merge --abort
+
+              # Create a detailed error message
+              echo "::group::Merge Conflict Details"
+              echo "The automated merge from ${{ inputs.target_branch }} to main failed due to conflicts."
+              echo "Please resolve these conflicts manually by:"
+              echo "1. Creating a PR from ${{ inputs.target_branch }} to main"
+              echo "2. Resolving the conflicts in the PR"
+              echo "3. Merging the PR"
+              echo "4. Then run this release workflow again from the main branch"
+
+              # Try to identify conflicting files to provide more context
+              echo "Potential conflicting files:"
+              git checkout ${{ inputs.target_branch }}
+              FEATURE_FILES=$(git diff --name-only origin/main)
+              git checkout origin/main
+              MAIN_FILES=$(git diff --name-only ${{ inputs.target_branch }})
+              echo "$FEATURE_FILES" | grep -f <(echo "$MAIN_FILES") || echo "Could not determine specific conflicting files"
+              echo "::endgroup::"
+
+              # Return to the original branch
+              git checkout ${{ inputs.target_branch }}
+
+              # Exit with error
+              exit 1
+            fi
+
+            # If we get here, the merge was successful
+            echo "Successfully merged ${{ inputs.target_branch }} to temp-main-for-merge"
+
+            # We'll push this branch later in the push step
+
+            # Set a flag to indicate successful merge
+            echo "MERGE_SUCCESSFUL=true" >> $GITHUB_ENV
+
+            # Return to the original branch for the rest of the release process
+            git checkout ${{ inputs.target_branch }}
+          else
+            echo "Not on a feature branch, skipping merge to main"
           fi
 
-          # Push the merge to main
-          git push origin main
-
           echo "::endgroup::"
+
+      - name: 🚀 Push Branches
+        id: push_tags
+        shell: bash
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "::group::Git log"
+          git log --oneline -n 5
+          echo "::endgroup::"
+
+          # If we merged a feature branch to main, push the main branch
+          if [[ "${MERGE_SUCCESSFUL}" == "true" ]] && git rev-parse --verify --quiet "temp-main-for-merge" >/dev/null; then
+            echo "Pushing merged main branch..."
+            git checkout temp-main-for-merge
+            git push --no-verify --force-with-lease origin temp-main-for-merge:main
+            echo "✅ Successfully pushed merged main branch"
+
+            # Return to the original branch
+            git checkout ${{ inputs.target_branch }}
+          fi
 
       - name: 📋 Log changes (dry run only)
         if: ${{ inputs.dry_run }}

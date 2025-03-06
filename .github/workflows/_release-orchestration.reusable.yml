@@ -76,7 +76,6 @@ jobs:
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       release_version: ${{ inputs.release_version }}
-      version: ${{ needs.prepare_release.outputs.version }}
       dry_run: ${{ inputs.dry_run }}
       branch_type: ${{ inputs.branch }}
     secrets:
