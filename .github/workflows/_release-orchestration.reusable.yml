@@ -1,7 +1,7 @@
-name: Shared release workflow
+name: Release Orchestration
 
 # This is a reusable workflow that handles both regular releases and pre-releases
-# It's called by both release.yml and pre-release.yml workflows
+# It is called by both release.yml and pre-release.yml workflows
 # See: https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
 on:
@@ -49,15 +49,15 @@ jobs:
   # Calculate branch names and validate parameters
   calculate_branches:
     needs: [verify_repository]
-    uses: ./.github/workflows/_release-shared-calculate.yml
+    uses: ./.github/workflows/_release-calculate.reusable.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
 
   # Main release process
   release_tasks:
-    needs: ['calculate_branches', 'calculate_branches']
-    uses: ./.github/workflows/_release-shared-publish.yml
+    needs: ['calculate_branches']
+    uses: ./.github/workflows/_release-publish.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
@@ -70,8 +70,8 @@ jobs:
 
   # Post-release tasks
   post_release:
-    needs: ['calculate_branches', 'calculate_branches', 'release_tasks']
-    uses: ./.github/workflows/_release-shared-post.yml
+    needs: ['calculate_branches', 'release_tasks']
+    uses: ./.github/workflows/_release-post.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}

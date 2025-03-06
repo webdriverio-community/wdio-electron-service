@@ -1,4 +1,3 @@
----
 name: Manual Release Publish
 
 on:
@@ -28,7 +27,7 @@ on:
 jobs:
   release:
     name: Release
-    uses: ./.github/workflows/_release-shared.yml
+    uses: ./.github/workflows/_release-orchestration.reusable.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
