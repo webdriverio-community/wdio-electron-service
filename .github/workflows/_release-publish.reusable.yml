@@ -1,4 +1,4 @@
-name: Publish Packages & Create Release
+name: Publish Release
 
 on:
   workflow_call:
@@ -7,12 +7,12 @@ on:
         description: 'Target branch to release from'
         required: true
         type: string
-      next_lts_branch:
-        description: 'Next LTS branch name'
-        required: true
-        type: string
       release_version:
         description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+      version:
+        description: 'Version number to publish'
         required: true
         type: string
       dry_run:
@@ -20,6 +20,10 @@ on:
         required: true
         default: false
         type: boolean
+      branch_type:
+        description: 'Branch type (main, feature, maintenance)'
+        required: true
+        type: string
     secrets:
       github_bot_token:
         description: 'GitHub token for authentication'
@@ -33,19 +37,21 @@ on:
     outputs:
       release_tag:
         description: 'The created release tag'
-        value: ${{ jobs.release.outputs.release_tag }}
+        value: ${{ jobs.publish.outputs.release_tag }}
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     outputs:
-      release_tag: ${{ steps.push_tags.outputs.RELEASE_TAG }}
+      release_tag: ${{ steps.create_tag.outputs.release_tag }}
     steps:
-      - name: 👷 Checkout target branch
+      - name: 👷 Checkout branch for tagging
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.deploy_key }}
-          ref: ${{ inputs.target_branch }}
+          # For maintenance releases, we tag directly on the maintenance branch
+          # For all other releases, we tag on main
+          ref: ${{ inputs.branch_type == 'maintenance' && inputs.target_branch || 'main' }}
           fetch-depth: 0 # Full history needed for versioning
 
       - name: 🛠️ Setup workspace
@@ -53,62 +59,38 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 🏗️ Build packages
-        uses: ./.github/workflows/actions/build-verify
-
       - name: 📦 Configure NPM registry
         shell: bash
-        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         run: |
           # Set up NPM authentication for publishing
           pnpm set registry "https://registry.npmjs.org/"
           pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
           pnpm whoami
 
-      - name: 🔄 Update dependabot configuration
-        # Update dependabot config for major releases, but not for prereleases
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}
+      - name: 🏷️ Create Release Tag
+        id: create_tag
+        if: ${{ !inputs.dry_run }}
         shell: bash
         env:
-          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
-          CONFIG_DEPENDABOT: '.github/dependabot.yml'
+          VERSION: ${{ inputs.version }}
         run: |
-          echo '::group::Updating the configuration of dependabot'
-          # Update the target-branch in dependabot.yml to point to the new LTS branch
-          yq e "(.. | select(has(\"target-branch\"))
-                    | select(.[\"target-branch\"]
-                    | test(\"^v[0-9]+$\"))).target-branch = \"${NEW_LTS_BRANCH}\"" \
-            -i "${CONFIG_DEPENDABOT}"
+          # Create the tag
+          RELEASE_TAG="v${VERSION}"
+          git tag -a "${RELEASE_TAG}" -m "Release ${RELEASE_TAG}"
 
-          if git diff --exit-code --quiet "${CONFIG_DEPENDABOT}"; then
-            echo "No changes detected."
-            exit 0
-          fi
+          # Push the tag
+          git push origin "${RELEASE_TAG}"
 
-          echo "Update branch name for LTS(New value: ${NEW_LTS_BRANCH})."
-          git diff "${CONFIG_DEPENDABOT}"
-          echo '::endgroup::'
-
-          echo '::group::Committing changes'
-          git add "${CONFIG_DEPENDABOT}"
-          git commit -F-<<EOF
-          chore: update dependabot.yml
-
-          Update branch name for LTS (new value: ${NEW_LTS_BRANCH})
-          [skip ci]
-          EOF
-          git show
-          echo '::endgroup::'
-
-      - name: 🏷️ Create Release and Tags
-        # Uses turbo-version to bump versions and create git tags
-        run: pnpm turbo-version -b ${{ inputs.release_version }}
+          echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+          echo "Created and pushed tag: ${RELEASE_TAG}"
 
       - name: 📢 Publish to NPM
         shell: bash
-        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' }}
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         env:
-          RELEASE_BRANCH: ${{ inputs.target_branch }}
+          RELEASE_BRANCH: ${{ inputs.branch_type }}
+          VERSION: ${{ inputs.version }}
         run: |
           # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
           test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
@@ -118,12 +100,10 @@ jobs:
       - name: 🔍 Verify published packages
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           echo "::group::Verifying published packages"
-
-          # Get the version that was just published
-          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          echo "Published version: $VERSION"
 
           # Dynamically get package names from package.json files
           PACKAGES=()
@@ -144,55 +124,32 @@ jobs:
 
           # Verify each package was published correctly
           for pkg in "${PACKAGES[@]}"; do
-            echo "Verifying $pkg@$VERSION..."
+            echo "Verifying $pkg@${VERSION}..."
 
             # Check if the package exists on NPM with the expected version
-            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
-              echo "::error::Package $pkg@$VERSION not found on NPM"
+            if ! npm view "$pkg@${VERSION}" version &>/dev/null; then
+              echo "::error::Package $pkg@${VERSION} not found on NPM"
               exit 1
             fi
 
-            echo "✅ $pkg@$VERSION verified"
+            echo "✅ $pkg@${VERSION} verified"
           done
 
           echo "All packages verified successfully"
           echo "::endgroup::"
 
-      - name: 📋 Log changes (dry run only)
-        if: ${{ inputs.dry_run }}
-        env:
-          RELEASE_BRANCH: ${{ inputs.target_branch }}
-        run: |
-          git diff "origin/${RELEASE_BRANCH}"
-          echo "DRY RUN: No changes were made."
-
-      - name: 🚀 Push Tags and Commits
-        id: push_tags
-        shell: bash
-        if: ${{ !inputs.dry_run }}
-        env:
-          NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
-        run: |
-          echo "Git log:"
-          git log --oneline -n 5
-
-          # Get the most recent tag (the one we just created)
-          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "Release tag: ${RELEASE_TAG}"
-
-          echo "Pushing tags and commits..."
-          # Push tags and commits without running the pre-push hook
-          git push --tags --no-verify && git push --no-verify
-
-          # Pass the release tag to the next step
-          echo "release_tag=${RELEASE_TAG}" >>"${GITHUB_OUTPUT}"
-
       - name: 📝 Create GitHub Release
+        if: ${{ !inputs.dry_run }}
         uses: softprops/action-gh-release@v2
         with:
           draft: true # Create as draft for manual review
           generate_release_notes: true
           prerelease: ${{ contains(inputs.release_version, 'pre') }}
           repository: ${{ github.repository }}
-          tag_name: ${{ steps.push_tags.outputs.release_tag }}
+          tag_name: ${{ steps.create_tag.outputs.release_tag }}
           token: ${{ secrets.github_bot_token }}
+
+      - name: 📋 Log changes (dry run only)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "DRY RUN: No changes were made."

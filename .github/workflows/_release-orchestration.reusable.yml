@@ -54,15 +54,31 @@ jobs:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
 
-  # Main release process
-  release_tasks:
+  # Prepare the release (version bump, changelog, etc.)
+  prepare_release:
     needs: ['calculate_branches']
-    uses: ./.github/workflows/_release-publish.reusable.yml
+    uses: ./.github/workflows/_release-prepare.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
       release_version: ${{ inputs.release_version }}
       dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
+    secrets:
+      github_bot_token: ${{ secrets.github_bot_token }}
+      deploy_key: ${{ secrets.deploy_key }}
+
+  # Publish the release (tag, npm publish, GitHub release)
+  publish_release:
+    needs: ['calculate_branches', 'prepare_release']
+    if: ${{ !inputs.dry_run }}
+    uses: ./.github/workflows/_release-publish.reusable.yml
+    with:
+      target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
+      release_version: ${{ inputs.release_version }}
+      version: ${{ needs.prepare_release.outputs.version }}
+      dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
     secrets:
       github_bot_token: ${{ secrets.github_bot_token }}
       npm_token: ${{ secrets.npm_token }}
@@ -70,13 +86,14 @@ jobs:
 
   # Post-release tasks
   post_release:
-    needs: ['calculate_branches', 'release_tasks']
+    needs: ['calculate_branches', 'prepare_release', 'publish_release']
+    if: ${{ !inputs.dry_run }}
     uses: ./.github/workflows/_release-post.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
       release_version: ${{ inputs.release_version }}
-      release_tag: ${{ needs.release_tasks.outputs.release_tag }}
+      release_tag: ${{ needs.publish_release.outputs.release_tag }}
       dry_run: ${{ inputs.dry_run }}
       branch_type: ${{ inputs.branch }}
     secrets:
