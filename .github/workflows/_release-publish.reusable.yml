@@ -70,6 +70,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: 🏗️ Build packages
+        uses: ./.github/workflows/actions/build-verify
+
       - name: 📦 Configure NPM registry
         shell: bash
         if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}

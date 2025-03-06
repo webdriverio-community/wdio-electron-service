@@ -48,9 +48,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 🏗️ Build packages
-        uses: ./.github/workflows/actions/build-verify
-
       - name: 🔄 Update dependabot configuration
         # Update dependabot config for major releases, but not for prereleases
         if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}
@@ -84,13 +81,8 @@ jobs:
           [skip ci]
           EOF
           git show
+          git push --no-verify
           echo '::endgroup::'
-
-      - name: 🔀 Push changes to original branch
-        if: ${{ !inputs.dry_run }}
-        shell: bash
-        run: |
-          git push origin ${{ inputs.target_branch }}
 
       - name: 🔀 Merge to Main (if needed)
         if: ${{ !inputs.dry_run && contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && startsWith(inputs.target_branch, 'feature/') }}
