@@ -1,4 +1,4 @@
-name: Publish & Release
+name: Shared release workflow
 
 # This is a reusable workflow that handles both regular releases and pre-releases
 # It's called by both release.yml and pre-release.yml workflows
@@ -21,7 +21,7 @@ on:
         default: false
         type: boolean
     secrets:
-      github_token:
+      github_bot_token:
         description: 'GitHub token for authentication'
         required: true
       npm_token:
@@ -32,7 +32,7 @@ on:
         required: true
 
 env:
-  GITHUB_TOKEN: ${{ secrets.github_token }}
+  GITHUB_TOKEN: ${{ secrets.github_bot_token }}
   NPM_TOKEN: ${{ secrets.npm_token }}
 
 jobs:
@@ -49,49 +49,35 @@ jobs:
   # Calculate branch names and validate parameters
   calculate_branches:
     needs: [verify_repository]
-    uses: ./.github/workflows/release-modules/calculate-branches.yml
+    uses: ./.github/workflows/release-shared-calculate.yml
     with:
       branch: ${{ inputs.branch }}
       release_version: ${{ inputs.release_version }}
 
-  # Set up the environment for release
-  setup:
-    needs: ['calculate_branches']
-    uses: ./.github/workflows/release-modules/setup.yml
-    with:
-      ref: ${{ needs.calculate_branches.outputs.target_branch }}
-    secrets:
-      deploy_key: ${{ secrets.deploy_key }}
-
-  # Build and verify packages
-  build_verify:
-    needs: ['setup']
-    uses: ./.github/workflows/release-modules/build-verify.yml
-    with:
-      ref: ${{ needs.calculate_branches.outputs.target_branch }}
-
   # Main release process
   release_tasks:
-    needs: ['calculate_branches', 'setup', 'build_verify']
-    uses: ./.github/workflows/release-modules/release-tasks.yml
+    needs: ['calculate_branches', 'calculate_branches']
+    uses: ./.github/workflows/release-shared-publish.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
       next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
-      package_version: ${{ needs.setup.outputs.package_version }}
       release_version: ${{ inputs.release_version }}
       dry_run: ${{ inputs.dry_run }}
     secrets:
-      github_token: ${{ secrets.github_token }}
+      github_bot_token: ${{ secrets.github_bot_token }}
       npm_token: ${{ secrets.npm_token }}
       deploy_key: ${{ secrets.deploy_key }}
 
   # Post-release tasks
   post_release:
-    needs: ['release_tasks']
-    uses: ./.github/workflows/release-modules/post-release.yml
+    needs: ['calculate_branches', 'calculate_branches', 'release_tasks']
+    uses: ./.github/workflows/release-shared-post.yml
     with:
-      release_tag: ${{ needs.release_tasks.outputs.release_tag }}
+      target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
+      next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
       release_version: ${{ inputs.release_version }}
+      release_tag: ${{ needs.release_tasks.outputs.release_tag }}
       dry_run: ${{ inputs.dry_run }}
     secrets:
-      github_token: ${{ secrets.github_token }}
+      github_bot_token: ${{ secrets.github_bot_token }}
+      deploy_key: ${{ secrets.deploy_key }}
