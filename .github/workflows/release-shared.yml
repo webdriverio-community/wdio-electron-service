@@ -57,11 +57,45 @@ jobs:
   # Set up the environment for release
   setup:
     needs: ['calculate_branches']
-    uses: ./.github/workflows/@release-setup.yml
-    with:
-      ref: ${{ needs.calculate_branches.outputs.target_branch }}
-    secrets:
-      deploy_key: ${{ secrets.deploy_key }}
+    runs-on: ubuntu-latest
+    outputs:
+      package_version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: 👷 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.deploy_key }}
+          ref: ${{ needs.calculate_branches.outputs.target_branch }}
+          fetch-depth: 0 # Full history needed for versioning
+
+      - name: 🧰 Setup PNPM package manager
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: 🛠️ Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm' # Enable caching for faster builds
+
+      - name: ⚙️ Install Dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔧 Configure Git identity
+        run: |
+          git config --global user.email "bot@webdriver.io"
+          git config --global user.name "WebdriverIO Release Bot"
+
+      - name: 📦 Get package version
+        id: get_version
+        shell: bash
+        run: |
+          PKG_JSON='packages/wdio-electron-service/package.json'
+          VERSION=$(jq -r '.version' ${PKG_JSON})
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Current package version: ${VERSION}"
 
   # Build and verify packages
   build_verify:
