@@ -84,18 +84,18 @@
     }
   },
   "dependencies": {
-    "@vitest/spy": "^3.0.7",
+    "@vitest/spy": "^3.0.8",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
-    "@wdio/globals": "^9.9.0",
+    "@wdio/globals": "^9.11.0",
     "@wdio/logger": "^9.1.3",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
-    "electron-to-chromium": "^1.5.112",
+    "electron-to-chromium": "^1.5.113",
     "fast-copy": "^3.0.1",
     "read-package-up": "^11.0.0",
     "tinyspy": "^3.0.2",
-    "webdriverio": "^9.9.0"
+    "webdriverio": "^9.11.0"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.7.0",
