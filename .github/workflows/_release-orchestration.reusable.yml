@@ -1,0 +1,100 @@
+name: Release Orchestration
+
+# This is a reusable workflow that handles both regular releases and pre-releases
+# It is called by both release.yml and pre-release.yml workflows
+# See: https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Branch type to release from (feature, main, maintenance - will be automatically resolved)'
+        required: true
+        type: string
+      release_version:
+        description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Do not touch or write anything. Show the commands.'
+        required: true
+        default: false
+        type: boolean
+    secrets:
+      github_bot_token:
+        description: 'GitHub token for authentication'
+        required: true
+      npm_token:
+        description: 'NPM token for publishing packages'
+        required: true
+      deploy_key:
+        description: 'SSH deploy key for pushing to the repository'
+        required: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.github_bot_token }}
+  NPM_TOKEN: ${{ secrets.npm_token }}
+
+jobs:
+  # Verify this is the official repository
+  verify_repository:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Official Repository
+        if: ${{ github.repository != 'webdriverio-community/wdio-electron-service' }}
+        run: |
+          echo "::error::This workflow can only be run in the official repository (webdriverio-community/wdio-electron-service)"
+          exit 1
+
+  # Calculate branch names and validate parameters
+  calculate_branches:
+    needs: [verify_repository]
+    uses: ./.github/workflows/_release-calculate.reusable.yml
+    with:
+      branch: ${{ inputs.branch }}
+      release_version: ${{ inputs.release_version }}
+
+  # Prepare the release (version bump, changelog, etc.)
+  prepare_release:
+    needs: ['calculate_branches']
+    uses: ./.github/workflows/_release-prepare.reusable.yml
+    with:
+      target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
+      next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
+      release_version: ${{ inputs.release_version }}
+      dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
+    secrets:
+      github_bot_token: ${{ secrets.github_bot_token }}
+      deploy_key: ${{ secrets.deploy_key }}
+
+  # Publish the release (tag, npm publish, GitHub release)
+  publish_release:
+    needs: ['calculate_branches', 'prepare_release']
+    if: ${{ !inputs.dry_run }}
+    uses: ./.github/workflows/_release-publish.reusable.yml
+    with:
+      target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
+      release_version: ${{ inputs.release_version }}
+      dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
+    secrets:
+      github_bot_token: ${{ secrets.github_bot_token }}
+      npm_token: ${{ secrets.npm_token }}
+      deploy_key: ${{ secrets.deploy_key }}
+
+  # Post-release tasks
+  post_release:
+    needs: ['calculate_branches', 'prepare_release', 'publish_release']
+    if: ${{ !inputs.dry_run }}
+    uses: ./.github/workflows/_release-post.reusable.yml
+    with:
+      target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
+      next_lts_branch: ${{ needs.calculate_branches.outputs.next_lts_branch }}
+      release_version: ${{ inputs.release_version }}
+      release_tag: ${{ needs.publish_release.outputs.release_tag }}
+      dry_run: ${{ inputs.dry_run }}
+      branch_type: ${{ inputs.branch }}
+    secrets:
+      github_bot_token: ${{ secrets.github_bot_token }}
+      deploy_key: ${{ secrets.deploy_key }}

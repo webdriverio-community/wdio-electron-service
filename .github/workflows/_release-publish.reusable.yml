@@ -1,0 +1,165 @@
+name: Publish Release
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        description: 'Target branch to release from'
+        required: true
+        type: string
+      release_version:
+        description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Do not touch or write anything. Show the commands.'
+        required: true
+        default: false
+        type: boolean
+      branch_type:
+        description: 'Branch type (main, feature, maintenance)'
+        required: true
+        type: string
+    secrets:
+      github_bot_token:
+        description: 'GitHub token for authentication'
+        required: true
+      npm_token:
+        description: 'NPM token for publishing packages'
+        required: true
+      deploy_key:
+        description: 'SSH deploy key for pushing to the repository'
+        required: true
+    outputs:
+      release_tag:
+        description: 'The created release tag'
+        value: ${{ jobs.publish.outputs.release_tag }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.push_tags.outputs.release_tag }}
+    steps:
+      - name: ⚖️ Define target branch
+        id: define
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+          IS_MAJOR: ${{ contains(inputs.release_version, 'major') }}
+          IS_PRE_RELEASE: ${{ contains(inputs.release_version, 'pre') }}
+        run: |
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_PRE_RELEASE}" == 'false' ]; then
+            echo "target_branch=main"
+            echo "target_branch=main" >>"${GITHUB_OUTPUT}"
+          else
+            echo "target_branch=${TARGET_BRANCH}"
+            echo "target_branch=${TARGET_BRANCH}" >>"${GITHUB_OUTPUT}"
+          fi
+
+      - name: 👷 Checkout branch for tagging
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.deploy_key }}
+          # For maintenance releases, we tag directly on the maintenance branch
+          # For all other releases, we tag on main
+          ref: ${{steps.define.outputs.target_branch }}
+          fetch-depth: 0 # Full history needed for versioning
+
+      - name: 🛠️ Setup workspace
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: '20'
+
+      - name: 🏗️ Build packages
+        uses: ./.github/workflows/actions/build-verify
+
+      - name: 📦 Configure NPM registry
+        shell: bash
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
+        run: |
+          # Set up NPM authentication for publishing
+          pnpm set registry "https://registry.npmjs.org/"
+          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
+          pnpm whoami
+
+      - name: 🏷️ Create Release and Tags
+        # Uses turbo-version to bump versions and create git tags
+        run: pnpm turbo-version -b ${{ inputs.release_version }}
+
+      - name: 📢 Publish to NPM
+        shell: bash
+        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch_type }}
+        run: |
+          # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
+          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
+          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      # Verify the published packages
+      - name: 🔍 Verify published packages
+        if: ${{ !inputs.dry_run }}
+        shell: bash
+        run: |
+          echo "::group::Verifying published packages"
+          # Get the version that was just published
+          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+          echo "Published version: $VERSION"
+          # Dynamically get package names from package.json files
+          PACKAGES=()
+          while IFS= read -r pkg_json; do
+            if [[ "$pkg_json" != *"node_modules"* ]]; then
+              PKG_NAME=$(jq -r '.name' "$pkg_json")
+              if [[ "$PKG_NAME" == @wdio/* ]]; then
+                PACKAGES+=("$PKG_NAME")
+              fi
+            fi
+          done < <(find packages -name "package.json" -not -depth 2)
+          echo "Found packages to verify: ${PACKAGES[*]}"
+          # Wait a moment for NPM to index the packages
+          echo "Waiting for NPM to index the packages..."
+          sleep 10
+          # Verify each package was published correctly
+          for pkg in "${PACKAGES[@]}"; do
+            echo "Verifying $pkg@$VERSION..."
+            # Check if the package exists on NPM with the expected version
+            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
+              echo "::error::Package $pkg@$VERSION not found on NPM"
+              exit 1
+            fi
+            echo "✅ $pkg@$VERSION verified"
+          done
+          echo "All packages verified successfully"
+          echo "::endgroup::"
+
+      - name: 🚀 Push Tags and Commits
+        id: push_tags
+        shell: bash
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "Git log:"
+          git log --oneline -n 5
+          # Get the most recent tag (the one we just created)
+          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Release tag: ${RELEASE_TAG}"
+          echo "Pushing tags and commits..."
+          # Push tags and commits without running the pre-push hook
+          git push --tags --no-verify && git push --no-verify
+          # Pass the release tag to the next step
+          echo "release_tag=${RELEASE_TAG}" >>"${GITHUB_OUTPUT}"
+
+      - name: 📝 Create GitHub Release
+        if: ${{ !inputs.dry_run }}
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true # Create as draft for manual review
+          generate_release_notes: true
+          prerelease: ${{ contains(inputs.release_version, 'pre') }}
+          repository: ${{ github.repository }}
+          tag_name: ${{ steps.push_tags.outputs.release_tag }}
+          token: ${{ secrets.github_bot_token }}
+
+      - name: 📋 Log changes (dry run only)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "DRY RUN: No changes were made."

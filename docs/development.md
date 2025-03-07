@@ -115,78 +115,109 @@ Check the issues or [raise a new one](https://github.com/webdriverio-community/w
 
 Project maintainers can publish a release or pre-release of the npm package by manually running the [`Manual NPM Publish`](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) GitHub workflow. They will choose the release type to trigger a `major` , `minor`, or `patch` release following [Semantic Versioning](https://semver.org/), or a pre-release.
 
+For detailed information about our release management process, including milestone structure, labeling system, and workflow, see the [Release Management](./release-management.md) documentation.
+
 ### Publish a Release
 
-To publish a release, run the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml) with the defaults for **Branch** `main` and **NPM Tag** `latest`, and set the appropriate **Release Type** (`major`, `minor`, or `patch`). This will:
+## Release Process
 
-- Create a Git tag
-- Create a GitHub Release
-- Publish to npm
+Project maintainers can publish releases using GitHub Actions workflows. The project follows a feature branch strategy with three main branch types, e.g.
 
-### Publish a Pre-Release
+- `main` - current stable version (e.g., v8.x)
+- `feature/v9` - next major version development (e.g. v9.0.0-next.0)
+- `v7.x` - maintenance/LTS branch
 
-To publish a pre-release, also referred to as a test release, run the [pre-release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/pre-release.yml) with the **NPM Tag** `next`. This will:
+### Publishing Pre-releases
 
-- Create a Git tag with the `-next.0` suffix
-- Create a GitHub Pre-Release
-- Publish to npm
+To publish a pre-release, run the [pre-release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/pre-release.yml):
 
-Use the **Release Type** to control which version to increment for the pre-release. The following table provides examples for publishing a pre-release from the current version `6.3.1`:
+1. Select the branch:
+   - `feature` for next major (automatically resolves to current feature branch, e.g., feature/v9)
+   - `main` for current version pre-releases
+2. Choose the pre-release type:
+   - `prepatch` - e.g., 8.2.4-alpha.0
+   - `preminor` - e.g., 8.3.0-alpha.0
+   - `premajor` - e.g., 9.0.0-alpha.0
+   - `prerelease` - increment alpha/beta number
+3. Optionally enable dry-run mode to preview the changes
 
-| Release Type | Pre-Release Version |
-| ------------ | ------------------- |
-| `major`      | `7.0.0-next.0`      |
-| `minor`      | `6.4.0-next.0`      |
-| `patch`      | `6.3.2-next.0`      |
-| `existing`   | `6.3.1-next.0`      |
+### Publishing Releases
 
-To create consecutive pre-releases you can select `existing` which will increment the pre-release version in the suffix. For example, if the current version is `6.3.1-next.3`, the following will be published:
+To publish a release, run the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml):
 
-| Release Type | Pre-Release Version |
-| ------------ | ------------------- |
-| `major`      | `7.0.0-next.0`      |
-| `minor`      | `6.4.0-next.0`      |
-| `patch`      | `6.3.2-next.0`      |
-| `existing`   | `6.3.1-next.4`      |
+1. Select the branch:
+   - `main` for current stable releases
+   - `feature` for major version releases (automatically resolves to current feature branch)
+   - `maintenance` for LTS releases (automatically resolves to current maintenance branch)
+2. Choose the release type:
+   - `patch` for bug fixes
+   - `minor` for new features
+   - `major` for breaking changes (only allowed from feature branch)
+3. Optionally enable dry-run mode to preview the changes
 
-### Major Version Maintenance Tasks
+### Major Version Releases
 
-When releasing a new major version, update the maintenance branch references in the following files:
+When releasing a new major version (e.g., v9.0.0):
 
-1. Update the release workflow
+1. Ensure all changes are ready in the feature branch
+2. Run the release workflow with:
+   - Branch: `feature`
+   - Release type: `major`
+3. This will automatically:
+   - Create maintenance branch for current version (e.g., `v8.x`)
+   - Update dependabot configuration
+   - Archive old maintenance branch
+   - Merge feature branch to main
+   - Create GitHub release
 
-   - Edit `.github/workflows/release.yml`
-   - In the `on.workflow_dispatch.inputs.branch.options` field, update the maintenance branch name
-   - Example: When releasing v8, change `v6` to `v7` in the branch options
+### Maintenance Policy
 
-2. Update the Dependabot configuration
-   - Edit `.github/dependabot.yml`
-   - Update the existing maintenance branch configuration's `target-branch`
-   - Example: When releasing v8, change `v6` to `v7` in the non-main branch configuration
+- Current version (e.g., v8.x) receives all updates
+- Previous version (e.g., v7.x) receives security updates and critical fixes
+- Older versions are not maintained
 
-## Maintenance policy
+### Branch Lifecycle
 
-Starting from v8 the team intends to backport all features that would be still backwards compatible with older (maintained) versions. With a new major version update (e.g. v8) we continue to maintain the previous version (e.g. v7) and deprecate the previously maintained version (e.g. v6 and lower).
+```
+feature/v9 (development) → main (v9.x) → v9.x (maintenance)
+                          main (v8.x) → v8.x (maintenance) → archived
+                                       v7.x (maintenance) → archived
+```
 
-## Backporting Bug Fixes
+### Backporting Changes
 
-In accordance with the maintenance policy, do the following to ensure that backwards-compatible fixes are reflected in the maintenance version.
+In accordance with the maintenance policy, changes should be backported from the current stable version to the maintenance version. This ensures that critical fixes are available in both versions.
 
-### As a Triager
+#### Backporting Process Overview
 
-Anyone making a triage or reviewing a PR should label it with `backport-requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
+1. **Identify PRs for backporting**: PRs that contain fixes applicable to the maintenance version should be labeled with `backport:requested`
+2. **Run the backport script**: After merging such PRs, run the backport script to cherry-pick changes to the maintenance branch
+3. **Release backported changes**: Create a patch release from the maintenance branch using the release workflow
 
-### As a Merger
+#### As a Triager
 
-Once a PR with a `backport-requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
+Anyone making a triage or reviewing a PR should label it with `backport:requested` if the changes can be applied to the maintained (previous) version. Generally every PR that would not be a breaking change for the previous version should be considered for backporting. If a change relies on features or code pieces that are only available in the current version, then a backport can still be considered if you feel comfortable making the necessary adjustments. That said, don't feel forced to backport code if the time investment and complexity is too high. Backporting functionality is a reasonable contribution that can be made by any contributor.
+
+#### As a Merger
+
+Once a PR with a `backport:requested` label is merged, you are responsible for backporting the patch to the older version. To do so, pull the latest code from GitHub:
 
 ```sh
 git pull
-$ git fetch --all
-$ git checkout v7
+git fetch --all
+git checkout v7  # Replace with current maintenance branch (e.g., v8.x for v9 active)
 ```
 
-Before you can start, you will need to create the file `.env` in the project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only the `public_repo` field enabled. Then copy the token to the `.env` file and run the backport script. It fetches all commits connected with PRs that are labeled with `backport-requested` and cherry-picks them into the maintenance branch. Via an interactive console you can get the chance to review the PR again and whether you want to backport it or not. To start the process, just execute:
+Before you can start, you will need to create the file `.env` in the project root with the access token set as `GITHUB_TOKEN` in order to allow the executing script to fetch data about pull requests and set proper labels. Go to your [personal access token](https://github.com/settings/tokens) settings page and generate such a token with only the `public_repo` field enabled. Then copy the token to the `.env` file and run the backport script.
+
+The script will:
+
+1. Automatically determine the active and maintenance versions from package.json
+2. If version detection fails, it will interactively ask you to confirm the versions
+3. Fetch all commits connected with PRs labeled with `backport:requested`
+4. Cherry-pick them into the maintenance branch
+
+To start the process, just execute:
 
 ```sh
 pnpm run backport
@@ -201,6 +232,7 @@ $ pnpm run backport
 > node ./scripts/backport.js
 
 Welcome to the backport script for v7! 🚀
+Will backport changes from v8 to v7
 
 ================================================================================
 PR: #904 - ci: workaround for CI on linux
@@ -230,3 +262,20 @@ Backporting sha 7976224f74bd57ebafa38819d05ac4f937c957fe from v8 to v7
 Successfully backported 2 PRs 👏!
 Please now push them to v7 and make a new v7.x release!
 ```
+
+#### Creating a Backport Release
+
+After successfully backporting changes:
+
+1. Push the changes to the maintenance branch
+
+   ```sh
+   git push origin v7  # Replace with current maintenance branch
+   ```
+
+2. Create a patch release using the [release workflow](https://github.com/webdriverio-community/wdio-electron-service/actions/workflows/release.yml):
+   - Select `maintenance` as the branch type
+   - Choose `patch` as the release type
+   - The workflow will automatically detect the current maintenance branch
+
+This ensures that backported changes are properly versioned and released according to the project's maintenance policy.
