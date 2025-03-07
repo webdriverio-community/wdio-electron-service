@@ -28,19 +28,6 @@ vi.mock('../src/bridge', () => {
   };
 });
 
-// TODO: Start: This section could be remove at V9
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  },
-}));
-
-global.console.log = vi.fn();
-// TODO: End: This section could be remove at V9
-
 let WorkerService: typeof ElectronWorkerService;
 let instance: ElectronWorkerService | undefined;
 
