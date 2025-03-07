@@ -257,7 +257,7 @@ const backportRun = async (prsToBackport: PullRequest[]): Promise<number> => {
 };
 
 const getBackportPRs = async (): Promise<PullRequest[]> => {
-  const iterator = api.paginate.iterator(api.rest.pulls.list, {
+  const prs = await api.pulls.list({
     owner: TARGET_REPO.OWNER,
     repo: TARGET_REPO.NAME,
     state: 'closed',
@@ -266,14 +266,9 @@ const getBackportPRs = async (): Promise<PullRequest[]> => {
     per_page: 100,
   });
 
-  const prsToBackport: PullRequest[] = [];
-
-  for await (const { data: prs } of iterator) {
-    const _prsToBackport = prs
-      .filter((pr) => pr.labels.find((label) => label.name === PR_LABEL.REQUESTED) && Boolean(pr.merged_at))
-      .reverse();
-    prsToBackport.push(..._prsToBackport);
-  }
+  const prsToBackport = prs.data
+    .filter((pr) => pr.labels.find((label) => label.name === PR_LABEL.REQUESTED) && Boolean(pr.merged_at))
+    .reverse();
   return prsToBackport;
 };
 
