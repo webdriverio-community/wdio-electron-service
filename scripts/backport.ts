@@ -13,8 +13,8 @@ const determineVersions = async () => {
   try {
     const pkgPath = path.join(process.cwd(), 'packages/wdio-electron-service/package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    const currentMajorVersion = parseInt(pkg.version.split('.')[0], 10);
-    const maintenanceMajorVersion = currentMajorVersion - 1;
+    const maintenanceMajorVersion = parseInt(pkg.version.split('.')[0], 10);
+    const currentMajorVersion = maintenanceMajorVersion - 1;
 
     return {
       activeLTSVersion: `v${currentMajorVersion}`,
