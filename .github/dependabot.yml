@@ -7,8 +7,8 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - 'dependencies'
-      - 'track:current'
+      - 'area:dependencies'
+      - 'track:main'
     groups:
       production-dependencies:
         dependency-type: 'production'
@@ -34,7 +34,7 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - 'dependencies'
+      - 'area:dependencies'
       - 'track:maintenance'
     groups:
       production-dependencies:
