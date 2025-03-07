@@ -713,9 +713,9 @@ type ElectronServiceCustomCapability = {
   'wdio:electronServiceOptions'?: ElectronServiceOptions;
 };
 
-type ElectronServiceRequestedStandaloneCapabilities = Capabilities.RequestedStandaloneCapabilities &
+export type ElectronServiceRequestedStandaloneCapabilities = Capabilities.RequestedStandaloneCapabilities &
   ElectronServiceCustomCapability;
-type ElectronServiceRequestedMultiremoteCapabilities = Capabilities.RequestedMultiremoteCapabilities &
+export type ElectronServiceRequestedMultiremoteCapabilities = Capabilities.RequestedMultiremoteCapabilities &
   ElectronServiceCustomCapability;
 
 export type ElectronServiceCapabilities =

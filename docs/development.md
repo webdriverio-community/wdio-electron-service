@@ -42,6 +42,52 @@ Below are the task graphs for the E2Es:
 
 ![Mac Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac Universal E2E Task Graph')
 
+### Managing Disk Space for E2E Tests
+
+The E2E tests create temporary directories that can consume significant disk space (up to 22GB per test run). These directories are automatically cleaned up when tests complete normally, but in case of test failures or forced terminations, they might remain on disk.
+
+To manually clean up all temporary test directories and free up disk space, run:
+
+```bash
+pnpm clean:temp-dirs
+```
+
+You can also run this command from the e2e directory:
+
+```bash
+cd e2e
+pnpm clean:temp-dirs
+```
+
+### Managing Test Logs
+
+Test logs are stored in the `e2e/logs` directory, organized by test type and example directory. To clean up all logs, run:
+
+```bash
+cd e2e
+pnpm clean:logs
+```
+
+To view the logs, run:
+
+```bash
+cd e2e
+pnpm logs
+```
+
+### No-Binary Tests
+
+No-binary tests run without building the Electron application binary. These tests have a 60-second timeout to prevent hanging, which can occur in certain environments. If a no-binary test times out, it will be marked as failed with an appropriate error message.
+
+If you encounter issues with no-binary tests:
+
+1. Check the logs in the `logs` directory for any error messages
+2. Try increasing the timeout value in `e2e/scripts/run-test-matrix.ts` if needed
+3. Consider running the tests individually with more verbose logging:
+   ```bash
+   cd e2e && cross-env DEBUG=wdio* PLATFORM=no-binary MODULE_TYPE=esm TEST_TYPE=multiremote BINARY=false EXAMPLE_DIR=no-binary-esm wdio run ./wdio.no-binary.multiremote.conf.ts --spec ./test/multiremote/api.spec.ts
+   ```
+
 ## Testing - Units
 
 Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
