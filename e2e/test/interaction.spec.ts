@@ -36,11 +36,11 @@ describe('interaction', () => {
         };
         expect(bounds.width).toEqual(200);
         expect(bounds.height).toEqual(300);
-        let biggerClickCount = await (await browser.$('.click-count .bigger')).getText();
+        let biggerClickCount = await browser.$('.click-count .bigger').getText();
         expect(biggerClickCount).toEqual('0');
-        const elem = await browser.$('.make-bigger');
+        const elem = browser.$('.make-bigger');
         await elem.click();
-        biggerClickCount = await (await browser.$('.click-count .bigger')).getText();
+        biggerClickCount = await browser.$('.click-count .bigger').getText();
         expect(biggerClickCount).toEqual('1');
         bounds = (await browser.electron.execute((electron) => {
           const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
@@ -65,7 +65,7 @@ describe('interaction', () => {
         };
         expect(bounds.width).toEqual(210);
         expect(bounds.height).toEqual(310);
-        const elem = await browser.$('.make-smaller');
+        const elem = browser.$('.make-smaller');
         await elem.click();
         bounds = (await browser.electron.execute((electron) => {
           const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
