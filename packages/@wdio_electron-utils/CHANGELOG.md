@@ -1,9 +1,8 @@
-# [7.4.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.4.0-next.0...v7.4.0) (2025-02-14)
-
-# [7.4.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.3...v7.4.0-next.0) (2025-02-14)
+## [7.3.2](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.1...v7.3.2) (2025-03-08)
 
 ### Bug Fixes
 
+- add typesVersions to package.json ([5a62afd](https://github.com/webdriverio-community/wdio-electron-service/commit/5a62afd640a77c50eb0c4a6c2a52c13ad24a6625))
 - JSON5 exports parse under the default key in ESM ([de398b4](https://github.com/webdriverio-community/wdio-electron-service/commit/de398b44cc2f7e417e2c7f1f403b796a8d5db748))
 
 # [7.3.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.1.1...v7.3.0) (2024-11-14)

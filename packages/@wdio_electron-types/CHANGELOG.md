@@ -1,10 +1,9 @@
-# [7.4.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.4.0-next.0...v7.4.0) (2025-02-14)
-
-# [7.4.0-next.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.2-next.3...v7.4.0-next.0) (2025-02-14)
+## [7.3.2](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.3.1...v7.3.2) (2025-03-08)
 
 ### Bug Fixes
 
 - fix inconsistency of electron version ([a3e83f8](https://github.com/webdriverio-community/wdio-electron-service/commit/a3e83f80c36fdb01620ea90a2dd0a232e99cc772))
+- update type of $ and $$ ([b5e1db6](https://github.com/webdriverio-community/wdio-electron-service/commit/b5e1db6918d17490708cb45ac9dad31fc699df8e))
 
 ## [7.3.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v7.2.1...v7.3.1) (2024-11-19)
 
