@@ -36,6 +36,16 @@
       "./dist/cjs/log.js"
     ]
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ],
+      "log": [
+        "dist/log.d.ts"
+      ]
+    }
+  },
   "engines": {
     "node": ">=18 || >=20"
   },
