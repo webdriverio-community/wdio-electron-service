@@ -88,20 +88,20 @@ jobs:
         run: |
           if [ "${BRANCH_TYPE}" == 'feature' ]; then
             # For feature branches, use as-is
-            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}"
-            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}" >> $GITHUB_OUTPUT
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x"
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x" >> $GITHUB_OUTPUT
           elif [ "${BRANCH_TYPE}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
-            echo "target_branch=v${LTS_MAJOR_VERSION}"
-            echo "target_branch=v${LTS_MAJOR_VERSION}" >> $GITHUB_OUTPUT
+            echo "target_branch=v${LTS_MAJOR_VERSION}.x"
+            echo "target_branch=v${LTS_MAJOR_VERSION}.x" >> $GITHUB_OUTPUT
           else
             # For main, use as-is
             echo "target_branch=${BRANCH_TYPE}" >> $GITHUB_OUTPUT
           fi
 
           # The next LTS branch will be the current major version
-          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}"
-          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}" >>"${GITHUB_OUTPUT}"
+          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}.x"
+          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}.x" >>"${GITHUB_OUTPUT}"
 
       - name: 🔍 Verify branch exists
         shell: bash
