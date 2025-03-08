@@ -1,5 +1,12 @@
 import log from '@wdio/electron-utils/log';
-import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
+import type {
+  AbstractFn,
+  BrowserExtension,
+  ElectronInterface,
+  ElectronServiceGlobalOptions,
+  ElectronType,
+  ExecuteOpts,
+} from '@wdio/electron-types';
 import type { Capabilities, Services } from '@wdio/types';
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
@@ -13,6 +20,7 @@ import { isMockFunction } from './commands/isMockFunction.js';
 import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
+import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
@@ -20,22 +28,22 @@ const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
     return numWindows > 0;
   });
 
-const isBridgeActive = async (browser: WebdriverIO.Browser) =>
-  await browser.execute(function executeWithinElectron() {
-    return window.wdioElectron !== undefined;
-  });
-
-const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
-  // Add __name to the global object to work around issue with function serialization
-  // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-  // https://github.com/privatenumber/tsx/issues/113
-  await browser.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-  await browser.electron.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
+const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
+  await browser.electron.execute<void, [ExecuteOpts]>(
+    async (electron) => {
+      const { default: copy } = await import('fast-copy');
+      globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
+      for (const api in electron) {
+        const apiName = api as keyof ElectronType;
+        globalThis.originalApi[apiName] = {} as ElectronType[ElectronInterface];
+        for (const apiElement in electron[apiName]) {
+          const apiElementName = apiElement as keyof ElectronType[ElectronInterface];
+          globalThis.originalApi[apiName][apiElementName] = copy(electron[apiName][apiElementName]);
+        }
+      }
+    },
+    { internal: true },
+  );
 };
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
@@ -43,6 +51,7 @@ const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOp
 export default class ElectronWorkerService implements Services.ServiceInstance {
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
   #puppeteerBrowser?: PuppeteerBrowser;
+  #cdpBridge?: ElectronCdpBridge;
   #globalOptions: ElectronServiceGlobalOptions;
   #clearMocks = false;
   #resetMocks = false;
@@ -60,11 +69,13 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#browser = browser;
   }
 
-  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
+  #getElectronAPI(browserInstance?: WebdriverIO.Browser, cdpBridgeInstance?: ElectronCdpBridge) {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
+    const cdpBridge = cdpBridgeInstance || this.#cdpBridge;
     const api = {
       clearAllMocks: clearAllMocks.bind(this),
-      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
+      execute: (script: string | AbstractFn, ...args: unknown[]) =>
+        execute.apply(this, [browser, cdpBridge, script, ...args]),
       isMockFunction: isMockFunction.bind(this),
       mock: mock.bind(this),
       mockAll: mockAll.bind(this),
@@ -90,17 +101,14 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
     this.#resetMocks = resetMocks ?? false;
     this.#restoreMocks = restoreMocks ?? false;
     this.#browser = browser;
-
+    if (!this.#browser.isMultiremote) {
+      this.#cdpBridge = new ElectronCdpBridge(getDebuggerEndpoint(capabilities));
+      await this.#cdpBridge.connect();
+    }
     /**
      * Add electron API to browser object
      */
     this.#browser.electron = this.#getElectronAPI();
-
-    this.#browser.electron.bridgeActive = await isBridgeActive(this.#browser);
-
-    if (this.#browser.electron.bridgeActive) {
-      await initSerializationWorkaround(this.#browser);
-    }
 
     if (this.#browser.isMultiremote) {
       const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
@@ -115,18 +123,16 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         }
 
         log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
+        const mrCdpBridge = new ElectronCdpBridge(getDebuggerEndpoint(caps));
+        mrInstance.electron = this.#getElectronAPI(mrInstance, mrCdpBridge);
 
         const mrPuppeteer = await mrInstance.getPuppeteer();
         mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
-        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
-
-        if (mrInstance.electron.bridgeActive) {
-          await initSerializationWorkaround(mrInstance);
-        }
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
+        await mrCdpBridge.connect();
+        await copyOriginalApi(mrInstance);
       }
     } else {
       const puppeteer = await browser.getPuppeteer();
@@ -134,6 +140,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       this.#browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(browser);
+      await copyOriginalApi(this.#browser);
     }
   }
 
