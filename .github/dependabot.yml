@@ -6,7 +6,15 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    labels:
+      - 'area:dependencies'
+      - 'track:main'
     groups:
+      wdio-dependencies:
+        patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
       production-dependencies:
         dependency-type: 'production'
         patterns:
@@ -22,6 +30,19 @@ updates:
       # For `electron-builder`, ignore all updates (they break things)
       - dependency-name: 'electron-builder'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      # For `puppeteer-core`, ignore major updates
+      - dependency-name: 'puppeteer-core'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'area:dependencies'
+      - 'track:main'
 
   # For maintenance branch
   - package-ecosystem: npm
@@ -31,8 +52,14 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - 'maintenance-version-dependencies'
+      - 'area:dependencies'
+      - 'track:maintenance'
     groups:
+      wdio-dependencies:
+        patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
       production-dependencies:
         dependency-type: 'production'
         patterns:
@@ -48,3 +75,17 @@ updates:
       # For `electron-builder`, ignore all updates (they break things)
       - dependency-name: 'electron-builder'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      # For `puppeteer-core`, ignore major updates
+      - dependency-name: 'puppeteer-core'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    target-branch: v7
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'area:dependencies'
+      - 'track:maintenance'

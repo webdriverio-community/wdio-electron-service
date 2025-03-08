@@ -1,0 +1,128 @@
+name: Calculate Release Branches
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Branch type to release from (feature, main, maintenance)'
+        required: true
+        type: string
+      release_version:
+        description: 'Release type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        type: string
+    outputs:
+      target_branch:
+        description: 'Resolved target branch name'
+        value: ${{ jobs.calculate.outputs.target_branch }}
+      next_lts_branch:
+        description: 'Next LTS branch name'
+        value: ${{ jobs.calculate.outputs.next_lts_branch }}
+
+jobs:
+  # Validate release parameters
+  check:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Check Release Parameters
+        env:
+          IS_MAJOR: ${{ contains(inputs.release_version, 'major') }}
+          IS_FEATURE: ${{ inputs.branch == 'feature' }}
+          IS_MAINTENANCE: ${{ inputs.branch == 'maintenance' }}
+        run: |
+          # Prevent major releases on maintenance branches
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_MAINTENANCE}" == 'true' ]; then
+            echo "::error::Maintenance branches cannot have major releases"
+            exit 1
+          fi
+
+          # Ensure major releases only happen from feature branches
+          if [ "${IS_MAJOR}" == 'true' -a "${IS_FEATURE}" == 'false' ]; then
+            echo "::error::Major releases must come from feature branches"
+            exit 1
+          fi
+
+  # Calculate version numbers and determine target branches
+  calculate:
+    runs-on: 'ubuntu-latest'
+    outputs:
+      target_branch: ${{ steps.define_branches.outputs.target_branch }}
+      next_lts_branch: ${{ steps.define_branches.outputs.next_lts_branch }}
+    needs: ['check']
+    steps:
+      - name: 👷 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Always checkout main first to calculate the target branch
+          ref: 'main'
+
+      - name: 🧮 Calculate version numbers
+        id: calculate_versions
+        shell: bash
+        env:
+          BRANCH_TYPE: ${{ inputs.branch }}
+          RELEASE_TYPE: ${{ inputs.release_version }}
+        run: |
+          # Extract the current major version from package.json
+          PKG_JSON='packages/wdio-electron-service/package.json'
+          CURRENT_MAJOR_VERSION="$(cat ${PKG_JSON} |jq -r '.version' |grep -o -E "([0-9]+){1})?" |head -n1)"
+          echo "current-major-version=${CURRENT_MAJOR_VERSION}"
+          echo "current-major-version=${CURRENT_MAJOR_VERSION}" >>"${GITHUB_OUTPUT}"
+
+          # LTS is the previous major version
+          echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))"
+          echo "lts-major-version=$((CURRENT_MAJOR_VERSION - 1))" >>"${GITHUB_OUTPUT}"
+
+          # Feature is the next major version
+          echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))"
+          echo "feature-major-version=$((CURRENT_MAJOR_VERSION + 1))" >>"${GITHUB_OUTPUT}"
+
+      - name: 🎯 Define target branch names
+        id: define_branches
+        shell: bash
+        env:
+          BRANCH_TYPE: ${{ inputs.branch }}
+          LTS_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.lts-major-version}}
+          CURRENT_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.current-major-version}}
+          FEATURE_MAJOR_VERSION: ${{ steps.calculate_versions.outputs.feature-major-version}}
+        run: |
+          if [ "${BRANCH_TYPE}" == 'feature' ]; then
+            # For feature branches, use as-is
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x"
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x" >> $GITHUB_OUTPUT
+          elif [ "${BRANCH_TYPE}" == 'maintenance' ]; then
+            # For maintenance branches, use as-is
+            echo "target_branch=v${LTS_MAJOR_VERSION}.x"
+            echo "target_branch=v${LTS_MAJOR_VERSION}.x" >> $GITHUB_OUTPUT
+          else
+            # For main, use as-is
+            echo "target_branch=${BRANCH_TYPE}" >> $GITHUB_OUTPUT
+          fi
+
+          # The next LTS branch will be the current major version
+          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}.x"
+          echo "next_lts_branch=v${CURRENT_MAJOR_VERSION}.x" >>"${GITHUB_OUTPUT}"
+
+      - name: 🔍 Verify branch exists
+        shell: bash
+        env:
+          BRANCH_TYPE: ${{ inputs.branch }}
+          TARGET_BRANCH: ${{ steps.define_branches.outputs.target_branch }}
+        run: |
+          echo "Verifying branch: ${TARGET_BRANCH}"
+
+          # Check if branch exists remotely
+          if ! git ls-remote --heads origin "${TARGET_BRANCH}" | grep -q "${TARGET_BRANCH}"; then
+            if [ "${BRANCH_TYPE}" == "feature" ]; then
+              echo "::error::Feature branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
+              echo "::error::Expected branch naming convention: feature/v{next_major_version} (e.g., feature/v9)"
+            elif [ "${BRANCH_TYPE}" == "maintenance" ]; then
+              echo "::error::Maintenance branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
+              echo "::error::Expected branch naming convention: v{previous_major_version} (e.g., v8)"
+            else
+              echo "::error::Branch '${TARGET_BRANCH}' does not exist."
+            fi
+            exit 1
+          fi
+
+          echo "✅ Branch '${TARGET_BRANCH}' exists and is valid"
