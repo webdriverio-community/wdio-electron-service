@@ -75,78 +75,165 @@ jobs:
 
       - name: 📦 Configure NPM registry
         shell: bash
-        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         run: |
-          # Set up NPM authentication for publishing
-          pnpm set registry "https://registry.npmjs.org/"
-          pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
-          pnpm whoami
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: Would configure NPM registry for publishing"
+          else
+            # Set up NPM authentication for publishing
+            pnpm set registry "https://registry.npmjs.org/"
+            pnpm set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
+            pnpm whoami
+          fi
 
       - name: 🏷️ Create Release and Tags
         # Uses turbo-version to bump versions and create git tags
-        run: pnpm turbo-version -b ${{ inputs.release_version }}
+        run: |
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            # Get the current version
+            CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            echo "Current version: $CURRENT_VERSION"
+
+            # Run turbo-version to calculate the next version
+            # This will update package.json files but won't create git tags or push anything
+            echo "Running turbo-version to calculate the next version..."
+            pnpm turbo-version -b ${{ inputs.release_version }}
+
+            # Get the new version that was calculated
+            NEW_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            echo "Next version would be: $NEW_VERSION"
+
+            # Show what files were changed
+            echo "Files that would be modified:"
+            git diff --name-only
+
+            # Show the actual changes
+            echo "Changes that would be made:"
+            git diff --color
+
+            echo "DRY RUN: Would create release and tags with command: pnpm turbo-version -b ${{ inputs.release_version }}"
+            echo "DRY RUN: Would bump version from $CURRENT_VERSION to $NEW_VERSION"
+            echo "DRY RUN: Would create git tag v$NEW_VERSION"
+
+            # Store the new version for later use
+            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+            # Reset changes made by turbo-version since this is a dry run
+            git reset --hard HEAD
+          else
+            pnpm turbo-version -b ${{ inputs.release_version }}
+            # Store the new version for later use
+            NEW_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          fi
 
       - name: 📢 Publish to NPM
         shell: bash
-        if: ${{ github.repository == 'webdriverio-community/wdio-electron-service' && !inputs.dry_run }}
         env:
           RELEASE_BRANCH: ${{ inputs.branch_type }}
         run: |
           # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
           test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
-          pnpx tsx scripts/publish.ts --tag ${TAG} ${{ inputs.dry_run && '--dry-run' || '' }}
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            # Get package names that would be published
+            echo "DRY RUN: Would publish the following packages to NPM with tag '${TAG}':"
+            PACKAGES=()
+            while IFS= read -r pkg_json; do
+              if [[ "$pkg_json" != *"node_modules"* ]]; then
+                PKG_NAME=$(jq -r '.name' "$pkg_json")
+                if [[ "$PKG_NAME" == @wdio/* ]]; then
+                  echo "  - $PKG_NAME@${{ env.NEW_VERSION }}"
+                  PACKAGES+=("$PKG_NAME")
+                fi
+              fi
+            done < <(find packages -name "package.json" -not -depth 2)
+
+            echo "DRY RUN: Would publish to NPM with command: pnpx tsx scripts/publish.ts --tag ${TAG}"
+          else
+            if [[ "${{ github.repository }}" == "webdriverio-community/wdio-electron-service" ]]; then
+              pnpx tsx scripts/publish.ts --tag ${TAG}
+            else
+              echo "Skipping actual publish because this is not the official repository"
+            fi
+          fi
 
       # Verify the published packages
       - name: 🔍 Verify published packages
-        if: ${{ !inputs.dry_run }}
         shell: bash
         run: |
-          echo "::group::Verifying published packages"
-          # Get the version that was just published
-          VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          echo "Published version: $VERSION"
-          # Dynamically get package names from package.json files
-          PACKAGES=()
-          while IFS= read -r pkg_json; do
-            if [[ "$pkg_json" != *"node_modules"* ]]; then
-              PKG_NAME=$(jq -r '.name' "$pkg_json")
-              if [[ "$PKG_NAME" == @wdio/* ]]; then
-                PACKAGES+=("$PKG_NAME")
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: Would verify the following packages were published successfully:"
+            PACKAGES=()
+            while IFS= read -r pkg_json; do
+              if [[ "$pkg_json" != *"node_modules"* ]]; then
+                PKG_NAME=$(jq -r '.name' "$pkg_json")
+                if [[ "$PKG_NAME" == @wdio/* ]]; then
+                  echo "  - $PKG_NAME@${{ env.NEW_VERSION }}"
+                  PACKAGES+=("$PKG_NAME")
+                fi
               fi
-            fi
-          done < <(find packages -name "package.json" -not -depth 2)
-          echo "Found packages to verify: ${PACKAGES[*]}"
-          # Wait a moment for NPM to index the packages
-          echo "Waiting for NPM to index the packages..."
-          sleep 10
-          # Verify each package was published correctly
-          for pkg in "${PACKAGES[@]}"; do
-            echo "Verifying $pkg@$VERSION..."
-            # Check if the package exists on NPM with the expected version
-            if ! npm view "$pkg@$VERSION" version &>/dev/null; then
-              echo "::error::Package $pkg@$VERSION not found on NPM"
-              exit 1
-            fi
-            echo "✅ $pkg@$VERSION verified"
-          done
-          echo "All packages verified successfully"
-          echo "::endgroup::"
+            done < <(find packages -name "package.json" -not -depth 2)
+
+            echo "DRY RUN: Would wait for NPM to index the packages"
+            echo "DRY RUN: Would check each package exists on NPM with the expected version"
+          else
+            echo "::group::Verifying published packages"
+            # Get the version that was just published
+            VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            echo "Published version: $VERSION"
+            # Dynamically get package names from package.json files
+            PACKAGES=()
+            while IFS= read -r pkg_json; do
+              if [[ "$pkg_json" != *"node_modules"* ]]; then
+                PKG_NAME=$(jq -r '.name' "$pkg_json")
+                if [[ "$PKG_NAME" == @wdio/* ]]; then
+                  PACKAGES+=("$PKG_NAME")
+                fi
+              fi
+            done < <(find packages -name "package.json" -not -depth 2)
+            echo "Found packages to verify: ${PACKAGES[*]}"
+            # Wait a moment for NPM to index the packages
+            echo "Waiting for NPM to index the packages..."
+            sleep 10
+            # Verify each package was published correctly
+            for pkg in "${PACKAGES[@]}"; do
+              echo "Verifying $pkg@$VERSION..."
+              # Check if the package exists on NPM with the expected version
+              if ! npm view "$pkg@$VERSION" version &>/dev/null; then
+                echo "::error::Package $pkg@$VERSION not found on NPM"
+                exit 1
+              fi
+              echo "✅ $pkg@$VERSION verified"
+            done
+            echo "All packages verified successfully"
+            echo "::endgroup::"
+          fi
 
       - name: 🚀 Push Tags and Commits
         id: push_tags
         shell: bash
-        if: ${{ !inputs.dry_run }}
         run: |
-          echo "Git log:"
-          git log --oneline -n 5
-          # Get the most recent tag (the one we just created)
-          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "Release tag: ${RELEASE_TAG}"
-          echo "Pushing tags and commits..."
-          # Push tags and commits without running the pre-push hook
-          git push --tags --no-verify && git push --no-verify
-          # Pass the release tag to the next step
-          echo "release_tag=${RELEASE_TAG}" >>"${GITHUB_OUTPUT}"
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            RELEASE_TAG="v${{ env.NEW_VERSION }}"
+            echo "DRY RUN: Would push tags and commits to remote repository"
+            echo "DRY RUN: Would push tag $RELEASE_TAG"
+            echo "DRY RUN: Would push branch ${{ inputs.target_branch }}"
+
+            # For dry run, set the calculated release tag for downstream jobs
+            echo "release_tag=$RELEASE_TAG" >>"${GITHUB_OUTPUT}"
+            echo "DRY RUN: Set release_tag output to $RELEASE_TAG for downstream jobs"
+          else
+            echo "Git log:"
+            git log --oneline -n 5
+            # Get the most recent tag (the one we just created)
+            RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "Release tag: ${RELEASE_TAG}"
+            echo "Pushing tags and commits..."
+            # Push tags and commits without running the pre-push hook
+            git push --tags --no-verify && git push --no-verify
+            # Pass the release tag to the next step
+            echo "release_tag=${RELEASE_TAG}" >>"${GITHUB_OUTPUT}"
+          fi
 
       - name: 📝 Create GitHub Release
         if: ${{ !inputs.dry_run }}
@@ -159,7 +246,14 @@ jobs:
           tag_name: ${{ steps.push_tags.outputs.release_tag }}
           token: ${{ secrets.github_bot_token }}
 
-      - name: 📋 Log changes (dry run only)
+      - name: 📋 Log GitHub Release (dry run only)
         if: ${{ inputs.dry_run }}
         run: |
-          echo "DRY RUN: No changes were made."
+          RELEASE_TAG="v${{ env.NEW_VERSION }}"
+          echo "DRY RUN: Would create a GitHub release with:"
+          echo "  - Tag name: $RELEASE_TAG"
+          echo "  - Draft: true"
+          echo "  - Generate release notes: true"
+          echo "  - Prerelease: ${{ contains(inputs.release_version, 'pre') }}"
+          echo "  - Repository: ${{ github.repository }}"
+          echo "  - Title: Release $RELEASE_TAG"

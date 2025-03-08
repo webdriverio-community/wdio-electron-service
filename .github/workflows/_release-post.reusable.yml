@@ -53,254 +53,324 @@ jobs:
           node-version: '20'
 
       - name: 🚧 Create new LTS branch
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run }}
         shell: bash
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
         run: |
-          echo "::group::Creating maintenance branch"
-          # Check if branch already exists remotely
-          if git ls-remote --heads origin ${NEW_LTS_BRANCH} | grep -q ${NEW_LTS_BRANCH}; then
-            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists remotely."
-            exit 0
-          fi
-
-          # Check if branch exists locally
-          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
-            echo "The maintenance branch ${NEW_LTS_BRANCH} already exists locally."
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "DRY RUN: Would create new LTS branch ${NEW_LTS_BRANCH}"
+              echo "DRY RUN: Would add maintenance information to README.md and create MAINTENANCE.md"
+            else
+              echo "DRY RUN: Not a major release, would skip LTS branch creation"
+            fi
           else
-            echo "Creating the maintenance branch ${NEW_LTS_BRANCH}..."
-            RELEASE_TAG_COMMIT="$(git rev-parse ${RELEASE_TAG}^{commit})"
-            LTS_BRANCH_PARENT_COMMIT="$(git rev-parse ${RELEASE_TAG_COMMIT}^1)"
-            git branch ${NEW_LTS_BRANCH} ${LTS_BRANCH_PARENT_COMMIT}
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "::group::Creating maintenance branch"
+              # Check if branch already exists remotely
+              if git ls-remote --heads origin ${NEW_LTS_BRANCH} | grep -q ${NEW_LTS_BRANCH}; then
+                echo "The maintenance branch ${NEW_LTS_BRANCH} already exists remotely."
+                exit 0
+              fi
 
-            # Switch to the new branch to add documentation
-            git checkout ${NEW_LTS_BRANCH}
+              # Check if branch exists locally
+              if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+                echo "The maintenance branch ${NEW_LTS_BRANCH} already exists locally."
+              else
+                echo "Creating the maintenance branch ${NEW_LTS_BRANCH}..."
+                RELEASE_TAG_COMMIT="$(git rev-parse ${RELEASE_TAG}^{commit})"
+                LTS_BRANCH_PARENT_COMMIT="$(git rev-parse ${RELEASE_TAG_COMMIT}^1)"
+                git branch ${NEW_LTS_BRANCH} ${LTS_BRANCH_PARENT_COMMIT}
 
-            # Use the TypeScript script to update documentation
-            pnpx tsx scripts/update-maintenance-docs.ts maintenance ${NEW_LTS_BRANCH}
+                # Switch to the new branch to add documentation
+                git checkout ${NEW_LTS_BRANCH}
 
-            # Stage and commit the changes
-            git add MAINTENANCE.md README.md
-            git commit -m "docs: add maintenance branch information to README.md and MAINTENANCE.md [skip ci]"
+                # Use the TypeScript script to update documentation
+                pnpx tsx scripts/update-maintenance-docs.ts maintenance ${NEW_LTS_BRANCH}
 
-            echo "✅ Added maintenance information to README.md and created MAINTENANCE.md"
+                # Stage and commit the changes
+                git add MAINTENANCE.md README.md
+                git commit -m "docs: add maintenance branch information to README.md and MAINTENANCE.md [skip ci]"
 
-            # Return to the original branch
-            git checkout ${{ inputs.target_branch }}
+                echo "✅ Added maintenance information to README.md and created MAINTENANCE.md"
+
+                # Return to the original branch
+                git checkout ${{ inputs.target_branch }}
+              fi
+
+              echo "✅ Maintenance branch ${NEW_LTS_BRANCH} is ready"
+              echo "::endgroup::"
+            else
+              echo "Not a major release, skipping LTS branch creation"
+            fi
           fi
-
-          echo "✅ Maintenance branch ${NEW_LTS_BRANCH} is ready"
-          echo "::endgroup::"
 
       - name: 📁 Archive old maintenance branch
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run }}
         shell: bash
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
         run: |
-          echo "::group::Archiving old maintenance branch"
-
-          # Calculate the old maintenance branch (two versions back)
-          # Extract the version number from the new LTS branch (e.g., v8 -> 8)
-          NEW_LTS_VERSION=$(echo ${NEW_LTS_BRANCH} | grep -o -E "([0-9]+){1}" | head -n1)
-
-          # Calculate the old LTS version (two versions back from current)
-          OLD_LTS_VERSION=$((NEW_LTS_VERSION - 1))
-          OLD_LTS_BRANCH="v${OLD_LTS_VERSION}"
-
-          echo "New LTS branch: ${NEW_LTS_BRANCH} (version ${NEW_LTS_VERSION})"
-          echo "Old LTS branch to archive: ${OLD_LTS_BRANCH} (version ${OLD_LTS_VERSION})"
-
-          # Check if the old branch exists
-          if git ls-remote --heads origin ${OLD_LTS_BRANCH} | grep -q ${OLD_LTS_BRANCH}; then
-            echo "Old maintenance branch ${OLD_LTS_BRANCH} exists, preparing to archive it"
-
-            # Fetch the old branch
-            git fetch origin ${OLD_LTS_BRANCH}
-
-            # Create a local copy of the branch
-            git checkout -b archive-temp origin/${OLD_LTS_BRANCH}
-
-            # Use the TypeScript script to update documentation for archiving
-            pnpx tsx scripts/update-maintenance-docs.ts archive ${NEW_LTS_BRANCH} ${OLD_LTS_BRANCH}
-
-            # Commit and push the change
-            git add ARCHIVED.md README.md
-            git commit -m "docs: mark branch as archived in README.md and ARCHIVED.md [skip ci]"
-            git push origin archive-temp:${OLD_LTS_BRANCH}
-
-            echo "✅ Successfully archived ${OLD_LTS_BRANCH}"
-
-            # Return to the original branch
-            git checkout ${{ inputs.target_branch }}
-            git branch -D archive-temp
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "DRY RUN: Would archive old maintenance branch"
+              # Calculate the old maintenance branch (two versions back)
+              NEW_LTS_VERSION=$(echo ${NEW_LTS_BRANCH} | grep -o -E "([0-9]+){1}" | head -n1)
+              OLD_LTS_VERSION=$((NEW_LTS_VERSION - 1))
+              OLD_LTS_BRANCH="v${OLD_LTS_VERSION}"
+              echo "DRY RUN: Would archive ${OLD_LTS_BRANCH} branch"
+            else
+              echo "DRY RUN: Not a major release, would skip archiving old maintenance branch"
+            fi
           else
-            echo "Old maintenance branch ${OLD_LTS_BRANCH} does not exist, skipping archival"
-          fi
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "::group::Archiving old maintenance branch"
 
-          echo "::endgroup::"
+              # Calculate the old maintenance branch (two versions back)
+              # Extract the version number from the new LTS branch (e.g., v8 -> 8)
+              NEW_LTS_VERSION=$(echo ${NEW_LTS_BRANCH} | grep -o -E "([0-9]+){1}" | head -n1)
+
+              # Calculate the old LTS version (two versions back from current)
+              OLD_LTS_VERSION=$((NEW_LTS_VERSION - 1))
+              OLD_LTS_BRANCH="v${OLD_LTS_VERSION}"
+
+              echo "New LTS branch: ${NEW_LTS_BRANCH} (version ${NEW_LTS_VERSION})"
+              echo "Old LTS branch to archive: ${OLD_LTS_BRANCH} (version ${OLD_LTS_VERSION})"
+
+              # Check if the old branch exists
+              if git ls-remote --heads origin ${OLD_LTS_BRANCH} | grep -q ${OLD_LTS_BRANCH}; then
+                echo "Old maintenance branch ${OLD_LTS_BRANCH} exists, preparing to archive it"
+
+                # Fetch the old branch
+                git fetch origin ${OLD_LTS_BRANCH}
+
+                # Create a local copy of the branch
+                git checkout -b archive-temp origin/${OLD_LTS_BRANCH}
+
+                # Use the TypeScript script to update documentation for archiving
+                pnpx tsx scripts/update-maintenance-docs.ts archive ${NEW_LTS_BRANCH} ${OLD_LTS_BRANCH}
+
+                # Commit and push the change
+                git add ARCHIVED.md README.md
+                git commit -m "docs: mark branch as archived in README.md and ARCHIVED.md [skip ci]"
+                git push origin archive-temp:${OLD_LTS_BRANCH}
+
+                echo "✅ Successfully archived ${OLD_LTS_BRANCH}"
+
+                # Return to the original branch
+                git checkout ${{ inputs.target_branch }}
+                git branch -D archive-temp
+              else
+                echo "Old maintenance branch ${OLD_LTS_BRANCH} does not exist, skipping archival"
+              fi
+
+              echo "::endgroup::"
+            else
+              echo "Not a major release, skipping archiving old maintenance branch"
+            fi
+          fi
 
       - name: 🌱 Create new feature branch for next major version
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && inputs.branch_type == 'feature' }}
         shell: bash
         run: |
-          echo "::group::Creating feature branch for next major version"
-
-          # Calculate the next major version
-          CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
-          NEXT_MAJOR=$((CURRENT_MAJOR + 1))
-          FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
-
-          # Check if branch already exists remotely
-          if git ls-remote --heads origin ${FEATURE_BRANCH} | grep -q ${FEATURE_BRANCH}; then
-            echo "The feature branch ${FEATURE_BRANCH} already exists remotely."
-            exit 0
-          fi
-
-          # Check if branch exists locally
-          if git rev-parse --verify --quiet "${FEATURE_BRANCH}" >/dev/null; then
-            echo "The feature branch ${FEATURE_BRANCH} already exists locally."
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && inputs.branch_type == 'feature' }}" == "true" ]]; then
+              # Calculate the next major version
+              CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+              CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+              NEXT_MAJOR=$((CURRENT_MAJOR + 1))
+              FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
+              echo "DRY RUN: Would create new feature branch ${FEATURE_BRANCH} for next major version"
+            else
+              echo "DRY RUN: Not a major release from feature branch, would skip creating new feature branch"
+            fi
           else
-            echo "Creating the feature branch ${FEATURE_BRANCH}..."
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && inputs.branch_type == 'feature' }}" == "true" ]]; then
+              echo "::group::Creating feature branch for next major version"
 
-            # Create the branch from main
-            git checkout main
-            git pull origin main
-            git branch ${FEATURE_BRANCH}
-            git checkout ${FEATURE_BRANCH}
+              # Calculate the next major version
+              CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+              CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+              NEXT_MAJOR=$((CURRENT_MAJOR + 1))
+              FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
 
-            git commit --allow-empty -m "chore: initialize feature branch for v${NEXT_MAJOR} [skip ci]"
-            echo "Initialized feature branch with empty commit"
+              # Check if branch already exists remotely
+              if git ls-remote --heads origin ${FEATURE_BRANCH} | grep -q ${FEATURE_BRANCH}; then
+                echo "The feature branch ${FEATURE_BRANCH} already exists remotely."
+                exit 0
+              fi
 
-            # Return to the original branch
-            git checkout ${{ inputs.target_branch }}
+              # Check if branch exists locally
+              if git rev-parse --verify --quiet "${FEATURE_BRANCH}" >/dev/null; then
+                echo "The feature branch ${FEATURE_BRANCH} already exists locally."
+              else
+                echo "Creating the feature branch ${FEATURE_BRANCH}..."
+
+                # Create the branch from main
+                git checkout main
+                git pull origin main
+                git branch ${FEATURE_BRANCH}
+                git checkout ${FEATURE_BRANCH}
+
+                git commit --allow-empty -m "chore: initialize feature branch for v${NEXT_MAJOR} [skip ci]"
+                echo "Initialized feature branch with empty commit"
+
+                # Return to the original branch
+                git checkout ${{ inputs.target_branch }}
+              fi
+
+              echo "✅ Feature branch ${FEATURE_BRANCH} is ready"
+              echo "::endgroup::"
+            else
+              echo "Not a major release from feature branch, skipping creating new feature branch"
+            fi
           fi
-
-          echo "✅ Feature branch ${FEATURE_BRANCH} is ready"
-          echo "::endgroup::"
 
       - name: 🔄 Merge feature branch to main
-        if: ${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && !inputs.dry_run && startsWith(inputs.target_branch, 'feature/') }}
         shell: bash
         run: |
-          echo "::group::Merging feature branch to main"
-
-          # Ensure we have the latest main branch
-          git fetch origin main
-
-          # Check if we're on a feature branch
-          if [[ "${{ inputs.target_branch }}" == feature/* ]]; then
-            echo "We are on feature branch ${{ inputs.target_branch }}, preparing to merge to main"
-
-            # Create a temporary branch from main to merge into
-            git checkout origin/main -b temp-main-for-merge
-
-            # Set git identity for potential conflict resolution commits
-            git config user.email "bot@webdriver.io"
-            git config user.name "WebdriverIO Release Bot"
-
-            # Try to merge the feature branch into the temp branch
-            # Using --no-ff to ensure a merge commit is created
-            if ! git merge --no-ff ${{ inputs.target_branch }} -m "feat: merge ${{ inputs.target_branch }} to main for v$(jq -r '.version' packages/wdio-electron-service/package.json) release [skip ci]"; then
-              echo "::error::Merge conflict detected when merging ${{ inputs.target_branch }} to main"
-
-              # Abort the merge
-              git merge --abort
-
-              # Create a detailed error message
-              echo "::group::Merge Conflict Details"
-              echo "The automated merge from ${{ inputs.target_branch }} to main failed due to conflicts."
-              echo "Please resolve these conflicts manually by:"
-              echo "1. Creating a PR from ${{ inputs.target_branch }} to main"
-              echo "2. Resolving the conflicts in the PR"
-              echo "3. Merging the PR"
-              echo "4. Then run this release workflow again from the main branch"
-
-              # Try to identify conflicting files to provide more context
-              echo "Potential conflicting files:"
-              git checkout ${{ inputs.target_branch }}
-              FEATURE_FILES=$(git diff --name-only origin/main)
-              git checkout origin/main
-              MAIN_FILES=$(git diff --name-only ${{ inputs.target_branch }})
-              echo "$FEATURE_FILES" | grep -f <(echo "$MAIN_FILES") || echo "Could not determine specific conflicting files"
-              echo "::endgroup::"
-
-              # Return to the original branch
-              git checkout ${{ inputs.target_branch }}
-
-              # Exit with error
-              exit 1
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && startsWith(inputs.target_branch, 'feature/') }}" == "true" ]]; then
+              echo "DRY RUN: Would merge feature branch ${{ inputs.target_branch }} to main"
+            else
+              echo "DRY RUN: Not a major release from feature branch, would skip merge to main"
             fi
-
-            # If we get here, the merge was successful
-            echo "Successfully merged ${{ inputs.target_branch }} to temp-main-for-merge"
-
-            # We'll push this branch later in the push step
-
-            # Set a flag to indicate successful merge
-            echo "MERGE_SUCCESSFUL=true" >> $GITHUB_ENV
-
-            # Return to the original branch for the rest of the release process
-            git checkout ${{ inputs.target_branch }}
           else
-            echo "Not on a feature branch, skipping merge to main"
-          fi
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && startsWith(inputs.target_branch, 'feature/') }}" == "true" ]]; then
+              echo "::group::Merging feature branch to main"
 
-          echo "::endgroup::"
+              # Ensure we have the latest main branch
+              git fetch origin main
+
+              # Check if we're on a feature branch
+              if [[ "${{ inputs.target_branch }}" == feature/* ]]; then
+                echo "We are on feature branch ${{ inputs.target_branch }}, preparing to merge to main"
+
+                # Create a temporary branch from main to merge into
+                git checkout origin/main -b temp-main-for-merge
+
+                # Set git identity for potential conflict resolution commits
+                git config user.email "bot@webdriver.io"
+                git config user.name "WebdriverIO Release Bot"
+
+                # Try to merge the feature branch into the temp branch
+                # Using --no-ff to ensure a merge commit is created
+                if ! git merge --no-ff ${{ inputs.target_branch }} -m "feat: merge ${{ inputs.target_branch }} to main for v$(jq -r '.version' packages/wdio-electron-service/package.json) release [skip ci]"; then
+                  echo "::error::Merge conflict detected when merging ${{ inputs.target_branch }} to main"
+
+                  # Abort the merge
+                  git merge --abort
+
+                  # Create a detailed error message
+                  echo "::group::Merge Conflict Details"
+                  echo "The automated merge from ${{ inputs.target_branch }} to main failed due to conflicts."
+                  echo "Please resolve these conflicts manually by:"
+                  echo "1. Creating a PR from ${{ inputs.target_branch }} to main"
+                  echo "2. Resolving the conflicts in the PR"
+                  echo "3. Merging the PR"
+                  echo "4. Then run this release workflow again from the main branch"
+
+                  # Try to identify conflicting files to provide more context
+                  echo "Potential conflicting files:"
+                  git checkout ${{ inputs.target_branch }}
+                  FEATURE_FILES=$(git diff --name-only origin/main)
+                  git checkout origin/main
+                  MAIN_FILES=$(git diff --name-only ${{ inputs.target_branch }})
+                  echo "$FEATURE_FILES" | grep -f <(echo "$MAIN_FILES") || echo "Could not determine specific conflicting files"
+                  echo "::endgroup::"
+
+                  # Return to the original branch
+                  git checkout ${{ inputs.target_branch }}
+
+                  # Exit with error
+                  exit 1
+                fi
+
+                # If we get here, the merge was successful
+                echo "Successfully merged ${{ inputs.target_branch }} to temp-main-for-merge"
+
+                # We'll push this branch later in the push step
+
+                # Set a flag to indicate successful merge
+                echo "MERGE_SUCCESSFUL=true" >> $GITHUB_ENV
+
+                # Return to the original branch for the rest of the release process
+                git checkout ${{ inputs.target_branch }}
+              else
+                echo "Not on a feature branch, skipping merge to main"
+              fi
+
+              echo "::endgroup::"
+            else
+              echo "Not a major release from feature branch, skipping merge to main"
+            fi
+          fi
 
       - name: 🚀 Push Tags & Branches
         id: push_tags
         shell: bash
-        if: ${{ !inputs.dry_run }}
         env:
           NEW_LTS_BRANCH: ${{ inputs.next_lts_branch }}
         run: |
-          echo "Git log:"
-          git log --oneline -n 5
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: Would push tags and branches"
 
-          # Get the most recent tag (the one we just created)
-          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "Release tag: $RELEASE_TAG"
+            # Calculate the next major version for feature branch
+            CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+            NEXT_MAJOR=$((CURRENT_MAJOR + 1))
+            FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
 
-          echo "Pushing tags and commits..."
-          # Push tags and commits without running the pre-push hook
-          git push --tags --no-verify && git push --no-verify
+            echo "DRY RUN: Would push the following branches if they exist:"
+            echo "  - ${{ inputs.target_branch }}"
+            echo "  - ${NEW_LTS_BRANCH} (if created)"
+            echo "  - ${FEATURE_BRANCH} (if created)"
+            echo "  - main (if merged from feature branch)"
+          else
+            echo "Git log:"
+            git log --oneline -n 5
 
-          # Pass the release tag to the next step
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
+            # Get the most recent tag (the one we just created)
+            RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "Release tag: $RELEASE_TAG"
 
-          # Push the maintenance branch if it exists locally
-          if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
-            echo "Pushing the maintenance branch: ${NEW_LTS_BRANCH}..."
-            git push --no-verify --set-upstream origin "${NEW_LTS_BRANCH}"
-            echo "✅ Successfully pushed maintenance branch ${NEW_LTS_BRANCH}"
-          fi
+            echo "Pushing tags and commits..."
+            # Push tags and commits without running the pre-push hook
+            git push --tags --no-verify && git push --no-verify
 
-          # Calculate the next major version for feature branch
-          CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-          CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
-          NEXT_MAJOR=$((CURRENT_MAJOR + 1))
-          FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
+            # Pass the release tag to the next step
+            echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
-          # Push the feature branch if it exists locally
-          if git rev-parse --verify --quiet "${FEATURE_BRANCH}" >/dev/null; then
-            echo "Pushing the feature branch: ${FEATURE_BRANCH}..."
-            git push --no-verify --set-upstream origin "${FEATURE_BRANCH}"
-            echo "✅ Successfully pushed feature branch ${FEATURE_BRANCH}"
-          fi
+            # Push the maintenance branch if it exists locally
+            if git rev-parse --verify --quiet "${NEW_LTS_BRANCH}" >/dev/null; then
+              echo "Pushing the maintenance branch: ${NEW_LTS_BRANCH}..."
+              git push --no-verify --set-upstream origin "${NEW_LTS_BRANCH}"
+              echo "✅ Successfully pushed maintenance branch ${NEW_LTS_BRANCH}"
+            fi
 
-          # If we merged a feature branch to main, push the main branch
-          if [[ "${MERGE_SUCCESSFUL}" == "true" ]] && git rev-parse --verify --quiet "temp-main-for-merge" >/dev/null; then
-            echo "Pushing merged main branch..."
-            git checkout temp-main-for-merge
-            git push --no-verify --force-with-lease origin temp-main-for-merge:main
-            echo "✅ Successfully pushed merged main branch"
+            # Calculate the next major version for feature branch
+            CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+            NEXT_MAJOR=$((CURRENT_MAJOR + 1))
+            FEATURE_BRANCH="feature/v${NEXT_MAJOR}"
 
-            # Return to the original branch
-            git checkout ${{ inputs.target_branch }}
+            # Push the feature branch if it exists locally
+            if git rev-parse --verify --quiet "${FEATURE_BRANCH}" >/dev/null; then
+              echo "Pushing the feature branch: ${FEATURE_BRANCH}..."
+              git push --no-verify --set-upstream origin "${FEATURE_BRANCH}"
+              echo "✅ Successfully pushed feature branch ${FEATURE_BRANCH}"
+            fi
+
+            # If we merged a feature branch to main, push the main branch
+            if [[ "${MERGE_SUCCESSFUL}" == "true" ]] && git rev-parse --verify --quiet "temp-main-for-merge" >/dev/null; then
+              echo "Pushing merged main branch..."
+              git checkout temp-main-for-merge
+              git push --no-verify --force-with-lease origin temp-main-for-merge:main
+              echo "✅ Successfully pushed merged main branch"
+
+              # Return to the original branch
+              git checkout ${{ inputs.target_branch }}
+            fi
           fi
 
       # Create appropriate milestones based on the release type
@@ -318,22 +388,31 @@ jobs:
       # Prepare for updating labels from release:future to release:next
       - name: 🔄 Prepare Release Label Updates
         # Skip during dry runs and prereleases
-        if: ${{ !inputs.dry_run && !contains(inputs.release_version, 'pre') }}
-        env:
-          # Use the branch_type input to determine which track to update
-          TRACK: ${{ inputs.branch_type }}
         run: |
-          echo "::group::Preparing release label updates"
-          echo "After the release is complete, you should manually run the label update script:"
-          echo ""
-          echo "  GITHUB_TOKEN=<your-token> TRACK=$TRACK pnpx tsx scripts/update-release-labels.ts"
-          echo ""
-          echo "To create a GitHub token:"
-          echo "1. Go to https://github.com/settings/tokens"
-          echo "2. Click 'Generate new token' > 'Generate new token (classic)'"
-          echo "3. Give it a name like 'Label Update Script'"
-          echo "4. Select the 'repo' scope (to manage repository labels)"
-          echo "5. Click 'Generate token' and copy the token"
-          echo ""
-          echo "This will help you review and update issues/PRs from 'release:future' to 'release:next'"
-          echo "::endgroup::"
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            if [[ "${{ !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "DRY RUN: Would prepare release label updates"
+              echo "DRY RUN: Would suggest running: GITHUB_TOKEN=<your-token> TRACK=${{ inputs.branch_type }} pnpx tsx scripts/update-release-labels.ts"
+            else
+              echo "DRY RUN: Pre-release, would skip label updates"
+            fi
+          else
+            if [[ "${{ !contains(inputs.release_version, 'pre') }}" == "true" ]]; then
+              echo "::group::Preparing release label updates"
+              echo "After the release is complete, you should manually run the label update script:"
+              echo ""
+              echo "  GITHUB_TOKEN=<your-token> TRACK=${{ inputs.branch_type }} pnpx tsx scripts/update-release-labels.ts"
+              echo ""
+              echo "To create a GitHub token:"
+              echo "1. Go to https://github.com/settings/tokens"
+              echo "2. Click 'Generate new token' > 'Generate new token (classic)'"
+              echo "3. Give it a name like 'Label Update Script'"
+              echo "4. Select the 'repo' scope (to manage repository labels)"
+              echo "5. Click 'Generate token' and copy the token"
+              echo ""
+              echo "This will help you review and update issues/PRs from 'release:future' to 'release:next'"
+              echo "::endgroup::"
+            else
+              echo "Pre-release, skipping label updates"
+            fi
+          fi
