@@ -249,7 +249,7 @@ jobs:
       - name: 📋 Log GitHub Release (dry run only)
         if: ${{ inputs.dry_run }}
         run: |
-          RELEASE_TAG="v${{ env.NEW_VERSION }}"
+          RELEASE_TAG="v${NEW_VERSION}"
           echo "DRY RUN: Would create a GitHub release with:"
           echo "  - Tag name: $RELEASE_TAG"
           echo "  - Draft: true"
