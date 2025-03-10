@@ -1,0 +1,120 @@
+name: E2E Tests
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      os:
+        description: 'OS of runner'
+        required: true
+        type: string
+      node-version:
+        description: 'A version of Node.js'
+        required: true
+        type: string
+      build-command:
+        description: 'build command for sample apps (build or build:mac-universal)'
+        type: string
+        default: 'build'
+      scenario:
+        description: 'Application type of electron (forge, builder or no-binary)'
+        required: true
+        type: string
+      type:
+        description: 'Type of javascript (*, esm or cjs)'
+        type: string
+        default: '*'
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  e2e:
+    name: E2E tests (${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }})
+    runs-on: ${{ inputs.os }}
+    strategy:
+      fail-fast: false
+    steps:
+      - name: 👷 Checkout
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: 🛠️ Setup workspace
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: ⬇️ Download Build Archive
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: .
+          filename: wdio-electron-service-build.zip
+
+      - name: 🔧 Workaround for linux
+        # https://github.com/electron/electron/issues/41066
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: 🪄 Generate the filter for building apps
+        id: gen-build
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const generateBuildFilter = (scenario, type) => {
+              return scenario
+                .split(',')
+                .map((s) => `--filter=example-${s.trim()}-${type}`)
+                .join(' ');
+            };
+            return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
+
+      - name: 🏗️ Build apps
+        shell: bash
+        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+
+      - name: 🪄 Generate the list of test that should be run
+        id: gen-test
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const generateTestCommand = (scenario, type) => {
+              return scenario
+                .split(',')
+                .flatMap((s) => {
+                  const scenario = s.trim();
+                  return type === '*'
+                    ? [`test:e2e:${scenario}-esm`, `test:e2e:${scenario}-cjs`]
+                    : [`test:e2e:${scenario}-${type}`];
+                })
+                .join(' ');
+            };
+            return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
+
+      - name: 🚀 Run E2E
+        shell: bash
+        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+
+      - name: 🐛 Show logs
+        shell: bash
+        if: failure()
+        run: pnpm run ci:e2e:logs
+
+      - name: 🐛 Upload logs
+        uses: ./.github/workflows/actions/upload-archive
+        if: failure()
+        with:
+          name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-universal' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
+          output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-universal' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
+          paths: e2e/*/*.log
+
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
