@@ -168,7 +168,7 @@ jobs:
               if [[ "$pkg_json" != *"node_modules"* ]]; then
                 PKG_NAME=$(jq -r '.name' "$pkg_json")
                 if [[ "$PKG_NAME" == @wdio/* ]]; then
-                  echo "  - $PKG_NAME@${{ env.NEW_VERSION }}"
+                  echo "  - $PKG_NAME@${NEW_VERSION}"
                   PACKAGES+=("$PKG_NAME")
                 fi
               fi
