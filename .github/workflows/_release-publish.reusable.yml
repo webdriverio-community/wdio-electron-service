@@ -190,7 +190,7 @@ jobs:
                   PACKAGES+=("$PKG_NAME")
                 fi
               fi
-            done < <(find packages -name "package.json" -not -depth 2)
+            done < <(find packages -name "package.json" -depth 2)
             echo "Found packages to verify: ${PACKAGES[*]}"
             # Wait a moment for NPM to index the packages
             echo "Waiting for NPM to index the packages..."
