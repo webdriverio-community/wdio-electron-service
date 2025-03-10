@@ -214,7 +214,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
-            RELEASE_TAG="v${{ env.NEW_VERSION }}"
+            RELEASE_TAG="v${NEW_VERSION}"
             echo "DRY RUN: Would push tags and commits to remote repository"
             echo "DRY RUN: Would push tag $RELEASE_TAG"
             echo "DRY RUN: Would push branch ${{ inputs.target_branch }}"
