@@ -7,10 +7,6 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 async function checkTempDir() {
   // Get the temporary directory from the environment variable
