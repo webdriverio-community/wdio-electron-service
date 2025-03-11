@@ -156,21 +156,29 @@ jobs:
       - name: 🚀 Push Branches
         id: push_tags
         shell: bash
-        if: ${{ !inputs.dry_run }}
         run: |
-          echo "::group::Git log"
-          git log --oneline -n 5
-          echo "::endgroup::"
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: Would push branches"
 
-          # If we merged a feature branch to main, push the main branch
-          if [[ "${MERGE_SUCCESSFUL}" == "true" ]] && git rev-parse --verify --quiet "temp-main-for-merge" >/dev/null; then
-            echo "Pushing merged main branch..."
-            git checkout temp-main-for-merge
-            git push --no-verify --force-with-lease origin temp-main-for-merge:main
-            echo "✅ Successfully pushed merged main branch"
+            # If we would merge a feature branch to main, show what would happen
+            if [[ "${{ contains(inputs.release_version, 'major') && !contains(inputs.release_version, 'pre') && startsWith(inputs.target_branch, 'feature/') }}" == "true" ]]; then
+              echo "DRY RUN: Would push merged main branch"
+            fi
+          else
+            echo "::group::Git log"
+            git log --oneline -n 5
+            echo "::endgroup::"
 
-            # Return to the original branch
-            git checkout ${{ inputs.target_branch }}
+            # If we merged a feature branch to main, push the main branch
+            if [[ "${MERGE_SUCCESSFUL}" == "true" ]] && git rev-parse --verify --quiet "temp-main-for-merge" >/dev/null; then
+              echo "Pushing merged main branch..."
+              git checkout temp-main-for-merge
+              git push --no-verify --force-with-lease origin temp-main-for-merge:main
+              echo "✅ Successfully pushed merged main branch"
+
+              # Return to the original branch
+              git checkout ${{ inputs.target_branch }}
+            fi
           fi
 
       - name: 📋 Log changes (dry run only)
@@ -179,4 +187,4 @@ jobs:
           RELEASE_BRANCH: ${{ inputs.target_branch }}
         run: |
           git diff "origin/${RELEASE_BRANCH}"
-          echo "DRY RUN: No changes were made."
+          echo "DRY RUN: No changes were pushed. This is what would have been pushed."

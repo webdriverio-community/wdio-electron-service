@@ -71,7 +71,6 @@ jobs:
   # Publish the release (tag, npm publish, GitHub release)
   publish_release:
     needs: ['calculate_branches', 'prepare_release']
-    if: ${{ !inputs.dry_run }}
     uses: ./.github/workflows/_release-publish.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
@@ -86,7 +85,7 @@ jobs:
   # Post-release tasks
   post_release:
     needs: ['calculate_branches', 'prepare_release', 'publish_release']
-    if: ${{ !inputs.dry_run }}
+    if: ${{ always() && (needs.publish_release.result == 'success' || needs.publish_release.result == 'skipped') }}
     uses: ./.github/workflows/_release-post.reusable.yml
     with:
       target_branch: ${{ needs.calculate_branches.outputs.target_branch }}
