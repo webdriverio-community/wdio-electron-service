@@ -21,13 +21,18 @@
       "inputs": ["**/*.{j,mj,cj,t}s"]
     },
     "@repo/e2e#init-e2es": {
-      "dependsOn": ["wdio-electron-service#build"]
+      "dependsOn": ["wdio-electron-service#build", "@repo/e2e#build"]
     },
     "@repo/e2e#test:e2e:builder-cjs": {
-      "dependsOn": ["example-builder-cjs#build", "@repo/e2e#init-e2es", "@repo/e2e#test:e2e:builder-esm"]
+      "dependsOn": [
+        "example-builder-cjs#build",
+        "@repo/e2e#build",
+        "@repo/e2e#init-e2es",
+        "@repo/e2e#test:e2e:builder-esm"
+      ]
     },
     "@repo/e2e#test:e2e:builder-esm": {
-      "dependsOn": ["example-builder-esm#build", "@repo/e2e#init-e2es"]
+      "dependsOn": ["example-builder-esm#build", "@repo/e2e#build", "@repo/e2e#init-e2es"]
     },
     "@repo/e2e#test:e2e:forge-cjs": {
       "dependsOn": ["example-forge-cjs#build", "@repo/e2e#init-e2es", "@repo/e2e#test:e2e:forge-esm"]
@@ -153,6 +158,52 @@
       "dependsOn": ["build"],
       "cache": false,
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
+    },
+    "@repo/e2e#build": {
+      "dependsOn": ["wdio-electron-service#build"],
+      "outputs": ["dist/**"]
+    },
+    "@repo/e2e#test:js": {
+      "dependsOn": ["@repo/e2e#build"]
+    },
+    "@repo/e2e#test:js:no-binary": {
+      "dependsOn": ["@repo/e2e#build"]
+    },
+    "@repo/e2e#test:matrix": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:single": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:standard": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:window": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:multiremote": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:standalone": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:builder:cjs": {
+      "dependsOn": ["example-builder-cjs#build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:builder:esm": {
+      "dependsOn": ["example-builder-esm#build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:forge:cjs": {
+      "dependsOn": ["example-forge-cjs#build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:forge:esm": {
+      "dependsOn": ["example-forge-esm#build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:no-binary:cjs": {
+      "dependsOn": ["example-no-binary-cjs#build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:no-binary:esm": {
+      "dependsOn": ["example-no-binary-esm#build", "@repo/e2e#init-e2es"]
     }
   }
 }
