@@ -1,8 +1,8 @@
 import rollupTS from '@rollup/plugin-typescript';
 import { defineConfig } from 'rollup';
 
-// Workaround for https://github.com/rollup/plugins/issues/1583
-const tsPlugin = rollupTS({ tsconfig: 'tsconfig.json', module: 'nodeNext' });
+// Use the specific tsconfig for Rollup
+const tsPlugin = rollupTS({ tsconfig: 'tsconfig.rollup.json', module: 'nodeNext' });
 
 export default defineConfig([
   {

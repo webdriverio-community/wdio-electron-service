@@ -5,18 +5,6 @@
     "//#format:check": {
       "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}"]
     },
-    "//#init-forge:apps": {
-      "dependsOn": ["//#init-forge:package"]
-    },
-    "//#init-forge:apps:mac-universal": {
-      "dependsOn": ["//#init-forge:package:mac-universal"]
-    },
-    "//#init-forge:package": {
-      "dependsOn": ["@repo/e2e#test:e2e:builder-esm", "@repo/e2e#test:e2e:builder-cjs"]
-    },
-    "//#init-forge:package:mac-universal": {
-      "dependsOn": ["@repo/e2e#test:e2e-mac-universal:builder-esm", "@repo/e2e#test:e2e-mac-universal:builder-cjs"]
-    },
     "//#lint": {
       "inputs": ["**/*.{j,mj,cj,t}s"]
     },
@@ -108,11 +96,11 @@
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build": {
-      "dependsOn": ["//#init-forge:apps", "^build", "example-forge-esm#build"],
+      "dependsOn": ["^build", "example-forge-esm#build"],
       "outputs": ["out/**"]
     },
     "example-forge-esm#build": {
-      "dependsOn": ["//#init-forge:apps", "^build"],
+      "dependsOn": ["^build"],
       "outputs": ["out/**"]
     },
     "example-no-binary-cjs#build": {
@@ -132,11 +120,11 @@
       "outputs": ["dist/**"]
     },
     "example-forge-cjs#build:mac-universal": {
-      "dependsOn": ["//#init-forge:apps:mac-universal", "^build", "example-forge-esm#build:mac-universal"],
+      "dependsOn": ["^build", "example-forge-esm#build:mac-universal"],
       "outputs": ["out/**"]
     },
     "example-forge-esm#build:mac-universal": {
-      "dependsOn": ["//#init-forge:apps:mac-universal", "^build", "example-builder-cjs#build:mac-universal"],
+      "dependsOn": ["^build", "example-builder-cjs#build:mac-universal"],
       "outputs": ["out/**"]
     },
     "logs": {},
@@ -170,6 +158,9 @@
       "dependsOn": ["@repo/e2e#build"]
     },
     "@repo/e2e#test:matrix": {
+      "dependsOn": ["^build", "@repo/e2e#init-e2es"]
+    },
+    "@repo/e2e#test:all": {
       "dependsOn": ["^build", "@repo/e2e#init-e2es"]
     },
     "@repo/e2e#test:single": {
