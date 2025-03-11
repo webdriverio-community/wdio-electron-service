@@ -8,7 +8,6 @@
     "clean": "pnpm dlx shx rm -rf ./test/js ./node_modules pnpm-lock.yaml ./logs && tsx ../scripts/clean-test-apps.ts",
     "clean:temp-dirs": "tsx ../scripts/clean-temp-dirs.ts",
     "clean:logs": "pnpm dlx shx rm -rf ./logs && pnpm dlx shx mkdir -p ./logs",
-    "init-e2es": "pnpm dlx shx mkdir -p ./test/js && rollup -c rollup.config.js",
     "cat-logs": "pnpm dlx shx cat ./logs/*/*.log",
     "prepare-apps": "tsx -e \"import { setupTestSuite } from './scripts/suite-setup.js'; setupTestSuite();\"",
     "check-temp-dir": "tsx ./scripts/check-temp-dir.ts",
@@ -31,7 +30,6 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.7.0",
-    "@rollup/plugin-typescript": "^12.1.2",
     "@testing-library/webdriverio": "^3.2.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.13.9",
@@ -48,7 +46,6 @@
     "electron": "^35.0.0",
     "p-limit": "^6.2.0",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.34.9",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "wdio-electron-service": "workspace:*",
