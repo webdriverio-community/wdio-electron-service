@@ -1,4 +1,4 @@
-import { expect } from '@wdio/globals';
+import { expect, $, $$ } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 

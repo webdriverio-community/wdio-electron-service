@@ -2,13 +2,21 @@ import { browser } from 'wdio-electron-service';
 import { multiremotebrowser, expect } from '@wdio/globals';
 
 const { name, version } = globalThis.packageJson;
+// Check if we're running in no-binary mode
+const isBinary = process.env.BINARY !== 'false';
 
 describe('Electron APIs using Multiremote', () => {
   it('should retrieve app metadata through the electron API', async () => {
     const appName = await browser.electron.execute((electron) => electron.app.getName());
-    expect(appName).toStrictEqual([name, name]);
+    // In no-binary mode, the app name will be "Electron" (default)
+    const expectedName = isBinary ? name : 'Electron';
+    expect(appName).toStrictEqual([expectedName, expectedName]);
+
     const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
-    expect(appVersion).toStrictEqual([version, version]);
+    // In no-binary mode, the version will be the Electron version
+    const electronVersion = await browser.electron.execute((_electron) => process.versions.electron);
+    const expectedVersion = isBinary ? version : electronVersion[0];
+    expect(appVersion).toStrictEqual([expectedVersion, expectedVersion]);
   });
 
   it('should retrieve instance-specific values from a single instance', async () => {
