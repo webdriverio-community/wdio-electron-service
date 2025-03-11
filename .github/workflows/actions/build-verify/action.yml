@@ -51,7 +51,7 @@ runs:
           if [[ "$pkg_json" != *"node_modules"* ]]; then
             PACKAGE_JSONS+=("$pkg_json")
           fi
-        done < <(find packages -name "package.json" -depth 2)
+        done < <(find packages -name "package.json" -maxdepth 2 -mindepth 2)
 
         echo "Found package.json files to verify: ${PACKAGE_JSONS[*]}"
 
