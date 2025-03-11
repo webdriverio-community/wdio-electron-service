@@ -42,6 +42,101 @@ Below are the task graphs for the E2Es:
 
 ![Mac Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac Universal E2E Task Graph')
 
+### Managing Disk Space for E2E Tests
+
+The E2E tests create temporary directories that can consume significant disk space (up to 22GB per test run). These directories are automatically cleaned up when tests complete normally, but in case of test failures or forced terminations, they might remain on disk.
+
+To manually clean up all temporary test directories and free up disk space, run:
+
+```bash
+pnpm clean:temp-dirs
+```
+
+You can also run this command from the e2e directory:
+
+```bash
+cd e2e
+pnpm clean:temp-dirs
+```
+
+### Managing Test Logs
+
+Test logs are stored in the `e2e/logs` directory, organized by test type and example directory. To clean up all logs, run:
+
+```bash
+cd e2e
+pnpm clean:logs
+```
+
+To view the logs, run:
+
+```bash
+cd e2e
+pnpm logs
+```
+
+### Monitoring E2E Test Progress
+
+The E2E test suite includes features for monitoring test progress in real-time, making it easier to track test execution and diagnose issues.
+
+#### Status Monitor (Default)
+
+When you run `pnpm run test:all` or `pnpm run test:matrix` in the e2e directory, a full-screen status monitor is displayed by default. This monitor shows:
+
+- Overall test progress
+- Number of passed, failed, and skipped tests
+- Currently running tests
+- Elapsed time
+- Last updated timestamp
+
+The status monitor provides a clean, real-time overview of test execution without overwhelming you with detailed logs. Debug messages are suppressed when running from the `test:all` script to keep the display clean.
+
+#### Viewing Detailed Logs
+
+There are two ways to view detailed test logs:
+
+##### 1. Real-time Log Monitoring
+
+To view detailed logs in real-time while tests are running, open a separate terminal window and run:
+
+```bash
+cd e2e
+pnpm run logs
+```
+
+This TypeScript-based log monitor (`test-logs.ts`) will:
+
+- Display all test logs with colorized output
+- Highlight test results (passed, failed, skipped)
+- Show detailed error messages and stack traces
+- Update in real-time as tests progress
+
+The log monitor uses the `tail` command to follow all log files in the logs directory, providing a consolidated view of all test output.
+
+##### 2. View All Logs After Tests Complete
+
+To view all logs after tests have completed:
+
+```bash
+cd e2e
+pnpm run cat-logs
+```
+
+This will display the contents of all log files created during test execution.
+
+### No-Binary Tests
+
+No-binary tests run without building the Electron application binary. These tests have a 60-second timeout to prevent hanging, which can occur in certain environments. If a no-binary test times out, it will be marked as failed with an appropriate error message.
+
+If you encounter issues with no-binary tests:
+
+1. Check the logs in the `logs` directory for any error messages
+2. Try increasing the timeout value in `e2e/scripts/run-test-matrix.ts` if needed
+3. Consider running the tests individually with more verbose logging:
+   ```bash
+   cd e2e && cross-env DEBUG=wdio* PLATFORM=no-binary MODULE_TYPE=esm TEST_TYPE=multiremote BINARY=false EXAMPLE_DIR=no-binary-esm wdio run ./wdio.no-binary.multiremote.conf.ts --spec ./test/multiremote/api.spec.ts
+   ```
+
 ## Testing - Units
 
 Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
