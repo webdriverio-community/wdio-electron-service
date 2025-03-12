@@ -1,4 +1,5 @@
-name: Unit tests
+name: Unit Tests
+description: 'Runs unit tests across different operating systems'
 
 on:
   workflow_call:
@@ -10,7 +11,7 @@ env:
 
 jobs:
   unit:
-    name: Unit Tests (${{ matrix.os }}.${{ matrix.node-version }})
+    name: Node ${{ matrix.node-version }} (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -18,23 +19,23 @@ jobs:
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
     runs-on: ${{ matrix.os }}
     steps:
-      - name: 👷 Checkout
+      - name: 👷 Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
-      - name: 🛠️ Setup workspace
+      - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: ⬇️ Download Build Archive
+      - name: 📦 Download Build Artifacts
         uses: ./.github/workflows/actions/download-archive
         with:
           name: wdio-electron-service
           path: .
           filename: wdio-electron-service-build.zip
 
-      - name: 👍 Run the unit test
+      - name: 🧪 Execute Unit Tests
         run: pnpm run test:unit --only
         shell: bash

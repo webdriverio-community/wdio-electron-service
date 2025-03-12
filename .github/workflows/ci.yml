@@ -15,7 +15,7 @@ env:
 jobs:
   # Due to limit of number of MacOS, run first.
   build:
-    name: Build
+    name: Build Packages (Linux/macOS)
     strategy:
       matrix:
         os: ['ubuntu-latest', 'macos-latest']
@@ -23,25 +23,25 @@ jobs:
     with:
       os: ${{ matrix.os }}
   lint:
-    name: Lint
+    name: Code Linting
     needs: [build]
     uses: ./.github/workflows/ci-lint.yml
 
   unit:
-    name: Unit
+    name: Unit Tests
     needs: [build, lint]
     uses: ./.github/workflows/ci-unit.yml
 
   # Due to low performance, execute separately
   build-win:
-    name: Build (windows-latest)
+    name: Build Packages (Windows)
     needs: [build, lint]
     uses: ./.github/workflows/ci-build.yml
     with:
       os: 'windows-latest'
 
   e2e:
-    name: E2E (${{ matrix.os }})
+    name: E2E Tests - ${{ matrix.scenario }} (${{ matrix.os }})
     needs: [build]
     strategy:
       matrix:
@@ -80,7 +80,7 @@ jobs:
       type: ${{ matrix.type }}
 
   e2e-mac-universal:
-    name: E2E for Mac Universal
+    name: E2E Tests - Mac Universal (${{ matrix.scenario }})
     needs: [build]
     strategy:
       matrix:

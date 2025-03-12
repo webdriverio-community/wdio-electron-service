@@ -1,4 +1,5 @@
 name: Lint
+description: 'Runs code quality checks across the codebase'
 
 on:
   workflow_call:
@@ -10,7 +11,7 @@ env:
 
 jobs:
   lint:
-    name: Lint
+    name: Code Quality Checks
     strategy:
       fail-fast: false
       matrix:
@@ -18,23 +19,23 @@ jobs:
         os: ['ubuntu-latest']
     runs-on: ${{ matrix.os }}
     steps:
-      - name: 👷 Checkout
+      - name: 👷 Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
-      - name: 🛠️ Setup workspace
+      - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: ⬇️ Download Build Archive
+      - name: 📦 Download Build Artifacts
         uses: ./.github/workflows/actions/download-archive
         with:
           name: wdio-electron-service
           path: .
           filename: wdio-electron-service-build.zip
 
-      - name: 📃 Run the lint
+      - name: 🔍 Run Code Quality Checks
         run: pnpm run lint
         shell: bash

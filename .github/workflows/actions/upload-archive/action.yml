@@ -1,12 +1,12 @@
-name: 'wdio-electron-service Archive Upload'
-description: 'compresses and uploads an archive to be reused across jobs'
+name: 'Upload Compressed Artifacts'
+description: 'Compresses and uploads files or directories as artifacts to be shared between jobs'
 inputs:
   paths:
-    description: 'paths to files or directories to archive (recursive)'
+    description: 'Paths to files or directories to compress and upload (recursive)'
   output:
-    description: 'output file name'
+    description: 'Output filename for the compressed archive'
   name:
-    description: 'name of the archive to upload'
+    description: 'Artifact name for identification in GitHub Actions'
 runs:
   using: 'composite'
   steps:
@@ -20,7 +20,7 @@ runs:
       shell: bash
       if: ${{ runner.os == 'Windows' }}
 
-    - name: ⬆️ Upload Archive
+    - name: 📦 Upload Artifact to GitHub
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.name }}

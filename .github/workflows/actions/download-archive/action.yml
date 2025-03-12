@@ -1,21 +1,21 @@
-name: 'wdio-electron-service Archive Download'
-description: 'downloads and decompresses an archive from a previous job'
+name: 'Download and Extract Artifacts'
+description: 'Downloads and extracts compressed artifacts shared from previous jobs'
 inputs:
   path:
-    description: 'location to decompress the archive to'
+    description: 'Destination directory to extract the artifact contents'
   filename:
-    description: 'the name of the decompressed artifact'
+    description: 'Filename of the compressed artifact to download'
   name:
-    description: 'name of the archive to decompress'
+    description: 'Artifact name as identified in GitHub Actions'
 runs:
   using: 'composite'
   steps:
-    - name: ⬇️ Download Build Archive
+    - name: 📦 Download Artifact from GitHub
       uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
 
-    - name: 📂 Extract Archive
+    - name: 📂 Extract Compressed Archive
       run: unzip -q -o ${{ inputs.path }}/${{ inputs.filename }} -d ${{ inputs.path }}
       shell: bash
