@@ -10,25 +10,33 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  # This job runs linting checks to ensure code quality
+  # It only needs to run on a single OS (Ubuntu) since linting rules are platform-independent
   lint:
     name: Code Quality Checks
     strategy:
       fail-fast: false
       matrix:
+        # Only run on Node.js 20 since linting is not version-dependent
         node-version: ['20']
+        # Only run on Ubuntu since linting results are the same across platforms
         os: ['ubuntu-latest']
     runs-on: ${{ matrix.os }}
     steps:
+      # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
+      # Set up Node.js and PNPM using the reusable action
       - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: ${{ matrix.node-version }}
 
+      # Download the pre-built packages from the build job
+      # This ensures linting can check against built artifacts if needed
       - name: 📦 Download Build Artifacts
         uses: ./.github/workflows/actions/download-archive
         with:
@@ -36,6 +44,8 @@ jobs:
           path: .
           filename: wdio-electron-service-build.zip
 
+      # Run ESLint and other code quality checks
+      # This ensures code follows project standards and best practices
       - name: 🔍 Run Code Quality Checks
         run: pnpm run lint
         shell: bash

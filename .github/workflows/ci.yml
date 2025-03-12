@@ -14,25 +14,32 @@ env:
 
 jobs:
   # Due to limit of number of MacOS, run first.
+  # Strategy: Build on Linux and macOS first since they're faster.
+  # Linux build artifacts are shared with all other jobs.
   build:
     name: Build Packages (Linux/macOS)
     strategy:
       matrix:
+        # Primary build platforms - Linux artifacts are used by all other jobs
         os: ['ubuntu-latest', 'macos-latest']
     uses: ./.github/workflows/ci-build.yml
     with:
       os: ${{ matrix.os }}
+
+  # Run linting after build to use the build artifacts
   lint:
     name: Code Linting
     needs: [build]
     uses: ./.github/workflows/ci-lint.yml
 
+  # Run unit tests after linting to ensure code quality first
   unit:
     name: Unit Tests
     needs: [build, lint]
     uses: ./.github/workflows/ci-unit.yml
 
-  # Due to low performance, execute separately
+  # Windows builds are slower, so run them separately and only after linting passes
+  # This prevents wasting resources on Windows if there are linting issues
   build-win:
     name: Build Packages (Windows)
     needs: [build, lint]
@@ -40,16 +47,25 @@ jobs:
     with:
       os: 'windows-latest'
 
+  # E2E test matrix strategy:
+  # - Run tests across 3 operating systems (Linux, Windows, macOS)
+  # - Test 3 scenarios (builder, forge, no-binary)
+  # - Test 2 module types (ESM, CJS)
+  # - Optimize for GitHub Actions concurrency limits
   e2e:
     name: E2E Tests - ${{ matrix.scenario }} (${{ matrix.os }})
     needs: [build]
     strategy:
       matrix:
+        # Test across all major operating systems
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        # Test all application scenarios
         scenario: ['builder', 'forge', 'no-binary']
+        # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # E2E on the Linux/Mac runs as scenario-by-scenario (excludes specific type).
+          # Optimization: Linux/Mac run both ESM and CJS together using wildcard
+          # This reduces the number of jobs while still testing all combinations
           - os: 'ubuntu-latest'
             type: 'esm'
           - os: 'ubuntu-latest'
@@ -58,17 +74,19 @@ jobs:
             type: 'esm'
           - os: 'macos-latest'
             type: 'cjs'
-          # Due to limitation of number of parallel job on MacOS, execute custom unit. (exclude forge and no-binary)
-          # https://docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration#usage-limits
+          # Optimization: Reduce macOS jobs due to GitHub Actions concurrency limits
+          # macOS runners are limited, so we combine tests to reduce parallel jobs
           - os: 'macos-latest'
             scenario: 'forge'
           - os: 'macos-latest'
             scenario: 'no-binary'
-          # E2E on the Windows runs as type-by-type (excludes wildcard type).
+          # Optimization: Windows runs ESM and CJS separately for better parallelization
+          # Windows is slower, so running separately helps identify issues faster
           - os: 'windows-latest'
             type: '*'
         include:
-          # Due to limitation of number of parallel job on MacOS, add custom unit.
+          # Special case: Combined test for macOS to reduce total jobs
+          # This runs both forge and no-binary tests in a single job
           - os: 'macos-latest'
             scenario: 'no-binary, forge'
             type: '*'
@@ -79,20 +97,24 @@ jobs:
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
 
+  # Mac Universal builds require special handling
+  # These are separate from regular macOS tests because they use a different build command
   e2e-mac-universal:
     name: E2E Tests - Mac Universal (${{ matrix.scenario }})
     needs: [build]
     strategy:
       matrix:
+        # Test both application scenarios
         scenario: ['forge', 'builder']
+        # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          #  Forge E2E runs as scenario-by-scenario (excludes specific type).
+          # Optimization: Forge tests run ESM and CJS together to reduce jobs
           - scenario: 'forge'
             type: 'esm'
           - scenario: 'forge'
             type: 'cjs'
-          #  Bundler E2E runs as type-by-type (excludes wildcard type).
+          # Optimization: Builder tests run ESM and CJS separately for better error isolation
           - scenario: 'builder'
             type: '*'
     uses: ./.github/workflows/ci-e2e.yml

@@ -15,24 +15,34 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  # This job builds all packages in the monorepo
+  # It runs on the specified OS (default: ubuntu-latest)
+  # Only Linux builds create artifacts that are shared with other jobs
   build:
     name: Build Packages
     runs-on: ${{ inputs.os }}
     steps:
+      # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
+      # Set up Node.js and PNPM using the reusable action
       - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: '20'
 
+      # Build all packages using Turbo
+      # This creates the dist/ directories with compiled code
       - name: 🏗️ Build All Packages
         run: pnpm run build
         shell: bash
 
+      # Upload build artifacts, but only from Linux
+      # This is because Linux builds are most consistent and used by all other jobs
+      # The artifacts include all dist/ and cjs/ directories from all packages
       - name: 📦 Upload Package Build Artifacts
         if: ${{ runner.os == 'Linux' }}
         uses: ./.github/workflows/actions/upload-archive

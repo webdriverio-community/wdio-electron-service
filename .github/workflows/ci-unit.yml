@@ -10,25 +10,35 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  # This job runs unit tests across all supported operating systems
+  # The matrix strategy ensures tests pass on all platforms
   unit:
     name: Node ${{ matrix.node-version }} (${{ matrix.os }})
     strategy:
+      # Continue with other tests even if one fails
       fail-fast: false
       matrix:
+        # Currently only testing on Node.js 20
+        # Add more versions here if needed for backward compatibility
         node-version: ['20']
+        # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
     runs-on: ${{ matrix.os }}
     steps:
+      # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
+      # Set up Node.js and PNPM using the reusable action
       - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: ${{ matrix.node-version }}
 
+      # Download the pre-built packages from the build job
+      # This ensures all tests use the same build artifacts
       - name: 📦 Download Build Artifacts
         uses: ./.github/workflows/actions/download-archive
         with:
@@ -36,6 +46,8 @@ jobs:
           path: .
           filename: wdio-electron-service-build.zip
 
+      # Run unit tests using Turbo
+      # The --only flag ensures we only run tests for the packages that have changed
       - name: 🧪 Execute Unit Tests
         run: pnpm run test:unit --only
         shell: bash
