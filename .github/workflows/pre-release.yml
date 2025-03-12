@@ -11,6 +11,7 @@ on:
         options:
           - feature
           - main
+          - maintenance
       prerelease_version:
         description: 'The new prerelease version to create.'
         required: true
