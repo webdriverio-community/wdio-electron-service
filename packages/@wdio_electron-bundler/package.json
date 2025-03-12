@@ -35,11 +35,11 @@
     "test": "pnpm test:unit"
   },
   "dependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.2",
     "debug": "^4.4.0",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.34.9",
+    "rollup": "^4.35.0",
     "rollup-plugin-node-externals": "^8.0.0"
   },
   "devDependencies": {
