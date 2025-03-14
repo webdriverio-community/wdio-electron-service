@@ -10,161 +10,122 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+*
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  # Due to limit of number of MacOS, run first.
+  # Strategy: Build on Linux and macOS first since they're faster.
+  # Linux build artifacts are shared with all other jobs.
   build:
-    name: Build & Test
-    runs-on: ${{ matrix.os }}
+    name: Build Packages (Linux/macOS)
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        node-version: [20.x]
-      fail-fast: false
+        # Primary build platforms - Linux artifacts are used by all other jobs
+        os: ['ubuntu-latest', 'macos-latest']
+    uses: ./.github/workflows/_ci-build.reusable.yml
+    with:
+      os: ${{ matrix.os }}
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            # Workaround for linux CI
-            # https://github.com/electron/electron/issues/41066
-            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-            # Run tasks in serial on Ubuntu to avoid Xvfb issues
-            pnpm run ci-linux
-          else
-            pnpm run ci
-          fi
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
-  build-macos-universal:
-    name: MacOS Universal Build & Test
-    runs-on: ${{ matrix.os }}
+  # Run linting after build to use the build artifacts
+  lint:
+    name: Code Linting
+    needs: [build]
+    uses: ./.github/workflows/_ci-lint.reusable.yml
+
+  # Run unit tests after linting to ensure code quality first
+  unit:
+    name: Unit Tests
+    needs: [build, lint]
+    uses: ./.github/workflows/_ci-unit.reusable.yml
+
+  # Windows builds are slower, so run them separately and only after linting passes
+  # This prevents wasting resources on Windows if there are linting issues
+  build-win:
+    name: Build Packages (Windows)
+    needs: [build, lint]
+    uses: ./.github/workflows/_ci-build.reusable.yml
+    with:
+      os: 'windows-latest'
+
+  # E2E test matrix strategy:
+  # - Run tests across 3 operating systems (Linux, Windows, macOS)
+  # - Test 3 scenarios (builder, forge, no-binary)
+  # - Test 2 module types (ESM, CJS)
+  # - Optimize for GitHub Actions concurrency limits
+  e2e:
+    name: E2E Tests - ${{ matrix.scenario }} (${{ matrix.os }})
+    needs: [build]
     strategy:
       matrix:
-        os: [macOS-latest]
-        node-version: [20.x]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          pnpm build
-          pnpm run ci-mac:e2e:mac-universal
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
-  build-windows:
-    name: Windows Build & Test
-    runs-on: ${{ matrix.os }}
+        # Test across all major operating systems
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        # Test all application scenarios
+        scenario: ['builder', 'forge', 'no-binary']
+        # Test both module types and wildcard for combined tests
+        type: ['esm', 'cjs', '*']
+        exclude:
+          # Optimization: Linux/Mac run both ESM and CJS together using wildcard
+          # This reduces the number of jobs while still testing all combinations
+          - os: 'ubuntu-latest'
+            type: 'esm'
+          - os: 'ubuntu-latest'
+            type: 'cjs'
+          - os: 'macos-latest'
+            type: 'esm'
+          - os: 'macos-latest'
+            type: 'cjs'
+          # Optimization: Reduce macOS jobs due to GitHub Actions concurrency limits
+          # macOS runners are limited, so we combine tests to reduce parallel jobs
+          - os: 'macos-latest'
+            scenario: 'forge'
+          - os: 'macos-latest'
+            scenario: 'no-binary'
+          # Optimization: Windows runs ESM and CJS separately for better parallelization
+          # Windows is slower, so running separately helps identify issues faster
+          - os: 'windows-latest'
+            type: '*'
+        include:
+          # Special case: Combined test for macOS to reduce total jobs
+          # This runs both forge and no-binary tests in a single job
+          - os: 'macos-latest'
+            scenario: 'no-binary, forge'
+            type: '*'
+    uses: ./.github/workflows/_ci-e2e.reusable.yml
+    with:
+      os: ${{ matrix.os }}
+      node-version: '20'
+      scenario: ${{ matrix.scenario }}
+      type: ${{ matrix.type }}
+
+  # Mac Universal builds require special handling
+  # These are separate from regular macOS tests because they use a different build command
+  e2e-mac-universal:
+    name: E2E Tests - Mac Universal (${{ matrix.scenario }})
+    needs: [build]
     strategy:
       matrix:
-        os: [windows-latest]
-        test: ['units', 'e2e:no-binary', 'e2e:builder-cjs', 'e2e:builder-esm', 'e2e:forge-cjs', 'e2e:forge-esm']
-        node-version: [20.x]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache pnpm modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-pnpm-modules
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set pnpm store path
-        run: |
-          pnpm config set store-dir ~/.pnpm-store --global
-      - name: Install Dependencies
-        run: |
-          pnpm install
-        shell: bash
-      - name: Run Tests
-        run: |
-          pnpm run build
-          pnpm run ci-windows:${{ matrix.test }}
-        shell: bash
-      - name: 🐛 Show logs
-        if: failure()
-        run: |
-          pnpm run ci:e2e:logs
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1.1.0
-        if: failure()
-        with:
-          timeout: '180000'
+        # Test both application scenarios
+        scenario: ['forge', 'builder']
+        # Test both module types and wildcard for combined tests
+        type: ['esm', 'cjs', '*']
+        exclude:
+          # Optimization: Forge tests run ESM and CJS together to reduce jobs
+          - scenario: 'forge'
+            type: 'esm'
+          - scenario: 'forge'
+            type: 'cjs'
+          # Optimization: Builder tests run ESM and CJS separately for better error isolation
+          - scenario: 'builder'
+            type: '*'
+    uses: ./.github/workflows/_ci-e2e.reusable.yml
+    with:
+      os: 'macos-latest'
+      node-version: '20'
+      build-command: 'build:mac-universal'
+      scenario: ${{ matrix.scenario }}
+      type: ${{ matrix.type }}
