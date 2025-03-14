@@ -26,7 +26,7 @@ jobs:
       matrix:
         # Primary build platforms - Linux artifacts are used by all other jobs
         os: ['ubuntu-latest', 'macos-latest']
-    uses: ./.github/workflows/ci-build.yml
+    uses: ./.github/workflows/_ci-build.reusable.yml
     with:
       os: ${{ matrix.os }}
 
@@ -34,20 +34,20 @@ jobs:
   lint:
     name: Code Linting
     needs: [build]
-    uses: ./.github/workflows/ci-lint.yml
+    uses: ./.github/workflows/_ci-lint.reusable.yml
 
   # Run unit tests after linting to ensure code quality first
   unit:
     name: Unit Tests
     needs: [build, lint]
-    uses: ./.github/workflows/ci-unit.yml
+    uses: ./.github/workflows/_ci-unit.reusable.yml
 
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
   build-win:
     name: Build Packages (Windows)
     needs: [build, lint]
-    uses: ./.github/workflows/ci-build.yml
+    uses: ./.github/workflows/_ci-build.reusable.yml
     with:
       os: 'windows-latest'
 
@@ -94,7 +94,7 @@ jobs:
           - os: 'macos-latest'
             scenario: 'no-binary, forge'
             type: '*'
-    uses: ./.github/workflows/ci-e2e.yml
+    uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
       os: ${{ matrix.os }}
       node-version: '20'
@@ -121,7 +121,7 @@ jobs:
           # Optimization: Builder tests run ESM and CJS separately for better error isolation
           - scenario: 'builder'
             type: '*'
-    uses: ./.github/workflows/ci-e2e.yml
+    uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
       os: 'macos-latest'
       node-version: '20'
