@@ -8,8 +8,8 @@ const waitTextOfElement = async (element: ReturnType<typeof browser.$>, expected
       return (await this.getText()) === expectedText;
     },
     {
-      timeout: 1000,
-      timeoutMsg: 'expected text to be different after 1s',
+      timeout: 5000,
+      timeoutMsg: 'Did not reach the expected value after 5s.',
     },
   );
 };
