@@ -19,10 +19,18 @@ updates:
         dependency-type: 'production'
         patterns:
           - '*'
+        exclude-patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
       development-dependencies:
         dependency-type: 'development'
         patterns:
           - '*'
+        exclude-patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
     ignore:
       # For all packages, ignore major updates
       - dependency-name: '*'
@@ -64,10 +72,18 @@ updates:
         dependency-type: 'production'
         patterns:
           - '*'
+        exclude-patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
       development-dependencies:
         dependency-type: 'development'
         patterns:
           - '*'
+        exclude-patterns:
+          - '@wdio/*'
+          - 'webdriver'
+          - 'webdriverio'
     ignore:
       # For all packages, ignore major updates
       - dependency-name: '*'
