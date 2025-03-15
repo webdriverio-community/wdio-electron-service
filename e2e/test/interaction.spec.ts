@@ -1,26 +1,23 @@
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
-import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 import type { BrowserWindow } from 'electron';
 
 describe('interaction', () => {
-  let screen: WebdriverIOQueries;
-
-  before(() => {
-    /**
-     * This is a workaround for the issue with the `browser` object type being
-     * mismatched`.
-     * @see https://github.com/testing-library/webdriverio-testing-library/issues/51
-     */
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    screen = setupBrowser(browser);
-  });
-
   describe('keyboard input', () => {
     it('should detect keyboard input', async () => {
+      const el = browser.$('.keypress-count');
       await browser.keys(['y', 'o']);
-      expect(await (await screen.getByTestId('keypress-count')).getText()).toEqual('YO');
+      await el.waitUntil(
+        async function (this: WebdriverIO.Element) {
+          return (await this.getText()) === 'YO';
+        },
+        {
+          timeout: 1000,
+          timeoutMsg: 'expected text to be different after 1s',
+        },
+      );
+
+      await expect(el).toHaveText('YO');
     });
   });
 
