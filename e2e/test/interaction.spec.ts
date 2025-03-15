@@ -3,13 +3,14 @@ import { browser } from 'wdio-electron-service';
 import type { BrowserWindow } from 'electron';
 
 const waitTextOfElement = async (element: ReturnType<typeof browser.$>, expectedText: string) => {
+  // respect configuration for the timeout and interval
+  // @see https://webdriver.io/docs/api/browser/waitUntil
   return await element.waitUntil(
     async function (this: WebdriverIO.Element) {
       return (await this.getText()) === expectedText;
     },
     {
-      timeout: 5000,
-      timeoutMsg: 'Did not reach the expected value after 5s.',
+      timeoutMsg: 'Did not reach the expected value.',
     },
   );
 };
