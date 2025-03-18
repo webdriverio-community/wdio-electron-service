@@ -13,12 +13,12 @@ const determineVersions = async () => {
   try {
     const pkgPath = path.join(process.cwd(), 'packages/wdio-electron-service/package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    const currentMajorVersion = parseInt(pkg.version.split('.')[0], 10);
-    const maintenanceMajorVersion = currentMajorVersion - 1;
+    const maintenanceMajorVersion = parseInt(pkg.version.split('.')[0], 10);
+    const currentMajorVersion = maintenanceMajorVersion + 1;
 
     return {
-      activeLTSVersion: `v${currentMajorVersion}`,
-      maintenanceLTSVersion: `v${maintenanceMajorVersion}`,
+      activeLTSVersion: `v${currentMajorVersion}.x`,
+      maintenanceLTSVersion: `v${maintenanceMajorVersion}.x`,
     };
   } catch (_error) {
     console.warn('Could not determine versions automatically from package.json');
@@ -26,18 +26,18 @@ const determineVersions = async () => {
     // Ask the user to provide the versions
     console.log('Please provide the version information:');
     const activeMajor = await input({
-      message: 'What is the current active major version? (e.g., 8 for v8)',
+      message: 'What is the current active major version? (e.g., 8 for v8.x)',
       default: '8',
     });
 
     const maintenanceMajor = await input({
-      message: 'What is the maintenance major version? (e.g., 7 for v7)',
+      message: 'What is the maintenance major version? (e.g., 7 for v7.x)',
       default: String(parseInt(activeMajor, 10) - 1),
     });
 
     return {
-      activeLTSVersion: `v${activeMajor}`,
-      maintenanceLTSVersion: `v${maintenanceMajor}`,
+      activeLTSVersion: `v${activeMajor}.x`,
+      maintenanceLTSVersion: `v${maintenanceMajor}.x`,
     };
   }
 };
@@ -257,7 +257,7 @@ const backportRun = async (prsToBackport: PullRequest[]): Promise<number> => {
 };
 
 const getBackportPRs = async (): Promise<PullRequest[]> => {
-  const iterator = api.paginate.iterator(api.rest.pulls.list, {
+  const prs = await api.pulls.list({
     owner: TARGET_REPO.OWNER,
     repo: TARGET_REPO.NAME,
     state: 'closed',
@@ -266,14 +266,9 @@ const getBackportPRs = async (): Promise<PullRequest[]> => {
     per_page: 100,
   });
 
-  const prsToBackport: PullRequest[] = [];
-
-  for await (const { data: prs } of iterator) {
-    const _prsToBackport = prs
-      .filter((pr) => pr.labels.find((label) => label.name === PR_LABEL.REQUESTED) && Boolean(pr.merged_at))
-      .reverse();
-    prsToBackport.push(..._prsToBackport);
-  }
+  const prsToBackport = prs.data
+    .filter((pr) => pr.labels.find((label) => label.name === PR_LABEL.REQUESTED) && Boolean(pr.merged_at))
+    .reverse();
   return prsToBackport;
 };
 
