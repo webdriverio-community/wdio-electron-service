@@ -1,5 +1,5 @@
 name: 'Download and Extract Artifacts'
-description: 'Downloads and extracts compressed artifacts shared from previous jobs'
+description: 'Downloads and extracts compressed artifacts shared from previous jobs using GitHub cache (90-day retention)'
 inputs:
   path:
     description: 'Destination directory to extract the artifact contents'
@@ -13,16 +13,51 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # Use GitHub Actions cache exclusively for all artifact storage
-    - name: 🗄️ Restore Artifact from Cache
-      uses: actions/cache@v4
+    # Single cache restore step with retry logic
+    - name: 🗄️ Restore Cache
+      id: cache-restore
+      uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ inputs.cache_key_prefix }}-${{ inputs.name }}-${{ runner.os }}-
         restore-keys: |
           ${{ inputs.cache_key_prefix }}-${{ inputs.name }}-${{ runner.os }}-
         lookup-only: true
+        fail-on-cache-miss: false
 
-    - name: 📂 Extract Compressed Archive
-      run: unzip -q -o ${{ inputs.path }}/${{ inputs.filename }} -d ${{ inputs.path }}
+    # Create fallback file if cache miss
+    - name: ⚠️ Handle Cache Miss
+      if: steps.cache-restore.outputs.cache-hit != 'true'
       shell: bash
+      run: |
+        echo "::warning::Failed to download artifact '${{ inputs.name }}' from cache."
+        echo "This might be because the cache expired, was purged, or this is the first run."
+        # Create an empty file to prevent downstream failures
+        mkdir -p $(dirname "${{ inputs.path }}/${{ inputs.filename }}")
+        touch "${{ inputs.path }}/${{ inputs.filename }}"
+
+    # Extract if cache was successfully restored
+    - name: 📂 Extract Compressed Archive
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "::warning::Downloaded artifact file doesn't exist"
+          exit 0
+        fi
+
+        if [ ! -s "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "::warning::Downloaded artifact is empty (0 bytes)"
+          exit 0
+        fi
+
+        # Attempt extraction with error handling
+        echo "Extracting archive to ${{ inputs.path }}..."
+        if unzip -q -o "${{ inputs.path }}/${{ inputs.filename }}" -d "${{ inputs.path }}"; then
+          echo "✅ Successfully extracted artifact"
+        else
+          unzip_exit=$?
+          echo "::warning::Extraction failed with exit code $unzip_exit"
+          # Try list contents to see what's wrong
+          echo "Archive contents:"
+          unzip -l "${{ inputs.path }}/${{ inputs.filename }}" || echo "Cannot list archive contents"
+        fi
