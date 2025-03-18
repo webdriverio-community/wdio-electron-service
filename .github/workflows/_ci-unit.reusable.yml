@@ -45,6 +45,7 @@ jobs:
           name: wdio-electron-service
           path: .
           filename: wdio-electron-service-build.zip
+          cache_key_prefix: wdio-electron-build
 
       # Run unit tests using Turbo
       # The --only flag ensures we only run tests for the packages that have changed

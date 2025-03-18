@@ -6,15 +6,22 @@ inputs:
   filename:
     description: 'Filename of the compressed artifact to download'
   name:
-    description: 'Artifact name as identified in GitHub Actions'
+    description: 'Artifact name as used in the cache key'
+  cache_key_prefix:
+    description: 'Prefix for the cache key (must match upload setting)'
+    default: 'build-artifacts'
 runs:
   using: 'composite'
   steps:
-    - name: 📦 Download Artifact from GitHub
-      uses: actions/download-artifact@v4
+    # Use GitHub Actions cache exclusively for all artifact storage
+    - name: 🗄️ Restore Artifact from Cache
+      uses: actions/cache@v4
       with:
-        name: ${{ inputs.name }}
-        path: ${{ inputs.path }}
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ inputs.cache_key_prefix }}-${{ inputs.name }}-${{ runner.os }}-
+        restore-keys: |
+          ${{ inputs.cache_key_prefix }}-${{ inputs.name }}-${{ runner.os }}-
+        lookup-only: true
 
     - name: 📂 Extract Compressed Archive
       run: unzip -q -o ${{ inputs.path }}/${{ inputs.filename }} -d ${{ inputs.path }}

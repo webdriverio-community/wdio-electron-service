@@ -50,3 +50,5 @@ jobs:
           name: wdio-electron-service
           output: wdio-electron-service-build.zip
           paths: packages/*/dist packages/*/cjs
+          cache_key_prefix: wdio-electron-build
+          retention_days: '30'

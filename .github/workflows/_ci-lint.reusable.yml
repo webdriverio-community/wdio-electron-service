@@ -43,6 +43,7 @@ jobs:
           name: wdio-electron-service
           path: .
           filename: wdio-electron-service-build.zip
+          cache_key_prefix: wdio-electron-build
 
       # Run ESLint and other code quality checks
       # This ensures code follows project standards and best practices

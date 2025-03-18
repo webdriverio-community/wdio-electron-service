@@ -62,6 +62,7 @@ jobs:
           name: wdio-electron-service
           path: .
           filename: wdio-electron-service-build.zip
+          cache_key_prefix: wdio-electron-build
 
       # Special workaround for Linux to enable Electron testing
       - name: 🔧 Apply Linux Kernel Workaround
