@@ -33,7 +33,6 @@
     "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
-    "@testing-library/webdriverio": "^3.2.1",
     "@wdio/cli": "^9.8.0",
     "@wdio/electron-utils": "workspace:*",
     "@wdio/globals": "^9.8.0",
