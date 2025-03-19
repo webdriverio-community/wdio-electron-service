@@ -4,13 +4,24 @@ This directory contains the GitHub Actions workflows for CI/CD processes.
 
 ## Artifact Retention Policy
 
-Build artifacts are stored using GitHub Actions cache with the following characteristics:
+Our workflows use a dual-storage approach combining cache and artifacts for maximum reliability:
 
-- **Retention Period**: ~90 days (compared to 1 day for standard GitHub Actions artifacts)
-- **Implementation**: Uses actions/cache instead of actions/upload-artifact
-- **Automatic Cleanup**: GitHub automatically evicts unused caches after ~90 days
-- **Cache Keys**: Based on runner OS, workflow run ID, and content hash
-- **Rerun Behavior**: When a workflow job is rerun, the previous cache is automatically deleted and replaced with a new one
+- **Primary Storage**: GitHub Actions cache (90-day retention)
+
+  - Faster access times and longer retention
+  - Deterministic keys based on runner OS, workflow run ID, and content hash
+  - Automatically deleted and replaced during reruns (requires `actions: write` permission)
+
+- **Fallback Storage**: GitHub Actions artifacts (1-day default retention)
+  - Provides redundancy when cache retrieval fails
+  - Immune to cache eviction policies
+  - Configurable retention via `retention-days` parameter
+
+**Implementation Flow**:
+
+- Parallel upload to both cache and artifacts
+- Download attempts cache first, falls back to artifacts if needed
+- Ensures both long-term availability and reliable access
 
 ## Workflow Structure
 
