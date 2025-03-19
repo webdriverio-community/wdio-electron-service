@@ -92,6 +92,7 @@ runs:
       with:
         path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
         key: ${{ steps.generate-keys.outputs.standard_key }}
+        enableCrossOsArchive: true
 
     # Save with OS-agnostic key for better cross-OS compatibility
     - name: 🗄️ Cache Archive (OS-agnostic)
@@ -101,6 +102,27 @@ runs:
       with:
         path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_key }}
+        enableCrossOsArchive: true
+
+    # Log cache details for debugging
+    - name: 📊 Cache Operation Details
+      shell: bash
+      run: |
+        echo "::notice::===== CACHE SAVE DETAILS ====="
+        echo "::notice::Cache keys used:"
+        echo "::notice:: - OS-specific: ${{ steps.generate-keys.outputs.standard_key }}"
+        echo "::notice:: - OS-agnostic: ${{ steps.generate-keys.outputs.agnostic_key }}"
+        echo "::notice::File details:"
+        echo "::notice:: - Location: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}"
+
+        # Check file exists and get size info
+        if [ -f "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" ]; then
+          SIZE=$(stat -c%s "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" 2>/dev/null || ls -l "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" | awk '{print $5}')
+          echo "::notice:: - Size: $(du -h "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" | cut -f1) (${SIZE} bytes)"
+          echo "::notice:: - Exists: YES"
+        else
+          echo "::warning:: - File does not exist!"
+        fi
 
     # Save to standard artifact storage as fallback
     - name: 📤 Upload Artifact

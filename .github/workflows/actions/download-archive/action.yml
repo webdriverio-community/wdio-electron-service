@@ -75,7 +75,7 @@ runs:
         echo "::notice::===== AVAILABLE CACHES ====="
         gh cache list --limit 20 || echo "::warning::Unable to list caches with GH CLI"
 
-    # Try exact cache key if provided
+    # Restore cache with exact key (if provided)
     - name: 🗄️ Restore with Exact Key
       id: cache-restore-exact
       if: inputs.exact_cache_key != ''
@@ -87,38 +87,38 @@ runs:
         lookup-only: false
         fail-on-cache-miss: false
 
-    # Try standard key matching upload format
+    # Restore with standard key (os-specific)
     - name: 🗄️ Restore with Standard Key
       id: cache-restore-standard
       if: steps.cache-restore-exact.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
-        key: ${{ steps.generate-keys.outputs.standard_key || format('{0}-{1}-{2}-{3}', runner.os, inputs.cache_key_prefix, inputs.name, github.run_id) }}
+        key: ${{ steps.generate-keys.outputs.standard_key }}
         enableCrossOsArchive: true
         lookup-only: false
         fail-on-cache-miss: false
 
-    # Try OS-agnostic key which should work across platforms
+    # Restore with OS-agnostic key
     - name: 🗄️ Restore with OS-Agnostic Key
       id: cache-restore-agnostic
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
-        key: ${{ steps.generate-keys.outputs.agnostic_key || format('{0}-{1}-{2}', inputs.cache_key_prefix, inputs.name, github.run_id) }}
+        key: ${{ steps.generate-keys.outputs.agnostic_key }}
         enableCrossOsArchive: true
         lookup-only: false
         fail-on-cache-miss: false
 
-    # Try Linux key since most builds run on Linux
+    # Restore with Linux key for cross-OS compatibility
     - name: 🗄️ Restore with Linux Key
       id: cache-restore-linux
-      if: runner.os != 'Linux' && steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true'
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && runner.os != 'Linux'
       uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
-        key: ${{ steps.generate-keys.outputs.linux_key || format('Linux-{0}-{1}-{2}', inputs.cache_key_prefix, inputs.name, github.run_id) }}
+        key: ${{ steps.generate-keys.outputs.linux_key }}
         enableCrossOsArchive: true
         lookup-only: false
         fail-on-cache-miss: false
@@ -345,6 +345,8 @@ runs:
           echo "::notice::Cache source: OS-agnostic pattern hit (verified)"
         elif [ "${{ steps.cache-restore-run-id.outputs.cache-hit }}" == "true" ] && [ "${{ steps.verify-run-id.outputs.valid }}" == "true" ]; then
           echo "::notice::Cache source: Run ID pattern search hit (verified)"
+        elif [ "${{ steps.direct-cache-restore.outputs.success }}" == "true" ]; then
+          echo "::notice::Cache source: Direct cache restore (gh CLI)"
         else
           echo "::warning::No valid cache hit detected"
         fi
@@ -357,20 +359,51 @@ runs:
         echo "::notice::Extracting compressed artifact: ${{ inputs.path }}/${{ inputs.filename }}"
         cd "${{ inputs.path }}" && unzip -q -o "${{ inputs.filename }}"
 
-    # Download from GitHub Artifacts
+    # Download from GitHub Artifacts with retries
     - name: 📥 Download from GitHub Artifacts
       id: download-artifact
-      if: steps.file-check.outputs.valid != 'true' && inputs.use_cache != 'true-only'
-      uses: actions/download-artifact@v4
-      continue-on-error: true
-      with:
-        name: ${{ inputs.name }}.zip
-        path: ${{ inputs.path }}
+      if: steps.file-check.outputs.valid != 'true' && steps.direct-cache-restore.outputs.success != 'true' && inputs.use_cache != 'true-only'
+      shell: bash
+      run: |
+        MAX_RETRIES=3
+        RETRY_DELAY=5
+        SUCCESS=false
+
+        for i in $(seq 1 $MAX_RETRIES); do
+          echo "::notice::Artifact download attempt $i of $MAX_RETRIES"
+
+          # Use actions/download-artifact@v4 via gh run command
+          gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" || true
+
+          # Check if the download was successful
+          if find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
+            echo "::notice::Successfully downloaded artifact on attempt $i"
+            SUCCESS=true
+            break
+          else
+            echo "::warning::Artifact download failed on attempt $i"
+            if [ $i -lt $MAX_RETRIES ]; then
+              echo "::notice::Waiting ${RETRY_DELAY}s before next attempt..."
+              sleep $RETRY_DELAY
+              # Increase delay for next retry
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            fi
+          fi
+        done
+
+        if [ "$SUCCESS" = "true" ]; then
+          echo "outcome=success" >> $GITHUB_OUTPUT
+        else
+          echo "::warning::All artifact download attempts failed"
+          echo "outcome=failure" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     # Find and move the artifact file if needed
     - name: 🔄 Find and Move Artifact
       id: find-artifact
-      if: steps.download-artifact.outcome == 'success'
+      if: steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success'
       shell: bash
       run: |
         echo "::notice::Checking for downloaded artifact"
@@ -407,13 +440,13 @@ runs:
 
           # List all files recursively for debugging
           echo "::notice::Listing all files in download directory:"
-          find "${{ inputs.path }}" -type f -not -path "*/\.*" | xargs ls -la || echo "No files found"
+          find "${{ inputs.path }}" -type f -not -path "*/\.*" | xargs ls -la 2>/dev/null || echo "No files found"
         fi
 
     # Re-verify after artifact download
     - name: 🔍 Verify Downloaded Artifact
       id: artifact-check
-      if: steps.download-artifact.outcome == 'success' && steps.find-artifact.outputs.found == 'true'
+      if: (steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success') && steps.find-artifact.outputs.found == 'true'
       shell: bash
       run: |
         echo "::notice::Checking downloaded artifact"
@@ -444,3 +477,48 @@ runs:
       run: |
         echo "::notice::Extracting downloaded artifact: ${{ inputs.path }}/${{ inputs.filename }}"
         cd "${{ inputs.path }}" && unzip -q -o "${{ inputs.filename }}"
+
+    # Add a brute-force approach with direct action/cache for absolute fallback
+    - name: 🔄 Direct Cache Restore (Fallback)
+      id: direct-cache-restore
+      if: steps.file-check.outputs.valid != 'true'
+      shell: bash
+      run: |
+        echo "::notice::Attempting direct cache restore as last resort"
+        CACHE_KEY="${{ steps.generate-keys.outputs.agnostic_key }}"
+        CACHE_PATH="${{ inputs.path }}/${{ inputs.filename }}"
+
+        echo "::notice::Using key: $CACHE_KEY, path: $CACHE_PATH"
+        mkdir -p "${{ inputs.path }}"
+
+        # Try each fallback key directly using the actions/cache action via the gh cache command
+        # First OS-agnostic key
+        echo "::notice::Trying OS-agnostic key: $CACHE_KEY"
+        gh cache restore "$CACHE_KEY" -p "$CACHE_PATH" --cross-os && FOUND="true" || FOUND="false"
+
+        # If that didn't work, try the run ID specific key
+        if [ "$FOUND" != "true" ] && [ -n "${{ github.run_id }}" ]; then
+          RUN_ID_KEY="${{ inputs.cache_key_prefix }}-${{ inputs.name }}-${{ github.run_id }}"
+          echo "::notice::Trying run ID key: $RUN_ID_KEY"
+          gh cache restore "$RUN_ID_KEY" -p "$CACHE_PATH" --cross-os && FOUND="true" || FOUND="false"
+        fi
+
+        # Check if we have a file now
+        if [ -f "$CACHE_PATH" ]; then
+          FILE_SIZE=$(stat -c%s "$CACHE_PATH" 2>/dev/null || stat -f%z "$CACHE_PATH" 2>/dev/null || ls -l "$CACHE_PATH" | awk '{print $5}')
+          echo "::notice::File found with size: $FILE_SIZE bytes"
+
+          if [ "$FILE_SIZE" -gt 1000 ]; then
+            echo "::notice::Direct cache restore succeeded!"
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::File found but too small: $FILE_SIZE bytes"
+            rm -f "$CACHE_PATH"
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "::warning::Direct cache restore failed, file not found"
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
