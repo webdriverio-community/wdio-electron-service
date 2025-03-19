@@ -149,6 +149,6 @@ runs:
       if: inputs.use_cache != 'true-only'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.name }}.zip
+        name: ${{ inputs.name }}
         path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
         retention-days: ${{ inputs.retention_days }}

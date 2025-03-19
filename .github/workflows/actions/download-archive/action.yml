@@ -382,7 +382,33 @@ runs:
       shell: bash
       run: |
         echo "::notice::Extracting compressed artifact: ${{ inputs.path }}/${{ inputs.filename }}"
-        cd "${{ inputs.path }}" && unzip -o "${{ inputs.filename }}"
+
+        # Show archive contents before extraction
+        echo "::notice::Archive contents listing:"
+        unzip -l "${{ inputs.path }}/${{ inputs.filename }}"
+
+        # Create the destination directory
+        mkdir -p "${{ github.workspace }}"
+
+        # Get file size before extraction
+        FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
+        echo "::notice::Archive size: ${FILE_SIZE} bytes"
+
+        # Try to extract with verbose output
+        echo "::notice::Extraction in progress with verbose output..."
+        cd "${{ github.workspace }}" && unzip -o "${{ inputs.path }}/${{ inputs.filename }}" -d "${{ github.workspace }}"
+
+        # Verify extraction success
+        EXTRACT_STATUS=$?
+        if [ $EXTRACT_STATUS -eq 0 ]; then
+          echo "::notice::✅ Extraction completed successfully"
+        else
+          echo "::error::❌ Extraction failed with status code: ${EXTRACT_STATUS}"
+        fi
+
+        # List directory contents after extraction
+        echo "::notice::Directory contents after extraction:"
+        ls -la "${{ github.workspace }}/packages" 2>/dev/null || echo "packages directory not found"
 
     # Debug step to check the contents of the extracted files
     - name: 🔍 Debug Extracted Files
