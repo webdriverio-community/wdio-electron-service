@@ -37,22 +37,22 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@inquirer/prompts": "^7.3.3",
+    "@inquirer/prompts": "^7.4.0",
     "@octokit/rest": "^21.1.1",
-    "@octokit/types": "^13.7.0",
+    "@octokit/types": "^13.9.0",
     "@turbo-version/version": "^0.8.3",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/node": "^22.13.10",
     "@types/shelljs": "^0.8.15",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
-    "@vitest/eslint-plugin": "^1.1.37",
+    "@vitest/eslint-plugin": "^1.1.38",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
-    "eslint-import-resolver-typescript": "^3.8.7",
-    "eslint-plugin-import-x": "^4.6.1",
+    "eslint-import-resolver-typescript": "^3.9.1",
+    "eslint-plugin-import-x": "^4.8.1",
     "eslint-plugin-wdio": "^9.9.1",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
@@ -60,8 +60,8 @@
     "prettier": "^3.5.3",
     "read-package-up": "^11.0.0",
     "rollup": "^4.35.0",
-    "shelljs": "^0.9.1",
-    "shx": "^0.3.4",
+    "shelljs": "^0.9.2",
+    "shx": "^0.4.0",
     "tsx": "^4.19.3",
     "turbo": "^2.4.4"
   },
@@ -72,7 +72,10 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "electron"
+      "edgedriver",
+      "electron",
+      "esbuild",
+      "geckodriver"
     ]
   },
   "packageManager": "pnpm@10.3.0+sha512.ee592eda8815a8a293c206bb0917c4bb0ff274c50def7cbc17be05ec641fc2d1b02490ce660061356bd0d126a4d7eb2ec8830e6959fb8a447571c631d5a2442d"
