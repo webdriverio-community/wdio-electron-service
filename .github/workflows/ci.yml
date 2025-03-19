@@ -43,6 +43,9 @@ jobs:
     name: Unit Tests
     needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-unit.reusable.yml
+    with:
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
 
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
@@ -102,6 +105,8 @@ jobs:
       node-version: '20'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
 
   # Mac Universal builds require special handling
   # These are separate from regular macOS tests because they use a different build command
@@ -130,3 +135,5 @@ jobs:
       build-command: 'build:mac-universal'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}

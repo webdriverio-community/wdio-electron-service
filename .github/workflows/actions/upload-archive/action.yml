@@ -39,7 +39,7 @@ runs:
         if [[ "${RUN_ATTEMPT}" -gt 1 ]]; then
           # This is a rerun, add a suffix to avoid conflicts
           RERUN_SUFFIX="-rerun${RUN_ATTEMPT}"
-          echo "::notice::This is rerun attempt #${RUN_ATTEMPT}, will use unique suffix to avoid conflicts"
+          echo "::notice::Rerun #${RUN_ATTEMPT} detected - using unique cache keys to avoid conflicts"
         else
           # Not a rerun, no suffix needed
           RERUN_SUFFIX=""
@@ -55,9 +55,6 @@ runs:
         # Create output directory
         mkdir -p $(dirname "${{ inputs.output }}")
 
-        # Log what's being archived with a pattern count
-        echo "::notice::Archiving ${{ inputs.paths }} -> ${{ inputs.output }}"
-
         # Get file count before compression (for validation)
         FILE_COUNT=$(find ${{ inputs.paths }} -type f | wc -l)
 
@@ -69,7 +66,7 @@ runs:
         HUMAN_SIZE=$(du -h "${{ inputs.output }}" | cut -f1)
 
         # Display a concise summary of the archive
-        echo "::notice::Archive created: ${{ inputs.output }} | Size: ${HUMAN_SIZE} | Contains: ${FILE_COUNT} files"
+        echo "::notice::Artifact ${{ inputs.name }}: created ${HUMAN_SIZE} archive with ${FILE_COUNT} files"
 
         # Export artifact size
         echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT

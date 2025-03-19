@@ -176,7 +176,7 @@ runs:
           fi
 
           # Only output essential information
-          echo "::notice::Downloaded from: ${SOURCE} | Size: ${HUMAN_SIZE} | Integrity: ${ZIP_VALID}"
+          echo "::notice::Downloaded ${{ inputs.name }} from ${SOURCE}: ${HUMAN_SIZE}, integrity: ${ZIP_VALID}"
 
           echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
           echo "valid=${ZIP_VALID}" >> $GITHUB_OUTPUT
@@ -195,13 +195,10 @@ runs:
       if: steps.verify-file.outputs.exists != 'true' && inputs.use_cache != 'true-only'
       shell: bash
       run: |
-        # Fallback to artifacts if cache failed
-        echo "::notice::Downloading artifact: ${{ inputs.name }}"
-
         # Create directory for artifact
         mkdir -p "${{ inputs.path }}"
 
-        # Download artifact
+        # Download artifact with retries
         MAX_RETRIES=3
         for i in $(seq 1 $MAX_RETRIES); do
           # Download with automatic retry
@@ -233,7 +230,7 @@ runs:
         if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
           echo "valid=true" >> $GITHUB_OUTPUT
           echo "success=true" >> $GITHUB_OUTPUT
-          echo "::notice::Successfully downloaded artifact from GH Artifacts"
+          echo "::notice::Successfully downloaded ${{ inputs.name }} from GitHub Artifacts"
         else
           echo "::error::Failed to find downloaded artifact"
           echo "valid=false" >> $GITHUB_OUTPUT
@@ -256,14 +253,17 @@ runs:
         fi
 
         # Extract to workspace root directory
-        echo "Extracting archive to ${{ github.workspace }}"
-        cd "${{ github.workspace }}" && unzip -o "${{ inputs.path }}/${{ inputs.filename }}"
+        cd "${{ github.workspace }}" && unzip -q -o "${{ inputs.path }}/${{ inputs.filename }}"
 
-        # Quick validation of extraction
+        # Check extraction success
         if [ $? -eq 0 ]; then
-          # Show a compact summary of what was extracted - distilled info from existing dirs
+          # Count distribution directories without producing output
           DIST_DIRS=$(find . -type d -path "*/dist" | sort | wc -l)
-          echo "::notice::Extraction complete - Found ${DIST_DIRS} dist directories"
+
+          # Only show a message if extraction fails
+          if [ "$DIST_DIRS" -lt 1 ]; then
+            echo "::warning::Extraction completed but no dist directories found"
+          fi
         else
           echo "::error::Failed to extract archive"
           exit 1

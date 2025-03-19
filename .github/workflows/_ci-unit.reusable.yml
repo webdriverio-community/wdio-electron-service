@@ -5,6 +5,15 @@ on:
   workflow_call:
     # Make this a reusable workflow, no value needed
     # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      build_id:
+        description: 'Build ID from the build job'
+        type: string
+        required: false
+      artifact_size:
+        description: 'Size of the build artifact in bytes'
+        type: string
+        required: false
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -52,14 +61,14 @@ jobs:
         id: verify-build
         shell: bash
         run: |
-          # Provide a single, concise summary of build information
-          echo "::notice::Build info: ID=${{ needs.build.outputs.build_id || 'N/A' }}, Size=${{ needs.build.outputs.artifact_size || 'N/A' }} bytes"
+          # Only output build info if it's available
+          if [ -n "${{ inputs.build_id }}" ] && [ -n "${{ inputs.artifact_size }}" ]; then
+            echo "::notice::Build artifact: ID=${{ inputs.build_id }}, Size=${{ inputs.artifact_size }} bytes"
+          fi
 
           # Check for distribution directories (minimal validation)
           DIST_DIRS=$(find "${{ github.workspace }}" -path "*/dist" -type d | wc -l)
-          if [ "$DIST_DIRS" -gt 0 ]; then
-            echo "Verification passed: Found $DIST_DIRS dist directories"
-          else
+          if [ "$DIST_DIRS" -lt 1 ]; then
             echo "::warning::No dist directories found, build extraction may have failed"
           fi
 
