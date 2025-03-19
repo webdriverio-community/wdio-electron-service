@@ -21,6 +21,7 @@ inputs:
   use_cache:
     description: 'Use cache only (true-only or false-only)'
     required: false
+
 runs:
   using: 'composite'
   steps:
@@ -38,38 +39,22 @@ runs:
         # Generate standard key (os-specific)
         STANDARD_KEY="${OS}-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
         echo "standard_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
-        echo "::notice::Standard key: ${STANDARD_KEY}"
 
         # Generate OS-agnostic key
         AGNOSTIC_KEY="${CACHE_PREFIX}-${NAME}-${RUN_ID}"
         echo "agnostic_key=${AGNOSTIC_KEY}" >> $GITHUB_OUTPUT
-        echo "::notice::OS-agnostic key: ${AGNOSTIC_KEY}"
 
         # Generate Linux-specific key for cross-OS compatibility
         LINUX_KEY="Linux-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
         echo "linux_key=${LINUX_KEY}" >> $GITHUB_OUTPUT
-        echo "::notice::Linux key: ${LINUX_KEY}"
 
         # Generate pattern keys
         PATTERN_KEY="${OS}-${CACHE_PREFIX}-${NAME}-"
         echo "pattern_key=${PATTERN_KEY}" >> $GITHUB_OUTPUT
-        echo "::notice::Pattern key: ${PATTERN_KEY}"
 
         # Generate OS-agnostic pattern
         AGNOSTIC_PATTERN="${CACHE_PREFIX}-${NAME}-"
         echo "agnostic_pattern=${AGNOSTIC_PATTERN}" >> $GITHUB_OUTPUT
-        echo "::notice::OS-agnostic pattern: ${AGNOSTIC_PATTERN}"
-
-    # List available caches for debugging
-    - name: 📋 List Available Caches
-      id: list-caches
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-        ACTIONS_CACHE_SERVICE_V2: 'true'
-      run: |
-        echo "::notice::===== AVAILABLE CACHES ====="
-        gh cache list --limit 20 || echo "::warning::Unable to list caches with GH CLI"
 
     # Restore cache with exact key (if provided)
     - name: 🗄️ Restore with Exact Key
@@ -143,307 +128,146 @@ runs:
         lookup-only: false
         fail-on-cache-miss: false
 
-    # Verify pattern match is valid
-    - name: 🔍 Verify Pattern Match
-      id: verify-pattern
-      if: steps.cache-restore-pattern.outputs.cache-hit == 'true'
-      shell: bash
-      run: |
-        echo "::notice::Checking if pattern match produced a valid file..."
-
-        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::warning::Pattern match found but file does not exist"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # Check file size
-        FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-        echo "::notice::Pattern match file size: ${FILE_SIZE} bytes"
-
-        # Check if too small (< 10KB)
-        if [ "$FILE_SIZE" -lt 10000 ]; then
-          echo "::warning::Pattern match file is too small (${FILE_SIZE} bytes), considering it invalid"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          # Remove the invalid file
-          rm -f "${{ inputs.path }}/${{ inputs.filename }}"
-        else
-          echo "::notice::Pattern match file appears valid"
-          echo "valid=true" >> $GITHUB_OUTPUT
-        fi
-
-    # Final attempt with OS-agnostic pattern
-    - name: 🗄️ Restore with OS-Agnostic Pattern
-      id: cache-restore-agnostic-pattern
-      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true')
-      uses: actions/cache/restore@v4
-      env:
-        ACTIONS_CACHE_SERVICE_V2: 'true'
-      with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
-        key: ${{ steps.generate-keys.outputs.agnostic_pattern || format('{0}-{1}-', inputs.cache_key_prefix, inputs.name) }}
-        restore-keys: |
-          ${{ steps.generate-keys.outputs.agnostic_pattern || format('{0}-{1}-', inputs.cache_key_prefix, inputs.name) }}
-        enableCrossOsArchive: true
-        lookup-only: false
-        fail-on-cache-miss: false
-
-    # Verify OS-agnostic pattern match is valid
-    - name: 🔍 Verify OS-Agnostic Pattern Match
-      id: verify-agnostic-pattern
-      if: steps.cache-restore-agnostic-pattern.outputs.cache-hit == 'true'
-      shell: bash
-      run: |
-        echo "::notice::Checking if OS-agnostic pattern match produced a valid file..."
-
-        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::warning::OS-agnostic pattern match found but file does not exist"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # Check file size
-        FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-        echo "::notice::OS-agnostic pattern match file size: ${FILE_SIZE} bytes"
-
-        # Check if too small (< 10KB)
-        if [ "$FILE_SIZE" -lt 10000 ]; then
-          echo "::warning::OS-agnostic pattern match file is too small (${FILE_SIZE} bytes), considering it invalid"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          # Remove the invalid file
-          rm -f "${{ inputs.path }}/${{ inputs.filename }}"
-        else
-          echo "::notice::OS-agnostic pattern match file appears valid"
-          echo "valid=true" >> $GITHUB_OUTPUT
-        fi
-
-    # Absolute last resort - find any cache with the run ID
-    - name: 🗄️ Restore with Run ID Pattern
-      id: cache-restore-run-id
-      if: steps.generate-keys.outputs.run_id_pattern != '' && steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true') && (steps.cache-restore-agnostic-pattern.outputs.cache-hit != 'true' || steps.verify-agnostic-pattern.outputs.valid != 'true')
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-        ACTIONS_CACHE_SERVICE_V2: 'true'
-      run: |
-        echo "::notice::Attempting to find any cache with run ID: ${{ steps.generate-keys.outputs.run_id_pattern }}"
-
-        # Get list of caches containing the run ID
-        CACHE_LIST=$(gh cache list --json key,sizeInBytes --jq ".[] | select(.key | contains(\"${{ steps.generate-keys.outputs.run_id_pattern }}\")) | [.key, .sizeInBytes] | @tsv" || echo "")
-
-        if [[ -n "${CACHE_LIST}" ]]; then
-          echo "::notice::Found caches with matching run ID:"
-          echo "${CACHE_LIST}"
-
-          # Find the largest cache
-          LARGEST_CACHE=$(echo "${CACHE_LIST}" | sort -k2 -nr | head -1)
-          if [[ -n "${LARGEST_CACHE}" ]]; then
-            CACHE_KEY=$(echo "${LARGEST_CACHE}" | cut -f1)
-            CACHE_SIZE=$(echo "${LARGEST_CACHE}" | cut -f2)
-
-            echo "::notice::Selected largest cache: ${CACHE_KEY} (${CACHE_SIZE} bytes)"
-            echo "found_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
-            echo "cache-hit=false" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::No valid cache with matching run ID"
-            echo "cache-hit=false" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "::warning::No cache found with run ID: ${{ steps.generate-keys.outputs.run_id_pattern }}"
-          echo "cache-hit=false" >> $GITHUB_OUTPUT
-        fi
-
-    # Verify Run ID pattern match is valid
-    - name: 🔍 Verify Run ID Pattern Match
-      id: verify-run-id
-      if: steps.cache-restore-run-id.outputs.cache-hit == 'true'
-      shell: bash
-      run: |
-        echo "::notice::Checking if Run ID pattern match produced a valid file..."
-
-        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::warning::Run ID pattern match found but file does not exist"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # Check file size
-        FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-        echo "::notice::Run ID pattern match file size: ${FILE_SIZE} bytes"
-
-        # Check if too small (< 10KB)
-        if [ "$FILE_SIZE" -lt 10000 ]; then
-          echo "::warning::Run ID pattern match file is too small (${FILE_SIZE} bytes), considering it invalid"
-          echo "valid=false" >> $GITHUB_OUTPUT
-          # Remove the invalid file
-          rm -f "${{ inputs.path }}/${{ inputs.filename }}"
-        else
-          echo "::notice::Run ID pattern match file appears valid"
-          echo "valid=true" >> $GITHUB_OUTPUT
-        fi
-
     # Handle cache miss
     - name: ⚠️ Handle Cache Miss
-      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true') && (steps.cache-restore-agnostic-pattern.outputs.cache-hit != 'true' || steps.verify-agnostic-pattern.outputs.valid != 'true') && (steps.cache-restore-run-id.outputs.cache-hit != 'true' || steps.verify-run-id.outputs.valid != 'true')
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true')
       shell: bash
       run: |
-        echo "::warning::No valid cache found for any of the following keys:"
-        echo "::warning::  - Exact key: ${{ inputs.exact_cache_key || 'not provided' }}"
-        echo "::warning::  - Standard key: ${{ steps.generate-keys.outputs.standard_key }} (hit: ${{ steps.cache-restore-standard.outputs.cache-hit || 'false' }})"
-        echo "::warning::  - OS-Agnostic key: ${{ steps.generate-keys.outputs.agnostic_key }} (hit: ${{ steps.cache-restore-agnostic.outputs.cache-hit || 'false' }})"
-        echo "::warning::  - Linux pattern: ${{ steps.generate-keys.outputs.linux_key }} (hit: ${{ steps.cache-restore-linux.outputs.cache-hit || 'false' }})"
-        echo "::warning::  - Pattern key: ${{ steps.generate-keys.outputs.pattern_key }} (hit: ${{ steps.cache-restore-pattern.outputs.cache-hit || 'false' }}, valid: ${{ steps.verify-pattern.outputs.valid || 'unknown' }})"
-        echo "::warning::  - OS-Agnostic pattern: ${{ steps.generate-keys.outputs.agnostic_pattern }} (hit: ${{ steps.cache-restore-agnostic-pattern.outputs.cache-hit || 'false' }}, valid: ${{ steps.verify-agnostic-pattern.outputs.valid || 'unknown' }})"
-        echo "::warning::  - Run ID search: ${{ steps.generate-keys.outputs.run_id_pattern }} (hit: ${{ steps.cache-restore-run-id.outputs.cache-hit || 'false' }}, valid: ${{ steps.verify-run-id.outputs.valid || 'unknown' }})"
-        echo "::warning::Trying alternative approaches..."
-
-        # Create an empty file to prevent downstream failures
-        mkdir -p $(dirname "${{ inputs.path }}/${{ inputs.filename }}")
-        touch "${{ inputs.path }}/${{ inputs.filename }}"
-
-    # Check if the file exists and has valid size/content before extraction
-    - name: 🔍 Verify Downloaded File
-      id: file-check
-      shell: bash
-      run: |
-        echo "::notice::DOWNLOADED FILE DETAILS:"
-        # Mark as invalid by default
-        echo "valid=false" >> $GITHUB_OUTPUT
-
-        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::notice::File exists: YES"
-
-          # Check size
-          FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-          echo "::notice::File size: $(du -h "${{ inputs.path }}/${{ inputs.filename }}" | cut -f1) (${FILE_SIZE} bytes)"
-
-          # Check if empty
-          if [ "$FILE_SIZE" -gt 1000 ]; then
-            # Try to verify zip integrity
-            if unzip -t "${{ inputs.path }}/${{ inputs.filename }}" > /dev/null 2>&1; then
-              echo "::notice::Zip integrity: VALID"
-              echo "valid=true" >> $GITHUB_OUTPUT
-            else
-              echo "::warning::Zip integrity check failed"
-              # Delete corrupted file
-              rm -f "${{ inputs.path }}/${{ inputs.filename }}"
-            fi
-          else
-            echo "::warning::File is too small (${FILE_SIZE} bytes)"
-            # Delete suspiciously small file
-            rm -f "${{ inputs.path }}/${{ inputs.filename }}"
-          fi
+        if [ -n "${{ inputs.use_cache }}" ] && [ "${{ inputs.use_cache }}" = "true-only" ]; then
+          echo "::error::Cache miss and use_cache=true-only, failing step"
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
         else
-          echo "::warning::File does not exist"
+          echo "::warning::Falling back to artifact download"
+          echo "success=false" >> $GITHUB_OUTPUT
         fi
 
-        # Determine which cache hit actually worked
+    # Verify the downloaded file and print minimal but useful info
+    - name: 🔍 Verify Downloaded File
+      id: verify-file
+      shell: bash
+      run: |
+        # Summary of what method was used to get the file (for debugging)
         if [ "${{ steps.cache-restore-exact.outputs.cache-hit }}" == "true" ]; then
-          echo "::notice::Cache source: Exact key hit"
+          SOURCE="exact key cache"
         elif [ "${{ steps.cache-restore-standard.outputs.cache-hit }}" == "true" ]; then
-          echo "::notice::Cache source: Standard key hit"
+          SOURCE="standard key cache"
         elif [ "${{ steps.cache-restore-agnostic.outputs.cache-hit }}" == "true" ]; then
-          echo "::notice::Cache source: OS-Agnostic key hit"
+          SOURCE="OS-agnostic key cache"
         elif [ "${{ steps.cache-restore-linux.outputs.cache-hit }}" == "true" ]; then
-          echo "::notice::Cache source: Linux key hit"
-        elif [ "${{ steps.cache-restore-pattern.outputs.cache-hit }}" == "true" ] && [ "${{ steps.verify-pattern.outputs.valid }}" == "true" ]; then
-          echo "::notice::Cache source: Pattern key hit (verified)"
-        elif [ "${{ steps.cache-restore-agnostic-pattern.outputs.cache-hit }}" == "true" ] && [ "${{ steps.verify-agnostic-pattern.outputs.valid }}" == "true" ]; then
-          echo "::notice::Cache source: OS-agnostic pattern hit (verified)"
-        elif [ "${{ steps.cache-restore-run-id.outputs.cache-hit }}" == "true" ] && [ "${{ steps.verify-run-id.outputs.valid }}" == "true" ]; then
-          echo "::notice::Cache source: Run ID pattern search hit (verified)"
-        elif [ "${{ steps.direct-cache-restore.outputs.success }}" == "true" ]; then
-          echo "::notice::Cache source: Direct cache restore (fallback approach)"
+          SOURCE="Linux key cache"
+        elif [ "${{ steps.cache-restore-pattern.outputs.cache-hit }}" == "true" && "${{ steps.verify-pattern.outputs.valid }}" == "true" ]; then
+          SOURCE="pattern key cache"
         else
-          echo "::warning::No valid cache hit detected"
+          SOURCE="GitHub artifact (fallback)"
+        fi
+
+        # Check if file exists and get size
+        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
+          HUMAN_SIZE=$(du -h "${{ inputs.path }}/${{ inputs.filename }}" | cut -f1)
+
+          # Test zip file integrity
+          unzip -t "${{ inputs.path }}/${{ inputs.filename }}" > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            ZIP_VALID="VALID"
+          else
+            ZIP_VALID="INVALID"
+          fi
+
+          # Only output essential information
+          echo "::notice::Downloaded from: ${SOURCE} | Size: ${HUMAN_SIZE} | Integrity: ${ZIP_VALID}"
+
+          echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
+          echo "valid=${ZIP_VALID}" >> $GITHUB_OUTPUT
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "::error::File not found: ${{ inputs.path }}/${{ inputs.filename }}"
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
         fi
 
     # Download from GitHub Artifacts as fallback
     - name: 📥 Download from GitHub Artifacts
       id: download-artifact
-      if: steps.file-check.outputs.valid != 'true' && inputs.use_cache != 'true-only'
+      if: steps.verify-file.outputs.exists != 'true' && inputs.use_cache != 'true-only'
       shell: bash
       run: |
-        echo "::notice::Cache not found, attempting to download from GitHub Artifacts..."
-        # Create output directory
+        # Fallback to artifacts if cache failed
+        echo "::notice::Downloading artifact: ${{ inputs.name }}"
+
+        # Create directory for artifact
         mkdir -p "${{ inputs.path }}"
 
-        # Add retry logic for reliability
+        # Download artifact
         MAX_RETRIES=3
         for i in $(seq 1 $MAX_RETRIES); do
-          echo "::notice::Artifact download attempt $i of $MAX_RETRIES"
+          # Download with automatic retry
+          echo "Attempt $i of $MAX_RETRIES"
+          gh run download --name "${{ inputs.name }}" --dir "${{ inputs.path }}" && break
 
-          # Use actions/download-artifact via gh run command
-          gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" && DOWNLOAD_SUCCESS=true || DOWNLOAD_SUCCESS=false
-
-          if [ "$DOWNLOAD_SUCCESS" = "true" ] || find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
-            echo "::notice::Successfully downloaded artifact on attempt $i"
-            break
-          elif [ $i -lt $MAX_RETRIES ]; then
-            echo "::warning::Artifact download failed on attempt $i, retrying in $((i * 5))s..."
-            sleep $((i * 5))
-          else
-            echo "::warning::All artifact download attempts failed"
+          # Exit on final attempt failure
+          if [ $i -eq $MAX_RETRIES ]; then
+            echo "::error::Failed to download artifact after $MAX_RETRIES attempts"
+            exit 1
           fi
+
+          # Wait with exponential backoff
+          SLEEP_TIME=$((2 ** $i))
+          echo "Waiting ${SLEEP_TIME}s before retry..."
+          sleep $SLEEP_TIME
         done
 
-        # Find and move ZIP files if needed
-        ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" -not -path "*/\.*" 2>/dev/null)
-        if [ -n "$ZIP_FILES" ]; then
-          FIRST_ZIP=$(echo "$ZIP_FILES" | head -1)
-          if [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-            echo "::notice::Moving $FIRST_ZIP to ${{ inputs.path }}/${{ inputs.filename }}"
-            mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
-          fi
+        # Find the downloaded zip (handles different behavior of gh run download)
+        ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" | sort)
+        FIRST_ZIP=$(echo "$ZIP_FILES" | head -n 1)
 
-          # Verify downloaded artifact
-          if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-            FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-            if [ "$FILE_SIZE" -gt 1000 ]; then
-              echo "valid=true" >> $GITHUB_OUTPUT
-            else
-              echo "::warning::Downloaded artifact is too small: ${FILE_SIZE} bytes"
-            fi
-          fi
+        if [ -n "$FIRST_ZIP" ] && [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          # Move the file to the expected location
+          mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
+        fi
+
+        # Check if the file exists
+        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+          echo "::notice::Successfully downloaded artifact from GH Artifacts"
+        else
+          echo "::error::Failed to find downloaded artifact"
+          echo "valid=false" >> $GITHUB_OUTPUT
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
         fi
       env:
         GH_TOKEN: ${{ github.token }}
 
-    # Extract if any method was successful
+    # Extract the compressed artifact to the destination
     - name: 📂 Extract Compressed Archive
       id: extract-archive
-      if: steps.file-check.outputs.valid == 'true' || steps.download-artifact.outputs.valid == 'true'
+      if: steps.verify-file.outputs.exists == 'true' || steps.download-artifact.outputs.valid == 'true'
       shell: bash
       run: |
-        echo "::notice::Extracting compressed artifact: ${{ inputs.path }}/${{ inputs.filename }}"
-
-        # Show archive contents before extraction
-        echo "::notice::Archive contents summary:"
-        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | head -n 10
-        echo "... (truncated) ..."
-        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | tail -n 5
-
-        # Extract to the workspace root
-        echo "::notice::Extraction in progress..."
-        cd "${{ github.workspace }}" && unzip -o "${{ inputs.path }}/${{ inputs.filename }}" -d "${{ github.workspace }}"
-
-        # Verify extraction success
-        EXTRACT_STATUS=$?
-        if [ $EXTRACT_STATUS -eq 0 ]; then
-          echo "::notice::✅ Extraction completed successfully"
-          echo "success=true" >> $GITHUB_OUTPUT
-
-          # Provide basic info about extracted files
-          echo "::notice::Extract verification:"
-          echo "::notice::- Workspace root contents:"
-          ls -la "${{ github.workspace }}" | head -n 10
-
-          echo "::notice::- Packages directory contents:"
-          ls -la "${{ github.workspace }}/packages" 2>/dev/null || echo "packages directory not found"
-
-          echo "::notice::- Found dist directories:"
-          find "${{ github.workspace }}" -name "dist" -type d | head -n 10 || echo "No dist directories found"
-        else
-          echo "::error::❌ Extraction failed with status code: ${EXTRACT_STATUS}"
-          echo "success=false" >> $GITHUB_OUTPUT
+        # Ensure the archive exists
+        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "::error::Archive not found for extraction: ${{ inputs.path }}/${{ inputs.filename }}"
+          exit 1
         fi
+
+        # Extract to workspace root directory
+        echo "Extracting archive to ${{ github.workspace }}"
+        cd "${{ github.workspace }}" && unzip -o "${{ inputs.path }}/${{ inputs.filename }}"
+
+        # Quick validation of extraction
+        if [ $? -eq 0 ]; then
+          # Show a compact summary of what was extracted - distilled info from existing dirs
+          DIST_DIRS=$(find . -type d -path "*/dist" | sort | wc -l)
+          echo "::notice::Extraction complete - Found ${DIST_DIRS} dist directories"
+        else
+          echo "::error::Failed to extract archive"
+          exit 1
+        fi
+
+        # Return success
+        echo "success=true" >> $GITHUB_OUTPUT

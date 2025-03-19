@@ -72,7 +72,7 @@ jobs:
         uses: ./.github/workflows/actions/upload-archive
         with:
           name: wdio-electron-service
-          output: wdio-electron-service-build
+          output: wdio-electron-service-build/artifact.zip
           paths: packages/*/dist
           cache_key_prefix: wdio-electron-build
           retention_days: '90'

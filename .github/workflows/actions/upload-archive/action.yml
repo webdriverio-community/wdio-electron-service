@@ -1,195 +1,124 @@
-name: Upload Compressed Artifacts
-description: Compresses and uploads artifacts with caching for faster workflow access
+name: 'Upload Artifacts with Caching'
+description: 'Uploads compressed artifacts and saves them to GitHub cache (90-day retention)'
 
 inputs:
-  paths:
-    description: 'Path(s) to upload'
+  name:
+    description: 'Artifact name'
     required: true
   output:
-    description: 'Output directory for the compressed file'
-    required: false
-    default: 'dist'
-  name:
-    description: 'Name of the artifact'
+    description: 'Output filename (with .zip extension)'
     required: true
-  cache_key_prefix:
-    description: 'Prefix for cache key'
-    required: false
-    default: 'artifacts'
+  paths:
+    description: 'Artifact paths (can be a pattern or directory)'
+    required: true
   retention_days:
-    description: 'Number of days to keep artifacts'
+    description: 'Retention days for GitHub artifacts'
     required: false
-    default: '1'
-  custom_cache_key:
-    description: 'Custom cache key to use instead of auto-generated'
+    default: '90'
+  cache_key_prefix:
+    description: 'Prefix for the cache key'
+    default: 'build-artifacts'
     required: false
-  use_cache:
-    description: 'Whether to use cache'
-    required: false
-    default: 'true'
 
 outputs:
-  filename:
-    description: 'Filename of the created archive'
-    value: ${{ steps.create-archive.outputs.filename }}
   size:
-    description: 'Size of the created archive in bytes'
-    value: ${{ steps.create-archive.outputs.size }}
-  cache_key:
-    description: 'Key used for the cache'
-    value: ${{ steps.generate-keys.outputs.cache_key }}
+    description: 'Size of the upload in bytes'
+    value: ${{ steps.compress.outputs.size }}
 
 runs:
-  using: composite
+  using: 'composite'
   steps:
-    # Generate standard cache keys
+    # Check for rerun attempts and handle them specially
+    - name: 🪄 Check for Rerun Attempt
+      id: check-rerun
+      shell: bash
+      run: |
+        # Check if this is a rerun of a previous workflow run
+        RUN_ATTEMPT="${{ github.run_attempt }}"
+
+        if [[ "${RUN_ATTEMPT}" -gt 1 ]]; then
+          # This is a rerun, add a suffix to avoid conflicts
+          RERUN_SUFFIX="-rerun${RUN_ATTEMPT}"
+          echo "::notice::This is rerun attempt #${RUN_ATTEMPT}, will use unique suffix to avoid conflicts"
+        else
+          # Not a rerun, no suffix needed
+          RERUN_SUFFIX=""
+        fi
+
+        echo "rerun_suffix=${RERUN_SUFFIX}" >> $GITHUB_OUTPUT
+
+    # Compress the specified directories/files into a .zip file
+    - name: 🗜️ Compress Files
+      id: compress
+      shell: bash
+      run: |
+        # Create output directory
+        mkdir -p $(dirname "${{ inputs.output }}")
+
+        # Log what's being archived with a pattern count
+        echo "::notice::Archiving ${{ inputs.paths }} -> ${{ inputs.output }}"
+
+        # Get file count before compression (for validation)
+        FILE_COUNT=$(find ${{ inputs.paths }} -type f | wc -l)
+
+        # Compress files (excluding node_modules by default)
+        zip -r "${{ inputs.output }}" ${{ inputs.paths }} -x "*/node_modules/*" "*/\.*/*"
+
+        # Get archive size for reporting
+        FILE_SIZE=$(stat -c%s "${{ inputs.output }}" 2>/dev/null || stat -f%z "${{ inputs.output }}" 2>/dev/null || ls -l "${{ inputs.output }}" | awk '{print $5}')
+        HUMAN_SIZE=$(du -h "${{ inputs.output }}" | cut -f1)
+
+        # Display a concise summary of the archive
+        echo "::notice::Archive created: ${{ inputs.output }} | Size: ${HUMAN_SIZE} | Contains: ${FILE_COUNT} files"
+
+        # Export artifact size
+        echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
+
+    # Generate cache keys
     - name: 🔑 Generate Cache Keys
       id: generate-keys
       shell: bash
       run: |
-        # Ensure cache key prefix has a value
+        # Ensure values have defaults
         CACHE_PREFIX="${{ inputs.cache_key_prefix || 'artifacts' }}"
         NAME="${{ inputs.name }}"
         OS="${{ runner.os }}"
         RUN_ID="${{ github.run_id }}"
+        RERUN_SUFFIX="${{ steps.check-rerun.outputs.rerun_suffix }}"
 
-        # If a custom key is provided, use that
-        if [ -n "${{ inputs.custom_cache_key }}" ]; then
-          echo "standard_key=${{ inputs.custom_cache_key }}" >> $GITHUB_OUTPUT
-          echo "cache_key=${{ inputs.custom_cache_key }}" >> $GITHUB_OUTPUT
-          echo "::notice::Using custom cache key: ${{ inputs.custom_cache_key }}"
-        else
-          # Generate a standard cache key - format matches download-archive
-          STANDARD_KEY="${OS}-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
-          echo "standard_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
-          echo "cache_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
-          echo "::notice::Generated standard cache key: ${STANDARD_KEY}"
+        # Generate standard key (OS specific)
+        STANDARD_KEY="${OS}-${CACHE_PREFIX}-${NAME}-${RUN_ID}${RERUN_SUFFIX}"
+        echo "standard_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
 
-          # Generate OS-agnostic key for cross-platform compatibility
-          AGNOSTIC_KEY="${CACHE_PREFIX}-${NAME}-${RUN_ID}"
-          echo "agnostic_key=${AGNOSTIC_KEY}" >> $GITHUB_OUTPUT
-          echo "::notice::Generated OS-agnostic key: ${AGNOSTIC_KEY}"
-        fi
+        # Generate OS-agnostic key (used across platforms)
+        AGNOSTIC_KEY="${CACHE_PREFIX}-${NAME}-${RUN_ID}${RERUN_SUFFIX}"
+        echo "agnostic_key=${AGNOSTIC_KEY}" >> $GITHUB_OUTPUT
 
-    # Create the archive
-    - name: 📦 Create Archive
-      id: create-archive
-      shell: bash
-      run: |
-        # Create output directory if it doesn't exist
-        mkdir -p "${{ inputs.output }}"
-
-        # Create the zip file without using the artifact name in the path
-        FILENAME="artifact.zip"
-        echo "::notice::Compressing ${{ inputs.paths }} to ${{ inputs.output }}/${FILENAME}"
-
-        # Debug paths before creating archive
-        echo "::notice::===== DEBUG PATHS TO ARCHIVE ====="
-        for path in ${{ inputs.paths }}; do
-          echo "::notice::Path pattern: $path"
-          echo "::notice::Matching files (sample):"
-          find "${{ github.workspace }}" -path "*$path*" 2>/dev/null | sort | head -n 20 || echo "Error listing files"
-
-          # Count total files matching the pattern
-          TOTAL_FILES=$(find "${{ github.workspace }}" -path "*$path*" 2>/dev/null | wc -l || echo "unknown")
-          echo "::notice::Total files matching this pattern: ${TOTAL_FILES}"
-        done
-
-        # Use zip to create the archive
-        cd "${{ github.workspace }}" && zip -r "${{ inputs.output }}/${FILENAME}" ${{ inputs.paths }}
-
-        # Check if the file was created
-        if [ -f "${{ inputs.output }}/${FILENAME}" ]; then
-          FILE_SIZE=$(stat -c%s "${{ inputs.output }}/${FILENAME}" 2>/dev/null || stat -f%z "${{ inputs.output }}/${FILENAME}" 2>/dev/null || ls -l "${{ inputs.output }}/${FILENAME}" | awk '{print $5}')
-          echo "::notice::Created archive: ${{ inputs.output }}/${FILENAME} ($(du -h "${{ inputs.output }}/${FILENAME}" | cut -f1))"
-          echo "filename=${FILENAME}" >> $GITHUB_OUTPUT
-          echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
-
-          # List archive contents
-          echo "::notice::Archive contents:"
-          unzip -l "${{ inputs.output }}/${FILENAME}" | head -n 20
-        else
-          echo "::error::Failed to create archive"
-          exit 1
-        fi
-
-    # Check if this is a rerun and delete previous cache if needed
-    - name: 🗑️ Delete Previous Cache for Reruns
-      if: inputs.use_cache != 'false' && github.run_attempt > 1
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        echo "::notice::This is run attempt #${{ github.run_attempt }} - checking for previous cache to delete"
-        echo "::notice::Note: Deleting caches requires 'actions: write' permission in the workflow"
-
-        # Only try deleting if this is a rerun
-        if [ "${{ github.run_attempt }}" -gt "1" ]; then
-          CACHE_KEY="${{ steps.generate-keys.outputs.standard_key }}"
-          AGNOSTIC_KEY="${{ steps.generate-keys.outputs.agnostic_key }}"
-
-          echo "::notice::Deleting previous OS-specific cache: ${CACHE_KEY}"
-          gh extension install actions/gh-actions-cache
-
-          # Delete OS-specific cache
-          gh actions-cache delete "${CACHE_KEY}" --confirm || echo "::notice::Cache not found or already deleted"
-
-          # Delete OS-agnostic cache
-          echo "::notice::Deleting previous OS-agnostic cache: ${AGNOSTIC_KEY}"
-          gh actions-cache delete "${AGNOSTIC_KEY}" --confirm || echo "::notice::OS-agnostic cache not found or already deleted"
-
-          echo "::notice::Previous caches deleted successfully"
-        fi
-
-    # Save the archive to cache with OS-specific key
-    - name: 🗄️ Cache Archive (OS-specific)
-      id: cache-save
-      if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4
-      env:
-        ACTIONS_CACHE_SERVICE_V2: 'true'
-      with:
-        path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
-        key: ${{ steps.generate-keys.outputs.standard_key }}
-        enableCrossOsArchive: true
-
-    # Save with OS-agnostic key for better cross-OS compatibility
-    - name: 🗄️ Cache Archive (OS-agnostic)
-      id: cache-save-agnostic
-      if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4
-      env:
-        ACTIONS_CACHE_SERVICE_V2: 'true'
-      with:
-        path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
-        key: ${{ steps.generate-keys.outputs.agnostic_key }}
-        enableCrossOsArchive: true
-
-    # Log cache details for debugging
-    - name: 📊 Cache Operation Details
-      shell: bash
-      run: |
-        echo "::notice::===== CACHE SAVE DETAILS ====="
-        echo "::notice::Cache keys used:"
-        echo "::notice:: - OS-specific: ${{ steps.generate-keys.outputs.standard_key }}"
-        echo "::notice:: - OS-agnostic: ${{ steps.generate-keys.outputs.agnostic_key }}"
-        echo "::notice::File details:"
-        echo "::notice:: - Path for caching: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}"
-
-        # Check file exists and get size info
-        if [ -f "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" ]; then
-          SIZE=$(stat -c%s "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" 2>/dev/null || ls -l "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" | awk '{print $5}')
-          echo "::notice:: - Size: $(du -h "${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}" | cut -f1) (${SIZE} bytes)"
-          echo "::notice:: - Exists: YES"
-        else
-          echo "::warning:: - File does not exist!"
-        fi
-
-    # Save to standard artifact storage as fallback
+    # Upload to GitHub Artifacts
     - name: 📤 Upload Artifact
-      if: inputs.use_cache != 'true-only'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.name }}
-        path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
+        path: ${{ inputs.output }}
         retention-days: ${{ inputs.retention_days }}
+        if-no-files-found: error
+
+    # Cache with OS-specific key
+    - name: 🗄️ Cache Artifact (OS-specific)
+      uses: actions/cache/save@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.output }}
+        key: ${{ steps.generate-keys.outputs.standard_key }}
+        enableCrossOsArchive: true
+
+    # Cache with OS-agnostic key
+    - name: 🗄️ Cache Artifact (OS-agnostic)
+      uses: actions/cache/save@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.output }}
+        key: ${{ steps.generate-keys.outputs.agnostic_key }}
+        enableCrossOsArchive: true

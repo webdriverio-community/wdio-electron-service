@@ -49,21 +49,19 @@ jobs:
 
       # Verify the extracted dist directories exist
       - name: 🔍 Verify Extracted Files
+        id: verify-build
         shell: bash
         run: |
-          echo "::notice::===== VERIFYING EXTRACTED FILES ====="
-          echo "::notice::Used build ID: ${{ needs.build.outputs.build_id || 'not available' }}"
-          echo "::notice::Build completed at: ${{ needs.build.outputs.build_date || 'not available' }}"
-          echo "::notice::Artifact size: ${{ needs.build.outputs.artifact_size || 'unknown' }} bytes"
+          # Provide a single, concise summary of build information
+          echo "::notice::Build info: ID=${{ needs.build.outputs.build_id || 'N/A' }}, Size=${{ needs.build.outputs.artifact_size || 'N/A' }} bytes"
 
-          echo "::notice::Current directory structure:"
-          ls -la
-
-          echo "::notice::Looking for packages/*/dist directories:"
-          find packages -type d -name "dist" -ls || echo "No dist directories found"
-
-          echo "::notice::Checking dist file permissions:"
-          find packages -type d -name "dist" -exec ls -la {} \; || echo "No dist directories to check permissions"
+          # Check for distribution directories (minimal validation)
+          DIST_DIRS=$(find "${{ github.workspace }}" -path "*/dist" -type d | wc -l)
+          if [ "$DIST_DIRS" -gt 0 ]; then
+            echo "Verification passed: Found $DIST_DIRS dist directories"
+          else
+            echo "::warning::No dist directories found, build extraction may have failed"
+          fi
 
       # Run unit tests using Turbo
       # The --only flag ensures we only run tests for the packages that have changed
