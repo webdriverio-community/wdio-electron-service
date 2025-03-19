@@ -10,10 +10,9 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
-  # This job runs unit tests across all supported operating systems
-  # The matrix strategy ensures tests pass on all platforms
-  unit:
-    name: Node ${{ matrix.node-version }} (${{ matrix.os }})
+  # This job runs unit tests on multiple Node.js versions and operating systems
+  test:
+    name: Unit ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
