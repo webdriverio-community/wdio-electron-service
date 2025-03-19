@@ -70,6 +70,18 @@ runs:
         FILENAME="artifact.zip"
         echo "::notice::Compressing ${{ inputs.paths }} to ${{ inputs.output }}/${FILENAME}"
 
+        # Debug paths before creating archive
+        echo "::notice::===== DEBUG PATHS TO ARCHIVE ====="
+        for path in ${{ inputs.paths }}; do
+          echo "::notice::Path pattern: $path"
+          echo "::notice::Matching files (sample):"
+          find "${{ github.workspace }}" -path "*$path*" 2>/dev/null | sort | head -n 20 || echo "Error listing files"
+
+          # Count total files matching the pattern
+          TOTAL_FILES=$(find "${{ github.workspace }}" -path "*$path*" 2>/dev/null | wc -l || echo "unknown")
+          echo "::notice::Total files matching this pattern: ${TOTAL_FILES}"
+        done
+
         # Use zip to create the archive
         cd "${{ github.workspace }}" && zip -r "${{ inputs.output }}/${FILENAME}" ${{ inputs.paths }}
 
@@ -79,6 +91,10 @@ runs:
           echo "::notice::Created archive: ${{ inputs.output }}/${FILENAME} ($(du -h "${{ inputs.output }}/${FILENAME}" | cut -f1))"
           echo "filename=${FILENAME}" >> $GITHUB_OUTPUT
           echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
+
+          # List archive contents
+          echo "::notice::Archive contents:"
+          unzip -l "${{ inputs.output }}/${FILENAME}" | head -n 20
         else
           echo "::error::Failed to create archive"
           exit 1

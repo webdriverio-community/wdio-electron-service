@@ -382,7 +382,41 @@ runs:
       shell: bash
       run: |
         echo "::notice::Extracting compressed artifact: ${{ inputs.path }}/${{ inputs.filename }}"
-        cd "${{ inputs.path }}" && unzip -q -o "${{ inputs.filename }}"
+        cd "${{ inputs.path }}" && unzip -o "${{ inputs.filename }}"
+
+    # Debug step to check the contents of the extracted files
+    - name: 🔍 Debug Extracted Files
+      if: steps.file-check.outputs.valid == 'true'
+      shell: bash
+      run: |
+        echo "::notice::===== DEBUG EXTRACTED FILES ====="
+
+        # Check archive contents without extracting
+        echo "::notice::Archive contents (sample):"
+        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | head -n 30
+
+        # Show basic workspace structure
+        echo "::notice::Basic workspace structure:"
+        find "${{ github.workspace }}" -maxdepth 3 -type d | sort
+
+        # List files in extraction directory
+        echo "::notice::Extraction path: ${{ inputs.path }}"
+        ls -la "${{ inputs.path }}"
+
+        # List any dist directories and their contents
+        echo "::notice::Looking for packages/*/dist directories:"
+        find "${{ github.workspace }}/packages" -name "dist" -type d 2>/dev/null | sort || echo "No dist directories found"
+
+        # Count files in extracted package directories
+        echo "::notice::Files in package directories:"
+        for pkg in $(find "${{ github.workspace }}/packages" -maxdepth 1 -type d | grep -v "^${{ github.workspace }}/packages$"); do
+          COUNT=$(find "$pkg" -type f | wc -l)
+          echo "::notice::  - $(basename "$pkg"): $COUNT files"
+        done
+
+        # Checking file permissions
+        echo "::notice::Checking file permissions for dist directories:"
+        find "${{ github.workspace }}/packages" -name "dist" -type d -exec ls -la {} \; 2>/dev/null || echo "No dist directories found"
 
     # Download from GitHub Artifacts with retries
     - name: 📥 Download from GitHub Artifacts
@@ -499,7 +533,7 @@ runs:
         fi
 
     # Extract if artifact download was successful
-    - name: �� Extract Downloaded Artifact
+    - name: 📂 Extract Downloaded Artifact
       if: steps.artifact-check.outputs.valid == 'true'
       shell: bash
       run: |

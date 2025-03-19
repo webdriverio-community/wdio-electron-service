@@ -48,6 +48,20 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ github.run_id && format('{0}-{1}-{2}-{3}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id) || '' }}
 
+      # Verify the extracted dist directories exist
+      - name: 🔍 Verify Extracted Files
+        shell: bash
+        run: |
+          echo "::notice::===== VERIFYING EXTRACTED FILES ====="
+          echo "::notice::Current directory structure:"
+          ls -la
+
+          echo "::notice::Looking for packages/*/dist directories:"
+          find packages -type d -name "dist" -ls || echo "No dist directories found"
+
+          echo "::notice::Checking dist file permissions:"
+          find packages -type d -name "dist" -exec ls -la {} \; || echo "No dist directories to check permissions"
+
       # Run unit tests using Turbo
       # The --only flag ensures we only run tests for the packages that have changed
       - name: 🧪 Execute Unit Tests
