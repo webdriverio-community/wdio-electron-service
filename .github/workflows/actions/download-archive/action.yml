@@ -80,7 +80,7 @@ runs:
     - name: 🗄️ Restore with Exact Key
       id: cache-restore-exact
       if: inputs.exact_cache_key != ''
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -94,7 +94,7 @@ runs:
     - name: 🗄️ Restore with Standard Key
       id: cache-restore-standard
       if: steps.cache-restore-exact.outputs.cache-hit != 'true'
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -108,7 +108,7 @@ runs:
     - name: 🗄️ Restore with OS-Agnostic Key
       id: cache-restore-agnostic
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true'
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -122,7 +122,7 @@ runs:
     - name: 🗄️ Restore with Linux Key
       id: cache-restore-linux
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && runner.os != 'Linux'
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -136,7 +136,7 @@ runs:
     - name: 🗄️ Restore with Pattern
       id: cache-restore-pattern
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true'
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -181,7 +181,7 @@ runs:
     - name: 🗄️ Restore with OS-Agnostic Pattern
       id: cache-restore-agnostic-pattern
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true')
-      uses: actions/cache/restore@v4.1.2
+      uses: actions/cache/restore@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -312,70 +312,10 @@ runs:
       if: steps.file-check.outputs.valid != 'true'
       shell: bash
       run: |
-        echo "::notice::Attempting direct cache restore as last resort"
-        CACHE_KEY="${{ steps.generate-keys.outputs.agnostic_key }}"
-        CACHE_PATH="${{ inputs.path }}/${{ inputs.filename }}"
-
-        echo "::notice::Using key: $CACHE_KEY, path: $CACHE_PATH"
-        mkdir -p "${{ inputs.path }}"
-
-        # Approach using nodejs script to restore the cache
-        echo "const cache = require('@actions/cache');" > restore.js
-        echo "const path = require('path');" >> restore.js
-        echo "const core = require('@actions/core');" >> restore.js
-        echo "async function run() {" >> restore.js
-        echo "  try {" >> restore.js
-        echo "    const paths = ['${{ inputs.path }}/${{ inputs.filename }}'];" >> restore.js
-        echo "    const restoreKeys = ['${{ steps.generate-keys.outputs.agnostic_key }}', '${{ steps.generate-keys.outputs.standard_key }}'];" >> restore.js
-        echo "    console.log('Attempting to restore', paths, 'with keys', restoreKeys);" >> restore.js
-        echo "    const cacheKey = await cache.restoreCache(paths, restoreKeys[0], restoreKeys.slice(1));" >> restore.js
-        echo "    console.log('Cache restore result:', cacheKey);" >> restore.js
-        echo "    process.exit(cacheKey ? 0 : 1);" >> restore.js
-        echo "  } catch(error) {" >> restore.js
-        echo "    console.error('Cache restore error:', error);" >> restore.js
-        echo "    process.exit(1);" >> restore.js
-        echo "  }" >> restore.js
-        echo "}" >> restore.js
-        echo "run();" >> restore.js
-
-        # Try to execute with node
-        if node restore.js; then
-          echo "::notice::Successfully used Node.js script to restore cache"
-          FOUND="true"
-        else
-          echo "::warning::Failed to restore cache with Node.js script"
-
-          # Fallback to using the cache-save@v4.1.2 action directly
-          echo "::notice::Falling back to using the cache action executable directly"
-          if ${{ github.action_path }}/../../../actions/cache/v4.1.2/dist/restore/index.js; then
-            echo "::notice::Successfully used cache action executable"
-            FOUND="true"
-          else
-            echo "::warning::Failed to restore with cache action executable"
-            FOUND="false"
-          fi
-        fi
-
-        # Check if we have a file now
-        if [ -f "$CACHE_PATH" ]; then
-          FILE_SIZE=$(stat -c%s "$CACHE_PATH" 2>/dev/null || stat -f%z "$CACHE_PATH" 2>/dev/null || ls -l "$CACHE_PATH" | awk '{print $5}')
-          echo "::notice::File found with size: $FILE_SIZE bytes"
-
-          if [ "$FILE_SIZE" -gt 1000 ]; then
-            echo "::notice::Direct cache restore succeeded!"
-            echo "success=true" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::File found but too small: $FILE_SIZE bytes"
-            rm -f "$CACHE_PATH"
-            echo "success=false" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "::warning::Direct cache restore failed, file not found"
-          echo "success=false" >> $GITHUB_OUTPUT
-        fi
+        echo "::notice::Skipping direct cache restore approach"
+        echo "success=false" >> $GITHUB_OUTPUT
       env:
         GH_TOKEN: ${{ github.token }}
-        ACTIONS_CACHE_SERVICE_V2: 'true'
 
     # Check if the file exists and has valid size/content before extraction
     - name: 🔍 Verify Downloaded File

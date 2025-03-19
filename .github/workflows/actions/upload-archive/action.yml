@@ -68,7 +68,7 @@ runs:
 
         # Create the zip file
         FILENAME="${{ inputs.name }}.zip"
-        echo "Compressing ${{ inputs.paths }} to ${{ inputs.output }}/${FILENAME}"
+        echo "::notice::Compressing ${{ inputs.paths }} to ${{ inputs.output }}/${FILENAME}"
 
         # Use zip to create the archive
         cd "${{ github.workspace }}" && zip -r "${{ inputs.output }}/${FILENAME}" ${{ inputs.paths }}
@@ -88,7 +88,7 @@ runs:
     - name: 🗄️ Cache Archive (OS-specific)
       id: cache-save
       if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4.1.2
+      uses: actions/cache/save@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -100,7 +100,7 @@ runs:
     - name: 🗄️ Cache Archive (OS-agnostic)
       id: cache-save-agnostic
       if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4.1.2
+      uses: actions/cache/save@v4
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
