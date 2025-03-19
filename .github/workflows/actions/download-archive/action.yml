@@ -306,23 +306,15 @@ runs:
         mkdir -p $(dirname "${{ inputs.path }}/${{ inputs.filename }}")
         touch "${{ inputs.path }}/${{ inputs.filename }}"
 
-    # Last resort with direct cache command
-    - name: 🔄 Direct Cache Restore (Fallback)
-      id: direct-cache-restore
-      if: steps.file-check.outputs.valid != 'true'
-      shell: bash
-      run: |
-        echo "::notice::Skipping direct cache restore approach"
-        echo "success=false" >> $GITHUB_OUTPUT
-      env:
-        GH_TOKEN: ${{ github.token }}
-
     # Check if the file exists and has valid size/content before extraction
     - name: 🔍 Verify Downloaded File
       id: file-check
       shell: bash
       run: |
         echo "::notice::DOWNLOADED FILE DETAILS:"
+        # Mark as invalid by default
+        echo "valid=false" >> $GITHUB_OUTPUT
+
         if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
           echo "::notice::File exists: YES"
 
@@ -332,27 +324,22 @@ runs:
 
           # Check if empty
           if [ "$FILE_SIZE" -gt 1000 ]; then
-            echo "::notice::File is valid: YES"
-            echo "valid=true" >> $GITHUB_OUTPUT
-
             # Try to verify zip integrity
             if unzip -t "${{ inputs.path }}/${{ inputs.filename }}" > /dev/null 2>&1; then
               echo "::notice::Zip integrity: VALID"
+              echo "valid=true" >> $GITHUB_OUTPUT
             else
               echo "::warning::Zip integrity check failed"
-              echo "valid=false" >> $GITHUB_OUTPUT
               # Delete corrupted file
               rm -f "${{ inputs.path }}/${{ inputs.filename }}"
             fi
           else
             echo "::warning::File is too small (${FILE_SIZE} bytes)"
-            echo "valid=false" >> $GITHUB_OUTPUT
             # Delete suspiciously small file
             rm -f "${{ inputs.path }}/${{ inputs.filename }}"
           fi
         else
           echo "::warning::File does not exist"
-          echo "valid=false" >> $GITHUB_OUTPUT
         fi
 
         # Determine which cache hit actually worked
@@ -376,192 +363,83 @@ runs:
           echo "::warning::No valid cache hit detected"
         fi
 
-    # Extract if cache was successfully restored
+    # Download from GitHub Artifacts as fallback
+    - name: 📥 Download from GitHub Artifacts
+      id: download-artifact
+      if: steps.file-check.outputs.valid != 'true' && inputs.use_cache != 'true-only'
+      shell: bash
+      run: |
+        echo "::notice::Cache not found, attempting to download from GitHub Artifacts..."
+        # Create output directory
+        mkdir -p "${{ inputs.path }}"
+
+        # Use actions/download-artifact via gh run command
+        gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" || true
+
+        # Check if the download was successful
+        if find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
+          echo "::notice::Successfully downloaded artifact"
+
+          # Find and move ZIP files if needed
+          ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" -not -path "*/\.*" 2>/dev/null)
+          if [ -n "$ZIP_FILES" ]; then
+            FIRST_ZIP=$(echo "$ZIP_FILES" | head -1)
+            if [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+              echo "::notice::Moving $FIRST_ZIP to ${{ inputs.path }}/${{ inputs.filename }}"
+              mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
+            fi
+
+            # Verify downloaded artifact
+            if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+              FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
+              if [ "$FILE_SIZE" -gt 1000 ]; then
+                echo "valid=true" >> $GITHUB_OUTPUT
+              else
+                echo "::warning::Downloaded artifact is too small: ${FILE_SIZE} bytes"
+              fi
+            fi
+          fi
+        else
+          echo "::warning::Artifact download failed"
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    # Extract if any method was successful
     - name: 📂 Extract Compressed Archive
-      if: steps.file-check.outputs.valid == 'true'
+      id: extract-archive
+      if: steps.file-check.outputs.valid == 'true' || steps.download-artifact.outputs.valid == 'true'
       shell: bash
       run: |
         echo "::notice::Extracting compressed artifact: ${{ inputs.path }}/${{ inputs.filename }}"
 
         # Show archive contents before extraction
-        echo "::notice::Archive contents listing:"
-        unzip -l "${{ inputs.path }}/${{ inputs.filename }}"
+        echo "::notice::Archive contents summary:"
+        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | head -n 10
+        echo "... (truncated) ..."
+        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | tail -n 5
 
-        # Create the destination directory
-        mkdir -p "${{ github.workspace }}"
-
-        # Get file size before extraction
-        FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-        echo "::notice::Archive size: ${FILE_SIZE} bytes"
-
-        # Try to extract with verbose output
-        echo "::notice::Extraction in progress with verbose output..."
+        # Extract to the workspace root
+        echo "::notice::Extraction in progress..."
         cd "${{ github.workspace }}" && unzip -o "${{ inputs.path }}/${{ inputs.filename }}" -d "${{ github.workspace }}"
 
         # Verify extraction success
         EXTRACT_STATUS=$?
         if [ $EXTRACT_STATUS -eq 0 ]; then
           echo "::notice::✅ Extraction completed successfully"
+          echo "success=true" >> $GITHUB_OUTPUT
+
+          # Provide basic info about extracted files
+          echo "::notice::Extract verification:"
+          echo "::notice::- Workspace root contents:"
+          ls -la "${{ github.workspace }}" | head -n 10
+
+          echo "::notice::- Packages directory contents:"
+          ls -la "${{ github.workspace }}/packages" 2>/dev/null || echo "packages directory not found"
+
+          echo "::notice::- Found dist directories:"
+          find "${{ github.workspace }}" -name "dist" -type d | head -n 10 || echo "No dist directories found"
         else
           echo "::error::❌ Extraction failed with status code: ${EXTRACT_STATUS}"
+          echo "success=false" >> $GITHUB_OUTPUT
         fi
-
-        # List directory contents after extraction
-        echo "::notice::Directory contents after extraction:"
-        ls -la "${{ github.workspace }}/packages" 2>/dev/null || echo "packages directory not found"
-
-    # Debug step to check the contents of the extracted files
-    - name: 🔍 Debug Extracted Files
-      if: steps.file-check.outputs.valid == 'true'
-      shell: bash
-      run: |
-        echo "::notice::===== DEBUG EXTRACTED FILES ====="
-
-        # Check archive contents without extracting
-        echo "::notice::Archive contents (sample):"
-        unzip -l "${{ inputs.path }}/${{ inputs.filename }}" | head -n 30
-
-        # Show basic workspace structure
-        echo "::notice::Basic workspace structure:"
-        find "${{ github.workspace }}" -maxdepth 3 -type d | sort
-
-        # List files in extraction directory
-        echo "::notice::Extraction path: ${{ inputs.path }}"
-        ls -la "${{ inputs.path }}"
-
-        # List any dist directories and their contents
-        echo "::notice::Looking for packages/*/dist directories:"
-        find "${{ github.workspace }}/packages" -name "dist" -type d 2>/dev/null | sort || echo "No dist directories found"
-
-        # Count files in extracted package directories
-        echo "::notice::Files in package directories:"
-        for pkg in $(find "${{ github.workspace }}/packages" -maxdepth 1 -type d | grep -v "^${{ github.workspace }}/packages$"); do
-          COUNT=$(find "$pkg" -type f | wc -l)
-          echo "::notice::  - $(basename "$pkg"): $COUNT files"
-        done
-
-        # Checking file permissions
-        echo "::notice::Checking file permissions for dist directories:"
-        find "${{ github.workspace }}/packages" -name "dist" -type d -exec ls -la {} \; 2>/dev/null || echo "No dist directories found"
-
-    # Download from GitHub Artifacts with retries
-    - name: 📥 Download from GitHub Artifacts
-      id: download-artifact
-      if: steps.file-check.outputs.valid != 'true' && steps.direct-cache-restore.outputs.success != 'true' && inputs.use_cache != 'true-only'
-      shell: bash
-      run: |
-        MAX_RETRIES=3
-        RETRY_DELAY=5
-        SUCCESS=false
-
-        # Create output directory
-        mkdir -p "${{ inputs.path }}"
-
-        for i in $(seq 1 $MAX_RETRIES); do
-          echo "::notice::Artifact download attempt $i of $MAX_RETRIES"
-
-          # Use actions/download-artifact@v4 via gh run command
-          gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" || true
-
-          # Check if the download was successful
-          if find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
-            echo "::notice::Successfully downloaded artifact on attempt $i"
-            SUCCESS=true
-            break
-          else
-            echo "::warning::Artifact download failed on attempt $i"
-            if [ $i -lt $MAX_RETRIES ]; then
-              echo "::notice::Waiting ${RETRY_DELAY}s before next attempt..."
-              sleep $RETRY_DELAY
-              # Increase delay for next retry
-              RETRY_DELAY=$((RETRY_DELAY * 2))
-            fi
-          fi
-        done
-
-        if [ "$SUCCESS" = "true" ]; then
-          echo "outcome=success" >> $GITHUB_OUTPUT
-        else
-          echo "::warning::All artifact download attempts failed"
-          echo "outcome=failure" >> $GITHUB_OUTPUT
-        fi
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    # Find and move the artifact file if needed
-    - name: 🔄 Find and Move Artifact
-      id: find-artifact
-      if: (steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success')
-      shell: bash
-      run: |
-        echo "::notice::Checking for downloaded artifact"
-
-        # First check if our expected file exists
-        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::notice::Artifact found at expected location: ${{ inputs.path }}/${{ inputs.filename }}"
-          echo "found=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        echo "::notice::Searching for artifact files in downloaded directory"
-
-        # Find zip files in the download directory
-        ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" -not -path "*/\.*" 2>/dev/null || echo "")
-        if [ -n "$ZIP_FILES" ]; then
-          # Count how many files we found
-          COUNT=$(echo "$ZIP_FILES" | wc -l | tr -d ' ')
-          echo "::notice::Found $COUNT zip file(s) in download directory"
-
-          # Get the first file
-          FIRST_ZIP=$(echo "$ZIP_FILES" | head -1)
-
-          # If it's not at the expected location, move it
-          if [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-            echo "::notice::Moving $FIRST_ZIP to ${{ inputs.path }}/${{ inputs.filename }}"
-            mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
-          fi
-
-          echo "found=true" >> $GITHUB_OUTPUT
-        else
-          echo "::warning::No zip files found in download directory"
-          echo "found=false" >> $GITHUB_OUTPUT
-
-          # List all files recursively for debugging
-          echo "::notice::Listing all files in download directory:"
-          find "${{ inputs.path }}" -type f -not -path "*/\.*" | xargs ls -la 2>/dev/null || echo "No files found"
-        fi
-
-    # Re-verify after artifact download
-    - name: 🔍 Verify Downloaded Artifact
-      id: artifact-check
-      if: (steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success') && steps.find-artifact.outputs.found == 'true'
-      shell: bash
-      run: |
-        echo "::notice::Checking downloaded artifact"
-        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-          echo "::notice::Artifact exists: YES"
-
-          # Check size
-          FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-          echo "::notice::Artifact size: $(du -h "${{ inputs.path }}/${{ inputs.filename }}" | cut -f1) (${FILE_SIZE} bytes)"
-
-          # Check if empty
-          if [ "$FILE_SIZE" -gt 1000 ]; then
-            echo "::notice::Artifact downloaded successfully from GitHub Artifacts"
-            echo "valid=true" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::Downloaded artifact is too small (${FILE_SIZE} bytes)"
-            echo "valid=false" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "::warning::No artifact found at path: ${{ inputs.path }}/${{ inputs.filename }}"
-          echo "valid=false" >> $GITHUB_OUTPUT
-        fi
-
-    # Extract if artifact download was successful
-    - name: 📂 Extract Downloaded Artifact
-      if: steps.artifact-check.outputs.valid == 'true'
-      shell: bash
-      run: |
-        echo "::notice::Extracting downloaded artifact: ${{ inputs.path }}/${{ inputs.filename }}"
-        cd "${{ inputs.path }}" && unzip -q -o "${{ inputs.filename }}"
