@@ -88,7 +88,7 @@ runs:
     - name: 🗄️ Cache Archive (OS-specific)
       id: cache-save
       if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v4.1.2
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
@@ -100,7 +100,7 @@ runs:
     - name: 🗄️ Cache Archive (OS-agnostic)
       id: cache-save-agnostic
       if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v4.1.2
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
