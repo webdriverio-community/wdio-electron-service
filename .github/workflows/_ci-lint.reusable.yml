@@ -36,7 +36,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       # Download the pre-built packages from the build job
-      # This ensures linting can check against built artifacts if needed
+      # This ensures all tests use the same build artifacts
       - name: 📦 Download Build Artifacts
         uses: ./.github/workflows/actions/download-archive
         with:
@@ -44,6 +44,7 @@ jobs:
           path: .
           filename: wdio-electron-service-build.zip
           cache_key_prefix: wdio-electron-build
+          exact_cache_key: ${{ github.run_id && format('{0}-{1}-{2}-{3}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id) || '' }}
 
       # Run ESLint and other code quality checks
       # This ensures code follows project standards and best practices
