@@ -373,34 +373,43 @@ runs:
         # Create output directory
         mkdir -p "${{ inputs.path }}"
 
-        # Use actions/download-artifact via gh run command
-        gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" || true
+        # Add retry logic for reliability
+        MAX_RETRIES=3
+        for i in $(seq 1 $MAX_RETRIES); do
+          echo "::notice::Artifact download attempt $i of $MAX_RETRIES"
 
-        # Check if the download was successful
-        if find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
-          echo "::notice::Successfully downloaded artifact"
+          # Use actions/download-artifact via gh run command
+          gh run download -n "${{ inputs.name }}.zip" -D "${{ inputs.path }}" && DOWNLOAD_SUCCESS=true || DOWNLOAD_SUCCESS=false
 
-          # Find and move ZIP files if needed
-          ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" -not -path "*/\.*" 2>/dev/null)
-          if [ -n "$ZIP_FILES" ]; then
-            FIRST_ZIP=$(echo "$ZIP_FILES" | head -1)
-            if [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-              echo "::notice::Moving $FIRST_ZIP to ${{ inputs.path }}/${{ inputs.filename }}"
-              mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
-            fi
+          if [ "$DOWNLOAD_SUCCESS" = "true" ] || find "${{ inputs.path }}" -type f -name "*.zip" | grep -q .; then
+            echo "::notice::Successfully downloaded artifact on attempt $i"
+            break
+          elif [ $i -lt $MAX_RETRIES ]; then
+            echo "::warning::Artifact download failed on attempt $i, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          else
+            echo "::warning::All artifact download attempts failed"
+          fi
+        done
 
-            # Verify downloaded artifact
-            if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
-              FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
-              if [ "$FILE_SIZE" -gt 1000 ]; then
-                echo "valid=true" >> $GITHUB_OUTPUT
-              else
-                echo "::warning::Downloaded artifact is too small: ${FILE_SIZE} bytes"
-              fi
+        # Find and move ZIP files if needed
+        ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" -not -path "*/\.*" 2>/dev/null)
+        if [ -n "$ZIP_FILES" ]; then
+          FIRST_ZIP=$(echo "$ZIP_FILES" | head -1)
+          if [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+            echo "::notice::Moving $FIRST_ZIP to ${{ inputs.path }}/${{ inputs.filename }}"
+            mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
+          fi
+
+          # Verify downloaded artifact
+          if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+            FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
+            if [ "$FILE_SIZE" -gt 1000 ]; then
+              echo "valid=true" >> $GITHUB_OUTPUT
+            else
+              echo "::warning::Downloaded artifact is too small: ${FILE_SIZE} bytes"
             fi
           fi
-        else
-          echo "::warning::Artifact download failed"
         fi
       env:
         GH_TOKEN: ${{ github.token }}
