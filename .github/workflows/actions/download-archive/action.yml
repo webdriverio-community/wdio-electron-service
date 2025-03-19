@@ -71,6 +71,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       run: |
         echo "::notice::===== AVAILABLE CACHES ====="
         gh cache list --limit 20 || echo "::warning::Unable to list caches with GH CLI"
@@ -80,6 +81,8 @@ runs:
       id: cache-restore-exact
       if: inputs.exact_cache_key != ''
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ inputs.exact_cache_key }}
@@ -92,6 +95,8 @@ runs:
       id: cache-restore-standard
       if: steps.cache-restore-exact.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.standard_key }}
@@ -104,6 +109,8 @@ runs:
       id: cache-restore-agnostic
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_key }}
@@ -116,6 +123,8 @@ runs:
       id: cache-restore-linux
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && runner.os != 'Linux'
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.linux_key }}
@@ -128,6 +137,8 @@ runs:
       id: cache-restore-pattern
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.pattern_key || format('{0}-{1}-{2}-', runner.os, inputs.cache_key_prefix, inputs.name) }}
@@ -171,6 +182,8 @@ runs:
       id: cache-restore-agnostic-pattern
       if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true')
       uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_pattern || format('{0}-{1}-', inputs.cache_key_prefix, inputs.name) }}
@@ -216,6 +229,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       run: |
         echo "::notice::Attempting to find any cache with run ID: ${{ steps.generate-keys.outputs.run_id_pattern }}"
 
@@ -522,3 +536,4 @@ runs:
         fi
       env:
         GH_TOKEN: ${{ github.token }}
+        ACTIONS_CACHE_SERVICE_V2: 'true'

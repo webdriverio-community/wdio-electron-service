@@ -89,6 +89,8 @@ runs:
       id: cache-save
       if: inputs.use_cache != 'false'
       uses: actions/cache/save@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
         key: ${{ steps.generate-keys.outputs.standard_key }}
@@ -99,6 +101,8 @@ runs:
       id: cache-save-agnostic
       if: inputs.use_cache != 'false'
       uses: actions/cache/save@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
         path: ${{ inputs.output }}/${{ steps.create-archive.outputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_key }}
