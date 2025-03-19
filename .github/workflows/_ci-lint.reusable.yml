@@ -14,14 +14,7 @@ jobs:
   # It only needs to run on a single OS (Ubuntu) since linting rules are platform-independent
   lint:
     name: Code Quality
-    strategy:
-      fail-fast: false
-      matrix:
-        # Only run on Node.js 20 since linting is not version-dependent
-        node-version: ['20']
-        # Only run on Ubuntu since linting results are the same across platforms
-        os: ['ubuntu-latest']
-    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -33,7 +26,7 @@ jobs:
       - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
 
       # Download the pre-built packages from the build job
       # This ensures all tests use the same build artifacts
