@@ -32,22 +32,22 @@ jobs:
       os: ${{ matrix.os }}
 
   # Run linting after build to use the build artifacts
-  lint-matrix:
-    name: Lint
+  lint:
+    name: Lint - Ubuntu
     needs: [build-matrix]
     uses: ./.github/workflows/_ci-lint.reusable.yml
 
   # Run unit tests after linting to ensure code quality first
   unit-matrix:
     name: Unit Tests
-    needs: [build-matrix, lint-matrix]
+    needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-unit.reusable.yml
 
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
   build-win-matrix:
     name: Build - Windows
-    needs: [build-matrix, lint-matrix]
+    needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:
       os: 'windows-latest'
