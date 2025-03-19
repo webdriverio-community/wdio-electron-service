@@ -296,13 +296,45 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   throw new Error(BUILD_TOOL_DETECTION_ERROR);
 }
 
-export function getElectronVersion(pkg: NormalizedReadResult) {
-  const { dependencies, devDependencies } = pkg.packageJson;
-  const pkgElectronVersion =
-    dependencies?.electron ||
-    devDependencies?.electron ||
-    dependencies?.['electron-nightly'] ||
-    devDependencies?.['electron-nightly'];
+type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: string } };
 
-  return pkgElectronVersion ? findVersions(pkgElectronVersion, { loose: true })[0] : undefined;
+async function findPnpmCatalogVersions(
+  pkgElectronVersion: string | undefined,
+  pkgElectronNightlyVersion: string | undefined,
+  projectDir: string,
+) {
+  const configFilePath = path.join(projectDir, 'pnpm-workspace.yaml');
+  const data = await fs.readFile(configFilePath, 'utf8');
+  const pnpmWorkspace = (await import('yaml')).parse(data) as PnpmWorkspace;
+
+  // default catalogs
+  if (pkgElectronVersion?.endsWith(':') || pkgElectronNightlyVersion?.endsWith(':')) {
+    const workspaceElectronVersion = pnpmWorkspace.catalog?.['electron'];
+    const workspaceElectronNightlyVersion = pnpmWorkspace.catalog?.['electron-nightly'];
+
+    return workspaceElectronVersion || workspaceElectronNightlyVersion;
+  }
+
+  // named catalogs
+  const electronCatalogName = pkgElectronVersion?.split(':')[1];
+  const electronNightlyCatalogName = pkgElectronNightlyVersion?.split(':')[1];
+
+  return (
+    (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]) ||
+    (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName])
+  );
+}
+
+export async function getElectronVersion(pkg: NormalizedReadResult) {
+  const { dependencies, devDependencies } = pkg.packageJson;
+  const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
+  const pkgElectronNightlyVersion = dependencies?.['electron-nightly'] || devDependencies?.['electron-nightly'];
+
+  if (pkgElectronVersion?.startsWith('catalog') || pkgElectronNightlyVersion?.startsWith('catalog')) {
+    return await findPnpmCatalogVersions(pkgElectronVersion, pkgElectronNightlyVersion, pkg.path);
+  }
+
+  const electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
+
+  return electronVersion ? findVersions(electronVersion, { loose: true })[0] : undefined;
 }
