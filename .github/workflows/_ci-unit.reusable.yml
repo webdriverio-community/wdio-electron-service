@@ -12,7 +12,7 @@ env:
 jobs:
   # This job runs unit tests on multiple Node.js versions and operating systems
   test:
-    name: Unit [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
+    name: Unit - ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
