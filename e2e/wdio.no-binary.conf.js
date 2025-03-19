@@ -12,7 +12,7 @@ const appEntryPoint = path.join(__dirname, '..', 'apps', exampleDir, 'dist', 'ma
 
 globalThis.packageJson = {
   name: 'Electron',
-  version: getElectronVersion({ packageJson, path: packageJsonPath }),
+  version: await getElectronVersion({ packageJson, path: packageJsonPath }),
 };
 process.env.TEST = 'true';
 
