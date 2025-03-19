@@ -1,5 +1,5 @@
 name: 'Upload Compressed Artifacts'
-description: 'Compresses and uploads files or directories as artifacts to be shared between jobs'
+description: 'Compresses and uploads files or directories as artifacts via GitHub Actions cache'
 inputs:
   paths:
     description: 'Paths to files or directories to compress and upload (recursive)'
@@ -11,7 +11,7 @@ inputs:
     description: 'Prefix for the cache key'
     default: 'build-artifacts'
   retention_days:
-    description: 'Number of days to retain the artifacts (for logging purposes only)'
+    description: 'Number of days to retain the artifacts'
     default: '90'
 runs:
   using: 'composite'
