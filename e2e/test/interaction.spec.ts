@@ -1,27 +1,30 @@
 /// <reference types="mocha" />
 import { expect } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
-import { setupBrowser, type WebdriverIOQueries } from '@testing-library/webdriverio';
 import type { BrowserWindow } from 'electron';
 
+const waitTextOfElement = async (element: ReturnType<typeof browser.$>, expectedText: string) => {
+  // respect configuration for the timeout and interval
+  // @see https://webdriver.io/docs/api/browser/waitUntil
+  return await element.waitUntil(
+    async function (this: WebdriverIO.Element) {
+      return (await this.getText()) === expectedText;
+    },
+    {
+      timeoutMsg: 'Did not reach the expected value.',
+    },
+  );
+};
+
 describe('interaction', () => {
-  let screen: WebdriverIOQueries;
-
-  before(() => {
-    /**
-     * This is a workaround for the issue with the `browser` object type being
-     * mismatched`.
-     * @see https://github.com/testing-library/webdriverio-testing-library/issues/51
-     */
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    screen = setupBrowser(browser);
-  });
-
   describe('keyboard input', () => {
     it('should detect keyboard input', async () => {
+      const expectedText = 'YO';
+      const elem = browser.$('.keypress-count');
       await browser.keys(['y', 'o']);
-      expect(await (await screen.getByTestId('keypress-count')).getText()).toEqual('YO');
+      await waitTextOfElement(elem, expectedText);
+
+      await expect(elem).toHaveText(expectedText);
     });
   });
 
@@ -41,8 +44,12 @@ describe('interaction', () => {
         expect(biggerClickCount).toEqual('0');
         const elem = browser.$('.make-bigger');
         await elem.click();
-        biggerClickCount = await browser.$('.click-count .bigger').getText();
+
+        const biggerClickCountElem = browser.$('.click-count .bigger');
+        await waitTextOfElement(biggerClickCountElem, '1');
+        biggerClickCount = await biggerClickCountElem.getText();
         expect(biggerClickCount).toEqual('1');
+
         bounds = (await browser.electron.execute((electron) => {
           const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
@@ -68,6 +75,12 @@ describe('interaction', () => {
         expect(bounds.height).toEqual(310);
         const elem = browser.$('.make-smaller');
         await elem.click();
+
+        const smallerClickCountElem = browser.$('.click-count .bigger');
+        await waitTextOfElement(smallerClickCountElem, '1');
+        const smallerClickCount = await smallerClickCountElem.getText();
+        expect(smallerClickCount).toEqual('1');
+
         bounds = (await browser.electron.execute((electron) => {
           const browserWindow = electron.BrowserWindow.getAllWindows()[0] as BrowserWindow;
           return browserWindow.getBounds();
