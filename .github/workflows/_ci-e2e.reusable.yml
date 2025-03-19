@@ -36,7 +36,7 @@ jobs:
   # - Test scenario (builder, forge, no-binary)
   # - Module type (ESM, CJS, or both)
   e2e:
-    name: E2E [${{ inputs.scenario }}]${{ inputs.type != '*' && format(' {0}', inputs.type) || '' }}
+    name: E2E [${{ inputs.scenario }}${{ inputs.type != '*' && format(', {0}', inputs.type) || '' }}]
     runs-on: ${{ inputs.os }}
     strategy:
       # Continue with other tests even if one fails
