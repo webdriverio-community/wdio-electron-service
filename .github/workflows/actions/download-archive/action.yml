@@ -60,11 +60,6 @@ runs:
         echo "agnostic_pattern=${AGNOSTIC_PATTERN}" >> $GITHUB_OUTPUT
         echo "::notice::OS-agnostic pattern: ${AGNOSTIC_PATTERN}"
 
-        # Generate RunID pattern for last resort lookup
-        RUN_ID_PATTERN="*${RUN_ID}*"
-        echo "run_id_pattern=${RUN_ID_PATTERN}" >> $GITHUB_OUTPUT
-        echo "::notice::Run ID pattern: ${RUN_ID_PATTERN}"
-
     # List available caches for debugging
     - name: 📋 List Available Caches
       id: list-caches
@@ -348,7 +343,7 @@ runs:
         elif [ "${{ steps.cache-restore-standard.outputs.cache-hit }}" == "true" ]; then
           echo "::notice::Cache source: Standard key hit"
         elif [ "${{ steps.cache-restore-agnostic.outputs.cache-hit }}" == "true" ]; then
-          echo "::notice::Cache source: OS-agnostic key hit"
+          echo "::notice::Cache source: OS-Agnostic key hit"
         elif [ "${{ steps.cache-restore-linux.outputs.cache-hit }}" == "true" ]; then
           echo "::notice::Cache source: Linux key hit"
         elif [ "${{ steps.cache-restore-pattern.outputs.cache-hit }}" == "true" ] && [ "${{ steps.verify-pattern.outputs.valid }}" == "true" ]; then

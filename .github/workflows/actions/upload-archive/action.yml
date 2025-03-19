@@ -56,11 +56,13 @@ runs:
         # If a custom key is provided, use that
         if [ -n "${{ inputs.custom_cache_key }}" ]; then
           echo "standard_key=${{ inputs.custom_cache_key }}" >> $GITHUB_OUTPUT
+          echo "cache_key=${{ inputs.custom_cache_key }}" >> $GITHUB_OUTPUT
           echo "::notice::Using custom cache key: ${{ inputs.custom_cache_key }}"
         else
           # Generate a standard cache key - format matches download-archive
           STANDARD_KEY="${OS}-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
           echo "standard_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
+          echo "cache_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
           echo "::notice::Generated standard cache key: ${STANDARD_KEY}"
 
           # Generate OS-agnostic key for cross-platform compatibility
@@ -109,6 +111,34 @@ runs:
         else
           echo "::error::Failed to create archive"
           exit 1
+        fi
+
+    # Check if this is a rerun and delete previous cache if needed
+    - name: 🗑️ Delete Previous Cache for Reruns
+      if: inputs.use_cache != 'false' && github.run_attempt > 1
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        echo "::notice::This is run attempt #${{ github.run_attempt }} - checking for previous cache to delete"
+        echo "::notice::Note: Deleting caches requires 'actions: write' permission in the workflow"
+
+        # Only try deleting if this is a rerun
+        if [ "${{ github.run_attempt }}" -gt "1" ]; then
+          CACHE_KEY="${{ steps.generate-keys.outputs.standard_key }}"
+          AGNOSTIC_KEY="${{ steps.generate-keys.outputs.agnostic_key }}"
+
+          echo "::notice::Deleting previous OS-specific cache: ${CACHE_KEY}"
+          gh extension install actions/gh-actions-cache
+
+          # Delete OS-specific cache
+          gh actions-cache delete "${CACHE_KEY}" --confirm || echo "::notice::Cache not found or already deleted"
+
+          # Delete OS-agnostic cache
+          echo "::notice::Deleting previous OS-agnostic cache: ${AGNOSTIC_KEY}"
+          gh actions-cache delete "${AGNOSTIC_KEY}" --confirm || echo "::notice::OS-agnostic cache not found or already deleted"
+
+          echo "::notice::Previous caches deleted successfully"
         fi
 
     # Save the archive to cache with OS-specific key
