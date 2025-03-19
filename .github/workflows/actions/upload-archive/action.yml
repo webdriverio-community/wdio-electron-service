@@ -28,6 +28,17 @@ inputs:
     required: false
     default: 'true'
 
+outputs:
+  filename:
+    description: 'Filename of the created archive'
+    value: ${{ steps.create-archive.outputs.filename }}
+  size:
+    description: 'Size of the created archive in bytes'
+    value: ${{ steps.create-archive.outputs.size }}
+  cache_key:
+    description: 'Key used for the cache'
+    value: ${{ steps.generate-keys.outputs.cache_key }}
+
 runs:
   using: composite
   steps:

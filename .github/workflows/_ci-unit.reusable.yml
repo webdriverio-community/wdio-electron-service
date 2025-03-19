@@ -53,6 +53,10 @@ jobs:
         shell: bash
         run: |
           echo "::notice::===== VERIFYING EXTRACTED FILES ====="
+          echo "::notice::Used build ID: ${{ needs.build.outputs.build_id || 'not available' }}"
+          echo "::notice::Build completed at: ${{ needs.build.outputs.build_date || 'not available' }}"
+          echo "::notice::Artifact size: ${{ needs.build.outputs.artifact_size || 'unknown' }} bytes"
+
           echo "::notice::Current directory structure:"
           ls -la
 
