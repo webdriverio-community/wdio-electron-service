@@ -84,7 +84,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ inputs.exact_cache_key }}
         enableCrossOsArchive: true
         lookup-only: false
@@ -98,7 +98,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.standard_key }}
         enableCrossOsArchive: true
         lookup-only: false
@@ -112,7 +112,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_key }}
         enableCrossOsArchive: true
         lookup-only: false
@@ -126,7 +126,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.linux_key }}
         enableCrossOsArchive: true
         lookup-only: false
@@ -140,7 +140,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.pattern_key || format('{0}-{1}-{2}-', runner.os, inputs.cache_key_prefix, inputs.name) }}
         restore-keys: |
           ${{ steps.generate-keys.outputs.pattern_key || format('{0}-{1}-{2}-', runner.os, inputs.cache_key_prefix, inputs.name) }}
@@ -185,7 +185,7 @@ runs:
       env:
         ACTIONS_CACHE_SERVICE_V2: 'true'
       with:
-        path: ${{ inputs.path }}/${{ inputs.filename }}
+        path: ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.filename }}
         key: ${{ steps.generate-keys.outputs.agnostic_pattern || format('{0}-{1}-', inputs.cache_key_prefix, inputs.name) }}
         restore-keys: |
           ${{ steps.generate-keys.outputs.agnostic_pattern || format('{0}-{1}-', inputs.cache_key_prefix, inputs.name) }}
@@ -394,6 +394,9 @@ runs:
         RETRY_DELAY=5
         SUCCESS=false
 
+        # Create output directory
+        mkdir -p "${{ inputs.path }}"
+
         for i in $(seq 1 $MAX_RETRIES); do
           echo "::notice::Artifact download attempt $i of $MAX_RETRIES"
 
@@ -428,7 +431,7 @@ runs:
     # Find and move the artifact file if needed
     - name: 🔄 Find and Move Artifact
       id: find-artifact
-      if: steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success'
+      if: (steps.download-artifact.outcome == 'success' || steps.download-artifact.outputs.outcome == 'success')
       shell: bash
       run: |
         echo "::notice::Checking for downloaded artifact"
@@ -496,7 +499,7 @@ runs:
         fi
 
     # Extract if artifact download was successful
-    - name: 📂 Extract Downloaded Artifact
+    - name: �� Extract Downloaded Artifact
       if: steps.artifact-check.outputs.valid == 'true'
       shell: bash
       run: |
