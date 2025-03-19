@@ -49,7 +49,7 @@ jobs:
         uses: ./.github/workflows/actions/upload-archive
         with:
           name: wdio-electron-service
-          output: wdio-electron-service-build.zip
+          output: wdio-electron-service-build
           paths: packages/*/dist
           cache_key_prefix: wdio-electron-build
           retention_days: '90'
