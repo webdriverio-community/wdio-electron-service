@@ -10,6 +10,7 @@ Build artifacts are stored using GitHub Actions cache with the following charact
 - **Implementation**: Uses actions/cache instead of actions/upload-artifact
 - **Automatic Cleanup**: GitHub automatically evicts unused caches after ~90 days
 - **Cache Keys**: Based on runner OS, workflow run ID, and content hash
+- **Rerun Behavior**: When a workflow job is rerun, the previous cache is automatically deleted and replaced with a new one
 
 ## Workflow Structure
 
@@ -26,3 +27,13 @@ Custom actions in `.github/workflows/actions/`:
 - **upload-archive**: Compresses and uploads build artifacts to cache
 - **download-archive**: Downloads and extracts artifacts from cache
 - **setup-workspace**: Sets up Node.js and PNPM environment
+
+## Required Permissions
+
+Some workflows require specific permissions:
+
+- **Cache Deletion**: When rerunning jobs, the workflow requires `actions: write` permission to delete old caches
+  ```yaml
+  permissions:
+    actions: write # Required for deleting and overwriting caches during reruns
+  ```
