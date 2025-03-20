@@ -18,7 +18,7 @@ jobs:
   # This job runs linting checks to ensure code quality
   # It only needs to run on a single OS (Ubuntu) since linting rules are platform-independent
   lint:
-    name: Lint
+    name: Code Quality
     runs-on: ubuntu-latest
     steps:
       # Standard checkout with SSH key for private repositories
