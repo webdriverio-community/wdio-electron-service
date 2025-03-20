@@ -23,7 +23,7 @@ jobs:
   # Strategy: Build on Linux and macOS first since they're faster.
   # Linux build artifacts are shared with all other jobs.
   build-matrix:
-    name: Build - ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || matrix.os }}
+    name: Build [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || 'Windows' }}]
     strategy:
       matrix:
         # Primary build platforms - Linux artifacts are used by all other jobs
@@ -34,13 +34,13 @@ jobs:
 
   # Run linting after build to use the build artifacts
   lint:
-    name: Lint - Ubuntu
+    name: Lint [Linux]
     needs: [build-matrix]
     uses: ./.github/workflows/_ci-lint.reusable.yml
 
   # Run unit tests after linting to ensure code quality first
   unit-matrix:
-    name: Unit Tests
+    name: Unit [All]
     needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-unit.reusable.yml
     with:
@@ -50,7 +50,7 @@ jobs:
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
   build-win-matrix:
-    name: Build - Windows
+    name: Build [Windows]
     needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:

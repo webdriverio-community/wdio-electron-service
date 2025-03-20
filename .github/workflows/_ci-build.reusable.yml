@@ -29,7 +29,7 @@ jobs:
   # It runs on the specified OS (default: ubuntu-latest)
   # Only Linux builds create artifacts that are shared with other jobs
   build:
-    name: Packages
+    name: Build
     runs-on: ${{ inputs.os }}
     outputs:
       build_id: ${{ steps.build-info.outputs.build_id }}
