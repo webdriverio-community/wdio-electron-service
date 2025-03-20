@@ -19,42 +19,36 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
-  # Due to limit of number of MacOS, run first.
-  # Strategy: Build on Linux and macOS first since they're faster.
-  # Linux build artifacts are shared with all other jobs.
-  build-matrix:
-    name: Build [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || 'Windows' }}]
-    strategy:
-      matrix:
-        # Primary build platforms - Linux artifacts are used by all other jobs
-        os: ['ubuntu-latest', 'macos-latest']
+  # Build on Linux first since it's the fastest and its artifacts are used by all other jobs
+  build:
+    name: Build [Linux]
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:
-      os: ${{ matrix.os }}
+      os: 'ubuntu-latest'
 
   # Run linting after build to use the build artifacts
   lint:
     name: Lint [Linux]
-    needs: [build-matrix]
+    needs: [build]
     uses: ./.github/workflows/_ci-lint.reusable.yml
     with:
-      cache_key: ${{ needs.build-matrix.outputs.cache_key }}
+      cache_key: ${{ needs.build.outputs.cache_key }}
 
   # Run unit tests after linting to ensure code quality first
   unit-matrix:
     name: Unit [All]
-    needs: [build-matrix, lint]
+    needs: [build, lint]
     uses: ./.github/workflows/_ci-unit.reusable.yml
     with:
-      build_id: ${{ needs.build-matrix.outputs.build_id }}
-      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
-      cache_key: ${{ needs.build-matrix.outputs.cache_key }}
+      build_id: ${{ needs.build.outputs.build_id }}
+      artifact_size: ${{ needs.build.outputs.artifact_size }}
+      cache_key: ${{ needs.build.outputs.cache_key }}
 
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
-  build-win-matrix:
+  build-win:
     name: Build [Windows]
-    needs: [build-matrix, lint]
+    needs: [build, lint]
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:
       os: 'windows-latest'
@@ -66,7 +60,7 @@ jobs:
   # - Optimize for GitHub Actions concurrency limits
   e2e-matrix:
     name: E2E - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
-    needs: [build-matrix]
+    needs: [build]
     strategy:
       matrix:
         # Test across all major operating systems
@@ -108,15 +102,15 @@ jobs:
       node-version: '20'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
-      build_id: ${{ needs.build-matrix.outputs.build_id }}
-      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
-      cache_key: ${{ needs.build-matrix.outputs.cache_key }}
+      build_id: ${{ needs.build.outputs.build_id }}
+      artifact_size: ${{ needs.build.outputs.artifact_size }}
+      cache_key: ${{ needs.build.outputs.cache_key }}
 
   # Mac Universal builds require special handling
   # These are separate from regular macOS tests because they use a different build command
   e2e-mac-universal-matrix:
     name: E2E [macOS-U] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
-    needs: [build-matrix]
+    needs: [build]
     strategy:
       matrix:
         # Test both application scenarios
@@ -139,6 +133,6 @@ jobs:
       build-command: 'build:mac-universal'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
-      build_id: ${{ needs.build-matrix.outputs.build_id }}
-      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
-      cache_key: ${{ needs.build-matrix.outputs.cache_key }}
+      build_id: ${{ needs.build.outputs.build_id }}
+      artifact_size: ${{ needs.build.outputs.artifact_size }}
+      cache_key: ${{ needs.build.outputs.cache_key }}
