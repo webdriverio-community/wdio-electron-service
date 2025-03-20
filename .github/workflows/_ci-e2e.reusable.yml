@@ -26,6 +26,14 @@ on:
         description: 'JavaScript module type (esm, cjs, or * for both)'
         type: string
         default: '*'
+      build_id:
+        description: 'Build ID from the build job'
+        type: string
+        required: false
+      artifact_size:
+        description: 'Size of the build artifact in bytes'
+        type: string
+        required: false
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -36,7 +44,7 @@ jobs:
   # - Test scenario (builder, forge, no-binary)
   # - Module type (ESM, CJS, or both)
   e2e:
-    name: E2E Tests - ${{ inputs.scenario }}${{ inputs.type != '*' && format(' ({0})',inputs.type) || '' }}
+    name: E2E [${{ inputs.scenario }}${{ inputs.type != '*' && format(', {0}', inputs.type) || '' }}]
     runs-on: ${{ inputs.os }}
     strategy:
       # Continue with other tests even if one fails
@@ -60,8 +68,17 @@ jobs:
         uses: ./.github/workflows/actions/download-archive
         with:
           name: wdio-electron-service
-          path: .
-          filename: wdio-electron-service-build.zip
+          path: wdio-electron-service-build
+          filename: artifact.zip
+          cache_key_prefix: wdio-electron-build
+          exact_cache_key: ${{ github.run_id && format('{0}-{1}-{2}-{3}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id) || '' }}
+
+      # Display build information if available
+      - name: 📊 Show Build Information
+        if: inputs.build_id != '' && inputs.artifact_size != ''
+        shell: bash
+        run: |
+          echo "::notice::Build artifact: ID=${{ inputs.build_id }}, Size=${{ inputs.artifact_size }} bytes"
 
       # Special workaround for Linux to enable Electron testing
       - name: 🔧 Apply Linux Kernel Workaround

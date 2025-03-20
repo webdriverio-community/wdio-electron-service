@@ -10,6 +10,16 @@ on:
         description: 'OS of runner'
         default: 'ubuntu-latest'
         type: string
+    outputs:
+      build_id:
+        description: 'Unique identifier for this build'
+        value: ${{ jobs.build.outputs.build_id }}
+      build_date:
+        description: 'Timestamp when the build completed'
+        value: ${{ jobs.build.outputs.build_date }}
+      artifact_size:
+        description: 'Size of the build artifact in bytes'
+        value: ${{ jobs.build.outputs.artifact_size }}
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -19,8 +29,12 @@ jobs:
   # It runs on the specified OS (default: ubuntu-latest)
   # Only Linux builds create artifacts that are shared with other jobs
   build:
-    name: Build Packages
+    name: Packages
     runs-on: ${{ inputs.os }}
+    outputs:
+      build_id: ${{ steps.build-info.outputs.build_id }}
+      build_date: ${{ steps.build-info.outputs.build_date }}
+      artifact_size: ${{ steps.upload-archive.outputs.size || '0' }}
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -34,6 +48,14 @@ jobs:
         with:
           node-version: '20'
 
+      # Generate build information for tracking
+      - name: 📊 Generate Build Information
+        id: build-info
+        shell: bash
+        run: |
+          echo "build_id=$(date +%s)-${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "build_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+
       # Build all packages using Turbo
       # This creates the dist/ directories with compiled code
       - name: 🏗️ Build All Packages
@@ -43,10 +65,14 @@ jobs:
       # Upload build artifacts, but only from Linux
       # This is because Linux builds are most consistent and used by all other jobs
       # The artifacts include all dist/ and cjs/ directories from all packages
+      # Using GitHub Actions cache with ~90 day retention (vs. 1 day for regular artifacts)
       - name: 📦 Upload Package Build Artifacts
+        id: upload-archive
         if: ${{ runner.os == 'Linux' }}
         uses: ./.github/workflows/actions/upload-archive
         with:
           name: wdio-electron-service
-          output: wdio-electron-service-build.zip
-          paths: packages/*/dist packages/*/cjs
+          output: wdio-electron-service-build/artifact.zip
+          paths: packages/*/dist
+          cache_key_prefix: wdio-electron-build
+          retention_days: '90'

@@ -9,6 +9,7 @@ on:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+*
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -21,8 +22,8 @@ jobs:
   # Due to limit of number of MacOS, run first.
   # Strategy: Build on Linux and macOS first since they're faster.
   # Linux build artifacts are shared with all other jobs.
-  build:
-    name: Build Packages (Linux/macOS)
+  build-matrix:
+    name: Build - ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || matrix.os }}
     strategy:
       matrix:
         # Primary build platforms - Linux artifacts are used by all other jobs
@@ -33,21 +34,24 @@ jobs:
 
   # Run linting after build to use the build artifacts
   lint:
-    name: Code Linting
-    needs: [build]
+    name: Lint - Ubuntu
+    needs: [build-matrix]
     uses: ./.github/workflows/_ci-lint.reusable.yml
 
   # Run unit tests after linting to ensure code quality first
-  unit:
+  unit-matrix:
     name: Unit Tests
-    needs: [build, lint]
+    needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-unit.reusable.yml
+    with:
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
 
   # Windows builds are slower, so run them separately and only after linting passes
   # This prevents wasting resources on Windows if there are linting issues
-  build-win:
-    name: Build Packages (Windows)
-    needs: [build, lint]
+  build-win-matrix:
+    name: Build - Windows
+    needs: [build-matrix, lint]
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:
       os: 'windows-latest'
@@ -57,9 +61,9 @@ jobs:
   # - Test 3 scenarios (builder, forge, no-binary)
   # - Test 2 module types (ESM, CJS)
   # - Optimize for GitHub Actions concurrency limits
-  e2e:
-    name: E2E Tests - ${{ matrix.scenario }} (${{ matrix.os }})
-    needs: [build]
+  e2e-matrix:
+    name: E2E [${{ matrix.scenario }}${{ matrix.type != '*' && format(', {0}', matrix.type) || '' }}] - ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}
+    needs: [build-matrix]
     strategy:
       matrix:
         # Test across all major operating systems
@@ -101,12 +105,14 @@ jobs:
       node-version: '20'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
 
   # Mac Universal builds require special handling
   # These are separate from regular macOS tests because they use a different build command
-  e2e-mac-universal:
-    name: E2E Tests - Mac Universal (${{ matrix.scenario }})
-    needs: [build]
+  e2e-mac-universal-matrix:
+    name: E2E [${{ matrix.scenario }}${{ matrix.type != '*' && format(', {0}', matrix.type) || '' }}] - macOS (Universal)
+    needs: [build-matrix]
     strategy:
       matrix:
         # Test both application scenarios
@@ -129,3 +135,5 @@ jobs:
       build-command: 'build:mac-universal'
       scenario: ${{ matrix.scenario }}
       type: ${{ matrix.type }}
+      build_id: ${{ needs.build-matrix.outputs.build_id }}
+      artifact_size: ${{ needs.build-matrix.outputs.artifact_size }}
