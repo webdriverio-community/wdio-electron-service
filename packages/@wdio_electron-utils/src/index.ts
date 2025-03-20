@@ -301,7 +301,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
 type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: string } };
 
-export async function findPnpmCatalogVersions(
+export async function findPnpmCatalogVersion(
   pkgElectronVersion?: string,
   pkgElectronNightlyVersion?: string,
   projectDir?: string,
@@ -313,6 +313,8 @@ export async function findPnpmCatalogVersions(
   // Determine catalog names
   const electronCatalogName = pkgElectronVersion?.split('catalog:')[1]?.trim();
   const electronNightlyCatalogName = pkgElectronNightlyVersion?.split('catalog:')[1]?.trim();
+
+  log.debug('Locating pnpm-workspace.yaml...');
 
   try {
     // Traverse up the directory tree to find pnpm-workspace.yaml
@@ -371,13 +373,18 @@ export async function getElectronVersion(pkg: NormalizedReadResult) {
   const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
   const pkgElectronNightlyVersion = dependencies?.['electron-nightly'] || devDependencies?.['electron-nightly'];
 
+  let electronVersion;
+
   if (pkgElectronVersion?.startsWith('catalog') || pkgElectronNightlyVersion?.startsWith('catalog')) {
     // Extract the directory path from the package.json file path
     const projectDir = path.dirname(pkg.path);
-    return await findPnpmCatalogVersions(pkgElectronVersion, pkgElectronNightlyVersion, projectDir);
+    electronVersion = await findPnpmCatalogVersion(pkgElectronVersion, pkgElectronNightlyVersion, projectDir);
   }
 
-  const electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
+  // If no catalog version was found, use the direct version from package.json
+  if (!electronVersion) {
+    electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
+  }
 
   return electronVersion ? findVersions(electronVersion, { loose: true })[0] : undefined;
 }
