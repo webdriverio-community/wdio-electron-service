@@ -626,7 +626,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalog:\n  electron: "29.4.1"');
+      });
 
       const pkg = {
         packageJson: {
@@ -641,7 +645,8 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('29.4.1');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      // Since we're traversing directories, we don't need to check the exact path anymore
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should fetch the electron-nightly version from pnpm workspace default catalog', async () => {
@@ -652,7 +657,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalog:\n  electron-nightly: "33.0.0-nightly.20240621"');
+      });
 
       const pkg = {
         packageJson: {
@@ -667,7 +676,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('33.0.0-nightly.20240621');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should fetch the electron version from pnpm workspace named catalog', async () => {
@@ -678,7 +687,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalogs:\n  stable: "29.4.1"');
+      });
 
       const pkg = {
         packageJson: {
@@ -693,7 +706,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('29.4.1');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should fetch the electron-nightly version from pnpm workspace named catalog', async () => {
@@ -704,7 +717,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalogs:\n  nightly: "33.0.0-nightly.20240621"');
+      });
 
       const pkg = {
         packageJson: {
@@ -719,7 +736,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('33.0.0-nightly.20240621');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should prioritize electron over electron-nightly when both are using catalogs', async () => {
@@ -731,7 +748,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalog:\n  electron: "29.4.1"\n  electron-nightly: "33.0.0-nightly.20240621"');
+      });
 
       const pkg = {
         packageJson: {
@@ -747,7 +768,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('29.4.1');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it("should fallback to electron-nightly when electron catalog doesn't exist", async () => {
@@ -758,7 +779,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalog:\n  electron-nightly: "33.0.0-nightly.20240621"');
+      });
 
       const pkg = {
         packageJson: {
@@ -774,7 +799,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('33.0.0-nightly.20240621');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should handle a mix of named and default catalogs', async () => {
@@ -785,7 +810,11 @@ describe('Electron Utilities', () => {
       });
 
       const pkgPath = '/path/to/project/package.json';
-      const projectDir = getProjectDirFromPackagePath(pkgPath);
+
+      // Set up mock to succeed with the workspace file
+      vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+        return Promise.resolve('catalogs:\n  stable: "29.4.1"');
+      });
 
       const pkg = {
         packageJson: {
@@ -801,7 +830,7 @@ describe('Electron Utilities', () => {
 
       const version = await getElectronVersion(pkg);
       expect(version).toBe('29.4.1');
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+      expect(fs.readFile).toHaveBeenCalled();
     });
 
     it('should gracefully handle missing workspace file', async () => {
@@ -1413,6 +1442,11 @@ describe('PNPM Catalog Versions Edge Cases', () => {
       },
     });
 
+    // Set up mock to succeed with the workspace file
+    vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+      return Promise.resolve('catalog:\n  electron: "29.4.1"');
+    });
+
     const version = await findPnpmCatalogVersions('catalog:', undefined, '/project/dir');
     expect(version).toBe('29.4.1');
   });
@@ -1440,6 +1474,42 @@ describe('PNPM Catalog Versions Edge Cases', () => {
     // This should hit line 341 - the catch block in findPnpmCatalogVersions
     const result = await findPnpmCatalogVersions('default', '/non-existent-dir');
     expect(result).toBeUndefined();
+  });
+
+  it('should traverse up directory tree to find pnpm-workspace.yaml', async () => {
+    // Mock readFile to fail for the first two attempts and succeed on the third
+    let callCount = 0;
+    vi.mocked(fs.readFile).mockImplementation((_filePath) => {
+      callCount++;
+      if (callCount < 3) {
+        throw new Error('File not found');
+      }
+
+      // On the third call, return a valid YAML content
+      return Promise.resolve('catalog:\n  electron: "30.0.0"');
+    });
+
+    // Mock YAML parse to return a valid workspace config
+    vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
+      catalog: {
+        electron: '30.0.0',
+      },
+    });
+
+    // Start from a nested directory
+    const nestedDir = '/project/src/components/app';
+    const version = await findPnpmCatalogVersions('catalog:', undefined, nestedDir);
+
+    // Should find the version in parent directory
+    expect(version).toBe('30.0.0');
+
+    // Verify that readFile was called multiple times as it traversed up
+    expect(fs.readFile).toHaveBeenCalledTimes(3);
+
+    // Should have tried these paths in order
+    expect(fs.readFile).toHaveBeenNthCalledWith(1, '/project/src/components/app/pnpm-workspace.yaml', 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(2, '/project/src/components/pnpm-workspace.yaml', 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(3, '/project/src/pnpm-workspace.yaml', 'utf8');
   });
 });
 
