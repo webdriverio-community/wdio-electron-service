@@ -63,8 +63,16 @@ pnpm test:dev
 Dependencies can be updated interactively via:
 
 ```bash
-pnpm update:all
+pnpm update:interactive
 ```
+
+and
+
+```bash
+pnpm update:interactive:dry
+```
+
+for a dry run.
 
 ## Updating E2E Task Graphs
 
