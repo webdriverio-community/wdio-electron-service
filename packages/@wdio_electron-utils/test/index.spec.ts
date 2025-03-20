@@ -81,7 +81,7 @@ function getBuilderConfigCandidates(configFileName = 'electron-builder'): string
 }
 
 function getFixturePackagePath(moduleType: string, fixtureName: string) {
-  return path.join(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
+  return path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
 }
 
 // Utility function to get the directory from a package.json path
@@ -266,9 +266,9 @@ beforeEach(() => {
     const filePathStr = String(filePath);
 
     // Check if it's a fixture path
-    if (filePathStr.includes('/fixtures/')) {
+    if (filePathStr.includes('/fixtures/') || filePathStr.includes('\\fixtures\\')) {
       // Extract the fixture type from the path
-      const match = filePathStr.match(/\/fixtures\/([^/]+)\/([^/]+)\/package\.json$/);
+      const match = filePathStr.match(/[/\\]fixtures[/\\]([^/\\]+)[/\\]([^/\\]+)[/\\]package\.json$/);
       if (match) {
         const moduleType = match[1]; // cjs or esm
         const fixtureName = match[2]; // name of the fixture
@@ -463,8 +463,8 @@ beforeEach(() => {
       pathStr.endsWith('.config.json')
     ) {
       // Specially handle certain config files based on the fixture name
-      if (pathStr.includes('/fixtures/')) {
-        const match = pathStr.match(/\/fixtures\/([^/]+)\/([^/]+)\/(.+)$/);
+      if (pathStr.includes('/fixtures/') || pathStr.includes('\\fixtures\\')) {
+        const match = pathStr.match(/[/\\]fixtures[/\\]([^/\\]+)[/\\]([^/\\]+)[/\\](.+)$/);
         if (match) {
           const fixtureName = match[2];
           const configFile = match[3];
@@ -523,7 +523,19 @@ beforeEach(() => {
 
     // Check against the accessMocks map for binary paths
     if (accessMocks.has(pathStr)) {
-      return accessMocks.get(pathStr) ? Promise.resolve() : Promise.reject(new Error('ENOENT'));
+      return accessMocks.get(pathStr)?.() || Promise.reject(new Error('ENOENT'));
+    }
+
+    // Use normalized paths (both Windows and Unix style) as fallback
+    const normalizedUnixPath = pathStr.replace(/\\/g, '/');
+    const normalizedWinPath = pathStr.replace(/\//g, '\\');
+
+    if (accessMocks.has(normalizedUnixPath)) {
+      return accessMocks.get(normalizedUnixPath)?.() || Promise.reject(new Error('ENOENT'));
+    }
+
+    if (accessMocks.has(normalizedWinPath)) {
+      return accessMocks.get(normalizedWinPath)?.() || Promise.reject(new Error('ENOENT'));
     }
 
     return Promise.reject(new Error('ENOENT'));
@@ -841,14 +853,23 @@ describe('Electron Utilities', () => {
       });
 
       it('should throw an error when the Forge app name is unable to be determined', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-inline-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        delete packageJson.name;
-        delete packageJson.config.forge.packagerConfig;
+        // Create a minimal package.json with Forge dependency but no app name
+        const packageJson = {
+          version: '1.0.0',
+          readme: '',
+          _id: 'test-app@1.0.0',
+          config: {
+            forge: {},
+          },
+          devDependencies: {
+            '@electron-forge/cli': '6.0.0',
+          },
+        } as NormalizedPackageJson;
+
         await expect(() =>
           getAppBuildInfo({
             packageJson,
-            path: packageJsonPath,
+            path: '/path/to/package.json',
           }),
         ).rejects.toThrow(
           'No application name was detected, please set name / productName in your package.json or build tool configuration.',
@@ -856,14 +877,21 @@ describe('Electron Utilities', () => {
       });
 
       it('should throw an error when the builder app name is unable to be determined', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-inline-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        delete packageJson.name;
-        delete packageJson.build.productName;
+        // Create a minimal package.json with Builder dependency but no app name
+        const packageJson = {
+          version: '1.0.0',
+          readme: '',
+          _id: 'test-app@1.0.0',
+          build: {},
+          devDependencies: {
+            'electron-builder': '22.0.0',
+          },
+        } as NormalizedPackageJson;
+
         await expect(() =>
           getAppBuildInfo({
             packageJson,
-            path: packageJsonPath,
+            path: '/path/to/package.json',
           }),
         ).rejects.toThrow(
           'No application name was detected, please set name / productName in your package.json or build tool configuration.',
@@ -886,7 +914,7 @@ describe('Electron Utilities', () => {
       it('should throw an error when Forge is detected but has no config', async () => {
         const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-no-config');
         const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
+        await expect(() =>
           getAppBuildInfo({
             packageJson,
             path: packageJsonPath,
@@ -1014,7 +1042,7 @@ describe('Electron Utilities', () => {
     }
 
     function mockBinaryPath(path: string) {
-      accessMocks.set(path, true);
+      accessMocks.set(path, () => Promise.resolve());
     }
 
     // Mock module imports for getAppBuildInfo tests
