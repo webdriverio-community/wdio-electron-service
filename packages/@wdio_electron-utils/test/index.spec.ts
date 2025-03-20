@@ -1506,10 +1506,17 @@ describe('PNPM Catalog Versions Edge Cases', () => {
     // Verify that readFile was called multiple times as it traversed up
     expect(fs.readFile).toHaveBeenCalledTimes(3);
 
+    // Use path.join to handle platform-specific path separators
+    const expectedPaths = [
+      path.join('/project', 'src', 'components', 'app', 'pnpm-workspace.yaml'),
+      path.join('/project', 'src', 'components', 'pnpm-workspace.yaml'),
+      path.join('/project', 'src', 'pnpm-workspace.yaml'),
+    ];
+
     // Should have tried these paths in order
-    expect(fs.readFile).toHaveBeenNthCalledWith(1, '/project/src/components/app/pnpm-workspace.yaml', 'utf8');
-    expect(fs.readFile).toHaveBeenNthCalledWith(2, '/project/src/components/pnpm-workspace.yaml', 'utf8');
-    expect(fs.readFile).toHaveBeenNthCalledWith(3, '/project/src/pnpm-workspace.yaml', 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(1, expectedPaths[0], 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(2, expectedPaths[1], 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(3, expectedPaths[2], 'utf8');
   });
 });
 
