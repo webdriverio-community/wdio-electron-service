@@ -24,6 +24,9 @@ outputs:
   size:
     description: 'Size of the upload in bytes'
     value: ${{ steps.compress.outputs.size }}
+  cache_key:
+    description: 'The cache key used for the upload, can be passed to download-archive as exact_cache_key'
+    value: ${{ steps.generate-keys.outputs.standard_key }}
 
 runs:
   using: 'composite'

@@ -14,6 +14,10 @@ on:
         description: 'Size of the build artifact in bytes'
         type: string
         required: false
+      cache_key:
+        description: 'Cache key to use for downloading artifacts'
+        type: string
+        required: false
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -54,7 +58,7 @@ jobs:
           path: wdio-electron-service-build
           filename: artifact.zip
           cache_key_prefix: wdio-electron-build
-          exact_cache_key: ${{ github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
+          exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
       # Verify the extracted dist directories exist
       - name: 🔍 Verify Extracted Files

@@ -20,6 +20,9 @@ on:
       artifact_size:
         description: 'Size of the build artifact in bytes'
         value: ${{ jobs.build.outputs.artifact_size }}
+      cache_key:
+        description: 'Cache key used for artifact uploads, can be passed to download actions'
+        value: ${{ jobs.build.outputs.cache_key }}
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -35,6 +38,7 @@ jobs:
       build_id: ${{ steps.build-info.outputs.build_id }}
       build_date: ${{ steps.build-info.outputs.build_date }}
       artifact_size: ${{ steps.upload-archive.outputs.size || '0' }}
+      cache_key: ${{ steps.upload-archive.outputs.cache_key }}
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
