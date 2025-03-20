@@ -298,31 +298,48 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
 
 type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: string } };
 
-async function findPnpmCatalogVersions(
-  pkgElectronVersion: string | undefined,
-  pkgElectronNightlyVersion: string | undefined,
-  projectDir: string,
+export async function findPnpmCatalogVersions(
+  pkgElectronVersion?: string,
+  pkgElectronNightlyVersion?: string,
+  projectDir?: string,
 ) {
-  const configFilePath = path.join(projectDir, 'pnpm-workspace.yaml');
-  const data = await fs.readFile(configFilePath, 'utf8');
-  const pnpmWorkspace = (await import('yaml')).parse(data) as PnpmWorkspace;
-
-  // default catalogs
-  if (pkgElectronVersion?.endsWith(':') || pkgElectronNightlyVersion?.endsWith(':')) {
-    const workspaceElectronVersion = pnpmWorkspace.catalog?.['electron'];
-    const workspaceElectronNightlyVersion = pnpmWorkspace.catalog?.['electron-nightly'];
-
-    return workspaceElectronVersion || workspaceElectronNightlyVersion;
+  if (!projectDir) {
+    return undefined;
   }
 
-  // named catalogs
-  const electronCatalogName = pkgElectronVersion?.split(':')[1];
-  const electronNightlyCatalogName = pkgElectronNightlyVersion?.split(':')[1];
+  // Determine catalog names
+  const electronCatalogName = pkgElectronVersion?.split('catalog:')[1]?.trim();
+  const electronNightlyCatalogName = pkgElectronNightlyVersion?.split('catalog:')[1]?.trim();
 
-  return (
-    (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]) ||
-    (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName])
-  );
+  try {
+    const yamlContent = await fs.readFile(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+    const pnpmWorkspace = (await import('yaml')).parse(yamlContent) as PnpmWorkspace;
+
+    // Check for electron with named catalog
+    if (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]) {
+      return pnpmWorkspace.catalogs[electronCatalogName];
+    }
+
+    // Check for electron with default catalog
+    if (pkgElectronVersion === 'catalog:' && pnpmWorkspace.catalog?.electron) {
+      return pnpmWorkspace.catalog.electron;
+    }
+
+    // Check for electron-nightly with named catalog
+    if (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName]) {
+      return pnpmWorkspace.catalogs[electronNightlyCatalogName];
+    }
+
+    // Check for electron-nightly with default catalog
+    if (pkgElectronNightlyVersion === 'catalog:' && pnpmWorkspace.catalog?.['electron-nightly']) {
+      return pnpmWorkspace.catalog['electron-nightly'];
+    }
+
+    return undefined;
+  } catch (_error) {
+    // Gracefully handle missing workspace file or other errors
+    return undefined;
+  }
 }
 
 export async function getElectronVersion(pkg: NormalizedReadResult) {
@@ -331,7 +348,9 @@ export async function getElectronVersion(pkg: NormalizedReadResult) {
   const pkgElectronNightlyVersion = dependencies?.['electron-nightly'] || devDependencies?.['electron-nightly'];
 
   if (pkgElectronVersion?.startsWith('catalog') || pkgElectronNightlyVersion?.startsWith('catalog')) {
-    return await findPnpmCatalogVersions(pkgElectronVersion, pkgElectronNightlyVersion, pkg.path);
+    // Extract the directory path from the package.json file path
+    const projectDir = path.dirname(pkg.path);
+    return await findPnpmCatalogVersions(pkgElectronVersion, pkgElectronNightlyVersion, projectDir);
   }
 
   const electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
