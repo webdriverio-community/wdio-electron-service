@@ -337,7 +337,7 @@ export async function findPnpmCatalogVersions(
 
     // Check for electron with named catalog
     if (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]) {
-      return pnpmWorkspace.catalogs[electronCatalogName];
+      return pnpmWorkspace.catalogs[electronCatalogName]['electron'];
     }
 
     // Check for electron with default catalog
