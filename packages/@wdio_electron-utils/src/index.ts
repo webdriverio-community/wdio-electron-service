@@ -347,7 +347,7 @@ export async function findPnpmCatalogVersions(
 
     // Check for electron-nightly with named catalog
     if (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName]) {
-      return pnpmWorkspace.catalogs[electronNightlyCatalogName];
+      return pnpmWorkspace.catalogs[electronNightlyCatalogName]['electron-nightly'];
     }
 
     // Check for electron-nightly with default catalog
