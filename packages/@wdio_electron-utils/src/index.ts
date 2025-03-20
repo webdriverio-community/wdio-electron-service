@@ -108,13 +108,10 @@ export async function getBinaryPath(
 
   if (appBuildInfo.isForge) {
     // Forge case
-    const archs =
-      p.platform === 'darwin'
-        ? ['arm64', 'x64']
-        : (allOfficialArchsForPlatformAndVersion(
-            p.platform as keyof typeof SupportedPlatform,
-            electronVersion,
-          ) as ForgeArch[]);
+    const archs = allOfficialArchsForPlatformAndVersion(
+      p.platform as keyof typeof SupportedPlatform,
+      electronVersion,
+    ) as ForgeArch[];
 
     const forgeOutDir = (appBuildInfo.config as ForgeConfig)?.outDir || 'out';
     outDirs = archs.map((arch) =>
