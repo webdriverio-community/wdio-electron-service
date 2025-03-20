@@ -296,7 +296,10 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   throw new Error(BUILD_TOOL_DETECTION_ERROR);
 }
 
-type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: { [key: string]: string } } };
+type PnpmWorkspace = {
+  catalog?: { [key: string]: string };
+  catalogs?: { [key: string]: { [key: string]: string } };
+};
 
 export async function findPnpmCatalogVersions(
   pkgElectronVersion?: string,
@@ -336,8 +339,8 @@ export async function findPnpmCatalogVersions(
     const pnpmWorkspace = (await import('yaml')).parse(yamlContent) as PnpmWorkspace;
 
     // Check for electron with named catalog
-    if (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]) {
-      return pnpmWorkspace.catalogs[electronCatalogName]['electron'];
+    if (electronCatalogName && pnpmWorkspace.catalogs?.[electronCatalogName]?.electron) {
+      return pnpmWorkspace.catalogs[electronCatalogName].electron;
     }
 
     // Check for electron with default catalog
@@ -346,7 +349,7 @@ export async function findPnpmCatalogVersions(
     }
 
     // Check for electron-nightly with named catalog
-    if (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName]) {
+    if (electronNightlyCatalogName && pnpmWorkspace.catalogs?.[electronNightlyCatalogName]?.['electron-nightly']) {
       return pnpmWorkspace.catalogs[electronNightlyCatalogName]['electron-nightly'];
     }
 

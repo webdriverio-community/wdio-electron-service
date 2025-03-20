@@ -682,7 +682,9 @@ describe('Electron Utilities', () => {
     it('should fetch the electron version from pnpm workspace named catalog', async () => {
       vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
         catalogs: {
-          stable: '29.4.1',
+          stable: {
+            electron: '29.4.1',
+          },
         },
       });
 
@@ -690,7 +692,7 @@ describe('Electron Utilities', () => {
 
       // Set up mock to succeed with the workspace file
       vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
-        return Promise.resolve('catalogs:\n  stable: "29.4.1"');
+        return Promise.resolve('catalogs:\n  stable:\n    electron: "29.4.1"');
       });
 
       const pkg = {
@@ -712,7 +714,9 @@ describe('Electron Utilities', () => {
     it('should fetch the electron-nightly version from pnpm workspace named catalog', async () => {
       vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
         catalogs: {
-          nightly: '33.0.0-nightly.20240621',
+          nightly: {
+            'electron-nightly': '33.0.0-nightly.20240621',
+          },
         },
       });
 
@@ -720,7 +724,7 @@ describe('Electron Utilities', () => {
 
       // Set up mock to succeed with the workspace file
       vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
-        return Promise.resolve('catalogs:\n  nightly: "33.0.0-nightly.20240621"');
+        return Promise.resolve('catalogs:\n  nightly:\n    electron-nightly: "33.0.0-nightly.20240621"');
       });
 
       const pkg = {
@@ -804,8 +808,13 @@ describe('Electron Utilities', () => {
 
     it('should handle a mix of named and default catalogs', async () => {
       vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
+        catalog: {
+          'electron-nightly': '33.0.0-nightly.20240621',
+        },
         catalogs: {
-          stable: '29.4.1',
+          stable: {
+            electron: '29.4.1',
+          },
         },
       });
 
@@ -813,7 +822,9 @@ describe('Electron Utilities', () => {
 
       // Set up mock to succeed with the workspace file
       vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
-        return Promise.resolve('catalogs:\n  stable: "29.4.1"');
+        return Promise.resolve(
+          'catalog:\n  electron-nightly: "33.0.0-nightly.20240621"\ncatalogs:\n  stable:\n    electron: "29.4.1"',
+        );
       });
 
       const pkg = {
@@ -1506,17 +1517,38 @@ describe('PNPM Catalog Versions Edge Cases', () => {
     // Verify that readFile was called multiple times as it traversed up
     expect(fs.readFile).toHaveBeenCalledTimes(3);
 
-    // Use path.join to handle platform-specific path separators
-    const expectedPaths = [
-      path.join('/project', 'src', 'components', 'app', 'pnpm-workspace.yaml'),
-      path.join('/project', 'src', 'components', 'pnpm-workspace.yaml'),
-      path.join('/project', 'src', 'pnpm-workspace.yaml'),
-    ];
+    // Should have tried these paths in order - using normalized paths for cross-platform tests
+    const call1 = vi.mocked(fs.readFile).mock.calls[0];
+    const call2 = vi.mocked(fs.readFile).mock.calls[1];
+    const call3 = vi.mocked(fs.readFile).mock.calls[2];
 
-    // Should have tried these paths in order
-    expect(fs.readFile).toHaveBeenNthCalledWith(1, expectedPaths[0], 'utf8');
-    expect(fs.readFile).toHaveBeenNthCalledWith(2, expectedPaths[1], 'utf8');
-    expect(fs.readFile).toHaveBeenNthCalledWith(3, expectedPaths[2], 'utf8');
+    // Normalize paths to forward slashes for comparison
+    expect(call1[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/app/pnpm-workspace.yaml');
+    expect(call1[1]).toBe('utf8');
+
+    expect(call2[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/pnpm-workspace.yaml');
+    expect(call2[1]).toBe('utf8');
+
+    expect(call3[0].toString().replace(/\\/g, '/')).toBe('/project/src/pnpm-workspace.yaml');
+    expect(call3[1]).toBe('utf8');
+  });
+
+  it('should handle empty catalog names with the new structure', async () => {
+    vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
+      catalogs: {
+        '': {
+          electron: '29.4.1',
+        },
+      },
+    });
+
+    // Set up mock to succeed with the workspace file
+    vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
+      return Promise.resolve('catalogs:\n  "":\n    electron: "29.4.1"');
+    });
+
+    const version = await findPnpmCatalogVersions('catalog:', undefined, '/project/dir');
+    expect(version).toBe(undefined); // Should return undefined since empty catalog name isn't handled
   });
 });
 
