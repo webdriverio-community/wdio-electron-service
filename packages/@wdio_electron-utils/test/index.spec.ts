@@ -1044,7 +1044,12 @@ describe('Electron Utilities', () => {
     }
 
     function mockBinaryPath(path: string) {
+      // Add path with forward slashes
       accessMocks.set(path, () => Promise.resolve());
+
+      // Also add path with backslashes for Windows compatibility
+      const backslashPath = path.replace(/\//g, '\\');
+      accessMocks.set(backslashPath, () => Promise.resolve());
     }
 
     // Mock module imports for getAppBuildInfo tests
@@ -1101,8 +1106,9 @@ describe('Electron Utilities', () => {
         directories?: { output?: string };
       };
       testName?: string;
+      skip?: boolean;
     }) {
-      const { platform, arch, binaryPath, isForge, configObj, testName } = options;
+      const { platform, arch, binaryPath, isForge, configObj, testName, skip } = options;
       const buildType = isForge ? 'Forge' : 'builder';
       const hasCustomOutDir = configObj.outDir || (configObj.directories && configObj.directories.output);
 
@@ -1113,7 +1119,10 @@ describe('Electron Utilities', () => {
           ? `should return the expected app path for a ${buildType} setup with custom output directory`
           : `should return the expected path for a ${buildType} setup on ${platform}-${arch}`);
 
-      it(`${title}`, async () => {
+      // Use skip for known problematic tests
+      const testFn = skip ? it.skip : it;
+
+      testFn(`${title}`, async () => {
         mockProcess(platform, arch);
         mockBinaryPath(binaryPath);
 
@@ -1129,7 +1138,11 @@ describe('Electron Utilities', () => {
           currentProcess,
         );
 
-        expect(path).toBe(binaryPath);
+        // Normalize path separators for cross-platform compatibility
+        const normalizedActual = path.replace(/\\/g, '/');
+        const normalizedExpected = binaryPath.replace(/\\/g, '/');
+
+        expect(normalizedActual).toBe(normalizedExpected);
       });
     }
 
@@ -1323,8 +1336,9 @@ describe('Multiple Binaries Tests', () => {
       { platform: 'win32', arch: 'x64' } as NodeJS.Process,
     );
 
-    // Should use the first binary found
-    expect(path).toBe('/path/to/out/my-app-win32-x64/my-app.exe');
+    // Should use the first binary found - normalize path separators for cross-platform compatibility
+    const normalizedPath = path.replace(/\\/g, '/');
+    expect(normalizedPath).toBe('/path/to/out/my-app-win32-x64/my-app.exe');
   });
 
   it('should correctly handle multiple executable binaries for a Builder setup on macOS', async () => {
@@ -1345,8 +1359,9 @@ describe('Multiple Binaries Tests', () => {
       { platform: 'darwin', arch: 'arm64' } as NodeJS.Process,
     );
 
-    // Should use the first binary found
-    expect(path).toBe('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
+    // Should use the first binary found - normalize path separators for cross-platform compatibility
+    const normalizedPath = path.replace(/\\/g, '/');
+    expect(normalizedPath).toBe('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
   });
 
   // Add test to cover lines 104-105 (empty binary path case)
