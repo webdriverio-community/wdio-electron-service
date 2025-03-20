@@ -1506,20 +1506,17 @@ describe('PNPM Catalog Versions Edge Cases', () => {
     // Verify that readFile was called multiple times as it traversed up
     expect(fs.readFile).toHaveBeenCalledTimes(3);
 
-    // Should have tried these paths in order - using normalized paths for cross-platform tests
-    const call1 = vi.mocked(fs.readFile).mock.calls[0];
-    const call2 = vi.mocked(fs.readFile).mock.calls[1];
-    const call3 = vi.mocked(fs.readFile).mock.calls[2];
+    // Use path.join to handle platform-specific path separators
+    const expectedPaths = [
+      path.join('/project', 'src', 'components', 'app', 'pnpm-workspace.yaml'),
+      path.join('/project', 'src', 'components', 'pnpm-workspace.yaml'),
+      path.join('/project', 'src', 'pnpm-workspace.yaml'),
+    ];
 
-    // Normalize paths to forward slashes for comparison
-    expect(call1[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/app/pnpm-workspace.yaml');
-    expect(call1[1]).toBe('utf8');
-
-    expect(call2[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/pnpm-workspace.yaml');
-    expect(call2[1]).toBe('utf8');
-
-    expect(call3[0].toString().replace(/\\/g, '/')).toBe('/project/src/pnpm-workspace.yaml');
-    expect(call3[1]).toBe('utf8');
+    // Should have tried these paths in order
+    expect(fs.readFile).toHaveBeenNthCalledWith(1, expectedPaths[0], 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(2, expectedPaths[1], 'utf8');
+    expect(fs.readFile).toHaveBeenNthCalledWith(3, expectedPaths[2], 'utf8');
   });
 });
 
