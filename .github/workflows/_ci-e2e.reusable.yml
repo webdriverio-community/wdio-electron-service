@@ -148,8 +148,8 @@ jobs:
         uses: ./.github/workflows/actions/upload-archive
         if: failure()
         with:
-          name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-universal' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
-          output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-universal' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
+          name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
+          output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
           paths: e2e/*/*.log
 
       # Provide an interactive debugging session on failure

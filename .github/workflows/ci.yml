@@ -111,7 +111,7 @@ jobs:
   # Mac Universal builds require special handling
   # These are separate from regular macOS tests because they use a different build command
   e2e-mac-universal-matrix:
-    name: E2E [macOS Universal] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
+    name: E2E [macOS-U] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build-matrix]
     strategy:
       matrix:
