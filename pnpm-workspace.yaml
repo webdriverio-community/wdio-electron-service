@@ -23,7 +23,7 @@ catalog:
   "@rollup/plugin-typescript": ^12.1.2
   "@turbo-version/version": ^0.8.3
   "@types/debug": ^4.1.12
-  "@types/eslint-config-prettier": ^6.11.2
+  "@types/eslint-config-prettier": ^6.11.3
   "@types/mocha": ^10.0.10
   "@types/node": ^22.13.10
   "@types/shelljs": ^0.8.15
@@ -39,26 +39,29 @@ catalog:
   "@wdio/mocha-framework": ^9.7.3
   "@wdio/types": ^9.10.1
   builder-util: ^25.1.7
+  chalk: ^5.4.1
   compare-versions: ^6.1.1
   cross-env: ^7.0.3
   debug: ^4.4.0
   dotenv: ^16.4.7
-  electron: ^35.0.2
+  electron: ^35.0.3
   electron-builder: ^25.1.8
-  electron-to-chromium: ^1.5.120
+  electron-to-chromium: ^1.5.122
   eslint: ^9.22.0
   eslint-config-prettier: ^10.1.1
   eslint-import-resolver-typescript: ^3.9.1
   eslint-plugin-import-x: ^4.8.1
   eslint-plugin-wdio: ^9.9.1
-  fast-copy: ^3.0.1
+  fast-copy: ^3.0.2
   find-versions: ^6.0.0
   globals: ^16.0.0
   husky: ^9.1.7
   jsdom: ^26.0.0
   json5: ^2.2.3
   lint-staged: ^15.5.0
+  list: ^2.0.19
   nock: ^14.0.1
+  ora: ^8.1.2
   prettier: ^3.5.3
   puppeteer-core: ^22.15.0
   read-package-up: ^11.0.0
