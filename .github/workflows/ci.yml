@@ -62,7 +62,7 @@ jobs:
   # - Test 2 module types (ESM, CJS)
   # - Optimize for GitHub Actions concurrency limits
   e2e-matrix:
-    name: E2E [${{ matrix.scenario }}${{ matrix.type != '*' && format(', {0}', matrix.type) || '' }}] - ${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}
+    name: E2E [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build-matrix]
     strategy:
       matrix:
@@ -111,7 +111,7 @@ jobs:
   # Mac Universal builds require special handling
   # These are separate from regular macOS tests because they use a different build command
   e2e-mac-universal-matrix:
-    name: E2E [${{ matrix.scenario }}${{ matrix.type != '*' && format(', {0}', matrix.type) || '' }}] - macOS (Universal)
+    name: E2E [macOS Universal] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build-matrix]
     strategy:
       matrix:
