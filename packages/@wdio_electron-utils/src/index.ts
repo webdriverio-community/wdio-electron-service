@@ -312,7 +312,27 @@ export async function findPnpmCatalogVersions(
   const electronNightlyCatalogName = pkgElectronNightlyVersion?.split('catalog:')[1]?.trim();
 
   try {
-    const yamlContent = await fs.readFile(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+    // Traverse up the directory tree to find pnpm-workspace.yaml
+    let currentDir = projectDir;
+    let workspaceYamlPath;
+    let yamlContent;
+
+    while (currentDir !== path.parse(currentDir).root) {
+      workspaceYamlPath = path.join(currentDir, 'pnpm-workspace.yaml');
+      try {
+        yamlContent = await fs.readFile(workspaceYamlPath, 'utf8');
+        log.debug(`Found pnpm-workspace.yaml at ${workspaceYamlPath}`);
+        break;
+      } catch (_e) {
+        // Move up one directory
+        currentDir = path.dirname(currentDir);
+      }
+    }
+
+    if (!yamlContent) {
+      return undefined;
+    }
+
     const pnpmWorkspace = (await import('yaml')).parse(yamlContent) as PnpmWorkspace;
 
     // Check for electron with named catalog
@@ -336,8 +356,9 @@ export async function findPnpmCatalogVersions(
     }
 
     return undefined;
-  } catch (_error) {
-    // Gracefully handle missing workspace file or other errors
+  } catch (error) {
+    // Gracefully handle other errors
+    log.debug(`Error finding pnpm workspace: ${(error as Error).message}`);
     return undefined;
   }
 }
