@@ -2,7 +2,7 @@ import path from 'node:path';
 import { expect, it, vi, describe, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 
-import { getBinaryPath, getAppBuildInfo, getElectronVersion, findPnpmCatalogVersions } from '../src/index.js';
+import { getBinaryPath, getAppBuildInfo, getElectronVersion, findPnpmCatalogVersion } from '../src/index.js';
 import { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 import { AppBuildInfo } from '@wdio/electron-types';
 
@@ -1433,7 +1433,7 @@ describe('Multiple Binaries Tests', () => {
   });
 });
 
-// Additional tests for findPnpmCatalogVersions to cover edge cases
+// Additional tests for findPnpmCatalogVersion to cover edge cases
 describe('PNPM Catalog Versions Edge Cases', () => {
   it('should handle empty catalog names', async () => {
     vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
@@ -1447,12 +1447,12 @@ describe('PNPM Catalog Versions Edge Cases', () => {
       return Promise.resolve('catalog:\n  electron: "29.4.1"');
     });
 
-    const version = await findPnpmCatalogVersions('catalog:', undefined, '/project/dir');
+    const version = await findPnpmCatalogVersion('catalog:', undefined, '/project/dir');
     expect(version).toBe('29.4.1');
   });
 
   it('should handle missing projectDir', async () => {
-    const version = await findPnpmCatalogVersions('catalog:name', undefined, undefined);
+    const version = await findPnpmCatalogVersion('catalog:name', undefined, undefined);
     expect(version).toBeUndefined();
   });
 
@@ -1461,18 +1461,18 @@ describe('PNPM Catalog Versions Edge Cases', () => {
       throw new Error('YAML parse error');
     });
 
-    const version = await findPnpmCatalogVersions('catalog:name', undefined, '/project/dir');
+    const version = await findPnpmCatalogVersion('catalog:name', undefined, '/project/dir');
     expect(version).toBeUndefined();
   });
 
-  it('should handle other errors in findPnpmCatalogVersions', async () => {
+  it('should handle other errors in findPnpmCatalogVersion', async () => {
     // Mock a function that throws an error when called
     vi.spyOn(fs, 'readFile').mockImplementation(() => {
       throw new Error('Some unexpected error');
     });
 
-    // This should hit line 341 - the catch block in findPnpmCatalogVersions
-    const result = await findPnpmCatalogVersions('default', '/non-existent-dir');
+    // This should hit line 341 - the catch block in findPnpmCatalogVersion
+    const result = await findPnpmCatalogVersion('default', '/non-existent-dir');
     expect(result).toBeUndefined();
   });
 
@@ -1498,7 +1498,7 @@ describe('PNPM Catalog Versions Edge Cases', () => {
 
     // Start from a nested directory
     const nestedDir = '/project/src/components/app';
-    const version = await findPnpmCatalogVersions('catalog:', undefined, nestedDir);
+    const version = await findPnpmCatalogVersion('catalog:', undefined, nestedDir);
 
     // Should find the version in parent directory
     expect(version).toBe('30.0.0');
