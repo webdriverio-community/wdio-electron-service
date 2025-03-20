@@ -296,7 +296,7 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   throw new Error(BUILD_TOOL_DETECTION_ERROR);
 }
 
-type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: string } };
+type PnpmWorkspace = { catalog?: { [key: string]: string }; catalogs?: { [key: string]: { [key: string]: string } } };
 
 export async function findPnpmCatalogVersions(
   pkgElectronVersion?: string,
