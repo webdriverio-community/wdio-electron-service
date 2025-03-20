@@ -31,19 +31,19 @@
     "build": "rollup --config rollup.config.ts --configPlugin typescript"
   },
   "dependencies": {
-    "@vitest/spy": "^3.0.9"
+    "@vitest/spy": "catalog:"
   },
   "devDependencies": {
-    "@electron-forge/shared-types": "^7.7.0",
-    "@electron/packager": "^18.3.6",
+    "@electron-forge/shared-types": "catalog:",
+    "@electron/packager": "catalog:",
     "@wdio/electron-bundler": "workspace:*",
-    "@wdio/globals": "^9.8.0",
-    "@wdio/types": "^9.10.1",
-    "builder-util": "^25.1.7",
-    "electron": "^35.0.2",
-    "read-package-up": "^11.0.0",
-    "typescript": "^5.8.2",
-    "webdriverio": "^9.8.0"
+    "@wdio/globals": "catalog:",
+    "@wdio/types": "catalog:",
+    "builder-util": "catalog:",
+    "electron": "catalog:",
+    "read-package-up": "catalog:",
+    "typescript": "catalog:",
+    "webdriverio": "catalog:"
   },
   "files": [
     "dist/*"

@@ -4,93 +4,288 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@electron-forge/cli':
+      specifier: ^7.7.0
+      version: 7.7.0
+    '@electron-forge/shared-types':
+      specifier: ^7.7.0
+      version: 7.7.0
+    '@electron/packager':
+      specifier: ^18.3.6
+      version: 18.3.6
+    '@eslint/js':
+      specifier: ^9.22.0
+      version: 9.22.0
+    '@inquirer/prompts':
+      specifier: ^7.4.0
+      version: 7.4.0
+    '@octokit/rest':
+      specifier: ^21.1.1
+      version: 21.1.1
+    '@octokit/types':
+      specifier: ^13.9.0
+      version: 13.9.0
+    '@rollup/plugin-commonjs':
+      specifier: ^28.0.3
+      version: 28.0.3
+    '@rollup/plugin-node-resolve':
+      specifier: ^16.0.1
+      version: 16.0.1
+    '@rollup/plugin-typescript':
+      specifier: ^12.1.2
+      version: 12.1.2
+    '@turbo-version/version':
+      specifier: ^0.8.3
+      version: 0.8.3
+    '@types/debug':
+      specifier: ^4.1.12
+      version: 4.1.12
+    '@types/eslint-config-prettier':
+      specifier: ^6.11.2
+      version: 6.11.3
+    '@types/mocha':
+      specifier: ^10.0.10
+      version: 10.0.10
+    '@types/node':
+      specifier: ^22.13.10
+      version: 22.13.10
+    '@types/shelljs':
+      specifier: ^0.8.15
+      version: 0.8.15
+    '@typescript-eslint/eslint-plugin':
+      specifier: ^8.26.1
+      version: 8.26.1
+    '@typescript-eslint/parser':
+      specifier: ^8.26.1
+      version: 8.26.1
+    '@vitest/coverage-v8':
+      specifier: ^3.0.9
+      version: 3.0.9
+    '@vitest/eslint-plugin':
+      specifier: ^1.1.38
+      version: 1.1.38
+    '@vitest/spy':
+      specifier: ^3.0.9
+      version: 3.0.9
+    '@wdio/cli':
+      specifier: ^9.8.0
+      version: 9.8.0
+    '@wdio/globals':
+      specifier: ^9.8.0
+      version: 9.8.0
+    '@wdio/local-runner':
+      specifier: ^9.8.0
+      version: 9.8.0
+    '@wdio/logger':
+      specifier: ^9.4.4
+      version: 9.4.4
+    '@wdio/mocha-framework':
+      specifier: ^9.7.3
+      version: 9.7.3
+    '@wdio/types':
+      specifier: ^9.10.1
+      version: 9.10.1
+    builder-util:
+      specifier: ^25.1.7
+      version: 25.1.7
+    compare-versions:
+      specifier: ^6.1.1
+      version: 6.1.1
+    cross-env:
+      specifier: ^7.0.3
+      version: 7.0.3
+    debug:
+      specifier: ^4.4.0
+      version: 4.4.0
+    dotenv:
+      specifier: ^16.4.7
+      version: 16.4.7
+    electron:
+      specifier: ^35.0.2
+      version: 35.0.2
+    electron-builder:
+      specifier: ^25.1.8
+      version: 25.1.8
+    electron-to-chromium:
+      specifier: ^1.5.120
+      version: 1.5.120
+    eslint:
+      specifier: ^9.22.0
+      version: 9.22.0
+    eslint-config-prettier:
+      specifier: ^10.1.1
+      version: 10.1.1
+    eslint-import-resolver-typescript:
+      specifier: ^3.9.1
+      version: 3.9.1
+    eslint-plugin-import-x:
+      specifier: ^4.8.1
+      version: 4.8.1
+    eslint-plugin-wdio:
+      specifier: ^9.9.1
+      version: 9.9.1
+    fast-copy:
+      specifier: ^3.0.1
+      version: 3.0.2
+    find-versions:
+      specifier: ^6.0.0
+      version: 6.0.0
+    globals:
+      specifier: ^16.0.0
+      version: 16.0.0
+    husky:
+      specifier: ^9.1.7
+      version: 9.1.7
+    jsdom:
+      specifier: ^26.0.0
+      version: 26.0.0
+    json5:
+      specifier: ^2.2.3
+      version: 2.2.3
+    lint-staged:
+      specifier: ^15.5.0
+      version: 15.5.0
+    nock:
+      specifier: ^14.0.1
+      version: 14.0.1
+    prettier:
+      specifier: ^3.5.3
+      version: 3.5.3
+    puppeteer-core:
+      specifier: ^22.15.0
+      version: 22.15.0
+    read-package-up:
+      specifier: ^11.0.0
+      version: 11.0.0
+    rollup:
+      specifier: ^4.36.0
+      version: 4.36.0
+    rollup-plugin-node-externals:
+      specifier: ^8.0.0
+      version: 8.0.0
+    shelljs:
+      specifier: ^0.9.2
+      version: 0.9.2
+    shx:
+      specifier: ^0.4.0
+      version: 0.4.0
+    smol-toml:
+      specifier: ^1.3.1
+      version: 1.3.1
+    tinyspy:
+      specifier: ^3.0.2
+      version: 3.0.2
+    tsx:
+      specifier: ^4.19.3
+      version: 4.19.3
+    turbo:
+      specifier: ^2.4.4
+      version: 2.4.4
+    typescript:
+      specifier: ^5.8.2
+      version: 5.8.2
+    vitest:
+      specifier: ^3.0.9
+      version: 3.0.9
+    webdriverio:
+      specifier: ^9.8.0
+      version: 9.8.0
+    xvfb-maybe:
+      specifier: ^0.2.1
+      version: 0.2.1
+    yaml:
+      specifier: ^2.7.0
+      version: 2.7.0
+
 importers:
 
   .:
     devDependencies:
       '@eslint/js':
-        specifier: ^9.22.0
+        specifier: 'catalog:'
         version: 9.22.0
       '@inquirer/prompts':
-        specifier: ^7.4.0
+        specifier: 'catalog:'
         version: 7.4.0(@types/node@22.13.10)
       '@octokit/rest':
-        specifier: ^21.1.1
+        specifier: 'catalog:'
         version: 21.1.1
       '@octokit/types':
-        specifier: ^13.9.0
+        specifier: 'catalog:'
         version: 13.9.0
       '@turbo-version/version':
-        specifier: ^0.8.3
+        specifier: 'catalog:'
         version: 0.8.3
       '@types/eslint-config-prettier':
-        specifier: ^6.11.2
+        specifier: 'catalog:'
         version: 6.11.3
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@types/shelljs':
-        specifier: ^0.8.15
+        specifier: 'catalog:'
         version: 0.8.15
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.26.1
+        specifier: 'catalog:'
         version: 8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)(typescript@5.8.2)
       '@typescript-eslint/parser':
-        specifier: ^8.26.1
+        specifier: 'catalog:'
         version: 8.26.1(eslint@9.22.0)(typescript@5.8.2)
       '@vitest/eslint-plugin':
-        specifier: ^1.1.38
+        specifier: 'catalog:'
         version: 1.1.38(@typescript-eslint/utils@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)(typescript@5.8.2)(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0))
       cross-env:
-        specifier: ^7.0.3
+        specifier: 'catalog:'
         version: 7.0.3
       dotenv:
-        specifier: ^16.4.7
+        specifier: 'catalog:'
         version: 16.4.7
       eslint:
-        specifier: ^9.22.0
+        specifier: 'catalog:'
         version: 9.22.0
       eslint-config-prettier:
-        specifier: ^10.1.1
+        specifier: 'catalog:'
         version: 10.1.1(eslint@9.22.0)
       eslint-import-resolver-typescript:
-        specifier: ^3.9.1
+        specifier: 'catalog:'
         version: 3.9.1(eslint-plugin-import-x@4.8.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)
       eslint-plugin-import-x:
-        specifier: ^4.8.1
+        specifier: 'catalog:'
         version: 4.8.1(eslint@9.22.0)(typescript@5.8.2)
       eslint-plugin-wdio:
-        specifier: ^9.9.1
+        specifier: 'catalog:'
         version: 9.9.1
       globals:
-        specifier: ^16.0.0
+        specifier: 'catalog:'
         version: 16.0.0
       husky:
-        specifier: ^9.1.7
+        specifier: 'catalog:'
         version: 9.1.7
       lint-staged:
-        specifier: ^15.5.0
+        specifier: 'catalog:'
         version: 15.5.0
       prettier:
-        specifier: ^3.5.3
+        specifier: 'catalog:'
         version: 3.5.3
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       shelljs:
-        specifier: ^0.9.2
+        specifier: 'catalog:'
         version: 0.9.2
       shx:
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       turbo:
-        specifier: ^2.4.4
+        specifier: 'catalog:'
         version: 2.4.4
 
   apps/builder-cjs:
@@ -100,34 +295,34 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       electron-builder:
-        specifier: ^25.1.8
+        specifier: 'catalog:'
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   apps/builder-esm:
@@ -137,34 +332,34 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       electron-builder:
-        specifier: ^25.1.8
+        specifier: 'catalog:'
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   apps/forge-cjs:
@@ -174,46 +369,46 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
-        specifier: ^7.7.0
+        specifier: 'catalog:'
         version: 7.7.0(encoding@0.1.13)
       '@rollup/plugin-commonjs':
-        specifier: ^28.0.3
+        specifier: 'catalog:'
         version: 28.0.3(rollup@4.36.0)
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.1
+        specifier: 'catalog:'
         version: 16.0.1(rollup@4.36.0)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   apps/forge-esm:
@@ -223,46 +418,46 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
-        specifier: ^7.7.0
+        specifier: 'catalog:'
         version: 7.7.0(encoding@0.1.13)
       '@rollup/plugin-commonjs':
-        specifier: ^28.0.3
+        specifier: 'catalog:'
         version: 28.0.3(rollup@4.36.0)
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.1
+        specifier: 'catalog:'
         version: 16.0.1(rollup@4.36.0)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   apps/no-binary-cjs:
@@ -272,43 +467,43 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@rollup/plugin-commonjs':
-        specifier: ^28.0.3
+        specifier: 'catalog:'
         version: 28.0.3(rollup@4.36.0)
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.1
+        specifier: 'catalog:'
         version: 16.0.1(rollup@4.36.0)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   apps/no-binary-esm:
@@ -318,221 +513,221 @@ importers:
         version: link:../../packages/wdio-electron-service
     devDependencies:
       '@rollup/plugin-commonjs':
-        specifier: ^28.0.3
+        specifier: 'catalog:'
         version: 28.0.3(rollup@4.36.0)
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.1
+        specifier: 'catalog:'
         version: 16.0.1(rollup@4.36.0)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   e2e:
     dependencies:
       '@wdio/cli':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/electron-utils':
         specifier: workspace:*
         version: link:../packages/@wdio_electron-utils
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/local-runner':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       '@wdio/mocha-framework':
-        specifier: ^9.7.3
+        specifier: 'catalog:'
         version: 9.7.3
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       wdio-electron-service:
         specifier: workspace:*
         version: link:../packages/wdio-electron-service
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
       xvfb-maybe:
-        specifier: ^0.2.1
+        specifier: 'catalog:'
         version: 0.2.1
     devDependencies:
       '@electron-forge/cli':
-        specifier: ^7.7.0
+        specifier: 'catalog:'
         version: 7.7.0(encoding@0.1.13)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       '@types/mocha':
-        specifier: ^10.0.10
+        specifier: 'catalog:'
         version: 10.0.10
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@vitest/spy':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9
       '@wdio/electron-types':
         specifier: workspace:*
         version: link:../packages/@wdio_electron-types
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
 
   packages/@wdio_electron-bundler:
     dependencies:
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.1
+        specifier: 'catalog:'
         version: 16.0.1(rollup@4.36.0)
       '@rollup/plugin-typescript':
-        specifier: ^12.1.2
+        specifier: 'catalog:'
         version: 12.1.2(rollup@4.36.0)(tslib@2.8.1)(typescript@5.8.2)
       debug:
-        specifier: ^4.4.0
+        specifier: 'catalog:'
         version: 4.4.0(supports-color@8.1.1)
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       rollup:
-        specifier: ^4.36.0
+        specifier: 'catalog:'
         version: 4.36.0
       rollup-plugin-node-externals:
-        specifier: ^8.0.0
+        specifier: 'catalog:'
         version: 8.0.0(rollup@4.36.0)
     devDependencies:
       '@types/debug':
-        specifier: ^4.1.12
+        specifier: 'catalog:'
         version: 4.1.12
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@vitest/coverage-v8':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0))
       shx:
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       vitest:
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/@wdio_electron-types:
     dependencies:
       '@vitest/spy':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9
     devDependencies:
       '@electron-forge/shared-types':
-        specifier: ^7.7.0
+        specifier: 'catalog:'
         version: 7.7.0
       '@electron/packager':
-        specifier: ^18.3.6
+        specifier: 'catalog:'
         version: 18.3.6
       '@wdio/electron-bundler':
         specifier: workspace:*
         version: link:../@wdio_electron-bundler
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/types':
-        specifier: ^9.10.1
+        specifier: 'catalog:'
         version: 9.10.1
       builder-util:
-        specifier: ^25.1.7
+        specifier: 'catalog:'
         version: 25.1.7
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
 
   packages/@wdio_electron-utils:
     dependencies:
       '@electron/packager':
-        specifier: ^18.3.6
+        specifier: 'catalog:'
         version: 18.3.6
       '@wdio/logger':
-        specifier: ^9.4.4
+        specifier: 'catalog:'
         version: 9.4.4
       debug:
-        specifier: ^4.4.0
+        specifier: 'catalog:'
         version: 4.4.0(supports-color@8.1.1)
       find-versions:
-        specifier: ^6.0.0
+        specifier: 'catalog:'
         version: 6.0.0
       json5:
-        specifier: ^2.2.3
+        specifier: 'catalog:'
         version: 2.2.3
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       smol-toml:
-        specifier: ^1.3.1
+        specifier: 'catalog:'
         version: 1.3.1
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.19.3
       yaml:
-        specifier: ^2.7.0
+        specifier: 'catalog:'
         version: 2.7.0
     devDependencies:
       '@types/debug':
-        specifier: ^4.1.12
+        specifier: 'catalog:'
         version: 4.1.12
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@vitest/coverage-v8':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0))
       '@wdio/electron-bundler':
         specifier: workspace:*
@@ -541,19 +736,19 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-types
       shx:
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       vitest:
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/wdio-electron-service:
     dependencies:
       '@vitest/spy':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9
       '@wdio/electron-types':
         specifier: workspace:*
@@ -562,74 +757,74 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-utils
       '@wdio/globals':
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(@wdio/logger@9.4.4)(puppeteer-core@22.15.0)
       '@wdio/logger':
-        specifier: ^9.4.4
+        specifier: 'catalog:'
         version: 9.4.4
       compare-versions:
-        specifier: ^6.1.1
+        specifier: 'catalog:'
         version: 6.1.1
       debug:
-        specifier: ^4.4.0
+        specifier: 'catalog:'
         version: 4.4.0(supports-color@8.1.1)
       electron-to-chromium:
-        specifier: ^1.5.120
+        specifier: 'catalog:'
         version: 1.5.120
       fast-copy:
-        specifier: ^3.0.1
+        specifier: 'catalog:'
         version: 3.0.2
       puppeteer-core:
-        specifier: ^22.15.0
+        specifier: 'catalog:'
         version: 22.15.0
       read-package-up:
-        specifier: ^11.0.0
+        specifier: 'catalog:'
         version: 11.0.0
       tinyspy:
-        specifier: ^3.0.2
+        specifier: 'catalog:'
         version: 3.0.2
       webdriverio:
-        specifier: ^9.8.0
+        specifier: 'catalog:'
         version: 9.8.0(puppeteer-core@22.15.0)
     devDependencies:
       '@electron-forge/shared-types':
-        specifier: ^7.7.0
+        specifier: 'catalog:'
         version: 7.7.0
       '@types/debug':
-        specifier: ^4.1.12
+        specifier: 'catalog:'
         version: 4.1.12
       '@types/node':
-        specifier: ^22.13.10
+        specifier: 'catalog:'
         version: 22.13.10
       '@vitest/coverage-v8':
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0))
       '@wdio/electron-bundler':
         specifier: workspace:*
         version: link:../@wdio_electron-bundler
       '@wdio/types':
-        specifier: ^9.10.1
+        specifier: 'catalog:'
         version: 9.10.1
       builder-util:
-        specifier: ^25.1.7
+        specifier: 'catalog:'
         version: 25.1.7
       electron:
-        specifier: ^35.0.2
+        specifier: 'catalog:'
         version: 35.0.2
       jsdom:
-        specifier: ^26.0.0
+        specifier: 'catalog:'
         version: 26.0.0
       nock:
-        specifier: ^14.0.1
+        specifier: 'catalog:'
         version: 14.0.1
       shx:
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.8.2
       vitest:
-        specifier: ^3.0.9
+        specifier: 'catalog:'
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.0)
 
 packages:
@@ -820,34 +1015,16 @@ packages:
   '@emnapi/wasi-threads@1.0.1':
     resolution: {integrity: sha512-iIBu7mwkq4UQGeMEM8bLwNK962nXdhodeScX4slfQnRhEMMzvYivHhutCIk8uojvmASXXPC2WNEjwxFWk72Oqw==}
 
-  '@esbuild/aix-ppc64@0.25.0':
-    resolution: {integrity: sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ==}
-    engines: {node: '>=18'}
-    cpu: [ppc64]
-    os: [aix]
-
   '@esbuild/aix-ppc64@0.25.1':
     resolution: {integrity: sha512-kfYGy8IdzTGy+z0vFGvExZtxkFlA4zAxgKEahG9KE1ScBjpQnFsNOX8KTU5ojNru5ed5CVoJYXFtoxaq5nFbjQ==}
     engines: {node: '>=18'}
     cpu: [ppc64]
     os: [aix]
 
-  '@esbuild/android-arm64@0.25.0':
-    resolution: {integrity: sha512-grvv8WncGjDSyUBjN9yHXNt+cq0snxXbDxy5pJtzMKGmmpPxeAmAhWxXI+01lU5rwZomDgD3kJwulEnhTRUd6g==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [android]
-
   '@esbuild/android-arm64@0.25.1':
     resolution: {integrity: sha512-50tM0zCJW5kGqgG7fQ7IHvQOcAn9TKiVRuQ/lN0xR+T2lzEFvAi1ZcS8DiksFcEpf1t/GYOeOfCAgDHFpkiSmA==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [android]
-
-  '@esbuild/android-arm@0.25.0':
-    resolution: {integrity: sha512-PTyWCYYiU0+1eJKmw21lWtC+d08JDZPQ5g+kFyxP0V+es6VPPSUhM6zk8iImp2jbV6GwjX4pap0JFbUQN65X1g==}
-    engines: {node: '>=18'}
-    cpu: [arm]
     os: [android]
 
   '@esbuild/android-arm@0.25.1':
@@ -856,34 +1033,16 @@ packages:
     cpu: [arm]
     os: [android]
 
-  '@esbuild/android-x64@0.25.0':
-    resolution: {integrity: sha512-m/ix7SfKG5buCnxasr52+LI78SQ+wgdENi9CqyCXwjVR2X4Jkz+BpC3le3AoBPYTC9NHklwngVXvbJ9/Akhrfg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [android]
-
   '@esbuild/android-x64@0.25.1':
     resolution: {integrity: sha512-GCj6WfUtNldqUzYkN/ITtlhwQqGWu9S45vUXs7EIYf+7rCiiqH9bCloatO9VhxsL0Pji+PF4Lz2XXCES+Q8hDw==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [android]
 
-  '@esbuild/darwin-arm64@0.25.0':
-    resolution: {integrity: sha512-mVwdUb5SRkPayVadIOI78K7aAnPamoeFR2bT5nszFUZ9P8UpK4ratOdYbZZXYSqPKMHfS1wdHCJk1P1EZpRdvw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [darwin]
-
   '@esbuild/darwin-arm64@0.25.1':
     resolution: {integrity: sha512-5hEZKPf+nQjYoSr/elb62U19/l1mZDdqidGfmFutVUjjUZrOazAtwK+Kr+3y0C/oeJfLlxo9fXb1w7L+P7E4FQ==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [darwin]
-
-  '@esbuild/darwin-x64@0.25.0':
-    resolution: {integrity: sha512-DgDaYsPWFTS4S3nWpFcMn/33ZZwAAeAFKNHNa1QN0rI4pUjgqf0f7ONmXf6d22tqTY+H9FNdgeaAa+YIFUn2Rg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [darwin]
 
   '@esbuild/darwin-x64@0.25.1':
@@ -892,22 +1051,10 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@esbuild/freebsd-arm64@0.25.0':
-    resolution: {integrity: sha512-VN4ocxy6dxefN1MepBx/iD1dH5K8qNtNe227I0mnTRjry8tj5MRk4zprLEdG8WPyAPb93/e4pSgi1SoHdgOa4w==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [freebsd]
-
   '@esbuild/freebsd-arm64@0.25.1':
     resolution: {integrity: sha512-1MrCZs0fZa2g8E+FUo2ipw6jw5qqQiH+tERoS5fAfKnRx6NXH31tXBKI3VpmLijLH6yriMZsxJtaXUyFt/8Y4A==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [freebsd]
-
-  '@esbuild/freebsd-x64@0.25.0':
-    resolution: {integrity: sha512-mrSgt7lCh07FY+hDD1TxiTyIHyttn6vnjesnPoVDNmDfOmggTLXRv8Id5fNZey1gl/V2dyVK1VXXqVsQIiAk+A==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [freebsd]
 
   '@esbuild/freebsd-x64@0.25.1':
@@ -916,22 +1063,10 @@ packages:
     cpu: [x64]
     os: [freebsd]
 
-  '@esbuild/linux-arm64@0.25.0':
-    resolution: {integrity: sha512-9QAQjTWNDM/Vk2bgBl17yWuZxZNQIF0OUUuPZRKoDtqF2k4EtYbpyiG5/Dk7nqeK6kIJWPYldkOcBqjXjrUlmg==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [linux]
-
   '@esbuild/linux-arm64@0.25.1':
     resolution: {integrity: sha512-jaN3dHi0/DDPelk0nLcXRm1q7DNJpjXy7yWaWvbfkPvI+7XNSc/lDOnCLN7gzsyzgu6qSAmgSvP9oXAhP973uQ==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [linux]
-
-  '@esbuild/linux-arm@0.25.0':
-    resolution: {integrity: sha512-vkB3IYj2IDo3g9xX7HqhPYxVkNQe8qTK55fraQyTzTX/fxaDtXiEnavv9geOsonh2Fd2RMB+i5cbhu2zMNWJwg==}
-    engines: {node: '>=18'}
-    cpu: [arm]
     os: [linux]
 
   '@esbuild/linux-arm@0.25.1':
@@ -940,22 +1075,10 @@ packages:
     cpu: [arm]
     os: [linux]
 
-  '@esbuild/linux-ia32@0.25.0':
-    resolution: {integrity: sha512-43ET5bHbphBegyeqLb7I1eYn2P/JYGNmzzdidq/w0T8E2SsYL1U6un2NFROFRg1JZLTzdCoRomg8Rvf9M6W6Gg==}
-    engines: {node: '>=18'}
-    cpu: [ia32]
-    os: [linux]
-
   '@esbuild/linux-ia32@0.25.1':
     resolution: {integrity: sha512-OJykPaF4v8JidKNGz8c/q1lBO44sQNUQtq1KktJXdBLn1hPod5rE/Hko5ugKKZd+D2+o1a9MFGUEIUwO2YfgkQ==}
     engines: {node: '>=18'}
     cpu: [ia32]
-    os: [linux]
-
-  '@esbuild/linux-loong64@0.25.0':
-    resolution: {integrity: sha512-fC95c/xyNFueMhClxJmeRIj2yrSMdDfmqJnyOY4ZqsALkDrrKJfIg5NTMSzVBr5YW1jf+l7/cndBfP3MSDpoHw==}
-    engines: {node: '>=18'}
-    cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-loong64@0.25.1':
@@ -964,22 +1087,10 @@ packages:
     cpu: [loong64]
     os: [linux]
 
-  '@esbuild/linux-mips64el@0.25.0':
-    resolution: {integrity: sha512-nkAMFju7KDW73T1DdH7glcyIptm95a7Le8irTQNO/qtkoyypZAnjchQgooFUDQhNAy4iu08N79W4T4pMBwhPwQ==}
-    engines: {node: '>=18'}
-    cpu: [mips64el]
-    os: [linux]
-
   '@esbuild/linux-mips64el@0.25.1':
     resolution: {integrity: sha512-1osBbPEFYwIE5IVB/0g2X6i1qInZa1aIoj1TdL4AaAb55xIIgbg8Doq6a5BzYWgr+tEcDzYH67XVnTmUzL+nXg==}
     engines: {node: '>=18'}
     cpu: [mips64el]
-    os: [linux]
-
-  '@esbuild/linux-ppc64@0.25.0':
-    resolution: {integrity: sha512-NhyOejdhRGS8Iwv+KKR2zTq2PpysF9XqY+Zk77vQHqNbo/PwZCzB5/h7VGuREZm1fixhs4Q/qWRSi5zmAiO4Fw==}
-    engines: {node: '>=18'}
-    cpu: [ppc64]
     os: [linux]
 
   '@esbuild/linux-ppc64@0.25.1':
@@ -988,22 +1099,10 @@ packages:
     cpu: [ppc64]
     os: [linux]
 
-  '@esbuild/linux-riscv64@0.25.0':
-    resolution: {integrity: sha512-5S/rbP5OY+GHLC5qXp1y/Mx//e92L1YDqkiBbO9TQOvuFXM+iDqUNG5XopAnXoRH3FjIUDkeGcY1cgNvnXp/kA==}
-    engines: {node: '>=18'}
-    cpu: [riscv64]
-    os: [linux]
-
   '@esbuild/linux-riscv64@0.25.1':
     resolution: {integrity: sha512-nSut/Mx5gnilhcq2yIMLMe3Wl4FK5wx/o0QuuCLMtmJn+WeWYoEGDN1ipcN72g1WHsnIbxGXd4i/MF0gTcuAjQ==}
     engines: {node: '>=18'}
     cpu: [riscv64]
-    os: [linux]
-
-  '@esbuild/linux-s390x@0.25.0':
-    resolution: {integrity: sha512-XM2BFsEBz0Fw37V0zU4CXfcfuACMrppsMFKdYY2WuTS3yi8O1nFOhil/xhKTmE1nPmVyvQJjJivgDT+xh8pXJA==}
-    engines: {node: '>=18'}
-    cpu: [s390x]
     os: [linux]
 
   '@esbuild/linux-s390x@0.25.1':
@@ -1012,34 +1111,16 @@ packages:
     cpu: [s390x]
     os: [linux]
 
-  '@esbuild/linux-x64@0.25.0':
-    resolution: {integrity: sha512-9yl91rHw/cpwMCNytUDxwj2XjFpxML0y9HAOH9pNVQDpQrBxHy01Dx+vaMu0N1CKa/RzBD2hB4u//nfc+Sd3Cw==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [linux]
-
   '@esbuild/linux-x64@0.25.1':
     resolution: {integrity: sha512-xbfUhu/gnvSEg+EGovRc+kjBAkrvtk38RlerAzQxvMzlB4fXpCFCeUAYzJvrnhFtdeyVCDANSjJvOvGYoeKzFA==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
 
-  '@esbuild/netbsd-arm64@0.25.0':
-    resolution: {integrity: sha512-RuG4PSMPFfrkH6UwCAqBzauBWTygTvb1nxWasEJooGSJ/NwRw7b2HOwyRTQIU97Hq37l3npXoZGYMy3b3xYvPw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [netbsd]
-
   '@esbuild/netbsd-arm64@0.25.1':
     resolution: {integrity: sha512-O96poM2XGhLtpTh+s4+nP7YCCAfb4tJNRVZHfIE7dgmax+yMP2WgMd2OecBuaATHKTHsLWHQeuaxMRnCsH8+5g==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [netbsd]
-
-  '@esbuild/netbsd-x64@0.25.0':
-    resolution: {integrity: sha512-jl+qisSB5jk01N5f7sPCsBENCOlPiS/xptD5yxOx2oqQfyourJwIKLRA2yqWdifj3owQZCL2sn6o08dBzZGQzA==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [netbsd]
 
   '@esbuild/netbsd-x64@0.25.1':
@@ -1048,22 +1129,10 @@ packages:
     cpu: [x64]
     os: [netbsd]
 
-  '@esbuild/openbsd-arm64@0.25.0':
-    resolution: {integrity: sha512-21sUNbq2r84YE+SJDfaQRvdgznTD8Xc0oc3p3iW/a1EVWeNj/SdUCbm5U0itZPQYRuRTW20fPMWMpcrciH2EJw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [openbsd]
-
   '@esbuild/openbsd-arm64@0.25.1':
     resolution: {integrity: sha512-Na9T3szbXezdzM/Kfs3GcRQNjHzM6GzFBeU1/6IV/npKP5ORtp9zbQjvkDJ47s6BCgaAZnnnu/cY1x342+MvZg==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [openbsd]
-
-  '@esbuild/openbsd-x64@0.25.0':
-    resolution: {integrity: sha512-2gwwriSMPcCFRlPlKx3zLQhfN/2WjJ2NSlg5TKLQOJdV0mSxIcYNTMhk3H3ulL/cak+Xj0lY1Ym9ysDV1igceg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [openbsd]
 
   '@esbuild/openbsd-x64@0.25.1':
@@ -1072,23 +1141,11 @@ packages:
     cpu: [x64]
     os: [openbsd]
 
-  '@esbuild/sunos-x64@0.25.0':
-    resolution: {integrity: sha512-bxI7ThgLzPrPz484/S9jLlvUAHYMzy6I0XiU1ZMeAEOBcS0VePBFxh1JjTQt3Xiat5b6Oh4x7UC7IwKQKIJRIg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [sunos]
-
   '@esbuild/sunos-x64@0.25.1':
     resolution: {integrity: sha512-2H3RUvcmULO7dIE5EWJH8eubZAI4xw54H1ilJnRNZdeo8dTADEZ21w6J22XBkXqGJbe0+wnNJtw3UXRoLJnFEg==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [sunos]
-
-  '@esbuild/win32-arm64@0.25.0':
-    resolution: {integrity: sha512-ZUAc2YK6JW89xTbXvftxdnYy3m4iHIkDtK3CLce8wg8M2L+YZhIvO1DKpxrd0Yr59AeNNkTiic9YLf6FTtXWMw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [win32]
 
   '@esbuild/win32-arm64@0.25.1':
     resolution: {integrity: sha512-GE7XvrdOzrb+yVKB9KsRMq+7a2U/K5Cf/8grVFRAGJmfADr/e/ODQ134RK2/eeHqYV5eQRFxb1hY7Nr15fv1NQ==}
@@ -1096,22 +1153,10 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@esbuild/win32-ia32@0.25.0':
-    resolution: {integrity: sha512-eSNxISBu8XweVEWG31/JzjkIGbGIJN/TrRoiSVZwZ6pkC6VX4Im/WV2cz559/TXLcYbcrDN8JtKgd9DJVIo8GA==}
-    engines: {node: '>=18'}
-    cpu: [ia32]
-    os: [win32]
-
   '@esbuild/win32-ia32@0.25.1':
     resolution: {integrity: sha512-uOxSJCIcavSiT6UnBhBzE8wy3n0hOkJsBOzy7HDAuTDE++1DJMRRVCPGisULScHL+a/ZwdXPpXD3IyFKjA7K8A==}
     engines: {node: '>=18'}
     cpu: [ia32]
-    os: [win32]
-
-  '@esbuild/win32-x64@0.25.0':
-    resolution: {integrity: sha512-ZENoHJBxA20C2zFzh6AI4fT6RraMzjYw4xKWemRTRmRVtN9c5DcH9r/f2ihEkMjOW5eGgrwCslG/+Y/3bL+DHQ==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [win32]
 
   '@esbuild/win32-x64@0.25.1':
@@ -2896,11 +2941,6 @@ packages:
 
   es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
-
-  esbuild@0.25.0:
-    resolution: {integrity: sha512-BXq5mqc8ltbaN34cDqWuYKyNhX8D/Z0J1xdtdQ8UcIIIyJyz+ZMKUt58tF3SrZ85jcfN/PZYhjR5uDQAYNVbuw==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   esbuild@0.25.1:
     resolution: {integrity: sha512-BGO5LtrGC7vxnqucAe/rmvKdJllfGaYWdyABvyMoXQlfYMb2bbRuReWR5tEGE//4LcNJj9XrkovTqNYRFZHAMQ==}
@@ -5971,151 +6011,76 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@esbuild/aix-ppc64@0.25.0':
-    optional: true
-
   '@esbuild/aix-ppc64@0.25.1':
-    optional: true
-
-  '@esbuild/android-arm64@0.25.0':
     optional: true
 
   '@esbuild/android-arm64@0.25.1':
     optional: true
 
-  '@esbuild/android-arm@0.25.0':
-    optional: true
-
   '@esbuild/android-arm@0.25.1':
-    optional: true
-
-  '@esbuild/android-x64@0.25.0':
     optional: true
 
   '@esbuild/android-x64@0.25.1':
     optional: true
 
-  '@esbuild/darwin-arm64@0.25.0':
-    optional: true
-
   '@esbuild/darwin-arm64@0.25.1':
-    optional: true
-
-  '@esbuild/darwin-x64@0.25.0':
     optional: true
 
   '@esbuild/darwin-x64@0.25.1':
     optional: true
 
-  '@esbuild/freebsd-arm64@0.25.0':
-    optional: true
-
   '@esbuild/freebsd-arm64@0.25.1':
-    optional: true
-
-  '@esbuild/freebsd-x64@0.25.0':
     optional: true
 
   '@esbuild/freebsd-x64@0.25.1':
     optional: true
 
-  '@esbuild/linux-arm64@0.25.0':
-    optional: true
-
   '@esbuild/linux-arm64@0.25.1':
-    optional: true
-
-  '@esbuild/linux-arm@0.25.0':
     optional: true
 
   '@esbuild/linux-arm@0.25.1':
     optional: true
 
-  '@esbuild/linux-ia32@0.25.0':
-    optional: true
-
   '@esbuild/linux-ia32@0.25.1':
-    optional: true
-
-  '@esbuild/linux-loong64@0.25.0':
     optional: true
 
   '@esbuild/linux-loong64@0.25.1':
     optional: true
 
-  '@esbuild/linux-mips64el@0.25.0':
-    optional: true
-
   '@esbuild/linux-mips64el@0.25.1':
-    optional: true
-
-  '@esbuild/linux-ppc64@0.25.0':
     optional: true
 
   '@esbuild/linux-ppc64@0.25.1':
     optional: true
 
-  '@esbuild/linux-riscv64@0.25.0':
-    optional: true
-
   '@esbuild/linux-riscv64@0.25.1':
-    optional: true
-
-  '@esbuild/linux-s390x@0.25.0':
     optional: true
 
   '@esbuild/linux-s390x@0.25.1':
     optional: true
 
-  '@esbuild/linux-x64@0.25.0':
-    optional: true
-
   '@esbuild/linux-x64@0.25.1':
-    optional: true
-
-  '@esbuild/netbsd-arm64@0.25.0':
     optional: true
 
   '@esbuild/netbsd-arm64@0.25.1':
     optional: true
 
-  '@esbuild/netbsd-x64@0.25.0':
-    optional: true
-
   '@esbuild/netbsd-x64@0.25.1':
-    optional: true
-
-  '@esbuild/openbsd-arm64@0.25.0':
     optional: true
 
   '@esbuild/openbsd-arm64@0.25.1':
     optional: true
 
-  '@esbuild/openbsd-x64@0.25.0':
-    optional: true
-
   '@esbuild/openbsd-x64@0.25.1':
-    optional: true
-
-  '@esbuild/sunos-x64@0.25.0':
     optional: true
 
   '@esbuild/sunos-x64@0.25.1':
     optional: true
 
-  '@esbuild/win32-arm64@0.25.0':
-    optional: true
-
   '@esbuild/win32-arm64@0.25.1':
     optional: true
 
-  '@esbuild/win32-ia32@0.25.0':
-    optional: true
-
   '@esbuild/win32-ia32@0.25.1':
-    optional: true
-
-  '@esbuild/win32-x64@0.25.0':
     optional: true
 
   '@esbuild/win32-x64@0.25.1':
@@ -8244,34 +8209,6 @@ snapshots:
 
   es6-error@4.1.1:
     optional: true
-
-  esbuild@0.25.0:
-    optionalDependencies:
-      '@esbuild/aix-ppc64': 0.25.0
-      '@esbuild/android-arm': 0.25.0
-      '@esbuild/android-arm64': 0.25.0
-      '@esbuild/android-x64': 0.25.0
-      '@esbuild/darwin-arm64': 0.25.0
-      '@esbuild/darwin-x64': 0.25.0
-      '@esbuild/freebsd-arm64': 0.25.0
-      '@esbuild/freebsd-x64': 0.25.0
-      '@esbuild/linux-arm': 0.25.0
-      '@esbuild/linux-arm64': 0.25.0
-      '@esbuild/linux-ia32': 0.25.0
-      '@esbuild/linux-loong64': 0.25.0
-      '@esbuild/linux-mips64el': 0.25.0
-      '@esbuild/linux-ppc64': 0.25.0
-      '@esbuild/linux-riscv64': 0.25.0
-      '@esbuild/linux-s390x': 0.25.0
-      '@esbuild/linux-x64': 0.25.0
-      '@esbuild/netbsd-arm64': 0.25.0
-      '@esbuild/netbsd-x64': 0.25.0
-      '@esbuild/openbsd-arm64': 0.25.0
-      '@esbuild/openbsd-x64': 0.25.0
-      '@esbuild/sunos-x64': 0.25.0
-      '@esbuild/win32-arm64': 0.25.0
-      '@esbuild/win32-ia32': 0.25.0
-      '@esbuild/win32-x64': 0.25.0
 
   esbuild@0.25.1:
     optionalDependencies:
@@ -10699,7 +10636,7 @@ snapshots:
 
   tsx@4.19.3:
     dependencies:
-      esbuild: 0.25.0
+      esbuild: 0.25.1
       get-tsconfig: 4.10.0
     optionalDependencies:
       fsevents: 2.3.3
