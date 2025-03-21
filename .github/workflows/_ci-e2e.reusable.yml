@@ -220,29 +220,32 @@ jobs:
           # Debug electron-bundler package
           echo "=============== BUNDLER PACKAGE DIAGNOSTICS ==============="
           echo "Checking for @wdio/electron-bundler module..."
-          BUNDLER_PATH=$(find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found")
-          if [ "$BUNDLER_PATH" != "Not found" ]; then
-            echo "✅ electron-bundler found at: $BUNDLER_PATH"
-            cat $BUNDLER_PATH/package.json | grep -E "name|version"
 
-            # Check dependencies
-            echo "Checking bundler dependencies:"
-            if [ -f "$BUNDLER_PATH/package.json" ]; then
-              cat $BUNDLER_PATH/package.json | grep -A 15 "dependencies"
-              cat $BUNDLER_PATH/package.json | grep -A 15 "devDependencies"
-            fi
+          # Show workspace structure for better diagnostics
+          echo "Workspace package structure:"
+          pnpm list --depth 2 | grep "@wdio" || echo "No @wdio packages found in workspace"
 
-            # Check if it's built
-            if [ -d "$BUNDLER_PATH/dist" ]; then
-              echo "✅ dist directory exists"
-              ls -la $BUNDLER_PATH/dist
-            else
-              echo "❌ dist directory missing"
-            fi
-          else
-            echo "❌ electron-bundler not found"
-            echo "Looking in workspace packages.json..."
-            cat package.json | grep -A 10 "workspaces"
+          # Try finding the bundler in various locations
+          echo "Looking for bundler in packages directory:"
+          find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
+
+          echo "Looking for bundler in node_modules:"
+          find node_modules -name "electron-bundler" -type d || echo "Not found in node_modules"
+
+          # For Windows, ensure workspace dependencies are built
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            echo "=============== INSTALLING WINDOWS DEPENDENCIES ==============="
+            echo "Running pnpm install for all packages to ensure dependencies are available"
+            pnpm install
+
+            # Check if we need to install the bundler package
+            echo "Building all workspace packages explicitly on Windows"
+            pnpm run build
+
+            # Check if bundler was built
+            echo "Checking if bundler is built after pnpm run build:"
+            find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
+            find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
           fi
 
           # Check workspace build status
@@ -544,3 +547,79 @@ jobs:
         if: failure()
         with:
           timeout: '180000'
+
+      - name: 🔍 Debug bundler
+        run: |
+          echo "Checking for @wdio/electron-bundler module"
+
+          echo "Workspace structure:"
+          ls -la ./packages/
+
+          echo "Looking for electron-bundler in packages:"
+          find ./packages -name "electron-bundler" -type d
+
+          echo "Looking for @wdio/electron-bundler in node_modules:"
+          find ./node_modules -name "electron-bundler" -type d
+
+          if [ -d "./packages/wdio-electron-bundler" ]; then
+            echo "Found bundler in packages/wdio-electron-bundler"
+            ls -la ./packages/wdio-electron-bundler
+
+            echo "Checking package.json:"
+            cat ./packages/wdio-electron-bundler/package.json
+
+            echo "Checking if bundler is built:"
+            if [ -d "./packages/wdio-electron-bundler/dist" ]; then
+              echo "Bundler is built, dist directory exists"
+              ls -la ./packages/wdio-electron-bundler/dist
+            else
+              echo "Bundler is not built, dist directory is missing"
+            fi
+          fi
+
+          if [ -d "./packages/@wdio/electron-bundler" ]; then
+            echo "Found bundler in packages/@wdio/electron-bundler"
+            ls -la ./packages/@wdio/electron-bundler
+          fi
+
+      - name: 🛠️ Workspace dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "Building workspace dependencies for Windows..."
+
+          echo "Installing all packages with --no-frozen-lockfile"
+          pnpm install --no-frozen-lockfile
+
+          echo "Building utils package first"
+          cd packages/wdio-electron-utils
+          pnpm build
+          cd ../..
+
+          echo "Building bundler package"
+          cd packages/wdio-electron-bundler
+          pnpm build
+          cd ../..
+
+          echo "Building service package"
+          cd packages/wdio-electron-service
+          pnpm build
+          cd ../..
+
+          echo "Verifying build output"
+          if [ -d "./packages/wdio-electron-bundler/dist" ]; then
+            echo "✅ Bundler built successfully"
+            ls -la ./packages/wdio-electron-bundler/dist
+          else
+            echo "❌ Bundler build failed - dist directory missing"
+          fi
+
+          if [ -d "./packages/wdio-electron-service/dist" ]; then
+            echo "✅ Service built successfully"
+            ls -la ./packages/wdio-electron-service/dist
+          else
+            echo "❌ Service build failed - dist directory missing"
+          fi
+        shell: bash
+
+      - name: 🏗️ Build packages
+        run: pnpm run build:wdio

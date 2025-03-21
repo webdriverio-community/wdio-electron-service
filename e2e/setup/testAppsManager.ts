@@ -305,7 +305,6 @@ class TestAppsManager {
     console.log('Creating symlink for wdio-electron-service');
     try {
       const nodeModulesDir = join(this.tmpDir, 'apps', 'node_modules');
-      const serviceSymlinkPath = join(nodeModulesDir, 'wdio-electron-service');
 
       // First, make sure the node_modules directory exists
       try {
@@ -328,24 +327,36 @@ class TestAppsManager {
         if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
           console.log(`Extracting dist files from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
           try {
+            const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
             // Create a temp extraction directory
             const extractDir = join(this.tmpDir, 'extract-tarball');
             await this.createDirectory(extractDir);
 
             // Extract the tarball
             await execAsync(`tar -xzf ${process.env.WDIO_SERVICE_TARBALL} -C ${extractDir}`);
-            console.log(`Extracted tarball to ${extractDir}`);
 
-            // Check if package/dist exists in the extracted tarball
-            if (fs.existsSync(join(extractDir, 'package', 'dist'))) {
-              console.log('Found dist directory in extracted tarball, copying to package directory');
-              await execAsync(`mkdir -p ${packageDir}/dist`);
-              await execAsync(`cp -r ${extractDir}/package/dist/* ${packageDir}/dist/`);
-              console.log('Successfully copied dist files from tarball');
-            } else {
-              console.log('Could not find dist directory in extracted tarball');
-              console.log('Contents of extracted directory:');
-              await execAsync(`find ${extractDir} -type d | sort`);
+            // Create the dist directory in the package if it doesn't exist
+            const distDir = join(packageDir, 'dist');
+            await this.createDirectory(distDir);
+
+            // Copy the extracted dist files to the package dist directory
+            await execAsync(`cp -r ${join(extractDir, 'package', 'dist')}/* ${distDir}`);
+            console.log('Successfully extracted dist files from tarball');
+
+            // Update the symlink to match the one created above
+            const nodeModulesDir = join(this.tmpDir, 'apps', 'node_modules');
+            const wdioServicePath = join(nodeModulesDir, 'wdio-electron-service');
+
+            try {
+              // Remove existing symlink if it exists
+              if (fs.existsSync(wdioServicePath)) {
+                await fs.promises.unlink(wdioServicePath);
+              }
+              // Create a new symlink
+              await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
+              console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
+            } catch (symlinkError) {
+              console.error('Error creating symlink:', symlinkError);
             }
           } catch (extractError) {
             console.error('Error extracting from tarball:', extractError);

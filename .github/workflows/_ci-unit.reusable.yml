@@ -74,5 +74,5 @@ jobs:
       # Run unit tests using Turbo
       # The --only flag ensures we only run tests for the packages that have changed
       - name: 🧪 Execute Unit Tests
-        run: pnpm run test:unit --only
+        run: pnpm run test:unit
         shell: bash
