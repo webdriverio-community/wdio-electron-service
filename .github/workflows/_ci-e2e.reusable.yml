@@ -97,17 +97,61 @@ jobs:
         run: |
           # Generate build filters based on scenarios
           BUILD_FILTERS=""
+          FORGE_FILTERS=""
+          NON_FORGE_FILTERS=""
+          IS_WINDOWS_FORGE=$([[ "${{ runner.os }}" == "Windows" && "${{ inputs.scenario }}" == *"forge"* ]] && echo "true" || echo "false")
+
+          echo "Is Windows Forge: $IS_WINDOWS_FORGE"
+
+          # Debug Windows environment
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            echo "Windows environment detected - dumping environment for debugging"
+            echo "Node.js version: $(node --version)"
+            echo "NPM version: $(npm --version)"
+            echo "PNPM version: $(pnpm --version)"
+            echo "Current directory: $(pwd)"
+            echo "Checking if mkdir -p works:"
+            mkdir -p test-dir && echo "SUCCESS" || echo "FAILURE"
+            echo "Testing Node.js fs.mkdirSync:"
+            node -e "require('fs').mkdirSync('test-dir2', { recursive: true }); console.log('SUCCESS');" || echo "FAILURE"
+            echo "Testing directory creation complete"
+          fi
+
           IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
           for SCENARIO in "${SCENARIOS[@]}"; do
             TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
-            # Use wildcard to match both cjs and esm variants
-            BUILD_FILTERS="$BUILD_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
+
+            if [[ "$IS_WINDOWS_FORGE" == "true" && "$TRIMMED_SCENARIO" == "forge" ]]; then
+              # For Windows forge builds, we'll handle them separately
+              FORGE_FILTERS="$FORGE_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
+            else
+              # For all other builds, we'll run them in parallel
+              NON_FORGE_FILTERS="$NON_FORGE_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
+            fi
           done
 
-          echo "Building with filters: $BUILD_FILTERS"
+          # Build non-forge apps in parallel (if any)
+          if [[ -n "$NON_FORGE_FILTERS" ]]; then
+            echo "Building non-forge apps with filters: $NON_FORGE_FILTERS"
+            pnpm exec turbo run ${{ inputs.build-command }} $NON_FORGE_FILTERS --only --parallel
+          fi
 
-          # First build the test applications using the specified build command with proper filters
-          pnpm exec turbo run ${{ inputs.build-command }} $BUILD_FILTERS --only --parallel
+          # Build forge apps sequentially on Windows (if any)
+          if [[ "$IS_WINDOWS_FORGE" == "true" && -n "$FORGE_FILTERS" ]]; then
+            echo "Building Windows forge apps sequentially with filters: $FORGE_FILTERS"
+            # Split the forge filters and run one by one
+            IFS=' ' read -ra FILTER_PARTS <<< "$FORGE_FILTERS"
+            for FILTER in "${FILTER_PARTS[@]}"; do
+              if [[ "$FILTER" == "--filter=example-forge-"* ]]; then
+                echo "Building: $FILTER"
+                pnpm exec turbo run ${{ inputs.build-command }} $FILTER --only
+              fi
+            done
+          elif [[ -n "$FORGE_FILTERS" ]]; then
+            # For non-Windows, build forge apps in parallel
+            echo "Building forge apps with filters: $FORGE_FILTERS"
+            pnpm exec turbo run ${{ inputs.build-command }} $FORGE_FILTERS --only --parallel
+          fi
 
           # Then prepare the test apps for all tests
           cd e2e && pnpm run prepare-apps
