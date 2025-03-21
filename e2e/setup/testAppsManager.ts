@@ -323,85 +323,35 @@ class TestAppsManager {
         console.log('Successfully built wdio-electron-service package');
       } catch (buildError) {
         console.error('Error building wdio-electron-service package:', buildError);
-        // Continue even if build fails, as the package might already be built
-      }
 
-      // Find the actual path of the installed package
-      try {
-        // List the contents of the node_modules/.pnpm directory to find the package
-        const { stdout: pnpmDirContents } = await execAsync(
-          `find ${nodeModulesDir}/.pnpm -name "wdio-electron-service" -type d | head -n 1`,
-        );
-        const extractedServicePath = pnpmDirContents.trim();
-
-        if (extractedServicePath) {
-          // Create the parent directory for the symlink if it doesn't exist
-          await this.createDirectory(join(nodeModulesDir, 'wdio-electron-service'));
-
-          // Create the symlink
-          await execAsync(`ln -sf ${extractedServicePath} ${serviceSymlinkPath}`);
-          console.log(`Created symlink from ${extractedServicePath} to ${serviceSymlinkPath}`);
-        } else {
-          console.log('Could not find wdio-electron-service package in node_modules/.pnpm');
-
-          // Alternative approach: copy the package directly from the built package
-          console.log('Trying alternative approach: copying package files');
-          const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
-
-          // Create the target directory
-          await this.createDirectory(serviceSymlinkPath);
-
-          // Copy the package.json
-          await execAsync(`cp ${packageDir}/package.json ${serviceSymlinkPath}/`);
-
-          // Verify the dist directory exists
+        // If build fails and we have a tarball, try to extract it directly
+        if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
+          console.log(`Extracting dist files from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
           try {
-            await fs.promises.access(join(packageDir, 'dist'), fs.constants.F_OK);
-            console.log(`Verified dist directory exists at: ${join(packageDir, 'dist')}`);
-          } catch (error) {
-            console.error(`Dist directory not found at ${join(packageDir, 'dist')}:`, error);
-            console.log('Attempting to build the package again');
+            // Create a temp extraction directory
+            const extractDir = join(this.tmpDir, 'extract-tarball');
+            await this.createDirectory(extractDir);
 
-            try {
-              await execAsync('pnpm build', { cwd: packageDir });
-              console.log('Successfully built wdio-electron-service package');
-            } catch (buildError) {
-              console.error('Error building wdio-electron-service package:', buildError);
-              // Continue even if build fails, as we'll try to copy what exists
+            // Extract the tarball
+            await execAsync(`tar -xzf ${process.env.WDIO_SERVICE_TARBALL} -C ${extractDir}`);
+            console.log(`Extracted tarball to ${extractDir}`);
+
+            // Check if package/dist exists in the extracted tarball
+            if (fs.existsSync(join(extractDir, 'package', 'dist'))) {
+              console.log('Found dist directory in extracted tarball, copying to package directory');
+              await execAsync(`mkdir -p ${packageDir}/dist`);
+              await execAsync(`cp -r ${extractDir}/package/dist/* ${packageDir}/dist/`);
+              console.log('Successfully copied dist files from tarball');
+            } else {
+              console.log('Could not find dist directory in extracted tarball');
+              console.log('Contents of extracted directory:');
+              await execAsync(`find ${extractDir} -type d | sort`);
             }
-          }
-
-          // Create the dist directory structure
-          await this.createDirectory(join(serviceSymlinkPath, 'dist', 'esm'));
-          await this.createDirectory(join(serviceSymlinkPath, 'dist', 'cjs'));
-
-          // Copy the dist files if they exist
-          try {
-            await execAsync(`cp -r ${packageDir}/dist/esm ${serviceSymlinkPath}/dist/`);
-            await execAsync(`cp -r ${packageDir}/dist/cjs ${serviceSymlinkPath}/dist/`);
-            console.log('Copied dist files to the target directory');
-          } catch (copyError) {
-            console.error('Error copying dist files:', copyError);
-            // Continue even if copy fails, as we'll try to copy other directories
-          }
-
-          // Copy the main and preload directories if they exist
-          try {
-            if (fs.existsSync(join(packageDir, 'main'))) {
-              await execAsync(`cp -r ${packageDir}/main ${serviceSymlinkPath}/`);
-            }
-            if (fs.existsSync(join(packageDir, 'preload'))) {
-              await execAsync(`cp -r ${packageDir}/preload ${serviceSymlinkPath}/`);
-            }
-            console.log(`Copied package files to ${serviceSymlinkPath}`);
-          } catch (copyError) {
-            console.error('Error copying main/preload directories:', copyError);
-            // Continue even if copy fails
+          } catch (extractError) {
+            console.error('Error extracting from tarball:', extractError);
           }
         }
-      } catch (error) {
-        console.error('Error creating symlink or copying files:', error);
-        // Continue even if symlink creation fails
+        // Continue even if build fails, as we'll try to copy what exists
       }
     } catch (error) {
       console.error('Error setting up wdio-electron-service:', error);

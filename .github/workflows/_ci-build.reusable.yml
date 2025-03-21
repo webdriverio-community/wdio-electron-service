@@ -67,7 +67,16 @@ jobs:
       # Build all packages using Turbo
       # This creates the dist/ directories with compiled code
       - name: 🏗️ Build All Packages
-        run: pnpm run build
+        run: |
+          echo "Building packages with diagnostic output..."
+          echo "Workspace directory structure:"
+          find packages -type d -maxdepth 2 | sort
+
+          echo "Building all packages in correct dependency order..."
+          pnpm run build
+
+          echo "Verifying build output:"
+          find packages -name "dist" -type d | sort
         shell: bash
 
       # Package the service once to be reused in e2e tests

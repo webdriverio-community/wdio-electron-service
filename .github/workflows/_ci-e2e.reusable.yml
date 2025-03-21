@@ -217,6 +217,70 @@ jobs:
           echo "Available memory: $(free -h || echo 'free command not available')"
           echo "NODE_OPTIONS=$NODE_OPTIONS"
 
+          # Debug electron-bundler package
+          echo "=============== BUNDLER PACKAGE DIAGNOSTICS ==============="
+          echo "Checking for @wdio/electron-bundler module..."
+          BUNDLER_PATH=$(find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found")
+          if [ "$BUNDLER_PATH" != "Not found" ]; then
+            echo "✅ electron-bundler found at: $BUNDLER_PATH"
+            cat $BUNDLER_PATH/package.json | grep -E "name|version"
+
+            # Check dependencies
+            echo "Checking bundler dependencies:"
+            if [ -f "$BUNDLER_PATH/package.json" ]; then
+              cat $BUNDLER_PATH/package.json | grep -A 15 "dependencies"
+              cat $BUNDLER_PATH/package.json | grep -A 15 "devDependencies"
+            fi
+
+            # Check if it's built
+            if [ -d "$BUNDLER_PATH/dist" ]; then
+              echo "✅ dist directory exists"
+              ls -la $BUNDLER_PATH/dist
+            else
+              echo "❌ dist directory missing"
+            fi
+          else
+            echo "❌ electron-bundler not found"
+            echo "Looking in workspace packages.json..."
+            cat package.json | grep -A 10 "workspaces"
+          fi
+
+          # Check workspace build status
+          echo "Checking if workspace packages are already built:"
+          find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
+
+          # Build dependencies first
+          echo "=============== BUILDING WORKSPACE DEPENDENCIES ==============="
+          echo "Building all workspace packages..."
+          pnpm run build
+
+          # For MacOS, verify workspace dependencies are built
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            echo "Checking workspace module directories:"
+
+            echo "Looking for @wdio/electron-bundler dist directory..."
+            if ls packages/**/electron-bundler/dist 2>/dev/null; then
+              echo "✅ electron-bundler dist directory found"
+            else
+              echo "❌ electron-bundler dist directory not found"
+              echo "Attempting to build it specifically..."
+              if [ -d "packages/@wdio/electron-bundler" ]; then
+                cd packages/@wdio/electron-bundler
+                pnpm install
+                pnpm build
+                cd ../..
+              else
+                find packages -name "electron-bundler" -type d | grep -v "node_modules" | while read dir; do
+                  echo "Found directory: $dir, attempting to build..."
+                  cd "$dir"
+                  pnpm install
+                  pnpm build
+                  cd - > /dev/null
+                done
+              fi
+            fi
+          fi
+
           # Show process resource limits
           echo "=============== RESOURCE LIMITS ==============="
           ulimit -a || echo "ulimit command not available"
