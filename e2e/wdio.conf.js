@@ -7,10 +7,6 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const appDir = path.join(__dirname, '..', 'apps', exampleDir);
 const packageJsonPath = path.join(appDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
-const pkg = { packageJson, path: packageJsonPath };
-const electronVersion = await getElectronVersion(pkg);
-const appBuildInfo = await getAppBuildInfo(pkg);
-const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
 
 globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
