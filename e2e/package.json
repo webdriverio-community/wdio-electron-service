@@ -9,7 +9,7 @@
     "clean:temp-dirs": "tsx ../scripts/clean-temp-dirs.ts",
     "clean:logs": "pnpm dlx shx rm -rf ./logs && pnpm dlx shx mkdir -p ./logs",
     "cat-logs": "pnpm dlx shx cat ./logs/*/*.log",
-    "prepare-apps": "tsx -e \"import { setupTestSuite } from './scripts/suite-setup.js'; setupTestSuite();\"",
+    "prepare-apps": "tsx ./scripts/prepare-apps.ts",
     "check-temp-dir": "tsx ./scripts/check-temp-dir.ts",
     "prepare-and-check": "tsx ./scripts/prepare-and-check.ts",
     "test": "pnpm run test:matrix",
