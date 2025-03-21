@@ -192,35 +192,10 @@ jobs:
         shell: bash
         run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # Pre-download Electron binary to avoid permission issues on Windows
-      - name: 🔄 Pre-download Electron Binary
-        shell: bash
-        run: |
-          # Create a local directory for electron binaries
-          mkdir -p electron-cache
-
-          # Set environment variables for electron binary download and usage
-          echo "ELECTRON_CACHE=$PWD/electron-cache" >> $GITHUB_ENV
-
-          # Pre-download Electron binary
-          echo "Pre-downloading Electron binary to prevent permission issues..."
-
-          # Get the Electron version directly from an Electron Forge app package.json
-          ELECTRON_VERSION=$(node -e "console.log(require('./apps/forge-esm/package.json').devDependencies.electron.replace(/[^0-9.]/g, ''))")
-          echo "Using Electron version from package.json: $ELECTRON_VERSION"
-
-          # Run the TypeScript download script with the Electron version set via environment variable
-          ELECTRON_VERSION=$ELECTRON_VERSION npx tsx scripts/download-electron.ts
-
-          # List the cache directory to verify
-          echo "Electron cache directory contents:"
-          ls -la electron-cache
-
       # Prepare the test applications once - new approach
       - name: 🏗️ Prepare Test Applications
         shell: bash
         env:
-          ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
           # Increase Node.js memory limit to prevent OOM issues
           NODE_OPTIONS: '--max-old-space-size=8192'
           # Preserve temp directories between steps
@@ -240,7 +215,6 @@ jobs:
           echo "Current directory: $(pwd)"
           echo "Available disk space: $(df -h .)"
           echo "Available memory: $(free -h || echo 'free command not available')"
-          echo "ELECTRON_CACHE=$ELECTRON_CACHE"
           echo "NODE_OPTIONS=$NODE_OPTIONS"
 
           # Show process resource limits
@@ -422,8 +396,6 @@ jobs:
           MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
           # Add DEBUG for more verbose output
           DEBUG: 'wdio-electron-service*'
-          # Set ELECTRON_CACHE to use our pre-downloaded binaries
-          ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
         run: |
           cd e2e
 
