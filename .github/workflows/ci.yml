@@ -51,14 +51,18 @@ jobs:
       artifact_size: ${{ needs.build.outputs.artifact_size }}
       cache_key: ${{ needs.build.outputs.cache_key }}
 
-  # Windows builds are slower, so run them separately and only after linting passes
-  # This prevents wasting resources on Windows if there are linting issues
-  build-win:
-    name: Build [Windows]
+  # Run build tests outside of the Linux.
+  build-matrix:
+    name: Build [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
+    strategy:
+      # Continue with other tests even if one fails
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'macos-latest']
     uses: ./.github/workflows/_ci-build.reusable.yml
     with:
-      os: 'windows-latest'
+      os: ${{ matrix.os }}
 
   # E2E test matrix strategy:
   # - Run tests across 3 operating systems (Linux, Windows, macOS)
