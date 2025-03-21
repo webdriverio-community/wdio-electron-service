@@ -121,6 +121,9 @@ jobs:
         shell: bash
         env:
           ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
+          # Increase Node.js memory limit to prevent OOM issues
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        timeout-minutes: 10
         run: |
           # Show environment variables for debugging
           echo "ELECTRON_CACHE=$ELECTRON_CACHE"
@@ -210,6 +213,8 @@ jobs:
 
               # Package with Electron Forge using the pre-downloaded binary
               echo "Packaging $appDir with Electron Forge..."
+
+              # Run electron-forge package with environment variables
               ELECTRON_CACHE="$GITHUB_WORKSPACE/electron-cache" pnpm exec electron-forge package
 
               # Return to workspace root
@@ -224,7 +229,8 @@ jobs:
           fi
 
           # Then prepare the test apps for all tests
-          cd e2e && pnpm run prepare-apps
+          echo "Running prepare-apps with increased timeout..."
+          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" pnpm run prepare-apps --timeout=120000
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
