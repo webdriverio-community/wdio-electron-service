@@ -6,6 +6,10 @@ on:
     # Make this a reusable workflow, no value needed
     # https://docs.github.com/en/actions/using-workflows/reusing-workflows
     inputs:
+      os:
+        description: 'Operating system to run tests on'
+        type: string
+        required: true
       build_id:
         description: 'Build ID from the build job'
         type: string
@@ -26,16 +30,7 @@ jobs:
   # This job runs unit tests on multiple Node.js versions and operating systems
   unit:
     name: Unit Tests
-    strategy:
-      # Continue with other tests even if one fails
-      fail-fast: false
-      matrix:
-        # Currently only testing on Node.js 20
-        # Add more versions here if needed for backward compatibility
-        node-version: ['20']
-        # Test on all major operating systems to ensure cross-platform compatibility
-        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ inputs.os }}
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -47,7 +42,7 @@ jobs:
       - name: 🛠️ Setup Development Environment
         uses: ./.github/workflows/actions/setup-workspace
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
 
       # Download the pre-built packages from the build job
       # This ensures all tests use the same build artifacts
