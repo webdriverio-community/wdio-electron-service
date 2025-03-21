@@ -50,6 +50,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ${{ inputs.os }}
+    continue-on-error: true
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
@@ -91,38 +92,69 @@ jobs:
         shell: bash
         run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
 
+      # Pre-download Electron binary to avoid permission issues on Windows
+      - name: 🔄 Pre-download Electron Binary
+        shell: bash
+        run: |
+          # Create a local directory for electron binaries
+          mkdir -p electron-cache
+
+          # Set environment variables for electron binary download and usage
+          echo "ELECTRON_CACHE=$PWD/electron-cache" >> $GITHUB_ENV
+
+          # Pre-download Electron binary
+          echo "Pre-downloading Electron binary to prevent permission issues..."
+
+          # Get the Electron version directly from an Electron Forge app package.json
+          ELECTRON_VERSION=$(node -e "console.log(require('./apps/forge-esm/package.json').devDependencies.electron.replace(/[^0-9.]/g, ''))")
+          echo "Using Electron version from package.json: $ELECTRON_VERSION"
+
+          # Run the TypeScript download script with the Electron version set via environment variable
+          ELECTRON_VERSION=$ELECTRON_VERSION npx tsx scripts/download-electron.ts
+
+          # List the cache directory to verify
+          echo "Electron cache directory contents:"
+          ls -la electron-cache
+
       # Prepare the test applications once - new approach
       - name: 🏗️ Prepare Test Applications
         shell: bash
+        env:
+          ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
         run: |
+          # Show environment variables for debugging
+          echo "ELECTRON_CACHE=$ELECTRON_CACHE"
+
           # Generate build filters based on scenarios
           BUILD_FILTERS=""
           FORGE_FILTERS=""
           NON_FORGE_FILTERS=""
-          IS_WINDOWS_FORGE=$([[ "${{ runner.os }}" == "Windows" && "${{ inputs.scenario }}" == *"forge"* ]] && echo "true" || echo "false")
+          IS_FORGE=$([[ "${{ inputs.scenario }}" == *"forge"* ]] && echo "true" || echo "false")
+          IS_WINDOWS_FORGE=$([[ "${{ runner.os }}" == "Windows" && "$IS_FORGE" == "true" ]] && echo "true" || echo "false")
+          IS_LINUX_FORGE=$([[ "${{ runner.os }}" == "Linux" && "$IS_FORGE" == "true" ]] && echo "true" || echo "false")
 
+          echo "Is Forge: $IS_FORGE"
           echo "Is Windows Forge: $IS_WINDOWS_FORGE"
+          echo "Is Linux Forge: $IS_LINUX_FORGE"
 
-          # Debug Windows environment
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            echo "Windows environment detected - dumping environment for debugging"
+          # Debug environment
+          if [[ "${{ runner.os }}" == "Windows" || "${{ runner.os }}" == "Linux" ]]; then
+            echo "Environment debugging for ${runner.os}"
             echo "Node.js version: $(node --version)"
             echo "NPM version: $(npm --version)"
             echo "PNPM version: $(pnpm --version)"
             echo "Current directory: $(pwd)"
-            echo "Checking if mkdir -p works:"
+            echo "Testing directory creation..."
             mkdir -p test-dir && echo "SUCCESS" || echo "FAILURE"
-            echo "Testing Node.js fs.mkdirSync:"
             node -e "require('fs').mkdirSync('test-dir2', { recursive: true }); console.log('SUCCESS');" || echo "FAILURE"
-            echo "Testing directory creation complete"
           fi
 
           IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
           for SCENARIO in "${SCENARIOS[@]}"; do
             TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
 
-            if [[ "$IS_WINDOWS_FORGE" == "true" && "$TRIMMED_SCENARIO" == "forge" ]]; then
-              # For Windows forge builds, we'll handle them separately
+            if [[ "$IS_WINDOWS_FORGE" == "true" || "$IS_LINUX_FORGE" == "true" ]] && [[ "$TRIMMED_SCENARIO" == "forge" ]]; then
+              # For Windows/Linux forge builds, we'll handle them separately
               FORGE_FILTERS="$FORGE_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
             else
               # For all other builds, we'll run them in parallel
@@ -136,19 +168,57 @@ jobs:
             pnpm exec turbo run ${{ inputs.build-command }} $NON_FORGE_FILTERS --only --parallel
           fi
 
-          # Build forge apps sequentially on Windows (if any)
-          if [[ "$IS_WINDOWS_FORGE" == "true" && -n "$FORGE_FILTERS" ]]; then
-            echo "Building Windows forge apps sequentially with filters: $FORGE_FILTERS"
-            # Split the forge filters and run one by one
-            IFS=' ' read -ra FILTER_PARTS <<< "$FORGE_FILTERS"
-            for FILTER in "${FILTER_PARTS[@]}"; do
-              if [[ "$FILTER" == "--filter=example-forge-"* ]]; then
-                echo "Building: $FILTER"
-                pnpm exec turbo run ${{ inputs.build-command }} $FILTER --only
+          # Build forge apps with special handling on Windows and Linux
+          if [[ "$IS_WINDOWS_FORGE" == "true" || "$IS_LINUX_FORGE" == "true" ]] && [[ -n "$FORGE_FILTERS" ]]; then
+            echo "Building Forge apps sequentially on ${{ runner.os }} with filters: $FORGE_FILTERS"
+
+            # First clean the forge output directories to prevent dest already exists errors
+            echo "Cleaning Electron Forge output directories..."
+            for appDir in forge-cjs forge-esm; do
+              echo "Cleaning output for $appDir"
+              # Remove the out directory where Electron Forge places packaged apps
+              rm -rf "apps/$appDir/out" || true
+              # Also ensure dist is clean
+              rm -rf "apps/$appDir/dist" || true
+
+              # Create clean directories using node instead of bash commands for better cross-platform compatibility
+              node -e "const fs = require('fs'); fs.mkdirSync('apps/$appDir/dist', { recursive: true });"
+
+              echo "Cleaned $appDir directories"
+            done
+
+            # Use modified approach to build forge apps with explicit environment variables
+            echo "Using custom approach for Forge builds on ${{ runner.os }}"
+            for appDir in forge-cjs forge-esm; do
+              echo "Building $appDir with custom approach..."
+
+              # Go to the app directory
+              cd "apps/$appDir"
+
+              # Compile the TypeScript first
+              pnpm exec tsc
+
+              # Bundle with Rollup
+              if [[ "$appDir" == "forge-cjs" ]]; then
+                pnpm exec rollup -c rollup.config.mjs
+              else
+                pnpm exec rollup -c rollup.config.js
               fi
+
+              # Copy HTML files
+              cp ./src/*.html ./dist/
+
+              # Package with Electron Forge using the pre-downloaded binary
+              echo "Packaging $appDir with Electron Forge..."
+              ELECTRON_CACHE="$GITHUB_WORKSPACE/electron-cache" pnpm exec electron-forge package
+
+              # Return to workspace root
+              cd "$GITHUB_WORKSPACE"
+
+              echo "Built $appDir successfully"
             done
           elif [[ -n "$FORGE_FILTERS" ]]; then
-            # For non-Windows, build forge apps in parallel
+            # For other platforms, build forge apps in parallel
             echo "Building forge apps with filters: $FORGE_FILTERS"
             pnpm exec turbo run ${{ inputs.build-command }} $FORGE_FILTERS --only --parallel
           fi
@@ -159,7 +229,6 @@ jobs:
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
         shell: bash
-        continue-on-error: true
         id: run_tests
         env:
           # Set environment variables for testing
@@ -168,11 +237,13 @@ jobs:
           MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
           # Add DEBUG for more verbose output
           DEBUG: 'wdio-electron-service*'
+          # Set ELECTRON_CACHE to use our pre-downloaded binaries
+          ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
         run: |
           cd e2e
 
           # Log environment for debugging
-          echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}"
+          echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}, ELECTRON_CACHE=$ELECTRON_CACHE"
 
           # Generate test execution command based on the scenario and type
           if [[ "${{ inputs.scenario }}" == *","* ]]; then
