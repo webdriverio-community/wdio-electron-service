@@ -2,11 +2,10 @@ import url from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
-
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJsonPath = path.join(__dirname, '..', 'apps', exampleDir, 'package.json');
+const appDir = path.join(__dirname, '..', 'apps', exampleDir);
+const packageJsonPath = path.join(appDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
 const pkg = { packageJson, path: packageJsonPath };
 const electronVersion = await getElectronVersion(pkg);
@@ -17,12 +16,11 @@ globalThis.packageJson = packageJson;
 process.env.TEST = 'true';
 
 export const config = {
-  services: [['electron', { restoreMocks: true }]],
+  services: [['electron', { rootDir: appDir, restoreMocks: true }]],
   capabilities: [
     {
       'browserName': 'electron',
       'wdio:electronServiceOptions': {
-        appBinaryPath,
         appArgs: ['foo', 'bar=baz'],
       },
     },

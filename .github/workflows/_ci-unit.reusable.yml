@@ -1,0 +1,78 @@
+name: Unit
+description: 'Runs unit tests across different operating systems'
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      os:
+        description: 'Operating system to run tests on'
+        type: string
+        required: true
+      build_id:
+        description: 'Build ID from the build job'
+        type: string
+        required: false
+      artifact_size:
+        description: 'Size of the build artifact in bytes'
+        type: string
+        required: false
+      cache_key:
+        description: 'Cache key to use for downloading artifacts'
+        type: string
+        required: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # This job runs unit tests on multiple Node.js versions and operating systems
+  unit:
+    name: Unit Tests
+    runs-on: ${{ inputs.os }}
+    steps:
+      # Standard checkout with SSH key for private repositories
+      - name: 👷 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      # Set up Node.js and PNPM using the reusable action
+      - name: 🛠️ Setup Development Environment
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: '20'
+
+      # Download the pre-built packages from the build job
+      # This ensures all tests use the same build artifacts
+      - name: 📦 Download Build Artifacts
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: wdio-electron-service-build
+          filename: artifact.zip
+          cache_key_prefix: wdio-electron-build
+          exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
+
+      # Verify the extracted dist directories exist
+      - name: 🔍 Verify Extracted Files
+        id: verify-build
+        shell: bash
+        run: |
+          # Only output build info if it's available
+          if [ -n "${{ inputs.build_id }}" ] && [ -n "${{ inputs.artifact_size }}" ]; then
+            echo "::notice::Build artifact: ID=${{ inputs.build_id }}, Size=${{ inputs.artifact_size }} bytes"
+          fi
+
+          # Check for distribution directories (minimal validation)
+          DIST_DIRS=$(find "${{ github.workspace }}" -path "*/dist" -type d | wc -l)
+          if [ "$DIST_DIRS" -lt 1 ]; then
+            echo "::warning::No dist directories found, build extraction may have failed"
+          fi
+
+      # Run unit tests using Turbo
+      # The --only flag ensures we only run tests for the packages that have changed
+      - name: 🧪 Execute Unit Tests
+        run: pnpm run test:unit --only
+        shell: bash

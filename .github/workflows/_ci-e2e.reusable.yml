@@ -1,0 +1,165 @@
+name: E2E Tests
+description: 'Runs end-to-end tests across different scenarios and JavaScript module types'
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      os:
+        description: 'Operating system to run tests on'
+        required: true
+        type: string
+      node-version:
+        description: 'Node.js version to use for testing'
+        required: true
+        type: string
+      build-command:
+        description: 'Build command for test applications (build or build:mac-universal)'
+        type: string
+        default: 'build'
+      scenario:
+        description: 'Test scenario (forge, builder, or no-binary)'
+        required: true
+        type: string
+      type:
+        description: 'JavaScript module type (esm, cjs, or * for both)'
+        type: string
+        default: '*'
+      build_id:
+        description: 'Build ID from the build job'
+        type: string
+        required: false
+      artifact_size:
+        description: 'Size of the build artifact in bytes'
+        type: string
+        required: false
+      cache_key:
+        description: 'Cache key to use for downloading artifacts'
+        type: string
+        required: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # This job runs E2E tests for a specific combination of:
+  # - Operating system (Linux, Windows, macOS)
+  # - Test scenario (builder, forge, no-binary)
+  # - Module type (ESM, CJS, or both)
+  e2e:
+    name: E2E Tests
+    runs-on: ${{ inputs.os }}
+    strategy:
+      # Continue with other tests even if one fails
+      fail-fast: false
+    steps:
+      # Standard checkout with SSH key for private repositories
+      - name: 👷 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      # Set up Node.js and PNPM using the reusable action
+      - name: 🛠️ Setup Development Environment
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      # Download the pre-built packages from the build job
+      # This ensures all tests use the same build artifacts
+      - name: 📦 Download Build Artifacts
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: wdio-electron-service-build
+          filename: artifact.zip
+          cache_key_prefix: wdio-electron-build
+          exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
+
+      # Display build information if available
+      - name: 📊 Show Build Information
+        if: inputs.build_id != '' && inputs.artifact_size != ''
+        shell: bash
+        run: |
+          echo "::notice::Build artifact: ID=${{ inputs.build_id }}, Size=${{ inputs.artifact_size }} bytes"
+
+      # Special workaround for Linux to enable Electron testing
+      - name: 🔧 Apply Linux Kernel Workaround
+        # https://github.com/electron/electron/issues/41066
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # Dynamically generate the Turbo filter for building test applications
+      # This converts the scenario and type inputs into Turbo filter syntax
+      - name: 🪄 Generate Build Filter for Test Apps
+        id: gen-build
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const generateBuildFilter = (scenario, type) => {
+              return scenario
+                .split(',')
+                .map((s) => `--filter=example-${s.trim()}-${type}`)
+                .join(' ');
+            };
+            return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
+
+      # Build the test applications using Turbo with the generated filter
+      # This builds only the necessary test apps for the current test configuration
+      - name: 🏗️ Build Test Applications
+        shell: bash
+        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+
+      # Dynamically generate the test commands to run
+      # This handles both single and multiple scenarios, and ESM/CJS/both
+      - name: 🪄 Generate Test Execution Plan
+        id: gen-test
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const generateTestCommand = (scenario, type) => {
+              return scenario
+                .split(',')
+                .flatMap((s) => {
+                  const scenario = s.trim();
+                  return type === '*'
+                    ? [`test:e2e:${scenario}-esm`, `test:e2e:${scenario}-cjs`]
+                    : [`test:e2e:${scenario}-${type}`];
+                })
+                .join(' ');
+            };
+            return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
+
+      # Run the E2E tests using Turbo with the generated test commands
+      # First initializes the E2E environment, then runs the specific tests
+      - name: 🧪 Execute E2E Tests
+        shell: bash
+        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+
+      # Show logs on failure to help with debugging
+      - name: 🐛 Show Test Logs on Failure
+        shell: bash
+        if: failure()
+        run: pnpm run ci:e2e:logs
+
+      # Upload logs as artifacts on failure for later analysis
+      # This helps debug issues without cluttering the GitHub Actions console
+      - name: 📦 Upload Test Logs on Failure
+        uses: ./.github/workflows/actions/upload-archive
+        if: failure()
+        with:
+          name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
+          output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
+          paths: e2e/*/*.log
+
+      # Provide an interactive debugging session on failure
+      # This allows manual investigation of the environment
+      - name: 🐛 Debug Build on Failure
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
