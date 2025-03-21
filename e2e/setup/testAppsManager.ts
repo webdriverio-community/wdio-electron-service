@@ -22,6 +22,17 @@ class TestAppsManager {
     return TestAppsManager.instance;
   }
 
+  // Helper method for cross-platform directory creation
+  private async createDirectory(dirPath: string): Promise<void> {
+    try {
+      fs.mkdirSync(dirPath, { recursive: true });
+      console.log(`Created directory: ${dirPath}`);
+    } catch (error) {
+      console.error(`Error creating directory ${dirPath}:`, error);
+      throw error;
+    }
+  }
+
   private registerCleanupHandlers() {
     if (this.cleanupRegistered) return;
 
@@ -133,7 +144,8 @@ class TestAppsManager {
     // 3. Copy apps
     console.log('Copying apps');
     // Create the apps directory
-    await execAsync(`mkdir -p ${join(this.tmpDir, 'apps')}`);
+    const appsTargetDir = join(this.tmpDir, 'apps');
+    await this.createDirectory(appsTargetDir);
 
     // Copy each app directory individually to ensure proper structure
     const appDirs = ['builder-cjs', 'builder-esm', 'forge-cjs', 'forge-esm', 'no-binary-cjs', 'no-binary-esm'];
@@ -150,7 +162,7 @@ class TestAppsManager {
       }
 
       // Create the target app directory
-      await execAsync(`mkdir -p ${targetAppDir}`);
+      await this.createDirectory(targetAppDir);
 
       // Use cp -R with the --preserve=all flag to ensure all file attributes are preserved
       // Copy all files and directories except node_modules to avoid large copies
@@ -169,16 +181,15 @@ class TestAppsManager {
         if (fs.existsSync(distDir)) {
           console.log(`Copying dist directory for ${appDir}...`);
 
-          // Use a more robust copying method to ensure all files and directories are copied
-          // This is especially important for binary apps that have nested directories
-          await execAsync(`mkdir -p ${join(targetAppDir, 'dist')}`);
+          // Create the dist directory in the target app
+          const targetDistDir = join(targetAppDir, 'dist');
+          await this.createDirectory(targetDistDir);
 
           // Use cp -R to copy the entire dist directory with all its contents
           // The /* pattern might miss hidden files or cause issues with nested directories
           await execAsync(`cp -R "${distDir}" "${targetAppDir}/"`);
 
           // Verify the dist directory was copied
-          const targetDistDir = join(targetAppDir, 'dist');
           if (fs.existsSync(targetDistDir)) {
             // Check if mac-arm64 directory exists for binary apps
             const macArmDir = join(targetDistDir, 'mac-arm64');
@@ -269,7 +280,7 @@ class TestAppsManager {
 
       // First, make sure the node_modules directory exists
       try {
-        await execAsync(`mkdir -p ${nodeModulesDir}`);
+        await this.createDirectory(nodeModulesDir);
         console.log(`Created node_modules directory at: ${nodeModulesDir}`);
       } catch (mkdirError) {
         console.error('Error creating node_modules directory:', mkdirError);
@@ -296,7 +307,7 @@ class TestAppsManager {
 
         if (extractedServicePath) {
           // Create the parent directory for the symlink if it doesn't exist
-          await execAsync(`mkdir -p $(dirname ${serviceSymlinkPath})`);
+          await this.createDirectory(join(nodeModulesDir, 'wdio-electron-service'));
 
           // Create the symlink
           await execAsync(`ln -sf ${extractedServicePath} ${serviceSymlinkPath}`);
@@ -309,7 +320,7 @@ class TestAppsManager {
           const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
 
           // Create the target directory
-          await execAsync(`mkdir -p ${serviceSymlinkPath}`);
+          await this.createDirectory(serviceSymlinkPath);
 
           // Copy the package.json
           await execAsync(`cp ${packageDir}/package.json ${serviceSymlinkPath}/`);
@@ -332,7 +343,8 @@ class TestAppsManager {
           }
 
           // Create the dist directory structure
-          await execAsync(`mkdir -p ${serviceSymlinkPath}/dist/esm ${serviceSymlinkPath}/dist/cjs`);
+          await this.createDirectory(join(serviceSymlinkPath, 'dist', 'esm'));
+          await this.createDirectory(join(serviceSymlinkPath, 'dist', 'cjs'));
 
           // Copy the dist files if they exist
           try {

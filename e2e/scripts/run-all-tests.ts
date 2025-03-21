@@ -176,7 +176,12 @@ async function runAllTests() {
   try {
     // Ensure logs directory exists
     try {
-      await execAsync('mkdir -p logs');
+      // Use fs.mkdirSync instead of mkdir -p for cross-platform compatibility
+      const fs = await import('fs');
+      const path = await import('path');
+      const logsDir = path.join(process.cwd(), 'logs');
+      fs.mkdirSync(logsDir, { recursive: true });
+      console.log(`Created logs directory at: ${logsDir}`);
     } catch (error) {
       console.error('Failed to create logs directory:', error);
     }
