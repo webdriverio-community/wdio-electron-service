@@ -139,7 +139,7 @@ jobs:
 
           # Debug environment
           if [[ "${{ runner.os }}" == "Windows" || "${{ runner.os }}" == "Linux" ]]; then
-            echo "Environment debugging for ${runner.os}"
+            echo "Environment debugging for ${{ runner.os }}"
             echo "Node.js version: $(node --version)"
             echo "NPM version: $(npm --version)"
             echo "PNPM version: $(pnpm --version)"
