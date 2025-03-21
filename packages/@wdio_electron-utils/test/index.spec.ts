@@ -1547,7 +1547,7 @@ describe('PNPM Catalog Versions Edge Cases', () => {
       return Promise.resolve('catalogs:\n  "":\n    electron: "29.4.1"');
     });
 
-    const version = await findPnpmCatalogVersions('catalog:', undefined, '/project/dir');
+    const version = await findPnpmCatalogVersion('catalog:', undefined, '/project/dir');
     expect(version).toBe(undefined); // Should return undefined since empty catalog name isn't handled
   });
 });
