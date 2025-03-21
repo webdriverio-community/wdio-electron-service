@@ -66,6 +66,25 @@ jobs:
         run: pnpm run build
         shell: bash
 
+      # Package the service to be reused in e2e tests
+      - name: 📦 Package Service
+        shell: bash
+        id: package-service
+        run: |
+          echo "Creating service package..."
+          cd packages/wdio-electron-service
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+          echo "Created package: $PACKAGE_FILE"
+
+          # Create a directory for the package and move it there
+          mkdir -p ../../packaged-service
+          mv "$PACKAGE_FILE" ../../packaged-service/
+          echo "package_file=packaged-service/$PACKAGE_FILE" >> $GITHUB_OUTPUT
+          cd ../..
+
+          echo "Service package created at: packaged-service/$PACKAGE_FILE"
+          ls -la packaged-service
+
       # Upload build artifacts, but only from Linux
       # This is because Linux builds are most consistent and used by all other jobs
       # The artifacts include all dist/ and cjs/ directories from all packages
@@ -77,6 +96,6 @@ jobs:
         with:
           name: wdio-electron-service
           output: wdio-electron-service-build/artifact.zip
-          paths: packages/*/dist
+          paths: packages/*/dist packaged-service
           cache_key_prefix: wdio-electron-build
           retention_days: '90'

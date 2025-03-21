@@ -156,15 +156,23 @@ jobs:
             ulimit -a || echo "ulimit command not available"
           fi
 
-          # Use the pre-packaged service tarball
-          echo "=============== USING PRE-PACKAGED SERVICE ==============="
-          if [ -n "$WDIO_SERVICE_TARBALL" ] && [ -f "$WDIO_SERVICE_TARBALL" ]; then
-            echo "Using pre-packaged service from dedicated packaging step: $WDIO_SERVICE_TARBALL"
+          # Find the pre-packaged service in the build artifacts
+          echo "=============== FINDING PRE-PACKAGED SERVICE ==============="
+          cd wdio-electron-service-build
+
+          # Look for the service package in the build artifacts
+          SERVICE_PACKAGE=$(find packaged-service -name "wdio-electron-service-*.tgz" 2>/dev/null | head -n 1)
+
+          if [ -n "$SERVICE_PACKAGE" ]; then
+            echo "Found service package in artifacts: $SERVICE_PACKAGE"
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
             echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
           else
-            echo "WARNING: No pre-packaged service found from packaging step. Will package on demand."
+            echo "WARNING: No pre-packaged service found in build artifacts. Will package on demand."
             echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
           fi
+
+          cd ..
 
           # Show running processes
           echo "=============== RUNNING PROCESSES ==============="
@@ -315,47 +323,6 @@ jobs:
           echo "Available memory: $(free -h || echo 'free command not available')"
           echo "Running processes:"
           ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
-
-      # Package the service once for all tests to avoid SIGTERM issues
-      - name: 📦 Package Service Once
-        shell: bash
-        env:
-          NODE_OPTIONS: '--max-old-space-size=4096'
-        timeout-minutes: 5
-        run: |
-          echo "=============== PACKAGING SERVICE ONCE ==============="
-
-          # Create a directory for the packaged service
-          mkdir -p service-package
-
-          # Go to the service directory and package it
-          cd packages/wdio-electron-service
-          echo "Running pnpm pack in $(pwd)"
-          echo "Node version: $(node --version)"
-
-          # Package the service
-          PACKAGE_FILE=$(pnpm pack | tail -n 1)
-
-          # Check if the package was created successfully
-          if [ -f "$PACKAGE_FILE" ]; then
-            echo "Created package: $PACKAGE_FILE"
-
-            # Move the package to the shared directory
-            mv "$PACKAGE_FILE" ../../service-package/
-            echo "Moved package to: $(pwd)/../../service-package/$PACKAGE_FILE"
-
-            # Return to workspace root
-            cd ../..
-
-            # Set the environment variable for later use
-            echo "WDIO_SERVICE_TARBALL=$(pwd)/service-package/$PACKAGE_FILE" >> $GITHUB_ENV
-            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
-          else
-            echo "ERROR: Failed to create package"
-            cd ../..
-            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
-            # Continue anyway, the test steps will package on demand
-          fi
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
