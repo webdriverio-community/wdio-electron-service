@@ -159,6 +159,8 @@ jobs:
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
         shell: bash
+        continue-on-error: true
+        id: run_tests
         env:
           # Set environment variables for testing
           PRESERVE_TEMP_DIR: 'true'
