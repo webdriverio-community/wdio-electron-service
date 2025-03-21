@@ -645,6 +645,9 @@ async function runTests() {
   console.log('\n🧪 WebdriverIO Electron Service Test Matrix Runner 🧪');
   console.log('═'.repeat(80));
 
+  // Set PRESERVE_TEMP_DIR to true to avoid cleaning up between test runs
+  process.env.PRESERVE_TEMP_DIR = 'true';
+
   // Generate all possible test variants
   const variants = generateTestVariants();
 
@@ -694,12 +697,19 @@ async function runTests() {
   }, 1000);
 
   try {
-    // Clean up any leftover temporary directories from previous runs
-    console.log('🧹 Cleaning up any leftover temporary directories...');
-    await cleanupAllTempDirs();
+    // We don't need to clean up leftover directories at the start
+    // This ensures we can reuse prepared test apps
 
     // Kill any existing Electron processes before starting
     await killElectronProcesses();
+
+    // Log environment variables for debugging
+    console.log('📊 Environment variables:');
+    console.log(`- WDIO_TEST_APPS_PREPARED: ${process.env.WDIO_TEST_APPS_PREPARED || 'not set'}`);
+    console.log(`- WDIO_TEST_APPS_DIR: ${process.env.WDIO_TEST_APPS_DIR || 'not set'}`);
+    console.log(`- SUITE_SETUP_DONE: ${process.env.SUITE_SETUP_DONE || 'not set'}`);
+    console.log(`- PRESERVE_TEMP_DIR: ${process.env.PRESERVE_TEMP_DIR || 'not set'}`);
+    console.log(`- ELECTRON_CACHE: ${process.env.ELECTRON_CACHE || 'not set'}`);
 
     // Check if suite setup has already been performed
     const suiteSetupDone = process.env.SUITE_SETUP_DONE === 'true';
@@ -708,12 +718,55 @@ async function runTests() {
     if (!suiteSetupDone) {
       if (testAppsPrepared) {
         console.log('ℹ️ Test apps already prepared, skipping setup...');
+
+        // Verify that the test apps directory exists
+        if (process.env.WDIO_TEST_APPS_DIR) {
+          try {
+            const stats = fs.statSync(process.env.WDIO_TEST_APPS_DIR);
+            if (stats.isDirectory()) {
+              console.log(`✅ Verified that test apps directory exists: ${process.env.WDIO_TEST_APPS_DIR}`);
+            } else {
+              console.log(`❌ WDIO_TEST_APPS_DIR is not a directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+              console.log('Will perform setup anyway...');
+
+              // Reset the environment variables
+              process.env.WDIO_TEST_APPS_PREPARED = 'false';
+              process.env.WDIO_TEST_APPS_DIR = '';
+
+              // Perform suite-level setup
+              console.log('🔧 Performing suite-level setup...');
+              await setupTestSuite();
+              console.log('✅ Suite setup complete');
+            }
+          } catch (error) {
+            console.log(`❌ Failed to access test apps directory: ${error}`);
+            console.log('Will perform setup anyway...');
+
+            // Reset the environment variables
+            process.env.WDIO_TEST_APPS_PREPARED = 'false';
+            process.env.WDIO_TEST_APPS_DIR = '';
+
+            // Perform suite-level setup
+            console.log('🔧 Performing suite-level setup...');
+            await setupTestSuite();
+            console.log('✅ Suite setup complete');
+          }
+        } else {
+          console.log('❌ WDIO_TEST_APPS_DIR not set, will perform setup...');
+          // Perform suite-level setup
+          console.log('🔧 Performing suite-level setup...');
+          await setupTestSuite();
+          console.log('✅ Suite setup complete');
+        }
       } else {
         // Perform suite-level setup before running any tests
         console.log('🔧 Performing suite-level setup...');
         await setupTestSuite();
         console.log('✅ Suite setup complete');
       }
+
+      // Set SUITE_SETUP_DONE to true to avoid duplicate setup
+      process.env.SUITE_SETUP_DONE = 'true';
     } else {
       console.log('ℹ️ Suite setup already performed, skipping...');
     }
@@ -803,6 +856,7 @@ async function runTests() {
     }
   } catch (error) {
     // Clean up the status bar on error
+    clearInterval(statusUpdateInterval);
     statusBar.cleanup();
     console.error(`\n❌ Error running tests: ${error}`);
     process.exit(1);
@@ -810,24 +864,10 @@ async function runTests() {
     // Make sure to kill any remaining Electron processes
     await killElectronProcesses();
 
-    // Check if suite cleanup is managed by the parent process
-    const suiteCleanupManaged = process.env.SUITE_CLEANUP_MANAGED === 'true';
-
-    if (!suiteCleanupManaged) {
-      // Perform suite-level cleanup after all tests have completed
-      console.log('🧹 Performing suite-level cleanup...');
-      await cleanupSuite();
-      console.log('✅ Suite cleanup complete');
-    } else {
-      console.log('ℹ️ Suite cleanup will be managed by the parent process, skipping...');
-    }
-
-    // Clean up any remaining temporary directories
-    console.log('🧹 Final cleanup of any remaining temporary directories...');
-    await cleanupAllTempDirs();
-
-    // Kill any remaining processes one last time
-    await killElectronProcesses();
+    // We set PRESERVE_TEMP_DIR to true, so temp directories will be preserved
+    // for the next run
+    process.env.SUITE_CLEANUP_MANAGED = 'true';
+    console.log('ℹ️ Preserving test directories for reuse in subsequent runs');
   }
 }
 

@@ -388,6 +388,24 @@ class TestAppsManager {
    * @returns true if test apps are prepared, false otherwise
    */
   isTestAppsPrepared(): boolean {
+    // Check if environment variables are set first
+    if (process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR) {
+      try {
+        // Verify that the directory actually exists
+        const stats = fs.statSync(process.env.WDIO_TEST_APPS_DIR);
+        if (stats.isDirectory()) {
+          // Update instance variables to match environment variables
+          this.tmpDir = process.env.WDIO_TEST_APPS_DIR;
+          this.isPrepared = true;
+          return true;
+        }
+      } catch (error) {
+        // If there's an error (e.g., directory doesn't exist), fall back to instance check
+        console.error(`Error checking WDIO_TEST_APPS_DIR: ${error}`);
+      }
+    }
+
+    // Fall back to instance variables
     return this.isPrepared && this.tmpDir !== null;
   }
 
@@ -400,19 +418,42 @@ class TestAppsManager {
   }
 
   async cleanup(): Promise<void> {
+    // Check if we should preserve the temp directory
+    if (process.env.PRESERVE_TEMP_DIR === 'true') {
+      console.log(`Preserving temp directory: ${this.tmpDir} for reuse`);
+      return;
+    }
+
+    // First try the directory from the environment variable
+    if (process.env.WDIO_TEST_APPS_DIR && process.env.WDIO_TEST_APPS_PREPARED === 'true') {
+      try {
+        console.log(`Cleaning up environment-specified temp directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+        await rm(process.env.WDIO_TEST_APPS_DIR, { recursive: true, force: true });
+        console.log('Environment-specified temp directory cleanup completed successfully');
+
+        // Clear environment variables
+        process.env.WDIO_TEST_APPS_PREPARED = 'false';
+        process.env.WDIO_TEST_APPS_DIR = '';
+      } catch (error) {
+        console.error('Failed to cleanup environment-specified temp directory:', error);
+      }
+    }
+
+    // Then try the instance variable
     if (this.tmpDir) {
       try {
         console.log(`Cleaning up temp directory: ${this.tmpDir}`);
         await rm(this.tmpDir, { recursive: true, force: true });
-        this.tmpDir = null;
-        this.isPrepared = false;
         console.log('Temp directory cleanup completed successfully');
       } catch (error) {
         console.error('Failed to cleanup temp directory:', error);
-        // Even if cleanup fails, reset the state
-        this.tmpDir = null;
-        this.isPrepared = false;
       }
+
+      // Even if cleanup fails, reset the state
+      this.tmpDir = null;
+      this.isPrepared = false;
+    } else {
+      console.log('No temp directory to clean up');
     }
   }
 
@@ -422,6 +463,33 @@ class TestAppsManager {
    */
   static async cleanupAllTempDirs(): Promise<void> {
     try {
+      // Check if environment has WDIO_TEST_APPS_DIR set
+      if (process.env.WDIO_TEST_APPS_DIR && process.env.WDIO_TEST_APPS_PREPARED === 'true') {
+        console.log(`Found prepared test apps directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+
+        // If PRESERVE_TEMP_DIR is set, don't clean up
+        if (process.env.PRESERVE_TEMP_DIR === 'true') {
+          console.log(`Preserving test apps directory as PRESERVE_TEMP_DIR=true`);
+          return;
+        }
+
+        // Try to clean up the specific directory
+        try {
+          console.log(`Removing prepared test apps directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+          await rm(process.env.WDIO_TEST_APPS_DIR, { recursive: true, force: true });
+          console.log(`Successfully removed ${process.env.WDIO_TEST_APPS_DIR}`);
+
+          // Clear environment variables
+          process.env.WDIO_TEST_APPS_PREPARED = 'false';
+          process.env.WDIO_TEST_APPS_DIR = '';
+
+          return;
+        } catch (error) {
+          console.error(`Failed to remove prepared test apps directory:`, error);
+          // Continue with the cleanup of other directories
+        }
+      }
+
       const tempDir = tmpdir();
       console.log(`Searching for test directories in ${tempDir}...`);
 
@@ -431,7 +499,7 @@ class TestAppsManager {
         cmd = `dir /b /s "${tempDir}" | findstr "wdio-e2e-"`;
       } else {
         // Redirect stderr to /dev/null to suppress "Operation not permitted" errors
-        cmd = `ls -la ${tempDir} | grep wdio-e2e 2>/dev/null`;
+        cmd = `find ${tempDir} -maxdepth 1 -name "wdio-e2e-*" -type d 2>/dev/null || true`;
       }
 
       let tempDirs: string[] = [];
@@ -439,15 +507,7 @@ class TestAppsManager {
       try {
         const { stdout } = await execAsync(cmd);
 
-        // Extract directory names from ls output
-        if (process.platform !== 'win32') {
-          const lines = stdout.trim().split('\n').filter(Boolean);
-          tempDirs = lines.map((line) => {
-            const parts = line.trim().split(/\s+/);
-            const dirName = parts[parts.length - 1];
-            return `${tempDir}/${dirName}`;
-          });
-        } else {
+        if (stdout.trim()) {
           tempDirs = stdout.trim().split('\n').filter(Boolean);
         }
       } catch (_cmdError) {
@@ -464,14 +524,21 @@ class TestAppsManager {
 
       for (const dir of tempDirs) {
         try {
+          // Skip cleaning if it's the current test directory and PRESERVE_TEMP_DIR is true
+          if (process.env.WDIO_TEST_APPS_DIR === dir && process.env.PRESERVE_TEMP_DIR === 'true') {
+            console.log(`Preserving ${dir} as it's the current test directory and PRESERVE_TEMP_DIR=true`);
+            continue;
+          }
+
           console.log(`Removing ${dir}...`);
           await rm(dir, { recursive: true, force: true });
+          console.log(`Successfully removed ${dir}`);
         } catch (error) {
           console.error(`Failed to remove ${dir}:`, error);
         }
       }
 
-      console.log('All temporary directories cleaned up.');
+      console.log('Temporary directory cleanup completed.');
     } catch (error) {
       console.error('Error cleaning up temporary directories:', error);
     }

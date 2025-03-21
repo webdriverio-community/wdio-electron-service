@@ -123,6 +123,8 @@ jobs:
           ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
           # Increase Node.js memory limit to prevent OOM issues
           NODE_OPTIONS: '--max-old-space-size=4096'
+          # Preserve temp directories between steps
+          PRESERVE_TEMP_DIR: 'true'
         timeout-minutes: 10
         run: |
           # Show environment variables for debugging
@@ -230,7 +232,16 @@ jobs:
 
           # Then prepare the test apps for all tests
           echo "Running prepare-apps with increased timeout..."
-          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" pnpx tsx scripts/prepare-apps.ts --timeout=120000
+          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" PRESERVE_TEMP_DIR=true npx tsx scripts/prepare-apps.ts --timeout=120000
+
+          # Capture the test apps directory for later steps
+          if [ -n "$WDIO_TEST_APPS_DIR" ]; then
+            echo "WDIO_TEST_APPS_DIR=$WDIO_TEST_APPS_DIR" >> $GITHUB_ENV
+            echo "WDIO_TEST_APPS_PREPARED=true" >> $GITHUB_ENV
+            echo "PRESERVE_TEMP_DIR=true" >> $GITHUB_ENV
+            echo "SUITE_SETUP_DONE=true" >> $GITHUB_ENV
+            echo "Test apps prepared at: $WDIO_TEST_APPS_DIR"
+          fi
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
@@ -239,6 +250,10 @@ jobs:
         env:
           # Set environment variables for testing
           PRESERVE_TEMP_DIR: 'true'
+          # Pass through test apps variables from previous steps
+          WDIO_TEST_APPS_PREPARED: ${{ env.WDIO_TEST_APPS_PREPARED }}
+          WDIO_TEST_APPS_DIR: ${{ env.WDIO_TEST_APPS_DIR }}
+          SUITE_SETUP_DONE: 'true'
           # Set MAC_UNIVERSAL flag if we're using the mac-universal build command
           MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
           # Add DEBUG for more verbose output
@@ -250,6 +265,7 @@ jobs:
 
           # Log environment for debugging
           echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}, ELECTRON_CACHE=$ELECTRON_CACHE"
+          echo "Test apps: WDIO_TEST_APPS_PREPARED=$WDIO_TEST_APPS_PREPARED, WDIO_TEST_APPS_DIR=$WDIO_TEST_APPS_DIR, SUITE_SETUP_DONE=$SUITE_SETUP_DONE"
 
           # Generate test execution command based on the scenario and type
           if [[ "${{ inputs.scenario }}" == *","* ]]; then
