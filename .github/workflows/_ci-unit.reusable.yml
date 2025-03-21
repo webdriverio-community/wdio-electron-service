@@ -25,7 +25,7 @@ env:
 jobs:
   # This job runs unit tests on multiple Node.js versions and operating systems
   unit:
-    name: Unit
+    name: Unit Tests
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
