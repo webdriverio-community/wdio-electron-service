@@ -39,7 +39,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw noElectronCapabilityError;
     }
 
-    const localElectronVersion = getElectronVersion(pkg);
+    const localElectronVersion = await getElectronVersion(pkg);
 
     await Promise.all(
       caps.map(async (cap) => {

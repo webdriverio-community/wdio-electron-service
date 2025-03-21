@@ -18,7 +18,7 @@ const packageJsonPath = path.join(__dirname, '..', '..', '..', 'apps', exampleDi
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
 const pkg = { packageJson, path: packageJsonPath };
 const appEntryPoint = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
-const electronVersion = getElectronVersion(pkg);
+const electronVersion = await getElectronVersion(pkg);
 
 const logDir = path.join(__dirname, '..', '..', `wdio-logs-${exampleDir}`);
 shelljs.mkdir('-p', logDir);
