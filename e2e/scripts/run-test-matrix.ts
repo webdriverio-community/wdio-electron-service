@@ -1,7 +1,7 @@
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import pLimit from 'p-limit';
-import { setupTestSuite, cleanupSuite } from './suite-setup.js';
+import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
 import { cleanupAllTempDirs } from '../setup/testAppsManager.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -876,7 +876,7 @@ runTests().catch((error) => {
   console.error('❌ Error running tests:', error);
   // Ensure cleanup happens even on unexpected errors
   Promise.all([
-    cleanupSuite().catch((cleanupError: Error) => {
+    cleanupTestSuite().catch((cleanupError: Error) => {
       console.error('❌ Error during suite cleanup:', cleanupError);
     }),
     cleanupAllTempDirs().catch((cleanupError: Error) => {

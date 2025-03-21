@@ -90,7 +90,7 @@ export async function setupTestSuite(): Promise<void> {
   process.on('SIGTERM', handleTermination);
   process.on('exit', () => {
     console.log('Process exit event received');
-    cleanupSuite().catch((error) => {
+    cleanupTestSuite().catch((error) => {
       console.error('Error in suite cleanup:', error);
       process.exit(1);
     });
@@ -156,7 +156,7 @@ export async function setupTestSuite(): Promise<void> {
     console.error(`Setup failed after ${setupTime.toFixed(2)} seconds`);
 
     // Still try to clean up even if setup failed
-    cleanupSuite().catch((error) => {
+    cleanupTestSuite().catch((error) => {
       console.error('Error in suite cleanup:', error);
       process.exit(1);
     });
@@ -190,7 +190,7 @@ function handleTermination(signal: string): void {
     }
   }
 
-  cleanupSuite().finally(() => {
+  cleanupTestSuite().finally(() => {
     process.exit(signal === 'SIGTERM' ? 143 : 130);
   });
 }
@@ -198,7 +198,7 @@ function handleTermination(signal: string): void {
 /**
  * Clean up suite resources
  */
-export function cleanupSuite(): Promise<void> {
+export function cleanupTestSuite(): Promise<void> {
   try {
     console.log('🧹 Performing suite-level cleanup...');
 
