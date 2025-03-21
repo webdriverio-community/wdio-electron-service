@@ -8,7 +8,12 @@ const testType = process.env.TEST_TYPE || 'standard';
 const binary = process.env.BINARY !== 'false';
 const exampleDir = binary ? `${platform}-${moduleType}` : `no-binary-${moduleType}`;
 
-console.log(`Running test: ${platform}-${moduleType}-${testType}-${binary ? 'binary' : 'no-binary'}`);
+// Check if this is a Mac Universal build
+const isMacUniversal = process.env.MAC_UNIVERSAL === 'true';
+
+console.log(
+  `Running test: ${platform}-${moduleType}-${testType}-${binary ? 'binary' : 'no-binary'}${isMacUniversal ? ' (Mac Universal build)' : ''}`,
+);
 
 // Set up environment variables
 const env: Record<string, string> = {
@@ -22,6 +27,11 @@ const env: Record<string, string> = {
 // Enable splash screen for window tests
 if (testType === 'window') {
   env.ENABLE_SPLASH_WINDOW = 'true';
+}
+
+// Pass through the MAC_UNIVERSAL env var if set
+if (isMacUniversal) {
+  env.MAC_UNIVERSAL = 'true';
 }
 
 // Helper to convert env object to string
@@ -45,8 +55,17 @@ async function runWithCleanup() {
       console.log('Suite setup completed');
     }
 
-    // Run the appropriate test command based on test type
-    if (testType === 'multiremote') {
+    // Special handling for Mac Universal forge CJS tests due to ESM loader issues
+    // Standalone test works differently and doesn't have these issues
+    const isForgeCase = platform === 'forge' && moduleType === 'cjs' && isMacUniversal && testType !== 'standalone';
+
+    if (isForgeCase) {
+      console.log('🔍 Detected Mac Universal forge CJS test - using special command to prevent ESM loader issues');
+      // Use CommonJS mode to run these tests to avoid ESM loader errors
+      const cmd = `cross-env ${envString(env)} node --no-warnings ./node_modules/.bin/wdio run ./wdio.conf.ts`;
+      console.log(`Executing special cmd: ${cmd}`);
+      execSync(cmd, { stdio: 'inherit' });
+    } else if (testType === 'multiremote') {
       const cmd = `cross-env ${envString(env)} wdio run ./wdio.conf.ts`;
       console.log(`Executing: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
