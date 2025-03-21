@@ -49,6 +49,9 @@ function logDebugInfo() {
   console.log(`- WDIO_TEST_APPS_PREPARED: ${process.env.WDIO_TEST_APPS_PREPARED || 'not set'}`);
   console.log(`- WDIO_TEST_APPS_DIR: ${process.env.WDIO_TEST_APPS_DIR || 'not set'}`);
   console.log(`- ELECTRON_CACHE: ${process.env.ELECTRON_CACHE || 'not set'}`);
+  console.log(`- USE_ARTIFACT_SERVICE: ${process.env.USE_ARTIFACT_SERVICE || 'not set'}`);
+  console.log(`- SKIP_SERVICE_PACKING: ${process.env.SKIP_SERVICE_PACKING || 'not set'}`);
+  console.log(`- WDIO_SERVICE_TARBALL: ${process.env.WDIO_SERVICE_TARBALL || 'not set'}`);
 
   // Command line
   console.log('Command line:');

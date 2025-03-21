@@ -78,6 +78,77 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
+      # Verify the downloaded build artifacts
+      - name: 🔍 Verify Downloaded Artifacts
+        shell: bash
+        run: |
+          echo "=============== VERIFYING BUILD ARTIFACTS ==============="
+          echo "Artifact directory contents:"
+          ls -la wdio-electron-service-build
+
+          # Check if packaged-service exists
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            echo "✅ Found packaged-service directory"
+            echo "Contents of packaged-service directory:"
+            ls -la wdio-electron-service-build/packaged-service
+          else
+            echo "❌ packaged-service directory not found"
+            echo "Creating packaged-service directory for debugging:"
+            mkdir -p wdio-electron-service-build/packaged-service
+          fi
+
+          # Check for dist directories
+          if [ -d "wdio-electron-service-build/packages" ]; then
+            echo "✅ Found packages directory"
+            echo "Contents of packages directory:"
+            ls -la wdio-electron-service-build/packages
+          else
+            echo "❌ packages directory not found"
+          fi
+
+      # Package service locally if not found in build artifacts
+      - name: 📦 Create Service Package Locally
+        shell: bash
+        id: local-package-service
+        if: ${{ success() }}
+        run: |
+          # Check if packaged-service directory exists and has a .tgz file
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            SERVICE_PACKAGE=$(find wdio-electron-service-build/packaged-service -name "wdio-electron-service-*.tgz" 2>/dev/null | head -n 1)
+            if [ -n "$SERVICE_PACKAGE" ]; then
+              echo "✅ Using service package from build artifacts: $SERVICE_PACKAGE"
+              echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
+              echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+              echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+              exit 0
+            fi
+          fi
+
+          echo "❌ Service package not found in build artifacts. Creating locally..."
+
+          # Create a local package
+          mkdir -p local-service-package
+          cd packages/wdio-electron-service
+          echo "Running pnpm pack in $(pwd)"
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+
+          if [ -f "$PACKAGE_FILE" ]; then
+            echo "✅ Successfully created package: $PACKAGE_FILE"
+            # Move the package to the shared directory
+            mv "$PACKAGE_FILE" ../../local-service-package/
+            cd ../..
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/local-service-package/$PACKAGE_FILE" >> $GITHUB_ENV
+            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+            echo "Local service package created at: $(pwd)/local-service-package/$PACKAGE_FILE"
+            ls -la local-service-package
+          else
+            echo "❌ Failed to create local service package"
+            cd ../..
+            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=false" >> $GITHUB_ENV
+          fi
+
       # Display build information if available
       - name: 📊 Show Build Information
         if: inputs.build_id != '' && inputs.artifact_size != ''
@@ -155,24 +226,6 @@ jobs:
             echo "Updated limits:"
             ulimit -a || echo "ulimit command not available"
           fi
-
-          # Find the pre-packaged service in the build artifacts
-          echo "=============== FINDING PRE-PACKAGED SERVICE ==============="
-          cd wdio-electron-service-build
-
-          # Look for the service package in the build artifacts
-          SERVICE_PACKAGE=$(find packaged-service -name "wdio-electron-service-*.tgz" 2>/dev/null | head -n 1)
-
-          if [ -n "$SERVICE_PACKAGE" ]; then
-            echo "Found service package in artifacts: $SERVICE_PACKAGE"
-            echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
-            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
-          else
-            echo "WARNING: No pre-packaged service found in build artifacts. Will package on demand."
-            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
-          fi
-
-          cd ..
 
           # Show running processes
           echo "=============== RUNNING PROCESSES ==============="
@@ -288,8 +341,9 @@ jobs:
           # Run prepare-apps with detailed logging and environment variables
           cd e2e && NODE_OPTIONS="--max-old-space-size=8192" PRESERVE_TEMP_DIR=true \
             DEBUG=wdio-electron-service* \
-            USE_ARTIFACT_SERVICE=true \
+            USE_ARTIFACT_SERVICE=$USE_ARTIFACT_SERVICE \
             WDIO_SERVICE_TARBALL="$WDIO_SERVICE_TARBALL" \
+            SKIP_SERVICE_PACKING=$SKIP_SERVICE_PACKING \
             npx tsx scripts/prepare-apps.ts --timeout=300000
 
           # Show end time

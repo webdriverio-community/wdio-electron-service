@@ -122,6 +122,10 @@ class TestAppsManager {
 
     // 2. Obtain the service package
     console.log('Setting up service package');
+    console.log('Environment variables for package detection:');
+    console.log(`- USE_ARTIFACT_SERVICE: ${process.env.USE_ARTIFACT_SERVICE || 'not set'}`);
+    console.log(`- SKIP_SERVICE_PACKING: ${process.env.SKIP_SERVICE_PACKING || 'not set'}`);
+    console.log(`- WDIO_SERVICE_TARBALL: ${process.env.WDIO_SERVICE_TARBALL || 'not set'}`);
 
     let packageFileName: string;
 
@@ -576,14 +580,64 @@ class TestAppsManager {
    */
   private async packService(serviceDir: string): Promise<string> {
     try {
+      // Check if we should skip service packing
+      if (process.env.SKIP_SERVICE_PACKING === 'true' && process.env.WDIO_SERVICE_TARBALL) {
+        console.log(`Skipping service packing as SKIP_SERVICE_PACKING=true`);
+        console.log(`Using pre-packaged service from: ${process.env.WDIO_SERVICE_TARBALL}`);
+
+        // Verify the tarball path is valid
+        const sourceTarball = process.env.WDIO_SERVICE_TARBALL;
+        if (!sourceTarball || !sourceTarball.endsWith('.tgz')) {
+          console.error(`Invalid tarball path: ${sourceTarball}`);
+          console.log(`Will fall back to packaging the service`);
+        } else {
+          const packageFileName = path.basename(sourceTarball);
+
+          // Verify the tarball exists
+          try {
+            await fs.promises.access(sourceTarball, fs.constants.F_OK);
+            console.log(`Verified tarball exists at: ${sourceTarball}`);
+
+            // Copy the tarball to the temp directory
+            const tempPackagePath = join(this.tmpDir!, packageFileName);
+            try {
+              await fs.promises.copyFile(sourceTarball, tempPackagePath);
+              console.log(`Copied tarball to: ${tempPackagePath}`);
+
+              // Verify the copy was successful
+              await fs.promises.access(tempPackagePath, fs.constants.F_OK);
+              console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
+
+              return packageFileName;
+            } catch (copyError: unknown) {
+              console.error(`Error copying tarball:`, copyError);
+              console.log(`Will fall back to packaging the service`);
+              // Fall through to regular packaging
+            }
+          } catch (error) {
+            console.error(`Pre-packaged tarball not found at ${sourceTarball}:`, error);
+            console.log(`Will fall back to packaging the service`);
+            // Fall through to regular packaging
+          }
+        }
+      }
+
       const packageStartTime = Date.now();
       console.log(`[${new Date().toISOString()}] Starting service packing`);
       console.log(`Running pnpm pack in directory: ${serviceDir}`);
       console.log(`Service directory exists: ${fs.existsSync(serviceDir)}`);
 
-      const { stdout: packOutput } = await execAsync('pnpm pack', {
-        cwd: serviceDir,
+      // Set up a timeout for the packing process to prevent hanging
+      const timeoutPromise = new Promise<{ stdout: string }>((_, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Service packing timed out after 2 minutes'));
+        }, 120000); // 2 minutes timeout
+        timeout.unref(); // Don't prevent process exit
       });
+
+      // Run the packing command with a timeout
+      const packPromise = execAsync('pnpm pack', { cwd: serviceDir });
+      const { stdout: packOutput } = await Promise.race([packPromise, timeoutPromise]);
 
       const packageEndTime = Date.now();
       console.log(

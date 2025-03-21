@@ -23,6 +23,9 @@ on:
       cache_key:
         description: 'Cache key used for artifact uploads, can be passed to download actions'
         value: ${{ jobs.build.outputs.cache_key }}
+      service_package:
+        description: 'Path to the packaged service file'
+        value: ${{ jobs.build.outputs.package_file }}
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -39,6 +42,7 @@ jobs:
       build_date: ${{ steps.build-info.outputs.build_date }}
       artifact_size: ${{ steps.upload-archive.outputs.size || '0' }}
       cache_key: ${{ steps.upload-archive.outputs.cache_key }}
+      package_file: ${{ steps.package-service.outputs.package_file }}
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -66,24 +70,64 @@ jobs:
         run: pnpm run build
         shell: bash
 
-      # Package the service to be reused in e2e tests
+      # Package the service once to be reused in e2e tests
       - name: 📦 Package Service
         shell: bash
         id: package-service
         run: |
           echo "Creating service package..."
+          mkdir -p packaged-service
           cd packages/wdio-electron-service
           PACKAGE_FILE=$(pnpm pack | tail -n 1)
           echo "Created package: $PACKAGE_FILE"
 
-          # Create a directory for the package and move it there
-          mkdir -p ../../packaged-service
+          # Move the package to the packaged-service directory
           mv "$PACKAGE_FILE" ../../packaged-service/
           echo "package_file=packaged-service/$PACKAGE_FILE" >> $GITHUB_OUTPUT
           cd ../..
 
           echo "Service package created at: packaged-service/$PACKAGE_FILE"
           ls -la packaged-service
+
+          # Create a debug file to help with extraction verification
+          echo "PACKAGE_PATH=packaged-service/$PACKAGE_FILE" > packaged-service/package-info.txt
+          echo "BUILD_ID=${{ github.run_id }}" >> packaged-service/package-info.txt
+
+      # Extract the artifact contents for verification
+      - name: 🧪 Extract Artifact for Verification
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: |
+          echo "=============== EXTRACTING ARTIFACT CONTENTS ==============="
+          # Extract the zip file to create the expected directory structure
+          mkdir -p wdio-electron-service-build
+          mkdir -p wdio-electron-service-build/packages/wdio-electron-service
+
+          # Copy dist directories
+          if [ -d "packages/wdio-electron-service/dist" ]; then
+            cp -R packages/wdio-electron-service/dist wdio-electron-service-build/packages/wdio-electron-service/
+            echo "✅ Copied dist directory"
+          else
+            echo "❌ dist directory not found in packages/wdio-electron-service/"
+          fi
+
+          # Copy packaged-service directory
+          if [ -d "packaged-service" ]; then
+            cp -R packaged-service wdio-electron-service-build/
+            echo "✅ Copied packaged-service directory"
+          else
+            echo "❌ packaged-service directory not found"
+          fi
+
+          echo "Contents of the extracted artifact directory:"
+          ls -la wdio-electron-service-build
+
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            echo "✅ packaged-service directory was copied successfully"
+            ls -la wdio-electron-service-build/packaged-service
+          else
+            echo "❌ Failed to copy packaged-service directory"
+          fi
 
       # Upload build artifacts, but only from Linux
       # This is because Linux builds are most consistent and used by all other jobs
@@ -96,6 +140,6 @@ jobs:
         with:
           name: wdio-electron-service
           output: wdio-electron-service-build/artifact.zip
-          paths: packages/*/dist packaged-service
+          paths: 'wdio-electron-service-build'
           cache_key_prefix: wdio-electron-build
           retention_days: '90'
