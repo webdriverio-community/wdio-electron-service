@@ -95,8 +95,19 @@ jobs:
       - name: 🏗️ Prepare Test Applications
         shell: bash
         run: |
-          # First build the test applications using the specified build command
-          pnpm exec turbo run ${{ inputs.build-command }} --filter=example-${{ inputs.scenario }} --only --parallel
+          # Generate build filters based on scenarios
+          BUILD_FILTERS=""
+          IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+          for SCENARIO in "${SCENARIOS[@]}"; do
+            TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+            # Use wildcard to match both cjs and esm variants
+            BUILD_FILTERS="$BUILD_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
+          done
+
+          echo "Building with filters: $BUILD_FILTERS"
+
+          # First build the test applications using the specified build command with proper filters
+          pnpm exec turbo run ${{ inputs.build-command }} $BUILD_FILTERS --only --parallel
 
           # Then prepare the test apps for all tests
           cd e2e && pnpm run prepare-apps
