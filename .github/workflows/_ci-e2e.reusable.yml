@@ -230,7 +230,7 @@ jobs:
 
           # Then prepare the test apps for all tests
           echo "Running prepare-apps with increased timeout..."
-          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" pnpm run prepare-apps --timeout=120000
+          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" pnpx tsx scripts/prepare-apps.ts --timeout=120000
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests

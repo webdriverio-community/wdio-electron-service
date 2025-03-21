@@ -1,7 +1,7 @@
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import pLimit from 'p-limit';
-import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
+import { setupTestSuite, cleanupSuite } from './suite-setup.js';
 import { cleanupAllTempDirs } from '../setup/testAppsManager.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -816,7 +816,7 @@ async function runTests() {
     if (!suiteCleanupManaged) {
       // Perform suite-level cleanup after all tests have completed
       console.log('🧹 Performing suite-level cleanup...');
-      await cleanupTestSuite();
+      await cleanupSuite();
       console.log('✅ Suite cleanup complete');
     } else {
       console.log('ℹ️ Suite cleanup will be managed by the parent process, skipping...');
@@ -836,8 +836,10 @@ runTests().catch((error) => {
   console.error('❌ Error running tests:', error);
   // Ensure cleanup happens even on unexpected errors
   Promise.all([
-    cleanupTestSuite(),
-    cleanupAllTempDirs().catch((cleanupError) => {
+    cleanupSuite().catch((cleanupError: Error) => {
+      console.error('❌ Error during suite cleanup:', cleanupError);
+    }),
+    cleanupAllTempDirs().catch((cleanupError: Error) => {
       console.error('❌ Error during temp directory cleanup:', cleanupError);
     }),
   ]).finally(() => {

@@ -4,12 +4,8 @@
  * and sets environment variables for all tests to use.
  */
 
-import { createTempDir, getTempDir, cleanupTempDir } from './temp-dir.js';
-import { killElectronProcesses } from './electron-process.js';
-import { packService } from './pack-service.js';
-import { linkExampleApps } from './link-example-apps.js';
-import { setupTestAssets } from './setup-test-assets.js';
 import { execSync } from 'child_process';
+import { testAppsManager } from '../setup/testAppsManager.js';
 
 /**
  * Parse command line arguments for timeout
@@ -29,6 +25,55 @@ function getTimeoutFromArgs(): number {
 }
 
 /**
+ * Kill all running Electron processes
+ */
+async function killElectronProcesses(): Promise<void> {
+  console.log('🔪 Killing any remaining Electron processes...');
+  try {
+    if (process.platform === 'win32') {
+      // On Windows, use taskkill with /F to force kill
+      execSync('taskkill /F /IM electron.exe /T', { stdio: 'ignore' });
+    } else {
+      // On Unix-like systems, try multiple approaches to ensure all processes are killed
+      try {
+        // First try pkill with -f to match command line
+        execSync('pkill -f electron', { stdio: 'ignore' });
+      } catch (_) {
+        // Ignore errors, as they likely mean no processes were found
+      }
+
+      try {
+        // Also try to kill by process name
+        execSync('pkill -9 -f Electron', { stdio: 'ignore' });
+      } catch (_) {
+        // Ignore errors
+      }
+
+      try {
+        // Also try to kill any node processes related to electron
+        execSync('pkill -f "node.*electron"', { stdio: 'ignore' });
+      } catch (_) {
+        // Ignore errors
+      }
+
+      // On macOS, also try to kill by app bundle
+      if (process.platform === 'darwin') {
+        try {
+          execSync('pkill -f "example-.*\\.app"', { stdio: 'ignore' });
+        } catch (_) {
+          // Ignore errors
+        }
+      }
+    }
+    console.log('✅ Electron processes killed');
+  } catch (_error) {
+    // Ignore errors as they likely mean no processes were found
+    console.log('ℹ️ No Electron processes found to kill');
+  }
+  return Promise.resolve();
+}
+
+/**
  * Set up the test suite
  */
 export async function setupTestSuite(): Promise<void> {
@@ -45,14 +90,10 @@ export async function setupTestSuite(): Promise<void> {
   process.on('SIGTERM', handleTermination);
   process.on('exit', () => {
     console.log('Process exit event received');
-    cleanupSuite()
-      .then(() => {
-        process.exit(0);
-      })
-      .catch((error) => {
-        console.error('Error in suite cleanup:', error);
-        process.exit(1);
-      });
+    cleanupSuite().catch((error) => {
+      console.error('Error in suite cleanup:', error);
+      process.exit(1);
+    });
   });
 
   console.log('📊 Setup environment info:');
@@ -64,12 +105,8 @@ export async function setupTestSuite(): Promise<void> {
   console.log(`- Memory usage: ${JSON.stringify(process.memoryUsage())}`);
 
   try {
-    console.log('🔪 Killing any remaining Electron processes...');
+    // Kill any leftover Electron processes first
     await killElectronProcesses();
-    console.log('✅ Electron processes killed');
-
-    console.log('📦 Preparing test apps...');
-    console.log('Registered cleanup handlers for process termination');
 
     // Add timeout promise to detect long-running operations
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -80,40 +117,35 @@ export async function setupTestSuite(): Promise<void> {
 
     // Create the actual setup promise
     const setupPromise = (async () => {
-      console.log('Creating temp directory');
-      await createTempDir();
-      console.log(`Temp directory created at: ${getTempDir()}`);
-
-      console.log('Packing service');
-      try {
-        await packService();
-        console.log('Service packed successfully');
-      } catch (err) {
-        console.error('Error packing service:', err);
-        throw err;
+      // Check if test apps are already prepared
+      if (testAppsManager.isTestAppsPrepared()) {
+        console.log('✅ Test apps already prepared, reusing existing setup');
+        const tmpDir = testAppsManager.getTmpDir();
+        if (tmpDir) {
+          process.env.WDIO_TEST_APPS_PREPARED = 'true';
+          process.env.WDIO_TEST_APPS_DIR = tmpDir;
+          console.log(`📂 Using existing test apps directory: ${tmpDir}`);
+        }
+        return;
       }
 
-      console.log('Linking example apps');
-      try {
-        await linkExampleApps();
-        console.log('Example apps linked successfully');
-      } catch (err) {
-        console.error('Error linking example apps:', err);
-        throw err;
+      // Prepare test apps
+      console.log('📦 Preparing test apps...');
+
+      // Log the PRESERVE_TEMP_DIR environment variable
+      if (process.env.PRESERVE_TEMP_DIR === 'true') {
+        console.log('🔒 Temp directory will be preserved (PRESERVE_TEMP_DIR=true)');
       }
 
-      console.log('Setting up test assets');
-      try {
-        await setupTestAssets();
-        console.log('Test assets set up successfully');
-      } catch (err) {
-        console.error('Error setting up test assets:', err);
-        throw err;
-      }
+      const tmpDir = await testAppsManager.prepareTestApps();
+
+      // Set environment variables for all tests to use
+      process.env.WDIO_TEST_APPS_PREPARED = 'true';
+      process.env.WDIO_TEST_APPS_DIR = tmpDir;
 
       console.log('✅ Test suite preparation complete');
       const setupTime = (Date.now() - startTime) / 1000;
-      console.log(`Setup completed in ${setupTime.toFixed(2)} seconds`);
+      console.log(`Setup completed in ${setupTime.toFixed(2)} seconds. Test apps prepared at: ${tmpDir}`);
     })();
 
     // Race the setup against the timeout
@@ -124,14 +156,10 @@ export async function setupTestSuite(): Promise<void> {
     console.error(`Setup failed after ${setupTime.toFixed(2)} seconds`);
 
     // Still try to clean up even if setup failed
-    cleanupSuite()
-      .then(() => {
-        process.exit(1);
-      })
-      .catch((error) => {
-        console.error('Error in suite cleanup:', error);
-        process.exit(1);
-      });
+    cleanupSuite().catch((error) => {
+      console.error('Error in suite cleanup:', error);
+      process.exit(1);
+    });
   }
 }
 
@@ -162,58 +190,42 @@ function handleTermination(signal: string): void {
     }
   }
 
-  cleanupSuite()
-    .then(() => {
-      process.exit(signal === 'SIGTERM' ? 143 : 130);
-    })
-    .catch((error) => {
-      console.error('Error in suite cleanup:', error);
-      process.exit(1);
-    });
+  cleanupSuite().finally(() => {
+    process.exit(signal === 'SIGTERM' ? 143 : 130);
+  });
 }
 
 /**
  * Clean up suite resources
  */
-function cleanupSuite(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    try {
-      console.log('🧹 Performing suite-level cleanup...');
+export function cleanupSuite(): Promise<void> {
+  try {
+    console.log('🧹 Performing suite-level cleanup...');
 
-      try {
-        console.log('🔪 Killing any remaining Electron processes...');
-        // Convert to a proper promise chain
-        killElectronProcesses()
-          .catch((err: Error) => {
-            console.error('Error killing Electron processes:', err);
-          })
-          .finally(() => {
-            try {
-              const tempDir = getTempDir();
-              if (tempDir) {
-                console.log(`Cleaning up temp directory: ${tempDir}`);
-                cleanupTempDir();
-              } else {
-                console.log('No temp directory to clean up');
-              }
-            } catch (err) {
-              console.error('Error during temp directory cleanup:', err);
-            }
-            resolve();
-          });
-      } catch (err) {
-        console.error('Error during process kill cleanup:', err);
-        resolve();
-      }
+    try {
+      // First kill any remaining Electron processes
+      return killElectronProcesses()
+        .catch((err) => {
+          console.error('Error killing Electron processes:', err);
+        })
+        .then(() => {
+          // Only clean up the test apps if PRESERVE_TEMP_DIR is not set to 'true'
+          if (process.env.PRESERVE_TEMP_DIR !== 'true') {
+            testAppsManager.cleanup();
+            console.log('✅ Temp directory cleaned up');
+          } else {
+            console.log('🔒 Preserving temp directory (PRESERVE_TEMP_DIR=true)');
+          }
+        });
     } catch (err) {
       console.error('Error during cleanup:', err);
-      resolve(); // Still resolve to avoid hanging
+      return Promise.resolve();
     }
-  });
+  } catch (err) {
+    console.error('Error during suite cleanup:', err);
+    return Promise.resolve();
+  }
 }
-
-// Export the cleanup function for external use
-export const cleanupTestSuite = cleanupSuite;
 
 // If this script is run directly, perform setup
 // In ES modules, we check if the current file is the main module
