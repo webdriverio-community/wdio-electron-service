@@ -118,8 +118,15 @@ jobs:
         env:
           # Set environment variables for testing
           PRESERVE_TEMP_DIR: 'true'
+          # Set MAC_UNIVERSAL flag if we're using the mac-universal build command
+          MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
+          # Add DEBUG for more verbose output
+          DEBUG: 'wdio-electron-service*'
         run: |
           cd e2e
+
+          # Log environment for debugging
+          echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}"
 
           # Generate test execution command based on the scenario and type
           if [[ "${{ inputs.scenario }}" == *","* ]]; then
