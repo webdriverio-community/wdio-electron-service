@@ -1,0 +1,51 @@
+name: Lint
+description: 'Runs code quality checks across the codebase'
+
+on:
+  workflow_call:
+    # Make this a reusable workflow, no value needed
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    inputs:
+      cache_key:
+        description: 'Cache key to use for downloading artifacts'
+        type: string
+        required: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # This job runs linting checks to ensure code quality
+  # It only needs to run on a single OS (Ubuntu) since linting rules are platform-independent
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      # Standard checkout with SSH key for private repositories
+      - name: 👷 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      # Set up Node.js and PNPM using the reusable action
+      - name: 🛠️ Setup Development Environment
+        uses: ./.github/workflows/actions/setup-workspace
+        with:
+          node-version: '20'
+
+      # Download the pre-built packages from the build job
+      # This ensures all tests use the same build artifacts
+      - name: 📦 Download Build Artifacts
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: wdio-electron-service
+          path: wdio-electron-service-build
+          filename: artifact.zip
+          cache_key_prefix: wdio-electron-build
+          exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
+
+      # Run ESLint and other code quality checks
+      # This ensures code follows project standards and best practices
+      - name: 🔍 Run Code Quality Checks
+        run: pnpm run lint
+        shell: bash

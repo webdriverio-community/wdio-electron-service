@@ -1,0 +1,273 @@
+name: 'Download and Extract Artifacts'
+description: 'Downloads and extracts compressed artifacts shared from previous jobs using GitHub cache (90-day retention)'
+inputs:
+  path:
+    description: 'Destination directory to extract the artifact contents'
+    required: true
+  filename:
+    description: 'Filename of the compressed artifact to download'
+    required: true
+    default: 'artifact.zip'
+  name:
+    description: 'Artifact name as used in the cache key'
+    required: true
+  cache_key_prefix:
+    description: 'Prefix for the cache key (must match upload setting)'
+    default: 'build-artifacts'
+    required: false
+  exact_cache_key:
+    description: 'Exact cache key to use for retrieval (if provided)'
+    required: false
+  use_cache:
+    description: 'Use cache only (true-only or false-only)'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    # Generate standard cache keys
+    - name: 🔑 Generate Cache Keys
+      id: generate-keys
+      shell: bash
+      run: |
+        # Ensure values have defaults
+        CACHE_PREFIX="${{ inputs.cache_key_prefix || 'artifacts' }}"
+        NAME="${{ inputs.name }}"
+        OS="${{ runner.os }}"
+        RUN_ID="${{ github.run_id }}"
+
+        # Generate standard key (os-specific)
+        STANDARD_KEY="${OS}-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
+        echo "standard_key=${STANDARD_KEY}" >> $GITHUB_OUTPUT
+
+        # Generate OS-agnostic key
+        AGNOSTIC_KEY="${CACHE_PREFIX}-${NAME}-${RUN_ID}"
+        echo "agnostic_key=${AGNOSTIC_KEY}" >> $GITHUB_OUTPUT
+
+        # Generate Linux-specific key for cross-OS compatibility
+        LINUX_KEY="Linux-${CACHE_PREFIX}-${NAME}-${RUN_ID}"
+        echo "linux_key=${LINUX_KEY}" >> $GITHUB_OUTPUT
+
+        # Generate pattern keys
+        PATTERN_KEY="${OS}-${CACHE_PREFIX}-${NAME}-"
+        echo "pattern_key=${PATTERN_KEY}" >> $GITHUB_OUTPUT
+
+        # Generate OS-agnostic pattern
+        AGNOSTIC_PATTERN="${CACHE_PREFIX}-${NAME}-"
+        echo "agnostic_pattern=${AGNOSTIC_PATTERN}" >> $GITHUB_OUTPUT
+
+    # Restore cache with exact key (if provided)
+    - name: 🗄️ Restore with Exact Key
+      id: cache-restore-exact
+      if: inputs.exact_cache_key != ''
+      uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ inputs.exact_cache_key }}
+        enableCrossOsArchive: true
+        lookup-only: false
+        fail-on-cache-miss: false
+
+    # Restore with standard key (os-specific)
+    - name: 🗄️ Restore with Standard Key
+      id: cache-restore-standard
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true'
+      uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ steps.generate-keys.outputs.standard_key }}
+        enableCrossOsArchive: true
+        lookup-only: false
+        fail-on-cache-miss: false
+
+    # Restore with OS-agnostic key
+    - name: 🗄️ Restore with OS-Agnostic Key
+      id: cache-restore-agnostic
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true'
+      uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ steps.generate-keys.outputs.agnostic_key }}
+        enableCrossOsArchive: true
+        lookup-only: false
+        fail-on-cache-miss: false
+
+    # Restore with Linux key for cross-OS compatibility
+    - name: 🗄️ Restore with Linux Key
+      id: cache-restore-linux
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && runner.os != 'Linux'
+      uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ steps.generate-keys.outputs.linux_key }}
+        enableCrossOsArchive: true
+        lookup-only: false
+        fail-on-cache-miss: false
+
+    # Try OS-specific pattern as fallback (finds latest matching cache)
+    - name: 🗄️ Restore with Pattern
+      id: cache-restore-pattern
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true'
+      uses: actions/cache/restore@v4
+      env:
+        ACTIONS_CACHE_SERVICE_V2: 'true'
+      with:
+        path: ${{ inputs.path }}/${{ inputs.filename }}
+        key: ${{ steps.generate-keys.outputs.pattern_key || format('{0}-{1}-{2}-', runner.os, inputs.cache_key_prefix, inputs.name) }}
+        restore-keys: |
+          ${{ steps.generate-keys.outputs.pattern_key || format('{0}-{1}-{2}-', runner.os, inputs.cache_key_prefix, inputs.name) }}
+        enableCrossOsArchive: true
+        lookup-only: false
+        fail-on-cache-miss: false
+
+    # Handle cache miss
+    - name: ⚠️ Handle Cache Miss
+      if: steps.cache-restore-exact.outputs.cache-hit != 'true' && steps.cache-restore-standard.outputs.cache-hit != 'true' && steps.cache-restore-agnostic.outputs.cache-hit != 'true' && steps.cache-restore-linux.outputs.cache-hit != 'true' && (steps.cache-restore-pattern.outputs.cache-hit != 'true' || steps.verify-pattern.outputs.valid != 'true')
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.use_cache }}" ] && [ "${{ inputs.use_cache }}" = "true-only" ]; then
+          echo "::error::Cache miss and use_cache=true-only, failing step"
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "::warning::Falling back to artifact download"
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
+
+    # Verify the downloaded file and print minimal but useful info
+    - name: 🔍 Verify Downloaded File
+      id: verify-file
+      shell: bash
+      run: |
+        # Summary of what method was used to get the file (for debugging)
+        if [ "${{ steps.cache-restore-exact.outputs.cache-hit }}" == "true" ]; then
+          SOURCE="exact key cache"
+        elif [ "${{ steps.cache-restore-standard.outputs.cache-hit }}" == "true" ]; then
+          SOURCE="standard key cache"
+        elif [ "${{ steps.cache-restore-agnostic.outputs.cache-hit }}" == "true" ]; then
+          SOURCE="OS-agnostic key cache"
+        elif [ "${{ steps.cache-restore-linux.outputs.cache-hit }}" == "true" ]; then
+          SOURCE="Linux key cache"
+        elif [ "${{ steps.cache-restore-pattern.outputs.cache-hit }}" == "true" && "${{ steps.verify-pattern.outputs.valid }}" == "true" ]; then
+          SOURCE="pattern key cache"
+        else
+          SOURCE="GitHub artifact (fallback)"
+        fi
+
+        # Check if file exists and get size
+        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          FILE_SIZE=$(stat -c%s "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || stat -f%z "${{ inputs.path }}/${{ inputs.filename }}" 2>/dev/null || ls -l "${{ inputs.path }}/${{ inputs.filename }}" | awk '{print $5}')
+          HUMAN_SIZE=$(du -h "${{ inputs.path }}/${{ inputs.filename }}" | cut -f1)
+
+          # Test zip file integrity
+          unzip -t "${{ inputs.path }}/${{ inputs.filename }}" > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            ZIP_VALID="VALID"
+          else
+            ZIP_VALID="INVALID"
+          fi
+
+          # Only output essential information
+          echo "::notice::Downloaded ${{ inputs.name }} from ${SOURCE}: ${HUMAN_SIZE}, integrity: ${ZIP_VALID}"
+
+          echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
+          echo "valid=${ZIP_VALID}" >> $GITHUB_OUTPUT
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "::error::File not found: ${{ inputs.path }}/${{ inputs.filename }}"
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    # Download from GitHub Artifacts as fallback
+    - name: 📥 Download from GitHub Artifacts
+      id: download-artifact
+      if: steps.verify-file.outputs.exists != 'true' && inputs.use_cache != 'true-only'
+      shell: bash
+      run: |
+        # Create directory for artifact
+        mkdir -p "${{ inputs.path }}"
+
+        # Download artifact with retries
+        MAX_RETRIES=3
+        for i in $(seq 1 $MAX_RETRIES); do
+          # Download with automatic retry
+          echo "Attempt $i of $MAX_RETRIES"
+          gh run download --name "${{ inputs.name }}" --dir "${{ inputs.path }}" && break
+
+          # Exit on final attempt failure
+          if [ $i -eq $MAX_RETRIES ]; then
+            echo "::error::Failed to download artifact after $MAX_RETRIES attempts"
+            exit 1
+          fi
+
+          # Wait with exponential backoff
+          SLEEP_TIME=$((2 ** $i))
+          echo "Waiting ${SLEEP_TIME}s before retry..."
+          sleep $SLEEP_TIME
+        done
+
+        # Find the downloaded zip (handles different behavior of gh run download)
+        ZIP_FILES=$(find "${{ inputs.path }}" -type f -name "*.zip" | sort)
+        FIRST_ZIP=$(echo "$ZIP_FILES" | head -n 1)
+
+        if [ -n "$FIRST_ZIP" ] && [ "$FIRST_ZIP" != "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          # Move the file to the expected location
+          mv "$FIRST_ZIP" "${{ inputs.path }}/${{ inputs.filename }}"
+        fi
+
+        # Check if the file exists
+        if [ -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+          echo "::notice::Successfully downloaded ${{ inputs.name }} from GitHub Artifacts"
+        else
+          echo "::error::Failed to find downloaded artifact"
+          echo "valid=false" >> $GITHUB_OUTPUT
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    # Extract the compressed artifact to the destination
+    - name: 📂 Extract Compressed Archive
+      id: extract-archive
+      if: steps.verify-file.outputs.exists == 'true' || steps.download-artifact.outputs.valid == 'true'
+      shell: bash
+      run: |
+        # Ensure the archive exists
+        if [ ! -f "${{ inputs.path }}/${{ inputs.filename }}" ]; then
+          echo "::error::Archive not found for extraction: ${{ inputs.path }}/${{ inputs.filename }}"
+          exit 1
+        fi
+
+        # Extract to workspace root directory
+        cd "${{ github.workspace }}" && unzip -q -o "${{ inputs.path }}/${{ inputs.filename }}"
+
+        # Check extraction success
+        if [ $? -eq 0 ]; then
+          # Count distribution directories without producing output
+          DIST_DIRS=$(find . -type d -path "*/dist" | sort | wc -l)
+
+          # Only show a message if extraction fails
+          if [ "$DIST_DIRS" -lt 1 ]; then
+            echo "::warning::Extraction completed but no dist directories found"
+          fi
+        else
+          echo "::error::Failed to extract archive"
+          exit 1
+        fi
+
+        # Return success
+        echo "success=true" >> $GITHUB_OUTPUT
