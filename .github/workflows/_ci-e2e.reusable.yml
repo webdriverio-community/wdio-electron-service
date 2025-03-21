@@ -91,60 +91,79 @@ jobs:
         shell: bash
         run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # Dynamically generate the Turbo filter for building test applications
-      # This converts the scenario and type inputs into Turbo filter syntax
-      - name: 🪄 Generate Build Filter for Test Apps
-        id: gen-build
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateBuildFilter = (scenario, type) => {
-              return scenario
-                .split(',')
-                .map((s) => `--filter=example-${s.trim()}-${type}`)
-                .join(' ');
-            };
-            return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
-
-      # Build the test applications using Turbo with the generated filter
-      # This builds only the necessary test apps for the current test configuration
-      - name: 🏗️ Build Test Applications
+      # Prepare the test applications once - new approach
+      - name: 🏗️ Prepare Test Applications
         shell: bash
-        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+        run: |
+          # First build the test applications using the specified build command
+          pnpm exec turbo run ${{ inputs.build-command }} --filter=example-${{ inputs.scenario }} --only --parallel
 
-      # Dynamically generate the test commands to run
-      # This handles both single and multiple scenarios, and ESM/CJS/both
-      - name: 🪄 Generate Test Execution Plan
-        id: gen-test
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateTestCommand = (scenario, type) => {
-              return scenario
-                .split(',')
-                .flatMap((s) => {
-                  const scenario = s.trim();
-                  return type === '*'
-                    ? [`test:e2e:${scenario}-esm`, `test:e2e:${scenario}-cjs`]
-                    : [`test:e2e:${scenario}-${type}`];
-                })
-                .join(' ');
-            };
-            return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
+          # Then prepare the test apps for all tests
+          cd e2e && pnpm run prepare-apps
 
-      # Run the E2E tests using Turbo with the generated test commands
-      # First initializes the E2E environment, then runs the specific tests
+      # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+        env:
+          # Set environment variables for testing
+          PRESERVE_TEMP_DIR: 'true'
+        run: |
+          cd e2e
+
+          # Generate test execution command based on the scenario and type
+          if [[ "${{ inputs.scenario }}" == *","* ]]; then
+            # Multiple scenarios
+            IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+
+            for SCENARIO in "${SCENARIOS[@]}"; do
+              TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests
+                pnpm run test:${TRIMMED_SCENARIO}:cjs
+                pnpm run test:${TRIMMED_SCENARIO}:esm
+              else
+                # Run specific module type test
+                pnpm run test:${TRIMMED_SCENARIO}:${{ inputs.type }}
+              fi
+            done
+          else
+            # Single scenario
+            if [[ "${{ inputs.scenario }}" == "no-binary" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for no-binary
+                pnpm run test:no-binary:cjs
+                pnpm run test:no-binary:esm
+              else
+                # Run specific module type test for no-binary
+                pnpm run test:no-binary:${{ inputs.type }}
+              fi
+            elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for builder
+                pnpm run test:builder:cjs
+                pnpm run test:builder:esm
+              else
+                # Run specific module type test for builder
+                pnpm run test:builder:${{ inputs.type }}
+              fi
+            elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for forge
+                pnpm run test:forge:cjs
+                pnpm run test:forge:esm
+              else
+                # Run specific module type test for forge
+                pnpm run test:forge:${{ inputs.type }}
+              fi
+            fi
+          fi
 
       # Show logs on failure to help with debugging
       - name: 🐛 Show Test Logs on Failure
         shell: bash
         if: failure()
-        run: pnpm run ci:e2e:logs
+        run: cd e2e && pnpm run cat-logs
 
       # Upload logs as artifacts on failure for later analysis
       # This helps debug issues without cluttering the GitHub Actions console
@@ -154,10 +173,15 @@ jobs:
         with:
           name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
           output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
-          paths: e2e/*/*.log
+          paths: e2e/logs
+
+      # Clean up temp directories after tests complete
+      - name: 🧹 Clean Up Temporary Directories
+        shell: bash
+        if: always()
+        run: cd e2e && pnpm run clean:temp-dirs
 
       # Provide an interactive debugging session on failure
-      # This allows manual investigation of the environment
       - name: 🐛 Debug Build on Failure
         uses: stateful/vscode-server-action@v1.1.0
         if: failure()

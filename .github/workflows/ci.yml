@@ -79,34 +79,19 @@ jobs:
         # Test all application scenarios
         scenario: ['builder', 'forge', 'no-binary']
         # Test both module types and wildcard for combined tests
-        type: ['esm', 'cjs', '*']
-        exclude:
-          # Optimization: Linux/Mac run both ESM and CJS together using wildcard
-          # This reduces the number of jobs while still testing all combinations
-          - os: 'ubuntu-latest'
-            type: 'esm'
-          - os: 'ubuntu-latest'
-            type: 'cjs'
-          - os: 'macos-latest'
-            type: 'esm'
-          - os: 'macos-latest'
-            type: 'cjs'
-          # Optimization: Reduce macOS jobs due to GitHub Actions concurrency limits
-          # macOS runners are limited, so we combine tests to reduce parallel jobs
-          - os: 'macos-latest'
-            scenario: 'forge'
-          - os: 'macos-latest'
-            scenario: 'no-binary'
-          # Optimization: Windows runs ESM and CJS separately for better parallelization
-          # Windows is slower, so running separately helps identify issues faster
-          - os: 'windows-latest'
-            type: '*'
+        type: ['*']
         include:
           # Special case: Combined test for macOS to reduce total jobs
           # This runs both forge and no-binary tests in a single job
           - os: 'macos-latest'
             scenario: 'no-binary, forge'
             type: '*'
+        exclude:
+          # Exclude some combinations that will be added with specific configurations
+          - os: 'macos-latest'
+            scenario: 'forge'
+          - os: 'macos-latest'
+            scenario: 'no-binary'
     uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
       os: ${{ matrix.os }}
@@ -127,16 +112,7 @@ jobs:
         # Test both application scenarios
         scenario: ['forge', 'builder']
         # Test both module types and wildcard for combined tests
-        type: ['esm', 'cjs', '*']
-        exclude:
-          # Optimization: Forge tests run ESM and CJS together to reduce jobs
-          - scenario: 'forge'
-            type: 'esm'
-          - scenario: 'forge'
-            type: 'cjs'
-          # Optimization: Builder tests run ESM and CJS separately for better error isolation
-          - scenario: 'builder'
-            type: '*'
+        type: ['*']
     uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
       os: 'macos-latest'
