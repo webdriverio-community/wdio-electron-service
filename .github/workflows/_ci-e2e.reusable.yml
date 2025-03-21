@@ -116,39 +116,6 @@ jobs:
           echo "Electron cache directory contents:"
           ls -la electron-cache
 
-      # Pre-package the service in a separate step to avoid SIGTERM issues
-      - name: 📦 Package Service
-        shell: bash
-        env:
-          # Increase Node.js memory limit to prevent OOM issues
-          NODE_OPTIONS: '--max-old-space-size=4096'
-        timeout-minutes: 5
-        run: |
-          echo "=============== PACKAGING SERVICE ==============="
-          cd packages/wdio-electron-service
-
-          # Show resource usage before
-          echo "Resource usage before packaging:"
-          free -h || echo "free command not available"
-
-          # Package the service
-          echo "Running pnpm pack..."
-          PACKAGE_FILE=$(pnpm pack | tail -n 1)
-          echo "Service packaged as: $PACKAGE_FILE"
-
-          # Verify the tarball exists
-          if [[ -f "$PACKAGE_FILE" ]]; then
-            echo "Verified tarball exists at: $(pwd)/$PACKAGE_FILE"
-            echo "WDIO_SERVICE_TARBALL=$(pwd)/$PACKAGE_FILE" >> $GITHUB_ENV
-          else
-            echo "ERROR: Failed to create package file"
-            exit 1
-          fi
-
-          # Show resource usage after
-          echo "Resource usage after packaging:"
-          free -h || echo "free command not available"
-
       # Prepare the test applications once - new approach
       - name: 🏗️ Prepare Test Applications
         shell: bash
@@ -160,10 +127,8 @@ jobs:
           PRESERVE_TEMP_DIR: 'true'
           # Enable more detailed debug logging
           DEBUG: 'wdio-electron-service*'
-          # Skip service packing since we did it in previous step
-          SKIP_SERVICE_PACKING: 'true'
-          # Pass the service tarball path
-          WDIO_SERVICE_TARBALL: ${{ env.WDIO_SERVICE_TARBALL }}
+          # Use the pre-built service from the build job
+          USE_ARTIFACT_SERVICE: 'true'
         timeout-minutes: 15
         run: |
           # Show diagnostic information
@@ -177,7 +142,6 @@ jobs:
           echo "Available memory: $(free -h || echo 'free command not available')"
           echo "ELECTRON_CACHE=$ELECTRON_CACHE"
           echo "NODE_OPTIONS=$NODE_OPTIONS"
-          echo "WDIO_SERVICE_TARBALL=$WDIO_SERVICE_TARBALL"
 
           # Show process resource limits
           echo "=============== RESOURCE LIMITS ==============="
@@ -192,16 +156,14 @@ jobs:
             ulimit -a || echo "ulimit command not available"
           fi
 
-          # Create a temp file for the service tarball copy if needed
-          if [[ -n "$WDIO_SERVICE_TARBALL" && "$SKIP_SERVICE_PACKING" == "true" ]]; then
-            echo "Using pre-packaged service tarball: $WDIO_SERVICE_TARBALL"
-            # Create a directory to store the tarball
-            mkdir -p service-package
-            # Copy the tarball
-            cp "$WDIO_SERVICE_TARBALL" service-package/
-            echo "Copied service tarball to: $(pwd)/service-package/$(basename $WDIO_SERVICE_TARBALL)"
-            # Set the environment variable to point to the new location
-            echo "WDIO_SERVICE_TARBALL=$(pwd)/service-package/$(basename $WDIO_SERVICE_TARBALL)" >> $GITHUB_ENV
+          # Use the pre-packaged service tarball
+          echo "=============== USING PRE-PACKAGED SERVICE ==============="
+          if [ -n "$WDIO_SERVICE_TARBALL" ] && [ -f "$WDIO_SERVICE_TARBALL" ]; then
+            echo "Using pre-packaged service from dedicated packaging step: $WDIO_SERVICE_TARBALL"
+            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+          else
+            echo "WARNING: No pre-packaged service found from packaging step. Will package on demand."
+            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
           fi
 
           # Show running processes
@@ -318,7 +280,7 @@ jobs:
           # Run prepare-apps with detailed logging and environment variables
           cd e2e && NODE_OPTIONS="--max-old-space-size=8192" PRESERVE_TEMP_DIR=true \
             DEBUG=wdio-electron-service* \
-            SKIP_SERVICE_PACKING=true \
+            USE_ARTIFACT_SERVICE=true \
             WDIO_SERVICE_TARBALL="$WDIO_SERVICE_TARBALL" \
             npx tsx scripts/prepare-apps.ts --timeout=300000
 
@@ -353,6 +315,47 @@ jobs:
           echo "Available memory: $(free -h || echo 'free command not available')"
           echo "Running processes:"
           ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
+
+      # Package the service once for all tests to avoid SIGTERM issues
+      - name: 📦 Package Service Once
+        shell: bash
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        timeout-minutes: 5
+        run: |
+          echo "=============== PACKAGING SERVICE ONCE ==============="
+
+          # Create a directory for the packaged service
+          mkdir -p service-package
+
+          # Go to the service directory and package it
+          cd packages/wdio-electron-service
+          echo "Running pnpm pack in $(pwd)"
+          echo "Node version: $(node --version)"
+
+          # Package the service
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+
+          # Check if the package was created successfully
+          if [ -f "$PACKAGE_FILE" ]; then
+            echo "Created package: $PACKAGE_FILE"
+
+            # Move the package to the shared directory
+            mv "$PACKAGE_FILE" ../../service-package/
+            echo "Moved package to: $(pwd)/../../service-package/$PACKAGE_FILE"
+
+            # Return to workspace root
+            cd ../..
+
+            # Set the environment variable for later use
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/service-package/$PACKAGE_FILE" >> $GITHUB_ENV
+            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+          else
+            echo "ERROR: Failed to create package"
+            cd ../..
+            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
+            # Continue anyway, the test steps will package on demand
+          fi
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
