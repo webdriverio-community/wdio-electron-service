@@ -43,6 +43,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit @repo/e2e#test:all",
     "test:unit": "turbo run test:unit",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
