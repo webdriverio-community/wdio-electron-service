@@ -35,20 +35,20 @@
     "test": "pnpm test:unit"
   },
   "dependencies": {
-    "@rollup/plugin-node-resolve": "catalog:",
-    "@rollup/plugin-typescript": "catalog:",
-    "debug": "catalog:",
-    "read-package-up": "catalog:",
-    "rollup": "catalog:",
-    "rollup-plugin-node-externals": "catalog:"
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "debug": "^4.4.0",
+    "read-package-up": "^11.0.0",
+    "rollup": "^4.36.0",
+    "rollup-plugin-node-externals": "^8.0.0"
   },
   "devDependencies": {
-    "@types/debug": "catalog:",
-    "@types/node": "catalog:",
-    "@vitest/coverage-v8": "catalog:",
-    "shx": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "@types/debug": "^4.1.12",
+    "@types/node": "^22.13.10",
+    "@vitest/coverage-v8": "^3.0.9",
+    "shx": "^0.4.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
   },
   "files": [
     "dist/*"
