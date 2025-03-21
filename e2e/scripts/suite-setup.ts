@@ -45,7 +45,14 @@ export async function setupTestSuite(): Promise<void> {
   process.on('SIGTERM', handleTermination);
   process.on('exit', () => {
     console.log('Process exit event received');
-    cleanupSuite();
+    cleanupSuite()
+      .then(() => {
+        process.exit(0);
+      })
+      .catch((error) => {
+        console.error('Error in suite cleanup:', error);
+        process.exit(1);
+      });
   });
 
   console.log('📊 Setup environment info:');
@@ -117,8 +124,14 @@ export async function setupTestSuite(): Promise<void> {
     console.error(`Setup failed after ${setupTime.toFixed(2)} seconds`);
 
     // Still try to clean up even if setup failed
-    cleanupSuite();
-    process.exit(1);
+    cleanupSuite()
+      .then(() => {
+        process.exit(1);
+      })
+      .catch((error) => {
+        console.error('Error in suite cleanup:', error);
+        process.exit(1);
+      });
   }
 }
 
@@ -149,41 +162,58 @@ function handleTermination(signal: string): void {
     }
   }
 
-  cleanupSuite();
-  process.exit(signal === 'SIGTERM' ? 143 : 130);
+  cleanupSuite()
+    .then(() => {
+      process.exit(signal === 'SIGTERM' ? 143 : 130);
+    })
+    .catch((error) => {
+      console.error('Error in suite cleanup:', error);
+      process.exit(1);
+    });
 }
 
 /**
  * Clean up suite resources
  */
-function cleanupSuite(): void {
-  try {
-    console.log('🧹 Performing suite-level cleanup...');
-
+function cleanupSuite(): Promise<void> {
+  return new Promise<void>((resolve) => {
     try {
-      console.log('🔪 Killing any remaining Electron processes...');
-      killElectronProcesses().catch((err) => {
-        console.error('Error killing Electron processes:', err);
-      });
-    } catch (err) {
-      console.error('Error during process kill cleanup:', err);
-    }
+      console.log('🧹 Performing suite-level cleanup...');
 
-    try {
-      const tempDir = getTempDir();
-      if (tempDir) {
-        console.log(`Cleaning up temp directory: ${tempDir}`);
-        cleanupTempDir();
-      } else {
-        console.log('No temp directory to clean up');
+      try {
+        console.log('🔪 Killing any remaining Electron processes...');
+        // Convert to a proper promise chain
+        killElectronProcesses()
+          .catch((err: Error) => {
+            console.error('Error killing Electron processes:', err);
+          })
+          .finally(() => {
+            try {
+              const tempDir = getTempDir();
+              if (tempDir) {
+                console.log(`Cleaning up temp directory: ${tempDir}`);
+                cleanupTempDir();
+              } else {
+                console.log('No temp directory to clean up');
+              }
+            } catch (err) {
+              console.error('Error during temp directory cleanup:', err);
+            }
+            resolve();
+          });
+      } catch (err) {
+        console.error('Error during process kill cleanup:', err);
+        resolve();
       }
     } catch (err) {
-      console.error('Error during temp directory cleanup:', err);
+      console.error('Error during cleanup:', err);
+      resolve(); // Still resolve to avoid hanging
     }
-  } catch (err) {
-    console.error('Error during cleanup:', err);
-  }
+  });
 }
+
+// Export the cleanup function for external use
+export const cleanupTestSuite = cleanupSuite;
 
 // If this script is run directly, perform setup
 // In ES modules, we check if the current file is the main module

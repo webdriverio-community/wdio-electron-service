@@ -836,9 +836,7 @@ runTests().catch((error) => {
   console.error('❌ Error running tests:', error);
   // Ensure cleanup happens even on unexpected errors
   Promise.all([
-    cleanupTestSuite().catch((cleanupError) => {
-      console.error('❌ Error during suite cleanup:', cleanupError);
-    }),
+    cleanupTestSuite(),
     cleanupAllTempDirs().catch((cleanupError) => {
       console.error('❌ Error during temp directory cleanup:', cleanupError);
     }),
