@@ -171,26 +171,132 @@ function handleTermination(signal: string): void {
   console.log(`Received ${signal}, cleaning up...`);
   console.log(`Signal received by process ${process.pid} at ${new Date().toISOString()}`);
 
-  // For Linux, dump process information to help debug SIGTERM issues
+  // For Linux, dump extensive debug information to help debug SIGTERM issues
   if (process.platform === 'linux') {
     try {
-      console.log('Process terminating due to SIGTERM:', signal);
-      console.log(`Memory usage at termination: ${JSON.stringify(process.memoryUsage())}`);
-      console.log(`Environment: NODE_OPTIONS=${process.env.NODE_OPTIONS || 'not set'}`);
+      console.log('************* SIGTERM DIAGNOSTIC INFO START *************');
+      console.log(`Process ${process.pid} terminating due to ${signal} at ${new Date().toISOString()}`);
 
-      // Attempt to get CPU and memory usage
+      // Memory usage details
+      const memoryUsage = process.memoryUsage();
+      console.log('Memory usage at termination:');
+      console.log(`- RSS: ${Math.round(memoryUsage.rss / 1024 / 1024)}MB`);
+      console.log(`- Heap Total: ${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
+      console.log(`- Heap Used: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`);
+      console.log(`- External: ${Math.round(memoryUsage.external / 1024 / 1024)}MB`);
+
+      // Environment variables
+      console.log('Environment variables:');
+      console.log(`- NODE_OPTIONS: ${process.env.NODE_OPTIONS || 'not set'}`);
+      console.log(`- PRESERVE_TEMP_DIR: ${process.env.PRESERVE_TEMP_DIR || 'not set'}`);
+      console.log(`- WDIO_TEST_APPS_DIR: ${process.env.WDIO_TEST_APPS_DIR || 'not set'}`);
+      console.log(`- ELECTRON_CACHE: ${process.env.ELECTRON_CACHE || 'not set'}`);
+
+      // Process info
       try {
-        const topOutput = execSync(`ps -p ${process.pid} -o %cpu,%mem,rss,vsz`).toString();
-        console.log(`Process resource usage:\n${topOutput}`);
+        const topOutput = execSync(
+          `ps -p ${process.pid} -o pid,ppid,pcpu,pmem,vsz,rss,tt,stat,start,time,comm`,
+        ).toString();
+        console.log('Process details:');
+        console.log(topOutput);
       } catch (err) {
-        console.log('Could not get process resource usage:', (err as Error).message);
+        console.log('Could not get process details:', (err as Error).message);
       }
+
+      // List child processes
+      try {
+        console.log('Child processes:');
+        const childProcesses = execSync(
+          `ps --ppid ${process.pid} -o pid,ppid,pcpu,pmem,vsz,rss,tt,stat,start,time,comm`,
+        ).toString();
+        console.log(childProcesses || 'No child processes found');
+      } catch (err) {
+        console.log('Could not get child processes:', (err as Error).message);
+      }
+
+      // List running Node processes
+      try {
+        console.log('Node processes running:');
+        const nodeProcesses = execSync('ps aux | grep node | grep -v grep').toString();
+        console.log(nodeProcesses || 'No Node processes found');
+      } catch (err) {
+        console.log('Could not get Node processes:', (err as Error).message);
+      }
+
+      // System load
+      try {
+        console.log('System load:');
+        const loadAvg = execSync('cat /proc/loadavg').toString();
+        console.log(loadAvg);
+      } catch (err) {
+        console.log('Could not get system load:', (err as Error).message);
+      }
+
+      // System memory
+      try {
+        console.log('System memory:');
+        const memInfo = execSync('free -m').toString();
+        console.log(memInfo);
+      } catch (err) {
+        console.log('Could not get system memory info:', (err as Error).message);
+      }
+
+      // Current working directory and file tree
+      console.log(`Current working directory: ${process.cwd()}`);
+      try {
+        console.log('Directory structure:');
+        const dirOutput = execSync(`ls -la ${process.cwd()}`).toString();
+        console.log(dirOutput);
+      } catch (err) {
+        console.log('Could not get directory structure:', (err as Error).message);
+      }
+
+      // If tmp dir exists, show its contents
+      if (process.env.WDIO_TEST_APPS_DIR) {
+        try {
+          console.log(`Test apps directory contents (${process.env.WDIO_TEST_APPS_DIR}):`);
+          const tmpDirOutput = execSync(`ls -la ${process.env.WDIO_TEST_APPS_DIR}`).toString();
+          console.log(tmpDirOutput);
+        } catch (err) {
+          console.log('Could not get test apps directory contents:', (err as Error).message);
+        }
+      }
+
+      // Check if any Electron processes are running
+      try {
+        console.log('Electron processes:');
+        const electronProcesses = execSync('ps aux | grep electron | grep -v grep').toString();
+        console.log(electronProcesses || 'No Electron processes found');
+      } catch (err) {
+        console.log('Could not get Electron processes:', (err as Error).message);
+      }
+
+      // Runtime context
+      console.log('Runtime information:');
+      console.log(`- Node.js version: ${process.version}`);
+      console.log(`- Platform: ${process.platform}`);
+      console.log(`- Architecture: ${process.arch}`);
+      console.log(`- PID: ${process.pid}`);
+      console.log(`- PPID: ${process.ppid}`);
+      console.log(`- Runtime since process start: ${process.uptime().toFixed(2)} seconds`);
+
+      console.log('************* SIGTERM DIAGNOSTIC INFO END *************');
     } catch (err) {
       console.error('Error while gathering diagnostic information:', err);
     }
   }
 
+  // Add a timeout to force exit after 10 seconds, in case cleanup hangs
+  const forceExitTimeout = setTimeout(() => {
+    console.error('Force exiting after timeout during cleanup (10s)');
+    process.exit(signal === 'SIGTERM' ? 143 : 130);
+  }, 10000);
+
+  // Make sure the timeout doesn't prevent the process from exiting naturally
+  forceExitTimeout.unref();
+
   cleanupTestSuite().finally(() => {
+    clearTimeout(forceExitTimeout);
     process.exit(signal === 'SIGTERM' ? 143 : 130);
   });
 }

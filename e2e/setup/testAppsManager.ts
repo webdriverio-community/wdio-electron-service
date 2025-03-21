@@ -1,6 +1,7 @@
 import { mkdtemp, readFile, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import * as path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
@@ -84,7 +85,24 @@ class TestAppsManager {
     // Register cleanup handlers when preparing test apps
     this.registerCleanupHandlers();
 
+    // Log start time and memory usage
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Starting test apps preparation`);
+    console.log(`Initial memory usage: RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+
+    // Track execution time for each step
+    const timings: Record<string, number> = {};
+    const timeStep = (step: string) => {
+      const now = Date.now();
+      const elapsed = now - (timings.last || startTime);
+      timings[step] = elapsed;
+      timings.last = now;
+      console.log(`Step "${step}" completed in ${(elapsed / 1000).toFixed(2)}s`);
+      console.log(`Memory usage after "${step}": RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+    };
+
     if (this.tmpDir) {
+      console.log(`Reusing existing temp directory: ${this.tmpDir}`);
       this.isPrepared = true;
       return this.tmpDir;
     }
@@ -92,53 +110,166 @@ class TestAppsManager {
     const serviceDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
     const appsDir = join(process.cwd(), '..', 'apps');
 
+    console.log(`Service directory: ${serviceDir}`);
+    console.log(`Apps directory: ${appsDir}`);
+
     // 1. Create temp directory first with a shorter path
     console.log('Creating temp directory');
     // Use a shorter prefix to avoid path length issues
     this.tmpDir = await mkdtemp(join(tmpdir(), 'wdio-e2e-'));
+    console.log(`Created temp directory: ${this.tmpDir}`);
+    timeStep('create_temp_dir');
 
     // 2. Package the service
     console.log('Packing service');
-    const { stdout: packOutput } = await execAsync('pnpm pack', {
-      cwd: serviceDir,
-    });
+    console.log(`Current working directory: ${process.cwd()}`);
+    console.log(`Service directory exists: ${fs.existsSync(serviceDir)}`);
 
-    // Extract just the filename from the output
-    // The last line of the output should be the tarball filename
-    const packageFileName =
-      packOutput
-        .split('\n')
-        .filter((line) => line.trim() && line.endsWith('.tgz'))
-        .pop() || '';
-    console.log(`Package filename: ${packageFileName}`);
+    let packageFileName: string;
 
-    if (!packageFileName) {
-      throw new Error('Failed to extract package filename from pnpm pack output');
-    }
+    // Check if we should skip service packing
+    if (process.env.SKIP_SERVICE_PACKING === 'true') {
+      console.log('SKIP_SERVICE_PACKING is set to true, skipping service packing');
 
-    // Verify the tarball exists
-    const packagePath = join(serviceDir, packageFileName);
-    try {
-      await fs.promises.access(packagePath, fs.constants.F_OK);
-      console.log(`Verified tarball exists at: ${packagePath}`);
-    } catch (error) {
-      console.error(`Tarball not found at ${packagePath}:`, error);
-      throw new Error(`Tarball not found at ${packagePath}`);
-    }
+      // Check for WDIO_SERVICE_TARBALL environment variable
+      if (process.env.WDIO_SERVICE_TARBALL) {
+        console.log(`Using pre-packaged tarball from WDIO_SERVICE_TARBALL: ${process.env.WDIO_SERVICE_TARBALL}`);
 
-    // Move the package directly to the temp directory to avoid long paths
-    const tempPackagePath = join(this.tmpDir, packageFileName);
-    try {
-      // Use fs.promises.copyFile instead of rename to avoid issues if the file is in use
-      await fs.promises.copyFile(packagePath, tempPackagePath);
-      console.log(`Copied tarball to: ${tempPackagePath}`);
+        const sourceTarball = process.env.WDIO_SERVICE_TARBALL;
+        packageFileName = path.basename(sourceTarball);
 
-      // Verify the copy was successful
-      await fs.promises.access(tempPackagePath, fs.constants.F_OK);
-      console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
-    } catch (copyError: unknown) {
-      console.error(`Error copying tarball:`, copyError);
-      throw new Error(`Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`);
+        // Verify the tarball exists
+        try {
+          await fs.promises.access(sourceTarball, fs.constants.F_OK);
+          console.log(`Verified tarball exists at: ${sourceTarball}`);
+        } catch (error) {
+          console.error(`Tarball not found at ${sourceTarball}:`, error);
+          throw new Error(`Tarball not found at ${sourceTarball}`);
+        }
+
+        // Copy the tarball to the temp directory
+        const tempPackagePath = join(this.tmpDir, packageFileName);
+        try {
+          await fs.promises.copyFile(sourceTarball, tempPackagePath);
+          console.log(`Copied tarball to: ${tempPackagePath}`);
+
+          // Verify the copy was successful
+          await fs.promises.access(tempPackagePath, fs.constants.F_OK);
+          console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
+        } catch (copyError: unknown) {
+          console.error(`Error copying tarball:`, copyError);
+          throw new Error(
+            `Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`,
+          );
+        }
+      } else {
+        // Look for existing package in the service directory as fallback
+        console.log('WDIO_SERVICE_TARBALL not set, looking for package in service directory');
+
+        const files = await fs.promises.readdir(serviceDir);
+        const packageFile = files.find((file) => file.endsWith('.tgz'));
+
+        if (!packageFile) {
+          console.error('No package file found in service directory');
+          throw new Error(
+            'No package file found in service directory. Cannot skip service packing without a package file.',
+          );
+        }
+
+        packageFileName = packageFile;
+        console.log(`Found existing package file in service directory: ${packageFileName}`);
+
+        // Verify the tarball exists
+        const packagePath = join(serviceDir, packageFileName);
+        try {
+          await fs.promises.access(packagePath, fs.constants.F_OK);
+          console.log(`Verified tarball exists at: ${packagePath}`);
+
+          // Copy the tarball to the temp directory
+          const tempPackagePath = join(this.tmpDir, packageFileName);
+          try {
+            await fs.promises.copyFile(packagePath, tempPackagePath);
+            console.log(`Copied tarball to: ${tempPackagePath}`);
+
+            // Verify the copy was successful
+            await fs.promises.access(tempPackagePath, fs.constants.F_OK);
+            console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
+          } catch (copyError: unknown) {
+            console.error(`Error copying tarball:`, copyError);
+            throw new Error(
+              `Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`,
+            );
+          }
+        } catch (error) {
+          console.error(`Tarball not found at ${packagePath}:`, error);
+          throw new Error(`Tarball not found at ${packagePath}`);
+        }
+      }
+
+      timeStep('use_existing_package');
+    } else {
+      // Perform normal service packing
+      try {
+        const packageStartTime = Date.now();
+        console.log(`[${new Date().toISOString()}] Starting service packing`);
+        console.log(`Running pnpm pack in directory: ${serviceDir}`);
+
+        const { stdout: packOutput } = await execAsync('pnpm pack', {
+          cwd: serviceDir,
+        });
+
+        const packageEndTime = Date.now();
+        console.log(
+          `[${new Date().toISOString()}] Service packing completed in ${((packageEndTime - packageStartTime) / 1000).toFixed(2)}s`,
+        );
+        console.log(`pnpm pack output: ${packOutput}`);
+
+        // Extract just the filename from the output
+        // The last line of the output should be the tarball filename
+        packageFileName =
+          packOutput
+            .split('\n')
+            .filter((line) => line.trim() && line.endsWith('.tgz'))
+            .pop() || '';
+        console.log(`Package filename: ${packageFileName}`);
+
+        if (!packageFileName) {
+          throw new Error('Failed to extract package filename from pnpm pack output');
+        }
+
+        // Verify the tarball exists
+        const packagePath = join(serviceDir, packageFileName);
+        try {
+          await fs.promises.access(packagePath, fs.constants.F_OK);
+          console.log(`Verified tarball exists at: ${packagePath}`);
+        } catch (error) {
+          console.error(`Tarball not found at ${packagePath}:`, error);
+          throw new Error(`Tarball not found at ${packagePath}`);
+        }
+
+        // Move the package directly to the temp directory to avoid long paths
+        const tempPackagePath = join(this.tmpDir, packageFileName);
+        try {
+          // Use fs.promises.copyFile instead of rename to avoid issues if the file is in use
+          await fs.promises.copyFile(packagePath, tempPackagePath);
+          console.log(`Copied tarball to: ${tempPackagePath}`);
+
+          // Verify the copy was successful
+          await fs.promises.access(tempPackagePath, fs.constants.F_OK);
+          console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
+        } catch (copyError: unknown) {
+          console.error(`Error copying tarball:`, copyError);
+          throw new Error(
+            `Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`,
+          );
+        }
+
+        timeStep('pack_service');
+      } catch (packError) {
+        console.error('Error during service packing:');
+        console.error(packError);
+        throw packError;
+      }
     }
 
     // 3. Copy apps

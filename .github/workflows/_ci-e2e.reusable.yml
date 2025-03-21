@@ -116,19 +116,97 @@ jobs:
           echo "Electron cache directory contents:"
           ls -la electron-cache
 
+      # Pre-package the service in a separate step to avoid SIGTERM issues
+      - name: 📦 Package Service
+        shell: bash
+        env:
+          # Increase Node.js memory limit to prevent OOM issues
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        timeout-minutes: 5
+        run: |
+          echo "=============== PACKAGING SERVICE ==============="
+          cd packages/wdio-electron-service
+
+          # Show resource usage before
+          echo "Resource usage before packaging:"
+          free -h || echo "free command not available"
+
+          # Package the service
+          echo "Running pnpm pack..."
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+          echo "Service packaged as: $PACKAGE_FILE"
+
+          # Verify the tarball exists
+          if [[ -f "$PACKAGE_FILE" ]]; then
+            echo "Verified tarball exists at: $(pwd)/$PACKAGE_FILE"
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/$PACKAGE_FILE" >> $GITHUB_ENV
+          else
+            echo "ERROR: Failed to create package file"
+            exit 1
+          fi
+
+          # Show resource usage after
+          echo "Resource usage after packaging:"
+          free -h || echo "free command not available"
+
       # Prepare the test applications once - new approach
       - name: 🏗️ Prepare Test Applications
         shell: bash
         env:
           ELECTRON_CACHE: ${{ github.workspace }}/electron-cache
           # Increase Node.js memory limit to prevent OOM issues
-          NODE_OPTIONS: '--max-old-space-size=4096'
+          NODE_OPTIONS: '--max-old-space-size=8192'
           # Preserve temp directories between steps
           PRESERVE_TEMP_DIR: 'true'
-        timeout-minutes: 10
+          # Enable more detailed debug logging
+          DEBUG: 'wdio-electron-service*'
+          # Skip service packing since we did it in previous step
+          SKIP_SERVICE_PACKING: 'true'
+          # Pass the service tarball path
+          WDIO_SERVICE_TARBALL: ${{ env.WDIO_SERVICE_TARBALL }}
+        timeout-minutes: 15
         run: |
-          # Show environment variables for debugging
+          # Show diagnostic information
+          echo "=============== ENVIRONMENT INFO ==============="
+          echo "OS: ${{ runner.os }}"
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "PNPM version: $(pnpm --version)"
+          echo "Current directory: $(pwd)"
+          echo "Available disk space: $(df -h .)"
+          echo "Available memory: $(free -h || echo 'free command not available')"
           echo "ELECTRON_CACHE=$ELECTRON_CACHE"
+          echo "NODE_OPTIONS=$NODE_OPTIONS"
+          echo "WDIO_SERVICE_TARBALL=$WDIO_SERVICE_TARBALL"
+
+          # Show process resource limits
+          echo "=============== RESOURCE LIMITS ==============="
+          ulimit -a || echo "ulimit command not available"
+
+          # Increase available resources
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Increasing system limits for Linux"
+            ulimit -n 65536 || echo "Failed to increase ulimit"
+            ulimit -u 65536 || echo "Failed to increase process limit"
+            echo "Updated limits:"
+            ulimit -a || echo "ulimit command not available"
+          fi
+
+          # Create a temp file for the service tarball copy if needed
+          if [[ -n "$WDIO_SERVICE_TARBALL" && "$SKIP_SERVICE_PACKING" == "true" ]]; then
+            echo "Using pre-packaged service tarball: $WDIO_SERVICE_TARBALL"
+            # Create a directory to store the tarball
+            mkdir -p service-package
+            # Copy the tarball
+            cp "$WDIO_SERVICE_TARBALL" service-package/
+            echo "Copied service tarball to: $(pwd)/service-package/$(basename $WDIO_SERVICE_TARBALL)"
+            # Set the environment variable to point to the new location
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/service-package/$(basename $WDIO_SERVICE_TARBALL)" >> $GITHUB_ENV
+          fi
+
+          # Show running processes
+          echo "=============== RUNNING PROCESSES ==============="
+          ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
 
           # Generate build filters based on scenarios
           BUILD_FILTERS=""
@@ -231,8 +309,22 @@ jobs:
           fi
 
           # Then prepare the test apps for all tests
+          echo "=============== RUNNING PREPARE-APPS ==============="
           echo "Running prepare-apps with increased timeout..."
-          cd e2e && NODE_OPTIONS="--max-old-space-size=4096" PRESERVE_TEMP_DIR=true npx tsx scripts/prepare-apps.ts --timeout=120000
+
+          # Show current time for timing purposes
+          echo "Start time: $(date)"
+
+          # Run prepare-apps with detailed logging and environment variables
+          cd e2e && NODE_OPTIONS="--max-old-space-size=8192" PRESERVE_TEMP_DIR=true \
+            DEBUG=wdio-electron-service* \
+            SKIP_SERVICE_PACKING=true \
+            WDIO_SERVICE_TARBALL="$WDIO_SERVICE_TARBALL" \
+            npx tsx scripts/prepare-apps.ts --timeout=300000
+
+          # Show end time
+          echo "End time: $(date)"
+          echo "=============== PREPARE-APPS COMPLETED ==============="
 
           # Capture the test apps directory for later steps
           if [ -n "$WDIO_TEST_APPS_DIR" ]; then
@@ -241,7 +333,26 @@ jobs:
             echo "PRESERVE_TEMP_DIR=true" >> $GITHUB_ENV
             echo "SUITE_SETUP_DONE=true" >> $GITHUB_ENV
             echo "Test apps prepared at: $WDIO_TEST_APPS_DIR"
+
+            # List what's in the test apps directory
+            echo "Test apps directory contents:"
+            ls -la "$WDIO_TEST_APPS_DIR" || echo "Failed to list contents"
+
+            # Check if apps directory exists and show contents
+            if [ -d "$WDIO_TEST_APPS_DIR/apps" ]; then
+              echo "Apps directory contents:"
+              ls -la "$WDIO_TEST_APPS_DIR/apps" || echo "Failed to list apps contents"
+            fi
+          else
+            echo "WARNING: WDIO_TEST_APPS_DIR not set after prepare-apps completed"
           fi
+
+          # Show final diagnostic information
+          echo "=============== FINAL ENVIRONMENT INFO ==============="
+          echo "Available disk space: $(df -h .)"
+          echo "Available memory: $(free -h || echo 'free command not available')"
+          echo "Running processes:"
+          ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
