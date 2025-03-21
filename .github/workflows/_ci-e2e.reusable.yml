@@ -120,6 +120,35 @@ jobs:
               echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
               echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
               echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+
+              echo "Installing service package in example apps..."
+              # Get the active scenario and module type
+              IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+              MODULE_TYPE="${{ inputs.type }}"
+
+              for SCENARIO in "${SCENARIOS[@]}"; do
+                TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+
+                if [[ "$MODULE_TYPE" == "*" ]]; then
+                  # Both ESM and CJS need to be installed
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-esm" "apps/${TRIMMED_SCENARIO}-cjs")
+                else
+                  # Only install for the specific module type
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-${MODULE_TYPE}")
+                fi
+
+                for APP_DIR in "${APP_DIRS[@]}"; do
+                  if [ -d "$APP_DIR" ]; then
+                    echo "Installing service package in $APP_DIR..."
+                    cd "$APP_DIR"
+                    pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
+                    cd ../..
+                  else
+                    echo "Skipping non-existent app directory: $APP_DIR"
+                  fi
+                done
+              done
+
               exit 0
             fi
           fi
