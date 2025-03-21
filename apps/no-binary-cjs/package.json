@@ -12,18 +12,18 @@
     "wdio-electron-service": "workspace:*"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "catalog:",
-    "@rollup/plugin-node-resolve": "catalog:",
-    "@rollup/plugin-typescript": "catalog:",
-    "@types/node": "catalog:",
-    "@wdio/cli": "catalog:",
-    "@wdio/globals": "catalog:",
-    "@wdio/local-runner": "catalog:",
-    "@wdio/mocha-framework": "catalog:",
-    "electron": "catalog:",
-    "rollup": "catalog:",
-    "tsx": "catalog:",
-    "typescript": "catalog:",
-    "webdriverio": "catalog:"
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.13.10",
+    "@wdio/cli": "catalog:default",
+    "@wdio/globals": "catalog:default",
+    "@wdio/local-runner": "catalog:default",
+    "@wdio/mocha-framework": "catalog:default",
+    "rollup": "^4.36.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "webdriverio": "catalog:default",
+    "electron": "catalog:default"
   }
 }

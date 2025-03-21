@@ -16,16 +16,16 @@
     "wdio-electron-service": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "catalog:",
-    "@wdio/cli": "catalog:",
-    "@wdio/globals": "catalog:",
-    "@wdio/local-runner": "catalog:",
-    "@wdio/mocha-framework": "catalog:",
-    "electron": "catalog:",
-    "electron-builder": "catalog:",
-    "tsx": "catalog:",
-    "typescript": "catalog:",
-    "webdriverio": "catalog:"
+    "@types/node": "^22.13.10",
+    "@wdio/cli": "catalog:default",
+    "@wdio/globals": "catalog:default",
+    "@wdio/local-runner": "catalog:default",
+    "@wdio/mocha-framework": "catalog:default",
+    "electron-builder": "^25.1.8",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "webdriverio": "catalog:default",
+    "electron": "catalog:default"
   },
   "build": {
     "asar": true,
