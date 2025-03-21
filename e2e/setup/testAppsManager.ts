@@ -298,7 +298,7 @@ class TestAppsManager {
 
     // 5. Install dependencies
     console.log('Installing dependencies');
-    await execAsync('pnpm install', { cwd: join(this.tmpDir, 'apps') });
+    await execAsync('pnpm install --no-frozen-lockfile', { cwd: join(this.tmpDir, 'apps') });
 
     // 6. Create a symlink to the wdio-electron-service package in node_modules
     // This helps with module resolution in ESM mode

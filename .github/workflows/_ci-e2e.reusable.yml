@@ -236,7 +236,7 @@ jobs:
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             echo "=============== INSTALLING WINDOWS DEPENDENCIES ==============="
             echo "Running pnpm install for all packages to ensure dependencies are available"
-            pnpm install
+            pnpm install --no-frozen-lockfile
 
             # Check if we need to install the bundler package
             echo "Building all workspace packages explicitly on Windows"
@@ -269,14 +269,14 @@ jobs:
               echo "Attempting to build it specifically..."
               if [ -d "packages/@wdio/electron-bundler" ]; then
                 cd packages/@wdio/electron-bundler
-                pnpm install
+                pnpm install --no-frozen-lockfile
                 pnpm build
                 cd ../..
               else
                 find packages -name "electron-bundler" -type d | grep -v "node_modules" | while read dir; do
                   echo "Found directory: $dir, attempting to build..."
                   cd "$dir"
-                  pnpm install
+                  pnpm install --no-frozen-lockfile
                   pnpm build
                   cd - > /dev/null
                 done
@@ -621,5 +621,112 @@ jobs:
           fi
         shell: bash
 
-      - name: 🏗️ Build packages
-        run: pnpm run build:wdio
+      - name: 🏗️ Build all packages
+        run: |
+          echo "=============== BUILDING WORKSPACE DEPENDENCIES ==============="
+
+          # First attempt to find and build the utils package (dependency of bundler)
+          echo "Building utils package first..."
+          if [ -d "./packages/wdio-electron-utils" ]; then
+            cd ./packages/wdio-electron-utils
+            echo "Contents of utils directory:"
+            ls -la
+            echo "Installing dependencies for utils..."
+            pnpm install --no-frozen-lockfile
+            echo "Building utils package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built utils package"
+          elif [ -d "./packages/@wdio/electron-utils" ]; then
+            cd ./packages/@wdio/electron-utils
+            echo "Contents of utils directory:"
+            ls -la
+            echo "Installing dependencies for utils..."
+            pnpm install --no-frozen-lockfile
+            echo "Building utils package..."
+            pnpm build
+            cd ../../..
+            echo "✅ Built utils package"
+          fi
+
+          # Then attempt to find and build the types package (dependency of bundler)
+          echo "Building types package..."
+          if [ -d "./packages/wdio-electron-types" ]; then
+            cd ./packages/wdio-electron-types
+            echo "Contents of types directory:"
+            ls -la
+            echo "Installing dependencies for types..."
+            pnpm install --no-frozen-lockfile
+            echo "Building types package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built types package"
+          elif [ -d "./packages/@wdio/electron-types" ]; then
+            cd ./packages/@wdio/electron-types
+            echo "Contents of types directory:"
+            ls -la
+            echo "Installing dependencies for types..."
+            pnpm install --no-frozen-lockfile
+            echo "Building types package..."
+            pnpm build
+            cd ../../..
+            echo "✅ Built types package"
+          fi
+
+          # Then build the bundler package
+          echo "Building bundler package..."
+          BUNDLER_DIR=""
+          if [ -d "./packages/wdio-electron-bundler" ]; then
+            cd ./packages/wdio-electron-bundler
+            BUNDLER_DIR="./packages/wdio-electron-bundler"
+            echo "Contents of bundler directory:"
+            ls -la
+            echo "Installing dependencies for bundler..."
+            pnpm install --no-frozen-lockfile
+            echo "Building bundler package with verbose logging..."
+            NODE_ENV=development NODE_OPTIONS=--max-old-space-size=4096 pnpm build --verbose
+            cd ../..
+          elif [ -d "./packages/@wdio/electron-bundler" ]; then
+            cd ./packages/@wdio/electron-bundler
+            BUNDLER_DIR="./packages/@wdio/electron-bundler"
+            echo "Contents of bundler directory:"
+            ls -la
+            echo "Installing dependencies for bundler..."
+            pnpm install --no-frozen-lockfile
+            echo "Building bundler package with verbose logging..."
+            NODE_ENV=development NODE_OPTIONS=--max-old-space-size=4096 pnpm build --verbose
+            cd ../../..
+          else
+            echo "Cannot find electron-bundler package directory"
+            find ./packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "No electron-bundler directory found"
+          fi
+
+          # Check if bundler build succeeded
+          if [ ! -z "$BUNDLER_DIR" ] && [ -d "$BUNDLER_DIR/dist" ]; then
+            echo "✅ Successfully built electron-bundler"
+            ls -la "$BUNDLER_DIR/dist"
+          else
+            echo "❌ Failed to build electron-bundler"
+            echo "Checking for typescript and other build dependencies..."
+            pnpm list typescript
+            pnpm list tsup
+            pnpm list @types/node
+          fi
+
+          # Finally, build the service package
+          echo "Building service package..."
+          if [ -d "./packages/wdio-electron-service" ]; then
+            cd ./packages/wdio-electron-service
+            echo "Contents of service directory:"
+            ls -la
+            echo "Installing dependencies for service..."
+            pnpm install --no-frozen-lockfile
+            echo "Building service package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built service package"
+          fi
+
+          # Final verification of all built packages
+          echo "Verifying all built packages..."
+          find ./packages -name "dist" -type d | sort
