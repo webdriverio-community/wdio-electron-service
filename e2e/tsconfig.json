@@ -1,14 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
-    "sourceMap": false,
-    "inlineSources": false,
-    "noEmit": true,
-    "types": ["node", "@wdio/globals/types", "mocha"],
-    "typeRoots": ["./node_modules", "./node_modules/@types"]
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": ["node", "@wdio/globals", "mocha"]
   },
-  "include": ["./test/**/*.spec.ts"],
-  "exclude": []
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

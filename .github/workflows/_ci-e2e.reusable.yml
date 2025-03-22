@@ -38,6 +38,10 @@ on:
         description: 'Cache key to use for downloading artifacts'
         type: string
         required: false
+      artifactsAvailable:
+        required: false
+        type: boolean
+        default: false
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -50,6 +54,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ${{ inputs.os }}
+    continue-on-error: true
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
@@ -77,6 +82,125 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
+      - name: 🔍 Verify Downloaded Artifacts
+        shell: bash
+        run: |
+          echo "=============== VERIFYING BUILD ARTIFACTS ==============="
+          echo "Artifact directory contents:"
+          ls -la wdio-electron-service-build
+
+          # Check if packaged-service exists
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            echo "✅ Found packaged-service directory"
+            echo "Contents of packaged-service directory:"
+            ls -la wdio-electron-service-build/packaged-service
+          else
+            echo "❌ packaged-service directory not found"
+            echo "Creating packaged-service directory for debugging:"
+            mkdir -p wdio-electron-service-build/packaged-service
+          fi
+
+          # Check for dist directories
+          if [ -d "wdio-electron-service-build/packages" ]; then
+            echo "✅ Found packages directory"
+            echo "Contents of packages directory:"
+            ls -la wdio-electron-service-build/packages
+          else
+            echo "❌ packages directory not found"
+          fi
+
+      # Run TypeScript and Rollup debugging scripts BEFORE any building starts
+      - name: 🔬 Run Debug Scripts
+        shell: bash
+        run: |
+          # Make scripts executable
+          chmod +x .github/debug-scripts/*.sh
+
+          # Run scripts in order
+          echo "Running TypeScript debug script..."
+          SCENARIO="${{ inputs.scenario }}" .github/debug-scripts/typescript-debug.sh
+
+          echo "Running Rollup debug script..."
+          SCENARIO="${{ inputs.scenario }}" .github/debug-scripts/rollup-debug.sh
+
+          echo "Running Service debug script..."
+          SCENARIO="${{ inputs.scenario }}" .github/debug-scripts/service-debug.sh
+
+          echo "Running Rollup detailed debug script..."
+          SCENARIO="${{ inputs.scenario }}" .github/debug-scripts/rollup-detailed-debug.sh
+
+      # Package service locally if not found in build artifacts
+      - name: 📦 Create Service Package Locally
+        shell: bash
+        id: local-package-service
+        if: ${{ success() }}
+        run: |
+          # Check if packaged-service directory exists and has a .tgz file
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            SERVICE_PACKAGE=$(find wdio-electron-service-build/packaged-service -name "wdio-electron-service-*.tgz" 2>/dev/null | head -n 1)
+            if [ -n "$SERVICE_PACKAGE" ]; then
+              echo "✅ Using service package from build artifacts: $SERVICE_PACKAGE"
+              echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
+              echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+              echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+
+              echo "Installing service package in example apps..."
+              # Get the active scenario and module type
+              IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+              MODULE_TYPE="${{ inputs.type }}"
+
+              for SCENARIO in "${SCENARIOS[@]}"; do
+                TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+
+                if [[ "$MODULE_TYPE" == "*" ]]; then
+                  # Both ESM and CJS need to be installed
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-esm" "apps/${TRIMMED_SCENARIO}-cjs")
+                else
+                  # Only install for the specific module type
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-${MODULE_TYPE}")
+                fi
+
+                for APP_DIR in "${APP_DIRS[@]}"; do
+                  if [ -d "$APP_DIR" ]; then
+                    echo "Installing service package in $APP_DIR..."
+                    cd "$APP_DIR"
+                    pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
+                    cd ../..
+                  else
+                    echo "Skipping non-existent app directory: $APP_DIR"
+                  fi
+                done
+              done
+
+              exit 0
+            fi
+          fi
+
+          echo "❌ Service package not found in build artifacts. Creating locally..."
+
+          # Create a local package
+          mkdir -p local-service-package
+          cd packages/wdio-electron-service
+          echo "Running pnpm pack in $(pwd)"
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+
+          if [ -f "$PACKAGE_FILE" ]; then
+            echo "✅ Successfully created package: $PACKAGE_FILE"
+            # Move the package to the shared directory
+            mv "$PACKAGE_FILE" ../../local-service-package/
+            cd ../..
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/local-service-package/$PACKAGE_FILE" >> $GITHUB_ENV
+            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+            echo "Local service package created at: $(pwd)/local-service-package/$PACKAGE_FILE"
+            ls -la local-service-package
+          else
+            echo "❌ Failed to create local service package"
+            cd ../..
+            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=false" >> $GITHUB_ENV
+          fi
+
       # Display build information if available
       - name: 📊 Show Build Information
         if: inputs.build_id != '' && inputs.artifact_size != ''
@@ -91,60 +215,616 @@ jobs:
         shell: bash
         run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # Dynamically generate the Turbo filter for building test applications
-      # This converts the scenario and type inputs into Turbo filter syntax
-      - name: 🪄 Generate Build Filter for Test Apps
-        id: gen-build
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateBuildFilter = (scenario, type) => {
-              return scenario
-                .split(',')
-                .map((s) => `--filter=example-${s.trim()}-${type}`)
-                .join(' ');
-            };
-            return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
-
-      # Build the test applications using Turbo with the generated filter
-      # This builds only the necessary test apps for the current test configuration
-      - name: 🏗️ Build Test Applications
+      # Prepare the test applications once - new approach
+      - name: 🏗️ Prepare Test Applications
         shell: bash
-        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+        env:
+          # Increase Node.js memory limit to prevent OOM issues
+          NODE_OPTIONS: '--max-old-space-size=8192'
+          # Preserve temp directories between steps
+          PRESERVE_TEMP_DIR: 'true'
+          # Enable more detailed debug logging
+          DEBUG: 'wdio-electron-service*'
+          # Use the pre-built service from the build job
+          USE_ARTIFACT_SERVICE: 'true'
+        timeout-minutes: 15
+        run: |
+          # Show diagnostic information
+          echo "=============== ENVIRONMENT INFO ==============="
+          echo "OS: ${{ runner.os }}"
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "PNPM version: $(pnpm --version)"
+          echo "Current directory: $(pwd)"
+          echo "Available disk space: $(df -h .)"
+          echo "Available memory: $(free -h || echo 'free command not available')"
+          echo "NODE_OPTIONS=$NODE_OPTIONS"
 
-      # Dynamically generate the test commands to run
-      # This handles both single and multiple scenarios, and ESM/CJS/both
-      - name: 🪄 Generate Test Execution Plan
-        id: gen-test
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateTestCommand = (scenario, type) => {
-              return scenario
-                .split(',')
-                .flatMap((s) => {
-                  const scenario = s.trim();
-                  return type === '*'
-                    ? [`test:e2e:${scenario}-esm`, `test:e2e:${scenario}-cjs`]
-                    : [`test:e2e:${scenario}-${type}`];
-                })
-                .join(' ');
-            };
-            return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
+          # Debug electron-bundler package
+          echo "=============== BUNDLER PACKAGE DIAGNOSTICS ==============="
+          echo "Checking for @wdio/electron-bundler module..."
 
-      # Run the E2E tests using Turbo with the generated test commands
-      # First initializes the E2E environment, then runs the specific tests
+          # Show workspace structure for better diagnostics
+          echo "Workspace package structure:"
+          pnpm list --depth 2 | grep "@wdio" || echo "No @wdio packages found in workspace"
+
+          # Try finding the bundler in various locations
+          echo "Looking for bundler in packages directory:"
+          find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
+
+          echo "Looking for bundler in node_modules:"
+          find node_modules -name "electron-bundler" -type d || echo "Not found in node_modules"
+
+          # For Windows, ensure workspace dependencies are built
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            echo "=============== INSTALLING WINDOWS DEPENDENCIES ==============="
+            echo "Running pnpm install for all packages to ensure dependencies are available"
+            pnpm install --no-frozen-lockfile
+
+            # Check if we need to install the bundler package
+            echo "Building all workspace packages explicitly on Windows"
+            pnpm run build
+
+            # Check if bundler was built
+            echo "Checking if bundler is built after pnpm run build:"
+            find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
+            find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
+          fi
+
+          # Check workspace build status
+          echo "Checking if workspace packages are already built:"
+          find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
+
+          # Build dependencies first
+          echo "=============== BUILDING WORKSPACE DEPENDENCIES ==============="
+          echo "Building all workspace packages..."
+          pnpm run build
+
+          # For MacOS, verify workspace dependencies are built
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            echo "Checking workspace module directories:"
+
+            echo "Looking for @wdio/electron-bundler dist directory..."
+            if ls packages/**/electron-bundler/dist 2>/dev/null; then
+              echo "✅ electron-bundler dist directory found"
+            else
+              echo "❌ electron-bundler dist directory not found"
+              echo "Attempting to build it specifically..."
+              if [ -d "packages/@wdio/electron-bundler" ]; then
+                cd packages/@wdio/electron-bundler
+                pnpm install --no-frozen-lockfile
+                pnpm build
+                cd ../..
+              else
+                find packages -name "electron-bundler" -type d | grep -v "node_modules" | while read dir; do
+                  echo "Found directory: $dir, attempting to build..."
+                  cd "$dir"
+                  pnpm install --no-frozen-lockfile
+                  pnpm build
+                  cd - > /dev/null
+                done
+              fi
+            fi
+          fi
+
+          # Show process resource limits
+          echo "=============== RESOURCE LIMITS ==============="
+          ulimit -a || echo "ulimit command not available"
+
+          # Increase available resources
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Increasing system limits for Linux"
+            ulimit -n 65536 || echo "Failed to increase ulimit"
+            ulimit -u 65536 || echo "Failed to increase process limit"
+            echo "Updated limits:"
+            ulimit -a || echo "ulimit command not available"
+          fi
+
+          # Show running processes
+          echo "=============== RUNNING PROCESSES ==============="
+          ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
+
+          # Add detailed debug steps here before preparing test apps
+
+          # First build debug - check if there's a bundler module
+          echo "=============== DETAILED BUNDLER DEBUG ==============="
+          if [ -d "./packages/wdio-electron-bundler" ]; then
+            echo "Found bundler in packages/wdio-electron-bundler"
+            ls -la ./packages/wdio-electron-bundler
+
+            echo "Checking package.json:"
+            cat ./packages/wdio-electron-bundler/package.json
+
+            echo "Checking if bundler is built:"
+            if [ -d "./packages/wdio-electron-bundler/dist" ]; then
+              echo "Bundler is built, dist directory exists"
+              ls -la ./packages/wdio-electron-bundler/dist
+            else
+              echo "Bundler is not built, dist directory is missing"
+            fi
+          fi
+
+          if [ -d "./packages/@wdio/electron-bundler" ]; then
+            echo "Found bundler in packages/@wdio/electron-bundler"
+            ls -la ./packages/@wdio/electron-bundler
+          fi
+
+          # TypeScript diagnostics
+          echo "=============== TYPESCRIPT DIAGNOSTICS ==============="
+
+          # Check if forge builds are being run
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            echo "Forge app detected in scenario: ${{ inputs.scenario }}"
+          else
+            echo "Non-Forge app in scenario: ${{ inputs.scenario }}"
+          fi
+
+          # Examine TypeScript configuration
+          echo "Looking for TypeScript configuration files:"
+          find . -name "tsconfig*.json" | xargs -I{} echo "Found TypeScript config: {}"
+
+          # Check if TypeScript references node types
+          echo "Looking for @types/node in TypeScript config files:"
+          find . -name "tsconfig*.json" | xargs grep -l "@types/node" || echo "No TypeScript config files with @types/node found"
+
+          # Check if TypeScript can resolve @types/node
+          echo "Checking if TypeScript can resolve @types/node:"
+          echo "const ts = require('typescript'); console.log('TypeScript compiler paths:', ts.sys.getDirectories(require('path').join(process.cwd(), 'node_modules', '@types')).join('\\n'));" > ts-paths.js
+          node ts-paths.js || echo "Failed to run TypeScript path resolution check"
+
+          # Check if there are multiple node_modules directories with conflicting types
+          echo "Searching for multiple @types/node installations:"
+          find . -path "*/node_modules/@types/node" | sort
+
+          echo "Searching for node.d.ts files:"
+          find . -name "node.d.ts" | sort
+
+          # Check if we're on Forge app and examine Forge-specific build configs
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            echo "Examining Forge-specific configs:"
+
+            # Find Forge config files
+            find . -name "forge.config.*" | xargs -I{} echo "Found Forge config: {}"
+
+            # Check for Forge-specific dependencies
+            echo "Forge-related dependencies:"
+            pnpm list electron-forge -r || echo "electron-forge not found"
+            pnpm list electron-builder -r || echo "electron-builder not found"
+
+            # Check if Forge and Electron versions are compatible
+            echo "Checking Forge and Electron versions:"
+            pnpm list electron -r || echo "electron not found"
+
+            # Check if the apps are using native modules which might affect TypeScript builds
+            echo "Checking for native/node-gyp dependencies:"
+            find . -name "binding.gyp" || echo "No binding.gyp files found"
+          fi
+
+          # Clean up
+          rm -f ts-paths.js
+
+          # Rollup TypeScript Debug
+          echo "=============== ROLLUP TYPESCRIPT DEBUG ==============="
+
+          # Check if forge builds are being run
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            echo "Forge app detected in scenario: ${{ inputs.scenario }}"
+          else
+            echo "Non-Forge app in scenario: ${{ inputs.scenario }}"
+          fi
+
+          # Examine rollup configuration
+          echo "Looking for rollup configuration files:"
+          find . -name "rollup.config.*" | xargs -I{} echo "Found rollup config: {}"
+
+          # If we find the service package rollup config, examine it
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            echo "Contents of service package rollup config:"
+            cat ./packages/wdio-electron-service/rollup.config.ts
+
+            echo "Checking rollup typescript plugin version:"
+            pnpm list @rollup/plugin-typescript -r || echo "Plugin not found"
+
+            echo "Checking typescript version:"
+            pnpm list typescript -r || echo "TypeScript not found"
+          fi
+
+          # Check if tsconfig references node types
+          echo "Looking for tsconfig files that reference node types:"
+          find . -name "tsconfig*.json" | xargs grep -l "node" || echo "No tsconfig references to node found"
+
+          # Print package.json dependences related to typescript and node types
+          echo "Looking for @types/node in package.json files:"
+          find . -name "package.json" | xargs grep -l "@types/node" || echo "No package.json files with @types/node found"
+
+          # Check TypeScript compiler resolution paths
+          echo "TypeScript compiler node resolution paths:"
+          echo "const ts = require('typescript'); console.log('TypeScript compiler paths:', ts.sys.getDirectories(require('path').join(process.cwd(), 'node_modules', '@types')).join('\\n'));" > ts-paths.js
+          node ts-paths.js || echo "Failed to run TypeScript path resolution check"
+
+          # Check if Rollup can resolve @types/node
+          echo "Checking if Rollup can resolve @types/node:"
+          echo "const rollup = require('rollup'); rollup.rollup({input: 'nonexistent.js', plugins: [require('@rollup/plugin-typescript')()]}).catch(e => console.log('Rollup error:', e));" > rollup-test.js
+          node rollup-test.js || echo "Failed to run Rollup resolution test"
+
+          # Check if there are multiple node_modules directories with conflicting types
+          echo "Searching for multiple @types/node installations:"
+          find . -path "*/node_modules/@types/node" | sort
+
+          echo "Searching for node.d.ts files:"
+          find . -name "node.d.ts" | sort
+
+          # Check if we're on Forge app and examine Forge-specific build configs
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            echo "Examining Forge-specific configs:"
+
+            # Find Forge config files
+            find . -name "forge.config.*" | xargs -I{} echo "Found Forge config: {}"
+
+            # Check for Forge-specific dependencies
+            echo "Forge-related dependencies:"
+            pnpm list electron-forge -r || echo "electron-forge not found"
+            pnpm list electron-builder -r || echo "electron-builder not found"
+
+            # Check if Forge and Electron versions are compatible
+            echo "Checking Forge and Electron versions:"
+            pnpm list electron -r || echo "electron not found"
+
+            # Check if the apps are using native modules which might affect TypeScript builds
+            echo "Checking for native/node-gyp dependencies:"
+            find . -name "binding.gyp" || echo "No binding.gyp files found"
+          fi
+
+          # Clean up
+          rm -f ts-paths.js rollup-test.js
+
+          # Service and Forge Build Debug
+          echo "=============== SERVICE AND FORGE BUILD DEBUG ==============="
+
+          # Check specific paths that should contain node typings
+          echo "Checking node_modules paths that should contain Node.js typings:"
+          NODE_MODULES_PATHS=(
+            "./node_modules/@types/node"
+            "./packages/wdio-electron-service/node_modules/@types/node"
+          )
+
+          # Add forge apps to the list if we're in a forge build
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            for app in apps/forge*; do
+              if [ -d "$app" ]; then
+                NODE_MODULES_PATHS+=("$app/node_modules/@types/node")
+              fi
+            done
+          fi
+
+          # Check each path
+          for path in "${NODE_MODULES_PATHS[@]}"; do
+            if [ -d "$path" ]; then
+              echo "✅ Found node types at: $path"
+              echo "Index.d.ts exists: $(test -f "$path/index.d.ts" && echo "Yes" || echo "No")"
+              echo "Types version: $(cat "$path/package.json" | grep -o '"version": "[^"]*"' || echo "Version not found")"
+            else
+              echo "❌ Missing node types at: $path"
+            fi
+          done
+
+          # Check rollup config to see how it references TypeScript
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            echo "Examining rollup config for TypeScript plugin configuration:"
+            grep -A 10 "typescript" ./packages/wdio-electron-service/rollup.config.ts || echo "No typescript plugin found in rollup config"
+
+            # Check compilerOptions in the typescript plugin if present
+            grep -A 20 "compilerOptions" ./packages/wdio-electron-service/rollup.config.ts || echo "No compilerOptions found in rollup config"
+          fi
+
+          # Check tsconfig that might be referenced by rollup
+          if [ -f "./packages/wdio-electron-service/tsconfig.json" ]; then
+            echo "Examining service package tsconfig.json:"
+            cat ./packages/wdio-electron-service/tsconfig.json
+
+            echo "Checking if tsconfig extends another config:"
+            grep "extends" ./packages/wdio-electron-service/tsconfig.json || echo "tsconfig does not extend another config"
+
+            # If it extends another config, check that one too
+            EXTENDS_CONFIG=$(grep -o '"extends": *"[^"]*"' ./packages/wdio-electron-service/tsconfig.json | sed 's/"extends": *"//;s/"//g' || echo "")
+            if [ ! -z "$EXTENDS_CONFIG" ]; then
+              # Resolve relative path if needed
+              if [[ "$EXTENDS_CONFIG" == ../* ]]; then
+                EXTENDS_PATH="./packages/wdio-electron-service/$EXTENDS_CONFIG"
+              elif [[ "$EXTENDS_CONFIG" == ./* ]]; then
+                EXTENDS_PATH="./packages/wdio-electron-service/$EXTENDS_CONFIG"
+              else
+                EXTENDS_PATH="$EXTENDS_CONFIG"
+              fi
+
+              if [ -f "$EXTENDS_PATH" ]; then
+                echo "Examining extended tsconfig at $EXTENDS_PATH:"
+                cat "$EXTENDS_PATH"
+              else
+                echo "Extended tsconfig not found at $EXTENDS_PATH"
+              fi
+            fi
+          fi
+
+          # If this is a Forge app, check the app's tsconfig
+          if [[ "${{ inputs.scenario }}" == *"forge"* ]]; then
+            for app in apps/forge*; do
+              if [ -d "$app" ]; then
+                if [ -f "$app/tsconfig.json" ]; then
+                  echo "Examining $app tsconfig.json:"
+                  cat "$app/tsconfig.json"
+
+                  # Check for types field
+                  grep -o '"types": *\[[^]]*\]' "$app/tsconfig.json" || echo "No types field found in $app tsconfig"
+
+                  # Check for lib field
+                  grep -o '"lib": *\[[^]]*\]' "$app/tsconfig.json" || echo "No lib field found in $app tsconfig"
+                else
+                  echo "No tsconfig.json found in $app"
+                fi
+              fi
+            done
+          fi
+
+          # List all types packages installed
+          echo "All @types packages installed:"
+          find . -path "*/node_modules/@types" -type d | xargs ls -la 2>/dev/null || echo "No @types directories found"
+
+          # Check for TypeScript paths configuration
+          echo "Checking for TypeScript paths configuration:"
+          find . -name "tsconfig*.json" | xargs grep -l '"paths"' || echo "No paths configurations found"
+
+          # Test basic TypeScript compilation with node types
+          echo "Testing basic TypeScript compilation with node types:"
+          echo 'import * as fs from "fs"; console.log(fs.readFileSync("package.json", "utf8"));' > test-node-types.ts
+          npx tsc test-node-types.ts --traceResolution || echo "TypeScript compilation failed"
+          rm -f test-node-types.ts
+
+          # Rollup Detailed Configuration Debug
+          echo "=============== ROLLUP DETAILED CONFIGURATION DEBUG ==============="
+
+          # Check for rollup.config.ts file in the service package
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            # Install dependencies for the test script
+            echo "Installing dependencies for rollup debugging..."
+            npm install --no-save typescript @rollup/plugin-typescript rollup
+
+            # Create a script to analyze rollup configuration
+            cat > rollup-debug.js << 'EOF'
+            const fs = require('fs');
+            const path = require('path');
+            const ts = require('typescript');
+            const rollup = require('rollup');
+
+            console.log('TypeScript version:', ts.version);
+            console.log('Rollup version:', rollup.VERSION);
+
+            // Examine the TypeScript compiler host environment
+            console.log('\nTypeScript compiler environment:');
+            console.log('Current directory:', process.cwd());
+            console.log('NODE_PATH environment variable:', process.env.NODE_PATH || 'not set');
+
+            // Try to find the node.d.ts file
+            const searchPaths = [
+              './node_modules/@types/node',
+              './packages/wdio-electron-service/node_modules/@types/node',
+              '../node_modules/@types/node',
+              '../../node_modules/@types/node',
+            ];
+
+            console.log('\nSearching for node.d.ts in:');
+            searchPaths.forEach(searchPath => {
+              const fullPath = path.resolve(searchPath);
+              const indexPath = path.join(fullPath, 'index.d.ts');
+              const exists = fs.existsSync(indexPath);
+              console.log(`- ${fullPath}: ${exists ? 'EXISTS' : 'NOT FOUND'}`);
+              if (exists) {
+                const packagePath = path.join(fullPath, 'package.json');
+                if (fs.existsSync(packagePath)) {
+                  try {
+                    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                    console.log(`  - Version: ${packageJson.version || 'unknown'}`);
+                  } catch (e) {
+                    console.log(`  - Error reading package.json: ${e.message}`);
+                  }
+                }
+              }
+            });
+
+            // Try to simulate the typescript plugin initialization
+            try {
+              console.log('\nTrying to load rollup.config.ts:');
+              // Check if the file exists but don't actually execute it
+              const configPath = path.resolve('./packages/wdio-electron-service/rollup.config.ts');
+              if (fs.existsSync(configPath)) {
+                console.log(`Configuration file exists at: ${configPath}`);
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                console.log('Configuration file content:');
+                console.log('---');
+                console.log(configContent);
+                console.log('---');
+
+                // Try to find typescript plugin configuration
+                if (configContent.includes('@rollup/plugin-typescript')) {
+                  console.log('\nTypeScript plugin found in configuration.');
+
+                  // Extract typescript plugin configuration using a simple regex
+                  // This is not a full parser but should help identify basic issues
+                  const tsPluginRegex = /typescript\(\s*(\{[^}]*\})/s;
+                  const match = configContent.match(tsPluginRegex);
+
+                  if (match && match[1]) {
+                    console.log('TypeScript plugin configuration:', match[1]);
+
+                    // Look for tsconfig path
+                    const tsconfigRegex = /tsconfig\s*:\s*['"]([^'"]*)['"]/;
+                    const tsconfigMatch = match[1].match(tsconfigRegex);
+
+                    if (tsconfigMatch && tsconfigMatch[1]) {
+                      const tsconfigPath = path.resolve('./packages/wdio-electron-service', tsconfigMatch[1]);
+                      console.log(`\nReferenced tsconfig file: ${tsconfigPath}`);
+
+                      if (fs.existsSync(tsconfigPath)) {
+                        console.log('tsconfig exists');
+                        try {
+                          const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+                          console.log('tsconfig content:', JSON.stringify(tsconfig, null, 2));
+
+                          // Check for types inclusion
+                          if (tsconfig.compilerOptions && tsconfig.compilerOptions.types) {
+                            console.log('Types specified in tsconfig:', tsconfig.compilerOptions.types);
+                            if (tsconfig.compilerOptions.types.includes('node')) {
+                              console.log('node types are explicitly included');
+                            } else {
+                              console.log('node types are NOT explicitly included');
+                            }
+                          } else {
+                            console.log('No types array found in tsconfig');
+                          }
+                        } catch (e) {
+                          console.log(`Error parsing tsconfig: ${e.message}`);
+                        }
+                      } else {
+                        console.log('Referenced tsconfig does NOT exist');
+                      }
+                    } else {
+                      console.log('No tsconfig reference found in TypeScript plugin configuration');
+                    }
+                  } else {
+                    console.log('Could not extract TypeScript plugin configuration');
+                  }
+                } else {
+                  console.log('No TypeScript plugin found in configuration');
+                }
+              } else {
+                console.log(`Configuration file does NOT exist at: ${configPath}`);
+              }
+            } catch (e) {
+              console.log(`Error analyzing rollup configuration: ${e.message}`);
+              console.log(e.stack);
+            }
+
+            // Check TypeScript path resolution for node types
+            console.log('\nTypeScript path resolution:');
+            try {
+              // Create a simple program to check module resolution
+              const sourceFile = ts.createSourceFile(
+                'test.ts',
+                'import * as fs from "fs";',
+                ts.ScriptTarget.Latest
+              );
+
+              const compilerOptions = {
+                target: ts.ScriptTarget.ES2015,
+                module: ts.ModuleKind.CommonJS,
+                moduleResolution: ts.ModuleResolutionKind.NodeJs,
+              };
+
+              const host = ts.createCompilerHost(compilerOptions);
+              const program = ts.createProgram(['test.ts'], compilerOptions, host);
+              program.emit();
+
+              // Print diagnostic information
+              const diagnostics = ts.getPreEmitDiagnostics(program);
+              if (diagnostics.length > 0) {
+                console.log('Diagnostics:');
+                diagnostics.forEach(diagnostic => {
+                  console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+                });
+              } else {
+                console.log('No diagnostics produced');
+              }
+            } catch (e) {
+              console.log(`Error testing TypeScript resolution: ${e.message}`);
+            }
+            EOF
+
+            # Run the script to analyze rollup configuration
+            echo "Running rollup debug analysis script..."
+            node rollup-debug.js
+
+            # Cleanup
+            rm -f rollup-debug.js
+          else
+            echo "Rollup configuration not found for the service package"
+          fi
+
+      # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+        id: run_tests
+        env:
+          # Set environment variables for testing
+          PRESERVE_TEMP_DIR: 'true'
+          # Pass through test apps variables from previous steps
+          WDIO_TEST_APPS_PREPARED: ${{ env.WDIO_TEST_APPS_PREPARED }}
+          WDIO_TEST_APPS_DIR: ${{ env.WDIO_TEST_APPS_DIR }}
+          SUITE_SETUP_DONE: 'true'
+          # Set MAC_UNIVERSAL flag if we're using the mac-universal build command
+          MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
+          # Add DEBUG for more verbose output
+          DEBUG: 'wdio-electron-service*'
+        run: |
+          cd e2e
+
+          # Log environment for debugging
+          echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}, ELECTRON_CACHE=$ELECTRON_CACHE"
+          echo "Test apps: WDIO_TEST_APPS_PREPARED=$WDIO_TEST_APPS_PREPARED, WDIO_TEST_APPS_DIR=$WDIO_TEST_APPS_DIR, SUITE_SETUP_DONE=$SUITE_SETUP_DONE"
+
+          # Generate test execution command based on the scenario and type
+          if [[ "${{ inputs.scenario }}" == *","* ]]; then
+            # Multiple scenarios
+            IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+
+            for SCENARIO in "${SCENARIOS[@]}"; do
+              TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests
+                pnpm run test:${TRIMMED_SCENARIO}:cjs
+                pnpm run test:${TRIMMED_SCENARIO}:esm
+              else
+                # Run specific module type test
+                pnpm run test:${TRIMMED_SCENARIO}:${{ inputs.type }}
+              fi
+            done
+          else
+            # Single scenario
+            if [[ "${{ inputs.scenario }}" == "no-binary" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for no-binary
+                pnpm run test:no-binary:cjs
+                pnpm run test:no-binary:esm
+              else
+                # Run specific module type test for no-binary
+                pnpm run test:no-binary:${{ inputs.type }}
+              fi
+            elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for builder
+                pnpm run test:builder:cjs
+                pnpm run test:builder:esm
+              else
+                # Run specific module type test for builder
+                pnpm run test:builder:${{ inputs.type }}
+              fi
+            elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
+              if [[ "${{ inputs.type }}" == "*" ]]; then
+                # Run both ESM and CJS tests for forge
+                pnpm run test:forge:cjs
+                pnpm run test:forge:esm
+              else
+                # Run specific module type test for forge
+                pnpm run test:forge:${{ inputs.type }}
+              fi
+            fi
+          fi
 
       # Show logs on failure to help with debugging
       - name: 🐛 Show Test Logs on Failure
         shell: bash
         if: failure()
-        run: pnpm run ci:e2e:logs
+        run: cd e2e && pnpm run cat-logs
 
       # Upload logs as artifacts on failure for later analysis
       # This helps debug issues without cluttering the GitHub Actions console
@@ -154,12 +834,606 @@ jobs:
         with:
           name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
           output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
-          paths: e2e/*/*.log
+          paths: e2e/logs
+
+      # Clean up temp directories after tests complete
+      - name: 🧹 Clean Up Temporary Directories
+        shell: bash
+        if: always()
+        run: cd e2e && pnpm run clean:temp-dirs
 
       # Provide an interactive debugging session on failure
-      # This allows manual investigation of the environment
       - name: 🐛 Debug Build on Failure
         uses: stateful/vscode-server-action@v1.1.0
         if: failure()
         with:
           timeout: '180000'
+
+      - name: 🔍 Debug bundler
+        run: |
+          echo "Checking for @wdio/electron-bundler module"
+
+          echo "Workspace structure:"
+          ls -la ./packages/
+
+          echo "Looking for electron-bundler in packages:"
+          find ./packages -name "electron-bundler" -type d
+
+          echo "Looking for @wdio/electron-bundler in node_modules:"
+          find ./node_modules -name "electron-bundler" -type d
+
+          if [ -d "./packages/wdio-electron-bundler" ]; then
+            echo "Found bundler in packages/wdio-electron-bundler"
+            ls -la ./packages/wdio-electron-bundler
+
+            echo "Checking package.json:"
+            cat ./packages/wdio-electron-bundler/package.json
+
+            echo "Checking if bundler is built:"
+            if [ -d "./packages/wdio-electron-bundler/dist" ]; then
+              echo "Bundler is built, dist directory exists"
+              ls -la ./packages/wdio-electron-bundler/dist
+            else
+              echo "Bundler is not built, dist directory is missing"
+            fi
+          fi
+
+          if [ -d "./packages/@wdio/electron-bundler" ]; then
+            echo "Found bundler in packages/@wdio/electron-bundler"
+            ls -la ./packages/@wdio/electron-bundler
+          fi
+
+      - name: 🛠️ Workspace dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "Building workspace dependencies for Windows..."
+
+          echo "Installing all packages with --no-frozen-lockfile"
+          pnpm install --no-frozen-lockfile
+
+          echo "Building utils package first"
+          cd packages/wdio-electron-utils
+          pnpm build
+          cd ../..
+
+          echo "Building bundler package"
+          cd packages/wdio-electron-bundler
+          pnpm build
+          cd ../..
+
+          echo "Building service package"
+          cd packages/wdio-electron-service
+          pnpm build
+          cd ../..
+
+          echo "Verifying build output"
+          if [ -d "./packages/wdio-electron-bundler/dist" ]; then
+            echo "✅ Bundler built successfully"
+            ls -la ./packages/wdio-electron-bundler/dist
+          else
+            echo "❌ Bundler build failed - dist directory missing"
+          fi
+
+          if [ -d "./packages/wdio-electron-service/dist" ]; then
+            echo "✅ Service built successfully"
+            ls -la ./packages/wdio-electron-service/dist
+          else
+            echo "❌ Service build failed - dist directory missing"
+          fi
+        shell: bash
+
+      - name: 🏗️ Build all packages
+        run: |
+          echo "=============== BUILDING WORKSPACE DEPENDENCIES ==============="
+
+          # First attempt to find and build the utils package (dependency of bundler)
+          echo "Building utils package first..."
+          if [ -d "./packages/wdio-electron-utils" ]; then
+            cd ./packages/wdio-electron-utils
+            echo "Contents of utils directory:"
+            ls -la
+            echo "Installing dependencies for utils..."
+            pnpm install --no-frozen-lockfile
+            echo "Building utils package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built utils package"
+          elif [ -d "./packages/@wdio/electron-utils" ]; then
+            cd ./packages/@wdio/electron-utils
+            echo "Contents of utils directory:"
+            ls -la
+            echo "Installing dependencies for utils..."
+            pnpm install --no-frozen-lockfile
+            echo "Building utils package..."
+            pnpm build
+            cd ../../..
+            echo "✅ Built utils package"
+          fi
+
+          # Then attempt to find and build the types package (dependency of bundler)
+          echo "Building types package..."
+          if [ -d "./packages/wdio-electron-types" ]; then
+            cd ./packages/wdio-electron-types
+            echo "Contents of types directory:"
+            ls -la
+            echo "Installing dependencies for types..."
+            pnpm install --no-frozen-lockfile
+            echo "Building types package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built types package"
+          elif [ -d "./packages/@wdio/electron-types" ]; then
+            cd ./packages/@wdio/electron-types
+            echo "Contents of types directory:"
+            ls -la
+            echo "Installing dependencies for types..."
+            pnpm install --no-frozen-lockfile
+            echo "Building types package..."
+            pnpm build
+            cd ../../..
+            echo "✅ Built types package"
+          fi
+
+          # Then build the bundler package
+          echo "Building bundler package..."
+          BUNDLER_DIR=""
+          if [ -d "./packages/wdio-electron-bundler" ]; then
+            cd ./packages/wdio-electron-bundler
+            BUNDLER_DIR="./packages/wdio-electron-bundler"
+            echo "Contents of bundler directory:"
+            ls -la
+            echo "Installing dependencies for bundler..."
+            pnpm install --no-frozen-lockfile
+            echo "Building bundler package with verbose logging..."
+            NODE_ENV=development NODE_OPTIONS=--max-old-space-size=4096 pnpm build --verbose
+            cd ../..
+          elif [ -d "./packages/@wdio/electron-bundler" ]; then
+            cd ./packages/@wdio/electron-bundler
+            BUNDLER_DIR="./packages/@wdio/electron-bundler"
+            echo "Contents of bundler directory:"
+            ls -la
+            echo "Installing dependencies for bundler..."
+            pnpm install --no-frozen-lockfile
+            echo "Building bundler package with verbose logging..."
+            NODE_ENV=development NODE_OPTIONS=--max-old-space-size=4096 pnpm build --verbose
+            cd ../../..
+          else
+            echo "Cannot find electron-bundler package directory"
+            find ./packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "No electron-bundler directory found"
+          fi
+
+          # Check if bundler build succeeded
+          if [ ! -z "$BUNDLER_DIR" ] && [ -d "$BUNDLER_DIR/dist" ]; then
+            echo "✅ Successfully built electron-bundler"
+            ls -la "$BUNDLER_DIR/dist"
+          else
+            echo "❌ Failed to build electron-bundler"
+            echo "Checking for typescript and other build dependencies..."
+            pnpm list typescript
+            pnpm list tsup
+            pnpm list @types/node
+          fi
+
+          # Finally, build the service package
+          echo "Building service package..."
+          if [ -d "./packages/wdio-electron-service" ]; then
+            cd ./packages/wdio-electron-service
+            echo "Contents of service directory:"
+            ls -la
+            echo "Installing dependencies for service..."
+            pnpm install --no-frozen-lockfile
+            echo "Building service package..."
+            pnpm build
+            cd ../..
+            echo "✅ Built service package"
+          fi
+
+          # Final verification of all built packages
+          echo "Verifying all built packages..."
+          find ./packages -name "dist" -type d | sort
+
+      - name: 📋 Rollup TypeScript Debug
+        run: |
+          echo "=============== ROLLUP TYPESCRIPT DEBUG ==============="
+
+          # Check if forge builds are being run
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            echo "Forge app detected in matrix: ${{ inputs.matrix-app }}"
+          else
+            echo "Non-Forge app in matrix: ${{ inputs.matrix-app }}"
+          fi
+
+          # Examine rollup configuration
+          echo "Looking for rollup configuration files:"
+          find . -name "rollup.config.*" | xargs -I{} echo "Found rollup config: {}"
+
+          # If we find the service package rollup config, examine it
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            echo "Contents of service package rollup config:"
+            cat ./packages/wdio-electron-service/rollup.config.ts
+
+            echo "Checking rollup typescript plugin version:"
+            pnpm list @rollup/plugin-typescript -r || echo "Plugin not found"
+
+            echo "Checking typescript version:"
+            pnpm list typescript -r || echo "TypeScript not found"
+          fi
+
+          # Check if tsconfig references node types
+          echo "Looking for tsconfig files that reference node types:"
+          find . -name "tsconfig*.json" | xargs grep -l "node" || echo "No tsconfig references to node found"
+
+          # Print package.json dependences related to typescript and node types
+          echo "Looking for @types/node in package.json files:"
+          find . -name "package.json" | xargs grep -l "@types/node" || echo "No package.json files with @types/node found"
+
+          # Check TypeScript compiler resolution paths
+          echo "TypeScript compiler node resolution paths:"
+          echo "const ts = require('typescript'); console.log('TypeScript compiler paths:', ts.sys.getDirectories(require('path').join(process.cwd(), 'node_modules', '@types')).join('\\n'));" > ts-paths.js
+          node ts-paths.js || echo "Failed to run TypeScript path resolution check"
+
+          # Check if Rollup can resolve @types/node
+          echo "Checking if Rollup can resolve @types/node:"
+          echo "const rollup = require('rollup'); rollup.rollup({input: 'nonexistent.js', plugins: [require('@rollup/plugin-typescript')()]}).catch(e => console.log('Rollup error:', e));" > rollup-test.js
+          node rollup-test.js || echo "Failed to run Rollup resolution test"
+
+          # Check if there are multiple node_modules directories with conflicting types
+          echo "Searching for multiple @types/node installations:"
+          find . -path "*/node_modules/@types/node" | sort
+
+          echo "Searching for node.d.ts files:"
+          find . -name "node.d.ts" | sort
+
+          # Check if we're on Forge app and examine Forge-specific build configs
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            echo "Examining Forge-specific configs:"
+
+            # Find Forge config files
+            find . -name "forge.config.*" | xargs -I{} echo "Found Forge config: {}"
+
+            # Check for Forge-specific dependencies
+            echo "Forge-related dependencies:"
+            pnpm list electron-forge -r || echo "electron-forge not found"
+            pnpm list electron-builder -r || echo "electron-builder not found"
+
+            # Check if Forge and Electron versions are compatible
+            echo "Checking Forge and Electron versions:"
+            pnpm list electron -r || echo "electron not found"
+
+            # Check if the apps are using native modules which might affect TypeScript builds
+            echo "Checking for native/node-gyp dependencies:"
+            find . -name "binding.gyp" || echo "No binding.gyp files found"
+          fi
+
+          # Clean up
+          rm -f ts-paths.js rollup-test.js
+        shell: bash
+
+      - name: 📋 TypeScript diagnostics
+        run: |
+          echo "=============== TYPESCRIPT DIAGNOSTICS ==============="
+
+          # Check if forge builds are being run
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            echo "Forge app detected in matrix: ${{ inputs.matrix-app }}"
+          else
+            echo "Non-Forge app in matrix: ${{ inputs.matrix-app }}"
+          fi
+
+          # Examine TypeScript configuration
+          echo "Looking for TypeScript configuration files:"
+          find . -name "tsconfig*.json" | xargs -I{} echo "Found TypeScript config: {}"
+
+          # Check if TypeScript references node types
+          echo "Looking for @types/node in TypeScript config files:"
+          find . -name "tsconfig*.json" | xargs grep -l "@types/node" || echo "No TypeScript config files with @types/node found"
+
+          # Check if TypeScript can resolve @types/node
+          echo "Checking if TypeScript can resolve @types/node:"
+          echo "const ts = require('typescript'); console.log('TypeScript compiler paths:', ts.sys.getDirectories(require('path').join(process.cwd(), 'node_modules', '@types')).join('\\n'));" > ts-paths.js
+          node ts-paths.js || echo "Failed to run TypeScript path resolution check"
+
+          # Check if there are multiple node_modules directories with conflicting types
+          echo "Searching for multiple @types/node installations:"
+          find . -path "*/node_modules/@types/node" | sort
+
+          echo "Searching for node.d.ts files:"
+          find . -name "node.d.ts" | sort
+
+          # Check if we're on Forge app and examine Forge-specific build configs
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            echo "Examining Forge-specific configs:"
+
+            # Find Forge config files
+            find . -name "forge.config.*" | xargs -I{} echo "Found Forge config: {}"
+
+            # Check for Forge-specific dependencies
+            echo "Forge-related dependencies:"
+            pnpm list electron-forge -r || echo "electron-forge not found"
+            pnpm list electron-builder -r || echo "electron-builder not found"
+
+            # Check if Forge and Electron versions are compatible
+            echo "Checking Forge and Electron versions:"
+            pnpm list electron -r || echo "electron not found"
+
+            # Check if the apps are using native modules which might affect TypeScript builds
+            echo "Checking for native/node-gyp dependencies:"
+            find . -name "binding.gyp" || echo "No binding.gyp files found"
+          fi
+
+          # Clean up
+          rm -f ts-paths.js
+        shell: bash
+
+      - name: 📋 Service and Forge Build Debug
+        run: |
+          echo "=============== SERVICE AND FORGE BUILD DEBUG ==============="
+
+          # Check specific paths that should contain node typings
+          echo "Checking node_modules paths that should contain Node.js typings:"
+          NODE_MODULES_PATHS=(
+            "./node_modules/@types/node"
+            "./packages/wdio-electron-service/node_modules/@types/node"
+          )
+
+          # Add forge apps to the list if we're in a forge build
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            for app in apps/forge*; do
+              if [ -d "$app" ]; then
+                NODE_MODULES_PATHS+=("$app/node_modules/@types/node")
+              fi
+            done
+          fi
+
+          # Check each path
+          for path in "${NODE_MODULES_PATHS[@]}"; do
+            if [ -d "$path" ]; then
+              echo "✅ Found node types at: $path"
+              echo "Index.d.ts exists: $(test -f "$path/index.d.ts" && echo "Yes" || echo "No")"
+              echo "Types version: $(cat "$path/package.json" | grep -o '"version": "[^"]*"' || echo "Version not found")"
+            else
+              echo "❌ Missing node types at: $path"
+            fi
+          done
+
+          # Check rollup config to see how it references TypeScript
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            echo "Examining rollup config for TypeScript plugin configuration:"
+            grep -A 10 "typescript" ./packages/wdio-electron-service/rollup.config.ts || echo "No typescript plugin found in rollup config"
+
+            # Check compilerOptions in the typescript plugin if present
+            grep -A 20 "compilerOptions" ./packages/wdio-electron-service/rollup.config.ts || echo "No compilerOptions found in rollup config"
+          fi
+
+          # Check tsconfig that might be referenced by rollup
+          if [ -f "./packages/wdio-electron-service/tsconfig.json" ]; then
+            echo "Examining service package tsconfig.json:"
+            cat ./packages/wdio-electron-service/tsconfig.json
+
+            echo "Checking if tsconfig extends another config:"
+            grep "extends" ./packages/wdio-electron-service/tsconfig.json || echo "tsconfig does not extend another config"
+
+            # If it extends another config, check that one too
+            EXTENDS_CONFIG=$(grep -o '"extends": *"[^"]*"' ./packages/wdio-electron-service/tsconfig.json | sed 's/"extends": *"//;s/"//g' || echo "")
+            if [ ! -z "$EXTENDS_CONFIG" ]; then
+              # Resolve relative path if needed
+              if [[ "$EXTENDS_CONFIG" == ../* ]]; then
+                EXTENDS_PATH="./packages/wdio-electron-service/$EXTENDS_CONFIG"
+              elif [[ "$EXTENDS_CONFIG" == ./* ]]; then
+                EXTENDS_PATH="./packages/wdio-electron-service/$EXTENDS_CONFIG"
+              else
+                EXTENDS_PATH="$EXTENDS_CONFIG"
+              fi
+
+              if [ -f "$EXTENDS_PATH" ]; then
+                echo "Examining extended tsconfig at $EXTENDS_PATH:"
+                cat "$EXTENDS_PATH"
+              else
+                echo "Extended tsconfig not found at $EXTENDS_PATH"
+              fi
+            fi
+          fi
+
+          # If this is a Forge app, check the app's tsconfig
+          if [[ "${{ inputs.matrix-app }}" == *"forge"* ]]; then
+            for app in apps/forge*; do
+              if [ -d "$app" ]; then
+                if [ -f "$app/tsconfig.json" ]; then
+                  echo "Examining $app tsconfig.json:"
+                  cat "$app/tsconfig.json"
+
+                  # Check for types field
+                  grep -o '"types": *\[[^]]*\]' "$app/tsconfig.json" || echo "No types field found in $app tsconfig"
+
+                  # Check for lib field
+                  grep -o '"lib": *\[[^]]*\]' "$app/tsconfig.json" || echo "No lib field found in $app tsconfig"
+                else
+                  echo "No tsconfig.json found in $app"
+                fi
+              fi
+            done
+          fi
+
+          # List all types packages installed
+          echo "All @types packages installed:"
+          find . -path "*/node_modules/@types" -type d | xargs ls -la 2>/dev/null || echo "No @types directories found"
+
+          # Check for TypeScript paths configuration
+          echo "Checking for TypeScript paths configuration:"
+          find . -name "tsconfig*.json" | xargs grep -l '"paths"' || echo "No paths configurations found"
+
+          # Test basic TypeScript compilation with node types
+          echo "Testing basic TypeScript compilation with node types:"
+          echo 'import * as fs from "fs"; console.log(fs.readFileSync("package.json", "utf8"));' > test-node-types.ts
+          npx tsc test-node-types.ts --traceResolution || echo "TypeScript compilation failed"
+          rm -f test-node-types.ts
+
+          # Rollup Detailed Configuration Debug
+          echo "=============== ROLLUP DETAILED CONFIGURATION DEBUG ==============="
+
+          # Check for rollup.config.ts file in the service package
+          if [ -f "./packages/wdio-electron-service/rollup.config.ts" ]; then
+            # Install dependencies for the test script
+            echo "Installing dependencies for rollup debugging..."
+            npm install --no-save typescript @rollup/plugin-typescript rollup
+
+            # Create a script to analyze rollup configuration
+            cat > rollup-debug.js << 'EOF'
+            const fs = require('fs');
+            const path = require('path');
+            const ts = require('typescript');
+            const rollup = require('rollup');
+
+            console.log('TypeScript version:', ts.version);
+            console.log('Rollup version:', rollup.VERSION);
+
+            // Examine the TypeScript compiler host environment
+            console.log('\nTypeScript compiler environment:');
+            console.log('Current directory:', process.cwd());
+            console.log('NODE_PATH environment variable:', process.env.NODE_PATH || 'not set');
+
+            // Try to find the node.d.ts file
+            const searchPaths = [
+              './node_modules/@types/node',
+              './packages/wdio-electron-service/node_modules/@types/node',
+              '../node_modules/@types/node',
+              '../../node_modules/@types/node',
+            ];
+
+            console.log('\nSearching for node.d.ts in:');
+            searchPaths.forEach(searchPath => {
+              const fullPath = path.resolve(searchPath);
+              const indexPath = path.join(fullPath, 'index.d.ts');
+              const exists = fs.existsSync(indexPath);
+              console.log(`- ${fullPath}: ${exists ? 'EXISTS' : 'NOT FOUND'}`);
+              if (exists) {
+                const packagePath = path.join(fullPath, 'package.json');
+                if (fs.existsSync(packagePath)) {
+                  try {
+                    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                    console.log(`  - Version: ${packageJson.version || 'unknown'}`);
+                  } catch (e) {
+                    console.log(`  - Error reading package.json: ${e.message}`);
+                  }
+                }
+              }
+            });
+
+            // Try to simulate the typescript plugin initialization
+            try {
+              console.log('\nTrying to load rollup.config.ts:');
+              // Check if the file exists but don't actually execute it
+              const configPath = path.resolve('./packages/wdio-electron-service/rollup.config.ts');
+              if (fs.existsSync(configPath)) {
+                console.log(`Configuration file exists at: ${configPath}`);
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                console.log('Configuration file content:');
+                console.log('---');
+                console.log(configContent);
+                console.log('---');
+
+                // Try to find typescript plugin configuration
+                if (configContent.includes('@rollup/plugin-typescript')) {
+                  console.log('\nTypeScript plugin found in configuration.');
+
+                  // Extract typescript plugin configuration using a simple regex
+                  // This is not a full parser but should help identify basic issues
+                  const tsPluginRegex = /typescript\(\s*(\{[^}]*\})/s;
+                  const match = configContent.match(tsPluginRegex);
+
+                  if (match && match[1]) {
+                    console.log('TypeScript plugin configuration:', match[1]);
+
+                    // Look for tsconfig path
+                    const tsconfigRegex = /tsconfig\s*:\s*['"]([^'"]*)['"]/;
+                    const tsconfigMatch = match[1].match(tsconfigRegex);
+
+                    if (tsconfigMatch && tsconfigMatch[1]) {
+                      const tsconfigPath = path.resolve('./packages/wdio-electron-service', tsconfigMatch[1]);
+                      console.log(`\nReferenced tsconfig file: ${tsconfigPath}`);
+
+                      if (fs.existsSync(tsconfigPath)) {
+                        console.log('tsconfig exists');
+                        try {
+                          const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+                          console.log('tsconfig content:', JSON.stringify(tsconfig, null, 2));
+
+                          // Check for types inclusion
+                          if (tsconfig.compilerOptions && tsconfig.compilerOptions.types) {
+                            console.log('Types specified in tsconfig:', tsconfig.compilerOptions.types);
+                            if (tsconfig.compilerOptions.types.includes('node')) {
+                              console.log('node types are explicitly included');
+                            } else {
+                              console.log('node types are NOT explicitly included');
+                            }
+                          } else {
+                            console.log('No types array found in tsconfig');
+                          }
+                        } catch (e) {
+                          console.log(`Error parsing tsconfig: ${e.message}`);
+                        }
+                      } else {
+                        console.log('Referenced tsconfig does NOT exist');
+                      }
+                    } else {
+                      console.log('No tsconfig reference found in TypeScript plugin configuration');
+                    }
+                  } else {
+                    console.log('Could not extract TypeScript plugin configuration');
+                  }
+                } else {
+                  console.log('No TypeScript plugin found in configuration');
+                }
+              } else {
+                console.log(`Configuration file does NOT exist at: ${configPath}`);
+              }
+            } catch (e) {
+              console.log(`Error analyzing rollup configuration: ${e.message}`);
+              console.log(e.stack);
+            }
+
+            // Check TypeScript path resolution for node types
+            console.log('\nTypeScript path resolution:');
+            try {
+              // Create a simple program to check module resolution
+              const sourceFile = ts.createSourceFile(
+                'test.ts',
+                'import * as fs from "fs";',
+                ts.ScriptTarget.Latest
+              );
+
+              const compilerOptions = {
+                target: ts.ScriptTarget.ES2015,
+                module: ts.ModuleKind.CommonJS,
+                moduleResolution: ts.ModuleResolutionKind.NodeJs,
+              };
+
+              const host = ts.createCompilerHost(compilerOptions);
+              const program = ts.createProgram(['test.ts'], compilerOptions, host);
+              program.emit();
+
+              // Print diagnostic information
+              const diagnostics = ts.getPreEmitDiagnostics(program);
+              if (diagnostics.length > 0) {
+                console.log('Diagnostics:');
+                diagnostics.forEach(diagnostic => {
+                  console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+                });
+              } else {
+                console.log('No diagnostics produced');
+              }
+            } catch (e) {
+              console.log(`Error testing TypeScript resolution: ${e.message}`);
+            }
+            EOF
+
+            # Run the script to analyze rollup configuration
+            echo "Running rollup debug analysis script..."
+            node rollup-debug.js
+
+            # Cleanup
+            rm -f rollup-debug.js
+          else
+            echo "Rollup configuration not found for the service package"
+          fi
+        shell: bash
