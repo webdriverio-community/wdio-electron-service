@@ -13,6 +13,9 @@ class TestAppsManager {
   private tmpDir: string | null = null;
   private cleanupRegistered = false;
   private isPrepared = false;
+  private _currentPhase: string | null = null;
+  private _lastCompletedPhase: string | null = null;
+  private _currentOperation: string | null = null;
 
   private constructor() {}
 
@@ -67,6 +70,11 @@ class TestAppsManager {
           console.log('************* LINUX SIGTERM DIAGNOSTIC INFO *************');
           console.log(`Process ${process.pid} terminating due to SIGTERM at ${new Date().toISOString()}`);
 
+          // Print the current phase of execution
+          console.log(`Current execution phase: ${this._currentPhase || 'unknown'}`);
+          console.log(`Last completed phase: ${this._lastCompletedPhase || 'none'}`);
+          console.log(`Current operation: ${this._currentOperation || 'unknown'}`);
+
           // Memory usage details
           const memoryUsage = process.memoryUsage();
           console.log('Memory usage at termination:');
@@ -81,6 +89,14 @@ class TestAppsManager {
             console.log(memInfo);
           } catch (_err) {
             console.log('Could not get system memory info');
+          }
+
+          // Log active processes
+          try {
+            console.log('Top processes by memory usage:');
+            console.log(execSync('ps aux --sort=-%mem | head -10').toString());
+          } catch (_err) {
+            console.log('Could not get top processes');
           }
 
           console.log('************* LINUX SIGTERM DIAGNOSTIC INFO END *************');
@@ -183,6 +199,11 @@ class TestAppsManager {
   }
 
   async prepareTestApps(): Promise<string> {
+    // Add tracking properties to track where in the process we are
+    this._currentPhase = 'init';
+    this._lastCompletedPhase = null;
+    this._currentOperation = 'starting';
+
     // Register cleanup handlers when preparing test apps
     this.registerCleanupHandlers();
 
@@ -199,12 +220,14 @@ class TestAppsManager {
     // Track execution time for each step
     const timings: Record<string, number> = {};
     const timeStep = (step: string) => {
+      this._currentPhase = step;
       const now = Date.now();
       const elapsed = now - (timings.last || startTime);
       timings[step] = elapsed;
       timings.last = now;
       console.log(`Step "${step}" completed in ${(elapsed / 1000).toFixed(2)}s`);
       console.log(`Memory usage after "${step}": RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+      this._lastCompletedPhase = step;
     };
 
     if (this.tmpDir) {
@@ -220,6 +243,7 @@ class TestAppsManager {
     console.log(`Apps directory: ${appsDir}`);
 
     // 1. Create temp directory first with a shorter path
+    this._currentOperation = 'creating temp directory';
     console.log('Creating temp directory');
     // Use a shorter prefix to avoid path length issues
     this.tmpDir = await mkdtemp(join(tmpdir(), 'wdio-e2e-'));
@@ -227,6 +251,7 @@ class TestAppsManager {
     timeStep('create_temp_dir');
 
     // 2. Obtain the service package
+    this._currentOperation = 'setting up service package';
     console.log('Setting up service package');
     console.log('Environment variables for package detection:');
     console.log(`- USE_ARTIFACT_SERVICE: ${process.env.USE_ARTIFACT_SERVICE || 'not set'}`);
@@ -235,48 +260,65 @@ class TestAppsManager {
 
     let packageFileName: string;
 
-    // Check if we should use a pre-built artifact
-    if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
-      console.log(`Using pre-built service from: ${process.env.WDIO_SERVICE_TARBALL}`);
+    try {
+      // Check if we should use a pre-built artifact
+      if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
+        this._currentOperation = 'using pre-built service artifact';
+        console.log(`Using pre-built service from: ${process.env.WDIO_SERVICE_TARBALL}`);
 
-      const sourceTarball = process.env.WDIO_SERVICE_TARBALL;
-      packageFileName = path.basename(sourceTarball);
+        const sourceTarball = process.env.WDIO_SERVICE_TARBALL;
+        packageFileName = path.basename(sourceTarball);
 
-      // Verify the tarball exists
-      try {
-        await fs.promises.access(sourceTarball, fs.constants.F_OK);
-        console.log(`Verified tarball exists at: ${sourceTarball}`);
-
-        // Copy the tarball to the temp directory
-        const tempPackagePath = join(this.tmpDir, packageFileName);
+        // Verify the tarball exists
         try {
-          await fs.promises.copyFile(sourceTarball, tempPackagePath);
-          console.log(`Copied tarball to: ${tempPackagePath}`);
+          this._currentOperation = 'verifying tarball exists';
+          await fs.promises.access(sourceTarball, fs.constants.F_OK);
+          console.log(`Verified tarball exists at: ${sourceTarball}`);
 
-          // Verify the copy was successful
-          await fs.promises.access(tempPackagePath, fs.constants.F_OK);
-          console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
-        } catch (copyError: unknown) {
-          console.error(`Error copying tarball:`, copyError);
-          throw new Error(
-            `Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`,
-          );
+          // Copy the tarball to the temp directory
+          this._currentOperation = 'copying tarball to temp directory';
+          const tempPackagePath = join(this.tmpDir, packageFileName);
+          try {
+            await fs.promises.copyFile(sourceTarball, tempPackagePath);
+            console.log(`Copied tarball to: ${tempPackagePath}`);
+
+            // Verify the copy was successful
+            this._currentOperation = 'verifying tarball copy';
+            await fs.promises.access(tempPackagePath, fs.constants.F_OK);
+            console.log(`Verified tarball copy exists at: ${tempPackagePath}`);
+          } catch (copyError: unknown) {
+            console.error(`Error copying tarball:`, copyError);
+            throw new Error(
+              `Failed to copy tarball: ${copyError instanceof Error ? copyError.message : String(copyError)}`,
+            );
+          }
+
+          timeStep('use_artifact_package');
+        } catch (error) {
+          console.error(`Pre-built tarball not found at ${sourceTarball}:`, error);
+          console.log('Falling back to packaging the service');
+
+          // Fall back to packaging the service
+          this._currentOperation = 'falling back to packaging service';
+          packageFileName = await this.packService(serviceDir);
         }
-
-        timeStep('use_artifact_package');
-      } catch (error) {
-        console.error(`Pre-built tarball not found at ${sourceTarball}:`, error);
-        console.log('Falling back to packaging the service');
-
-        // Fall back to packaging the service
+      } else {
+        // Package the service on demand
+        this._currentOperation = 'packaging service on demand';
         packageFileName = await this.packService(serviceDir);
       }
-    } else {
-      // Package the service on demand
-      packageFileName = await this.packService(serviceDir);
+    } catch (servicePackageError) {
+      console.error('Error preparing service package:', servicePackageError);
+      throw new Error(
+        `Failed to prepare service package: ${
+          servicePackageError instanceof Error ? servicePackageError.message : String(servicePackageError)
+        }`,
+      );
     }
 
     // 3. Copy apps
+    this._currentPhase = 'copying_apps';
+    this._currentOperation = 'setting up app directories';
     console.log('Copying apps');
     // Create the apps directory
     const appsTargetDir = join(this.tmpDir, 'apps');
@@ -299,6 +341,7 @@ class TestAppsManager {
 
     // Copy each selected app directory individually to ensure proper structure
     for (const appDir of appDirsToCopy) {
+      this._currentOperation = `copying app directory: ${appDir}`;
       const sourceAppDir = join(appsDir, appDir);
       const targetAppDir = join(this.tmpDir, 'apps', appDir);
 
@@ -324,15 +367,18 @@ class TestAppsManager {
 
       try {
         // Copy package.json and other files in the root directory
+        this._currentOperation = `copying package.json for ${appDir}`;
         await execAsync(`cp -R ${sourceAppDir}/package.json ${targetAppDir}/`);
 
         // Copy the src directory if it exists
         if (fs.existsSync(join(sourceAppDir, 'src'))) {
+          this._currentOperation = `copying src directory for ${appDir}`;
           await execAsync(`cp -R ${sourceAppDir}/src ${targetAppDir}/`);
         }
 
         // Copy the dist directory if it exists
         if (fs.existsSync(distDir)) {
+          this._currentOperation = `copying dist directory for ${appDir}`;
           console.log(`Copying dist directory for ${appDir}...`);
 
           // Create the dist directory in the target app
@@ -376,6 +422,7 @@ class TestAppsManager {
         }
 
         // Copy other important files and directories
+        this._currentOperation = `copying config files for ${appDir}`;
         const otherFiles = ['tsconfig.json', 'rollup.config.js', 'rollup.config.mjs', 'forge.config.js'];
         for (const file of otherFiles) {
           if (fs.existsSync(join(sourceAppDir, file))) {
@@ -391,6 +438,7 @@ class TestAppsManager {
     }
 
     // Create a package.json in the apps directory for pnpm workspace
+    this._currentOperation = 'creating workspace package.json';
     const workspacePackageJson = {
       name: 'wdio-electron-test-apps',
       version: '1.0.0',
@@ -399,6 +447,7 @@ class TestAppsManager {
     await writeFile(join(this.tmpDir, 'apps', 'package.json'), JSON.stringify(workspacePackageJson, null, 2));
 
     // Verify the apps directory structure
+    this._currentOperation = 'verifying apps directory structure';
     console.log('Verifying apps directory structure');
     try {
       const { stdout: lsOutput } = await execAsync(`ls -la ${join(this.tmpDir, 'apps')}`);
@@ -408,9 +457,11 @@ class TestAppsManager {
     }
 
     // 4. Update each app's package.json
+    this._currentPhase = 'updating_package_jsons';
     console.log('Updating package.jsons');
 
     for (const appDir of appDirsToCopy) {
+      this._currentOperation = `updating package.json for ${appDir}`;
       const appPath = join(this.tmpDir, 'apps', appDir);
       const packageJsonPath = join(appPath, 'package.json');
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'));
@@ -422,11 +473,16 @@ class TestAppsManager {
     }
 
     // 5. Install dependencies
+    this._currentPhase = 'installing_dependencies';
+    this._currentOperation = 'running pnpm install';
     console.log('Installing dependencies');
     await execAsync('pnpm install --no-lockfile', { cwd: join(this.tmpDir, 'apps') });
+    timeStep('install_dependencies');
 
     // 6. Create a symlink to the wdio-electron-service package in node_modules
     // This helps with module resolution in ESM mode
+    this._currentPhase = 'creating_service_symlink';
+    this._currentOperation = 'preparing wdio-electron-service symlink';
     console.log('Creating symlink for wdio-electron-service');
     try {
       const nodeModulesDir = join(this.tmpDir, 'apps', 'node_modules');
@@ -441,6 +497,7 @@ class TestAppsManager {
 
       // Check if we're using a pre-built tarball
       if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
+        this._currentOperation = 'extracting service tarball';
         console.log(`Using pre-built service from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
 
         // Create the service directory
@@ -453,10 +510,29 @@ class TestAppsManager {
         try {
           // Normalize path for Windows
           const tarballPath = process.env.WDIO_SERVICE_TARBALL.replace(/\\/g, '/');
-          await execAsync(`pnpx pacote extract "${tarballPath}" "${serviceDir}"`);
+
+          // Log before extraction
+          console.log(`About to extract tarball at path: ${tarballPath}`);
+          console.log(`Target extract directory: ${serviceDir}`);
+          console.log(`Current operation: ${this._currentOperation}`);
+          console.log(`Current memory usage: RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+
+          // Log command being executed
+          const extractCmd = `pnpx pacote extract "${tarballPath}" "${serviceDir}"`;
+          console.log(`Executing extract command: ${extractCmd}`);
+
+          // Add a timestamp before starting extraction
+          console.log(`Starting extraction at: ${new Date().toISOString()}`);
+
+          this._currentOperation = 'executing pacote extract';
+          await execAsync(extractCmd);
+
+          // Add a timestamp after extraction completes
+          console.log(`Extraction completed at: ${new Date().toISOString()}`);
           console.log(`Successfully extracted tarball to ${serviceDir}`);
 
           // Verify the extraction was successful
+          this._currentOperation = 'verifying extraction success';
           const distDir = join(serviceDir, 'dist');
           if (fs.existsSync(distDir)) {
             console.log(`Verified dist directory exists at: ${distDir}`);
@@ -472,6 +548,44 @@ class TestAppsManager {
             }
           } else {
             console.error(`Error: dist directory not found at ${distDir}`);
+            this._currentOperation = 'searching for dist directory';
+
+            // Try to find the correct dist directory structure
+            console.log('Searching for dist directory in extracted contents...');
+            try {
+              const { stdout: findOutput } = await execAsync(
+                process.platform === 'win32'
+                  ? `dir /s /b "${serviceDir}\\dist"`
+                  : `find "${serviceDir}" -name "dist" -type d`,
+              );
+
+              if (findOutput.trim()) {
+                console.log(`Found potential dist directories: ${findOutput}`);
+
+                // If we find a package/dist directory, move it up to the correct location
+                const packageDistDirs = findOutput
+                  .trim()
+                  .split('\n')
+                  .filter((dir) => dir.includes('package/dist'));
+                if (packageDistDirs.length > 0) {
+                  this._currentOperation = 'moving dist directory to correct location';
+                  console.log(`Found package/dist at ${packageDistDirs[0]}, moving to correct location...`);
+                  await execAsync(`cp -r "${packageDistDirs[0]}" "${serviceDir}/"`);
+
+                  // Check if the move was successful
+                  if (fs.existsSync(distDir)) {
+                    console.log(`Successfully moved dist directory to ${distDir}`);
+                  } else {
+                    console.error(`Failed to move dist directory to ${distDir}`);
+                  }
+                }
+              } else {
+                console.log('No dist directory found in extracted contents');
+              }
+            } catch (findError) {
+              console.error('Error searching for dist directory:', findError);
+            }
+
             throw new Error(`Extraction failed: dist directory not found`);
           }
         } catch (extractError) {
@@ -482,6 +596,7 @@ class TestAppsManager {
         }
       } else {
         // Build the package to ensure the dist directory exists
+        this._currentOperation = 'building wdio-electron-service package';
         try {
           console.log('Building wdio-electron-service package to ensure dist directory exists');
           const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
@@ -489,6 +604,7 @@ class TestAppsManager {
           console.log('Successfully built wdio-electron-service package');
 
           // Create a symlink to the package directory
+          this._currentOperation = 'creating symlink to package directory';
           const wdioServicePath = join(nodeModulesDir, 'wdio-electron-service');
           try {
             // Remove existing symlink if it exists
@@ -517,6 +633,10 @@ class TestAppsManager {
         `Failed to set up wdio-electron-service: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+
+    timeStep('finish_setup');
+    this._currentPhase = 'completed';
+    this._currentOperation = 'done';
 
     this.isPrepared = true;
     return this.tmpDir;

@@ -4,7 +4,7 @@ import pLimit from 'p-limit';
 import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
 import { cleanupAllTempDirs } from '../setup/testAppsManager.js';
 import * as fs from 'fs';
-import * as path from 'path';
+import { join } from 'path';
 
 /**
  * TEMPORARY MODIFICATION: Multiremote tests have been disabled.
@@ -14,6 +14,16 @@ import * as path from 'path';
 
 // Keep the promisified exec for simple commands
 const execAsync = promisify(exec);
+
+// Debug flag to track execution flow
+const DEBUG = process.env.WDIO_MATRIX_DEBUG === 'true';
+
+// Helper to print debug messages
+function debug(message: string): void {
+  if (DEBUG) {
+    console.log(`[DEBUG] ${message}`);
+  }
+}
 
 /**
  * ANSI escape codes for terminal control
@@ -322,27 +332,6 @@ async function execWithDebug(
       console.log(`🔍 DEBUG: Executing command: ${cmd}`);
     }
 
-    // Create a logs directory if it doesn't exist
-    const logsDir = path.join(process.cwd(), 'logs');
-    if (!fs.existsSync(logsDir)) {
-      fs.mkdirSync(logsDir, { recursive: true });
-    }
-
-    // Create a test-specific log directory
-    const testName =
-      env.PLATFORM && env.MODULE_TYPE && env.TEST_TYPE
-        ? `${env.PLATFORM}-${env.MODULE_TYPE}-${env.TEST_TYPE}-${env.BINARY === 'true' ? 'binary' : 'no-binary'}`
-        : `test-${Date.now()}`;
-
-    const testLogsDir = path.join(logsDir, testName);
-    if (!fs.existsSync(testLogsDir)) {
-      fs.mkdirSync(testLogsDir, { recursive: true });
-    }
-
-    // Create log files
-    const stdoutLogPath = path.join(testLogsDir, 'stdout.log');
-    const stderrLogPath = path.join(testLogsDir, 'stderr.log');
-
     // Split the command into parts for spawn
     const parts = cmd.split(' ');
     const command = parts[0];
@@ -365,22 +354,24 @@ async function execWithDebug(
     let stdout = '';
     let stderr = '';
 
-    // Capture stdout but don't display it (write to log file instead)
+    // Capture stdout
     childProcess.stdout.on('data', (data) => {
       const chunk = data.toString();
       stdout += chunk;
 
-      // Write to log file
-      fs.appendFileSync(stdoutLogPath, chunk);
+      // Display output in real-time for better debugging
+      if (process.env.WDIO_VERBOSE === 'true') {
+        process.stdout.write(chunk);
+      }
     });
 
-    // Capture stderr but don't display it (write to log file instead)
+    // Capture stderr
     childProcess.stderr.on('data', (data) => {
       const chunk = data.toString();
       stderr += chunk;
 
-      // Write to log file
-      fs.appendFileSync(stderrLogPath, chunk);
+      // Always display errors in real-time
+      process.stderr.write(chunk);
     });
 
     // Handle process completion
@@ -561,6 +552,12 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
   const { platform, moduleType, testType, binary } = variant;
   const testName = getTestName(variant);
 
+  console.log(`\n==================================================`);
+  console.log(`🚀 STARTING TEST: ${testName}`);
+  console.log(`==================================================`);
+  console.log(`Platform: ${platform}, ModuleType: ${moduleType}, TestType: ${testType}, Binary: ${binary}`);
+  console.log(`Working directory: ${process.cwd()}`);
+
   // Update test status
   testStatus.startTest(testName);
 
@@ -578,6 +575,9 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
       TEST_TYPE: testType,
       BINARY: binary ? 'true' : 'false',
       WDIO_LOG_LEVEL: 'info',
+      WDIO_VERBOSE: process.env.WDIO_VERBOSE || 'false',
+      NODE_OPTIONS: '--trace-warnings --no-warnings',
+      NODE_ENV: 'development',
     };
 
     // Enable splash screen for window tests
@@ -603,22 +603,53 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
       env.SUITE_CLEANUP_MANAGED = process.env.SUITE_CLEANUP_MANAGED;
     }
 
+    // Log debug info
+    console.log(`Debug info for test ${testName}:`);
+    console.log(`- Test working directory: ${process.cwd()}`);
+    console.log(`- Using run-single-test.ts at: ${join(process.cwd(), 'scripts', 'run-single-test.ts')}`);
+
+    // Check if run-single-test.ts exists
+    const runSingleTestPath = join(process.cwd(), 'scripts', 'run-single-test.ts');
+    if (fs.existsSync(runSingleTestPath)) {
+      console.log(`✅ run-single-test.ts exists at ${runSingleTestPath}`);
+    } else {
+      console.error(`❌ ERROR: run-single-test.ts does not exist at ${runSingleTestPath}`);
+      throw new Error(`run-single-test.ts not found at ${runSingleTestPath}`);
+    }
+
+    // Log command to be executed
+    const commandToRun = 'pnpm run test:single';
+    console.log(`Running command: ${commandToRun}`);
+    console.log(`Environment variables: ${JSON.stringify(env, null, 2)}`);
+
     // Run the test
-    const { code, stderr } = await execWithDebug('pnpm run test:single', env);
+    const { code, stderr, stdout } = await execWithDebug('pnpm run test:single', env);
+
+    // Log execution output
+    console.log(`Command execution completed with exit code: ${code}`);
+    console.log(`Output length: stdout=${stdout.length}, stderr=${stderr.length}`);
 
     // Check for success
     success = code === 0;
     if (!success) {
       error = new Error(`Test failed with exit code: ${code}`);
       errorSummary = stderr.split('\n').slice(-10).join('\n');
+
+      console.error(`❌ Test failed with exit code: ${code}`);
+      console.error(`Last 10 lines of stderr:\n${errorSummary}`);
+    } else {
+      console.log(`✅ Test passed successfully with exit code: ${code}`);
     }
   } catch (err) {
     success = false;
     error = err;
     errorSummary = err instanceof Error ? err.message : String(err);
+
+    console.error(`❌ Error executing test: ${errorSummary}`);
   }
 
   const duration = Date.now() - startTime;
+  console.log(`Test duration: ${formatDuration(duration)}`);
 
   // Update test status
   testStatus.completeTest(testName, {
@@ -630,6 +661,10 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
     skipped,
   });
 
+  console.log(`==================================================`);
+  console.log(`🏁 COMPLETED TEST: ${testName} - ${success ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`==================================================\n`);
+
   return {
     variant,
     success,
@@ -640,136 +675,77 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
   };
 }
 
-// Run tests with controlled concurrency
-async function runTests() {
-  console.log('\n🧪 WebdriverIO Electron Service Test Matrix Runner 🧪');
-  console.log('═'.repeat(80));
-
-  // Set PRESERVE_TEMP_DIR to true to avoid cleaning up between test runs
-  process.env.PRESERVE_TEMP_DIR = 'true';
-
-  // Generate all possible test variants
-  const variants = generateTestVariants();
-
-  // Filter variants based on environment variables
-  const filteredVariants = filterVariants(variants);
-
-  // Set concurrency based on environment variables or defaults
-  const concurrency = process.env.CONCURRENCY ? parseInt(process.env.CONCURRENCY, 10) : 1;
-  console.log(`\n🚀 Running tests with concurrency: ${concurrency}`);
-
-  // Create a limit function to control concurrency
-  const limit = pLimit(concurrency);
-
-  // Sort variants to optimize test execution
-  filteredVariants.sort((a, b) => {
-    // Run window tests first as they're usually faster
-    if (a.testType === 'window' && b.testType !== 'window') return -1;
-    if (a.testType !== 'window' && b.testType === 'window') return 1;
-
-    // Run standalone tests last as they're usually slower
-    if (a.testType === 'standalone' && b.testType !== 'standalone') return 1;
-    if (a.testType !== 'standalone' && b.testType === 'standalone') return -1;
-
-    // Non-binary tests are usually faster
-    if (!a.binary && b.binary) return -1;
-    if (a.binary && !b.binary) return 1;
-
-    return 0;
-  });
-
-  console.log(`\n🧪 Running ${filteredVariants.length} test variants`);
-  console.log('═'.repeat(80));
-
-  // Print test plan
-  console.log('\n📋 Test Plan:');
-  for (const variant of filteredVariants) {
-    console.log(`  • ${getTestName(variant)}`);
-  }
-  console.log('═'.repeat(80));
-
-  // Initialize test status
-  testStatus.initialize(filteredVariants.length);
-
-  // Set up an interval to update the status display periodically
-  const statusUpdateInterval = setInterval(() => {
-    testStatus.printStatus();
-  }, 1000);
+/**
+ * Run all tests based on environment variables
+ */
+async function runTests(): Promise<void> {
+  debug('Starting runTests function');
+  let statusUpdateInterval: NodeJS.Timeout | null = null;
 
   try {
-    // We don't need to clean up leftover directories at the start
-    // This ensures we can reuse prepared test apps
+    // Parse command line arguments to get timeout
+    const args = process.argv.slice(2);
+    const noTimeoutFlag = args.includes('--no-timeout');
+    const timeoutArg = args.find((arg) => arg.startsWith('--timeout='));
+    const timeout = noTimeoutFlag ? 0 : timeoutArg ? parseInt(timeoutArg.split('=')[1], 10) : 60000;
 
-    // Kill any existing Electron processes before starting
+    debug(`Using timeout: ${timeout}ms, noTimeoutFlag: ${noTimeoutFlag}`);
+
+    // Ensure we have access to the kill process function
     await killElectronProcesses();
 
-    // Log environment variables for debugging
-    console.log('📊 Environment variables:');
-    console.log(`- WDIO_TEST_APPS_PREPARED: ${process.env.WDIO_TEST_APPS_PREPARED || 'not set'}`);
-    console.log(`- WDIO_TEST_APPS_DIR: ${process.env.WDIO_TEST_APPS_DIR || 'not set'}`);
-    console.log(`- SUITE_SETUP_DONE: ${process.env.SUITE_SETUP_DONE || 'not set'}`);
-    console.log(`- PRESERVE_TEMP_DIR: ${process.env.PRESERVE_TEMP_DIR || 'not set'}`);
-    console.log(`- ELECTRON_CACHE: ${process.env.ELECTRON_CACHE || 'not set'}`);
+    // Get all concurrency info
+    const concurrencyArg = args.find((arg) => arg.startsWith('--concurrency='));
+    const concurrency = concurrencyArg ? parseInt(concurrencyArg.split('=')[1], 10) : 1;
+    console.log(`\n🚀 Running tests with concurrency: ${concurrency}`);
+    const limit = pLimit(concurrency);
 
-    // Check if suite setup has already been performed
-    const suiteSetupDone = process.env.SUITE_SETUP_DONE === 'true';
-    const testAppsPrepared = process.env.WDIO_TEST_APPS_PREPARED === 'true';
+    // Generate test variants
+    const allVariants = generateTestVariants();
+    debug(`Generated ${allVariants.length} test variants`);
 
-    if (!suiteSetupDone) {
-      if (testAppsPrepared) {
-        console.log('ℹ️ Test apps already prepared, skipping setup...');
+    // Filter based on environment variables
+    const filteredVariants = filterVariants(allVariants);
+    debug(`Filtered to ${filteredVariants.length} test variants`);
 
-        // Verify that the test apps directory exists
-        if (process.env.WDIO_TEST_APPS_DIR) {
-          try {
-            const stats = fs.statSync(process.env.WDIO_TEST_APPS_DIR);
-            if (stats.isDirectory()) {
-              console.log(`✅ Verified that test apps directory exists: ${process.env.WDIO_TEST_APPS_DIR}`);
-            } else {
-              console.log(`❌ WDIO_TEST_APPS_DIR is not a directory: ${process.env.WDIO_TEST_APPS_DIR}`);
-              console.log('Will perform setup anyway...');
+    console.log(`\n🧪 Running ${filteredVariants.length} test variants`);
+    console.log('═'.repeat(80));
 
-              // Reset the environment variables
-              process.env.WDIO_TEST_APPS_PREPARED = 'false';
-              process.env.WDIO_TEST_APPS_DIR = '';
-
-              // Perform suite-level setup
-              console.log('🔧 Performing suite-level setup...');
-              await setupTestSuite();
-              console.log('✅ Suite setup complete');
-            }
-          } catch (error) {
-            console.log(`❌ Failed to access test apps directory: ${error}`);
-            console.log('Will perform setup anyway...');
-
-            // Reset the environment variables
-            process.env.WDIO_TEST_APPS_PREPARED = 'false';
-            process.env.WDIO_TEST_APPS_DIR = '';
-
-            // Perform suite-level setup
-            console.log('🔧 Performing suite-level setup...');
-            await setupTestSuite();
-            console.log('✅ Suite setup complete');
-          }
-        } else {
-          console.log('❌ WDIO_TEST_APPS_DIR not set, will perform setup...');
-          // Perform suite-level setup
-          console.log('🔧 Performing suite-level setup...');
-          await setupTestSuite();
-          console.log('✅ Suite setup complete');
-        }
-      } else {
-        // Perform suite-level setup before running any tests
-        console.log('🔧 Performing suite-level setup...');
-        await setupTestSuite();
-        console.log('✅ Suite setup complete');
-      }
-
-      // Set SUITE_SETUP_DONE to true to avoid duplicate setup
-      process.env.SUITE_SETUP_DONE = 'true';
-    } else {
-      console.log('ℹ️ Suite setup already performed, skipping...');
+    // Print test plan
+    console.log('\n📋 Test Plan:');
+    for (const variant of filteredVariants) {
+      console.log(`  • ${getTestName(variant)}`);
     }
+    console.log('═'.repeat(80));
+
+    // Initialize test status
+    testStatus.initialize(filteredVariants.length);
+
+    // Check if we need to do suite-level setup
+    const testAppsPrepared = process.env.WDIO_TEST_APPS_PREPARED === 'true';
+    debug(`Test apps prepared flag: ${testAppsPrepared}`);
+
+    if (!testAppsPrepared) {
+      debug('Performing suite-level setup');
+      // Perform suite-level setup
+      await setupTestSuite();
+      debug('Suite setup complete');
+    } else {
+      debug('Skipping suite setup - apps already prepared');
+      console.log('ℹ️ Test apps already prepared, skipping setup...');
+    }
+
+    // Store suite setup done flag for child processes
+    process.env.SUITE_SETUP_DONE = 'true';
+
+    // We'll continue for previously prepared temp directories
+    process.env.SUITE_CLEANUP_MANAGED = 'true';
+
+    // Set up a regular status update interval
+    statusUpdateInterval = setInterval(() => {
+      // This is a no-op if not in interactive mode
+      testStatus.printStatus();
+    }, 500);
 
     // Run all tests with controlled concurrency
     const results: TestResult[] = await Promise.all(
@@ -777,7 +753,9 @@ async function runTests() {
     );
 
     // Clean up the status bar before printing the final results
-    clearInterval(statusUpdateInterval);
+    if (statusUpdateInterval) {
+      clearInterval(statusUpdateInterval);
+    }
     statusBar.cleanup();
 
     // Print summary table
@@ -856,7 +834,9 @@ async function runTests() {
     }
   } catch (error) {
     // Clean up the status bar on error
-    clearInterval(statusUpdateInterval);
+    if (statusUpdateInterval) {
+      clearInterval(statusUpdateInterval);
+    }
     statusBar.cleanup();
     console.error(`\n❌ Error running tests: ${error}`);
     process.exit(1);

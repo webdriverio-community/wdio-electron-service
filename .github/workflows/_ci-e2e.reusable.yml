@@ -141,7 +141,7 @@ jobs:
                   if [ -d "$APP_DIR" ]; then
                     echo "Installing service package in $APP_DIR..."
                     cd "$APP_DIR"
-                    pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
+                      pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
                     cd ../..
                   else
                     echo "Skipping non-existent app directory: $APP_DIR"
@@ -195,6 +195,7 @@ jobs:
       # Prepare the test applications once - new approach
       - name: 🏗️ Prepare Test Applications
         shell: bash
+        id: prepare_apps
         env:
           # Preserve temp directories between steps
           PRESERVE_TEMP_DIR: 'true'
@@ -204,26 +205,164 @@ jobs:
           USE_ARTIFACT_SERVICE: ${{ env.USE_ARTIFACT_SERVICE || 'true' }}
           # Pass through service tarball path if available
           WDIO_SERVICE_TARBALL: ${{ env.WDIO_SERVICE_TARBALL || '' }}
+          # Debug environment variable for SIGTERM debugging
+          WDIO_DEBUG_SIGTERM: 'true'
+          # Enable ESM mode support to fix __filename not defined error
+          NODE_OPTIONS: '--no-warnings --experimental-specifier-resolution=node'
         timeout-minutes: 15
         run: |
           echo "Preparing test applications for scenario: ${{ inputs.scenario }}, module type: ${{ inputs.type }}"
+
+          # Print system diagnostics
+          echo "=== System Diagnostics ==="
+          echo "Operating System: ${{ runner.os }}"
+          echo "Kernel version: $(uname -a)"
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Memory: $(free -h)"
+            echo "Disk space: $(df -h)"
+          fi
+          echo "================="
+
+          # Process environment information
+          echo "=== Environment Variables ==="
+          printenv | sort
+          echo "================="
+
+          # Set up signal tracing on Linux
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Setting up signal tracing on Linux..."
+
+            # Create a trap for SIGTERM to get stack trace
+            trap_sigterm() {
+              echo "************* CAUGHT SIGTERM in prepare-apps.sh wrapper *************"
+              echo "Time: $(date)"
+              echo "Current process: $$"
+
+              # Print stack trace if possible
+              if type -t caller > /dev/null; then
+                echo "Stack trace:"
+                local i=0
+                while caller $i; do
+                  ((i++))
+                done
+              fi
+
+              # Show what processes might be sending signals
+              echo "Running processes (sorted by memory usage):"
+              ps aux --sort=-%mem | head -15
+
+              # Print parent process tree to help identify the source of SIGTERM
+              echo "Process tree:"
+              pstree -p $$
+
+              echo "************* END SIGTERM TRAP *************"
+
+              # Exit with SIGTERM exit code
+              exit 143
+            }
+
+            # Set up the trap
+            trap 'trap_sigterm' TERM
+
+            # Monitor for processes that might be causing issues
+            (
+              while true; do
+                echo "[$(date)] Process monitor check..."
+                ps aux --sort=-%mem | head -8
+                sleep 10
+              done
+            ) > process_monitor.log &
+            MONITOR_PID=$!
+
+            # Make sure to kill the monitor when this script exits
+            trap 'kill $MONITOR_PID 2>/dev/null' EXIT
+          fi
+
+          # Add process monitoring on Linux
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Setting up Linux process monitoring..."
+
+            # Check for stray processes
+            echo "Checking for stray electron or node processes:"
+            ps aux | grep -E 'electron|node' | grep -v grep || echo "No matching processes found"
+
+            # Print all running processes to see what else might be competing for resources
+            echo "=== All Running Processes ==="
+            ps aux --sort=-%mem | head -20
+            echo "================="
+
+            # Clean up any leftover test directories
+            echo "Cleaning up any leftover test directories..."
+            find /tmp -maxdepth 1 -name "wdio-e2e-*" -type d -mmin +60 -exec rm -rf {} \; 2>/dev/null || true
+          fi
+
+          echo "Running prepare apps command..."
+
           cd e2e
+          echo "Running in $(pwd)"
 
-          # Build command with optional scenario and module type filters
-          PREPARE_CMD="pnpm run prepare-apps --timeout=600000"
+          # Create debug file to capture any errors
+          DEBUG_LOG="/tmp/prepare-apps-debug.log"
+          echo "Debug log will be written to $DEBUG_LOG"
 
-          # Add scenario filter if provided
-          if [[ -n "${{ inputs.scenario }}" && "${{ inputs.scenario }}" != "all" ]]; then
-            PREPARE_CMD+=" --scenario=${{ inputs.scenario }}"
+          # We need a way to catch SIGTERM and print diagnostics even if it happens in child processes
+          # Run the command with additional debug capabilities
+          {
+            # Run the command and capture start time
+            echo "Starting prepare-apps at $(date)"
+            START_TIME=$(date +%s)
+
+            # Run the prepare-apps script directly
+            echo "Command: node --no-warnings --import tsx ./scripts/prepare-apps.js --timeout=600000 --scenario=${{ inputs.scenario }} --module-type=${{ inputs.type }}"
+            node --no-warnings --import tsx ./scripts/prepare-apps.js --timeout=600000 --scenario=${{ inputs.scenario }} --module-type=${{ inputs.type }}
+            RC=$?
+
+            # Capture end time and calculate duration
+            END_TIME=$(date +%s)
+            DURATION=$((END_TIME - START_TIME))
+
+            echo "prepare-apps completed with exit code $RC after ${DURATION}s"
+            echo "Exit code: $RC"
+          } 2>&1 | tee -a $DEBUG_LOG
+
+          echo "=== Process completed ==="
+
+          # Check if the process was terminated by a signal
+          if [ $RC -gt 128 ]; then
+            SIGNAL=$((RC - 128))
+            echo "Process appears to have been terminated by signal $SIGNAL"
+
+            if [ $SIGNAL -eq 15 ]; then
+              echo "Process was terminated by SIGTERM (signal 15)"
+
+              # Show process information
+              echo "Current processes:"
+              ps aux --sort=-%mem | head -15
+            fi
           fi
 
-          # Add module type filter if provided
-          if [[ -n "${{ inputs.type }}" && "${{ inputs.type }}" != "all" ]]; then
-            PREPARE_CMD+=" --module-type=${{ inputs.type }}"
+          # Print debug log if the process failed
+          if [[ -f "$DEBUG_LOG" ]]; then
+            echo "Contents of debug log:"
+            cat "$DEBUG_LOG"
           fi
 
-          echo "Running: $PREPARE_CMD"
-          eval "$PREPARE_CMD"
+          # Additional diagnostics if process monitor log exists
+          if [[ -f "process_monitor.log" ]]; then
+            echo "Process monitor log contents:"
+            cat process_monitor.log
+          fi
+
+          # Save the environment variables to GITHUB_ENV to make them available to next steps
+          if [[ -n "${WDIO_TEST_APPS_PREPARED}" ]]; then
+            echo "WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED}" >> $GITHUB_ENV
+            echo "Exported WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED}"
+          fi
+
+          if [[ -n "${WDIO_TEST_APPS_DIR}" ]]; then
+            echo "WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR}" >> $GITHUB_ENV
+            echo "Exported WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR}"
+          fi
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
@@ -232,20 +371,41 @@ jobs:
         env:
           # Set environment variables for testing
           PRESERVE_TEMP_DIR: 'true'
-          # Pass through test apps variables from previous steps
-          WDIO_TEST_APPS_PREPARED: ${{ env.WDIO_TEST_APPS_PREPARED }}
-          WDIO_TEST_APPS_DIR: ${{ env.WDIO_TEST_APPS_DIR }}
-          SUITE_SETUP_DONE: 'true'
           # Set MAC_UNIVERSAL flag if we're using the mac-universal build command
           MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
           # Add DEBUG for more verbose output
           DEBUG: 'wdio-electron-service*'
+          # Test configuration
+          SUITE_SETUP_DONE: 'true'
         run: |
           cd e2e
 
           # Log environment for debugging
           echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}, ELECTRON_CACHE=$ELECTRON_CACHE"
-          echo "Test apps: WDIO_TEST_APPS_PREPARED=$WDIO_TEST_APPS_PREPARED, WDIO_TEST_APPS_DIR=$WDIO_TEST_APPS_DIR, SUITE_SETUP_DONE=$SUITE_SETUP_DONE"
+          echo "Test apps: WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''}, WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''}, SUITE_SETUP_DONE=$SUITE_SETUP_DONE"
+
+          # Debug: Check tools availability
+          echo "=== Debug: Available Tools ==="
+          echo "Node.js version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          echo "WebdriverIO CLI:"
+          if command -v wdio &> /dev/null; then
+            echo "wdio command is available"
+            wdio --version
+          else
+            echo "wdio command is NOT available"
+          fi
+
+          echo "Checking local WebdriverIO installation:"
+          ls -la node_modules/.bin | grep wdio || echo "wdio not found in node_modules/.bin"
+
+          # Check package.json scripts
+          echo "Available scripts in package.json:"
+          cat package.json | grep "\"test:" | sed 's/^/  /'
+
+          # Check if test:single script exists
+          test -f ./scripts/run-single-test.ts && echo "run-single-test.ts exists" || echo "run-single-test.ts does not exist"
+          test -f ./scripts/run-test-matrix.ts && echo "run-test-matrix.ts exists" || echo "run-test-matrix.ts does not exist"
 
           # Generate test execution command based on the scenario and type
           if [[ "${{ inputs.scenario }}" == *","* ]]; then
@@ -257,11 +417,15 @@ jobs:
 
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests
-                pnpm run test:${TRIMMED_SCENARIO}:cjs
-                pnpm run test:${TRIMMED_SCENARIO}:esm
+                echo "Running $TRIMMED_SCENARIO CJS tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:cjs
+
+                echo "Running $TRIMMED_SCENARIO ESM tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:esm
               else
                 # Run specific module type test
-                pnpm run test:${TRIMMED_SCENARIO}:${{ inputs.type }}
+                echo "Running $TRIMMED_SCENARIO ${{ inputs.type }} tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:${{ inputs.type }}
               fi
             done
           else
@@ -269,29 +433,41 @@ jobs:
             if [[ "${{ inputs.scenario }}" == "no-binary" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for no-binary
-                pnpm run test:no-binary:cjs
-                pnpm run test:no-binary:esm
+                echo "Running no-binary CJS tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:cjs
+
+                echo "Running no-binary ESM tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:esm
               else
                 # Run specific module type test for no-binary
-                pnpm run test:no-binary:${{ inputs.type }}
+                echo "Running no-binary ${{ inputs.type }} tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:${{ inputs.type }}
               fi
             elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for builder
-                pnpm run test:builder:cjs
-                pnpm run test:builder:esm
+                echo "Running builder CJS tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:cjs
+
+                echo "Running builder ESM tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:esm
               else
                 # Run specific module type test for builder
-                pnpm run test:builder:${{ inputs.type }}
+                echo "Running builder ${{ inputs.type }} tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:${{ inputs.type }}
               fi
             elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for forge
-                pnpm run test:forge:cjs
-                pnpm run test:forge:esm
+                echo "Running forge CJS tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:cjs
+
+                echo "Running forge ESM tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:esm
               else
                 # Run specific module type test for forge
-                pnpm run test:forge:${{ inputs.type }}
+                echo "Running forge ${{ inputs.type }} tests..."
+                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:${{ inputs.type }}
               fi
             fi
           fi
