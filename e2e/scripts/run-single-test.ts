@@ -1,5 +1,7 @@
 import { execSync } from 'node:child_process';
 import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
+import path from 'node:path';
+import fs from 'node:fs';
 
 // Get parameters from environment
 const platform = process.env.PLATFORM || 'builder';
@@ -37,8 +39,39 @@ if (isMacUniversal) {
 // Helper to convert env object to string
 function envString(env: Record<string, string>) {
   return Object.entries(env)
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]) => {
+      // Special handling for NODE_OPTIONS to remove debug port
+      if (key === 'NODE_OPTIONS' && value.includes('--inspect')) {
+        // Strip out any inspect flags
+        const cleanValue = value.replace(/--inspect(=[0-9]+)?/, '--no-warnings');
+        return `${key}=${cleanValue}`;
+      }
+      return `${key}=${value}`;
+    })
     .join(' ');
+}
+
+// Helper to determine the correct standalone test command
+function getStandaloneCommand(env: Record<string, string>): string {
+  const isCjs = env.MODULE_TYPE === 'cjs';
+  // Add MODULE_FORCE_CJS=true for CJS tests to ensure correct module resolution
+  const forceCjs = isCjs ? 'MODULE_FORCE_CJS=true ' : '';
+
+  // Add NODE_PATH to the command if WDIO_TEST_APPS_DIR is set
+  let nodePath = '';
+  const testAppsDir = process.env.WDIO_TEST_APPS_DIR;
+  if (testAppsDir) {
+    const nodeModulesPath = path.join(testAppsDir, 'apps', 'node_modules');
+    if (fs.existsSync(nodeModulesPath)) {
+      // We need to escape paths for the command line
+      const escapedPath = nodeModulesPath.replace(/(\s+)/g, '\\$1');
+      nodePath = `NODE_PATH="${escapedPath}" `;
+      console.log(`🔍 DEBUG: Added NODE_PATH="${nodeModulesPath}" to standalone command`);
+    }
+  }
+
+  // Use tsx for all cases - it works for both CJS and ESM
+  return `cross-env ${forceCjs}${nodePath}${envString(env)} NODE_OPTIONS="--no-warnings" tsx ./test/standalone/api.spec.ts`;
 }
 
 // Ensure cleanup happens even if tests fail
@@ -61,25 +94,35 @@ async function runWithCleanup() {
 
     if (isForgeCase) {
       console.log('🔍 Detected Mac Universal forge CJS test - using special command to prevent ESM loader issues');
-      // Use CommonJS mode to run these tests to avoid ESM loader errors
-      const cmd = `cross-env ${envString(env)} node --no-warnings ./node_modules/.bin/wdio run ./wdio.conf.ts`;
+      // Use pnpm exec to run wdio to avoid shell script interpretation issues
+      // Force CJS module resolution for CJS tests
+      const cmd = `cross-env MODULE_FORCE_CJS=true ${envString(env)} pnpm exec wdio run ./wdio.conf.ts`;
       console.log(`Executing special cmd: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
     } else if (testType === 'multiremote') {
-      const cmd = `cross-env ${envString(env)} wdio run ./wdio.conf.ts`;
+      // For multiremote tests, use pnpm exec for all module types
+      // Force CJS module resolution for CJS tests
+      const additionalEnv = moduleType === 'cjs' ? 'MODULE_FORCE_CJS=true ' : '';
+      const cmd = `cross-env ${additionalEnv}${envString(env)} pnpm exec wdio run ./wdio.conf.ts`;
       console.log(`Executing: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
     } else if (testType === 'standalone') {
       // Use the same tsx approach as the main test matrix for standalone tests
-      const cmd = `cross-env ${envString(env)} tsx ./test/standalone/api.spec.ts`;
+      const cmd = getStandaloneCommand(env);
       console.log(`Executing: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
     } else if (testType === 'window') {
-      const cmd = `cross-env ${envString(env)} wdio run ./wdio.conf.ts`;
+      // For window tests, use pnpm exec for all module types
+      // For CJS tests, force the use of the CJS version by setting MODULE_FORCE_CJS
+      const additionalEnv = moduleType === 'cjs' ? 'MODULE_FORCE_CJS=true ' : '';
+      const cmd = `cross-env ${additionalEnv}${envString(env)} pnpm exec wdio run ./wdio.conf.ts`;
       console.log(`Executing: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
     } else {
-      const cmd = `cross-env ${envString(env)} wdio run ./wdio.conf.ts`;
+      // For standard tests, use pnpm exec for all module types
+      // For CJS tests, force the use of the CJS version by setting MODULE_FORCE_CJS
+      const additionalEnv = moduleType === 'cjs' ? 'MODULE_FORCE_CJS=true ' : '';
+      const cmd = `cross-env ${additionalEnv}${envString(env)} pnpm exec wdio run ./wdio.conf.ts`;
       console.log(`Executing: ${cmd}`);
       execSync(cmd, { stdio: 'inherit' });
     }

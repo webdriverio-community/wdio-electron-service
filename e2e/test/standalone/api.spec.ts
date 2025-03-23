@@ -2,11 +2,148 @@ import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
-
-import { startWdioSession } from 'wdio-electron-service';
 import type { NormalizedPackageJson } from 'read-package-up';
 
-import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@wdio/electron-utils';
+// Debug module resolution
+console.log('🔍 DEBUG: Standalone test module resolution:');
+console.log(`  - Module Type: ${process.env.MODULE_TYPE || 'not set'}`);
+console.log(`  - NODE_OPTIONS: ${process.env.NODE_OPTIONS || 'not set'}`);
+console.log(`  - MODULE_FORCE_CJS: ${process.env.MODULE_FORCE_CJS || 'not set'}`);
+console.log(`  - import.meta.url: ${import.meta.url}`);
+
+// Determine if we should force CJS imports
+const shouldForceCjs = process.env.MODULE_TYPE === 'cjs' || process.env.MODULE_FORCE_CJS === 'true';
+console.log(`  - shouldForceCjs: ${shouldForceCjs}`);
+
+// Try to import the service
+let startWdioSession;
+let electronUtils;
+
+// Get the temp directory from environment variables
+const tempDir = process.env.WDIO_TEST_APPS_DIR;
+console.log(`🔍 DEBUG: Using temp directory: ${tempDir || 'not set'}`);
+
+// Debug what we know about the environment
+console.log('🔍 DEBUG: Environment information:');
+console.log(`  - MODULE_TYPE: ${process.env.MODULE_TYPE || 'not set'}`);
+console.log(`  - Working directory: ${process.cwd()}`);
+console.log(`  - NODE_OPTIONS: ${process.env.NODE_OPTIONS || 'not set'}`);
+
+try {
+  // Use direct path to the prepared package if available
+  if (tempDir) {
+    // Path to the service package in the temp directory
+    const servicePath = path.join(tempDir, 'apps', 'node_modules', 'wdio-electron-service');
+    console.log(`🔍 DEBUG: Checking service package at: ${servicePath}`);
+
+    // Verify the package exists
+    if (fs.existsSync(servicePath)) {
+      console.log('🔍 DEBUG: Service package exists at temp location');
+
+      // Check if we have dist/cjs and dist/esm directories
+      const cjsDir = path.join(servicePath, 'dist', 'cjs');
+      const esmDir = path.join(servicePath, 'dist', 'esm');
+
+      console.log(`🔍 DEBUG: CJS directory exists: ${fs.existsSync(cjsDir)}`);
+      console.log(`🔍 DEBUG: ESM directory exists: ${fs.existsSync(esmDir)}`);
+
+      // Choose the appropriate module type
+      const moduleType = process.env.MODULE_TYPE === 'cjs' ? 'cjs' : 'esm';
+      const moduleDir = moduleType === 'cjs' ? cjsDir : esmDir;
+
+      if (fs.existsSync(moduleDir)) {
+        // Import the index.js file from the module directory
+        const indexPath = path.join(moduleDir, 'index.js');
+        console.log(`🔍 DEBUG: Importing from ${moduleType.toUpperCase()} index: ${indexPath}`);
+
+        const serviceModule = await import(indexPath);
+        startWdioSession = serviceModule.startWdioSession;
+        console.log(`✅ Successfully imported service from ${moduleType.toUpperCase()} path`);
+      } else {
+        throw new Error(`Module directory not found: ${moduleDir}`);
+      }
+    } else {
+      // Fall back to package name
+      console.log('🔍 DEBUG: Service package not found in temp location, falling back to package name');
+      const serviceModule = await import('wdio-electron-service');
+      startWdioSession = serviceModule.startWdioSession;
+      console.log('✅ Successfully imported service via package name');
+    }
+  } else {
+    // No temp directory, use package name
+    console.log('🔍 DEBUG: No temp directory provided, importing service via package name');
+    const serviceModule = await import('wdio-electron-service');
+    startWdioSession = serviceModule.startWdioSession;
+    console.log('✅ Successfully imported service via package name');
+  }
+} catch (error) {
+  console.error('❌ Error importing service module:', error instanceof Error ? error.message : String(error));
+  throw error;
+}
+
+try {
+  console.log('🔍 DEBUG: Attempting to import @wdio/electron-utils...');
+
+  // Use direct path to the prepared utils package if available
+  if (tempDir) {
+    // First check in the service's node_modules
+    const utilsInServicePath = path.join(
+      tempDir,
+      'apps',
+      'node_modules',
+      'wdio-electron-service',
+      'node_modules',
+      '@wdio',
+      'electron-utils',
+    );
+    // Then check in the apps node_modules
+    const utilsInAppsPath = path.join(tempDir, 'apps', 'node_modules', '@wdio', 'electron-utils');
+
+    console.log(`🔍 DEBUG: Checking utils in service: ${utilsInServicePath}`);
+    console.log(`🔍 DEBUG: Checking utils in apps: ${utilsInAppsPath}`);
+
+    // Check if either path exists
+    const utilsPath = fs.existsSync(utilsInServicePath)
+      ? utilsInServicePath
+      : fs.existsSync(utilsInAppsPath)
+        ? utilsInAppsPath
+        : null;
+
+    if (utilsPath) {
+      console.log(`🔍 DEBUG: Utils package exists at: ${utilsPath}`);
+
+      // Choose the appropriate module type
+      const moduleType = process.env.MODULE_TYPE === 'cjs' ? 'cjs' : 'esm';
+      const indexPath = path.join(utilsPath, 'dist', moduleType, 'index.js');
+
+      if (fs.existsSync(indexPath)) {
+        console.log(`🔍 DEBUG: Importing utils from ${moduleType.toUpperCase()} index: ${indexPath}`);
+        electronUtils = await import(indexPath);
+        console.log(`✅ Successfully imported utils from ${moduleType.toUpperCase()} path`);
+      } else {
+        // Fall back to package name
+        console.log(`🔍 DEBUG: Utils ${moduleType} index not found, falling back to package name`);
+        electronUtils = await import('@wdio/electron-utils');
+        console.log('✅ Successfully imported utils via package name');
+      }
+    } else {
+      // Fall back to package name
+      console.log('🔍 DEBUG: Utils package not found in temp location, falling back to package name');
+      electronUtils = await import('@wdio/electron-utils');
+      console.log('✅ Successfully imported utils via package name');
+    }
+  } else {
+    // No temp directory, use package name
+    console.log('🔍 DEBUG: No temp directory provided, importing utils via package name');
+    electronUtils = await import('@wdio/electron-utils');
+    console.log('✅ Successfully imported utils via package name');
+  }
+} catch (error) {
+  console.error('❌ Error importing @wdio/electron-utils:', error instanceof Error ? error.message : String(error));
+  throw error;
+}
+
+const { getBinaryPath, getAppBuildInfo, getElectronVersion } = electronUtils;
 
 process.env.TEST = 'true';
 
@@ -69,7 +206,7 @@ console.log('🔍 Debug: Starting session with options:', JSON.stringify(session
 const browser = await startWdioSession([sessionOptions]);
 
 // Get app name and check against expected value
-const appName = await browser.electron.execute((electron) => electron.app.getName());
+const appName = await browser.electron.execute((electron: any) => electron.app.getName());
 // In binary mode, expect the package.json name; in no-binary mode, expect "Electron"
 const expectedAppName = isBinary ? packageJson.name : 'Electron';
 if (appName !== expectedAppName) {
@@ -77,7 +214,7 @@ if (appName !== expectedAppName) {
 }
 
 // Get app version and check against expected value
-const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
+const appVersion = await browser.electron.execute((electron: any) => electron.app.getVersion());
 // In binary mode, expect the package.json version; in no-binary mode, expect the Electron version
 const expectedAppVersion = isBinary ? packageJson.version : electronVersion;
 if (appVersion !== expectedAppVersion) {

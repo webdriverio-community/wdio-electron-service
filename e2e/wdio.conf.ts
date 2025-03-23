@@ -2,7 +2,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import type { NormalizedPackageJson } from 'read-package-up';
 import type { WdioElectronConfig } from '@wdio/electron-types';
 
 import { testAppsManager } from './setup/testAppsManager.js';
@@ -28,111 +27,71 @@ console.log(`🔍 Debug: Starting test with configuration:
   Example Directory: ${exampleDir}
 `);
 
-// Check if test apps have already been prepared by the suite-level setup
-let tmpDir: string;
-if (process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR) {
-  tmpDir = process.env.WDIO_TEST_APPS_DIR;
-  console.log('🔍 Debug: Using pre-prepared test apps from:', tmpDir);
-} else {
-  // This should not happen if using the suite-level setup
-  console.warn('Warning: Test apps not prepared by suite-level setup. This may cause duplicate setup.');
+// Initialize test apps manager if env var is not set
+let tmpDir: string | null;
+if (process.env.WDIO_TEST_APPS_PREPARED !== 'true') {
+  console.log('🔍 Debug: Initializing test apps manager for individual test');
   tmpDir = await testAppsManager.prepareTestApps();
+  console.log('🔍 Debug: Test apps prepared for individual test');
+} else {
+  console.log('🔍 Debug: Skipping test apps preparation as they were already prepared');
+  tmpDir = testAppsManager.getTmpDir();
 }
 
-// Set up packageJson for tests
-const packageJsonPath = path.join(tmpDir, 'apps', exampleDir, 'package.json');
+// Configure test type specific variables
+let appBinaryPath = '';
+let appEntryPoint = '';
 
-// Add error handling for missing package.json
-try {
-  if (!fs.existsSync(packageJsonPath)) {
-    console.error(`Error: Package.json not found at ${packageJsonPath}`);
-    console.error('Directory structure:');
+// Setup for app binary path or entry point
+if (tmpDir) {
+  const appName = `electron-example-${platform}`;
 
-    // List the apps directory to help debug
-    try {
-      const appsDir = path.join(tmpDir, 'apps');
-      if (fs.existsSync(appsDir)) {
-        const appDirs = fs.readdirSync(appsDir);
-        console.error(`Apps directory contents: ${appDirs.join(', ')}`);
-      } else {
-        console.error(`Apps directory not found at ${appsDir}`);
+  if (isNoBinary) {
+    console.log('🔍 Debug: Setting up no-binary test with entry point');
+    // Try multiple possible entry point locations
+    const possibleEntryPoints = [
+      path.join(tmpDir, 'apps', exampleDir, 'main.js'),
+      path.join(tmpDir, 'apps', exampleDir, 'dist', 'main.js'),
+      path.join(tmpDir, 'apps', exampleDir, 'dist', 'main.bundle.js'),
+    ];
+
+    for (const entryPoint of possibleEntryPoints) {
+      if (fs.existsSync(entryPoint)) {
+        appEntryPoint = entryPoint;
+        console.log('🔍 Debug: Found app entry point at:', appEntryPoint);
+        break;
       }
-    } catch (listError) {
-      console.error('Error listing apps directory:', listError);
     }
 
-    throw new Error(`Package.json not found at ${packageJsonPath}`);
-  }
-
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
-
-  // Set globalThis.packageJson for tests
-  globalThis.packageJson = packageJson;
-  console.log('🔍 Debug: globalThis.packageJson set:', globalThis.packageJson);
-} catch (error) {
-  console.error('Error reading package.json:', error);
-  // Provide a fallback packageJson to allow tests to continue
-  globalThis.packageJson = {
-    name: exampleDir,
-    version: '0.0.1',
-    dependencies: {},
-    devDependencies: {},
-  } as NormalizedPackageJson;
-  console.log('🔍 Debug: Using fallback packageJson');
-}
-
-process.env.TEST = 'true';
-
-// Determine the app path based on binary/no-binary mode
-let appBinaryPath: string | undefined;
-let appEntryPoint: string | undefined;
-const appName = `example-${exampleDir}`;
-
-if (isNoBinary) {
-  // No-binary mode - use appEntryPoint
-  // First try main.bundle.js (used by forge and no-binary apps)
-  const bundlePath = path.join(tmpDir, 'apps', exampleDir, 'dist', 'main.bundle.js');
-  // Fallback to main.js (used by builder apps)
-  const mainJsPath = path.join(tmpDir, 'apps', exampleDir, 'dist', 'main.js');
-
-  if (fs.existsSync(bundlePath)) {
-    appEntryPoint = bundlePath;
-    console.log('🔍 Debug: Using appEntryPoint (bundle):', appEntryPoint);
-  } else if (fs.existsSync(mainJsPath)) {
-    appEntryPoint = mainJsPath;
-    console.log('🔍 Debug: Using appEntryPoint (main.js):', appEntryPoint);
+    if (!appEntryPoint) {
+      console.error('❌ Error: Could not find a valid entry point. Checked:', possibleEntryPoints);
+    }
   } else {
-    console.error('❌ Error: Could not find a valid entry point. Checked:');
-    console.error(`  - ${bundlePath}`);
-    console.error(`  - ${mainJsPath}`);
-  }
-} else {
-  // Binary mode - determine the correct binary path
-  if (process.platform === 'darwin') {
-    if (platform === 'builder') {
-      // For builder apps on macOS with binary builds
+    console.log('🔍 Debug: Setting up binary test with app path');
+    // For all platforms, use the app directory as a fallback
+    appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
+    console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
+
+    if (process.platform === 'darwin' && platform === 'builder') {
+      // For electron-builder apps on macOS with binary builds
       const macAppPath = path.join(
         tmpDir,
         'apps',
         exampleDir,
         'dist',
-        'mac-arm64',
+        'mac',
         `${appName}.app`,
         'Contents',
         'MacOS',
         appName,
       );
 
-      // Check if the path exists, otherwise fall back to the app directory
+      // Check if the path exists, use it if available
       if (fs.existsSync(macAppPath)) {
         console.log('🔍 Debug: Using macOS app executable path:', macAppPath);
         appBinaryPath = macAppPath;
-      } else {
-        console.log('🔍 Debug: macOS app executable not found for builder, falling back to app directory');
-        appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
-        console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
       }
-    } else if (platform === 'forge') {
+    } else if (process.platform === 'darwin' && platform === 'forge') {
       // For forge apps on macOS with binary builds
       const forgeMacAppPath = path.join(
         tmpDir,
@@ -146,25 +105,15 @@ if (isNoBinary) {
         appName,
       );
 
-      // Check if the path exists, otherwise fall back to the app directory
+      // Check if the path exists, use it if available
       if (fs.existsSync(forgeMacAppPath)) {
         console.log('🔍 Debug: Using macOS app executable path for forge:', forgeMacAppPath);
         appBinaryPath = forgeMacAppPath;
-      } else {
-        console.log('🔍 Debug: macOS app executable not found for forge, falling back to app directory');
-        appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
-        console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
       }
-    } else {
-      // For other platforms, use the app directory
-      appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
-      console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
     }
-  } else {
-    // For other platforms, use the app directory
-    appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
-    console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
   }
+} else {
+  console.error('❌ Error: tmpDir is not set. Test apps preparation may have failed.');
 }
 
 // Configure specs based on test type
@@ -230,7 +179,15 @@ export const config: WdioElectronConfig = {
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
   connectionRetryCount: 3,
+
+  // Set up the electron service
   services: ['electron'],
+
+  beforeSession: async function () {
+    console.log('🔍 DEBUG: Module type:', moduleType);
+    console.log('🔍 DEBUG: Current directory:', process.cwd());
+  },
+
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {
