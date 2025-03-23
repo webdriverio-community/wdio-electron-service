@@ -384,59 +384,89 @@ class TestAppsManager {
         console.error('Error creating node_modules directory:', mkdirError);
       }
 
-      // Build the package to ensure the dist directory exists
-      try {
-        console.log('Building wdio-electron-service package to ensure dist directory exists');
-        const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
-        await execAsync('pnpm build', { cwd: packageDir });
-        console.log('Successfully built wdio-electron-service package');
-      } catch (buildError) {
-        console.error('Error building wdio-electron-service package:', buildError);
+      // Check if we're using a pre-built tarball
+      if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
+        console.log(`Using pre-built service from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
 
-        // If build fails and we have a tarball, try to extract it directly
-        if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
-          console.log(`Extracting dist files from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
-          try {
-            const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
-            // Create a temp extraction directory
-            const extractDir = join(this.tmpDir, 'extract-tarball');
-            await this.createDirectory(extractDir);
+        // Extract the tarball directly to the node_modules directory
+        try {
+          const extractDir = join(nodeModulesDir, 'wdio-electron-service');
+          await this.createDirectory(extractDir);
+          console.log(`Created extraction directory: ${extractDir}`);
 
-            // Extract the tarball
-            await execAsync(`tar -xzf ${process.env.WDIO_SERVICE_TARBALL} -C ${extractDir}`);
+          // Normalize paths for Windows compatibility
+          // Copy the tarball locally if on Windows to avoid path issues with tar command
+          let tarballPath = process.env.WDIO_SERVICE_TARBALL;
 
-            // Create the dist directory in the package if it doesn't exist
-            const distDir = join(packageDir, 'dist');
-            await this.createDirectory(distDir);
-
-            // Copy the extracted dist files to the package dist directory
-            await execAsync(`cp -r ${join(extractDir, 'package', 'dist')}/* ${distDir}`);
-            console.log('Successfully extracted dist files from tarball');
-
-            // Update the symlink to match the one created above
-            const nodeModulesDir = join(this.tmpDir, 'apps', 'node_modules');
-            const wdioServicePath = join(nodeModulesDir, 'wdio-electron-service');
-
-            try {
-              // Remove existing symlink if it exists
-              if (fs.existsSync(wdioServicePath)) {
-                await fs.promises.unlink(wdioServicePath);
-              }
-              // Create a new symlink
-              await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
-              console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
-            } catch (symlinkError) {
-              console.error('Error creating symlink:', symlinkError);
-            }
-          } catch (extractError) {
-            console.error('Error extracting from tarball:', extractError);
+          if (process.platform === 'win32' && tarballPath.includes('/')) {
+            const localTarballPath = join(this.tmpDir!, 'wdio-electron-service-8.0.2.tgz');
+            console.log(`Copying tarball to local path for Windows compatibility: ${localTarballPath}`);
+            await fs.promises.copyFile(tarballPath, localTarballPath);
+            tarballPath = localTarballPath;
           }
+
+          // Use platform-specific command for extraction
+          if (process.platform === 'win32') {
+            // Use Windows built-in tar command (available in Windows 10+)
+            console.log('Extracting using Windows tar command...');
+            await execAsync(`tar -xf "${tarballPath}" -C "${extractDir}" --strip-components=1`);
+            console.log(`Successfully extracted tarball to ${extractDir} using Windows tar`);
+          } else {
+            // On Unix-like systems, use tar command
+            await execAsync(`tar -xzf "${tarballPath}" -C "${extractDir}" --strip-components=1`);
+            console.log(`Successfully extracted tarball to ${extractDir} using tar`);
+          }
+
+          // Verify the extraction was successful by checking for key files
+          const distDir = join(extractDir, 'dist');
+          if (fs.existsSync(distDir)) {
+            console.log(`Verified dist directory exists at ${distDir}`);
+          } else {
+            console.error(`Error: dist directory not found in extracted tarball at ${distDir}`);
+            throw new Error(`Dist directory not found in extracted tarball at ${distDir}`);
+          }
+        } catch (extractError) {
+          console.error('Error extracting tarball to node_modules:', extractError);
+          throw new Error(
+            `Failed to extract tarball: ${extractError instanceof Error ? extractError.message : String(extractError)}`,
+          );
         }
-        // Continue even if build fails, as we'll try to copy what exists
+      } else {
+        // Build the package to ensure the dist directory exists
+        try {
+          console.log('Building wdio-electron-service package to ensure dist directory exists');
+          const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
+          await execAsync('pnpm build', { cwd: packageDir });
+          console.log('Successfully built wdio-electron-service package');
+
+          // Create a symlink to the package directory
+          const wdioServicePath = join(nodeModulesDir, 'wdio-electron-service');
+          try {
+            // Remove existing symlink if it exists
+            if (fs.existsSync(wdioServicePath)) {
+              await fs.promises.unlink(wdioServicePath);
+            }
+            // Create a new symlink
+            await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
+            console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
+          } catch (symlinkError) {
+            console.error('Error creating symlink:', symlinkError);
+            throw new Error(
+              `Failed to create symlink: ${symlinkError instanceof Error ? symlinkError.message : String(symlinkError)}`,
+            );
+          }
+        } catch (buildError) {
+          console.error('Error building wdio-electron-service package:', buildError);
+          throw new Error(
+            `Failed to build package: ${buildError instanceof Error ? buildError.message : String(buildError)}`,
+          );
+        }
       }
     } catch (error) {
       console.error('Error setting up wdio-electron-service:', error);
-      // Continue even if setup fails
+      throw new Error(
+        `Failed to set up wdio-electron-service: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
     this.isPrepared = true;
