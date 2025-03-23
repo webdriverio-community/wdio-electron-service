@@ -81,6 +81,52 @@ class TestAppsManager {
     console.log('Registered cleanup handlers for process termination');
   }
 
+  // Add a new method to get apps to prepare based on environment variables
+  getAppsToPrepare(): { scenarios: string[]; moduleTypes: string[] } {
+    // Default is to prepare all apps
+    const allScenarios = ['builder', 'forge', 'no-binary'];
+    const allModuleTypes = ['cjs', 'esm'];
+
+    // Check for environment variables that specify which apps to prepare
+    const scenarioEnv = process.env.SCENARIO;
+    const moduleTypeEnv = process.env.MODULE_TYPE;
+
+    let scenarios = [...allScenarios];
+    let moduleTypes = [...allModuleTypes];
+
+    // If SCENARIO is specified, use only those scenarios
+    if (scenarioEnv) {
+      // Handle comma-separated list of scenarios
+      const requestedScenarios = scenarioEnv.split(',').map((s) => s.trim());
+      scenarios = requestedScenarios.filter((s) => allScenarios.includes(s));
+
+      // If no valid scenarios were specified, fall back to all scenarios
+      if (scenarios.length === 0) {
+        console.log(`Warning: No valid scenarios found in "${scenarioEnv}", using all scenarios`);
+        scenarios = [...allScenarios];
+      } else {
+        console.log(`Preparing only these scenarios: ${scenarios.join(', ')}`);
+      }
+    }
+
+    // If MODULE_TYPE is specified, use only those module types
+    if (moduleTypeEnv && moduleTypeEnv !== '*') {
+      // Handle comma-separated list of module types
+      const requestedModuleTypes = moduleTypeEnv.split(',').map((t) => t.trim());
+      moduleTypes = requestedModuleTypes.filter((t) => allModuleTypes.includes(t));
+
+      // If no valid module types were specified, fall back to all module types
+      if (moduleTypes.length === 0) {
+        console.log(`Warning: No valid module types found in "${moduleTypeEnv}", using all module types`);
+        moduleTypes = [...allModuleTypes];
+      } else {
+        console.log(`Preparing only these module types: ${moduleTypes.join(', ')}`);
+      }
+    }
+
+    return { scenarios, moduleTypes };
+  }
+
   async prepareTestApps(): Promise<string> {
     // Register cleanup handlers when preparing test apps
     this.registerCleanupHandlers();
@@ -89,6 +135,11 @@ class TestAppsManager {
     const startTime = Date.now();
     console.log(`[${new Date().toISOString()}] Starting test apps preparation`);
     console.log(`Initial memory usage: RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+
+    // Determine which apps to prepare
+    const { scenarios, moduleTypes } = this.getAppsToPrepare();
+    console.log(`Will prepare apps for scenarios: ${scenarios.join(', ')}`);
+    console.log(`Will prepare apps for module types: ${moduleTypes.join(', ')}`);
 
     // Track execution time for each step
     const timings: Record<string, number> = {};
@@ -176,11 +227,30 @@ class TestAppsManager {
     const appsTargetDir = join(this.tmpDir, 'apps');
     await this.createDirectory(appsTargetDir);
 
-    // Copy each app directory individually to ensure proper structure
-    const appDirs = ['builder-cjs', 'builder-esm', 'forge-cjs', 'forge-esm', 'no-binary-cjs', 'no-binary-esm'];
-    for (const appDir of appDirs) {
+    // Get the list of apps to prepare
+    const { scenarios: prepareScenarios, moduleTypes: prepareModuleTypes } = this.getAppsToPrepare();
+
+    // Generate the list of app directories to copy based on the scenarios and moduleTypes
+    const appDirsToCopy: string[] = [];
+    for (const scenario of prepareScenarios) {
+      for (const moduleType of prepareModuleTypes) {
+        appDirsToCopy.push(`${scenario}-${moduleType}`);
+      }
+    }
+
+    console.log(
+      `Selective app preparation: copying ${appDirsToCopy.length} app directories: ${appDirsToCopy.join(', ')}`,
+    );
+
+    // Copy each selected app directory individually to ensure proper structure
+    for (const appDir of appDirsToCopy) {
       const sourceAppDir = join(appsDir, appDir);
       const targetAppDir = join(this.tmpDir, 'apps', appDir);
+
+      if (!fs.existsSync(sourceAppDir)) {
+        console.warn(`Warning: source app directory ${appDir} not found, skipping`);
+        continue;
+      }
 
       // Ensure the dist directory exists in the source app
       const distDir = join(sourceAppDir, 'dist');
@@ -285,7 +355,7 @@ class TestAppsManager {
     // 4. Update each app's package.json
     console.log('Updating package.jsons');
 
-    for (const appDir of appDirs) {
+    for (const appDir of appDirsToCopy) {
       const appPath = join(this.tmpDir, 'apps', appDir);
       const packageJsonPath = join(appPath, 'package.json');
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'));
@@ -298,7 +368,7 @@ class TestAppsManager {
 
     // 5. Install dependencies
     console.log('Installing dependencies');
-    await execAsync('pnpm install --no-frozen-lockfile', { cwd: join(this.tmpDir, 'apps') });
+    await execAsync('pnpm install --no-lockfile', { cwd: join(this.tmpDir, 'apps') });
 
     // 6. Create a symlink to the wdio-electron-service package in node_modules
     // This helps with module resolution in ESM mode

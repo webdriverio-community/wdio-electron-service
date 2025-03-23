@@ -3,22 +3,38 @@
 /**
  * Prepare test apps for E2E tests
  * This is a dedicated script that can be run separately to prepare the test apps
+ *
+ * Usage:
+ *   pnpm run prepare-apps                      # Prepare all apps
+ *   pnpm run prepare-apps --scenario=builder   # Prepare only builder apps
+ *   pnpm run prepare-apps --module-type=esm    # Prepare only ESM apps
+ *   pnpm run prepare-apps --timeout=300000     # Use custom timeout
  */
 
 import { setupTestSuite } from './suite-setup.js';
 
-// Parse command line arguments for timeout
-function getTimeoutFromArgs(): number {
+// Parse command line arguments for timeout and app filtering
+function parseArgs(): { timeout: number; scenario?: string; moduleType?: string } {
   const args = process.argv.slice(2);
-  const timeoutArg = args.find((arg) => arg.startsWith('--timeout='));
-  if (timeoutArg) {
-    const timeout = parseInt(timeoutArg.split('=')[1], 10);
-    if (!isNaN(timeout) && timeout > 0) {
-      return timeout;
+  const result: { timeout: number; scenario?: string; moduleType?: string } = {
+    timeout: 120000, // Default timeout (120 seconds)
+  };
+
+  // Parse each argument
+  for (const arg of args) {
+    if (arg.startsWith('--timeout=')) {
+      const timeout = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(timeout) && timeout > 0) {
+        result.timeout = timeout;
+      }
+    } else if (arg.startsWith('--scenario=')) {
+      result.scenario = arg.split('=')[1];
+    } else if (arg.startsWith('--module-type=')) {
+      result.moduleType = arg.split('=')[1];
     }
   }
-  // Default timeout (120 seconds)
-  return 120000;
+
+  return result;
 }
 
 // Add debug info logging
@@ -68,16 +84,28 @@ async function prepareApps(): Promise<void> {
     console.log('Starting prepare-apps process');
     logDebugInfo();
 
-    const timeout = getTimeoutFromArgs();
-    console.log(`Using timeout: ${timeout}ms for app preparation`);
+    // Parse command line arguments
+    const args = parseArgs();
+    console.log(`Using timeout: ${args.timeout}ms for app preparation`);
+
+    // Set environment variables based on CLI arguments (for testAppsManager)
+    if (args.scenario) {
+      process.env.SCENARIO = args.scenario;
+      console.log(`Setting SCENARIO environment variable to: ${args.scenario}`);
+    }
+
+    if (args.moduleType) {
+      process.env.MODULE_TYPE = args.moduleType;
+      console.log(`Setting MODULE_TYPE environment variable to: ${args.moduleType}`);
+    }
 
     // Add a force exit timeout as a last resort
     const forceExitTimeout = setTimeout(() => {
-      console.error(`Force exiting after timeout (${timeout}ms)`);
+      console.error(`Force exiting after timeout (${args.timeout}ms)`);
       console.log('Final diagnostics before force exit:');
       logDebugInfo();
       process.exit(143); // Same code as SIGTERM
-    }, timeout);
+    }, args.timeout);
 
     // Make sure the timeout doesn't prevent the process from exiting normally
     forceExitTimeout.unref();
