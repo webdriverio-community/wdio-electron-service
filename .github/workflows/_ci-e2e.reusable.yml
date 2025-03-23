@@ -196,257 +196,34 @@ jobs:
       - name: 🏗️ Prepare Test Applications
         shell: bash
         env:
-          # Increase Node.js memory limit to prevent OOM issues
-          NODE_OPTIONS: '--max-old-space-size=8192'
           # Preserve temp directories between steps
           PRESERVE_TEMP_DIR: 'true'
           # Enable more detailed debug logging
           DEBUG: 'wdio-electron-service*'
           # Use the pre-built service from the build job
-          USE_ARTIFACT_SERVICE: 'true'
+          USE_ARTIFACT_SERVICE: ${{ env.USE_ARTIFACT_SERVICE || 'true' }}
+          # Pass through service tarball path if available
+          WDIO_SERVICE_TARBALL: ${{ env.WDIO_SERVICE_TARBALL || '' }}
         timeout-minutes: 15
         run: |
-          # Show diagnostic information
-          echo "=============== ENVIRONMENT INFO ==============="
-          echo "OS: ${{ runner.os }}"
-          echo "Node.js version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "PNPM version: $(pnpm --version)"
-          echo "Current directory: $(pwd)"
-          echo "Available disk space: $(df -h .)"
-          echo "Available memory: $(free -h || echo 'free command not available')"
-          echo "NODE_OPTIONS=$NODE_OPTIONS"
+          echo "Preparing test applications for scenario: ${{ inputs.scenario }}, module type: ${{ inputs.type }}"
+          cd e2e
 
-          # Debug electron-bundler package
-          echo "=============== BUNDLER PACKAGE DIAGNOSTICS ==============="
-          echo "Checking for @wdio/electron-bundler module..."
+          # Build command with optional scenario and module type filters
+          PREPARE_CMD="pnpm run prepare-apps --timeout=600000"
 
-          # Show workspace structure for better diagnostics
-          echo "Workspace package structure:"
-          pnpm list --depth 2 | grep "@wdio" || echo "No @wdio packages found in workspace"
-
-          # Try finding the bundler in various locations
-          echo "Looking for bundler in packages directory:"
-          find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
-
-          echo "Looking for bundler in node_modules:"
-          find node_modules -name "electron-bundler" -type d || echo "Not found in node_modules"
-
-          # For Windows, ensure workspace dependencies are built
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            echo "=============== INSTALLING WINDOWS DEPENDENCIES ==============="
-            echo "Running pnpm install for all packages to ensure dependencies are available"
-            pnpm install --no-frozen-lockfile
-
-            # Check if we need to install the bundler package
-            echo "Building all workspace packages explicitly on Windows"
-            pnpm run build
-
-            # Check if bundler was built
-            echo "Checking if bundler is built after pnpm run build:"
-            find packages -name "electron-bundler" -type d | grep -v "node_modules" || echo "Not found in packages dir"
-            find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
+          # Add scenario filter if provided
+          if [[ -n "${{ inputs.scenario }}" && "${{ inputs.scenario }}" != "all" ]]; then
+            PREPARE_CMD+=" --scenario=${{ inputs.scenario }}"
           fi
 
-          # Check workspace build status
-          echo "Checking if workspace packages are already built:"
-          find packages -name "dist" -type d | grep -v "node_modules" || echo "No dist directories found"
-
-          # Build dependencies first
-          echo "=============== BUILDING WORKSPACE DEPENDENCIES ==============="
-          echo "Building all workspace packages..."
-          pnpm run build
-
-          # For MacOS, verify workspace dependencies are built
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
-            echo "Checking workspace module directories:"
-
-            echo "Looking for @wdio/electron-bundler dist directory..."
-            if ls packages/**/electron-bundler/dist 2>/dev/null; then
-              echo "✅ electron-bundler dist directory found"
-            else
-              echo "❌ electron-bundler dist directory not found"
-              echo "Attempting to build it specifically..."
-              if [ -d "packages/@wdio/electron-bundler" ]; then
-                cd packages/@wdio/electron-bundler
-                pnpm install --no-frozen-lockfile
-                pnpm build
-                cd ../..
-              else
-                find packages -name "electron-bundler" -type d | grep -v "node_modules" | while read dir; do
-                  echo "Found directory: $dir, attempting to build..."
-                  cd "$dir"
-                  pnpm install --no-frozen-lockfile
-                  pnpm build
-                  cd - > /dev/null
-                done
-              fi
-            fi
+          # Add module type filter if provided
+          if [[ -n "${{ inputs.type }}" && "${{ inputs.type }}" != "all" ]]; then
+            PREPARE_CMD+=" --module-type=${{ inputs.type }}"
           fi
 
-          # Show process resource limits
-          echo "=============== RESOURCE LIMITS ==============="
-          ulimit -a || echo "ulimit command not available"
-
-          # Increase available resources
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            echo "Increasing system limits for Linux"
-            ulimit -n 65536 || echo "Failed to increase ulimit"
-            ulimit -u 65536 || echo "Failed to increase process limit"
-            echo "Updated limits:"
-            ulimit -a || echo "ulimit command not available"
-          fi
-
-          # Show running processes
-          echo "=============== RUNNING PROCESSES ==============="
-          ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
-
-          # Generate build filters based on scenarios
-          BUILD_FILTERS=""
-          FORGE_FILTERS=""
-          NON_FORGE_FILTERS=""
-          IS_FORGE=$([[ "${{ inputs.scenario }}" == *"forge"* ]] && echo "true" || echo "false")
-          IS_WINDOWS_FORGE=$([[ "${{ runner.os }}" == "Windows" && "$IS_FORGE" == "true" ]] && echo "true" || echo "false")
-          IS_LINUX_FORGE=$([[ "${{ runner.os }}" == "Linux" && "$IS_FORGE" == "true" ]] && echo "true" || echo "false")
-
-          echo "Is Forge: $IS_FORGE"
-          echo "Is Windows Forge: $IS_WINDOWS_FORGE"
-          echo "Is Linux Forge: $IS_LINUX_FORGE"
-
-          # Debug environment
-          if [[ "${{ runner.os }}" == "Windows" || "${{ runner.os }}" == "Linux" ]]; then
-            echo "Environment debugging for ${{ runner.os }}"
-            echo "Node.js version: $(node --version)"
-            echo "NPM version: $(npm --version)"
-            echo "PNPM version: $(pnpm --version)"
-            echo "Current directory: $(pwd)"
-            echo "Testing directory creation..."
-            mkdir -p test-dir && echo "SUCCESS" || echo "FAILURE"
-            node -e "require('fs').mkdirSync('test-dir2', { recursive: true }); console.log('SUCCESS');" || echo "FAILURE"
-          fi
-
-          IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
-          for SCENARIO in "${SCENARIOS[@]}"; do
-            TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
-
-            if [[ "$IS_WINDOWS_FORGE" == "true" || "$IS_LINUX_FORGE" == "true" ]] && [[ "$TRIMMED_SCENARIO" == "forge" ]]; then
-              # For Windows/Linux forge builds, we'll handle them separately
-              FORGE_FILTERS="$FORGE_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
-            else
-              # For all other builds, we'll run them in parallel
-              NON_FORGE_FILTERS="$NON_FORGE_FILTERS --filter=example-${TRIMMED_SCENARIO}-*"
-            fi
-          done
-
-          # Build non-forge apps in parallel (if any)
-          if [[ -n "$NON_FORGE_FILTERS" ]]; then
-            echo "Building non-forge apps with filters: $NON_FORGE_FILTERS"
-            pnpm exec turbo run ${{ inputs.build-command }} $NON_FORGE_FILTERS --only --parallel
-          fi
-
-          # Build forge apps with special handling on Windows and Linux
-          if [[ "$IS_WINDOWS_FORGE" == "true" || "$IS_LINUX_FORGE" == "true" ]] && [[ -n "$FORGE_FILTERS" ]]; then
-            echo "Building Forge apps sequentially on ${{ runner.os }} with filters: $FORGE_FILTERS"
-
-            # First clean the forge output directories to prevent dest already exists errors
-            echo "Cleaning Electron Forge output directories..."
-            for appDir in forge-cjs forge-esm; do
-              echo "Cleaning output for $appDir"
-              # Remove the out directory where Electron Forge places packaged apps
-              rm -rf "apps/$appDir/out" || true
-              # Also ensure dist is clean
-              rm -rf "apps/$appDir/dist" || true
-
-              # Create clean directories using node instead of bash commands for better cross-platform compatibility
-              node -e "const fs = require('fs'); fs.mkdirSync('apps/$appDir/dist', { recursive: true });"
-
-              echo "Cleaned $appDir directories"
-            done
-
-            # Use modified approach to build forge apps with explicit environment variables
-            echo "Using custom approach for Forge builds on ${{ runner.os }}"
-            for appDir in forge-cjs forge-esm; do
-              echo "Building $appDir with custom approach..."
-
-              # Go to the app directory
-              cd "apps/$appDir"
-
-              # Compile the TypeScript first
-              pnpm exec tsc
-
-              # Bundle with Rollup
-              if [[ "$appDir" == "forge-cjs" ]]; then
-                pnpm exec rollup -c rollup.config.mjs
-              else
-                pnpm exec rollup -c rollup.config.js
-              fi
-
-              # Copy HTML files
-              cp ./src/*.html ./dist/
-
-              # Package with Electron Forge using the pre-downloaded binary
-              echo "Packaging $appDir with Electron Forge..."
-
-              # Run electron-forge package with environment variables
-              ELECTRON_CACHE="$GITHUB_WORKSPACE/electron-cache" pnpm exec electron-forge package
-
-              # Return to workspace root
-              cd "$GITHUB_WORKSPACE"
-
-              echo "Built $appDir successfully"
-            done
-          elif [[ -n "$FORGE_FILTERS" ]]; then
-            # For other platforms, build forge apps in parallel
-            echo "Building forge apps with filters: $FORGE_FILTERS"
-            pnpm exec turbo run ${{ inputs.build-command }} $FORGE_FILTERS --only --parallel
-          fi
-
-          # Then prepare the test apps for all tests
-          echo "=============== RUNNING PREPARE-APPS ==============="
-          echo "Running prepare-apps with increased timeout..."
-
-          # Show current time for timing purposes
-          echo "Start time: $(date)"
-
-          # Run prepare-apps with detailed logging and environment variables
-          cd e2e && NODE_OPTIONS="--max-old-space-size=8192" PRESERVE_TEMP_DIR=true \
-            DEBUG=wdio-electron-service* \
-            USE_ARTIFACT_SERVICE=$USE_ARTIFACT_SERVICE \
-            WDIO_SERVICE_TARBALL="$WDIO_SERVICE_TARBALL" \
-            SKIP_SERVICE_PACKING=$SKIP_SERVICE_PACKING \
-            npx tsx scripts/prepare-apps.ts --timeout=300000
-
-          # Show end time
-          echo "End time: $(date)"
-          echo "=============== PREPARE-APPS COMPLETED ==============="
-
-          # Capture the test apps directory for later steps
-          if [ -n "$WDIO_TEST_APPS_DIR" ]; then
-            echo "WDIO_TEST_APPS_DIR=$WDIO_TEST_APPS_DIR" >> $GITHUB_ENV
-            echo "WDIO_TEST_APPS_PREPARED=true" >> $GITHUB_ENV
-            echo "PRESERVE_TEMP_DIR=true" >> $GITHUB_ENV
-            echo "SUITE_SETUP_DONE=true" >> $GITHUB_ENV
-            echo "Test apps prepared at: $WDIO_TEST_APPS_DIR"
-
-            # List what's in the test apps directory
-            echo "Test apps directory contents:"
-            ls -la "$WDIO_TEST_APPS_DIR" || echo "Failed to list contents"
-
-            # Check if apps directory exists and show contents
-            if [ -d "$WDIO_TEST_APPS_DIR/apps" ]; then
-              echo "Apps directory contents:"
-              ls -la "$WDIO_TEST_APPS_DIR/apps" || echo "Failed to list apps contents"
-            fi
-          else
-            echo "WARNING: WDIO_TEST_APPS_DIR not set after prepare-apps completed"
-          fi
-
-          # Show final diagnostic information
-          echo "=============== FINAL ENVIRONMENT INFO ==============="
-          echo "Available disk space: $(df -h .)"
-          echo "Available memory: $(free -h || echo 'free command not available')"
-          echo "Running processes:"
-          ps aux | grep -E 'node|electron' || echo "No node/electron processes found"
+          echo "Running: $PREPARE_CMD"
+          eval "$PREPARE_CMD"
 
       # Run tests based on the scenario and type inputs
       - name: 🧪 Execute E2E Tests
