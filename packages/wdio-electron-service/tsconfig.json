@@ -7,6 +7,7 @@
     "moduleResolution": "bundler",
     "outDir": "dist",
     "types": ["node", "electron-to-chromium", "vitest/jsdom"],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"],
+    "baseUrl": "."
   }
 }
