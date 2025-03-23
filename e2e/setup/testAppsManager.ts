@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import * as path from 'path';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 
@@ -62,17 +62,72 @@ class TestAppsManager {
         if (error) console.error(`Process terminating due to ${signal}:`, error);
         console.log(`Received ${signal}, cleaning up...`);
 
+        // Linux-specific diagnostics to help troubleshoot SIGTERM issues
+        if (process.platform === 'linux' && signal === 'SIGTERM') {
+          console.log('************* LINUX SIGTERM DIAGNOSTIC INFO *************');
+          console.log(`Process ${process.pid} terminating due to SIGTERM at ${new Date().toISOString()}`);
+
+          // Memory usage details
+          const memoryUsage = process.memoryUsage();
+          console.log('Memory usage at termination:');
+          console.log(`- RSS: ${Math.round(memoryUsage.rss / 1024 / 1024)}MB`);
+          console.log(`- Heap Total: ${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
+          console.log(`- Heap Used: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`);
+
+          // Try to get system memory info on Linux
+          try {
+            console.log('System memory:');
+            const memInfo = execSync('free -m').toString();
+            console.log(memInfo);
+          } catch (_err) {
+            console.log('Could not get system memory info');
+          }
+
+          console.log('************* LINUX SIGTERM DIAGNOSTIC INFO END *************');
+        }
+
         try {
-          await this.cleanup();
+          // Allow more time for cleanup on Linux
+          const timeoutMs = process.platform === 'linux' ? 20000 : 10000;
+          const cleanupPromise = this.cleanup();
+
+          // Set up a timeout that resolves after the specified time
+          const timeoutPromise = new Promise<void>((resolve) => {
+            const timeout = setTimeout(() => {
+              console.log(`Cleanup timeout reached after ${timeoutMs}ms`);
+              resolve();
+            }, timeoutMs);
+            timeout.unref(); // Don't prevent process exit
+          });
+
+          // Race the cleanup and timeout, but don't throw if cleanup takes too long
+          await Promise.race([cleanupPromise, timeoutPromise]);
         } catch (cleanupError) {
           console.error('Error during cleanup:', cleanupError);
         }
 
-        // Exit with non-zero code for errors
-        if (signal === 'uncaughtException' || signal === 'unhandledRejection') {
-          process.exit(1);
+        // For Linux, delay exit slightly to allow for pending operations
+        if (process.platform === 'linux') {
+          console.log('Delaying exit on Linux to allow for cleanup completion...');
+          setTimeout(() => {
+            // Exit with non-zero code for errors
+            if (signal === 'uncaughtException' || signal === 'unhandledRejection') {
+              process.exit(1);
+            } else if (signal === 'SIGTERM') {
+              process.exit(143); // Standard SIGTERM exit code
+            } else {
+              process.exit(0);
+            }
+          }, 500);
         } else {
-          process.exit(0);
+          // Exit with non-zero code for errors
+          if (signal === 'uncaughtException' || signal === 'unhandledRejection') {
+            process.exit(1);
+          } else if (signal === 'SIGTERM') {
+            process.exit(143); // Standard SIGTERM exit code
+          } else {
+            process.exit(0);
+          }
         }
       });
     });
@@ -388,45 +443,39 @@ class TestAppsManager {
       if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
         console.log(`Using pre-built service from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
 
-        // Extract the tarball directly to the node_modules directory
+        // Create the service directory
+        const serviceDir = join(nodeModulesDir, 'wdio-electron-service');
+        console.log(`About to create service directory: ${serviceDir}`);
+        await this.createDirectory(serviceDir);
+
+        // Use pnpx pacote to extract the tarball - this is the most reliable option across platforms
+        console.log(`Extracting tarball using pnpx pacote...`);
         try {
-          const extractDir = join(nodeModulesDir, 'wdio-electron-service');
-          await this.createDirectory(extractDir);
-          console.log(`Created extraction directory: ${extractDir}`);
+          // Normalize path for Windows
+          const tarballPath = process.env.WDIO_SERVICE_TARBALL.replace(/\\/g, '/');
+          await execAsync(`pnpx pacote extract "${tarballPath}" "${serviceDir}"`);
+          console.log(`Successfully extracted tarball to ${serviceDir}`);
 
-          // Normalize paths for Windows compatibility
-          // Copy the tarball locally if on Windows to avoid path issues with tar command
-          let tarballPath = process.env.WDIO_SERVICE_TARBALL;
-
-          if (process.platform === 'win32' && tarballPath.includes('/')) {
-            const localTarballPath = join(this.tmpDir!, 'wdio-electron-service-8.0.2.tgz');
-            console.log(`Copying tarball to local path for Windows compatibility: ${localTarballPath}`);
-            await fs.promises.copyFile(tarballPath, localTarballPath);
-            tarballPath = localTarballPath;
-          }
-
-          // Use platform-specific command for extraction
-          if (process.platform === 'win32') {
-            // Use Windows built-in tar command (available in Windows 10+)
-            console.log('Extracting using Windows tar command...');
-            await execAsync(`tar -xf "${tarballPath}" -C "${extractDir}" --strip-components=1`);
-            console.log(`Successfully extracted tarball to ${extractDir} using Windows tar`);
-          } else {
-            // On Unix-like systems, use tar command
-            await execAsync(`tar -xzf "${tarballPath}" -C "${extractDir}" --strip-components=1`);
-            console.log(`Successfully extracted tarball to ${extractDir} using tar`);
-          }
-
-          // Verify the extraction was successful by checking for key files
-          const distDir = join(extractDir, 'dist');
+          // Verify the extraction was successful
+          const distDir = join(serviceDir, 'dist');
           if (fs.existsSync(distDir)) {
-            console.log(`Verified dist directory exists at ${distDir}`);
+            console.log(`Verified dist directory exists at: ${distDir}`);
+
+            // List contents to confirm
+            try {
+              const { stdout } = await execAsync(
+                process.platform === 'win32' ? `dir "${distDir}"` : `ls -la "${distDir}"`,
+              );
+              console.log(`Directory contents: ${stdout}`);
+            } catch (lsError) {
+              console.error('Error listing directory:', lsError);
+            }
           } else {
-            console.error(`Error: dist directory not found in extracted tarball at ${distDir}`);
-            throw new Error(`Dist directory not found in extracted tarball at ${distDir}`);
+            console.error(`Error: dist directory not found at ${distDir}`);
+            throw new Error(`Extraction failed: dist directory not found`);
           }
         } catch (extractError) {
-          console.error('Error extracting tarball to node_modules:', extractError);
+          console.error('Error extracting tarball:', extractError);
           throw new Error(
             `Failed to extract tarball: ${extractError instanceof Error ? extractError.message : String(extractError)}`,
           );
@@ -566,6 +615,31 @@ class TestAppsManager {
         // Try to clean up the specific directory
         try {
           console.log(`Removing prepared test apps directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+
+          // On Linux, use a more gradual approach to avoid resource spikes
+          if (process.platform === 'linux') {
+            try {
+              // First try to remove the largest subdirectories individually
+              const appsDir = join(process.env.WDIO_TEST_APPS_DIR, 'apps');
+              if (fs.existsSync(appsDir)) {
+                console.log('Cleaning up apps subdirectory first...');
+                await rm(appsDir, { recursive: true, force: true });
+                console.log('Apps subdirectory removed');
+              }
+
+              const nodeModulesDir = join(process.env.WDIO_TEST_APPS_DIR, 'node_modules');
+              if (fs.existsSync(nodeModulesDir)) {
+                console.log('Cleaning up node_modules subdirectory...');
+                await rm(nodeModulesDir, { recursive: true, force: true });
+                console.log('node_modules subdirectory removed');
+              }
+            } catch (subDirError) {
+              console.error('Error removing subdirectories:', subDirError);
+              // Continue to full directory removal
+            }
+          }
+
+          // Now remove the entire directory
           await rm(process.env.WDIO_TEST_APPS_DIR, { recursive: true, force: true });
           console.log(`Successfully removed ${process.env.WDIO_TEST_APPS_DIR}`);
 
@@ -612,19 +686,56 @@ class TestAppsManager {
 
       console.log(`Found ${tempDirs.length} temporary test directories to clean up.`);
 
-      for (const dir of tempDirs) {
-        try {
-          // Skip cleaning if it's the current test directory and PRESERVE_TEMP_DIR is true
-          if (process.env.WDIO_TEST_APPS_DIR === dir && process.env.PRESERVE_TEMP_DIR === 'true') {
-            console.log(`Preserving ${dir} as it's the current test directory and PRESERVE_TEMP_DIR=true`);
-            continue;
-          }
+      // On Linux, process fewer directories at once and add delays
+      const batchSize = process.platform === 'linux' ? 2 : tempDirs.length;
+      const delayMs = process.platform === 'linux' ? 1000 : 0;
 
-          console.log(`Removing ${dir}...`);
-          await rm(dir, { recursive: true, force: true });
-          console.log(`Successfully removed ${dir}`);
-        } catch (error) {
-          console.error(`Failed to remove ${dir}:`, error);
+      for (let i = 0; i < tempDirs.length; i += batchSize) {
+        const batch = tempDirs.slice(i, i + batchSize);
+
+        // Process batch concurrently
+        await Promise.all(
+          batch.map(async (dir) => {
+            try {
+              // Skip cleaning if it's the current test directory and PRESERVE_TEMP_DIR is true
+              if (process.env.WDIO_TEST_APPS_DIR === dir && process.env.PRESERVE_TEMP_DIR === 'true') {
+                console.log(`Preserving ${dir} as it's the current test directory and PRESERVE_TEMP_DIR=true`);
+                return;
+              }
+
+              console.log(`Removing ${dir}...`);
+
+              // On Linux, use a more gradual approach
+              if (process.platform === 'linux') {
+                // First try to remove the largest subdirectories individually
+                try {
+                  const appsDir = join(dir, 'apps');
+                  if (fs.existsSync(appsDir)) {
+                    await rm(appsDir, { recursive: true, force: true });
+                  }
+
+                  const nodeModulesDir = join(dir, 'node_modules');
+                  if (fs.existsSync(nodeModulesDir)) {
+                    await rm(nodeModulesDir, { recursive: true, force: true });
+                  }
+                } catch (subDirError) {
+                  console.error(`Error removing subdirectories in ${dir}:`, subDirError);
+                  // Continue to full directory removal
+                }
+              }
+
+              await rm(dir, { recursive: true, force: true });
+              console.log(`Successfully removed ${dir}`);
+            } catch (error) {
+              console.error(`Failed to remove ${dir}:`, error);
+            }
+          }),
+        );
+
+        // Add delay between batches on Linux
+        if (delayMs > 0 && i + batchSize < tempDirs.length) {
+          console.log(`Pausing for ${delayMs}ms before next cleanup batch...`);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
         }
       }
 
@@ -688,17 +799,68 @@ class TestAppsManager {
       console.log(`Running pnpm pack in directory: ${serviceDir}`);
       console.log(`Service directory exists: ${fs.existsSync(serviceDir)}`);
 
+      // Log system resources before packing
+      if (process.platform === 'linux') {
+        try {
+          console.log('System resources before packing:');
+          const memInfo = execSync('free -m').toString();
+          console.log(memInfo);
+        } catch (_err) {
+          console.log('Could not get system memory info');
+        }
+      }
+
+      // For Linux, adjust timeout and run with reduced priority to avoid OOM killer
+      let packCommand = 'pnpm pack';
+      if (process.platform === 'linux') {
+        // Use nice to reduce priority
+        packCommand = 'nice -n 10 pnpm pack';
+        console.log('Using nice command on Linux to reduce process priority');
+      }
+
       // Set up a timeout for the packing process to prevent hanging
+      // Longer timeout on Linux because of resource constraints
+      const timeoutMs = process.platform === 'linux' ? 300000 : 120000; // 5 mins on Linux, 2 mins elsewhere
       const timeoutPromise = new Promise<{ stdout: string }>((_, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('Service packing timed out after 2 minutes'));
-        }, 120000); // 2 minutes timeout
+          reject(new Error(`Service packing timed out after ${timeoutMs / 1000} seconds`));
+        }, timeoutMs);
         timeout.unref(); // Don't prevent process exit
       });
 
+      console.log(`Pack command timeout set to ${timeoutMs / 1000} seconds`);
+
       // Run the packing command with a timeout
-      const packPromise = execAsync('pnpm pack', { cwd: serviceDir });
-      const { stdout: packOutput } = await Promise.race([packPromise, timeoutPromise]);
+      const packPromise = execAsync(packCommand, { cwd: serviceDir });
+      let packOutput: string;
+
+      try {
+        const result = await Promise.race([packPromise, timeoutPromise]);
+        packOutput = result.stdout;
+      } catch (error) {
+        // If we timeout or have an error, try to get a pre-built package if available
+        console.error('Error or timeout during packing:', error);
+        if (process.env.WDIO_SERVICE_TARBALL) {
+          console.log(`Attempting to use pre-built tarball as fallback: ${process.env.WDIO_SERVICE_TARBALL}`);
+          const fallbackTarball = process.env.WDIO_SERVICE_TARBALL;
+          const packageFileName = path.basename(fallbackTarball);
+
+          try {
+            // Verify the tarball exists
+            await fs.promises.access(fallbackTarball, fs.constants.F_OK);
+
+            // Copy to temp directory
+            const tempPackagePath = join(this.tmpDir!, packageFileName);
+            await fs.promises.copyFile(fallbackTarball, tempPackagePath);
+            console.log(`Used fallback tarball: ${tempPackagePath}`);
+            return packageFileName;
+          } catch (fallbackError) {
+            console.error('Error using fallback tarball:', fallbackError);
+          }
+        }
+
+        throw new Error(`Service packing failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
 
       const packageEndTime = Date.now();
       console.log(
