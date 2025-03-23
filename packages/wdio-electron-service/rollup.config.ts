@@ -22,7 +22,6 @@ const configEsm: RollupOptions = {
   },
   plugins: [
     typescript({
-      tsconfig: './tsconfig.json',
       compilerOptions: {
         outDir: pkgInfo.outDir.esm,
       },
@@ -53,7 +52,6 @@ const configCjs: RollupOptions = {
   },
   plugins: [
     typescript({
-      tsconfig: './tsconfig.json',
       compilerOptions: {
         outDir: pkgInfo.outDir.cjs,
       },
