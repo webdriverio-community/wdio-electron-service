@@ -3,8 +3,13 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
-import findVersions from 'find-versions';
+import findVersionsImport from 'find-versions';
 import type { NormalizedReadResult } from 'read-package-up';
+
+// Handle both ESM and CJS module formats
+// In ESM, the default export is the function
+// In CJS after transpilation, the function might be on .default or directly the imported value
+const findVersions = (findVersionsImport as any)?.default || findVersionsImport;
 
 import log from './log.js';
 import { APP_NAME_DETECTION_ERROR, BUILD_TOOL_DETECTION_ERROR } from './constants.js';
@@ -379,5 +384,6 @@ export async function getElectronVersion(pkg: NormalizedReadResult) {
 
   const electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
 
-  return electronVersion ? findVersions(electronVersion, { loose: true })[0] : undefined;
+  // Return undefined if findVersions isn't available or electronVersion is falsy
+  return electronVersion && findVersions ? findVersions(electronVersion, { loose: true })[0] : undefined;
 }
