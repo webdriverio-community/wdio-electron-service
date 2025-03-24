@@ -475,7 +475,7 @@ jobs:
           # Generate test execution command based on the scenario and type
           if [[ "${{ inputs.scenario }}" == "*" ]]; then
             # Run all scenarios
-              if [[ "${{ inputs.type }}" == "*" ]]; then
+            if [[ "${{ inputs.type }}" == "*" ]]; then
               # Run all module types for all scenarios
               echo "Running all scenarios with all module types..."
               pnpm run test:matrix
