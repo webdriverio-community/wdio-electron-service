@@ -16,6 +16,14 @@
     "test:matrix": "tsx ./scripts/run-test-matrix.ts",
     "test:single": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" wdio run wdio.conf.ts",
     "test:all": "tsx ./scripts/run-all-tests.ts",
+    "test:forge:cjs": "cross-env PLATFORM=forge MODULE_TYPE=cjs pnpm run test:matrix",
+    "test:forge:esm": "cross-env PLATFORM=forge MODULE_TYPE=esm pnpm run test:matrix",
+    "test:builder:cjs": "cross-env PLATFORM=builder MODULE_TYPE=cjs pnpm run test:matrix",
+    "test:builder:esm": "cross-env PLATFORM=builder MODULE_TYPE=esm pnpm run test:matrix",
+    "test:no-binary:cjs": "cross-env PLATFORM=no-binary MODULE_TYPE=cjs pnpm run test:matrix",
+    "test:no-binary:esm": "cross-env PLATFORM=no-binary MODULE_TYPE=esm pnpm run test:matrix",
+    "test:standalone": "cross-env TEST_TYPE=standalone pnpm run test:matrix",
+    "test:mac-universal": "cross-env MAC_UNIVERSAL=true pnpm run test:all",
     "logs": "tail -f ./logs/**/*.log | grep -v '\\[\\$0\\]'"
   },
   "dependencies": {

@@ -31,7 +31,8 @@
     "test:unit": "turbo run test:unit",
     "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run test:all",
     "test:e2e-local:standalone": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm build:test-apps && cd e2e && pnpm run test:standalone",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service TEST=true pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run test:all",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service MAC_UNIVERSAL=true pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run test:mac-universal",
+    "test:e2e-standalone-debug": "cd e2e && MODULE_TYPE=cjs PLATFORM=forge TEST_TYPE=standalone BINARY=true EXAMPLE_DIR=forge-cjs DEBUG=wdio-electron-service* pnpm exec tsx ./test/standalone/api.spec.ts",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
