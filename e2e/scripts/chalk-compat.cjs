@@ -103,6 +103,12 @@ function createNodeUtilMock() {
     return format(...argsArray);
   };
 
+  // Add formatWithOptions function
+  const formatWithOptions = function (options, ...args) {
+    // Simple implementation that just uses format
+    return format(...args);
+  };
+
   // Add types object with isPromise method
   const types = {
     isPromise: function (value) {
@@ -129,6 +135,9 @@ function createNodeUtilMock() {
 
     // Add format function with apply method
     format: format,
+
+    // Add formatWithOptions function
+    formatWithOptions: formatWithOptions,
 
     // Add debuglog function that just returns console.debug
     debuglog: function (section) {
