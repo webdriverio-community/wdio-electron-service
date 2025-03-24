@@ -197,6 +197,8 @@ async function runAllTests() {
       PATH: process.env.PATH || '',
       NODE_OPTIONS: process.env.NODE_OPTIONS || '--no-warnings --experimental-specifier-resolution=node',
       DEBUG: process.env.DEBUG || 'wdio-electron-service',
+      // Set WDIO_CHALK_COMPAT=true for compatibility with ESM modules in CJS context
+      WDIO_CHALK_COMPAT: 'true',
       // Explicitly unset any limiting environment variables
       WDIO_FILTER: '',
       EXCLUDE_MULTIREMOTE: '',

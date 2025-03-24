@@ -591,6 +591,12 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
       EXAMPLE_DIR: binary ? `${platform}-${moduleType}` : `no-binary-${moduleType}`,
     };
 
+    // Set WDIO_CHALK_COMPAT=true for standalone tests
+    if (testType === 'standalone') {
+      env.WDIO_CHALK_COMPAT = 'true';
+      console.log(`✅ Set WDIO_CHALK_COMPAT=true for standalone test`);
+    }
+
     // Always pass test app preparation variables from parent process
     if (process.env.WDIO_TEST_APPS_DIR) {
       env.WDIO_TEST_APPS_PREPARED = 'true';
