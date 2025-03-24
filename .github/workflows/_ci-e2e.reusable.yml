@@ -106,6 +106,28 @@ jobs:
             echo "❌ packages directory not found"
           fi
 
+      # Copy the artifact package dist directory to the local package directory
+      - name: 📦 Copy Artifact Package Dist Directory
+        shell: bash
+        run: |
+          # Dynamically find all package directories in the artifact build
+          echo "Finding packages with dist directories in the artifact build..."
+          find wdio-electron-service-build/packages -type d -name dist -path "*/packages/*" | while read dist_dir; do
+            # Extract the package name by getting the parent directory name
+            package_dir=$(dirname "$dist_dir")
+            package_name=$(basename "$package_dir")
+            package_path="packages/$package_name"
+
+            if [ -d "$package_path" ]; then
+              echo "Copying dist directory for $package_name..."
+              mkdir -p "$package_path/dist"
+              cp -r "$dist_dir"/* "$package_path/dist/"
+              echo "✅ Copied dist files for $package_name"
+            else
+              echo "⚠️ Local package directory not found: $package_path"
+            fi
+          done
+
       # Package service locally if not found in build artifacts
       - name: 📦 Create Service Package Locally
         shell: bash
