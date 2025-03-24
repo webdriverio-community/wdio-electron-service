@@ -94,7 +94,7 @@ jobs:
           else
             echo "❌ packaged-service directory not found"
             echo "Creating packaged-service directory for debugging:"
-            mkdir -p wdio-electron-service-build/packaged-service
+            pnpx shx mkdir -p wdio-electron-service-build/packaged-service
           fi
 
           # Check for dist directories
@@ -120,8 +120,8 @@ jobs:
 
             if [ -d "$package_path" ]; then
               echo "Copying dist directory for $package_name..."
-              mkdir -p "$package_path/dist"
-              cp -r "$dist_dir"/* "$package_path/dist/"
+              pnpx shx mkdir -p "$package_path/dist"
+              pnpx shx cp -r "$dist_dir"/* "$package_path/dist/"
               echo "✅ Copied dist files for $package_name"
             else
               echo "⚠️ Local package directory not found: $package_path"
@@ -179,7 +179,7 @@ jobs:
           echo "❌ Service package not found in build artifacts. Creating locally..."
 
           # Create a local package
-          mkdir -p local-service-package
+          pnpx shx mkdir -p local-service-package
           cd packages/wdio-electron-service
           echo "Running pnpm pack in $(pwd)"
           PACKAGE_FILE=$(pnpm pack | tail -n 1)
@@ -390,7 +390,7 @@ jobs:
           # Create symlinks for workspace dependencies
           echo "Creating symlinks for workspace dependencies..."
           if [ -d "../wdio-electron-service-build/packages" ]; then
-            mkdir -p node_modules
+            pnpx shx mkdir -p node_modules
 
             # Find all workspace packages in the artifact
             find "../wdio-electron-service-build/packages" -maxdepth 1 -type d | grep -v "^../wdio-electron-service-build/packages$" | while read package_dir; do
@@ -411,7 +411,7 @@ jobs:
                 # Create symlinks for scoped packages
                 find "$package_dir/node_modules" -maxdepth 1 -type d -name "@*" | while read scope_dir; do
                   scope_name=$(basename "$scope_dir")
-                  mkdir -p "node_modules/$scope_name"
+                  pnpx shx mkdir -p "node_modules/$scope_name"
                   find "$scope_dir" -maxdepth 1 -type d | grep -v "^$scope_dir$" | while read scoped_dep_dir; do
                     scoped_dep_name=$(basename "$scoped_dep_dir")
                     if [ ! -d "node_modules/${scope_name}/${scoped_dep_name}" ]; then

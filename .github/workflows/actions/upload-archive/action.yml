@@ -56,14 +56,7 @@ runs:
       shell: bash
       run: |
         # Create output directory
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          # On Windows, use PowerShell New-Item for recursive directory creation
-          OUTPUT_DIR=$(dirname "${{ inputs.output }}")
-          powershell -command "New-Item -ItemType Directory -Force -Path '$OUTPUT_DIR'"
-        else
-          # On Unix systems, use mkdir -p
-          mkdir -p $(dirname "${{ inputs.output }}")
-        fi
+        mkdir -p $(dirname "${{ inputs.output }}")
 
         # Get file count before compression (for validation)
         FILE_COUNT=$(find ${{ inputs.paths }} -type f | wc -l)

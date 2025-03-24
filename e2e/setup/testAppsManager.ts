@@ -384,25 +384,25 @@ class TestAppsManager {
       // Create the target app directory
       await this.createDirectory(targetAppDir);
 
-      // Use cp -R with the --preserve=all flag to ensure all file attributes are preserved
+      // Use cp -r with the --preserve=all flag to ensure all file attributes are preserved
       // Copy all files and directories except node_modules to avoid large copies
       console.log(`Copying ${appDir} to ${targetAppDir}...`);
 
       try {
         // Copy package.json and other files in the root directory
         this._currentOperation = `copying package.json for ${appDir}`;
-        await execAsync(`cp -R ${sourceAppDir}/package.json ${targetAppDir}/`);
+        await execAsync(`pnpx shx cp -r "${sourceAppDir}/package.json" "${targetAppDir}/"`);
 
         // Copy the src directory if it exists
         if (fs.existsSync(join(sourceAppDir, 'src'))) {
           this._currentOperation = `copying src directory for ${appDir}`;
-          await execAsync(`cp -R ${sourceAppDir}/src ${targetAppDir}/`);
+          await execAsync(`pnpx shx cp -r "${sourceAppDir}/src" "${targetAppDir}/"`);
         }
 
         // Copy node_modules directory if it exists
         if (fs.existsSync(join(sourceAppDir, 'node_modules'))) {
           this._currentOperation = `copying node_modules for ${appDir}`;
-          await execAsync(`cp -R ${sourceAppDir}/node_modules ${targetAppDir}/`);
+          await execAsync(`pnpx shx cp -r ${sourceAppDir}/node_modules ${targetAppDir}/`);
         }
 
         // Copy the dist directory if it exists - this is critical for the tests
@@ -440,7 +440,7 @@ class TestAppsManager {
                     if (process.platform === 'darwin') {
                       await execAsync(`ditto "${sourceAppBundle}" "${targetAppBundle}"`);
                     } else {
-                      await execAsync(`cp -R "${sourceAppBundle}" "${targetAppBundle}"`);
+                      await execAsync(`pnpx shx cp -r "${sourceAppBundle}" "${targetAppBundle}"`);
                     }
                     console.log(`Successfully copied ${appBundle} to ${targetMacArmDir}`);
 
@@ -478,7 +478,7 @@ class TestAppsManager {
 
             if (fs.statSync(sourcePath).isDirectory()) {
               try {
-                await execAsync(`cp -R "${sourcePath}" "${targetDistDir}/"`);
+                await execAsync(`pnpx shx cp -r "${sourcePath}" "${targetDistDir}/"`);
               } catch (err) {
                 console.warn(`Error copying directory ${file}:`, err);
               }
@@ -563,7 +563,7 @@ class TestAppsManager {
                 } else {
                   // For non-macOS platforms, just copy the directory
                   try {
-                    await execAsync(`cp -R "${sourceItemPath}" "${targetOutDir}/"`);
+                    await execAsync(`pnpx shx cp -r "${sourceItemPath}" "${targetOutDir}/"`);
                   } catch (err) {
                     console.warn(`Error copying directory ${item}:`, err);
                   }
@@ -571,7 +571,7 @@ class TestAppsManager {
               } else {
                 // For regular directories, just copy them
                 try {
-                  await execAsync(`cp -R "${sourceItemPath}" "${targetOutDir}/"`);
+                  await execAsync(`pnpx shx cp -r "${sourceItemPath}" "${targetOutDir}/"`);
                 } catch (err) {
                   console.warn(`Error copying directory ${item}:`, err);
                 }
@@ -606,7 +606,7 @@ class TestAppsManager {
         const otherFiles = ['tsconfig.json', 'rollup.config.js', 'rollup.config.mjs', 'forge.config.js'];
         for (const file of otherFiles) {
           if (fs.existsSync(join(sourceAppDir, file))) {
-            await execAsync(`cp -R ${sourceAppDir}/${file} ${targetAppDir}/`);
+            await execAsync(`pnpx shx cp -r ${sourceAppDir}/${file} ${targetAppDir}/`);
           }
         }
       } catch (copyError) {

@@ -196,13 +196,7 @@ runs:
       shell: bash
       run: |
         # Create directory for artifact
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          # On Windows, use PowerShell New-Item for recursive directory creation
-          powershell -command "New-Item -ItemType Directory -Force -Path '${{ inputs.path }}'"
-        else
-          # On Unix systems, use mkdir -p
-          mkdir -p "${{ inputs.path }}"
-        fi
+        pnpx shx mkdir -p "${{ inputs.path }}"
 
         # Download artifact with retries
         MAX_RETRIES=3
