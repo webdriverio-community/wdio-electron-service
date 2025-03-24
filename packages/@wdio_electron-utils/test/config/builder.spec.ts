@@ -1,12 +1,23 @@
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import type { NormalizedPackageJson } from 'read-package-up';
 
 import { builderBuildInfo, getBuilderConfigCandidates, getConfig } from '../../src/config/builder';
-import path from 'node:path';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
+
+import type { NormalizedPackageJson } from 'read-package-up';
 
 function getFixturePackagePath(moduleType: string, fixtureName: string) {
   return path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
+}
+
+async function getFixturePackageJson(jsonPath: string) {
+  const packageJsonPath = jsonPath;
+  const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+  return {
+    packageJson,
+    path: packageJsonPath,
+  };
 }
 
 const expectedCandidates = [
@@ -41,7 +52,6 @@ describe('getBuilderConfigCandidates', () => {
   });
 });
 
-type ReadResult = { result: { productName: string } };
 describe('getConfig', () => {
   describe.each(['esm', 'cjs'])('%s', (type) => {
     it.each([
@@ -59,19 +69,28 @@ describe('getConfig', () => {
       ['YAML(.yml) config', 'builder-dependency-yml-config'],
     ])('%s', async (_title, scenario) => {
       const fixturePkg = getFixturePackagePath(type, scenario);
-      const config = await getConfig(expectedCandidates, path.dirname(fixturePkg));
-      expect((config as ReadResult)['result']['productName']).toBe(scenario);
+      const pkg = await getFixturePackageJson(fixturePkg);
+      const config = await getConfig(pkg);
+      expect(config).toStrictEqual({
+        appName: scenario,
+        config: {
+          productName: scenario,
+        },
+        isBuilder: true,
+        isForge: false,
+      });
     });
 
     it('should return undefined if no config file is found', async () => {
-      const fixturePkg = getFixturePackagePath(type, 'builder-dependency-inline-config');
-      const config = await getConfig(expectedCandidates, path.dirname(fixturePkg));
+      const fixturePkg = getFixturePackagePath(type, 'builder-dependency-no-config');
+      const pkg = await getFixturePackageJson(fixturePkg);
+      const config = await getConfig(pkg);
       expect(config).toBeUndefined();
     });
   });
 });
 
-describe('forgeBuildInfo', () => {
+describe('builderBuildInfo', () => {
   it('should return the expected config when productName is set in the package.json', async () => {
     const builderConfig = {
       productName: 'builder-product',

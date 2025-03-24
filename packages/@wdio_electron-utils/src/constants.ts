@@ -9,3 +9,13 @@ export const PKG_NAME_ELECTRON = {
 } as const;
 export const PNPM_CATALOG_PREFIX = 'catalog:';
 export const PNPM_WORKSPACE_YAML = 'pnpm-workspace.yaml';
+
+export const BUILDER_CONFIG_NOT_FOUND_ERROR =
+  'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.';
+
+export const FORGE_CONFIG_NOT_FOUND_ERROR = 'Forge was detected but no configuration was found.';
+export const MULTIPLE_BUILD_TOOL_WARNING = {
+  DESCRIPTION:
+    'Detected both Forge and Builder configurations, the Forge configuration will be used to determine build information',
+  SUGGESTION: 'You can override this by specifying the `appBinaryPath` option in your capabilities.',
+};
