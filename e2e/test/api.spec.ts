@@ -20,13 +20,7 @@ describe('Electron APIs', () => {
     const appName = await browser.electron.execute((electron) => electron.app.getName());
     const expectedName = getExpectedAppName();
 
-    if (isBinary) {
-      // In binary mode, expect the app name to match what's in the package.json
-      expect(appName).toBe(expectedName);
-    } else {
-      // In no-binary mode, the name will always be "Electron"
-      expect(appName).toBe('Electron');
-    }
+    expect(appName).toBe(expectedName);
   });
 
   it('should retrieve the app version through the electron API', async () => {
