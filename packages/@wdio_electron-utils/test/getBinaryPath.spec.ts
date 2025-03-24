@@ -2,8 +2,7 @@ import path from 'node:path';
 import { expect, it, vi, describe, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 
-import { getBinaryPath, getAppBuildInfo } from '../src/index.js';
-import { NormalizedPackageJson } from 'read-package-up';
+import { getBinaryPath } from '../src/getBinaryPath.js';
 import { AppBuildInfo } from '@wdio/electron-types';
 
 // Mock our own readConfig implementation for testing
@@ -81,9 +80,9 @@ function getBuilderConfigCandidates(configFileName = 'electron-builder'): string
   return exts.map((ext) => `${configFileName}${ext}`);
 }
 
-function getFixturePackagePath(moduleType: string, fixtureName: string) {
-  return path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
-}
+// function getFixturePackagePath(moduleType: string, fixtureName: string) {
+//   return path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
+// }
 
 // Utility function to check if a path includes the fixture type
 function isFixturePath(path: string, type: string): boolean {
@@ -539,211 +538,6 @@ beforeEach(() => {
 });
 
 describe('Electron Utilities', () => {
-  describe('getAppBuildInfo()', () => {
-    describe('ESM', () => {
-      it('should throw an error when no build tools are found', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'no-build-tool');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(() =>
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow(
-          'No build tool was detected, if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities.',
-        );
-      });
-
-      it('should throw an error when dependencies for multiple build tools are found without configuration', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-no-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(() =>
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
-      });
-
-      it('should throw an error when the Forge app name is unable to be determined', async () => {
-        // Create a minimal package.json with Forge dependency but no app name
-        const packageJson = {
-          // name property intentionally omitted to test error case
-          version: '1.0.0',
-          readme: '',
-          _id: 'no-name@1.0.0',
-          config: {
-            forge: {},
-          },
-          devDependencies: {
-            '@electron-forge/cli': '6.0.0',
-          },
-        } as unknown as NormalizedPackageJson;
-
-        await expect(() =>
-          getAppBuildInfo({
-            packageJson,
-            path: '/path/to/package.json',
-          }),
-        ).rejects.toThrow(
-          'No application name was detected, please set name / productName in your package.json or build tool configuration.',
-        );
-      });
-
-      it('should throw an error when the builder app name is unable to be determined', async () => {
-        // Create a minimal package.json with Builder dependency but no app name
-        const packageJson = {
-          // name property intentionally omitted to test error case
-          version: '1.0.0',
-          readme: '',
-          _id: 'no-name@1.0.0',
-          build: {},
-          devDependencies: {
-            'electron-builder': '22.0.0',
-          },
-        } as unknown as NormalizedPackageJson;
-
-        await expect(() =>
-          getAppBuildInfo({
-            packageJson,
-            path: '/path/to/package.json',
-          }),
-        ).rejects.toThrow(
-          'No application name was detected, please set name / productName in your package.json or build tool configuration.',
-        );
-      });
-
-      it('should throw an error when builder is detected but has no config', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-no-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow(
-          'Electron-builder was detected but no configuration was found, make sure your config file is named correctly, e.g. `electron-builder.config.json`.',
-        );
-      });
-
-      it('should throw an error when Forge is detected but has no config', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-no-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(() =>
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)forge.config.js'./);
-      });
-
-      it('should throw an error when Forge is detected with a linked JS config but the config file cannot be read', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-linked-js-config-broken');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow(/Forge was detected but no configuration was found at '(.*)custom-config.js'./);
-      });
-
-      it('should return the expected config when configuration for builder is found alongside a Forge dependency', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-wrong-config-1');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          await getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).toStrictEqual({
-          appName: 'multiple-build-tools-wrong-config-1',
-          config: { productName: 'multiple-build-tools-wrong-config-1' },
-          isBuilder: true,
-          isForge: false,
-        });
-      });
-
-      it('should return the expected config when configuration for Forge is found alongside a builder dependency', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'multiple-build-tools-wrong-config-2');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          await getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).toStrictEqual({
-          appName: 'multiple-build-tools-wrong-config-2',
-          config: { packagerConfig: { name: 'multiple-build-tools-wrong-config-2' } },
-          isBuilder: false,
-          isForge: true,
-        });
-      });
-
-      it('should return the expected config for a Forge dependency with JS config', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-js-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          await getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).toStrictEqual({
-          appName: 'forge-dependency-js-config',
-          config: { packagerConfig: { name: 'forge-dependency-js-config' } },
-          isBuilder: false,
-          isForge: true,
-        });
-      });
-
-      it('should return the expected config for a Forge dependency with linked JS config', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'forge-dependency-linked-js-config');
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        await expect(
-          await getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).toStrictEqual({
-          appName: 'forge-dependency-linked-js-config',
-          config: { packagerConfig: { name: 'forge-dependency-linked-js-config' } },
-          isBuilder: false,
-          isForge: true,
-        });
-      });
-
-      it('should try to access all variants of builder config files', async () => {
-        const packageJsonPath = getFixturePackagePath('esm', 'builder-dependency-no-config');
-        const packageJson = {
-          name: 'builder-dependency-no-config',
-          version: '1.0.0',
-          readme: '',
-          _id: 'builder-dependency-no-config@1.0.0',
-          devDependencies: {
-            'electron-builder': '22.0.0',
-          },
-        } as NormalizedPackageJson;
-
-        await expect(
-          getAppBuildInfo({
-            packageJson,
-            path: packageJsonPath,
-          }),
-        ).rejects.toThrow('Electron-builder was detected but no configuration was found');
-
-        // Check that we tried to access config files
-        expect(accessedConfigFilenames.size).toBeGreaterThan(0);
-
-        // Check that the tracked paths match our expected pattern
-        const trackedPaths = Array.from(accessedConfigFilenames);
-        trackedPaths.forEach((path) => {
-          expect(path.includes('builder-dependency-no-config')).toBe(true);
-          expect(path.includes('electron-builder')).toBe(true);
-        });
-      });
-    });
-  });
-
   describe('getBinaryPath()', () => {
     const pkgJSONPath = '/path/to/package.json';
     const winProcess = { platform: 'win32', arch: 'x64' } as NodeJS.Process;
@@ -1113,42 +907,5 @@ describe('Multiple Binaries Tests', () => {
         { platform: 'win32', arch: 'x64' } as NodeJS.Process,
       ),
     ).rejects.toThrow('No executable binary found, checked:');
-  });
-});
-
-// Test for getAppBuildInfo that covers both Forge and Builder configs being present
-describe('getAppBuildInfo with Multiple Build Tools', () => {
-  it('should handle both Forge and Builder configs being present and prefer Forge', async () => {
-    // Create a package.json with both forge and builder configs
-    const pkgJson = {
-      name: 'both-configs-app',
-      version: '1.0.0',
-      readme: '',
-      _id: 'both-configs-app@1.0.0',
-      build: {
-        productName: 'Builder App',
-      },
-      config: {
-        forge: {
-          packagerConfig: {
-            name: 'Forge App',
-          },
-        },
-      },
-      devDependencies: {
-        'electron-builder': '22.0.0',
-        '@electron-forge/cli': '6.0.0',
-      },
-    } as NormalizedPackageJson;
-
-    const result = await getAppBuildInfo({
-      packageJson: pkgJson,
-      path: '/path/to/package.json',
-    });
-
-    // Should prefer Forge config
-    expect(result.isForge).toBe(true);
-    expect(result.isBuilder).toBe(false);
-    expect(result.appName).toBe('Forge App');
   });
 });
