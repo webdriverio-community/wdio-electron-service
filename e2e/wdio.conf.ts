@@ -29,29 +29,16 @@ console.log(`🔍 Debug: Starting test with configuration:
   Example Directory: ${exampleDir}
 `);
 
-// Initialize test apps manager if env var is not set
-let tmpDir: string | null = null;
+// Determine if we need to prepare test apps
+let tmpDir: string;
 if (process.env.WDIO_TEST_APPS_PREPARED !== 'true') {
-  console.log('🔍 Debug: Initializing test apps manager for individual test');
+  // Prepare apps for individual test
   tmpDir = await testAppsManager.prepareTestApps();
-  console.log('🔍 Debug: Test apps prepared for individual test');
+  process.env.WDIO_TEST_APPS_PREPARED = 'true';
+  process.env.WDIO_TEST_APPS_DIR = tmpDir;
 } else {
-  console.log('🔍 Debug: Skipping test apps preparation as they were already prepared');
-  // Directly use the environment variable if set, or fall back to testAppsManager
-  tmpDir = process.env.WDIO_TEST_APPS_DIR || testAppsManager.getTmpDir();
-
-  if (!tmpDir) {
-    console.error('🔍 Debug: No tmpDir found from environment variable or testAppsManager');
-    // Fallback - use a reasonable default based on the existing environment variable pattern
-    if (process.env.WDIO_TEST_APPS_DIR) {
-      tmpDir = process.env.WDIO_TEST_APPS_DIR;
-      console.log(`🔍 Debug: Using tmpDir from environment variable: ${tmpDir}`);
-    } else {
-      throw new Error('tmpDir not set and cannot be determined from environment or testAppsManager');
-    }
-  } else {
-    console.log(`🔍 Debug: Using tmpDir: ${tmpDir}`);
-  }
+  // Use already prepared apps
+  tmpDir = process.env.WDIO_TEST_APPS_DIR || testAppsManager.getTmpDir() || '';
 }
 
 // Load package.json from the appropriate app directory and set it on globalThis
@@ -94,7 +81,7 @@ if (tmpDir) {
     for (const entryPoint of possibleEntryPoints) {
       if (fs.existsSync(entryPoint)) {
         appEntryPoint = entryPoint;
-        console.log('🔍 Debug: Found app entry point at:', appEntryPoint);
+        console.log('🔍 Debug: Found app entry point at:', entryPoint);
         break;
       }
     }
