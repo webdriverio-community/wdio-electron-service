@@ -87,6 +87,9 @@ jobs:
           echo "Creating service package..."
           mkdir -p packaged-service
           cd packages/wdio-electron-service
+          # Ensure dependencies are installed
+          pnpm install
+          # Package the service and capture the output filename
           PACKAGE_FILE=$(pnpm pack | tail -n 1)
           echo "Created package: $PACKAGE_FILE"
 
@@ -102,6 +105,25 @@ jobs:
           echo "PACKAGE_PATH=packaged-service/$PACKAGE_FILE" > packaged-service/package-info.txt
           echo "BUILD_ID=${{ github.run_id }}" >> packaged-service/package-info.txt
 
+      # Install all dependencies in packages
+      - name: 📦 Install Package Dependencies
+        shell: bash
+        run: |
+          echo "Installing all dependencies to ensure node_modules are populated..."
+          pnpm install
+
+          # Also install in each package directory individually to ensure all dependencies are resolved
+          echo "Installing dependencies in each package directory..."
+          find packages -maxdepth 1 -type d | grep -v "^packages$" | while read package_dir; do
+            package_name=$(basename "$package_dir")
+            echo "Installing dependencies for $package_name..."
+            (cd "$package_dir" && pnpm install --no-frozen-lockfile)
+          done
+
+          # Also install in e2e directory
+          echo "Installing dependencies in e2e directory..."
+          (cd e2e && pnpm install --no-frozen-lockfile)
+
       # Extract the artifact contents for verification
       - name: 🧪 Extract Artifact for Verification
         if: ${{ runner.os == 'Linux' }}
@@ -111,19 +133,38 @@ jobs:
           # Create the base directory structure
           mkdir -p wdio-electron-service-build/packages
 
-          # Copy dist directories
-          echo "Copying all package dist directories..."
+          # Copy dist directories and node_modules
+          echo "Copying all package dist directories and node_modules..."
           find packages -maxdepth 1 -type d | grep -v "^packages$" | while read package_dir; do
             package_name=$(basename "$package_dir")
+
+            # Create package directory in build
+            mkdir -p "wdio-electron-service-build/packages/$package_name"
+
+            # Copy dist if it exists
             if [ -d "$package_dir/dist" ]; then
               echo "Copying dist directory for $package_name..."
-              mkdir -p "wdio-electron-service-build/packages/$package_name"
               cp -R "$package_dir/dist" "wdio-electron-service-build/packages/$package_name/"
-              echo "✅ Copied dist directory for $package_name"
             else
               echo "📝 No dist directory found for $package_name"
             fi
+
+            # Copy node_modules if it exists
+            if [ -d "$package_dir/node_modules" ]; then
+              echo "Copying node_modules for $package_name..."
+              mkdir -p "wdio-electron-service-build/packages/$package_name/node_modules"
+              cp -R "$package_dir/node_modules" "wdio-electron-service-build/packages/$package_name/"
+            fi
+
+            echo "✅ Processed $package_name"
           done
+
+          # Copy e2e node_modules if it exists
+          if [ -d "e2e/node_modules" ]; then
+            echo "Copying e2e node_modules..."
+            mkdir -p "wdio-electron-service-build/e2e/node_modules"
+            cp -R "e2e/node_modules" "wdio-electron-service-build/e2e/"
+          fi
 
           # Copy packaged-service directory
           if [ -d "packaged-service" ]; then

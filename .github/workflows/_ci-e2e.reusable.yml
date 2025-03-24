@@ -235,6 +235,25 @@ jobs:
         run: |
           echo "Preparing test applications for scenario: ${{ inputs.scenario }}, module type: ${{ inputs.type }}"
 
+          # Copy node_modules from the built artifact to ensure all dependencies are available
+          echo "Copying node_modules from built artifact to local packages..."
+          if [ -d "wdio-electron-service-build/packages" ]; then
+            find wdio-electron-service-build/packages -type d -name node_modules | while read modules_dir; do
+              package_dir=$(dirname "$modules_dir")
+              package_name=$(basename "$package_dir")
+              local_package_dir="packages/$package_name"
+
+              if [ -d "$local_package_dir" ]; then
+                echo "Copying node_modules for $package_name..."
+                mkdir -p "$local_package_dir/node_modules"
+                cp -R "$modules_dir"/* "$local_package_dir/node_modules/"
+                echo "✅ Copied node_modules for $package_name"
+              fi
+            done
+          else
+            echo "⚠️ No packages directory found in artifact. Dependencies may be missing."
+          fi
+
           # Print system diagnostics
           echo "=== System Diagnostics ==="
           echo "Operating System: ${{ runner.os }}"
@@ -322,6 +341,32 @@ jobs:
 
           cd e2e
           echo "Running in $(pwd)"
+
+          # Ensure e2e directory has all dependencies installed
+          echo "Installing dependencies in the e2e directory..."
+          pnpm install
+
+          # Create symlinks for workspace dependencies
+          echo "Creating symlinks for workspace dependencies..."
+          if [ -d "../wdio-electron-service-build/packages" ]; then
+            mkdir -p node_modules
+
+            # Find all workspace packages in the artifact
+            find "../wdio-electron-service-build/packages" -maxdepth 1 -type d | grep -v "^../wdio-electron-service-build/packages$" | while read package_dir; do
+              package_name=$(basename "$package_dir")
+
+              if [ -d "$package_dir/node_modules" ]; then
+                echo "Copying node_modules from $package_name to e2e node_modules..."
+
+                # Merge the dependencies from each package
+                cp -R "$package_dir/node_modules"/* "node_modules/" 2>/dev/null || true
+              fi
+            done
+
+            echo "✅ Dependencies merged to e2e node_modules"
+          else
+            echo "⚠️ No packages directory found in artifact for dependency linking"
+          fi
 
           # Create debug file to capture any errors
           DEBUG_LOG="/tmp/prepare-apps-debug.log"
