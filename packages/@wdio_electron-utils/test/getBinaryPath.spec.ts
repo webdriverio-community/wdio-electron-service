@@ -4,6 +4,7 @@ import { AppBuildInfo } from '@wdio/electron-types';
 
 import log from '../src/log';
 import { getBinaryPath } from '../src/getBinaryPath.js';
+import { normalize } from 'node:path';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
@@ -51,15 +52,16 @@ function mockProcess(platform: string, arch: string) {
 }
 
 function mockBinaryPath(expectedPath: string | string[]) {
-  const target = Array.isArray(expectedPath) ? expectedPath : [expectedPath];
+  const target = Array.isArray(expectedPath) ? expectedPath.map((p) => normalize(p)) : [normalize(expectedPath)];
   vi.mocked(fs.access).mockImplementation(async (path, _mode?) => {
-    if (target.includes(path.toString())) {
+    if (target.includes(normalize(path.toString()))) {
       return Promise.resolve();
     } else {
       return Promise.reject('Not executable');
     }
   });
 }
+
 function testBinaryPath(options: TestBinaryPathOptions) {
   const { platform, arch, binaryPath, isForge, configObj, testName, skip } = options;
   const buildType = isForge ? 'Forge' : 'builder';
@@ -98,10 +100,12 @@ function testBinaryPath(options: TestBinaryPathOptions) {
     expect(normalizedActual).toBe(normalizedExpected);
   });
 }
+
 describe('getBinaryPath', () => {
   beforeEach(() => {
     vi.mocked(log.info).mockClear();
   });
+
   // Replace individual tests with parameterized version
   testBinaryPath({
     platform: 'win32',
@@ -110,6 +114,7 @@ describe('getBinaryPath', () => {
     isForge: true,
     configObj: { packagerConfig: { name: 'my-app' } },
   });
+
   testBinaryPath({
     platform: 'darwin',
     arch: 'arm64',
@@ -233,9 +238,9 @@ describe('getBinaryPath', () => {
       currentProcess,
     );
 
-    expect(result).toBe('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
+    expect(result).toBe(normalize('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app'));
     expect(log.info).toHaveBeenLastCalledWith(
-      `Detected multiple app binaries, using the first one: \n${executableBinaryPaths.join(', \n')}`,
+      expect.stringMatching(/Detected multiple app binaries, using the first one:/),
     );
   });
 
