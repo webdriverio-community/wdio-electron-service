@@ -54,7 +54,7 @@ export async function findPnpmCatalogVersion(pkgName: string, pkgVersion: string
     if (pkgVersion === PNPM_CATALOG_PREFIX && pnpmWorkspace.catalog?.[pkgName]) {
       return pnpmWorkspace.catalog[pkgName];
     }
-    // }
+
     return undefined;
   } catch (error) {
     // Gracefully handle other errors
