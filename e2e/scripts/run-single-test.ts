@@ -103,12 +103,14 @@ function getStandaloneCommand(env: Record<string, string>): string {
 async function runWithCleanup() {
   try {
     // Check if test apps are already prepared
-    if (process.env.WDIO_TEST_APPS_PREPARED === 'true') {
+    const testAppsPrepared = process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR;
+    if (testAppsPrepared) {
       console.log('ℹ️ Test apps already prepared, skipping setup...');
     } else {
       // Perform suite-level setup
+      console.log('🔄 Test apps not prepared, performing setup...');
       await setupTestSuite();
-      console.log('Suite setup completed');
+      console.log('✅ Suite setup completed');
     }
 
     // Always apply MODULE_FORCE_CJS=true for CJS tests to prevent ESM loader issues

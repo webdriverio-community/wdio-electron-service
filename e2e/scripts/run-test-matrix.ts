@@ -575,9 +575,13 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
       TEST_TYPE: testType,
       BINARY: binary ? 'true' : 'false',
       EXAMPLE_DIR: binary ? `${platform}-${moduleType}` : `no-binary-${moduleType}`,
-      WDIO_TEST_APPS_PREPARED: process.env.WDIO_TEST_APPS_PREPARED || 'false',
-      WDIO_TEST_APPS_DIR: process.env.WDIO_TEST_APPS_DIR || '',
     };
+
+    // Always pass test app preparation variables from parent process
+    if (process.env.WDIO_TEST_APPS_DIR) {
+      env.WDIO_TEST_APPS_PREPARED = 'true';
+      env.WDIO_TEST_APPS_DIR = process.env.WDIO_TEST_APPS_DIR;
+    }
 
     // Enable splash screen for window tests
     if (testType === 'window') {
