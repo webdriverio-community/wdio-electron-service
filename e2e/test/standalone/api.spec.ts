@@ -54,8 +54,6 @@ console.log(`  - __dirname: ${__dirname}`);
 const shouldForceCjs = process.env.MODULE_TYPE === 'cjs' || process.env.MODULE_FORCE_CJS === 'true';
 console.log(`  - shouldForceCjs: ${shouldForceCjs}`);
 
-// Try to import the service
-let startWdioSession;
 let electronUtils;
 
 // Get the temp directory from environment variables
@@ -78,60 +76,16 @@ async function safeImport(importPath: string) {
   }
 }
 
+// Import the service module
+console.log('Importing service module...');
+let serviceModule: any;
 try {
-  // Use direct path to the prepared package if available
-  if (tempDir) {
-    // Path to the service package in the temp directory
-    const servicePath = path.join(tempDir, 'apps', 'node_modules', 'wdio-electron-service');
-    console.log(`🔍 DEBUG: Checking service package at: ${servicePath}`);
-
-    // Verify the package exists
-    if (fs.existsSync(servicePath)) {
-      console.log('🔍 DEBUG: Service package exists at temp location');
-
-      // Check if we have dist/cjs and dist/esm directories
-      const cjsDir = path.join(servicePath, 'dist', 'cjs');
-      const esmDir = path.join(servicePath, 'dist', 'esm');
-
-      console.log(`🔍 DEBUG: CJS directory exists: ${fs.existsSync(cjsDir)}`);
-      console.log(`🔍 DEBUG: ESM directory exists: ${fs.existsSync(esmDir)}`);
-
-      // Choose the appropriate module type
-      const moduleType = process.env.MODULE_TYPE === 'cjs' ? 'cjs' : 'esm';
-      const moduleDir = moduleType === 'cjs' ? cjsDir : esmDir;
-
-      if (fs.existsSync(moduleDir)) {
-        // Import the index.js file from the module directory
-        const indexPath = path.join(moduleDir, 'index.js');
-        console.log(`🔍 DEBUG: Importing from ${moduleType.toUpperCase()} index: ${indexPath}`);
-
-        // Convert the path to a file:// URL for ESM compatibility
-        const fileUrl = url.pathToFileURL(indexPath).href;
-        console.log(`🔍 DEBUG: Using file URL for import: ${fileUrl}`);
-
-        const serviceModule = await safeImport(fileUrl);
-        startWdioSession = serviceModule.startWdioSession;
-        console.log(`✅ Successfully imported service from ${moduleType.toUpperCase()} path`);
-      } else {
-        throw new Error(`Module directory not found: ${moduleDir}`);
-      }
-    } else {
-      // Fall back to package name
-      console.log('🔍 DEBUG: Service package not found in temp location, falling back to package name');
-      const serviceModule = await safeImport('wdio-electron-service');
-      startWdioSession = serviceModule.startWdioSession;
-      console.log('✅ Successfully imported service via package name');
-    }
-  } else {
-    // No temp directory, use package name
-    console.log('🔍 DEBUG: No temp directory provided, importing service via package name');
-    const serviceModule = await safeImport('wdio-electron-service');
-    startWdioSession = serviceModule.startWdioSession;
-    console.log('✅ Successfully imported service via package name');
-  }
-} catch (error) {
-  console.error('❌ Error importing service module:', error instanceof Error ? error.message : String(error));
-  throw error;
+  // Always use package name import to ensure proper module resolution
+  serviceModule = await import('wdio-electron-service');
+  console.log('Successfully imported service module via package name');
+} catch (importError) {
+  console.error('Error importing service module:', importError);
+  throw importError;
 }
 
 try {
@@ -260,7 +214,7 @@ if (isBinary) {
 }
 
 console.log('🔍 Debug: Starting session with options:', JSON.stringify(sessionOptions, null, 2));
-const browser = await startWdioSession([sessionOptions]);
+const browser = await serviceModule.startWdioSession([sessionOptions]);
 
 // Helper function to get the expected app name consistent with other tests
 const getExpectedAppName = (): string => {
