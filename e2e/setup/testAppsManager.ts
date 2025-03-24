@@ -350,6 +350,20 @@ class TestAppsManager {
         continue;
       }
 
+      // Build the app first
+      this._currentOperation = `building app: ${appDir}`;
+      console.log(`Building app: ${appDir}`);
+      try {
+        // Run the build command
+        await execAsync('pnpm run build', { cwd: sourceAppDir });
+        console.log(`Successfully built ${appDir}`);
+      } catch (buildError) {
+        console.error(`Error building ${appDir}:`, buildError);
+        throw new Error(
+          `Failed to build ${appDir}: ${buildError instanceof Error ? buildError.message : String(buildError)}`,
+        );
+      }
+
       // Ensure the dist directory exists in the source app
       const distDir = join(sourceAppDir, 'dist');
       const outDir = join(sourceAppDir, 'out');
