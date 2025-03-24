@@ -105,7 +105,16 @@ if (tmpDir) {
   } else {
     console.log('🔍 Debug: Setting up binary test with app binary path');
     try {
-      const packageJsonPath = path.join(tmpDir, 'apps', exampleDir, 'package.json');
+      // Go up one level from e2e directory to get to project root
+      const projectRoot = path.join(process.cwd(), '..');
+      const originalAppDir = path.join(projectRoot, 'apps', exampleDir);
+      const packageJsonPath = path.join(originalAppDir, 'package.json');
+      console.log('🔍 Debug: Looking for package.json at:', packageJsonPath);
+
+      if (!fs.existsSync(packageJsonPath)) {
+        throw new Error(`Could not find package.json at ${packageJsonPath}`);
+      }
+
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
       const pkg = { packageJson, path: packageJsonPath };
       const electronVersion = await getElectronVersion(pkg);
