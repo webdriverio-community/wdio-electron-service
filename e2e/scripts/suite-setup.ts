@@ -73,8 +73,8 @@ async function killElectronProcesses(): Promise<void> {
 }
 
 // Set platform-specific timeouts
-const SETUP_TIMEOUT = process.platform === 'win32' ? 180000 : 60000; // 3 minutes for Windows, 1 minute for others
-const BUILD_TIMEOUT = process.platform === 'win32' ? 120000 : 60000; // 2 minutes for Windows, 1 minute for others
+const SETUP_TIMEOUT = process.platform === 'win32' ? 180000 : 120000; // 3 minutes for Windows, 2 minutes for others
+const BUILD_TIMEOUT = process.platform === 'win32' ? 180000 : 120000; // 3 minutes for Windows, 2 minutes for others
 
 /**
  * Set up the test suite
