@@ -35,6 +35,11 @@ if (testType === 'window') {
   env.ENABLE_SPLASH_WINDOW = 'true';
 }
 
+// Set STANDALONE=true for standalone tests
+if (testType === 'standalone') {
+  env.STANDALONE = 'true';
+}
+
 // Pass through the MAC_UNIVERSAL env var if set
 if (isMacUniversal) {
   env.MAC_UNIVERSAL = 'true';
