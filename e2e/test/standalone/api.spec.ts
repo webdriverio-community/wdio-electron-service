@@ -2,10 +2,45 @@ import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
 import process from 'node:process';
-import type { NormalizedPackageJson } from 'read-package-up';
 
 // Get the directory name once at the top
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+// Debug module resolution paths
+console.log('🔍 DEBUG: Module resolution paths:');
+console.log(`  - NODE_PATH: ${process.env.NODE_PATH || 'not set'}`);
+console.log(`  - Working directory: ${process.cwd()}`);
+console.log(`  - __dirname: ${__dirname}`);
+console.log(
+  `  - Service package path: ${process.env.WDIO_TEST_APPS_DIR ? path.join(process.env.WDIO_TEST_APPS_DIR, 'apps', 'node_modules', 'wdio-electron-service') : 'not set'}`,
+);
+console.log(
+  `  - Service node_modules: ${process.env.WDIO_TEST_APPS_DIR ? path.join(process.env.WDIO_TEST_APPS_DIR, 'apps', 'node_modules') : 'not set'}`,
+);
+
+// Check if read-package-up exists in various locations
+const possiblePaths = [
+  process.env.WDIO_TEST_APPS_DIR
+    ? path.join(process.env.WDIO_TEST_APPS_DIR, 'apps', 'node_modules', 'read-package-up')
+    : null,
+  path.join(process.cwd(), 'node_modules', 'read-package-up'),
+  process.env.NODE_PATH ? path.join(process.env.NODE_PATH, 'read-package-up') : null,
+].filter((p): p is string => p !== null);
+
+console.log('🔍 DEBUG: Checking read-package-up in locations:');
+for (const p of possiblePaths) {
+  console.log(`  - ${p}: ${fs.existsSync(p) ? 'exists' : 'not found'}`);
+}
+
+// Try to import read-package-up to see if it can be loaded
+try {
+  await import('read-package-up');
+  console.log('✅ Successfully imported read-package-up');
+} catch (error) {
+  console.error('❌ Error importing read-package-up:', error instanceof Error ? error.message : String(error));
+}
+
+import type { NormalizedPackageJson } from 'read-package-up';
 
 // Debug module resolution
 console.log('🔍 DEBUG: Standalone test module resolution:');
