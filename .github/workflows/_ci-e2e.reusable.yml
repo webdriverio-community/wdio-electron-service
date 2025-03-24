@@ -467,67 +467,63 @@ jobs:
           test -f ./scripts/run-single-test.ts && echo "run-single-test.ts exists" || echo "run-single-test.ts does not exist"
           test -f ./scripts/run-test-matrix.ts && echo "run-test-matrix.ts exists" || echo "run-test-matrix.ts does not exist"
 
+          # Set environment variables for test execution
+          export WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''}
+          export WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''}
+          export WDIO_VERBOSE=true
+
           # Generate test execution command based on the scenario and type
-          if [[ "${{ inputs.scenario }}" == *","* ]]; then
-            # Multiple scenarios
-            IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
-
-            for SCENARIO in "${SCENARIOS[@]}"; do
-              TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
-
+          if [[ "${{ inputs.scenario }}" == "*" ]]; then
+            # Run all scenarios
               if [[ "${{ inputs.type }}" == "*" ]]; then
-                # Run both ESM and CJS tests
-                echo "Running $TRIMMED_SCENARIO CJS tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:cjs
-
-                echo "Running $TRIMMED_SCENARIO ESM tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:esm
-              else
-                # Run specific module type test
-                echo "Running $TRIMMED_SCENARIO ${{ inputs.type }} tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:${TRIMMED_SCENARIO}:${{ inputs.type }}
-              fi
-            done
+              # Run all module types for all scenarios
+              echo "Running all scenarios with all module types..."
+              pnpm run test:matrix
+            else
+              # Run specific module type for all scenarios
+              echo "Running all scenarios with ${{ inputs.type }} module type..."
+              pnpm run test:matrix
+            fi
           else
             # Single scenario
             if [[ "${{ inputs.scenario }}" == "no-binary" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for no-binary
                 echo "Running no-binary CJS tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:cjs
+                pnpm run test:no-binary:cjs
 
                 echo "Running no-binary ESM tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:esm
+                pnpm run test:no-binary:esm
               else
                 # Run specific module type test for no-binary
                 echo "Running no-binary ${{ inputs.type }} tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:no-binary:${{ inputs.type }}
+                pnpm run test:no-binary:${{ inputs.type }}
               fi
             elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for builder
                 echo "Running builder CJS tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:cjs
+                pnpm run test:builder:cjs
 
                 echo "Running builder ESM tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:esm
+                pnpm run test:builder:esm
               else
                 # Run specific module type test for builder
                 echo "Running builder ${{ inputs.type }} tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} WDIO_VERBOSE=true pnpm run test:builder:${{ inputs.type }}
+                pnpm run test:builder:${{ inputs.type }}
               fi
             elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
               if [[ "${{ inputs.type }}" == "*" ]]; then
                 # Run both ESM and CJS tests for forge
                 echo "Running forge CJS tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:cjs
+                pnpm run test:forge:cjs
 
                 echo "Running forge ESM tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:esm
+                pnpm run test:forge:esm
               else
                 # Run specific module type test for forge
                 echo "Running forge ${{ inputs.type }} tests..."
-                WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''} WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''} NODE_ENV=development WDIO_VERBOSE=true pnpm run test:forge:${{ inputs.type }}
+                pnpm run test:forge:${{ inputs.type }}
               fi
             fi
           fi
