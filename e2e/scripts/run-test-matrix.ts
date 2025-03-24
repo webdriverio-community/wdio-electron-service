@@ -523,6 +523,19 @@ function filterVariants(variants: TestVariant[]): TestVariant[] {
     return envValue === variantValue; // Exact match check
   };
 
+  // Check if we're running in Mac Universal mode
+  const isMacUniversal = process.env.MAC_UNIVERSAL === 'true';
+  if (isMacUniversal) {
+    console.log('🍎 Running in Mac Universal mode - filtering to only include compatible test variants');
+    // In Mac Universal mode, only include builder and forge platforms
+    return variants.filter(
+      (variant) =>
+        ['builder', 'forge'].includes(variant.platform) &&
+        // Ensure we only include binary tests for Mac Universal
+        variant.binary === true,
+    );
+  }
+
   return variants.filter((variant) => {
     // Filter by platform
     if (!matches(process.env.PLATFORM, variant.platform)) return false;
@@ -710,6 +723,9 @@ async function runTests(): Promise<void> {
       console.log(`  MODULE_TYPE: ${process.env.MODULE_TYPE || 'not set'}`);
       console.log(`  TEST_TYPE: ${process.env.TEST_TYPE || 'not set'}`);
       console.log(`  BINARY: ${process.env.BINARY || 'not set'}`);
+      if (process.env.MAC_UNIVERSAL === 'true') {
+        console.log(`  MAC_UNIVERSAL: true - only builder and forge binary tests are included`);
+      }
     }
     console.log('═'.repeat(80));
 
