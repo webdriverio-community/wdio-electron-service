@@ -163,7 +163,8 @@ jobs:
                   if [ -d "$APP_DIR" ]; then
                     echo "Installing service package in $APP_DIR..."
                     cd "$APP_DIR"
-                      pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
+                    # Only install the service package since root dependencies are already installed
+                    pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
                     cd ../..
                   else
                     echo "Skipping non-existent app directory: $APP_DIR"
@@ -391,10 +392,6 @@ jobs:
           if [ -d "../wdio-electron-service-build/packages" ]; then
             mkdir -p node_modules
 
-            # Make sure critical dependencies are installed
-            echo "Installing critical dependencies..."
-            pnpm add read-package-up@11.0.0 --save-dev --no-lockfile
-
             # Find all workspace packages in the artifact
             find "../wdio-electron-service-build/packages" -maxdepth 1 -type d | grep -v "^../wdio-electron-service-build/packages$" | while read package_dir; do
               package_name=$(basename "$package_dir")
@@ -402,33 +399,29 @@ jobs:
               if [ -d "$package_dir/node_modules" ]; then
                 echo "Exploring dependencies in $package_name..."
 
-                # Find all directories in node_modules that aren't scoped packages
+                # Create symlinks for non-scoped packages
                 find "$package_dir/node_modules" -maxdepth 1 -type d | grep -v "^$package_dir/node_modules$" | grep -v "^$package_dir/node_modules/@" | while read dep_dir; do
                   dep_name=$(basename "$dep_dir")
                   if [ ! -d "node_modules/$dep_name" ]; then
-                    echo "Installing missing dependency: $dep_name"
-                    pnpm add $dep_name --save-dev --no-lockfile || true
+                    echo "Creating symlink for: $dep_name"
+                    ln -s "$dep_dir" "node_modules/$dep_name" || true
                   fi
                 done
 
-                # Also handle scoped packages
+                # Create symlinks for scoped packages
                 find "$package_dir/node_modules" -maxdepth 1 -type d -name "@*" | while read scope_dir; do
                   scope_name=$(basename "$scope_dir")
+                  mkdir -p "node_modules/$scope_name"
                   find "$scope_dir" -maxdepth 1 -type d | grep -v "^$scope_dir$" | while read scoped_dep_dir; do
                     scoped_dep_name=$(basename "$scoped_dep_dir")
-                    full_dep_name="${scope_name}/${scoped_dep_name}"
                     if [ ! -d "node_modules/${scope_name}/${scoped_dep_name}" ]; then
-                      echo "Installing missing scoped dependency: $full_dep_name"
-                      pnpm add $full_dep_name --save-dev --no-lockfile || true
+                      echo "Creating symlink for: ${scope_name}/${scoped_dep_name}"
+                      ln -s "$scoped_dep_dir" "node_modules/${scope_name}/${scoped_dep_name}" || true
                     fi
                   done
                 done
               fi
             done
-
-            echo "✅ Dependencies verified and installed"
-          else
-            echo "⚠️ No packages directory found in artifact for dependency linking"
           fi
 
       # Run tests based on the scenario and type inputs
