@@ -108,17 +108,22 @@ jobs:
         shell: bash
         run: |
           echo "=============== EXTRACTING ARTIFACT CONTENTS ==============="
-          # Extract the zip file to create the expected directory structure
-          mkdir -p wdio-electron-service-build
-          mkdir -p wdio-electron-service-build/packages/wdio-electron-service
+          # Create the base directory structure
+          mkdir -p wdio-electron-service-build/packages
 
           # Copy dist directories
-          if [ -d "packages/wdio-electron-service/dist" ]; then
-            cp -R packages/wdio-electron-service/dist wdio-electron-service-build/packages/wdio-electron-service/
-            echo "✅ Copied dist directory"
-          else
-            echo "❌ dist directory not found in packages/wdio-electron-service/"
-          fi
+          echo "Copying all package dist directories..."
+          find packages -maxdepth 1 -type d | grep -v "^packages$" | while read package_dir; do
+            package_name=$(basename "$package_dir")
+            if [ -d "$package_dir/dist" ]; then
+              echo "Copying dist directory for $package_name..."
+              mkdir -p "wdio-electron-service-build/packages/$package_name"
+              cp -R "$package_dir/dist" "wdio-electron-service-build/packages/$package_name/"
+              echo "✅ Copied dist directory for $package_name"
+            else
+              echo "📝 No dist directory found for $package_name"
+            fi
+          done
 
           # Copy packaged-service directory
           if [ -d "packaged-service" ]; then
