@@ -187,12 +187,14 @@ async function runAllTests() {
     }
 
     // Create a clean environment without test filtering variables
-    const cleanEnv = { ...process.env };
-    delete cleanEnv.PLATFORM;
-    delete cleanEnv.MODULE_TYPE;
-    delete cleanEnv.TEST_TYPE;
-    delete cleanEnv.BINARY;
-    delete cleanEnv.ENABLE_SPLASH_WINDOW;
+    const cleanEnv: Record<string, string> = {
+      PLATFORM: process.env.PLATFORM || 'builder',
+      MODULE_TYPE: process.env.MODULE_TYPE || 'esm',
+      TEST_TYPE: process.env.TEST_TYPE || 'standard',
+      BINARY: process.env.BINARY !== 'false' ? 'true' : 'false',
+      WDIO_TEST_APPS_PREPARED: 'true',
+      WDIO_TEST_APPS_DIR: process.env.WDIO_TEST_APPS_DIR || '',
+    };
 
     // Kill any existing Electron processes before starting
     await killElectronProcesses();
@@ -212,12 +214,7 @@ async function runAllTests() {
     console.log(`[${formatTimestamp()}] ✅ Test suite setup complete. Test apps prepared at: ${tmpDir}`);
 
     // Set environment variables to indicate suite management
-    cleanEnv.SUITE_SETUP_DONE = 'true';
     cleanEnv.SUITE_CLEANUP_MANAGED = 'true';
-
-    // Explicitly set the WDIO_TEST_APPS variables
-    cleanEnv.WDIO_TEST_APPS_PREPARED = 'true';
-    cleanEnv.WDIO_TEST_APPS_DIR = tmpDir;
 
     console.log(`[${formatTimestamp()}] 📝 Environment variables set:`);
     console.log(`   WDIO_TEST_APPS_PREPARED: ${cleanEnv.WDIO_TEST_APPS_PREPARED}`);

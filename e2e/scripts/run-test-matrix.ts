@@ -568,39 +568,20 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
   let skipped = false;
 
   try {
-    // Set up environment variables for the test
+    // Set up environment variables for test execution
     const env: Record<string, string> = {
       PLATFORM: platform,
       MODULE_TYPE: moduleType,
       TEST_TYPE: testType,
       BINARY: binary ? 'true' : 'false',
-      WDIO_LOG_LEVEL: 'info',
-      WDIO_VERBOSE: process.env.WDIO_VERBOSE || 'false',
-      NODE_OPTIONS: '--trace-warnings --no-warnings',
-      NODE_ENV: 'development',
+      EXAMPLE_DIR: binary ? `${platform}-${moduleType}` : `no-binary-${moduleType}`,
+      WDIO_TEST_APPS_PREPARED: process.env.WDIO_TEST_APPS_PREPARED || 'false',
+      WDIO_TEST_APPS_DIR: process.env.WDIO_TEST_APPS_DIR || '',
     };
 
     // Enable splash screen for window tests
     if (testType === 'window') {
       env.ENABLE_SPLASH_WINDOW = 'true';
-    }
-
-    // Pass through the test apps prepared flag and directory
-    if (process.env.WDIO_TEST_APPS_PREPARED) {
-      env.WDIO_TEST_APPS_PREPARED = process.env.WDIO_TEST_APPS_PREPARED;
-    }
-    if (process.env.WDIO_TEST_APPS_DIR) {
-      env.WDIO_TEST_APPS_DIR = process.env.WDIO_TEST_APPS_DIR;
-    }
-
-    // Pass through the suite setup flag
-    if (process.env.SUITE_SETUP_DONE) {
-      env.SUITE_SETUP_DONE = process.env.SUITE_SETUP_DONE;
-    }
-
-    // Pass through the suite cleanup flag
-    if (process.env.SUITE_CLEANUP_MANAGED) {
-      env.SUITE_CLEANUP_MANAGED = process.env.SUITE_CLEANUP_MANAGED;
     }
 
     // Log debug info
@@ -734,9 +715,6 @@ async function runTests(): Promise<void> {
       debug('Skipping suite setup - apps already prepared');
       console.log('ℹ️ Test apps already prepared, skipping setup...');
     }
-
-    // Store suite setup done flag for child processes
-    process.env.SUITE_SETUP_DONE = 'true';
 
     // We'll continue for previously prepared temp directories
     process.env.SUITE_CLEANUP_MANAGED = 'true';

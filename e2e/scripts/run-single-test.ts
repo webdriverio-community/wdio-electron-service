@@ -103,9 +103,7 @@ function getStandaloneCommand(env: Record<string, string>): string {
 async function runWithCleanup() {
   try {
     // Check if test apps are already prepared
-    const testAppsPrepared = process.env.WDIO_TEST_APPS_PREPARED === 'true';
-
-    if (testAppsPrepared) {
+    if (process.env.WDIO_TEST_APPS_PREPARED === 'true') {
       console.log('ℹ️ Test apps already prepared, skipping setup...');
     } else {
       // Perform suite-level setup
@@ -136,9 +134,14 @@ async function runWithCleanup() {
     console.error(error);
     return false;
   } finally {
-    // Perform suite-level cleanup
-    await cleanupTestSuite();
-    console.log('Suite cleanup completed');
+    // Only perform cleanup if we're not in suite-level cleanup
+    if (process.env.SUITE_CLEANUP_MANAGED !== 'true') {
+      // Perform suite-level cleanup
+      await cleanupTestSuite();
+      console.log('Suite cleanup completed');
+    } else {
+      console.log('ℹ️ Skipping cleanup as it is managed by suite-level cleanup');
+    }
   }
 }
 
