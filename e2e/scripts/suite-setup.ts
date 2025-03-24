@@ -4,7 +4,7 @@
  * and sets environment variables for all tests to use.
  */
 
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import { testAppsManager } from '../setup/testAppsManager.js';
 
 /**
@@ -70,7 +70,6 @@ async function killElectronProcesses(): Promise<void> {
     // Ignore errors as they likely mean no processes were found
     console.log('ℹ️ No Electron processes found to kill');
   }
-  return Promise.resolve();
 }
 
 /**
@@ -92,13 +91,6 @@ async function buildTestApps(scenarios: string[], moduleTypes: string[]): Promis
       console.log(`Building app: ${scenario}-${moduleType} in ${appDir}`);
 
       try {
-        console.log(`Installing dependencies for ${scenario}-${moduleType}...`);
-        // execSync('pnpm install --no-frozen-lockfile', {
-        //   cwd: appDir,
-        //   stdio: 'inherit',
-        //   timeout: 120000,
-        // });
-
         console.log(`Building ${scenario}-${moduleType}...`);
         execSync('pnpm run build', {
           cwd: appDir,
@@ -170,13 +162,6 @@ export async function setupTestSuite(): Promise<void> {
         }
         return;
       }
-
-      // Determine which scenarios and module types to build
-      const appsToPrepare = testAppsManager.getAppsToPrepare();
-      const { scenarios, moduleTypes } = appsToPrepare;
-
-      // Build the test apps before preparing them
-      await buildTestApps(scenarios, moduleTypes);
 
       // Prepare test apps
       console.log('📦 Preparing test apps...');
