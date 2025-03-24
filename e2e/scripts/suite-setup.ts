@@ -93,11 +93,11 @@ async function buildTestApps(scenarios: string[], moduleTypes: string[]): Promis
 
       try {
         console.log(`Installing dependencies for ${scenario}-${moduleType}...`);
-        execSync('pnpm install', {
-          cwd: appDir,
-          stdio: 'inherit',
-          timeout: 120000,
-        });
+        // execSync('pnpm install --no-frozen-lockfile', {
+        //   cwd: appDir,
+        //   stdio: 'inherit',
+        //   timeout: 120000,
+        // });
 
         console.log(`Building ${scenario}-${moduleType}...`);
         execSync('pnpm run build', {
