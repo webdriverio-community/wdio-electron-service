@@ -352,10 +352,19 @@ class TestAppsManager {
 
       // Ensure the dist directory exists in the source app
       const distDir = join(sourceAppDir, 'dist');
-      if (!fs.existsSync(distDir)) {
-        console.warn(`Warning: dist directory not found in ${appDir}. The app may not be built.`);
+      const outDir = join(sourceAppDir, 'out');
+      const hasDistDir = fs.existsSync(distDir);
+      const hasOutDir = fs.existsSync(outDir);
+
+      if (!hasDistDir && !hasOutDir) {
+        console.warn(`Warning: neither dist nor out directory found in ${appDir}. The app may not be built.`);
       } else {
-        console.log(`Found dist directory in ${appDir}`);
+        if (hasDistDir) {
+          console.log(`Found dist directory in ${appDir}`);
+        }
+        if (hasOutDir) {
+          console.log(`Found out directory in ${appDir}`);
+        }
       }
 
       // Create the target app directory
@@ -479,6 +488,96 @@ class TestAppsManager {
             }
           } else {
             console.error(`Error: dist directory not created for ${appDir}`);
+          }
+        }
+
+        // Copy the out directory for forge apps if it exists
+        if (fs.existsSync(outDir)) {
+          this._currentOperation = `copying out directory for ${appDir}`;
+          console.log(`Copying out directory for ${appDir}...`);
+
+          // Create the out directory in the target app
+          const targetOutDir = join(targetAppDir, 'out');
+          await this.createDirectory(targetOutDir);
+
+          // Get all items in the out directory
+          const outItems = fs.readdirSync(outDir);
+
+          for (const item of outItems) {
+            const sourceItemPath = join(outDir, item);
+            const targetItemPath = join(targetOutDir, item);
+
+            if (fs.statSync(sourceItemPath).isDirectory()) {
+              // If it's a directory, check if it contains a .app bundle (macOS)
+              const isDarwinAppDir =
+                item.includes('darwin') &&
+                fs.existsSync(join(sourceItemPath, `${appDir.split('-')[0]}-${appDir.split('-')[1]}.app`));
+
+              if (isDarwinAppDir) {
+                // Special handling for macOS app bundles
+                await this.createDirectory(targetItemPath);
+
+                // Get the app bundle name
+                const appName = `${appDir.split('-')[0]}-${appDir.split('-')[1]}`;
+                const appBundleName = `${appName}.app`;
+                const sourceAppBundle = join(sourceItemPath, appBundleName);
+                const targetAppBundle = join(targetItemPath, appBundleName);
+
+                console.log(`Copying ${appBundleName} from ${item} directory...`);
+
+                // Use platform-specific command to preserve permissions and structure
+                if (process.platform === 'darwin') {
+                  try {
+                    await execAsync(`ditto "${sourceAppBundle}" "${targetAppBundle}"`);
+                    console.log(`Successfully copied ${appBundleName} to ${targetItemPath}`);
+
+                    // Make sure the app binary is executable
+                    const appExecutable = join(targetAppBundle, 'Contents/MacOS', appName);
+                    if (fs.existsSync(appExecutable)) {
+                      await execAsync(`chmod +x "${appExecutable}"`);
+                      console.log(`Made app executable: ${appExecutable}`);
+                    }
+                  } catch (err) {
+                    console.warn(`Error copying app bundle ${appBundleName}:`, err);
+                  }
+                } else {
+                  // For non-macOS platforms, just copy the directory
+                  try {
+                    await execAsync(`cp -R "${sourceItemPath}" "${targetOutDir}/"`);
+                  } catch (err) {
+                    console.warn(`Error copying directory ${item}:`, err);
+                  }
+                }
+              } else {
+                // For regular directories, just copy them
+                try {
+                  await execAsync(`cp -R "${sourceItemPath}" "${targetOutDir}/"`);
+                } catch (err) {
+                  console.warn(`Error copying directory ${item}:`, err);
+                }
+              }
+            } else {
+              // For regular files, just copy them
+              try {
+                await fs.promises.copyFile(sourceItemPath, targetItemPath);
+              } catch (err) {
+                console.warn(`Error copying file ${item}:`, err);
+              }
+            }
+          }
+
+          console.log(`Successfully copied out directory for ${appDir}`);
+
+          // Verify files in out directory
+          if (fs.existsSync(targetOutDir)) {
+            try {
+              const outFiles = fs.readdirSync(targetOutDir);
+              console.log(`Copied out directory for ${appDir} with ${outFiles.length} files/directories`);
+            } catch (error) {
+              console.error('Error verifying out directory:', error);
+            }
+          } else {
+            console.error(`Error: out directory not created for ${appDir}`);
           }
         }
 
