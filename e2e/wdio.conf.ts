@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import type { WdioElectronConfig } from '@wdio/electron-types';
+import type { NormalizedPackageJson } from 'read-package-up';
 
 import { testAppsManager } from './setup/testAppsManager.js';
 
@@ -28,15 +29,51 @@ console.log(`🔍 Debug: Starting test with configuration:
 `);
 
 // Initialize test apps manager if env var is not set
-let tmpDir: string | null;
+let tmpDir: string | null = null;
 if (process.env.WDIO_TEST_APPS_PREPARED !== 'true') {
   console.log('🔍 Debug: Initializing test apps manager for individual test');
   tmpDir = await testAppsManager.prepareTestApps();
   console.log('🔍 Debug: Test apps prepared for individual test');
 } else {
   console.log('🔍 Debug: Skipping test apps preparation as they were already prepared');
-  tmpDir = testAppsManager.getTmpDir();
+  // Directly use the environment variable if set, or fall back to testAppsManager
+  tmpDir = process.env.WDIO_TEST_APPS_DIR || testAppsManager.getTmpDir();
+
+  if (!tmpDir) {
+    console.error('🔍 Debug: No tmpDir found from environment variable or testAppsManager');
+    // Fallback - use a reasonable default based on the existing environment variable pattern
+    if (process.env.WDIO_TEST_APPS_DIR) {
+      tmpDir = process.env.WDIO_TEST_APPS_DIR;
+      console.log(`🔍 Debug: Using tmpDir from environment variable: ${tmpDir}`);
+    } else {
+      throw new Error('tmpDir not set and cannot be determined from environment or testAppsManager');
+    }
+  } else {
+    console.log(`🔍 Debug: Using tmpDir: ${tmpDir}`);
+  }
 }
+
+// Load package.json from the appropriate app directory and set it on globalThis
+if (tmpDir) {
+  try {
+    const packageJsonPath = path.join(tmpDir, 'apps', exampleDir, 'package.json');
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
+      globalThis.packageJson = packageJson;
+      console.log(`🔍 Debug: Loaded packageJson from ${packageJsonPath} and set on globalThis`);
+      console.log(`🔍 Debug: Package name: ${packageJson.name}, version: ${packageJson.version}`);
+    } else {
+      console.log(`🔍 Debug: Could not find package.json at ${packageJsonPath}, using default values`);
+      globalThis.packageJson = { name: 'Electron', version: '35.0.2' };
+    }
+  } catch (error) {
+    console.error('❌ Error loading packageJson:', error);
+    globalThis.packageJson = { name: 'Electron', version: '35.0.2' };
+  }
+}
+
+// Always set TEST environment variable for tests
+process.env.TEST = 'true';
 
 // Configure test type specific variables
 let appBinaryPath = '';
@@ -74,22 +111,42 @@ if (tmpDir) {
 
     if (process.platform === 'darwin' && platform === 'builder') {
       // For electron-builder apps on macOS with binary builds
-      const macAppPath = path.join(
+      // Try mac-arm64 directory first, then fall back to mac directory
+      const macArmAppPath = path.join(
         tmpDir,
         'apps',
         exampleDir,
         'dist',
-        'mac',
-        `${appName}.app`,
+        'mac-arm64',
+        `example-${exampleDir}.app`,
         'Contents',
         'MacOS',
-        appName,
+        `example-${exampleDir}`,
       );
 
       // Check if the path exists, use it if available
-      if (fs.existsSync(macAppPath)) {
-        console.log('🔍 Debug: Using macOS app executable path:', macAppPath);
-        appBinaryPath = macAppPath;
+      if (fs.existsSync(macArmAppPath)) {
+        console.log('🔍 Debug: Using macOS arm64 app executable path:', macArmAppPath);
+        appBinaryPath = macArmAppPath;
+      } else {
+        // Fall back to mac directory if mac-arm64 doesn't exist
+        const macAppPath = path.join(
+          tmpDir,
+          'apps',
+          exampleDir,
+          'dist',
+          'mac',
+          `${appName}.app`,
+          'Contents',
+          'MacOS',
+          appName,
+        );
+
+        // Check if the path exists, use it if available
+        if (fs.existsSync(macAppPath)) {
+          console.log('🔍 Debug: Using macOS app executable path:', macAppPath);
+          appBinaryPath = macAppPath;
+        }
       }
     } else if (process.platform === 'darwin' && platform === 'forge') {
       // For forge apps on macOS with binary builds
@@ -119,10 +176,10 @@ if (tmpDir) {
 // Configure specs based on test type
 let specs: string[] = [];
 if (testType === 'window') {
-  // Exclude multiremote spec files when running in non-multiremote mode
+  // Always exclude multiremote spec files when running in non-multiremote mode
   specs = isMultiremote
     ? ['./test/window/*.spec.ts']
-    : ['./test/window/*.spec.ts', '!./test/window/*.multiremote.spec.ts'];
+    : ['./test/window/*.spec.ts', '!./test/window/**/*.multiremote.spec.ts'];
 } else if (testType === 'multiremote') {
   specs = ['./test/multiremote/*.spec.ts'];
 } else if (testType === 'standard') {

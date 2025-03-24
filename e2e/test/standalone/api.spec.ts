@@ -205,10 +205,20 @@ if (isBinary) {
 console.log('🔍 Debug: Starting session with options:', JSON.stringify(sessionOptions, null, 2));
 const browser = await startWdioSession([sessionOptions]);
 
+// Helper function to get the expected app name consistent with other tests
+const getExpectedAppName = (): string => {
+  // If running in binary mode, use the package name from globalThis or packageJson
+  if (isBinary) {
+    return globalThis.packageJson?.name || packageJson.name;
+  }
+  // In no-binary mode, the app name will always be "Electron"
+  return 'Electron';
+};
+
 // Get app name and check against expected value
 const appName = await browser.electron.execute((electron: any) => electron.app.getName());
-// In binary mode, expect the package.json name; in no-binary mode, expect "Electron"
-const expectedAppName = isBinary ? packageJson.name : 'Electron';
+const expectedAppName = getExpectedAppName();
+
 if (appName !== expectedAppName) {
   throw new Error(`appName test failed: ${appName} !== ${expectedAppName}`);
 }
