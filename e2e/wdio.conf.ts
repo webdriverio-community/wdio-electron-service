@@ -13,7 +13,7 @@ const moduleType = process.env.MODULE_TYPE || 'esm';
 const testType = process.env.TEST_TYPE || 'standard';
 const binary = process.env.BINARY !== 'false';
 const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
-const isMultiremote = testType === 'multiremote';
+const isMultiremote = testType === 'multiremote' || process.env.WDIO_MULTIREMOTE === 'true';
 const isNoBinary = platform === 'no-binary' || !binary;
 
 // Determine the example directory
@@ -81,11 +81,12 @@ let appEntryPoint = '';
 
 // Setup for app binary path or entry point
 if (tmpDir) {
-  const appName = `electron-example-${platform}`;
+  // Use the correct app name based on the example directory
+  const appName = platform === 'forge' ? `example-${exampleDir}` : `electron-example-${platform}`;
 
   if (isNoBinary) {
     console.log('🔍 Debug: Setting up no-binary test with entry point');
-    // Try multiple possible entry point locations
+    // Try multiple possible entry points
     const possibleEntryPoints = [
       path.join(tmpDir, 'apps', exampleDir, 'main.js'),
       path.join(tmpDir, 'apps', exampleDir, 'dist', 'main.js'),
@@ -107,8 +108,9 @@ if (tmpDir) {
     console.log('🔍 Debug: Setting up binary test with app path');
     // For all platforms, use the app directory as a fallback
     appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
-    console.log('🔍 Debug: Using appBinaryPath:', appBinaryPath);
+    console.log('🔍 Debug: Initial appBinaryPath (directory):', appBinaryPath);
 
+    // Make sure we check for the executable before proceeding
     if (process.platform === 'darwin' && platform === 'builder') {
       // For electron-builder apps on macOS with binary builds
       // Try mac-arm64 directory first, then fall back to mac directory
@@ -166,6 +168,38 @@ if (tmpDir) {
       if (fs.existsSync(forgeMacAppPath)) {
         console.log('🔍 Debug: Using macOS app executable path for forge:', forgeMacAppPath);
         appBinaryPath = forgeMacAppPath;
+      } else {
+        // If we can't find the executable, try to search for it
+        console.log('🔍 Debug: Could not find forge app at expected path:', forgeMacAppPath);
+        const outDirectory = path.join(tmpDir, 'apps', exampleDir, 'out');
+
+        // Debug what's in the directory to help diagnose the issue
+        if (fs.existsSync(outDirectory)) {
+          const outContents = fs.readdirSync(outDirectory);
+          console.log('🔍 Debug: Contents of out directory:', outContents);
+
+          // Try to find the darwin-arm64 directory
+          const darwinDir = outContents.find((item) => item.includes('darwin-arm64'));
+          if (darwinDir) {
+            const appBundle = path.join(outDirectory, darwinDir, `${appName}.app`);
+            if (fs.existsSync(appBundle)) {
+              console.log('🔍 Debug: Found app bundle at:', appBundle);
+              const macOSDir = path.join(appBundle, 'Contents', 'MacOS');
+              if (fs.existsSync(macOSDir)) {
+                const macOSContents = fs.readdirSync(macOSDir);
+                console.log('🔍 Debug: Contents of MacOS directory:', macOSContents);
+                if (macOSContents.length > 0) {
+                  // Use the first executable found
+                  const executable = path.join(macOSDir, macOSContents[0]);
+                  console.log('🔍 Debug: Using found executable:', executable);
+                  appBinaryPath = executable;
+                }
+              }
+            }
+          }
+        } else {
+          console.log('🔍 Debug: Out directory does not exist:', outDirectory);
+        }
       }
     }
   }
@@ -176,10 +210,8 @@ if (tmpDir) {
 // Configure specs based on test type
 let specs: string[] = [];
 if (testType === 'window') {
-  // Always exclude multiremote spec files when running in non-multiremote mode
-  specs = isMultiremote
-    ? ['./test/window/*.spec.ts']
-    : ['./test/window/*.spec.ts', '!./test/window/**/*.multiremote.spec.ts'];
+  // Use the consolidated window test file for both multiremote and non-multiremote mode
+  specs = ['./test/window.spec.ts'];
 } else if (testType === 'multiremote') {
   specs = ['./test/multiremote/*.spec.ts'];
 } else if (testType === 'standard') {
