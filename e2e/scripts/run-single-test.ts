@@ -1,7 +1,11 @@
 import { execSync } from 'node:child_process';
 import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
-import path from 'node:path';
-import fs from 'node:fs';
+import * as path from 'path';
+import * as fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Get parameters from environment
 const platform = process.env.PLATFORM || 'builder';
@@ -34,6 +38,12 @@ if (testType === 'window') {
 // Pass through the MAC_UNIVERSAL env var if set
 if (isMacUniversal) {
   env.MAC_UNIVERSAL = 'true';
+}
+
+// If this is a standalone test with CJS module type, add compatibility flag
+if (testType === 'standalone' && (moduleType === 'cjs' || process.env.MODULE_FORCE_CJS === 'true')) {
+  // Add special environment variable to signal compatibility mode
+  env.WDIO_CHALK_COMPAT = 'true';
 }
 
 // Helper to convert env object to string
@@ -70,8 +80,18 @@ function getStandaloneCommand(env: Record<string, string>): string {
     }
   }
 
+  // Enhanced NODE_OPTIONS for ESM compatibility in CJS mode
+  let nodeOptions = '--no-warnings';
+
+  // If this is a CJS test, use require to preload chalk compatibility
+  if (isCjs || env.WDIO_CHALK_COMPAT === 'true') {
+    const compatPath = path.join(__dirname, 'chalk-compat.cjs');
+    nodeOptions = `${nodeOptions} --require=${compatPath}`;
+    console.log('🔍 DEBUG: Enhanced NODE_OPTIONS for CJS/ESM compatibility:', nodeOptions);
+  }
+
   // Use tsx for all cases - it works for both CJS and ESM
-  return `cross-env ${forceCjs}${nodePath}${envString(env)} NODE_OPTIONS="--no-warnings" tsx ./test/standalone/api.spec.ts`;
+  return `cross-env ${forceCjs}${nodePath}${envString(env)} NODE_OPTIONS="${nodeOptions}" tsx ./test/standalone/api.spec.ts`;
 }
 
 // Ensure cleanup happens even if tests fail

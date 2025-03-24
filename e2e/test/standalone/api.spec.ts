@@ -4,12 +4,16 @@ import fs from 'node:fs';
 import process from 'node:process';
 import type { NormalizedPackageJson } from 'read-package-up';
 
+// Get the directory name once at the top
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
 // Debug module resolution
 console.log('🔍 DEBUG: Standalone test module resolution:');
 console.log(`  - Module Type: ${process.env.MODULE_TYPE || 'not set'}`);
 console.log(`  - NODE_OPTIONS: ${process.env.NODE_OPTIONS || 'not set'}`);
 console.log(`  - MODULE_FORCE_CJS: ${process.env.MODULE_FORCE_CJS || 'not set'}`);
 console.log(`  - import.meta.url: ${import.meta.url}`);
+console.log(`  - __dirname: ${__dirname}`);
 
 // Determine if we should force CJS imports
 const shouldForceCjs = process.env.MODULE_TYPE === 'cjs' || process.env.MODULE_FORCE_CJS === 'true';
@@ -28,6 +32,16 @@ console.log('🔍 DEBUG: Environment information:');
 console.log(`  - MODULE_TYPE: ${process.env.MODULE_TYPE || 'not set'}`);
 console.log(`  - Working directory: ${process.cwd()}`);
 console.log(`  - NODE_OPTIONS: ${process.env.NODE_OPTIONS || 'not set'}`);
+
+// Helper function to safely import modules with error handling
+async function safeImport(importPath: string) {
+  try {
+    return await import(importPath);
+  } catch (error) {
+    console.error(`❌ Error importing ${importPath}:`, error instanceof Error ? error.message : String(error));
+    throw error;
+  }
+}
 
 try {
   // Use direct path to the prepared package if available
@@ -56,7 +70,7 @@ try {
         const indexPath = path.join(moduleDir, 'index.js');
         console.log(`🔍 DEBUG: Importing from ${moduleType.toUpperCase()} index: ${indexPath}`);
 
-        const serviceModule = await import(indexPath);
+        const serviceModule = await safeImport(indexPath);
         startWdioSession = serviceModule.startWdioSession;
         console.log(`✅ Successfully imported service from ${moduleType.toUpperCase()} path`);
       } else {
@@ -65,14 +79,14 @@ try {
     } else {
       // Fall back to package name
       console.log('🔍 DEBUG: Service package not found in temp location, falling back to package name');
-      const serviceModule = await import('wdio-electron-service');
+      const serviceModule = await safeImport('wdio-electron-service');
       startWdioSession = serviceModule.startWdioSession;
       console.log('✅ Successfully imported service via package name');
     }
   } else {
     // No temp directory, use package name
     console.log('🔍 DEBUG: No temp directory provided, importing service via package name');
-    const serviceModule = await import('wdio-electron-service');
+    const serviceModule = await safeImport('wdio-electron-service');
     startWdioSession = serviceModule.startWdioSession;
     console.log('✅ Successfully imported service via package name');
   }
@@ -118,24 +132,24 @@ try {
 
       if (fs.existsSync(indexPath)) {
         console.log(`🔍 DEBUG: Importing utils from ${moduleType.toUpperCase()} index: ${indexPath}`);
-        electronUtils = await import(indexPath);
+        electronUtils = await safeImport(indexPath);
         console.log(`✅ Successfully imported utils from ${moduleType.toUpperCase()} path`);
       } else {
         // Fall back to package name
         console.log(`🔍 DEBUG: Utils ${moduleType} index not found, falling back to package name`);
-        electronUtils = await import('@wdio/electron-utils');
+        electronUtils = await safeImport('@wdio/electron-utils');
         console.log('✅ Successfully imported utils via package name');
       }
     } else {
       // Fall back to package name
       console.log('🔍 DEBUG: Utils package not found in temp location, falling back to package name');
-      electronUtils = await import('@wdio/electron-utils');
+      electronUtils = await safeImport('@wdio/electron-utils');
       console.log('✅ Successfully imported utils via package name');
     }
   } else {
     // No temp directory, use package name
     console.log('🔍 DEBUG: No temp directory provided, importing utils via package name');
-    electronUtils = await import('@wdio/electron-utils');
+    electronUtils = await safeImport('@wdio/electron-utils');
     console.log('✅ Successfully imported utils via package name');
   }
 } catch (error) {
@@ -152,7 +166,6 @@ const isBinary = process.env.BINARY !== 'false';
 console.log('🔍 Debug: Starting standalone test with binary mode:', isBinary);
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageJsonPath = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
 const pkg = { packageJson, path: packageJsonPath };
