@@ -248,31 +248,39 @@ if (process.env.WDIO_CHALK_COMPAT === 'true') {
   // Get Module constructor
   const Module = module.constructor;
 
+  // Track which modules we've already logged
+  const loggedModules = new Set();
+
   // Override Module.prototype.require to intercept module loading
   Module.prototype.require = function (id) {
-    if (id === 'chalk') {
+    if (id === 'chalk' && !loggedModules.has('chalk')) {
       console.log('🔍 DEBUG: Intercepted chalk import, providing compatibility mock');
+      loggedModules.add('chalk');
       return chalk;
     }
 
-    if (id === 'strip-ansi') {
+    if (id === 'strip-ansi' && !loggedModules.has('strip-ansi')) {
       console.log('🔍 DEBUG: Intercepted strip-ansi import, providing compatibility mock');
+      loggedModules.add('strip-ansi');
       return stripAnsi;
     }
 
-    if (id === 'node:util' || id === 'util') {
+    if ((id === 'node:util' || id === 'util') && !loggedModules.has('node:util')) {
       console.log('🔍 DEBUG: Intercepted node:util import, providing compatibility mock');
+      loggedModules.add('node:util');
       return nodeUtil;
     }
 
-    if (id === '@wdio/logger') {
+    if (id === '@wdio/logger' && !loggedModules.has('@wdio/logger')) {
       console.log('🔍 DEBUG: Intercepted @wdio/logger import, providing compatibility mock');
+      loggedModules.add('@wdio/logger');
       return logger;
     }
 
     // Special case for the log module from electron-utils
-    if (id === '@wdio/electron-utils/log') {
+    if (id === '@wdio/electron-utils/log' && !loggedModules.has('@wdio/electron-utils/log')) {
       console.log('🔍 DEBUG: Intercepted @wdio/electron-utils/log import, providing compatibility mock');
+      loggedModules.add('@wdio/electron-utils/log');
       return electronUtilsLog;
     }
 
