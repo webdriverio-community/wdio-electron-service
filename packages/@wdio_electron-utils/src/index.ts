@@ -3,7 +3,6 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
-import findVersions from 'find-versions';
 import type { NormalizedReadResult } from 'read-package-up';
 
 import log from './log.js';
@@ -17,7 +16,8 @@ import type {
   ForgeBuildInfo,
   BuilderBuildInfo,
 } from '@wdio/electron-types';
-import { findPnpmCatalogVersion } from './pnpm.js';
+
+export { getElectronVersion } from './getElectronVersion.js';
 
 const SupportedPlatform = {
   darwin: 'darwin',
@@ -295,25 +295,4 @@ export async function getAppBuildInfo(pkg: NormalizedReadResult): Promise<AppBui
   }
 
   throw new Error(BUILD_TOOL_DETECTION_ERROR);
-}
-
-export async function getElectronVersion(pkg: NormalizedReadResult) {
-  const { dependencies, devDependencies } = pkg.packageJson;
-  const pkgElectronVersion = dependencies?.electron || devDependencies?.electron;
-  const pkgElectronNightlyVersion = dependencies?.['electron-nightly'] || devDependencies?.['electron-nightly'];
-
-  let electronVersion;
-
-  if (pkgElectronVersion?.startsWith('catalog') || pkgElectronNightlyVersion?.startsWith('catalog')) {
-    // Extract the directory path from the package.json file path
-    const projectDir = path.dirname(pkg.path);
-    electronVersion = await findPnpmCatalogVersion(pkgElectronVersion, pkgElectronNightlyVersion, projectDir);
-  }
-
-  // If no catalog version was found, use the direct version from package.json
-  if (!electronVersion) {
-    electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
-  }
-
-  return electronVersion ? findVersions(electronVersion, { loose: true })[0] : undefined;
 }
