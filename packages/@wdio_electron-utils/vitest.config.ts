@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       include: ['src/**/*.ts'],
-      exclude: ['src/index.ts', 'src/constants.ts', 'src/log.ts'],
+      exclude: ['src/constants.ts', 'src/log.ts'],
       thresholds: {
         lines: 85,
         functions: 85,
