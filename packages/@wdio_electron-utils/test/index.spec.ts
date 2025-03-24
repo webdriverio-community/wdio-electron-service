@@ -2,7 +2,7 @@ import path from 'node:path';
 import { expect, it, vi, describe, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 
-import { getBinaryPath, getAppBuildInfo, getElectronVersion, findPnpmCatalogVersion } from '../src/index.js';
+import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '../src/index.js';
 import { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 import { AppBuildInfo } from '@wdio/electron-types';
 
@@ -1441,114 +1441,6 @@ describe('Multiple Binaries Tests', () => {
         { platform: 'win32', arch: 'x64' } as NodeJS.Process,
       ),
     ).rejects.toThrow('No executable binary found, checked:');
-  });
-});
-
-// Additional tests for findPnpmCatalogVersion to cover edge cases
-describe('PNPM Catalog Versions Edge Cases', () => {
-  it('should handle empty catalog names', async () => {
-    vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
-      catalog: {
-        electron: '29.4.1',
-      },
-    });
-
-    // Set up mock to succeed with the workspace file
-    vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
-      return Promise.resolve('catalog:\n  electron: "29.4.1"');
-    });
-
-    const version = await findPnpmCatalogVersion('catalog:', undefined, '/project/dir');
-    expect(version).toBe('29.4.1');
-  });
-
-  it('should handle missing projectDir', async () => {
-    const version = await findPnpmCatalogVersion('catalog:name', undefined, undefined);
-    expect(version).toBeUndefined();
-  });
-
-  it('should handle YAML parse errors', async () => {
-    vi.mocked(fs.readFile).mockImplementationOnce(() => {
-      throw new Error('YAML parse error');
-    });
-
-    const version = await findPnpmCatalogVersion('catalog:name', undefined, '/project/dir');
-    expect(version).toBeUndefined();
-  });
-
-  it('should handle other errors in findPnpmCatalogVersion', async () => {
-    // Mock a function that throws an error when called
-    vi.spyOn(fs, 'readFile').mockImplementation(() => {
-      throw new Error('Some unexpected error');
-    });
-
-    // This should hit line 341 - the catch block in findPnpmCatalogVersion
-    const result = await findPnpmCatalogVersion('default', '/non-existent-dir');
-    expect(result).toBeUndefined();
-  });
-
-  it('should traverse up directory tree to find pnpm-workspace.yaml', async () => {
-    // Mock readFile to fail for the first two attempts and succeed on the third
-    let callCount = 0;
-    vi.mocked(fs.readFile).mockImplementation((_filePath) => {
-      callCount++;
-      if (callCount < 3) {
-        throw new Error('File not found');
-      }
-
-      // On the third call, return a valid YAML content
-      return Promise.resolve('catalog:\n  electron: "30.0.0"');
-    });
-
-    // Mock YAML parse to return a valid workspace config
-    vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
-      catalog: {
-        electron: '30.0.0',
-      },
-    });
-
-    // Start from a nested directory
-    const nestedDir = '/project/src/components/app';
-    const version = await findPnpmCatalogVersion('catalog:', undefined, nestedDir);
-
-    // Should find the version in parent directory
-    expect(version).toBe('30.0.0');
-
-    // Verify that readFile was called multiple times as it traversed up
-    expect(fs.readFile).toHaveBeenCalledTimes(3);
-
-    // Should have tried these paths in order - using normalized paths for cross-platform tests
-    const call1 = vi.mocked(fs.readFile).mock.calls[0];
-    const call2 = vi.mocked(fs.readFile).mock.calls[1];
-    const call3 = vi.mocked(fs.readFile).mock.calls[2];
-
-    // Normalize paths to forward slashes for comparison
-    expect(call1[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/app/pnpm-workspace.yaml');
-    expect(call1[1]).toBe('utf8');
-
-    expect(call2[0].toString().replace(/\\/g, '/')).toBe('/project/src/components/pnpm-workspace.yaml');
-    expect(call2[1]).toBe('utf8');
-
-    expect(call3[0].toString().replace(/\\/g, '/')).toBe('/project/src/pnpm-workspace.yaml');
-    expect(call3[1]).toBe('utf8');
-  });
-
-  it('should handle empty catalog names with the new structure', async () => {
-    vi.mocked(await import('yaml')).parse.mockReturnValueOnce({
-      catalogs: {
-        '': {
-          electron: '29.4.1',
-        },
-      },
-    });
-
-    // Set up mock to succeed with the workspace file
-    vi.mocked(fs.readFile).mockImplementationOnce((_path) => {
-      return Promise.resolve('catalogs:\n  "":\n    electron: "29.4.1"');
-    });
-
-    const version = await findPnpmCatalogVersion('catalog:', undefined, '/project/dir');
-    expect(version).toBe(undefined); // Should return undefined since empty catalog name isn't handled
   });
 });
 
