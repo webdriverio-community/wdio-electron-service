@@ -8,6 +8,7 @@
   "scripts": {
     "build": "turbo run build --filter=@wdio* --filter=wdio-electron-service --only --force",
     "build:e2e": "turbo run build --filter=@repo/e2e --filter=example-* --only",
+    "build:test-apps": "tsx ./scripts/prebuild-test-apps.ts",
     "backport": "tsx ./scripts/backport.ts",
     "ci": "turbo run lint format:check test:unit @repo/e2e#test:all",
     "ci-linux": "cross-env CI=true turbo run lint format:check test:unit @repo/e2e#test:all --concurrency=1",
@@ -28,8 +29,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit @repo/e2e#test:all",
     "test:unit": "turbo run test:unit",
-    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && cd e2e && pnpm run prepare-apps && pnpm run test:all",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build:mac-universal --filter=example-* --only && cd e2e && pnpm run prepare-apps && pnpm run test:all",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm build:test-apps && cd e2e && pnpm run prepare-apps && pnpm run test:all",
+    "test:e2e-local:standalone": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm build:test-apps && cd e2e && pnpm run test:standalone",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service TEST=true pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run prepare-apps && pnpm run test:all",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {
