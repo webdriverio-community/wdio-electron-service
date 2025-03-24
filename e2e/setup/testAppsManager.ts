@@ -789,16 +789,40 @@ class TestAppsManager {
             await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
             console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
 
-            // For standalone mode, copy the service's node_modules to ensure dependencies are available
+            // For standalone mode, ensure service dependencies are available
             if (process.env.STANDALONE === 'true') {
-              this._currentOperation = 'copying service node_modules';
-              console.log('Copying service node_modules for standalone mode');
-              const serviceNodeModules = join(packageDir, 'node_modules');
-              const targetNodeModules = join(nodeModulesDir, 'wdio-electron-service', 'node_modules');
+              this._currentOperation = 'setting up service dependencies';
+              console.log('Setting up service dependencies for standalone mode');
 
-              // Copy the node_modules directory recursively
-              await this.copyDir(serviceNodeModules, targetNodeModules);
-              console.log('Successfully copied service node_modules');
+              // Create the service's node_modules directory
+              const serviceNodeModules = join(wdioServicePath, 'node_modules');
+              await fs.promises.mkdir(serviceNodeModules, { recursive: true });
+
+              // Copy dependencies from the service package's node_modules
+              const sourceNodeModules = join(packageDir, 'node_modules');
+              const dependencies = [
+                'read-package-up',
+                'read-pkg',
+                'read-pkg-up',
+                'pkg-up',
+                'find-up',
+                'locate-path',
+                'path-exists',
+              ];
+
+              for (const dep of dependencies) {
+                const sourceDep = join(sourceNodeModules, dep);
+                const targetDep = join(serviceNodeModules, dep);
+
+                if (fs.existsSync(sourceDep)) {
+                  console.log(`Copying dependency: ${dep}`);
+                  await this.copyDir(sourceDep, targetDep);
+                } else {
+                  console.warn(`Warning: dependency ${dep} not found in source node_modules`);
+                }
+              }
+
+              console.log('Successfully set up service dependencies');
             }
           } catch (symlinkError) {
             console.error('Error creating symlink:', symlinkError);
@@ -826,6 +850,22 @@ class TestAppsManager {
 
     this.isPrepared = true;
     return this.tmpDir;
+  }
+
+  private async copyDir(src: string, dest: string) {
+    await fs.promises.mkdir(dest, { recursive: true });
+    const entries = await fs.promises.readdir(src, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const srcPath = join(src, entry.name);
+      const destPath = join(dest, entry.name);
+
+      if (entry.isDirectory()) {
+        await this.copyDir(srcPath, destPath);
+      } else {
+        await fs.promises.copyFile(srcPath, destPath);
+      }
+    }
   }
 
   /**
@@ -1219,22 +1259,6 @@ class TestAppsManager {
       console.error('Error during service packing:');
       console.error(packError);
       throw packError;
-    }
-  }
-
-  private async copyDir(src: string, dest: string) {
-    await fs.promises.mkdir(dest, { recursive: true });
-    const entries = await fs.promises.readdir(src, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const srcPath = join(src, entry.name);
-      const destPath = join(dest, entry.name);
-
-      if (entry.isDirectory()) {
-        await this.copyDir(srcPath, destPath);
-      } else {
-        await fs.promises.copyFile(srcPath, destPath);
-      }
     }
   }
 }
