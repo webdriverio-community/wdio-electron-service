@@ -125,6 +125,9 @@ if (testType === 'window') {
   specs = ['./test/window.spec.ts'];
 } else if (testType === 'multiremote') {
   specs = ['./test/multiremote/*.spec.ts'];
+} else if (testType === 'standalone') {
+  // For standalone tests, specify the standalone test file
+  specs = ['./test/standalone/api.spec.ts'];
 } else if (testType === 'standard') {
   specs = ['./test/api.spec.ts', './test/application.spec.ts', './test/dom.spec.ts', './test/interaction.spec.ts'];
 }
