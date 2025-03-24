@@ -399,6 +399,12 @@ class TestAppsManager {
           await execAsync(`cp -R ${sourceAppDir}/src ${targetAppDir}/`);
         }
 
+        // Copy node_modules directory if it exists
+        if (fs.existsSync(join(sourceAppDir, 'node_modules'))) {
+          this._currentOperation = `copying node_modules for ${appDir}`;
+          await execAsync(`cp -R ${sourceAppDir}/node_modules ${targetAppDir}/`);
+        }
+
         // Copy the dist directory if it exists - this is critical for the tests
         if (fs.existsSync(distDir)) {
           this._currentOperation = `copying dist directory for ${appDir}`;
