@@ -56,6 +56,22 @@ describe('getElectronVersion()', () => {
     expect(version).toBe('33.0.0-nightly.20240621');
   });
 
+  it('should prioritize electron over electron-nightly when both are set package.json dependencies', async () => {
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {
+          'electron': '25.0.1',
+          'electron-nightly': '33.0.0-nightly.20240621',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('25.0.1');
+  });
+
   it('should return the nightly electron version from package.json devDependencies', async () => {
     const pkg = {
       packageJson: {
@@ -123,5 +139,23 @@ describe('getElectronVersion()', () => {
 
     const version = await getElectronVersion(pkg);
     expect(version).toBe('33.0.0-nightly.20240621');
+  });
+
+  it('should prioritize electron over electron-nightly when both are set pnpm catalog', async () => {
+    vi.mocked(findPnpmCatalogVersion).mockResolvedValueOnce('29.4.1').mockResolvedValueOnce('33.0.0-nightly.20240621');
+
+    const pkg = {
+      packageJson: {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {
+          'electron': 'catalog:',
+          'electron-nightly': 'catalog:',
+        },
+      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      path: '/path/to/package.json',
+    } as NormalizedReadResult;
+    const version = await getElectronVersion(pkg);
+    expect(version).toBe('29.4.1');
   });
 });

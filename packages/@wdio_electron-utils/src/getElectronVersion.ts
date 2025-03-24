@@ -7,26 +7,21 @@ import type { NormalizedReadResult } from 'read-package-up';
 import { PKG_NAME_ELECTRON, PNPM_CATALOG_PREFIX } from './constants';
 
 export async function getElectronVersion(pkg: NormalizedReadResult) {
+  const projectDir = dirname(pkg.path);
   const { dependencies, devDependencies } = pkg.packageJson;
-  const pkgElectronVersion = dependencies?.[PKG_NAME_ELECTRON.STABLE] || devDependencies?.[PKG_NAME_ELECTRON.STABLE];
-  const pkgElectronNightlyVersion =
-    dependencies?.[PKG_NAME_ELECTRON.NIGHTLY] || devDependencies?.[PKG_NAME_ELECTRON.NIGHTLY];
 
-  let electronVersion;
+  const getElectronDependencies = async (pkgName: string) => {
+    const deps = dependencies?.[pkgName] || devDependencies?.[pkgName];
+    if (typeof deps === `undefined`) {
+      return deps;
+    }
+    return deps.startsWith(PNPM_CATALOG_PREFIX) ? await findPnpmCatalogVersion(pkgName, deps, projectDir) : deps;
+  };
 
-  if (
-    pkgElectronVersion?.startsWith(PNPM_CATALOG_PREFIX) ||
-    pkgElectronNightlyVersion?.startsWith(PNPM_CATALOG_PREFIX)
-  ) {
-    // Extract the directory path from the package.json file path
-    const projectDir = dirname(pkg.path);
-    electronVersion = await findPnpmCatalogVersion(pkgElectronVersion, pkgElectronNightlyVersion, projectDir);
-  }
+  const pkgElectronVersion = await getElectronDependencies(PKG_NAME_ELECTRON.STABLE);
+  const pkgElectronNightlyVersion = await getElectronDependencies(PKG_NAME_ELECTRON.NIGHTLY);
 
-  // If no catalog version was found, use the direct version from package.json
-  if (!electronVersion) {
-    electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
-  }
+  const electronVersion = pkgElectronVersion || pkgElectronNightlyVersion;
 
   return electronVersion ? findVersions(electronVersion, { loose: true })[0] : undefined;
 }

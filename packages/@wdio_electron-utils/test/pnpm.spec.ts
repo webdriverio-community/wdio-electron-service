@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { expect, it, vi, describe } from 'vitest';
 import { findPnpmCatalogVersion } from '../src/pnpm';
+import { PKG_NAME_ELECTRON } from '../src/constants';
 
 function getPnpmFixtureDirPath(subPath?: string[]) {
   const fixtureDir = path.resolve(process.cwd(), '..', '..', 'fixtures', 'pnpm');
@@ -15,54 +16,38 @@ function getPnpmFixtureDirPath(subPath?: string[]) {
 // Additional tests for findPnpmCatalogVersion to cover edge cases
 describe('PNPM Catalog Versions Edge Cases', () => {
   it('should handle default catalog names', async () => {
-    const version = await findPnpmCatalogVersion('catalog:', undefined, getPnpmFixtureDirPath());
+    const version = await findPnpmCatalogVersion(PKG_NAME_ELECTRON.STABLE, 'catalog:', getPnpmFixtureDirPath());
     expect(version).toBe('^29.4.1');
   });
 
   it('should handle named catalog names', async () => {
-    const version = await findPnpmCatalogVersion('catalog:sample1', undefined, getPnpmFixtureDirPath());
+    const version = await findPnpmCatalogVersion(PKG_NAME_ELECTRON.STABLE, 'catalog:sample1', getPnpmFixtureDirPath());
     expect(version).toBe('^35.0.3');
   });
 
   it('should handle default catalog names of nightly-version', async () => {
-    const version = await findPnpmCatalogVersion(undefined, 'catalog:', getPnpmFixtureDirPath());
+    const version = await findPnpmCatalogVersion(PKG_NAME_ELECTRON.NIGHTLY, 'catalog:', getPnpmFixtureDirPath());
     expect(version).toBe('33.0.0-nightly.20240621');
   });
 
   it('should handle named catalog names of nightly-version', async () => {
-    const version = await findPnpmCatalogVersion(undefined, 'catalog:sample2', getPnpmFixtureDirPath());
+    const version = await findPnpmCatalogVersion(PKG_NAME_ELECTRON.NIGHTLY, 'catalog:sample2', getPnpmFixtureDirPath());
     expect(version).toBe('^37.0.0-nightly.20250320');
-  });
-
-  it('should prioritize electron over electron-nightly when both are using catalogs', async () => {
-    const version = await findPnpmCatalogVersion('catalog:', 'catalog:', getPnpmFixtureDirPath());
-    expect(version).toBe('^29.4.1');
-  });
-
-  it("should fallback to electron-nightly when electron catalog doesn't exist", async () => {
-    const version = await findPnpmCatalogVersion('catalog:sample2', 'catalog:sample2', getPnpmFixtureDirPath());
-    expect(version).toBe('^37.0.0-nightly.20250320');
-  });
-
-  it('should handle a mix of named and default catalogs', async () => {
-    const version = await findPnpmCatalogVersion('catalog:sample1', 'catalog:sample2', getPnpmFixtureDirPath());
-    expect(version).toBe('^35.0.3');
-  });
-
-  it('should handle missing projectDir', async () => {
-    const version = await findPnpmCatalogVersion('catalog:name', undefined, undefined);
-    expect(version).toBeUndefined();
   });
 
   it('should return undefined when pnpm-workspace.yaml was not found', async () => {
-    const version = await findPnpmCatalogVersion('catalog:name', undefined, path.parse(getPnpmFixtureDirPath()).root);
+    const version = await findPnpmCatalogVersion(
+      PKG_NAME_ELECTRON.STABLE,
+      'catalog:name',
+      path.parse(getPnpmFixtureDirPath()).root,
+    );
     expect(version).toBeUndefined();
   });
 
   it('should handle YAML parse errors', async () => {
     const version = await findPnpmCatalogVersion(
+      PKG_NAME_ELECTRON.STABLE,
       'catalog:name',
-      undefined,
       getPnpmFixtureDirPath(['packages', 'app2']),
     );
     expect(version).toBeUndefined();
@@ -83,8 +68,8 @@ describe('PNPM Catalog Versions Edge Cases', () => {
     const readFileSpy = vi.spyOn(fs, 'readFile');
 
     const version = await findPnpmCatalogVersion(
+      PKG_NAME_ELECTRON.STABLE,
       'catalog:sample1',
-      undefined,
       getPnpmFixtureDirPath(['packages', 'app1']),
     );
 
