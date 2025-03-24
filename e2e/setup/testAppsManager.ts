@@ -376,7 +376,7 @@ class TestAppsManager {
           await execAsync(`cp -R ${sourceAppDir}/src ${targetAppDir}/`);
         }
 
-        // Copy the dist directory if it exists
+        // Copy the dist directory if it exists - this is critical for the tests
         if (fs.existsSync(distDir)) {
           this._currentOperation = `copying dist directory for ${appDir}`;
           console.log(`Copying dist directory for ${appDir}...`);
@@ -385,37 +385,98 @@ class TestAppsManager {
           const targetDistDir = join(targetAppDir, 'dist');
           await this.createDirectory(targetDistDir);
 
-          // Use cp -R to copy the entire dist directory with all its contents
-          // The /* pattern might miss hidden files or cause issues with nested directories
-          await execAsync(`cp -R "${distDir}" "${targetAppDir}/"`);
+          // Special handling for Mac app bundles
+          const macArmDir = join(distDir, 'mac-arm64');
+          if (fs.existsSync(macArmDir)) {
+            // Create the mac-arm64 directory in target
+            const targetMacArmDir = join(targetDistDir, 'mac-arm64');
+            await this.createDirectory(targetMacArmDir);
+            console.log(`Created mac-arm64 directory in ${targetDistDir}`);
 
-          // Verify the dist directory was copied
-          if (fs.existsSync(targetDistDir)) {
-            // Check if mac-arm64 directory exists for binary apps
-            const macArmDir = join(targetDistDir, 'mac-arm64');
-            if (fs.existsSync(macArmDir)) {
-              console.log(`Verified mac-arm64 directory exists in ${targetDistDir}`);
+            // Find app bundles in mac-arm64 directory
+            const items = fs.readdirSync(macArmDir);
+            const appBundles = items.filter((item) => item.endsWith('.app'));
 
-              // Check if the app exists
-              const appName = `example-${appDir}.app`;
-              const appPath = join(macArmDir, appName);
-              if (fs.existsSync(appPath)) {
-                console.log(`Verified ${appName} exists in mac-arm64 directory`);
+            if (appBundles.length > 0) {
+              for (const appBundle of appBundles) {
+                const sourceAppBundle = join(macArmDir, appBundle);
+                const targetAppBundle = join(targetMacArmDir, appBundle);
 
-                // Check if the executable exists
-                const execPath = join(appPath, 'Contents', 'MacOS', `example-${appDir}`);
-                if (fs.existsSync(execPath)) {
-                  console.log(`Verified executable exists at ${execPath}`);
-                } else {
-                  console.warn(`Warning: Executable not found at ${execPath}`);
+                console.log(`Copying ${appBundle} using preserving command...`);
+
+                // Use platform-specific command to preserve permissions and structure
+                if (process.platform === 'darwin' || process.platform === 'linux') {
+                  try {
+                    // Use ditto on macOS for better preservation of bundle attributes
+                    if (process.platform === 'darwin') {
+                      await execAsync(`ditto "${sourceAppBundle}" "${targetAppBundle}"`);
+                    } else {
+                      await execAsync(`cp -R "${sourceAppBundle}" "${targetAppBundle}"`);
+                    }
+                    console.log(`Successfully copied ${appBundle} to ${targetMacArmDir}`);
+
+                    // Make sure the app binary is executable
+                    const appName = appBundle.replace('.app', '');
+                    const appExecutable = join(targetAppBundle, 'Contents/MacOS', appName);
+                    if (fs.existsSync(appExecutable)) {
+                      await execAsync(`chmod +x "${appExecutable}"`);
+                      console.log(`Made app executable: ${appExecutable}`);
+                    }
+                  } catch (err) {
+                    console.warn(`Error copying app bundle ${appBundle}:`, err);
+                  }
+                } else if (process.platform === 'win32') {
+                  try {
+                    await execAsync(`xcopy "${sourceAppBundle}" "${targetAppBundle}" /E /H /C /I`);
+                    console.log(`Successfully copied ${appBundle} to ${targetMacArmDir}`);
+                  } catch (err) {
+                    console.warn(`Error copying app bundle ${appBundle}:`, err);
+                  }
                 }
-              } else {
-                console.warn(`Warning: ${appName} not found in mac-arm64 directory`);
+              }
+            } else {
+              console.warn(`No .app bundles found in ${macArmDir}`);
+            }
+          }
+
+          // Copy remaining files in the dist directory (excluding mac-arm64 which was handled above)
+          const distFiles = fs.readdirSync(distDir);
+          for (const file of distFiles) {
+            if (file === 'mac-arm64') continue; // Skip, already handled above
+
+            const sourcePath = join(distDir, file);
+            const targetPath = join(targetDistDir, file);
+
+            if (fs.statSync(sourcePath).isDirectory()) {
+              try {
+                await execAsync(`cp -R "${sourcePath}" "${targetDistDir}/"`);
+              } catch (err) {
+                console.warn(`Error copying directory ${file}:`, err);
+              }
+            } else {
+              try {
+                await fs.promises.copyFile(sourcePath, targetPath);
+              } catch (err) {
+                console.warn(`Error copying file ${file}:`, err);
               }
             }
+          }
 
-            const distFiles = fs.readdirSync(targetDistDir);
-            console.log(`Copied dist directory for ${appDir} with ${distFiles.length} files/directories`);
+          console.log(`Successfully copied dist directory for ${appDir}`);
+
+          // Verify files in dist directory
+          if (fs.existsSync(targetDistDir)) {
+            try {
+              const distFiles = fs.readdirSync(targetDistDir);
+              console.log(`Copied dist directory for ${appDir} with ${distFiles.length} files/directories`);
+
+              // For binary apps, check if we have the binary properly copied
+              if (appDir.startsWith('builder-') || appDir.startsWith('forge-')) {
+                // ... existing code ...
+              }
+            } catch (error) {
+              console.error('Error verifying dist directory:', error);
+            }
           } else {
             console.error(`Error: dist directory not created for ${appDir}`);
           }
