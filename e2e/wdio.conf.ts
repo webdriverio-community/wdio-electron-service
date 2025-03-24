@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 import type { WdioElectronConfig } from '@wdio/electron-types';
 import type { NormalizedPackageJson } from 'read-package-up';
+import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@wdio/electron-utils';
 
 import { testAppsManager } from './setup/testAppsManager.js';
 
@@ -81,9 +82,6 @@ let appEntryPoint = '';
 
 // Setup for app binary path or entry point
 if (tmpDir) {
-  // Use the correct app name based on the example directory
-  const appName = platform === 'forge' ? `example-${exampleDir}` : `electron-example-${platform}`;
-
   if (isNoBinary) {
     console.log('🔍 Debug: Setting up no-binary test with entry point');
     // Try multiple possible entry points
@@ -105,9 +103,18 @@ if (tmpDir) {
       console.error('❌ Error: Could not find a valid entry point. Checked:', possibleEntryPoints);
     }
   } else {
-    console.log('🔍 Debug: Setting up binary test - letting service detect app binary path');
-    // Let the service handle app binary path detection
-    appBinaryPath = path.join(tmpDir, 'apps', exampleDir);
+    console.log('🔍 Debug: Setting up binary test with app binary path');
+    try {
+      const packageJsonPath = path.join(tmpDir, 'apps', exampleDir, 'package.json');
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
+      const pkg = { packageJson, path: packageJsonPath };
+      const electronVersion = await getElectronVersion(pkg);
+      const appBuildInfo = await getAppBuildInfo(pkg);
+      appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
+      console.log('🔍 Debug: Found app binary at:', appBinaryPath);
+    } catch (error) {
+      console.error('❌ Error getting app binary path:', error);
+    }
   }
 } else {
   console.error('❌ Error: tmpDir is not set. Test apps preparation may have failed.');
