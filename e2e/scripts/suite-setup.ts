@@ -6,6 +6,7 @@
 
 import { execSync } from 'node:child_process';
 import { testAppsManager } from '../setup/testAppsManager.js';
+import { killElectronProcesses } from './utils.js';
 
 /**
  * Parse command line arguments for timeout
@@ -25,58 +26,6 @@ function getTimeoutFromArgs(): number {
 }
 
 /**
- * Kill all running Electron processes
- */
-async function killElectronProcesses(): Promise<void> {
-  console.log('🔪 Killing any remaining Electron processes...');
-  try {
-    if (process.platform === 'win32') {
-      // On Windows, use taskkill with /F to force kill
-      execSync('taskkill /F /IM electron.exe /T', { stdio: 'ignore' });
-    } else {
-      // On Unix-like systems, try multiple approaches to ensure all processes are killed
-      try {
-        // First try pkill with -f to match command line
-        execSync('pkill -f electron', { stdio: 'ignore' });
-      } catch (_) {
-        // Ignore errors, as they likely mean no processes were found
-      }
-
-      try {
-        // Also try to kill by process name
-        execSync('pkill -9 -f Electron', { stdio: 'ignore' });
-      } catch (_) {
-        // Ignore errors
-      }
-
-      try {
-        // Also try to kill any node processes related to electron
-        execSync('pkill -f "node.*electron"', { stdio: 'ignore' });
-      } catch (_) {
-        // Ignore errors
-      }
-
-      // On macOS, also try to kill by app bundle
-      if (process.platform === 'darwin') {
-        try {
-          execSync('pkill -f "example-.*\\.app"', { stdio: 'ignore' });
-        } catch (_) {
-          // Ignore errors
-        }
-      }
-    }
-    console.log('✅ Electron processes killed');
-  } catch (_error) {
-    // Ignore errors as they likely mean no processes were found
-    console.log('ℹ️ No Electron processes found to kill');
-  }
-}
-
-// Set platform-specific timeouts
-const SETUP_TIMEOUT = process.platform === 'win32' ? 180000 : 120000; // 3 minutes for Windows, 2 minutes for others
-const BUILD_TIMEOUT = process.platform === 'win32' ? 180000 : 120000; // 3 minutes for Windows, 2 minutes for others
-
-/**
  * Set up the test suite
  */
 export async function setupTestSuite(): Promise<void> {
@@ -84,7 +33,6 @@ export async function setupTestSuite(): Promise<void> {
   console.log('🚀 Performing suite-level setup...');
   console.log(`Setup started at: ${new Date().toISOString()}`);
   console.log(`Platform: ${process.platform}`);
-  console.log(`Using timeout of ${SETUP_TIMEOUT}ms for suite setup`);
 
   // Get timeout from command line arguments
   const timeout = getTimeoutFromArgs();
@@ -95,7 +43,7 @@ export async function setupTestSuite(): Promise<void> {
   process.on('SIGTERM', handleTermination);
   process.on('exit', () => {
     console.log('Process exit event received');
-    cleanupTestSuite().catch((error) => {
+    cleanupTestSuite().catch((error: Error) => {
       console.error('Error in suite cleanup:', error);
       process.exit(1);
     });
@@ -113,64 +61,74 @@ export async function setupTestSuite(): Promise<void> {
     // Kill any leftover Electron processes first
     await killElectronProcesses();
 
-    // Add timeout promise to detect long-running operations
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Timeout during test suite setup - operation took too long (${SETUP_TIMEOUT}ms)`));
-      }, SETUP_TIMEOUT);
-    });
+    // Check if the apps are already prepared via environment variables
+    if (process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR) {
+      console.log('✅ Test apps already prepared via environment variables, reusing existing setup');
+      console.log(`📂 Using existing test apps directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+      return;
+    }
 
-    // Create the actual setup promise
-    const setupPromise = (async () => {
-      // Check if test apps are already prepared
-      if (testAppsManager.isTestAppsPrepared()) {
-        console.log('✅ Test apps already prepared, reusing existing setup');
-        const tmpDir = testAppsManager.getTmpDir();
-        if (tmpDir) {
-          process.env.WDIO_TEST_APPS_PREPARED = 'true';
-          process.env.WDIO_TEST_APPS_DIR = tmpDir;
-          console.log(`📂 Using existing test apps directory: ${tmpDir}`);
-        }
+    // Check if apps are already prepared via testAppsManager
+    if (testAppsManager.isTestAppsPrepared()) {
+      console.log('✅ Test apps already prepared via testAppsManager, reusing existing setup');
+      const tmpDir = testAppsManager.getTmpDir();
+      if (tmpDir) {
+        process.env.WDIO_TEST_APPS_PREPARED = 'true';
+        process.env.WDIO_TEST_APPS_DIR = tmpDir;
+        console.log(`📂 Using existing test apps directory: ${tmpDir}`);
         return;
       }
+    }
 
-      // Prepare test apps
-      console.log('📦 Preparing test apps...');
+    // If we reach here, we need to prepare the apps directly
+    console.log('📦 Preparing test apps directly...');
+    const tmpDir = await testAppsManager.prepareTestApps();
+    if (!tmpDir) {
+      throw new Error('Failed to prepare test apps');
+    }
 
-      // Log the PRESERVE_TEMP_DIR environment variable
-      if (process.env.PRESERVE_TEMP_DIR === 'true') {
-        console.log('🔒 Temp directory will be preserved (PRESERVE_TEMP_DIR=true)');
-      }
+    process.env.WDIO_TEST_APPS_PREPARED = 'true';
+    process.env.WDIO_TEST_APPS_DIR = tmpDir;
 
-      // Set a longer timeout for Windows builds
-      if (process.platform === 'win32') {
-        console.log('🔄 Windows detected - using extended build timeout');
-        process.env.WDIO_BUILD_TIMEOUT = BUILD_TIMEOUT.toString();
-      }
-
-      const tmpDir = await testAppsManager.prepareTestApps();
-
-      // Set environment variables for all tests to use
-      process.env.WDIO_TEST_APPS_PREPARED = 'true';
-      process.env.WDIO_TEST_APPS_DIR = tmpDir;
-
-      console.log('✅ Test suite preparation complete');
-      const setupTime = (Date.now() - startTime) / 1000;
-      console.log(`Setup completed in ${setupTime.toFixed(2)} seconds. Test apps prepared at: ${tmpDir}`);
-    })();
-
-    // Race the setup against the timeout
-    await Promise.race([setupPromise, timeoutPromise]);
+    console.log('✅ Test suite preparation complete');
+    const setupTime = (Date.now() - startTime) / 1000;
+    console.log(`Setup completed in ${setupTime.toFixed(2)} seconds. Test apps prepared at: ${tmpDir}`);
   } catch (err) {
     console.error('❌ Error during test suite setup:', err);
     const setupTime = (Date.now() - startTime) / 1000;
     console.error(`Setup failed after ${setupTime.toFixed(2)} seconds`);
 
     // Still try to clean up even if setup failed
-    cleanupTestSuite().catch((error) => {
+    cleanupTestSuite().catch((error: Error) => {
       console.error('Error in suite cleanup:', error);
       process.exit(1);
     });
+  }
+}
+
+/**
+ * Clean up suite resources
+ */
+export async function cleanupTestSuite(): Promise<void> {
+  try {
+    console.log('🧹 Performing suite-level cleanup...');
+
+    try {
+      // First kill any remaining Electron processes
+      await killElectronProcesses();
+
+      // Only clean up the test apps if PRESERVE_TEMP_DIR is not set to 'true'
+      if (process.env.PRESERVE_TEMP_DIR !== 'true') {
+        await testAppsManager.cleanup();
+        console.log('✅ Temp directory cleaned up');
+      } else {
+        console.log('🔒 Preserving temp directory (PRESERVE_TEMP_DIR=true)');
+      }
+    } catch (err) {
+      console.error('Error during cleanup:', err);
+    }
+  } catch (err) {
+    console.error('Error during suite cleanup:', err);
   }
 }
 
@@ -262,35 +220,6 @@ function handleTermination(signal: string): void {
         console.log('Could not get directory structure:', (err as Error).message);
       }
 
-      // If tmp dir exists, show its contents
-      if (process.env.WDIO_TEST_APPS_DIR) {
-        try {
-          console.log(`Test apps directory contents (${process.env.WDIO_TEST_APPS_DIR}):`);
-          const tmpDirOutput = execSync(`ls -la ${process.env.WDIO_TEST_APPS_DIR}`).toString();
-          console.log(tmpDirOutput);
-        } catch (err) {
-          console.log('Could not get test apps directory contents:', (err as Error).message);
-        }
-      }
-
-      // Check if any Electron processes are running
-      try {
-        console.log('Electron processes:');
-        const electronProcesses = execSync('ps aux | grep electron | grep -v grep').toString();
-        console.log(electronProcesses || 'No Electron processes found');
-      } catch (err) {
-        console.log('Could not get Electron processes:', (err as Error).message);
-      }
-
-      // Runtime context
-      console.log('Runtime information:');
-      console.log(`- Node.js version: ${process.version}`);
-      console.log(`- Platform: ${process.platform}`);
-      console.log(`- Architecture: ${process.arch}`);
-      console.log(`- PID: ${process.pid}`);
-      console.log(`- PPID: ${process.ppid}`);
-      console.log(`- Runtime since process start: ${process.uptime().toFixed(2)} seconds`);
-
       console.log('************* SIGTERM DIAGNOSTIC INFO END *************');
     } catch (err) {
       console.error('Error while gathering diagnostic information:', err);
@@ -310,32 +239,6 @@ function handleTermination(signal: string): void {
     clearTimeout(forceExitTimeout);
     process.exit(signal === 'SIGTERM' ? 143 : 130);
   });
-}
-
-/**
- * Clean up suite resources
- */
-export async function cleanupTestSuite(): Promise<void> {
-  try {
-    console.log('🧹 Performing suite-level cleanup...');
-
-    try {
-      // First kill any remaining Electron processes
-      await killElectronProcesses();
-
-      // Only clean up the test apps if PRESERVE_TEMP_DIR is not set to 'true'
-      if (process.env.PRESERVE_TEMP_DIR !== 'true') {
-        await testAppsManager.cleanup();
-        console.log('✅ Temp directory cleaned up');
-      } else {
-        console.log('🔒 Preserving temp directory (PRESERVE_TEMP_DIR=true)');
-      }
-    } catch (err) {
-      console.error('Error during cleanup:', err);
-    }
-  } catch (err) {
-    console.error('Error during suite cleanup:', err);
-  }
 }
 
 // If this script is run directly, perform setup

@@ -29,9 +29,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test:unit @repo/e2e#test:all",
     "test:unit": "turbo run test:unit",
-    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run prepare-apps && pnpm run test:all",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run test:all",
     "test:e2e-local:standalone": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm build:test-apps && cd e2e && pnpm run test:standalone",
-    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service TEST=true pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run prepare-apps && pnpm run test:all",
+    "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service TEST=true pnpm clean && pnpm i && pnpm build && cd e2e && pnpm run test:all",
     "update:all": "pnpm up -iLr"
   },
   "devDependencies": {

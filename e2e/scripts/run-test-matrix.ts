@@ -516,24 +516,25 @@ function generateTestVariants(): TestVariant[] {
 
 // Filter variants based on environment variables
 function filterVariants(variants: TestVariant[]): TestVariant[] {
+  // Helper function to check if a value matches, accounting for wildcards
+  const matches = (envValue: string | undefined, variantValue: string): boolean => {
+    if (!envValue) return true; // No filter specified
+    if (envValue === '*') return true; // Wildcard matches everything
+    return envValue === variantValue; // Exact match check
+  };
+
   return variants.filter((variant) => {
     // Filter by platform
-    if (process.env.PLATFORM) {
-      if (process.env.PLATFORM !== variant.platform) return false;
-    }
+    if (!matches(process.env.PLATFORM, variant.platform)) return false;
 
     // Filter by module type
-    if (process.env.MODULE_TYPE) {
-      if (process.env.MODULE_TYPE !== variant.moduleType) return false;
-    }
+    if (!matches(process.env.MODULE_TYPE, variant.moduleType)) return false;
 
     // Filter by test type
-    if (process.env.TEST_TYPE) {
-      if (process.env.TEST_TYPE !== variant.testType) return false;
-    }
+    if (!matches(process.env.TEST_TYPE, variant.testType)) return false;
 
     // Filter by binary
-    if (process.env.BINARY) {
+    if (process.env.BINARY && process.env.BINARY !== '*') {
       if (process.env.BINARY === 'true' && !variant.binary) return false;
       if (process.env.BINARY === 'false' && variant.binary) return false;
     }
@@ -699,7 +700,16 @@ async function runTests(): Promise<void> {
     // Print test plan
     console.log('\n📋 Test Plan:');
     for (const variant of filteredVariants) {
-      console.log(`  • ${getTestName(variant)}`);
+      const testName = getTestName(variant);
+      console.log(`  • ${testName}`);
+    }
+    if (filteredVariants.length === 0) {
+      console.log('\n⚠️ WARNING: No test variants match the current filters!');
+      console.log('Check your environment variables:');
+      console.log(`  PLATFORM: ${process.env.PLATFORM || 'not set'}`);
+      console.log(`  MODULE_TYPE: ${process.env.MODULE_TYPE || 'not set'}`);
+      console.log(`  TEST_TYPE: ${process.env.TEST_TYPE || 'not set'}`);
+      console.log(`  BINARY: ${process.env.BINARY || 'not set'}`);
     }
     console.log('═'.repeat(80));
 

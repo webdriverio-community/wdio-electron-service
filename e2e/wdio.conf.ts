@@ -31,14 +31,16 @@ console.log(`🔍 Debug: Starting test with configuration:
 
 // Determine if we need to prepare test apps
 let tmpDir: string;
-if (process.env.WDIO_TEST_APPS_PREPARED !== 'true') {
+if (process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR) {
+  // Use already prepared apps
+  tmpDir = process.env.WDIO_TEST_APPS_DIR;
+  console.log('✅ Using already prepared test apps from:', tmpDir);
+} else {
   // Prepare apps for individual test
   tmpDir = await testAppsManager.prepareTestApps();
   process.env.WDIO_TEST_APPS_PREPARED = 'true';
   process.env.WDIO_TEST_APPS_DIR = tmpDir;
-} else {
-  // Use already prepared apps
-  tmpDir = process.env.WDIO_TEST_APPS_DIR || testAppsManager.getTmpDir() || '';
+  console.log('📦 Prepared test apps at:', tmpDir);
 }
 
 // Load package.json from the appropriate app directory and set it on globalThis

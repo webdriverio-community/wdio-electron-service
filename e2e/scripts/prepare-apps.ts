@@ -11,13 +11,15 @@
  *   pnpm run prepare-apps --timeout=300000     # Use custom timeout
  */
 
-import { setupTestSuite } from './suite-setup.js';
+import { testAppsManager } from '../setup/testAppsManager.js';
+import { killElectronProcesses } from './utils.js';
 
 // Parse command line arguments for timeout and app filtering
-function parseArgs(): { timeout: number; scenario?: string; moduleType?: string } {
+function parseArgs(): { timeout: number; scenario?: string; moduleType?: string; isSuiteSetup: boolean } {
   const args = process.argv.slice(2);
-  const result: { timeout: number; scenario?: string; moduleType?: string } = {
+  const result: { timeout: number; scenario?: string; moduleType?: string; isSuiteSetup: boolean } = {
     timeout: 120000, // Default timeout (120 seconds)
+    isSuiteSetup: false,
   };
 
   // Parse each argument
@@ -31,6 +33,8 @@ function parseArgs(): { timeout: number; scenario?: string; moduleType?: string 
       result.scenario = arg.split('=')[1];
     } else if (arg.startsWith('--module-type=')) {
       result.moduleType = arg.split('=')[1];
+    } else if (arg.startsWith('--suite-setup')) {
+      result.isSuiteSetup = true;
     }
   }
 
@@ -77,15 +81,14 @@ function logDebugInfo() {
 }
 
 async function prepareApps(): Promise<void> {
-  try {
-    const startTime = Date.now();
+  const startTime = Date.now();
+  const args = parseArgs();
 
+  try {
     // Log debug info at the start
     console.log('Starting prepare-apps process');
     logDebugInfo();
 
-    // Parse command line arguments
-    const args = parseArgs();
     console.log(`Using timeout: ${args.timeout}ms for app preparation`);
 
     // Set environment variables based on CLI arguments (for testAppsManager)
@@ -110,23 +113,68 @@ async function prepareApps(): Promise<void> {
     // Make sure the timeout doesn't prevent the process from exiting normally
     forceExitTimeout.unref();
 
-    // Set up the test suite
-    await setupTestSuite();
+    // Kill any leftover Electron processes first
+    await killElectronProcesses();
+
+    // Check if test apps are already prepared
+    if (testAppsManager.isTestAppsPrepared()) {
+      console.log('✅ Test apps already prepared, reusing existing setup');
+      const tmpDir = testAppsManager.getTmpDir();
+      if (tmpDir) {
+        process.env.WDIO_TEST_APPS_PREPARED = 'true';
+        process.env.WDIO_TEST_APPS_DIR = tmpDir;
+        console.log(`📂 Using existing test apps directory: ${tmpDir}`);
+      }
+      return;
+    }
+
+    // Prepare test apps
+    console.log('📦 Preparing test apps...');
+
+    // Log the PRESERVE_TEMP_DIR environment variable
+    if (process.env.PRESERVE_TEMP_DIR === 'true') {
+      console.log('🔒 Temp directory will be preserved (PRESERVE_TEMP_DIR=true)');
+    }
+
+    // Set a longer timeout for Windows builds
+    if (process.platform === 'win32') {
+      console.log('🔄 Windows detected - using extended build timeout');
+      process.env.WDIO_BUILD_TIMEOUT = '180000'; // 3 minutes for Windows
+    } else {
+      process.env.WDIO_BUILD_TIMEOUT = '120000'; // 2 minutes for others
+    }
+
+    // Prepare the test apps
+    const tmpDir = await testAppsManager.prepareTestApps();
+    if (!tmpDir) {
+      throw new Error('Failed to prepare test apps');
+    }
+
+    // Set environment variables for all tests to use
+    process.env.WDIO_TEST_APPS_PREPARED = 'true';
+    process.env.WDIO_TEST_APPS_DIR = tmpDir;
 
     // Clear timeout since we completed successfully
     clearTimeout(forceExitTimeout);
 
     const duration = (Date.now() - startTime) / 1000;
     console.log(`✅ App preparation completed successfully in ${duration.toFixed(2)} seconds`);
+    console.log(`Test apps prepared at: ${tmpDir}`);
 
     // Log final state
     console.log('Final state after completion:');
     logDebugInfo();
 
-    process.exit(0);
+    // If running as part of suite setup, don't exit here
+    if (!args.isSuiteSetup) {
+      process.exit(0);
+    }
   } catch (error) {
     console.error('Error preparing test apps:', error);
-    process.exit(1);
+    if (!args.isSuiteSetup) {
+      process.exit(1);
+    }
+    throw error; // Re-throw if running as part of suite setup
   }
 }
 

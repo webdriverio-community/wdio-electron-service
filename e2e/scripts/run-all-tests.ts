@@ -3,8 +3,8 @@
  * This script runs all tests with a single setup and cleanup
  */
 
-import { exec, spawn } from 'child_process';
-import { promisify } from 'util';
+import { exec, execSync } from 'node:child_process';
+import { promisify } from 'node:util';
 import { setupTestSuite, cleanupTestSuite } from './suite-setup.js';
 
 const execAsync = promisify(exec);
@@ -126,45 +126,44 @@ async function runTestMatrix(cleanEnv: Record<string, string | undefined>): Prom
     console.log('─'.repeat(80));
     console.log(`${ANSI.dim}Run 'pnpm run logs' in another terminal to see detailed logs${ANSI.reset}`);
 
-    // Use spawn instead of exec to get real-time output
-    // Use 'inherit' for stdout to show the status display directly
-    const child = spawn('pnpm', ['exec', 'tsx', './scripts/run-test-matrix.ts'], {
-      env: cleanEnv,
-      stdio: ['ignore', 'inherit', 'pipe'], // Inherit stdout to show status display, pipe stderr
-      shell: true,
-    });
+    try {
+      console.log(`[${formatTimestamp()}] Executing test matrix...`);
 
-    let hasFailures = false;
+      // Create command with environment variables set inline
+      // This avoids any PATH or NODE_ENV issues
+      let command = '';
 
-    // Capture stderr but don't display it
-    child.stderr.on('data', (_data) => {
-      // Just capture but don't display
-      // Check for test failures in stderr
-      const chunk = _data.toString();
-      if (chunk.includes('tests failed')) {
-        hasFailures = true;
+      // Add environment variables to the command
+      for (const [key, value] of Object.entries(cleanEnv)) {
+        if (value !== undefined) {
+          // Escape any special characters in the value
+          const escapedValue = value.replace(/"/g, '\\"');
+          command += `${key}="${escapedValue}" `;
+        }
       }
-    });
 
-    // Handle process completion
-    child.on('close', (code) => {
+      // Add the command to run the test matrix
+      // Use direct tsx command to avoid ESM issues
+      command += `pnpm exec tsx ./scripts/run-test-matrix.ts`;
+
+      console.log(`[${formatTimestamp()}] Command: ${command}`);
+
+      // Use execSync to run the command directly with inherited stdio
+      execSync(command, {
+        stdio: 'inherit',
+        cwd: process.cwd(),
+      });
+
       const duration = Date.now() - startTime;
       console.log(`\n[${formatTimestamp()}] 🏁 Test execution completed in ${formatDuration(duration)}`);
-
-      if (code === 0 && !hasFailures) {
-        console.log(`\n[${formatTimestamp()}] ✅ All tests completed successfully!`);
-        resolve();
-      } else {
-        console.error(`\n[${formatTimestamp()}] ❌ Some tests failed with exit code: ${code}`);
-        reject(new Error(`Tests failed with exit code: ${code}`));
-      }
-    });
-
-    // Handle process errors
-    child.on('error', (error) => {
-      console.error(`\n[${formatTimestamp()}] ❌ Error executing test matrix:`, error);
-      reject(error);
-    });
+      console.log(`\n[${formatTimestamp()}] ✅ All tests completed successfully!`);
+      resolve();
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.log(`\n[${formatTimestamp()}] 🏁 Test execution completed in ${formatDuration(duration)}`);
+      console.error(`\n[${formatTimestamp()}] ❌ Some tests failed:`, error);
+      reject(new Error(`Tests failed with code ${(error as any).status || 'unknown'}`));
+    }
   });
 }
 
@@ -188,37 +187,75 @@ async function runAllTests() {
 
     // Create a clean environment without test filtering variables
     const cleanEnv: Record<string, string> = {
-      PLATFORM: process.env.PLATFORM || 'builder',
-      MODULE_TYPE: process.env.MODULE_TYPE || 'esm',
-      TEST_TYPE: process.env.TEST_TYPE || 'standard',
-      BINARY: process.env.BINARY !== 'false' ? 'true' : 'false',
-      WDIO_TEST_APPS_PREPARED: 'true',
-      WDIO_TEST_APPS_DIR: process.env.WDIO_TEST_APPS_DIR || '',
+      // Use '*' for these values to run all combinations
+      PLATFORM: '*',
+      MODULE_TYPE: '*',
+      TEST_TYPE: '*',
+      BINARY: '*',
+      PRESERVE_TEMP_DIR: 'true',
+      SUITE_CLEANUP_MANAGED: 'true',
+      PATH: process.env.PATH || '',
+      NODE_OPTIONS: process.env.NODE_OPTIONS || '--no-warnings --experimental-specifier-resolution=node',
+      DEBUG: process.env.DEBUG || 'wdio-electron-service',
+      // Explicitly unset any limiting environment variables
+      WDIO_FILTER: '',
+      EXCLUDE_MULTIREMOTE: '',
+      TEST_SKIP: '',
+      TEST_MODE: '',
     };
 
     // Kill any existing Electron processes before starting
     await killElectronProcesses();
 
-    // Always perform suite-level setup to ensure we have a fresh environment
-    console.log(`[${formatTimestamp()}] 🔧 Setting up test suite...`);
+    // Check if apps are already prepared
+    if (process.env.WDIO_TEST_APPS_PREPARED === 'true' && process.env.WDIO_TEST_APPS_DIR) {
+      console.log(`[${formatTimestamp()}] ✅ Test apps already prepared, reusing existing setup`);
+      console.log(`Using test apps directory: ${process.env.WDIO_TEST_APPS_DIR}`);
+    } else {
+      // Always perform suite-level setup to ensure we have a fresh environment
+      console.log(`[${formatTimestamp()}] 🔧 Setting up test suite...`);
 
-    // Set environment variable to preserve temp directory during test runs
-    process.env.PRESERVE_TEMP_DIR = 'true';
-    cleanEnv.PRESERVE_TEMP_DIR = 'true';
-
-    // Perform suite-level setup once for all tests
-    await setupTestSuite();
+      // Perform suite-level setup once for all tests
+      await setupTestSuite();
+    }
 
     // Get the temp directory from the environment variable
     const tmpDir = process.env.WDIO_TEST_APPS_DIR;
+    if (!tmpDir) {
+      throw new Error('Test apps directory not set after setup');
+    }
+
+    // Set environment variables for all tests
+    cleanEnv.WDIO_TEST_APPS_PREPARED = 'true';
+    cleanEnv.WDIO_TEST_APPS_DIR = tmpDir;
+
     console.log(`[${formatTimestamp()}] ✅ Test suite setup complete. Test apps prepared at: ${tmpDir}`);
-
-    // Set environment variables to indicate suite management
-    cleanEnv.SUITE_CLEANUP_MANAGED = 'true';
-
     console.log(`[${formatTimestamp()}] 📝 Environment variables set:`);
+
+    // Log key variables that affect what tests will run
+    console.log(`   PLATFORM: ${cleanEnv.PLATFORM}`);
+    console.log(`   MODULE_TYPE: ${cleanEnv.MODULE_TYPE}`);
+    console.log(`   TEST_TYPE: ${cleanEnv.TEST_TYPE}`);
+    console.log(`   BINARY: ${cleanEnv.BINARY}`);
     console.log(`   WDIO_TEST_APPS_PREPARED: ${cleanEnv.WDIO_TEST_APPS_PREPARED}`);
     console.log(`   WDIO_TEST_APPS_DIR: ${cleanEnv.WDIO_TEST_APPS_DIR}`);
+
+    console.log(`[${formatTimestamp()}] ℹ️ Test matrix explanation:`);
+    if (
+      cleanEnv.PLATFORM === '*' &&
+      cleanEnv.MODULE_TYPE === '*' &&
+      cleanEnv.TEST_TYPE === '*' &&
+      cleanEnv.BINARY === '*'
+    ) {
+      console.log(`   Using wildcard settings - will run ALL test combinations!`);
+    } else {
+      console.log(`   Using specific settings - will run a FILTERED set of tests:`);
+      if (cleanEnv.PLATFORM !== '*') console.log(`   - Only ${cleanEnv.PLATFORM} platform tests`);
+      if (cleanEnv.MODULE_TYPE !== '*') console.log(`   - Only ${cleanEnv.MODULE_TYPE} module type tests`);
+      if (cleanEnv.TEST_TYPE !== '*') console.log(`   - Only ${cleanEnv.TEST_TYPE} test type tests`);
+      if (cleanEnv.BINARY !== '*')
+        console.log(`   - Only ${cleanEnv.BINARY === 'true' ? 'binary' : 'no-binary'} tests`);
+    }
 
     // Run the test matrix and wait for it to complete
     await runTestMatrix(cleanEnv);
