@@ -70,7 +70,11 @@ try {
         const indexPath = path.join(moduleDir, 'index.js');
         console.log(`🔍 DEBUG: Importing from ${moduleType.toUpperCase()} index: ${indexPath}`);
 
-        const serviceModule = await safeImport(indexPath);
+        // Convert the path to a file:// URL for ESM compatibility
+        const fileUrl = url.pathToFileURL(indexPath).href;
+        console.log(`🔍 DEBUG: Using file URL for import: ${fileUrl}`);
+
+        const serviceModule = await safeImport(fileUrl);
         startWdioSession = serviceModule.startWdioSession;
         console.log(`✅ Successfully imported service from ${moduleType.toUpperCase()} path`);
       } else {
@@ -132,7 +136,12 @@ try {
 
       if (fs.existsSync(indexPath)) {
         console.log(`🔍 DEBUG: Importing utils from ${moduleType.toUpperCase()} index: ${indexPath}`);
-        electronUtils = await safeImport(indexPath);
+
+        // Convert the path to a file:// URL for ESM compatibility
+        const fileUrl = url.pathToFileURL(indexPath).href;
+        console.log(`🔍 DEBUG: Using file URL for import: ${fileUrl}`);
+
+        electronUtils = await safeImport(fileUrl);
         console.log(`✅ Successfully imported utils from ${moduleType.toUpperCase()} path`);
       } else {
         // Fall back to package name
