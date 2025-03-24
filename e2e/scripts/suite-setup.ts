@@ -74,6 +74,48 @@ async function killElectronProcesses(): Promise<void> {
 }
 
 /**
+ * Build test apps for the specified scenarios
+ * @param scenarios Array of scenarios to build (builder, forge, no-binary)
+ * @param moduleTypes Array of module types to build (cjs, esm)
+ */
+async function buildTestApps(scenarios: string[], moduleTypes: string[]): Promise<void> {
+  console.log(
+    `🔨 Building test apps for scenarios: ${scenarios.join(', ')} with module types: ${moduleTypes.join(', ')}`,
+  );
+
+  const rootDir = process.cwd();
+  const appsDir = `${rootDir}/../apps`;
+
+  for (const scenario of scenarios) {
+    for (const moduleType of moduleTypes) {
+      const appDir = `${appsDir}/${scenario}-${moduleType}`;
+      console.log(`Building app: ${scenario}-${moduleType} in ${appDir}`);
+
+      try {
+        console.log(`Installing dependencies for ${scenario}-${moduleType}...`);
+        execSync('pnpm install', {
+          cwd: appDir,
+          stdio: 'inherit',
+          timeout: 120000,
+        });
+
+        console.log(`Building ${scenario}-${moduleType}...`);
+        execSync('pnpm run build', {
+          cwd: appDir,
+          stdio: 'inherit',
+          timeout: 300000,
+        });
+
+        console.log(`✅ Successfully built ${scenario}-${moduleType}`);
+      } catch (error) {
+        console.error(`❌ Error building ${scenario}-${moduleType}:`, error);
+        // Continue with other apps even if one fails
+      }
+    }
+  }
+}
+
+/**
  * Set up the test suite
  */
 export async function setupTestSuite(): Promise<void> {
@@ -128,6 +170,13 @@ export async function setupTestSuite(): Promise<void> {
         }
         return;
       }
+
+      // Determine which scenarios and module types to build
+      const appsToPrepare = testAppsManager.getAppsToPrepare();
+      const { scenarios, moduleTypes } = appsToPrepare;
+
+      // Build the test apps before preparing them
+      await buildTestApps(scenarios, moduleTypes);
 
       // Prepare test apps
       console.log('📦 Preparing test apps...');
