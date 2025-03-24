@@ -72,6 +72,10 @@ async function killElectronProcesses(): Promise<void> {
   }
 }
 
+// Set platform-specific timeouts
+const SETUP_TIMEOUT = process.platform === 'win32' ? 180000 : 60000; // 3 minutes for Windows, 1 minute for others
+const BUILD_TIMEOUT = process.platform === 'win32' ? 120000 : 60000; // 2 minutes for Windows, 1 minute for others
+
 /**
  * Set up the test suite
  */
@@ -79,6 +83,8 @@ export async function setupTestSuite(): Promise<void> {
   const startTime = Date.now();
   console.log('🚀 Performing suite-level setup...');
   console.log(`Setup started at: ${new Date().toISOString()}`);
+  console.log(`Platform: ${process.platform}`);
+  console.log(`Using timeout of ${SETUP_TIMEOUT}ms for suite setup`);
 
   // Get timeout from command line arguments
   const timeout = getTimeoutFromArgs();
@@ -110,8 +116,8 @@ export async function setupTestSuite(): Promise<void> {
     // Add timeout promise to detect long-running operations
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`Timeout during test suite setup - operation took too long (${timeout}ms)`));
-      }, timeout);
+        reject(new Error(`Timeout during test suite setup - operation took too long (${SETUP_TIMEOUT}ms)`));
+      }, SETUP_TIMEOUT);
     });
 
     // Create the actual setup promise
@@ -134,6 +140,12 @@ export async function setupTestSuite(): Promise<void> {
       // Log the PRESERVE_TEMP_DIR environment variable
       if (process.env.PRESERVE_TEMP_DIR === 'true') {
         console.log('🔒 Temp directory will be preserved (PRESERVE_TEMP_DIR=true)');
+      }
+
+      // Set a longer timeout for Windows builds
+      if (process.platform === 'win32') {
+        console.log('🔄 Windows detected - using extended build timeout');
+        process.env.WDIO_BUILD_TIMEOUT = BUILD_TIMEOUT.toString();
       }
 
       const tmpDir = await testAppsManager.prepareTestApps();

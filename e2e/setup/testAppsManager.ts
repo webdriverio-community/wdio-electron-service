@@ -672,30 +672,29 @@ class TestAppsManager {
       // Check if we're using a pre-built tarball
       if (process.env.USE_ARTIFACT_SERVICE === 'true' && process.env.WDIO_SERVICE_TARBALL) {
         this._currentOperation = 'extracting service tarball';
-        console.log(`Using pre-built service from tarball: ${process.env.WDIO_SERVICE_TARBALL}`);
+        const tarballPath = process.env.WDIO_SERVICE_TARBALL;
+        console.log(`Using pre-built service from tarball: ${tarballPath}`);
 
         // Create the service directory
         const serviceDir = join(nodeModulesDir, 'wdio-electron-service');
         console.log(`About to create service directory: ${serviceDir}`);
         await this.createDirectory(serviceDir);
 
-        // Use pnpx pacote to extract the tarball - this is the most reliable option across platforms
-        console.log(`Extracting tarball using pnpx pacote...`);
-        try {
+        // Set up a timeout for the extraction process
+        const extractTimeout = process.platform === 'win32' ? 180000 : 90000; // 3 minutes for Windows, 1.5 minutes for others
+        const extractPromise = (async () => {
           // Normalize path for Windows
-          const tarballPath = process.env.WDIO_SERVICE_TARBALL.replace(/\\/g, '/');
+          const normalizedTarballPath = tarballPath.replace(/\\/g, '/');
 
           // Log before extraction
-          console.log(`About to extract tarball at path: ${tarballPath}`);
+          console.log(`About to extract tarball at path: ${normalizedTarballPath}`);
           console.log(`Target extract directory: ${serviceDir}`);
           console.log(`Current operation: ${this._currentOperation}`);
           console.log(`Current memory usage: RSS=${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
 
           // Log command being executed
-          const extractCmd = `pnpx pacote extract "${tarballPath}" "${serviceDir}"`;
+          const extractCmd = `pnpx pacote extract "${normalizedTarballPath}" "${serviceDir}"`;
           console.log(`Executing extract command: ${extractCmd}`);
-
-          // Add a timestamp before starting extraction
           console.log(`Starting extraction at: ${new Date().toISOString()}`);
 
           this._currentOperation = 'executing pacote extract';
@@ -708,65 +707,22 @@ class TestAppsManager {
           // Verify the extraction was successful
           this._currentOperation = 'verifying extraction success';
           const distDir = join(serviceDir, 'dist');
-          if (fs.existsSync(distDir)) {
-            console.log(`Verified dist directory exists at: ${distDir}`);
-
-            // List contents to confirm
-            try {
-              const { stdout } = await execAsync(
-                process.platform === 'win32' ? `dir "${distDir}"` : `ls -la "${distDir}"`,
-              );
-              console.log(`Directory contents: ${stdout}`);
-            } catch (lsError) {
-              console.error('Error listing directory:', lsError);
-            }
-          } else {
-            console.error(`Error: dist directory not found at ${distDir}`);
-            this._currentOperation = 'searching for dist directory';
-
-            // Try to find the correct dist directory structure
-            console.log('Searching for dist directory in extracted contents...');
-            try {
-              const { stdout: findOutput } = await execAsync(
-                process.platform === 'win32'
-                  ? `dir /s /b "${serviceDir}\\dist"`
-                  : `find "${serviceDir}" -name "dist" -type d`,
-              );
-
-              if (findOutput.trim()) {
-                console.log(`Found potential dist directories: ${findOutput}`);
-
-                // If we find a package/dist directory, move it up to the correct location
-                const packageDistDirs = findOutput
-                  .trim()
-                  .split('\n')
-                  .filter((dir) => dir.includes('package/dist'));
-                if (packageDistDirs.length > 0) {
-                  this._currentOperation = 'moving dist directory to correct location';
-                  console.log(`Found package/dist at ${packageDistDirs[0]}, moving to correct location...`);
-                  await execAsync(`cp -r "${packageDistDirs[0]}" "${serviceDir}/"`);
-
-                  // Check if the move was successful
-                  if (fs.existsSync(distDir)) {
-                    console.log(`Successfully moved dist directory to ${distDir}`);
-                  } else {
-                    console.error(`Failed to move dist directory to ${distDir}`);
-                  }
-                }
-              } else {
-                console.log('No dist directory found in extracted contents');
-              }
-            } catch (findError) {
-              console.error('Error searching for dist directory:', findError);
-            }
-
-            throw new Error(`Extraction failed: dist directory not found`);
+          if (!fs.existsSync(distDir)) {
+            throw new Error(`Extraction failed: dist directory not found at ${distDir}`);
           }
-        } catch (extractError) {
-          console.error('Error extracting tarball:', extractError);
-          throw new Error(
-            `Failed to extract tarball: ${extractError instanceof Error ? extractError.message : String(extractError)}`,
-          );
+        })();
+
+        const extractTimeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`Tarball extraction timed out after ${extractTimeout}ms`));
+          }, extractTimeout);
+        });
+
+        try {
+          await Promise.race([extractPromise, extractTimeoutPromise]);
+        } catch (error) {
+          console.error('Error extracting tarball:', error);
+          throw new Error(`Failed to extract tarball: ${error instanceof Error ? error.message : String(error)}`);
         }
       } else {
         // Build the package to ensure the dist directory exists
@@ -774,8 +730,23 @@ class TestAppsManager {
         try {
           console.log('Building wdio-electron-service package to ensure dist directory exists');
           const packageDir = join(process.cwd(), '..', 'packages', 'wdio-electron-service');
-          await execAsync('pnpm build', { cwd: packageDir });
-          console.log('Successfully built wdio-electron-service package');
+
+          // Set up a timeout for the build process
+          const buildTimeout = process.platform === 'win32' ? 180000 : 90000; // 3 minutes for Windows, 1.5 minutes for others
+          const buildPromise = execAsync('pnpm build', { cwd: packageDir });
+          const buildTimeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+              reject(new Error(`Build process timed out after ${buildTimeout}ms`));
+            }, buildTimeout);
+          });
+
+          try {
+            await Promise.race([buildPromise, buildTimeoutPromise]);
+            console.log('Successfully built wdio-electron-service package');
+          } catch (error) {
+            console.error('Error building package:', error);
+            throw new Error(`Failed to build package: ${error instanceof Error ? error.message : String(error)}`);
+          }
 
           // Create a symlink to the package directory
           this._currentOperation = 'creating symlink to package directory';
@@ -788,42 +759,6 @@ class TestAppsManager {
             // Create a new symlink
             await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
             console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
-
-            // For standalone mode, ensure service dependencies are available
-            if (process.env.STANDALONE === 'true') {
-              this._currentOperation = 'setting up service dependencies';
-              console.log('Setting up service dependencies for standalone mode');
-
-              // Create the service's node_modules directory
-              const serviceNodeModules = join(wdioServicePath, 'node_modules');
-              await fs.promises.mkdir(serviceNodeModules, { recursive: true });
-
-              // Copy dependencies from the service package's node_modules
-              const sourceNodeModules = join(packageDir, 'node_modules');
-              const dependencies = [
-                'read-package-up',
-                'read-pkg',
-                'read-pkg-up',
-                'pkg-up',
-                'find-up',
-                'locate-path',
-                'path-exists',
-              ];
-
-              for (const dep of dependencies) {
-                const sourceDep = join(sourceNodeModules, dep);
-                const targetDep = join(serviceNodeModules, dep);
-
-                if (fs.existsSync(sourceDep)) {
-                  console.log(`Copying dependency: ${dep}`);
-                  await this.copyDir(sourceDep, targetDep);
-                } else {
-                  console.warn(`Warning: dependency ${dep} not found in source node_modules`);
-                }
-              }
-
-              console.log('Successfully set up service dependencies');
-            }
           } catch (symlinkError) {
             console.error('Error creating symlink:', symlinkError);
             throw new Error(
@@ -850,22 +785,6 @@ class TestAppsManager {
 
     this.isPrepared = true;
     return this.tmpDir;
-  }
-
-  private async copyDir(src: string, dest: string) {
-    await fs.promises.mkdir(dest, { recursive: true });
-    const entries = await fs.promises.readdir(src, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const srcPath = join(src, entry.name);
-      const destPath = join(dest, entry.name);
-
-      if (entry.isDirectory()) {
-        await this.copyDir(srcPath, destPath);
-      } else {
-        await fs.promises.copyFile(srcPath, destPath);
-      }
-    }
   }
 
   /**
