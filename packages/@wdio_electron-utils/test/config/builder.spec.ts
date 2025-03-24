@@ -1,8 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { builderBuildInfo, getBuilderConfigCandidates, getConfig } from '../../src/config/builder';
+import { builderBuildInfo, getConfig } from '../../src/config/builder';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
 
 import type { NormalizedPackageJson } from 'read-package-up';
@@ -44,13 +44,6 @@ const expectedCandidates = [
   'electron-builder.cts',
   'electron-builder.config.cts',
 ];
-describe('getBuilderConfigCandidates', () => {
-  it('should generate file names of the builder configuration file', () => {
-    const candidates = getBuilderConfigCandidates();
-
-    expect(candidates).toStrictEqual(expectedCandidates);
-  });
-});
 
 describe('getConfig', () => {
   describe.each(['esm', 'cjs'])('%s', (type) => {
@@ -82,10 +75,14 @@ describe('getConfig', () => {
     });
 
     it('should return undefined if no config file is found', async () => {
+      const spy = vi.spyOn(fs, 'access');
       const fixturePkg = getFixturePackagePath(type, 'builder-dependency-no-config');
       const pkg = await getFixturePackageJson(fixturePkg);
       const config = await getConfig(pkg);
+      const checkedFiles = spy.mock.calls.map(([file]) => path.basename(file.toString()));
+
       expect(config).toBeUndefined();
+      expect(checkedFiles).toStrictEqual(expectedCandidates);
     });
   });
 });
@@ -110,7 +107,7 @@ describe('builderBuildInfo', () => {
     });
   });
 
-  it('should return the expected config when name of the packagerConfig is set in the forgeConfig', async () => {
+  it('should return the expected config when name of the packagerConfig is set in the builderConfig', async () => {
     const builderConfig = {
       productName: 'builder-product',
     };

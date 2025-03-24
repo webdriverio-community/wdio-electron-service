@@ -43,13 +43,13 @@ async function readBuilderConfig(fileCandidate: string[], projectDir: string) {
   }
   return undefined;
 }
-export const getBuilderConfigCandidates = (configFileName = 'electron-builder') => {
+function getBuilderConfigCandidates(configFileName = 'electron-builder') {
   const exts = ['.yml', '.yaml', '.json', '.json5', '.toml', '.js', '.mjs', '.cjs', '.ts', '.mts', '.cts'];
   return exts.reduce(
     (acc: string[], ext: string) => acc.concat([`${configFileName}${ext}`, `${configFileName}.config${ext}`]),
     [],
   );
-};
+}
 
 async function readConfig(configFile: string, projectDir: string) {
   const configFilePath = path.join(projectDir, configFile);
