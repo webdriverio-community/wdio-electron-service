@@ -159,13 +159,13 @@ class TestAppsManager {
     const allModuleTypes = ['cjs', 'esm'];
 
     // Check for environment variables that specify which apps to prepare
-    const scenarioEnv = process.env.SCENARIO;
+    const scenarioEnv = process.env.SCENARIO || process.env.PLATFORM;
     const moduleTypeEnv = process.env.MODULE_TYPE;
 
     let scenarios = [...allScenarios];
     let moduleTypes = [...allModuleTypes];
 
-    // If SCENARIO is specified, use only those scenarios
+    // If scenario/platform is specified, use only those scenarios
     if (scenarioEnv) {
       // Handle comma-separated list of scenarios
       const requestedScenarios = scenarioEnv.split(',').map((s) => s.trim());
