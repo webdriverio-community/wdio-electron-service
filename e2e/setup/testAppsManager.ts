@@ -788,6 +788,18 @@ class TestAppsManager {
             // Create a new symlink
             await fs.promises.symlink(packageDir, wdioServicePath, 'junction');
             console.log(`Created symlink from ${packageDir} to ${wdioServicePath}`);
+
+            // For standalone mode, copy the service's node_modules to ensure dependencies are available
+            if (process.env.STANDALONE === 'true') {
+              this._currentOperation = 'copying service node_modules';
+              console.log('Copying service node_modules for standalone mode');
+              const serviceNodeModules = join(packageDir, 'node_modules');
+              const targetNodeModules = join(nodeModulesDir, 'wdio-electron-service', 'node_modules');
+
+              // Copy the node_modules directory recursively
+              await this.copyDir(serviceNodeModules, targetNodeModules);
+              console.log('Successfully copied service node_modules');
+            }
           } catch (symlinkError) {
             console.error('Error creating symlink:', symlinkError);
             throw new Error(
@@ -1207,6 +1219,22 @@ class TestAppsManager {
       console.error('Error during service packing:');
       console.error(packError);
       throw packError;
+    }
+  }
+
+  private async copyDir(src: string, dest: string) {
+    await fs.promises.mkdir(dest, { recursive: true });
+    const entries = await fs.promises.readdir(src, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const srcPath = join(src, entry.name);
+      const destPath = join(dest, entry.name);
+
+      if (entry.isDirectory()) {
+        await this.copyDir(srcPath, destPath);
+      } else {
+        await fs.promises.copyFile(srcPath, destPath);
+      }
     }
   }
 }
