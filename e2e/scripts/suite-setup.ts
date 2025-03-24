@@ -315,32 +315,26 @@ function handleTermination(signal: string): void {
 /**
  * Clean up suite resources
  */
-export function cleanupTestSuite(): Promise<void> {
+export async function cleanupTestSuite(): Promise<void> {
   try {
     console.log('🧹 Performing suite-level cleanup...');
 
     try {
       // First kill any remaining Electron processes
-      return killElectronProcesses()
-        .catch((err) => {
-          console.error('Error killing Electron processes:', err);
-        })
-        .then(() => {
-          // Only clean up the test apps if PRESERVE_TEMP_DIR is not set to 'true'
-          if (process.env.PRESERVE_TEMP_DIR !== 'true') {
-            testAppsManager.cleanup();
-            console.log('✅ Temp directory cleaned up');
-          } else {
-            console.log('🔒 Preserving temp directory (PRESERVE_TEMP_DIR=true)');
-          }
-        });
+      await killElectronProcesses();
+
+      // Only clean up the test apps if PRESERVE_TEMP_DIR is not set to 'true'
+      if (process.env.PRESERVE_TEMP_DIR !== 'true') {
+        await testAppsManager.cleanup();
+        console.log('✅ Temp directory cleaned up');
+      } else {
+        console.log('🔒 Preserving temp directory (PRESERVE_TEMP_DIR=true)');
+      }
     } catch (err) {
       console.error('Error during cleanup:', err);
-      return Promise.resolve();
     }
   } catch (err) {
     console.error('Error during suite cleanup:', err);
-    return Promise.resolve();
   }
 }
 
