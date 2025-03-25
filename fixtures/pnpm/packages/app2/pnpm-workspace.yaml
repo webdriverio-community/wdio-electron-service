@@ -1,0 +1,6 @@
+--- # Error when multiple yaml documents are written in a single file
+catalog:
+  electron: '^29.4.1'
+---
+catalog:
+  electron: '^30.4.1'
