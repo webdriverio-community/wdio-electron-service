@@ -1,7 +1,6 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import { expect, it, vi, describe } from 'vitest';
 
+import { getFixturePackageJson } from './testUtils';
 import log from '../src/log';
 import { getAppBuildInfo } from '../src/getAppBuildInfo';
 import { getConfig as getBuilderConfig } from '../src/config/builder';
@@ -13,10 +12,6 @@ import {
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from '../src/constants';
-
-function getFixturePackagePath(moduleType: string, fixtureName: string) {
-  return path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
-}
 
 vi.mock('../src/log', () => {
   return {
@@ -62,65 +57,41 @@ const forgeConfig = {
 describe('getAppBuildInfo()', () => {
   describe.each(['esm', 'cjs'])('%s', (type) => {
     it('should throw an error when builder is detected but has no config', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'builder-dependency-cjs-config');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
-      await expect(() =>
-        getAppBuildInfo({
-          packageJson,
-          path: path.dirname(packageJsonPath),
-        }),
-      ).rejects.toThrowError(BUILDER_CONFIG_NOT_FOUND_ERROR);
+      await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILDER_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should throw an error when forge is detected but has no config', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'forge-dependency-js-config');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-js-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
-      await expect(() =>
-        getAppBuildInfo({
-          packageJson,
-          path: path.dirname(packageJsonPath),
-        }),
-      ).rejects.toThrowError(FORGE_CONFIG_NOT_FOUND_ERROR);
+      await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(FORGE_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should return builder config', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'builder-dependency-cjs-config');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
 
-      const result = await getAppBuildInfo({
-        packageJson,
-        path: path.dirname(packageJsonPath),
-      });
+      const result = await getAppBuildInfo(pkg);
 
       expect(result).toStrictEqual(builderConfig);
     });
 
     it('should return forge config', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'forge-dependency-inline-config');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
-      const result = await getAppBuildInfo({
-        packageJson,
-        path: path.dirname(packageJsonPath),
-      });
+      const result = await getAppBuildInfo(pkg);
 
       expect(result).toStrictEqual(forgeConfig);
     });
 
     it('should return forge config when multiple builder tool was detected', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'multiple-build-tools-config');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'multiple-build-tools-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
-      const result = await getAppBuildInfo({
-        packageJson,
-        path: path.dirname(packageJsonPath),
-      });
+      const result = await getAppBuildInfo(pkg);
 
       expect(result).toStrictEqual(forgeConfig);
       expect(log.warn).toHaveBeenCalledTimes(2);
@@ -129,15 +100,9 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should throw an error when no build tools are found', async () => {
-      const packageJsonPath = getFixturePackagePath(type, 'no-build-tool');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+      const pkg = await getFixturePackageJson(type, 'no-build-tool');
 
-      await expect(() =>
-        getAppBuildInfo({
-          packageJson,
-          path: path.dirname(packageJsonPath),
-        }),
-      ).rejects.toThrowError(BUILD_TOOL_DETECTION_ERROR);
+      await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILD_TOOL_DETECTION_ERROR);
     });
   });
 });

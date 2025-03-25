@@ -10,16 +10,19 @@ vi.mock('../src/pnpm', async () => {
     findPnpmCatalogVersion: vi.fn(),
   };
 });
+
+function createPackageJson(depName: string, dep: { [key: string]: string }) {
+  const pkgJson = {
+    name: 'my-app',
+    version: '1.0.0',
+  } as NormalizedPackageJson;
+  pkgJson[depName] = dep;
+  return pkgJson;
+}
 describe('getElectronVersion()', () => {
   it('should return the electron version from package.json dependencies', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        dependencies: {
-          electron: '25.0.1',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('dependencies', { electron: '25.0.1' }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -28,13 +31,7 @@ describe('getElectronVersion()', () => {
 
   it('should return the electron version from package.json devDependencies', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        devDependencies: {
-          electron: '25.0.1',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('devDependencies', { electron: '25.0.1' }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -43,13 +40,9 @@ describe('getElectronVersion()', () => {
 
   it('should return the nightly electron version from package.json dependencies', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        dependencies: {
-          'electron-nightly': '33.0.0-nightly.20240621',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('dependencies', {
+        'electron-nightly': '33.0.0-nightly.20240621',
+      }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -58,14 +51,10 @@ describe('getElectronVersion()', () => {
 
   it('should prioritize electron over electron-nightly when both are set package.json dependencies', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        dependencies: {
-          'electron': '25.0.1',
-          'electron-nightly': '33.0.0-nightly.20240621',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('dependencies', {
+        'electron': '25.0.1',
+        'electron-nightly': '33.0.0-nightly.20240621',
+      }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -74,13 +63,9 @@ describe('getElectronVersion()', () => {
 
   it('should return the nightly electron version from package.json devDependencies', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        devDependencies: {
-          'electron-nightly': '33.0.0-nightly.20240621',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('devDependencies', {
+        'electron-nightly': '33.0.0-nightly.20240621',
+      }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -89,11 +74,7 @@ describe('getElectronVersion()', () => {
 
   it('should return undefined when there is no electron dependency', async () => {
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        dependencies: {},
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('dependencies', {}),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);
@@ -103,17 +84,9 @@ describe('getElectronVersion()', () => {
   it('should fetch the electron version from pnpm workspace', async () => {
     vi.mocked(findPnpmCatalogVersion).mockResolvedValueOnce('^29.4.1');
 
-    const pkgPath = '/path/to/project/package.json';
-
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        devDependencies: {
-          electron: 'catalog:',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
-      path: pkgPath,
+      packageJson: createPackageJson('devDependencies', { electron: 'catalog:' }),
+      path: '/path/to/project/package.json',
     } as NormalizedReadResult;
 
     const version = await getElectronVersion(pkg);
@@ -124,17 +97,9 @@ describe('getElectronVersion()', () => {
     // if the version is specified with caret(^), the return value would be "33.0.0"
     vi.mocked(findPnpmCatalogVersion).mockResolvedValueOnce('33.0.0-nightly.20240621');
 
-    const pkgPath = '/path/to/project/package.json';
-
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        devDependencies: {
-          'electron-nightly': 'catalog:',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
-      path: pkgPath,
+      packageJson: createPackageJson('devDependencies', { 'electron-nightly': 'catalog:' }),
+      path: '/path/to/project/package.json',
     } as NormalizedReadResult;
 
     const version = await getElectronVersion(pkg);
@@ -145,14 +110,10 @@ describe('getElectronVersion()', () => {
     vi.mocked(findPnpmCatalogVersion).mockResolvedValueOnce('29.4.1').mockResolvedValueOnce('33.0.0-nightly.20240621');
 
     const pkg = {
-      packageJson: {
-        name: 'my-app',
-        version: '1.0.0',
-        dependencies: {
-          'electron': 'catalog:',
-          'electron-nightly': 'catalog:',
-        },
-      } as Omit<NormalizedPackageJson, 'readme' | '_id'>,
+      packageJson: createPackageJson('dependencies', {
+        'electron': 'catalog:',
+        'electron-nightly': 'catalog:',
+      }),
       path: '/path/to/package.json',
     } as NormalizedReadResult;
     const version = await getElectronVersion(pkg);

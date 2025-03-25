@@ -1,18 +1,8 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import { expect, it, describe } from 'vitest';
 
+import { getFixturePackageJson } from '../testUtils';
 import { getConfig } from '../../src/config/forge';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
-
-async function getFixturePackagePath(moduleType: string, fixtureName: string) {
-  const packageJsonPath = path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
-  const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-  return {
-    packageJson,
-    path: packageJsonPath,
-  };
-}
 
 describe('getConfig', () => {
   describe.each(['esm', 'cjs'])('%s', (type) => {
@@ -21,7 +11,7 @@ describe('getConfig', () => {
       ['JS config', 'forge-dependency-js-config'],
       ['Linked-JS config', 'forge-dependency-linked-js-config'],
     ])('%s', async (_title, scenario) => {
-      const pkg = await getFixturePackagePath(type, scenario);
+      const pkg = await getFixturePackageJson(type, scenario);
       const config = await getConfig(pkg!);
       expect(config).toStrictEqual({
         appName: scenario,
@@ -36,13 +26,13 @@ describe('getConfig', () => {
     });
 
     it('should return undefined if no config is detected', async () => {
-      const pkg = await getFixturePackagePath(type, 'forge-dependency-no-config');
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-no-config');
       const config = await getConfig(pkg);
       expect(config).toBeUndefined();
     });
 
     it('should return the expected config when productName is set in the package.json', async () => {
-      const pkg = await getFixturePackagePath(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
       pkg.packageJson.productName = 'forge-dependency-inline-config-product-name';
       const config = await getConfig(pkg);
 
@@ -50,14 +40,14 @@ describe('getConfig', () => {
     });
 
     it('should return the expected config when name of the packagerConfig is set in the builderConfig', async () => {
-      const pkg = await getFixturePackagePath(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
       const config = await getConfig(pkg);
 
       expect(config?.appName).toBe('forge-dependency-inline-config');
     });
 
     it('should return the expected config when name is set in the package.json', async () => {
-      const pkg = await getFixturePackagePath(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
       delete pkg.packageJson.config.forge.packagerConfig.name;
       const config = await getConfig(pkg);
 
@@ -65,7 +55,7 @@ describe('getConfig', () => {
     });
 
     it('should throw the error when could not detect the appName', async () => {
-      const pkg = await getFixturePackagePath(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
       delete pkg.packageJson.config.forge.packagerConfig.name;
       delete pkg.packageJson.name;
 
