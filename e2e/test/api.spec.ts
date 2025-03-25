@@ -2,18 +2,27 @@ import { expect, $ } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 import type { Mock } from '@vitest/spy';
 
+// Check if we're running in no-binary mode
+const isBinary = process.env.BINARY !== 'false';
+
 // Helper function to get the expected app name from globalThis.packageJson
 const getExpectedAppName = (): string => {
   // If running in binary mode, use the package name from globalThis
-  if (process.env.BINARY !== 'false' && globalThis.packageJson?.name) {
+  if (isBinary && globalThis.packageJson?.name) {
     return globalThis.packageJson.name;
   }
   // In no-binary mode, the app name will always be "Electron"
   return 'Electron';
 };
 
-// Check if we're running in no-binary mode
-const isBinary = process.env.BINARY !== 'false';
+const getExpectedAppVersion = (): string => {
+  // If running in binary mode, use the package name from globalThis
+  if (isBinary && globalThis.packageJson?.version) {
+    return globalThis.packageJson.version;
+  }
+  // In no-binary mode, the version should match the Electron version
+  return process.versions.electron;
+};
 
 describe('Electron APIs', () => {
   it('should retrieve the app name through the electron API', async () => {
@@ -25,15 +34,9 @@ describe('Electron APIs', () => {
 
   it('should retrieve the app version through the electron API', async () => {
     const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
+    const expectedVersion = getExpectedAppVersion();
 
-    if (isBinary) {
-      // In binary mode, should match a semantic version pattern
-      expect(appVersion).toMatch(/^\d+\.\d+\.\d+/);
-    } else {
-      // In no-binary mode, the version should match the Electron version
-      const electronVersion = await browser.electron.execute((_electron) => process.versions.electron);
-      expect(appVersion).toBe(electronVersion);
-    }
+    expect(appVersion).toBe(expectedVersion);
   });
 
   describe('browser.electron', () => {
