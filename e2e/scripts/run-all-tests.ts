@@ -207,11 +207,18 @@ async function runAllTests() {
       // In Mac Universal mode, don't set filter environment variables
       // as they would conflict with MAC_UNIVERSAL behavior
       cleanEnv.MAC_UNIVERSAL = 'true';
-      // Explicitly set MODULE_TYPE to include both CJS and ESM for Mac Universal mode
-      cleanEnv.MODULE_TYPE = 'cjs,esm';
-      console.log(
-        `[${formatTimestamp()}] 🍎 Running in Mac Universal mode - only builder and forge binary tests will be included`,
-      );
+
+      // Only set MODULE_TYPE to both if it's not already specified
+      if (!process.env.MODULE_TYPE || process.env.MODULE_TYPE === '*') {
+        cleanEnv.MODULE_TYPE = 'cjs,esm';
+        console.log(`[${formatTimestamp()}] 🍎 Running in Mac Universal mode - including both CJS and ESM`);
+      } else {
+        cleanEnv.MODULE_TYPE = process.env.MODULE_TYPE;
+        console.log(
+          `[${formatTimestamp()}] 🍎 Running in Mac Universal mode - using specified MODULE_TYPE=${process.env.MODULE_TYPE}`,
+        );
+      }
+
       console.log(`[${formatTimestamp()}] ⚠️ Note: MAC_UNIVERSAL=true will override any PLATFORM settings`);
     } else {
       // If not in Mac Universal mode, use wildcards for all combinations
