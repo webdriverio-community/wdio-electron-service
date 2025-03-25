@@ -1,3 +1,16 @@
+// IMMEDIATE DEBUG LOGGING - will run even if later code fails
+console.log('🚨 WDIO CONFIG START - Environment variables:');
+console.log('PATH:', process.env.PATH);
+console.log('PLATFORM:', process.env.PLATFORM);
+console.log('MODULE_TYPE:', process.env.MODULE_TYPE);
+console.log('TEST_TYPE:', process.env.TEST_TYPE);
+console.log('BINARY:', process.env.BINARY);
+console.log('MAC_UNIVERSAL:', process.env.MAC_UNIVERSAL);
+console.log('WDIO_TEST_APPS_PREPARED:', process.env.WDIO_TEST_APPS_PREPARED);
+console.log('WDIO_TEST_APPS_DIR:', process.env.WDIO_TEST_APPS_DIR);
+console.log('CWD:', process.cwd());
+console.log('-------------------------------------------');
+
 /// <reference types="mocha" />
 import path from 'node:path';
 import fs from 'node:fs';

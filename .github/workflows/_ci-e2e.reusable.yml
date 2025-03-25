@@ -430,6 +430,92 @@ jobs:
         run: echo "MAC_UNIVERSAL=true" >> $GITHUB_ENV
         shell: bash
 
+      # Special handling for macOS forge/no-binary tests that seem to be exiting early
+      - name: 🍎 macOS special test handling
+        if: ${{ runner.os == 'macOS' && (inputs.scenario == 'forge' || inputs.scenario == 'no-binary' || inputs.scenario == 'no-binary, forge') && env.MAC_UNIVERSAL != 'true' }}
+        shell: bash
+        run: |
+          echo "🧪 Running special handling for macOS ${{ inputs.scenario }} tests..."
+          cd e2e
+
+          # Print extensive debugging information
+          echo "==================== BEFORE TEST EXECUTION ===================="
+          echo "Current directory: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+
+          echo "Checking test script files:"
+          test -f ./scripts/run-test-matrix.ts && echo "✅ run-test-matrix.ts exists" || echo "❌ run-test-matrix.ts MISSING"
+          test -f ./scripts/run-single-test.ts && echo "✅ run-single-test.ts exists" || echo "❌ run-single-test.ts MISSING"
+
+          echo "Environment variables:"
+          echo "- WDIO_TEST_APPS_PREPARED: ${WDIO_TEST_APPS_PREPARED:-not set}"
+          echo "- WDIO_TEST_APPS_DIR: ${WDIO_TEST_APPS_DIR:-not set}"
+          echo "- PLATFORM: ${PLATFORM:-not set}"
+          echo "- MODULE_TYPE: ${MODULE_TYPE:-not set}"
+
+          echo "Setting up enhanced debug options..."
+          # Set up enhanced debugging
+          export DEBUG="wdio-electron-service*"
+          export NODE_OPTIONS="--no-warnings --experimental-specifier-resolution=node --trace-warnings"
+
+          # Create specialized logging directories
+          mkdir -p logs/debug/macOS-${{ inputs.scenario }}
+
+          # Parse the input scenario string and split by comma if necessary
+          IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+          for SCENARIO in "${SCENARIOS[@]}"; do
+            # Trim whitespace
+            SCENARIO=$(echo "$SCENARIO" | xargs)
+            echo "Processing scenario: $SCENARIO"
+
+            # Determine module type
+            if [[ "${{ inputs.type }}" == "*" ]]; then
+              MODULES=("cjs" "esm")
+            else
+              MODULES=("${{ inputs.type }}")
+            fi
+
+            for MODULE in "${MODULES[@]}"; do
+              echo "==================== RUNNING ${SCENARIO}-${MODULE} TEST ===================="
+              echo "Time: $(date)"
+
+              # Create log file for this test specifically
+              LOG_FILE="logs/debug/macOS-${SCENARIO}-${MODULE}.log"
+
+              echo "Running test for ${SCENARIO} with ${MODULE}..."
+              echo "Executing: PLATFORM=${SCENARIO} MODULE_TYPE=${MODULE} pnpm run test:matrix"
+
+              # Run with redirecting both stdout and stderr to both console and file
+              {
+                PLATFORM=${SCENARIO} MODULE_TYPE=${MODULE} WDIO_VERBOSE=true pnpm run test:matrix
+                TEST_EXIT_CODE=$?
+                echo "Test exited with code: ${TEST_EXIT_CODE}"
+              } 2>&1 | tee "${LOG_FILE}"
+
+              # Manually checking exit code since pipe creates a subshell that hides the original exit code
+              if [ ${TEST_EXIT_CODE} -ne 0 ]; then
+                echo "❌ Test failed with exit code: ${TEST_EXIT_CODE}"
+                echo "Checking for error patterns in log file..."
+                grep -A 10 -B 10 "Error:" "${LOG_FILE}" || echo "No error pattern found"
+
+                echo "Last 50 lines of log:"
+                tail -n 50 "${LOG_FILE}"
+              else
+                echo "✅ Test completed successfully"
+              fi
+
+              echo "==================== TEST COMPLETED ===================="
+            done
+          done
+
+          echo "All tests completed"
+          echo "Log files written to logs/debug/ directory"
+
+          # List available log files
+          echo "Available log files:"
+          find logs -type f | sort
+
       # Run Mac Universal matrix test
       - if: ${{ env.MAC_UNIVERSAL == 'true' && (inputs.type == '*' || contains(inputs.type, 'cjs')) }}
         name: 🧪 Run Mac Universal CJS Tests

@@ -516,6 +516,11 @@ function generateTestVariants(): TestVariant[] {
 
 // Filter variants based on environment variables
 function filterVariants(variants: TestVariant[]): TestVariant[] {
+  console.log(`Filtering ${variants.length} variants with environment settings:`);
+  console.log(
+    `PLATFORM=${process.env.PLATFORM || '*'}, MODULE_TYPE=${process.env.MODULE_TYPE || '*'}, MAC_UNIVERSAL=${process.env.MAC_UNIVERSAL || 'false'}`,
+  );
+
   // Helper function to check if a value matches, accounting for wildcards
   const matches = (envValue: string | undefined, variantValue: string): boolean => {
     if (!envValue) return true; // No filter specified
@@ -732,6 +737,15 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
  */
 async function runTests(): Promise<void> {
   debug('Starting runTests function');
+
+  // Log environment variables for debugging
+  console.log('\nStarting test run with environment variables:');
+  console.log(`- MAC_UNIVERSAL: ${process.env.MAC_UNIVERSAL || 'not set'}`);
+  console.log(`- PLATFORM: ${process.env.PLATFORM || 'not set'}`);
+  console.log(`- MODULE_TYPE: ${process.env.MODULE_TYPE || 'not set'}`);
+  console.log(`- TEST_TYPE: ${process.env.TEST_TYPE || 'not set'}`);
+  console.log(`- OS: ${process.platform}`);
+
   let statusUpdateInterval: NodeJS.Timeout | null = null;
 
   try {
@@ -939,3 +953,62 @@ runTests().catch((error) => {
     process.exit(1);
   });
 });
+
+// Process command line arguments
+(function processArgs() {
+  console.log('Processing command line arguments:', process.argv);
+
+  const args = process.argv.slice(2);
+  for (const arg of args) {
+    if (arg === '--debug') {
+      process.env.DEBUG = process.env.DEBUG || 'wdio-electron-service*';
+      continue;
+    }
+
+    if (arg === '--no-timeout') {
+      process.env.NO_TIMEOUT = 'true';
+      continue;
+    }
+
+    const match = arg.match(/^--([^=]+)=(.+)$/);
+    if (match) {
+      const [, key, value] = match;
+      switch (key) {
+        case 'platform':
+          process.env.PLATFORM = value;
+          console.log(`Set PLATFORM=${value} from command line`);
+          break;
+        case 'module-type':
+          process.env.MODULE_TYPE = value;
+          console.log(`Set MODULE_TYPE=${value} from command line`);
+          break;
+        case 'test-type':
+          process.env.TEST_TYPE = value;
+          console.log(`Set TEST_TYPE=${value} from command line`);
+          break;
+        case 'binary':
+          process.env.BINARY = value;
+          console.log(`Set BINARY=${value} from command line`);
+          break;
+        case 'concurrency':
+          process.env.CONCURRENCY = value;
+          console.log(`Set CONCURRENCY=${value} from command line`);
+          break;
+        default:
+          console.log(`Unknown argument: ${arg}`);
+      }
+    }
+  }
+})();
+
+// IMMEDIATE DEBUG LOGGING
+console.log('🚀 RUN-TEST-MATRIX SCRIPT STARTING');
+console.log('Script arguments:', process.argv);
+console.log('Environment variables:');
+console.log('PLATFORM:', process.env.PLATFORM);
+console.log('MODULE_TYPE:', process.env.MODULE_TYPE);
+console.log('TEST_TYPE:', process.env.TEST_TYPE);
+console.log('BINARY:', process.env.BINARY);
+console.log('MAC_UNIVERSAL:', process.env.MAC_UNIVERSAL);
+console.log('CWD:', process.cwd());
+console.log('-------------------------------------------');
