@@ -80,18 +80,6 @@ jobs:
         scenario: ['builder', 'forge', 'no-binary']
         # Test both module types and wildcard for combined tests
         type: ['*']
-        include:
-          # Special case: Combined test for macOS to reduce total jobs
-          # This runs both forge and no-binary tests in a single job
-          - os: 'macos-latest'
-            scenario: 'no-binary, forge'
-            type: '*'
-        exclude:
-          # Exclude some combinations that will be added with specific configurations
-          - os: 'macos-latest'
-            scenario: 'forge'
-          - os: 'macos-latest'
-            scenario: 'no-binary'
     uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
       os: ${{ matrix.os }}
