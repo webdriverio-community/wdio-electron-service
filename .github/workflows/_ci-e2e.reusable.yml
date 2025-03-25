@@ -426,7 +426,6 @@ jobs:
 
       # Run tests based on the scenario and type inputs (only if not MAC_UNIVERSAL)
       - name: 🧪 Execute E2E Tests
-        if: ${{ env.MAC_UNIVERSAL != 'true' }}
         shell: bash
         id: run_tests
         env:
@@ -449,16 +448,6 @@ jobs:
           echo "=== Debug: Available Tools ==="
           echo "Node.js version: $(node --version)"
           echo "pnpm version: $(pnpm --version)"
-          echo "WebdriverIO CLI:"
-          if command -v wdio &> /dev/null; then
-            echo "wdio command is available"
-            wdio --version
-          else
-            echo "wdio command is NOT available"
-          fi
-
-          echo "Checking local WebdriverIO installation:"
-          ls -la node_modules/.bin | grep wdio || echo "wdio not found in node_modules/.bin"
 
           # Check package.json scripts
           echo "Available scripts in package.json:"
@@ -472,126 +461,90 @@ jobs:
           export WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''}
           export WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''}
           export WDIO_VERBOSE=true
+          export TEST_TYPE=standard
+          export BINARY=true
+          export NODE_OPTIONS='--no-warnings --experimental-specifier-resolution=node'
 
-          # Create a temporary script to run the test with proper environment
-          cat > run-test.sh << 'EOF'
-          #!/bin/bash
-          set -e
-
-          # Function to handle signals
-          handle_signal() {
-            local signal=$1
-            echo "Received $signal signal at $(date)"
-            echo "Current process: $$"
+          # Add pre-execution diagnostics
+          echo "=== Pre-execution Diagnostics ==="
+          if [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win32"* || "$OSTYPE" == "darwin"* ]]; then
+            # Windows/macOS: Skip debugging, just show basic info
+            echo "Running on Windows/macOS - skipping detailed diagnostics"
+          else
+            # Linux: Full diagnostics
             echo "Parent process: $(ps -o ppid= -p $$)"
-
-            # Print process tree
             echo "Process tree:"
-            pstree -p $$
-
-            # Print memory usage
+            pstree -p $$ || echo "pstree not available"
+            echo "Running processes:"
+            ps aux --sort=-%mem | head -15
             echo "Memory usage:"
             free -h
+          fi
 
-            # Print running processes
-            echo "Top processes by memory:"
-            ps aux --sort=-%mem | head -10
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "=========================="
 
-            # Print current directory contents
-            echo "Current directory contents:"
-            ls -la
+          # Set up monitoring only for Linux
+          if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+            # Set up a background process to monitor for SIGTERM
+            (
+              while true; do
+                echo "[$(date)] SIGTERM monitor: Process $$ still running"
+                echo "Parent process: $(ps -o ppid= -p $$)"
+                echo "Process tree:"
+                pstree -p $$ || echo "pstree not available"
+                echo "Running processes:"
+                ps aux --sort=-%mem | head -15
+                echo "Memory usage:"
+                free -h
+                echo "----------------------------------------"
+                sleep 5
+              done
+            ) > sigterm_monitor.log &
+            SIGTERM_MONITOR_PID=$!
 
-            # Print test logs if they exist
-            for log_file in test*.log; do
-              if [[ -f "$log_file" ]]; then
-                echo "Contents of $log_file:"
-                tail -n 50 "$log_file"
-              fi
-            done
+            # Set up signal handlers
+            trap 'handle_signal SIGTERM' SIGTERM
+            trap 'handle_signal SIGINT' SIGINT
 
-            # Kill any remaining processes
-            pkill -P $$ || true
-            exit 143
-          }
+            # Function to handle signals
+            handle_signal() {
+              local signal=$1
+              echo "************* CAUGHT $signal in test execution *************"
+              echo "Time: $(date)"
+              echo "Current process: $$"
+              echo "Parent process: $(ps -o ppid= -p $$)"
 
-          # Set up signal handlers
-          trap 'handle_signal SIGTERM' SIGTERM
-          trap 'handle_signal SIGINT' SIGINT
+              # Print process tree
+              echo "Process tree:"
+              pstree -p $$ || echo "pstree not available"
 
-          # Function to run the test with environment variables
-          run_test() {
-            local env_vars="$1"
-            local cmd="$2"
-            local log_file="$3"
+              # Print memory usage
+              echo "Memory usage:"
+              free -h
 
-            echo "Running command: $cmd"
-            echo "Logging to: $log_file"
+              # Print running processes
+              echo "Top processes by memory:"
+              ps aux --sort=-%mem | head -15
 
-            # Ensure test apps are prepared
-            if [[ -z "${WDIO_TEST_APPS_PREPARED}" || -z "${WDIO_TEST_APPS_DIR}" ]]; then
-              echo "Test apps not prepared. Running prepare-apps first..."
+              # Print current directory contents
+              echo "Current directory contents:"
+              ls -la
 
-              # Create a temporary file for prepare-apps output
-              PREPARE_LOG="/tmp/prepare-apps-$$.log"
-              echo "prepare-apps log will be written to: $PREPARE_LOG"
-
-              # Run prepare-apps with detailed logging
-              {
-                echo "Starting prepare-apps at $(date)"
-                echo "Current directory: $(pwd)"
-                echo "Environment variables:"
-                env | grep -E 'WDIO_|TEST_|PLATFORM|MODULE_TYPE|BINARY' | sort
-
-                echo "Running prepare-apps command..."
-                node --no-warnings --import tsx ./scripts/prepare-apps.js --timeout=600000 --scenario=${{ inputs.scenario }} --module-type=${{ inputs.type }} 2>&1
-                PREPARE_RC=$?
-
-                echo "prepare-apps completed with exit code: $PREPARE_RC"
-                echo "Current directory contents:"
-                ls -la
-
-                if [[ -d "apps" ]]; then
-                  echo "Contents of apps directory:"
-                  ls -la apps
+              # Print test logs if they exist
+              for log_file in test*.log; do
+                if [[ -f "$log_file" ]]; then
+                  echo "Contents of $log_file:"
+                  tail -n 50 "$log_file"
                 fi
-              } > "$PREPARE_LOG" 2>&1
+              done
 
-              # Check if prepare-apps succeeded
-              if [ $PREPARE_RC -ne 0 ]; then
-                echo "Failed to prepare test apps. Exit code: $PREPARE_RC"
-                echo "Contents of prepare-apps log:"
-                cat "$PREPARE_LOG"
-                return 1
-              fi
-
-              # Extract environment variables from prepare-apps output
-              if grep -q "Test apps prepared at:" "$PREPARE_LOG"; then
-                WDIO_TEST_APPS_DIR=$(grep "Test apps prepared at:" "$PREPARE_LOG" | cut -d' ' -f5)
-                export WDIO_TEST_APPS_DIR
-                echo "Extracted WDIO_TEST_APPS_DIR: $WDIO_TEST_APPS_DIR"
-              else
-                echo "Could not find test apps directory in prepare-apps output"
-                cat "$PREPARE_LOG"
-                return 1
-              fi
-
-              export WDIO_TEST_APPS_PREPARED="true"
-              echo "Set WDIO_TEST_APPS_PREPARED=true"
-
-              # Verify the test apps directory exists
-              if [[ ! -d "$WDIO_TEST_APPS_DIR" ]]; then
-                echo "Test apps directory does not exist: $WDIO_TEST_APPS_DIR"
-                return 1
-              fi
-
-              echo "Test apps directory contents:"
-              ls -la "$WDIO_TEST_APPS_DIR"
-
-              if [[ -d "$WDIO_TEST_APPS_DIR/apps" ]]; then
-                echo "Contents of apps subdirectory:"
-                ls -la "$WDIO_TEST_APPS_DIR/apps"
-              fi
-            fi
+              # Kill any remaining processes
+              pkill -P $$ || true
+              exit 143
+            }
 
             # Set up process monitoring
             (
@@ -602,43 +555,71 @@ jobs:
               done
             ) > process_monitor.log &
             MONITOR_PID=$!
+          fi
 
-            # Make sure to kill the monitor when this script exits
-            trap 'kill $MONITOR_PID 2>/dev/null' EXIT
+          # Make sure to kill the monitor when this script exits
+          trap 'kill $MONITOR_PID 2>/dev/null' EXIT
 
-            echo "Environment variables:"
-            env | grep -E 'WDIO_|TEST_|PLATFORM|MODULE_TYPE|BINARY' | sort
+          # Define run_test function
+          run_test() {
+            local env_vars="$1"
+            local command="$2"
+            local log_file="$3"
 
-            # Set environment variables and run the command with timeout
-            # Use a subshell to ensure proper signal handling
+            echo "🔍 DEBUG: Starting test execution"
+            echo "Environment: $env_vars"
+            echo "Command: $command"
+            echo "Log file: $log_file"
+
+            # Print current environment
+            echo "Current environment variables:"
+            env | sort
+
+            # Create the log file directory if it doesn't exist
+            mkdir -p "$(dirname "$log_file")"
+
+            # Run the command with the specified environment variables and tee output
+            # This allows us to see the output in real-time while also saving it
             (
-              # Set up signal handling in the subshell
-              trap 'handle_signal SIGTERM' SIGTERM
-              trap 'handle_signal SIGINT' SIGINT
+              echo "=== Test execution started at $(date) ==="
+              echo "Working directory: $(pwd)"
+              echo "Command: $env_vars $command"
+              echo "----------------------------------------"
 
-              # Run the command
-              $env_vars $cmd > "$log_file" 2>&1
-            ) &
-            CMD_PID=$!
+              # Export the environment variables
+              eval "export $env_vars"
 
-            # Wait for the command to complete
-            wait $CMD_PID
-            local exit_code=$?
-
-            # Check the exit code
-            if [ $exit_code -ne 0 ]; then
-              echo "Test failed with exit code: $exit_code"
-              echo "Last 20 lines of log:"
-              tail -n 20 "$log_file"
-
-              # Show process monitor log if it exists
-              if [[ -f "process_monitor.log" ]]; then
-                echo "Process monitor log:"
-                cat process_monitor.log
+              # Check OS type and adjust debug behavior
+              if [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win32"* || "$OSTYPE" == "darwin"* ]]; then
+                # Windows/macOS: Run directly without debug
+                echo "Running on Windows/macOS - executing without debug mode"
+                $command 2>&1 | tee -a "$log_file"
+              else
+                # Linux: Run with debug mode
+                echo "Running on Linux - executing with debug mode"
+                DEBUG=wdio-electron-service* $command 2>&1 | tee -a "$log_file"
               fi
-            fi
+              exit_code=${PIPESTATUS[0]}
 
-            return $exit_code
+              echo "----------------------------------------"
+              echo "=== Test execution completed at $(date) ==="
+              echo "Exit code: $exit_code"
+
+              # Check if the process was terminated by a signal
+              if [ $exit_code -gt 128 ]; then
+                local signal=$((exit_code - 128))
+                echo "⚠️ Process terminated by signal $signal"
+                if [ $signal -eq 15 ]; then
+                  echo "❌ Process was terminated by SIGTERM"
+                  echo "Last 50 lines of log file:"
+                  tail -n 50 "$log_file"
+                fi
+              fi
+
+              exit $exit_code
+            )
+
+            return $?
           }
 
           # Main execution
@@ -646,57 +627,42 @@ jobs:
             if [[ "${{ inputs.type }}" == "*" ]]; then
               # Run both ESM and CJS tests for no-binary
               echo "Running no-binary CJS tests..."
-              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-cjs.log"
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
 
               echo "Running no-binary ESM tests..."
-              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-esm.log"
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
             else
               # Run specific module type test for no-binary
               echo "Running no-binary ${{ inputs.type }} tests..."
-              run_test "BINARY=false TEST_TYPE=standard PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test.log"
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
             fi
           elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
             if [[ "${{ inputs.type }}" == "*" ]]; then
               # Run both ESM and CJS tests for builder
               echo "Running builder CJS tests..."
-              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-cjs.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
 
               echo "Running builder ESM tests..."
-              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-esm.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
             else
               # Run specific module type test for builder
               echo "Running builder ${{ inputs.type }} tests..."
-              run_test "BINARY=true TEST_TYPE=standard PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
             fi
           elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
             if [[ "${{ inputs.type }}" == "*" ]]; then
               # Run both ESM and CJS tests for forge
               echo "Running forge CJS tests..."
-              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=forge" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-cjs.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
 
               echo "Running forge ESM tests..."
-              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=forge" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test-esm.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
             else
               # Run specific module type test for forge
               echo "Running forge ${{ inputs.type }} tests..."
-              run_test "BINARY=true TEST_TYPE=standard PLATFORM=forge" "pnpm exec tsx ./scripts/run-test-matrix.ts" "test.log"
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
             fi
           fi
-          EOF
-
-          # Make the script executable
-          chmod +x run-test.sh
-
-          # Run the test script
-          ./run-test.sh
-
-          # Show test logs if they exist
-          for log_file in test*.log; do
-            if [[ -f "$log_file" ]]; then
-              echo "Contents of $log_file:"
-              cat "$log_file"
-            fi
-          done
 
       # Show logs on failure to help with debugging
       - name: 🐛 Show Test Logs on Failure

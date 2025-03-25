@@ -677,7 +677,7 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
     // Log command to be executed
     const commandToRun = 'pnpm run test:single';
     console.log(`Running command: ${commandToRun}`);
-    console.log(`Environment variables: ${JSON.stringify(env, null, 2)}`);
+    console.log(`Environment variables  (TM): ${JSON.stringify(env, null, 2)}`);
 
     // Run the test
     const { code, stderr, stdout } = await execWithDebug('pnpm run test:single', env);
