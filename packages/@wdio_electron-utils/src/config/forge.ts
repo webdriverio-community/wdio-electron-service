@@ -7,7 +7,7 @@ import { APP_NAME_DETECTION_ERROR } from '../constants.js';
 import type { NormalizedReadResult } from 'read-package-up';
 import type { ForgeConfig, ForgeBuildInfo } from '@wdio/electron-types';
 
-export const forgeBuildInfo = (forgeConfig: ForgeConfig, pkg: NormalizedReadResult): ForgeBuildInfo => {
+function forgeBuildInfo(forgeConfig: ForgeConfig, pkg: NormalizedReadResult): ForgeBuildInfo {
   log.info(`Forge configuration detected: \n${JSON.stringify(forgeConfig)}`);
   const appName: string = pkg.packageJson.productName || forgeConfig?.packagerConfig?.name || pkg.packageJson.name;
 
@@ -21,7 +21,7 @@ export const forgeBuildInfo = (forgeConfig: ForgeConfig, pkg: NormalizedReadResu
     isForge: true,
     isBuilder: false,
   };
-};
+}
 
 export async function getConfig(pkg: NormalizedReadResult): Promise<ForgeBuildInfo | undefined> {
   const forgePackageJsonConfig = pkg.packageJson.config?.forge;

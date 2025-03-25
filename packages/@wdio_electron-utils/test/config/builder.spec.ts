@@ -84,7 +84,7 @@ describe('getConfig', () => {
       expect(config?.appName).toBe('builder-dependency-inline-config-product-name');
     });
 
-    it('should return the expected config when name of the packagerConfig is set in the builderConfig', async () => {
+    it('should return the expected config when productName is set in the builderConfig', async () => {
       const pkg = await getFixturePackagePath(type, 'builder-dependency-inline-config');
       delete pkg.packageJson.productName;
       const config = await getConfig(pkg);
