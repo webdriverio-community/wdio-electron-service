@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "dist/main.bundle.js",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "build": "tsc && rollup -c rollup.config.mjs && cp ./src/index.html ./dist && cp ./src/splash.html ./dist",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",

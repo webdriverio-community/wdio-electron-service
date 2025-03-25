@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "dist/main.js",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
     "build:bundle": "tsc",
