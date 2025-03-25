@@ -578,9 +578,15 @@ jobs:
             # Create the log file directory if it doesn't exist
             mkdir -p "$(dirname "$log_file")"
 
+            # Enable error tracing
+            set -E
+            trap 'echo "Error on line $LINENO. Exit code: $?"' ERR
+
             # Run the command with the specified environment variables and tee output
-            # This allows us to see the output in real-time while also saving it
             (
+              # Enable pipefail to catch errors in pipes
+              set -o pipefail
+
               echo "=== Test execution started at $(date) ==="
               echo "Working directory: $(pwd)"
               echo "Command: $env_vars $command"
@@ -594,20 +600,23 @@ jobs:
                 # Windows/macOS: Run directly without debug
                 echo "Running on Windows/macOS - executing without debug mode"
                 $command 2>&1 | tee -a "$log_file"
+                cmd_exit=${PIPESTATUS[0]}
+                echo "Command exit code: $cmd_exit"
               else
                 # Linux: Run with debug mode
                 echo "Running on Linux - executing with debug mode"
                 DEBUG=wdio-electron-service* $command 2>&1 | tee -a "$log_file"
+                cmd_exit=${PIPESTATUS[0]}
+                echo "Command exit code: $cmd_exit"
               fi
-              exit_code=${PIPESTATUS[0]}
 
               echo "----------------------------------------"
               echo "=== Test execution completed at $(date) ==="
-              echo "Exit code: $exit_code"
+              echo "Final exit code: $cmd_exit"
 
               # Check if the process was terminated by a signal
-              if [ $exit_code -gt 128 ]; then
-                local signal=$((exit_code - 128))
+              if [ $cmd_exit -gt 128 ]; then
+                local signal=$((cmd_exit - 128))
                 echo "⚠️ Process terminated by signal $signal"
                 if [ $signal -eq 15 ]; then
                   echo "❌ Process was terminated by SIGTERM"
@@ -616,10 +625,21 @@ jobs:
                 fi
               fi
 
-              exit $exit_code
+              # Print additional debug info on non-zero exit
+              if [ $cmd_exit -ne 0 ]; then
+                echo "❌ Command failed with exit code $cmd_exit"
+                echo "Last 50 lines of log file:"
+                tail -n 50 "$log_file"
+                echo "Environment at failure:"
+                env | sort
+              fi
+
+              exit $cmd_exit
             )
 
-            return $?
+            local final_exit=$?
+            echo "Final exit code from subshell: $final_exit"
+            return $final_exit
           }
 
           # Main execution

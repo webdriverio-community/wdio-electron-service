@@ -23,7 +23,7 @@ import { fileURLToPath } from 'url';
 // More detailed executable path detection
 try {
   console.log('Node executable path:', process.execPath);
-  console.log('Module lookup paths:', module.paths);
+  console.log('Module lookup paths:', module?.paths || []);
 } catch (e) {
   console.error('Error getting executable info:', e);
 }
