@@ -542,7 +542,13 @@ jobs:
                 kill $MONITOR_PID 2>/dev/null || true
               fi
 
-              # Exit with appropriate code
+              # Don't propagate SIGTERM if we're in a test process
+              if [[ "$signal" == "SIGTERM" && -n "$WDIO_TEST_PROCESS" ]]; then
+                echo "Test process received SIGTERM, handling cleanup without propagation"
+                return 0
+              fi
+
+              # Exit with appropriate code for non-test processes
               exit 143
             }
 
@@ -591,6 +597,9 @@ jobs:
               else
                 echo "Non-Linux OS detected: Skipping pipefail"
               fi
+
+              # Mark this as a test process
+              export WDIO_TEST_PROCESS=1
 
               echo "=== Test execution started at $(date) ==="
               echo "Working directory: $(pwd)"
