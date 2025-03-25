@@ -187,24 +187,39 @@ async function runAllTests() {
 
     // Create a clean environment without test filtering variables
     const cleanEnv: Record<string, string> = {
-      // Use '*' for these values to run all combinations
-      PLATFORM: '*',
-      MODULE_TYPE: '*',
-      TEST_TYPE: '*',
-      BINARY: '*',
-      PRESERVE_TEMP_DIR: 'true',
-      SUITE_CLEANUP_MANAGED: 'true',
+      // Base environment variables
       PATH: process.env.PATH || '',
       NODE_OPTIONS: process.env.NODE_OPTIONS || '--no-warnings --experimental-specifier-resolution=node',
       DEBUG: process.env.DEBUG || 'wdio-electron-service',
-      // Set WDIO_CHALK_COMPAT=true for compatibility with ESM modules in CJS context
-      WDIO_CHALK_COMPAT: 'true',
+      WDIO_CHALK_COMPAT: 'true', // For compatibility with ESM modules in CJS context
+      PRESERVE_TEMP_DIR: 'true',
+      SUITE_CLEANUP_MANAGED: 'true',
+
       // Explicitly unset any limiting environment variables
       WDIO_FILTER: '',
       EXCLUDE_MULTIREMOTE: '',
       TEST_SKIP: '',
       TEST_MODE: '',
     };
+
+    // Check if we're running in Mac Universal mode
+    if (process.env.MAC_UNIVERSAL === 'true') {
+      // In Mac Universal mode, don't set filter environment variables
+      // as they would conflict with MAC_UNIVERSAL behavior
+      cleanEnv.MAC_UNIVERSAL = 'true';
+      console.log(
+        `[${formatTimestamp()}] 🍎 Running in Mac Universal mode - only builder and forge binary tests will be included`,
+      );
+      console.log(
+        `[${formatTimestamp()}] ⚠️ Note: MAC_UNIVERSAL=true will override any PLATFORM, MODULE_TYPE, etc. settings`,
+      );
+    } else {
+      // If not in Mac Universal mode, use wildcards for all combinations
+      cleanEnv.PLATFORM = '*';
+      cleanEnv.MODULE_TYPE = '*';
+      cleanEnv.TEST_TYPE = '*';
+      cleanEnv.BINARY = '*';
+    }
 
     // Kill any existing Electron processes before starting
     await killElectronProcesses();

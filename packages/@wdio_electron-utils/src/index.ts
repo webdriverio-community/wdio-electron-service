@@ -125,11 +125,24 @@ export async function getBinaryPath(
   } else {
     // electron-builder case
     const builderOutDirName = (appBuildInfo.config as BuilderConfig)?.directories?.output || 'dist';
-    const builderOutDirMap = (arch: BuilderArch) => ({
-      darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${arch}`),
-      linux: path.join(builderOutDirName, 'linux-unpacked'),
-      win32: path.join(builderOutDirName, 'win-unpacked'),
-    });
+    const builderOutDirMap = (arch: BuilderArch) => {
+      // Helper function to get the macOS directory based on architecture
+      const getMacOSDir = (arch: BuilderArch) => {
+        if (arch === 'universal') {
+          return 'mac-universal';
+        } else if (arch === 'x64') {
+          return 'mac';
+        } else {
+          return `mac-${arch}`;
+        }
+      };
+
+      return {
+        darwin: path.join(builderOutDirName, getMacOSDir(arch)),
+        linux: path.join(builderOutDirName, 'linux-unpacked'),
+        win32: path.join(builderOutDirName, 'win-unpacked'),
+      };
+    };
 
     if (p.platform === 'darwin') {
       // macOS output dir depends on the arch used

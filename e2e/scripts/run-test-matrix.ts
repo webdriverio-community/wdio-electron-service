@@ -516,112 +516,90 @@ function generateTestVariants(): TestVariant[] {
 
 // Filter variants based on environment variables
 function filterVariants(variants: TestVariant[]): TestVariant[] {
-  console.log(`\n🔍 Debug: Starting test variant filtering with ${variants.length} total variants`);
-  console.log(`🔍 Debug: Current environment filters:`);
-  console.log(`   - PLATFORM: ${process.env.PLATFORM || '*'}`);
-  console.log(`   - MODULE_TYPE: ${process.env.MODULE_TYPE || '*'}`);
-  console.log(`   - TEST_TYPE: ${process.env.TEST_TYPE || '*'}`);
-  console.log(`   - BINARY: ${process.env.BINARY || '*'}`);
-  console.log(`   - MAC_UNIVERSAL: ${process.env.MAC_UNIVERSAL || 'false'}`);
-  console.log(`   - EXCLUDE_MULTIREMOTE: ${process.env.EXCLUDE_MULTIREMOTE || 'false'}`);
-
-  // Log some sample variants to understand what we're working with
-  if (variants.length > 0) {
-    console.log(`🔍 Debug: Sample variants (first 3):`);
-    variants.slice(0, 3).forEach((variant, i) => {
-      console.log(`   - Variant ${i + 1}: ${JSON.stringify(variant)}`);
-    });
-  }
-
   // Helper function to check if a value matches, accounting for wildcards
   const matches = (envValue: string | undefined, variantValue: string): boolean => {
     if (!envValue) return true; // No filter specified
-    if (envValue === '*') return true; // Wildcard matches everything
-    return envValue === variantValue; // Exact match check
+    // Wildcard matches everything
+    if (envValue === '*') return true;
+
+    // Check for comma-separated values
+    if (envValue.includes(',')) {
+      const values = envValue.split(',').map((v) => v.trim());
+      return values.includes(variantValue);
+    }
+
+    // Exact match check
+    return envValue === variantValue;
   };
 
   // Check if we're running in Mac Universal mode
   const isMacUniversal = process.env.MAC_UNIVERSAL === 'true';
   if (isMacUniversal) {
-    console.log('🍎 Running in Mac Universal mode - filtering to only include compatible test variants');
-    // In Mac Universal mode, only include builder and forge platforms
-    const macUniversalVariants = variants.filter(
-      (variant) =>
-        ['builder', 'forge'].includes(variant.platform) &&
-        // Ensure we only include binary tests for Mac Universal
-        variant.binary === true,
-    );
+    // IMPORTANT: Log warning if other environment variables are set that would be ignored
+    // This helps users and CI understand why their filters aren't working
+    const warningMessages = [];
 
-    console.log(`🔍 Debug: After Mac Universal filtering: ${macUniversalVariants.length} variants remain`);
-
-    if (macUniversalVariants.length === 0) {
-      console.log(`⚠️ WARNING: Mac Universal filtering removed all variants!`);
+    // Don't warn about PLATFORM as we want to support filtering by platform in MAC_UNIVERSAL mode
+    if (process.env.MODULE_TYPE && process.env.MODULE_TYPE !== '*') {
+      warningMessages.push(`MODULE_TYPE=${process.env.MODULE_TYPE}`);
+    }
+    if (process.env.TEST_TYPE && process.env.TEST_TYPE !== '*') {
+      warningMessages.push(`TEST_TYPE=${process.env.TEST_TYPE}`);
+    }
+    if (process.env.BINARY && process.env.BINARY !== '*') {
+      warningMessages.push(`BINARY=${process.env.BINARY}`);
     }
 
-    return macUniversalVariants;
+    console.log('🍎 Running in Mac Universal mode - filtering to only include compatible test variants');
+
+    if (warningMessages.length > 0) {
+      console.log(
+        `⚠️  WARNING: MAC_UNIVERSAL=true is overriding these environment variables: ${warningMessages.join(', ')}`,
+      );
+      console.log(
+        "⚠️  To avoid this warning, use test:mac-universal:matrix script or don't set these variables with MAC_UNIVERSAL=true",
+      );
+    }
+
+    // In Mac Universal mode, only include builder and forge platforms
+    return variants.filter((variant) => {
+      // First check if the variant is a binary test (required for Mac Universal)
+      const isBinaryTest = variant.binary === true;
+
+      // Then check if platform is builder or forge
+      const isCompatiblePlatform = ['builder', 'forge'].includes(variant.platform);
+
+      // If PLATFORM is specified, use it to further filter compatible platforms
+      const matchesPlatformFilter =
+        !process.env.PLATFORM || process.env.PLATFORM === '*' || matches(process.env.PLATFORM, variant.platform);
+
+      return isBinaryTest && isCompatiblePlatform && matchesPlatformFilter;
+    });
   }
 
-  // Track filter results for debugging
-  let filteredCount = {
-    platform: 0,
-    moduleType: 0,
-    testType: 0,
-    binary: 0,
-    multiremote: 0,
-  };
-
-  const filteredVariants = variants.filter((variant) => {
+  return variants.filter((variant) => {
     // Filter by platform
-    if (!matches(process.env.PLATFORM, variant.platform)) {
-      filteredCount.platform++;
-      return false;
-    }
+    if (!matches(process.env.PLATFORM, variant.platform)) return false;
 
     // Filter by module type
-    if (!matches(process.env.MODULE_TYPE, variant.moduleType)) {
-      filteredCount.moduleType++;
-      return false;
-    }
+    if (!matches(process.env.MODULE_TYPE, variant.moduleType)) return false;
 
     // Filter by test type
-    if (!matches(process.env.TEST_TYPE, variant.testType)) {
-      filteredCount.testType++;
-      return false;
-    }
+    if (!matches(process.env.TEST_TYPE, variant.testType)) return false;
 
     // Filter by binary
     if (process.env.BINARY && process.env.BINARY !== '*') {
-      if (process.env.BINARY === 'true' && !variant.binary) {
-        filteredCount.binary++;
-        return false;
-      }
-      if (process.env.BINARY === 'false' && variant.binary) {
-        filteredCount.binary++;
-        return false;
-      }
+      if (process.env.BINARY === 'true' && !variant.binary) return false;
+      if (process.env.BINARY === 'false' && variant.binary) return false;
     }
 
     // Exclude multiremote tests if requested
     if (process.env.EXCLUDE_MULTIREMOTE === 'true') {
-      if (variant.testType === 'multiremote') {
-        filteredCount.multiremote++;
-        return false;
-      }
+      if (variant.testType === 'multiremote') return false;
     }
 
     return true;
   });
-
-  // Log filter results
-  console.log(`\n🔍 Debug: Filter results:`);
-  console.log(`   - Filtered out by PLATFORM: ${filteredCount.platform}`);
-  console.log(`   - Filtered out by MODULE_TYPE: ${filteredCount.moduleType}`);
-  console.log(`   - Filtered out by TEST_TYPE: ${filteredCount.testType}`);
-  console.log(`   - Filtered out by BINARY: ${filteredCount.binary}`);
-  console.log(`   - Filtered out by EXCLUDE_MULTIREMOTE: ${filteredCount.multiremote}`);
-  console.log(`   - Final variants remaining: ${filteredVariants.length}`);
-
-  return filteredVariants;
 }
 
 // Run a single test variant
@@ -653,6 +631,12 @@ async function runTest(variant: TestVariant, _index: number, _total: number): Pr
       BINARY: binary ? 'true' : 'false',
       EXAMPLE_DIR: binary ? `${platform}-${moduleType}` : `no-binary-${moduleType}`,
     };
+
+    // Pass through MAC_UNIVERSAL environment variable if it's set
+    if (process.env.MAC_UNIVERSAL === 'true') {
+      env.MAC_UNIVERSAL = 'true';
+      console.log(`✅ Passed MAC_UNIVERSAL=true to the test environment`);
+    }
 
     // Set WDIO_CHALK_COMPAT=true for standalone tests
     if (testType === 'standalone') {
@@ -771,18 +755,17 @@ async function runTests(): Promise<void> {
     // Generate test variants
     const allVariants = generateTestVariants();
     debug(`Generated ${allVariants.length} test variants`);
+    console.log(`📊 Generated ${allVariants.length} possible test variants`);
 
     // Filter based on environment variables
     const filteredVariants = filterVariants(allVariants);
     debug(`Filtered to ${filteredVariants.length} test variants`);
-
-    // Log detailed environment information for debugging
-    console.log(`\n🔍 Debug: Environment details:`);
-    console.log(`   - Running on: ${process.platform} (${process.arch})`);
-    console.log(`   - Node version: ${process.version}`);
-    console.log(`   - Working directory: ${process.cwd()}`);
-    console.log(`   - WDIO_TEST_APPS_PREPARED: ${process.env.WDIO_TEST_APPS_PREPARED || 'not set'}`);
-    console.log(`   - WDIO_TEST_APPS_DIR: ${process.env.WDIO_TEST_APPS_DIR || 'not set'}`);
+    console.log(`📊 Filtered to ${filteredVariants.length} test variants based on:`);
+    console.log(`- PLATFORM=${process.env.PLATFORM || '*'}`);
+    console.log(`- MODULE_TYPE=${process.env.MODULE_TYPE || '*'}`);
+    console.log(`- TEST_TYPE=${process.env.TEST_TYPE || '*'}`);
+    console.log(`- BINARY=${process.env.BINARY || '*'}`);
+    console.log(`- MAC_UNIVERSAL=${process.env.MAC_UNIVERSAL || 'false'}`);
 
     console.log(`\n🧪 Running ${filteredVariants.length} test variants`);
     console.log('═'.repeat(80));
@@ -806,16 +789,6 @@ async function runTests(): Promise<void> {
       }
 
       console.error('\n❌ ERROR: Cannot continue without any test variants to run.');
-
-      // Show a sample of available variants
-      console.log('\n📋 Available test variants that would run without filters:');
-      const sampleVariants = allVariants.slice(0, 10).map((v) => getTestName(v));
-      console.log(`   ${sampleVariants.join('\n   ')}`);
-      if (allVariants.length > 10) {
-        console.log(`   ... and ${allVariants.length - 10} more`);
-      }
-
-      // Exit with error
       process.exit(1);
     }
 

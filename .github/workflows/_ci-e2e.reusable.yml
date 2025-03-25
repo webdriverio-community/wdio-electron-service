@@ -424,8 +424,33 @@ jobs:
             done
           fi
 
-      # Run tests based on the scenario and type inputs
+      # Set MAC_UNIVERSAL environment variable
+      - name: Set MAC_UNIVERSAL environment variable
+        if: ${{ inputs.build-command == 'build:mac-universal' }}
+        run: echo "MAC_UNIVERSAL=true" >> $GITHUB_ENV
+        shell: bash
+
+      # Run Mac Universal matrix test
+      - if: ${{ env.MAC_UNIVERSAL == 'true' && (inputs.type == '*' || contains(inputs.type, 'cjs')) }}
+        name: 🧪 Run Mac Universal CJS Tests
+        run: |
+          echo "🧪 Running Mac Universal matrix test for ${{ inputs.scenario }}..."
+          cd e2e
+          MAC_UNIVERSAL=true PLATFORM=${{ inputs.scenario }} pnpm run test:mac-universal:matrix
+        shell: bash
+
+      # Run Mac Universal ESM matrix test
+      - if: ${{ env.MAC_UNIVERSAL == 'true' && contains(inputs.type, 'esm') }}
+        name: 🧪 Run Mac Universal ESM Tests
+        run: |
+          echo "🧪 Running Mac Universal ESM matrix test for ${{ inputs.scenario }}..."
+          cd e2e
+          MAC_UNIVERSAL=true PLATFORM=${{ inputs.scenario }} MODULE_TYPE=esm pnpm run test:mac-universal:matrix
+        shell: bash
+
+      # Run tests based on the scenario and type inputs (only if not MAC_UNIVERSAL)
       - name: 🧪 Execute E2E Tests
+        if: ${{ env.MAC_UNIVERSAL != 'true' }}
         shell: bash
         id: run_tests
         env:
