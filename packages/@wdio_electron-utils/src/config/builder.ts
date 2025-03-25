@@ -93,7 +93,7 @@ async function readConfig(configFile: string, projectDir: string) {
   return { result, configFile };
 }
 
-export const builderBuildInfo = (builderConfig: BuilderConfig, pkg: NormalizedReadResult): BuilderBuildInfo => {
+function builderBuildInfo(builderConfig: BuilderConfig, pkg: NormalizedReadResult): BuilderBuildInfo {
   log.info(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
   const appName: string = pkg.packageJson.productName || builderConfig?.productName || pkg.packageJson.name;
 
@@ -107,4 +107,4 @@ export const builderBuildInfo = (builderConfig: BuilderConfig, pkg: NormalizedRe
     isForge: false,
     isBuilder: true,
   };
-};
+}
