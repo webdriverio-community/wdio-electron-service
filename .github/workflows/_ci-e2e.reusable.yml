@@ -488,83 +488,78 @@ jobs:
 
           # Set up monitoring only for Linux
           if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
-            # Set up a background process to monitor for SIGTERM
-            (
+            # Single monitor process instead of multiple
+            MONITOR_LOG="monitor.log"
+
+            # Function to handle process monitoring
+            monitor_processes() {
               while true; do
-                echo "[$(date)] SIGTERM monitor: Process $$ still running"
+                {
+                  echo "[$(date)] Process Monitor Status"
+                  echo "----------------------------------------"
+                  echo "Process tree:"
+                  pstree -p $$ || echo "pstree not available"
+                  echo "----------------------------------------"
+                  echo "Top processes by memory:"
+                  ps aux --sort=-%mem | head -8
+                  echo "----------------------------------------"
+                  echo "Memory status:"
+                  free -h
+                  echo "----------------------------------------"
+                } >> "$MONITOR_LOG"
+                sleep 10
+              done
+            }
+
+            # Start single monitor process
+            monitor_processes &
+            MONITOR_PID=$!
+
+            # Improved signal handling function
+            handle_signal() {
+              local signal=$1
+              echo "Received $signal signal in process $$"
+
+              # Only handle each signal once
+              trap '' SIGTERM SIGINT
+
+              {
+                echo "************* SIGNAL HANDLER START ($signal) *************"
+                date
+                echo "Process ID: $$"
                 echo "Parent process: $(ps -o ppid= -p $$)"
                 echo "Process tree:"
-                pstree -p $$ || echo "pstree not available"
-                echo "Running processes:"
-                ps aux --sort=-%mem | head -15
-                echo "Memory usage:"
+                pstree -p $$
+                echo "Memory status:"
                 free -h
-                echo "----------------------------------------"
-                sleep 5
-              done
-            ) > sigterm_monitor.log &
-            SIGTERM_MONITOR_PID=$!
+                echo "Monitor log tail:"
+                tail -n 50 "$MONITOR_LOG"
+                echo "************* SIGNAL HANDLER END *************"
+              } >> "$MONITOR_LOG"
+
+              # Kill monitor process if it exists
+              if [[ -n "$MONITOR_PID" ]]; then
+                kill $MONITOR_PID 2>/dev/null || true
+              fi
+
+              # Exit with appropriate code
+              exit 143
+            }
 
             # Set up signal handlers
             trap 'handle_signal SIGTERM' SIGTERM
             trap 'handle_signal SIGINT' SIGINT
 
-            # Function to handle signals
-            handle_signal() {
-              local signal=$1
-              echo "************* CAUGHT $signal in test execution *************"
-              echo "Time: $(date)"
-              echo "Current process: $$"
-              echo "Parent process: $(ps -o ppid= -p $$)"
-
-              # Print process tree
-              echo "Process tree:"
-              pstree -p $$ || echo "pstree not available"
-
-              # Print memory usage
-              echo "Memory usage:"
-              free -h
-
-              # Print running processes
-              echo "Top processes by memory:"
-              ps aux --sort=-%mem | head -15
-
-              # Print current directory contents
-              echo "Current directory contents:"
-              ls -la
-
-              # Print test logs if they exist
-              for log_file in test*.log; do
-                if [[ -f "$log_file" ]]; then
-                  echo "Contents of $log_file:"
-                  tail -n 50 "$log_file"
-                fi
-              done
-
-              # Kill any remaining processes
-              pkill -P $$ || true
-              exit 143
-            }
-
-            # Set up process monitoring
-            (
-              while true; do
-                echo "[$(date)] Process monitor check..."
-                ps aux --sort=-%mem | head -8
-                sleep 10
-              done
-            ) > process_monitor.log &
-            MONITOR_PID=$!
+            # Make sure monitor is killed on normal exit
+            trap 'if [[ -n "$MONITOR_PID" ]]; then kill $MONITOR_PID 2>/dev/null || true; fi' EXIT
           fi
-
-          # Make sure to kill the monitor when this script exits
-          trap 'kill $MONITOR_PID 2>/dev/null' EXIT
 
           # Define run_test function
           run_test() {
             local env_vars="$1"
             local command="$2"
             local log_file="$3"
+            local test_exit_code=0
 
             echo "🔍 DEBUG: Starting test execution"
             echo "Environment: $env_vars"
@@ -578,14 +573,24 @@ jobs:
             # Create the log file directory if it doesn't exist
             mkdir -p "$(dirname "$log_file")"
 
-            # Enable error tracing
-            set -E
-            trap 'echo "Error on line $LINENO. Exit code: $?"' ERR
+            # Enable error tracing only on Linux
+            if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+              set -E
+              trap 'echo "Error on line $LINENO. Exit code: $?"' ERR
+              echo "Linux detected: Enabled error trapping"
+            else
+              echo "Non-Linux OS detected: Skipping error trapping"
+            fi
 
             # Run the command with the specified environment variables and tee output
             (
-              # Enable pipefail to catch errors in pipes
-              set -o pipefail
+              # Enable pipefail to catch errors in pipes (Linux only)
+              if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+                set -o pipefail
+                echo "Linux detected: Enabled pipefail"
+              else
+                echo "Non-Linux OS detected: Skipping pipefail"
+              fi
 
               echo "=== Test execution started at $(date) ==="
               echo "Working directory: $(pwd)"
@@ -600,23 +605,23 @@ jobs:
                 # Windows/macOS: Run directly without debug
                 echo "Running on Windows/macOS - executing without debug mode"
                 $command 2>&1 | tee -a "$log_file"
-                cmd_exit=${PIPESTATUS[0]}
-                echo "Command exit code: $cmd_exit"
+                test_exit_code=${PIPESTATUS[0]}
+                echo "Command exit code: $test_exit_code"
               else
                 # Linux: Run with debug mode
                 echo "Running on Linux - executing with debug mode"
                 DEBUG=wdio-electron-service* $command 2>&1 | tee -a "$log_file"
-                cmd_exit=${PIPESTATUS[0]}
-                echo "Command exit code: $cmd_exit"
+                test_exit_code=${PIPESTATUS[0]}
+                echo "Command exit code: $test_exit_code"
               fi
 
               echo "----------------------------------------"
               echo "=== Test execution completed at $(date) ==="
-              echo "Final exit code: $cmd_exit"
+              echo "Final exit code: $test_exit_code"
 
               # Check if the process was terminated by a signal
-              if [ $cmd_exit -gt 128 ]; then
-                local signal=$((cmd_exit - 128))
+              if [ $test_exit_code -gt 128 ]; then
+                local signal=$((test_exit_code - 128))
                 echo "⚠️ Process terminated by signal $signal"
                 if [ $signal -eq 15 ]; then
                   echo "❌ Process was terminated by SIGTERM"
@@ -626,19 +631,27 @@ jobs:
               fi
 
               # Print additional debug info on non-zero exit
-              if [ $cmd_exit -ne 0 ]; then
-                echo "❌ Command failed with exit code $cmd_exit"
+              if [ $test_exit_code -ne 0 ]; then
+                echo "❌ Command failed with exit code $test_exit_code"
                 echo "Last 50 lines of log file:"
                 tail -n 50 "$log_file"
                 echo "Environment at failure:"
                 env | sort
               fi
 
-              exit $cmd_exit
+              exit $test_exit_code
             )
 
             local final_exit=$?
             echo "Final exit code from subshell: $final_exit"
+
+            # Print the log file contents for debugging
+            if [ -f "$log_file" ]; then
+              echo "=== Test Log Contents ==="
+              cat "$log_file"
+              echo "=== End Test Log ==="
+            fi
+
             return $final_exit
           }
 
