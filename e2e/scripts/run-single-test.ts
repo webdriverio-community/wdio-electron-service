@@ -23,7 +23,12 @@ import { fileURLToPath } from 'url';
 // More detailed executable path detection
 try {
   console.log('Node executable path:', process.execPath);
-  console.log('Module lookup paths:', module?.paths || []);
+  // Use import.meta.resolve for ESM module resolution info
+  const moduleInfo = {
+    url: import.meta.url,
+    resolve: (id: string) => import.meta.resolve?.(id),
+  };
+  console.log('Module info:', moduleInfo);
 } catch (e) {
   console.error('Error getting executable info:', e);
 }
