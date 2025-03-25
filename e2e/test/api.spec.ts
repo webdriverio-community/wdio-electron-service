@@ -15,13 +15,14 @@ const getExpectedAppName = (): string => {
   return 'Electron';
 };
 
-const getExpectedAppVersion = (): string => {
+const getExpectedAppVersion = async (): Promise<string> => {
   // If running in binary mode, use the package name from globalThis
   if (isBinary && globalThis.packageJson?.version) {
     return globalThis.packageJson.version;
   }
   // In no-binary mode, the version should match the Electron version
-  return process.versions.electron;
+  const electronVersion = await browser.electron.execute((_electron) => process.versions.electron);
+  return electronVersion;
 };
 
 describe('Electron APIs', () => {
@@ -34,7 +35,7 @@ describe('Electron APIs', () => {
 
   it('should retrieve the app version through the electron API', async () => {
     const appVersion = await browser.electron.execute((electron) => electron.app.getVersion());
-    const expectedVersion = getExpectedAppVersion();
+    const expectedVersion = await getExpectedAppVersion();
 
     expect(appVersion).toBe(expectedVersion);
   });

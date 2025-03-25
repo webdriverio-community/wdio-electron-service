@@ -193,7 +193,21 @@ class TestAppsManager {
       } else {
         console.log(`Preparing only these module types: ${moduleTypes.join(', ')}`);
       }
+    } else {
+      // If no module type is specified or it's '*', use all module types
+      console.log(`No specific module type requested, preparing all module types: ${moduleTypes.join(', ')}`);
     }
+
+    // Special handling for MAC_UNIVERSAL mode
+    if (process.env.MAC_UNIVERSAL === 'true') {
+      console.log('🍎 MAC_UNIVERSAL mode detected - ensuring both CJS and ESM are prepared');
+      moduleTypes = [...allModuleTypes];
+    }
+
+    // Log the final selection
+    console.log('Final app preparation configuration:');
+    console.log(`- Scenarios: ${scenarios.join(', ')}`);
+    console.log(`- Module Types: ${moduleTypes.join(', ')}`);
 
     return { scenarios, moduleTypes };
   }
