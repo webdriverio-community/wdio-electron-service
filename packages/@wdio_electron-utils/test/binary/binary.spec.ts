@@ -52,21 +52,22 @@ describe('ABinaryPathGenerator', () => {
   it('should return a binary paths for the MacOS', async () => {
     const mockClass = generateMockInstance('darwin');
     const result = mockClass.generate();
-    expect(result.map((p) => normalize(p))).toStrictEqual([
-      '/path/to/dir1/my-app.app/Contents/MacOS/my-app',
-      '/path/to/dir2/my-app.app/Contents/MacOS/my-app',
-    ]);
+    expect(result).toStrictEqual(
+      ['/path/to/dir1/my-app.app/Contents/MacOS/my-app', '/path/to/dir2/my-app.app/Contents/MacOS/my-app'].map((p) =>
+        normalize(p),
+      ),
+    );
   });
 
   it('should return a binary paths for the Windows', async () => {
     const mockClass = generateMockInstance('win32');
     const result = mockClass.generate();
-    expect(result.map((p) => normalize(p))).toStrictEqual(['/path/to/dir1/my-app.exe', '/path/to/dir2/my-app.exe']);
+    expect(result).toStrictEqual(['/path/to/dir1/my-app.exe', '/path/to/dir2/my-app.exe'].map((p) => normalize(p)));
   });
 
   it('should return a binary paths for the Linux', async () => {
     const mockClass = generateMockInstance('linux');
     const result = mockClass.generate();
-    expect(result.map((p) => normalize(p))).toStrictEqual(['/path/to/dir1/my-app', '/path/to/dir2/my-app']);
+    expect(result).toStrictEqual(['/path/to/dir1/my-app', '/path/to/dir2/my-app'].map((p) => normalize(p)));
   });
 });

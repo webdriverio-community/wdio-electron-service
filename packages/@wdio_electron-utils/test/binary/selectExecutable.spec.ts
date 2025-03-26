@@ -1,4 +1,3 @@
-import { normalize } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { mockBinaryPath } from '../testUtils';
@@ -48,7 +47,7 @@ describe('selectExecutable', () => {
 
     const result = await selectExecutable(executableBinaryPaths);
 
-    expect(result).toBe(normalize('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app'));
+    expect(result).toBe('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
     expect(log.info).toHaveBeenLastCalledWith(
       expect.stringMatching(/Detected multiple app binaries, using the first one:/),
     );
