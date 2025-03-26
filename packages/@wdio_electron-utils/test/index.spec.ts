@@ -1244,16 +1244,15 @@ describe('Electron Utilities', () => {
       configObj: { productName: 'my-app' },
     });
 
-    // For the darwin with custom output directory test we need to mock the correct path
-    // The error shows the paths being checked, e.g., /path/to/dist/mac-universal/mac/my-app.app/Contents/MacOS/my-app
-    mockBinaryPath('/path/to/dist/mac-universal/mac/my-app.app/Contents/MacOS/my-app');
+    // For macOS universal builds, the app is directly in the mac-universal directory
+    mockBinaryPath('/path/to/dist/mac-universal/my-app.app/Contents/MacOS/my-app');
 
     testBinaryPath({
       platform: 'darwin',
       arch: 'arm64',
-      binaryPath: '/path/to/dist/mac-universal/mac/my-app.app/Contents/MacOS/my-app',
+      binaryPath: '/path/to/dist/mac-universal/my-app.app/Contents/MacOS/my-app',
       isForge: false,
-      configObj: { productName: 'my-app', directories: { output: 'dist/mac-universal' } },
+      configObj: { productName: 'my-app' },
     });
 
     // For the linux tests we need to mock the correct paths

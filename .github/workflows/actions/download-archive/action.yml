@@ -196,7 +196,7 @@ runs:
       shell: bash
       run: |
         # Create directory for artifact
-        mkdir -p "${{ inputs.path }}"
+        pnpx shx mkdir -p "${{ inputs.path }}"
 
         # Download artifact with retries
         MAX_RETRIES=3

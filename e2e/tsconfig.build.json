@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": ["node", "@wdio/globals", "mocha"],
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist", "test/js"]
+}

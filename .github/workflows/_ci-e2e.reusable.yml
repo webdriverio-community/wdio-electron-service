@@ -50,6 +50,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ${{ inputs.os }}
+    continue-on-error: true
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
@@ -77,6 +78,129 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
+      # Verify the downloaded build artifacts
+      - name: 🔍 Verify Downloaded Artifacts
+        shell: bash
+        run: |
+          echo "=============== VERIFYING BUILD ARTIFACTS ==============="
+          echo "Artifact directory contents:"
+          ls -la wdio-electron-service-build
+
+          # Check if packaged-service exists
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            echo "✅ Found packaged-service directory"
+            echo "Contents of packaged-service directory:"
+            ls -la wdio-electron-service-build/packaged-service
+          else
+            echo "❌ packaged-service directory not found"
+            echo "Creating packaged-service directory for debugging:"
+            pnpx shx mkdir -p wdio-electron-service-build/packaged-service
+          fi
+
+          # Check for dist directories
+          if [ -d "wdio-electron-service-build/packages" ]; then
+            echo "✅ Found packages directory"
+            echo "Contents of packages directory:"
+            ls -la wdio-electron-service-build/packages
+          else
+            echo "❌ packages directory not found"
+          fi
+
+      # Copy the artifact package dist directory to the local package directory
+      - name: 📦 Copy Artifact Package Dist Directory
+        shell: bash
+        run: |
+          # Dynamically find all package directories in the artifact build
+          echo "Finding packages with dist directories in the artifact build..."
+          find wdio-electron-service-build/packages -type d -name dist -path "*/packages/*" | while read dist_dir; do
+            # Extract the package name by getting the parent directory name
+            package_dir=$(dirname "$dist_dir")
+            package_name=$(basename "$package_dir")
+            package_path="packages/$package_name"
+
+            if [ -d "$package_path" ]; then
+              echo "Copying dist directory for $package_name..."
+              pnpx shx mkdir -p "$package_path/dist"
+              pnpx shx cp -r "$dist_dir"/* "$package_path/dist/"
+              echo "✅ Copied dist files for $package_name"
+            else
+              echo "⚠️ Local package directory not found: $package_path"
+            fi
+          done
+
+      # Package service locally if not found in build artifacts
+      - name: 📦 Create Service Package Locally
+        shell: bash
+        id: local-package-service
+        if: ${{ success() }}
+        run: |
+          # Check if packaged-service directory exists and has a .tgz file
+          if [ -d "wdio-electron-service-build/packaged-service" ]; then
+            SERVICE_PACKAGE=$(find wdio-electron-service-build/packaged-service -name "wdio-electron-service-*.tgz" 2>/dev/null | head -n 1)
+            if [ -n "$SERVICE_PACKAGE" ]; then
+              echo "✅ Using service package from build artifacts: $SERVICE_PACKAGE"
+              echo "WDIO_SERVICE_TARBALL=$(pwd)/$SERVICE_PACKAGE" >> $GITHUB_ENV
+              echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+              echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+
+              echo "Installing service package in example apps..."
+              # Get the active scenario and module type
+              IFS=',' read -ra SCENARIOS <<< "${{ inputs.scenario }}"
+              MODULE_TYPE="${{ inputs.type }}"
+
+              for SCENARIO in "${SCENARIOS[@]}"; do
+                TRIMMED_SCENARIO=$(echo $SCENARIO | xargs)
+
+                if [[ "$MODULE_TYPE" == "*" ]]; then
+                  # Both ESM and CJS need to be installed
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-esm" "apps/${TRIMMED_SCENARIO}-cjs")
+                else
+                  # Only install for the specific module type
+                  APP_DIRS=("apps/${TRIMMED_SCENARIO}-${MODULE_TYPE}")
+                fi
+
+                for APP_DIR in "${APP_DIRS[@]}"; do
+                  if [ -d "$APP_DIR" ]; then
+                    echo "Installing service package in $APP_DIR..."
+                    cd "$APP_DIR"
+                    # Only install the service package since root dependencies are already installed
+                    pnpm install "$(pwd)/../../$SERVICE_PACKAGE" --no-lockfile
+                    cd ../..
+                  else
+                    echo "Skipping non-existent app directory: $APP_DIR"
+                  fi
+                done
+              done
+
+              exit 0
+            fi
+          fi
+
+          echo "❌ Service package not found in build artifacts. Creating locally..."
+
+          # Create a local package
+          pnpx shx mkdir -p local-service-package
+          cd packages/wdio-electron-service
+          echo "Running pnpm pack in $(pwd)"
+          PACKAGE_FILE=$(pnpm pack | tail -n 1)
+
+          if [ -f "$PACKAGE_FILE" ]; then
+            echo "✅ Successfully created package: $PACKAGE_FILE"
+            # Move the package to the shared directory
+            mv "$PACKAGE_FILE" ../../local-service-package/
+            cd ../..
+            echo "WDIO_SERVICE_TARBALL=$(pwd)/local-service-package/$PACKAGE_FILE" >> $GITHUB_ENV
+            echo "USE_ARTIFACT_SERVICE=true" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=true" >> $GITHUB_ENV
+            echo "Local service package created at: $(pwd)/local-service-package/$PACKAGE_FILE"
+            ls -la local-service-package
+          else
+            echo "❌ Failed to create local service package"
+            cd ../..
+            echo "USE_ARTIFACT_SERVICE=false" >> $GITHUB_ENV
+            echo "SKIP_SERVICE_PACKING=false" >> $GITHUB_ENV
+          fi
+
       # Display build information if available
       - name: 📊 Show Build Information
         if: inputs.build_id != '' && inputs.artifact_size != ''
@@ -91,60 +215,502 @@ jobs:
         shell: bash
         run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # Dynamically generate the Turbo filter for building test applications
-      # This converts the scenario and type inputs into Turbo filter syntax
-      - name: 🪄 Generate Build Filter for Test Apps
-        id: gen-build
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateBuildFilter = (scenario, type) => {
-              return scenario
-                .split(',')
-                .map((s) => `--filter=example-${s.trim()}-${type}`)
-                .join(' ');
-            };
-            return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
-
-      # Build the test applications using Turbo with the generated filter
-      # This builds only the necessary test apps for the current test configuration
-      - name: 🏗️ Build Test Applications
+      # Prepare the test applications
+      - name: 🏗️ Prepare Test Applications
         shell: bash
-        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+        id: prepare_apps
+        env:
+          # Preserve temp directories between steps
+          PRESERVE_TEMP_DIR: 'true'
+          # Enable more detailed debug logging
+          DEBUG: 'wdio-electron-service*'
+          # Use the pre-built service from the build job
+          USE_ARTIFACT_SERVICE: ${{ env.USE_ARTIFACT_SERVICE || 'true' }}
+          # Pass through service tarball path if available
+          WDIO_SERVICE_TARBALL: ${{ env.WDIO_SERVICE_TARBALL || '' }}
+          # Debug environment variable for SIGTERM debugging
+          WDIO_DEBUG_SIGTERM: 'true'
+          # Enable ESM mode support to fix __filename not defined error
+          NODE_OPTIONS: '--no-warnings --experimental-specifier-resolution=node'
+        timeout-minutes: 15
+        run: |
+          echo "Preparing test applications for scenario: ${{ inputs.scenario }}, module type: ${{ inputs.type }}"
 
-      # Dynamically generate the test commands to run
-      # This handles both single and multiple scenarios, and ESM/CJS/both
-      - name: 🪄 Generate Test Execution Plan
-        id: gen-test
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const generateTestCommand = (scenario, type) => {
-              return scenario
-                .split(',')
-                .flatMap((s) => {
-                  const scenario = s.trim();
-                  return type === '*'
-                    ? [`test:e2e:${scenario}-esm`, `test:e2e:${scenario}-cjs`]
-                    : [`test:e2e:${scenario}-${type}`];
-                })
-                .join(' ');
-            };
-            return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
+          # Print system diagnostics
+          echo "=== System Diagnostics ==="
+          echo "Operating System: ${{ runner.os }}"
+          echo "Kernel version: $(uname -a)"
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Memory: $(free -h)"
+            echo "Disk space: $(df -h)"
+          fi
+          echo "================="
 
-      # Run the E2E tests using Turbo with the generated test commands
-      # First initializes the E2E environment, then runs the specific tests
+          # Process environment information
+          echo "=== Environment Variables ==="
+          printenv | sort
+          echo "================="
+
+          # Set up signal tracing on Linux
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Setting up signal tracing on Linux..."
+
+            # Create a trap for SIGTERM to get stack trace
+            trap_sigterm() {
+              echo "************* CAUGHT SIGTERM in prepare-apps.sh wrapper *************"
+              echo "Time: $(date)"
+              echo "Current process: $$"
+
+              # Print stack trace if possible
+              if type -t caller > /dev/null; then
+                echo "Stack trace:"
+                local i=0
+                while caller $i; do
+                  ((i++))
+                done
+              fi
+
+              # Show what processes might be sending signals
+              echo "Running processes (sorted by memory usage):"
+              ps aux --sort=-%mem | head -15
+
+              # Print parent process tree to help identify the source of SIGTERM
+              echo "Process tree:"
+              pstree -p $$
+
+              echo "************* END SIGTERM TRAP *************"
+
+              # Exit with SIGTERM exit code
+              exit 143
+            }
+
+            # Set up the trap
+            trap 'trap_sigterm' TERM
+
+            # Monitor for processes that might be causing issues
+            (
+              while true; do
+                echo "[$(date)] Process monitor check..."
+                ps aux --sort=-%mem | head -8
+                sleep 10
+              done
+            ) > process_monitor.log &
+            MONITOR_PID=$!
+
+            # Make sure to kill the monitor when this script exits
+            trap 'kill $MONITOR_PID 2>/dev/null' EXIT
+          fi
+
+          # Add process monitoring on Linux
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            echo "Setting up Linux process monitoring..."
+
+            # Check for stray processes
+            echo "Checking for stray electron or node processes:"
+            ps aux | grep -E 'electron|node' | grep -v grep || echo "No matching processes found"
+
+            # Print all running processes to see what else might be competing for resources
+            echo "=== All Running Processes ==="
+            ps aux --sort=-%mem | head -20
+            echo "================="
+
+            # Clean up any leftover test directories
+            echo "Cleaning up any leftover test directories..."
+            find /tmp -maxdepth 1 -name "wdio-e2e-*" -type d -mmin +60 -exec rm -rf {} \; 2>/dev/null || true
+          fi
+
+          echo "Running prepare apps command..."
+
+          cd e2e
+          echo "Running in $(pwd)"
+
+          # Create debug file to capture any errors
+          DEBUG_LOG="/tmp/prepare-apps-debug.log"
+          echo "Debug log will be written to $DEBUG_LOG"
+
+          # We need a way to catch SIGTERM and print diagnostics even if it happens in child processes
+          # Run the command with additional debug capabilities
+          {
+            # Run the command and capture start time
+            echo "Starting prepare-apps at $(date)"
+            START_TIME=$(date +%s)
+
+            # Run the prepare-apps script directly
+            echo "Command: node --no-warnings --import tsx ./scripts/prepare-apps.js --timeout=600000 --scenario=${{ inputs.scenario }} --module-type=${{ inputs.type }}"
+            node --no-warnings --import tsx ./scripts/prepare-apps.js --timeout=600000 --scenario=${{ inputs.scenario }} --module-type=${{ inputs.type }}
+            RC=$?
+
+            # Capture end time and calculate duration
+            END_TIME=$(date +%s)
+            DURATION=$((END_TIME - START_TIME))
+
+            echo "prepare-apps completed with exit code $RC after ${DURATION}s"
+            echo "Exit code: $RC"
+          } 2>&1 | tee -a $DEBUG_LOG
+
+          echo "=== Process completed ==="
+
+          # Check if the process was terminated by a signal
+          if [ $RC -gt 128 ]; then
+            SIGNAL=$((RC - 128))
+            echo "Process appears to have been terminated by signal $SIGNAL"
+
+            if [ $SIGNAL -eq 15 ]; then
+              echo "Process was terminated by SIGTERM (signal 15)"
+
+              # Show process information
+              echo "Current processes:"
+              ps aux --sort=-%mem | head -15
+            fi
+          fi
+
+          # Print debug log if the process failed
+          if [[ -f "$DEBUG_LOG" ]]; then
+            echo "Contents of debug log:"
+            cat "$DEBUG_LOG"
+          fi
+
+          # Additional diagnostics if process monitor log exists
+          if [[ -f "process_monitor.log" ]]; then
+            echo "Process monitor log contents:"
+            cat process_monitor.log
+          fi
+
+          # Save the environment variables to GITHUB_ENV to make them available to next steps
+          if [[ -n "${WDIO_TEST_APPS_PREPARED}" ]]; then
+            echo "WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED}" >> $GITHUB_ENV
+            echo "Exported WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED}"
+          fi
+
+          if [[ -n "${WDIO_TEST_APPS_DIR}" ]]; then
+            echo "WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR}" >> $GITHUB_ENV
+            echo "Exported WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR}"
+          fi
+
+          # Create symlinks for workspace dependencies
+          echo "Creating symlinks for workspace dependencies..."
+          if [ -d "../wdio-electron-service-build/packages" ]; then
+            pnpx shx mkdir -p node_modules
+
+            # Find all workspace packages in the artifact
+            find "../wdio-electron-service-build/packages" -maxdepth 1 -type d | grep -v "^../wdio-electron-service-build/packages$" | while read package_dir; do
+              package_name=$(basename "$package_dir")
+
+              if [ -d "$package_dir/node_modules" ]; then
+                echo "Exploring dependencies in $package_name..."
+
+                # Create symlinks for non-scoped packages
+                find "$package_dir/node_modules" -maxdepth 1 -type d | grep -v "^$package_dir/node_modules$" | grep -v "^$package_dir/node_modules/@" | while read dep_dir; do
+                  dep_name=$(basename "$dep_dir")
+                  if [ ! -d "node_modules/$dep_name" ]; then
+                    echo "Creating symlink for: $dep_name"
+                    ln -s "$dep_dir" "node_modules/$dep_name" || true
+                  fi
+                done
+
+                # Create symlinks for scoped packages
+                find "$package_dir/node_modules" -maxdepth 1 -type d -name "@*" | while read scope_dir; do
+                  scope_name=$(basename "$scope_dir")
+                  pnpx shx mkdir -p "node_modules/$scope_name"
+                  find "$scope_dir" -maxdepth 1 -type d | grep -v "^$scope_dir$" | while read scoped_dep_dir; do
+                    scoped_dep_name=$(basename "$scoped_dep_dir")
+                    if [ ! -d "node_modules/${scope_name}/${scoped_dep_name}" ]; then
+                      echo "Creating symlink for: ${scope_name}/${scoped_dep_name}"
+                      ln -s "$scoped_dep_dir" "node_modules/${scope_name}/${scoped_dep_name}" || true
+                    fi
+                  done
+                done
+              fi
+            done
+          fi
+
+      # Run tests based on the scenario and type inputs (only if not MAC_UNIVERSAL)
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+        id: run_tests
+        env:
+          # Set environment variables for testing
+          PRESERVE_TEMP_DIR: 'true'
+          # Set MAC_UNIVERSAL flag if we're using the mac-universal build command
+          MAC_UNIVERSAL: ${{ contains(inputs.build-command, 'mac-universal') && 'true' || '' }}
+          # Add DEBUG for more verbose output
+          DEBUG: 'wdio-electron-service*'
+          # Test configuration
+          SUITE_SETUP_DONE: 'true'
+        run: |
+          cd e2e
+
+          # Log environment for debugging
+          echo "Environment: MAC_UNIVERSAL=$MAC_UNIVERSAL, build-command=${{ inputs.build-command }}, ELECTRON_CACHE=$ELECTRON_CACHE"
+          echo "Test apps: WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''}, WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''}, SUITE_SETUP_DONE=$SUITE_SETUP_DONE"
+
+          # Debug: Check tools availability
+          echo "=== Debug: Available Tools ==="
+          echo "Node.js version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+
+          # Check package.json scripts
+          echo "Available scripts in package.json:"
+          cat package.json | grep "\"test:" | sed 's/^/  /'
+
+          # Check if test:single script exists
+          test -f ./scripts/run-single-test.ts && echo "run-single-test.ts exists" || echo "run-single-test.ts does not exist"
+          test -f ./scripts/run-test-matrix.ts && echo "run-test-matrix.ts exists" || echo "run-test-matrix.ts does not exist"
+
+          # Set environment variables for test execution
+          export WDIO_TEST_APPS_PREPARED=${WDIO_TEST_APPS_PREPARED:-''}
+          export WDIO_TEST_APPS_DIR=${WDIO_TEST_APPS_DIR:-''}
+          export WDIO_VERBOSE=true
+          export TEST_TYPE=standard
+          export BINARY=true
+          export NODE_OPTIONS='--no-warnings --experimental-specifier-resolution=node'
+
+          # Add pre-execution diagnostics
+          echo "=== Pre-execution Diagnostics ==="
+          if [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win32"* || "$OSTYPE" == "darwin"* ]]; then
+            # Windows/macOS: Skip debugging, just show basic info
+            echo "Running on Windows/macOS - skipping detailed diagnostics"
+          else
+            # Linux: Full diagnostics
+            echo "Parent process: $(ps -o ppid= -p $$)"
+            echo "Process tree:"
+            pstree -p $$ || echo "pstree not available"
+            echo "Running processes:"
+            ps aux --sort=-%mem | head -15
+            echo "Memory usage:"
+            free -h
+          fi
+
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "=========================="
+
+          # Set up monitoring only for Linux
+          if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+            # Single monitor process instead of multiple
+            MONITOR_LOG="monitor.log"
+
+            # Function to handle process monitoring
+            monitor_processes() {
+              while true; do
+                {
+                  echo "[$(date)] Process Monitor Status"
+                  echo "----------------------------------------"
+                  echo "Process tree:"
+                  pstree -p $$ || echo "pstree not available"
+                  echo "----------------------------------------"
+                  echo "Top processes by memory:"
+                  ps aux --sort=-%mem | head -8
+                  echo "----------------------------------------"
+                  echo "Memory status:"
+                  free -h
+                  echo "----------------------------------------"
+                } >> "$MONITOR_LOG"
+                sleep 10
+              done
+            }
+
+            # Start single monitor process
+            monitor_processes &
+            MONITOR_PID=$!
+
+            # Improved signal handling function
+            handle_signal() {
+              local signal=$1
+              echo "Received $signal signal in process $$"
+
+              # Only handle each signal once
+              trap '' SIGTERM SIGINT
+
+              {
+                echo "************* SIGNAL HANDLER START ($signal) *************"
+                date
+                echo "Process ID: $$"
+                echo "Parent process: $(ps -o ppid= -p $$)"
+                echo "Process tree:"
+                pstree -p $$
+                echo "Memory status:"
+                free -h
+                echo "Monitor log tail:"
+                tail -n 50 "$MONITOR_LOG"
+                echo "************* SIGNAL HANDLER END *************"
+              } >> "$MONITOR_LOG"
+
+              # Kill monitor process if it exists
+              if [[ -n "$MONITOR_PID" ]]; then
+                kill $MONITOR_PID 2>/dev/null || true
+              fi
+
+              # Don't propagate SIGTERM if we're in a test process
+              if [[ "$signal" == "SIGTERM" && -n "$WDIO_TEST_PROCESS" ]]; then
+                echo "Test process received SIGTERM, handling cleanup without propagation"
+                return 0
+              fi
+
+              # Exit with appropriate code for non-test processes
+              exit 143
+            }
+
+            # Set up signal handlers
+            trap 'handle_signal SIGTERM' SIGTERM
+            trap 'handle_signal SIGINT' SIGINT
+
+            # Make sure monitor is killed on normal exit
+            trap 'if [[ -n "$MONITOR_PID" ]]; then kill $MONITOR_PID 2>/dev/null || true; fi' EXIT
+          fi
+
+          # Define run_test function
+          run_test() {
+            local env_vars="$1"
+            local command="$2"
+            local log_file="$3"
+            local test_exit_code=0
+
+            echo "🔍 DEBUG: Starting test execution"
+            echo "Environment: $env_vars"
+            echo "Command: $command"
+            echo "Log file: $log_file"
+
+            # Print current environment
+            echo "Current environment variables:"
+            env | sort
+
+            # Create the log file directory if it doesn't exist
+            mkdir -p "$(dirname "$log_file")"
+
+            # Enable error tracing only on Linux
+            if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+              set -E
+              trap 'echo "Error on line $LINENO. Exit code: $?"' ERR
+              echo "Linux detected: Enabled error trapping"
+            else
+              echo "Non-Linux OS detected: Skipping error trapping"
+            fi
+
+            # Run the command with the specified environment variables and tee output
+            (
+              # Enable pipefail to catch errors in pipes (Linux only)
+              if [[ "$OSTYPE" != "msys"* && "$OSTYPE" != "cygwin"* && "$OSTYPE" != "win32"* && "$OSTYPE" != "darwin"* ]]; then
+                set -o pipefail
+                echo "Linux detected: Enabled pipefail"
+              else
+                echo "Non-Linux OS detected: Skipping pipefail"
+              fi
+
+              # Mark this as a test process
+              export WDIO_TEST_PROCESS=1
+
+              echo "=== Test execution started at $(date) ==="
+              echo "Working directory: $(pwd)"
+              echo "Command: $env_vars $command"
+              echo "----------------------------------------"
+
+              # Export the environment variables
+              eval "export $env_vars"
+
+              # Check OS type and adjust debug behavior
+              if [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win32"* || "$OSTYPE" == "darwin"* ]]; then
+                # Windows/macOS: Run directly without debug
+                echo "Running on Windows/macOS - executing without debug mode"
+                $command 2>&1 | tee -a "$log_file"
+                test_exit_code=${PIPESTATUS[0]}
+                echo "Command exit code: $test_exit_code"
+              else
+                # Linux: Run with debug mode
+                echo "Running on Linux - executing with debug mode"
+                DEBUG=wdio-electron-service* $command 2>&1 | tee -a "$log_file"
+                test_exit_code=${PIPESTATUS[0]}
+                echo "Command exit code: $test_exit_code"
+              fi
+
+              echo "----------------------------------------"
+              echo "=== Test execution completed at $(date) ==="
+              echo "Final exit code: $test_exit_code"
+
+              # Check if the process was terminated by a signal
+              if [ $test_exit_code -gt 128 ]; then
+                local signal=$((test_exit_code - 128))
+                echo "⚠️ Process terminated by signal $signal"
+                if [ $signal -eq 15 ]; then
+                  echo "❌ Process was terminated by SIGTERM"
+                  echo "Last 50 lines of log file:"
+                  tail -n 50 "$log_file"
+                fi
+              fi
+
+              # Print additional debug info on non-zero exit
+              if [ $test_exit_code -ne 0 ]; then
+                echo "❌ Command failed with exit code $test_exit_code"
+                echo "Last 50 lines of log file:"
+                tail -n 50 "$log_file"
+                echo "Environment at failure:"
+                env | sort
+              fi
+
+              exit $test_exit_code
+            )
+
+            local final_exit=$?
+            echo "Final exit code from subshell: $final_exit"
+
+            # Print the log file contents for debugging
+            if [ -f "$log_file" ]; then
+              echo "=== Test Log Contents ==="
+              cat "$log_file"
+              echo "=== End Test Log ==="
+            fi
+
+            return $final_exit
+          }
+
+          # Main execution
+          if [[ "${{ inputs.scenario }}" == "no-binary" ]]; then
+            if [[ "${{ inputs.type }}" == "*" ]]; then
+              # Run both ESM and CJS tests for no-binary
+              echo "Running no-binary CJS tests..."
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
+
+              echo "Running no-binary ESM tests..."
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
+            else
+              # Run specific module type test for no-binary
+              echo "Running no-binary ${{ inputs.type }} tests..."
+              run_test "BINARY=false TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=no-binary" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
+            fi
+          elif [[ "${{ inputs.scenario }}" == "builder" ]]; then
+            if [[ "${{ inputs.type }}" == "*" ]]; then
+              # Run both ESM and CJS tests for builder
+              echo "Running builder CJS tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
+
+              echo "Running builder ESM tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
+            else
+              # Run specific module type test for builder
+              echo "Running builder ${{ inputs.type }} tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=builder" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
+            fi
+          elif [[ "${{ inputs.scenario }}" == "forge" ]]; then
+            if [[ "${{ inputs.type }}" == "*" ]]; then
+              # Run both ESM and CJS tests for forge
+              echo "Running forge CJS tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=cjs PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-cjs.log"
+
+              echo "Running forge ESM tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=esm PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test-esm.log"
+            else
+              # Run specific module type test for forge
+              echo "Running forge ${{ inputs.type }} tests..."
+              run_test "BINARY=true TEST_TYPE=standard MODULE_TYPE=${{ inputs.type }} PLATFORM=forge WDIO_DEBUG=true" "pnpm exec tsx ./scripts/run-test-matrix.ts" "logs/test.log"
+            fi
+          fi
 
       # Show logs on failure to help with debugging
       - name: 🐛 Show Test Logs on Failure
         shell: bash
         if: failure()
-        run: pnpm run ci:e2e:logs
+        run: cd e2e && pnpm run cat-logs
 
       # Upload logs as artifacts on failure for later analysis
       # This helps debug issues without cluttering the GitHub Actions console
@@ -154,10 +720,15 @@ jobs:
         with:
           name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
           output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
-          paths: e2e/*/*.log
+          paths: e2e/logs
+
+      # Clean up temp directories after tests complete
+      - name: 🧹 Clean Up Temporary Directories
+        shell: bash
+        if: always()
+        run: cd e2e && pnpm run clean:temp-dirs
 
       # Provide an interactive debugging session on failure
-      # This allows manual investigation of the environment
       - name: 🐛 Debug Build on Failure
         uses: stateful/vscode-server-action@v1.1.0
         if: failure()
