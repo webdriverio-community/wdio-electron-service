@@ -2,12 +2,12 @@ import { normalize } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ABinaryPathGenerator, ExecutableBinaryPath } from '../../src/binary/binary';
-import { selectExecutable } from '../../src/binary/selectExecutable';
+import { selectExecutable } from '../../src/binary/select';
 
 import type { AppBuildInfo } from '@wdio/electron-types';
 import type { SupportedPlatform } from '../../src/types';
 
-vi.mock('../../src/binary/selectExecutable', () => {
+vi.mock('../../src/binary/select', () => {
   return {
     selectExecutable: vi.fn(),
   };

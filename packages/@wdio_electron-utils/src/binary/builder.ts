@@ -15,7 +15,6 @@ export class BuilderBinaryPathGenerator extends ABinaryPathGenerator {
   getBinaryName(): string {
     return this.appBuildInfo.appName;
   }
-
   getOutDir() {
     const builderOutDirName = this.appBuildInfo.config?.directories?.output || 'dist';
     const builderOutDirMap = (arch: BuilderArch) => ({

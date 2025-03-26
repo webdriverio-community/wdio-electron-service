@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { selectExecutable } from './selectExecutable';
+import { selectExecutable } from './select';
 
 import type { CommonBinaryOptions, IBinaryPathGenerator, IExecutableBinaryPath, SupportedPlatform } from '../types.js';
 

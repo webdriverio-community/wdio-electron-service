@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { mockBinaryPath } from '../testUtils';
 import log from '../../src/log';
-import { selectExecutable } from '../../src/binary/selectExecutable';
+import { selectExecutable } from '../../src/binary/select';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
