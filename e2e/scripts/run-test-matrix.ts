@@ -544,7 +544,10 @@ function filterVariants(variants: TestVariant[]): TestVariant[] {
     // This helps users and CI understand why their filters aren't working
     const warningMessages = [];
 
-    // Don't warn about PLATFORM or MODULE_TYPE as we want to support filtering by these in MAC_UNIVERSAL mode
+    // Don't warn about PLATFORM as we want to support filtering by platform in MAC_UNIVERSAL mode
+    if (process.env.MODULE_TYPE && process.env.MODULE_TYPE !== '*') {
+      warningMessages.push(`MODULE_TYPE=${process.env.MODULE_TYPE}`);
+    }
     if (process.env.TEST_TYPE && process.env.TEST_TYPE !== '*') {
       warningMessages.push(`TEST_TYPE=${process.env.TEST_TYPE}`);
     }
@@ -563,11 +566,7 @@ function filterVariants(variants: TestVariant[]): TestVariant[] {
       );
     }
 
-    // In Mac Universal mode, filter by:
-    // 1. Must be a binary test
-    // 2. Must be builder or forge platform
-    // 3. Must match platform filter if specified
-    // 4. Must match module type filter if specified
+    // In Mac Universal mode, only include builder and forge platforms
     return variants.filter((variant) => {
       // First check if the variant is a binary test (required for Mac Universal)
       const isBinaryTest = variant.binary === true;
@@ -575,14 +574,11 @@ function filterVariants(variants: TestVariant[]): TestVariant[] {
       // Then check if platform is builder or forge
       const isCompatiblePlatform = ['builder', 'forge'].includes(variant.platform);
 
-      // Check if platform matches filter (if specified)
+      // If PLATFORM is specified, use it to further filter compatible platforms
       const matchesPlatformFilter =
         !process.env.PLATFORM || process.env.PLATFORM === '*' || matches(process.env.PLATFORM, variant.platform);
 
-      // Check if module type matches filter (if specified)
-      const matchesModuleType = matches(process.env.MODULE_TYPE, variant.moduleType);
-
-      return isBinaryTest && isCompatiblePlatform && matchesPlatformFilter && matchesModuleType;
+      return isBinaryTest && isCompatiblePlatform && matchesPlatformFilter;
     });
   }
 
