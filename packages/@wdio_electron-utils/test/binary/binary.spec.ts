@@ -15,16 +15,17 @@ vi.mock('../../src/binary/select', () => {
 
 describe('ExecutableBinaryPath', () => {
   it('should return the path of executable', async () => {
-    vi.mocked(selectExecutable).mockResolvedValue('/path/to/executable1');
+    const expectedArray = ['/path/to/executable1', '/path/to/executable2'];
+    vi.mocked(selectExecutable).mockResolvedValue(expectedArray[0]);
     const mockBinaryPathGenerator = {
-      generate: vi.fn().mockReturnValue(['/path/to/executable1', '/path/to/executable2']),
+      generate: vi.fn().mockReturnValue(expectedArray),
     };
     const testTargetClass = new ExecutableBinaryPath(mockBinaryPathGenerator);
     const result = await testTargetClass.get();
 
     expect(mockBinaryPathGenerator.generate).toHaveBeenCalledTimes(1);
-    expect(selectExecutable).toHaveBeenCalledWith(['/path/to/executable1', '/path/to/executable2']);
-    expect(result).toBe('/path/to/executable1');
+    expect(selectExecutable).toHaveBeenCalledWith(expectedArray);
+    expect(result).toBe(expectedArray[0]);
   });
 });
 

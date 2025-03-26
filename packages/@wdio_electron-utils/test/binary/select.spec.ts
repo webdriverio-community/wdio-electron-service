@@ -47,22 +47,16 @@ describe('selectExecutable', () => {
 
     const result = await selectExecutable(executableBinaryPaths);
 
-    expect(result).toBe('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app');
+    expect(result).toBe(executableBinaryPaths[0]);
     expect(log.info).toHaveBeenLastCalledWith(
       expect.stringMatching(/Detected multiple app binaries, using the first one:/),
     );
   });
 
   it('should throw an error when no executable binary found', async () => {
-    const binaryMock = {
-      binary: {
-        platform: 'linux',
-        appName: 'my-app',
-      },
-    };
     mockBinaryPath('/path/to/dummy');
 
-    await expect(() => selectExecutable.call(binaryMock, ['/path/to/dist'], 'my-app')).rejects.toThrowError(
+    await expect(() => selectExecutable(['/path/to/dist'])).rejects.toThrowError(
       'No executable binary found, checked:',
     );
   });
