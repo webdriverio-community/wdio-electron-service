@@ -10,10 +10,10 @@ export class ForgeBinaryPathGenerator extends ABinaryPathGenerator {
   appBuildInfo: ForgeBuildInfo;
   constructor(options: ForgeBinaryOptions) {
     super(options);
-    this.appBuildInfo = options.appBuildInfo as ForgeBuildInfo;
+    this.appBuildInfo = options.appBuildInfo;
   }
 
-  selectExecutablePathName(): string {
+  getBinaryName(): string {
     return this.appBuildInfo.config.packagerConfig?.executableName || this.appBuildInfo.appName;
   }
 

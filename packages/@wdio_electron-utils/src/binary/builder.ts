@@ -12,7 +12,7 @@ export class BuilderBinaryPathGenerator extends ABinaryPathGenerator {
     this.appBuildInfo = options.appBuildInfo;
   }
 
-  selectExecutablePathName(): string {
+  getBinaryName(): string {
     return this.appBuildInfo.appName;
   }
 

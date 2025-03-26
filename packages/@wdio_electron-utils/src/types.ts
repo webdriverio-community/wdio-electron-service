@@ -6,8 +6,8 @@ export type SupportedPlatform = keyof typeof SUPPORTED_PLATFORM;
 export interface IBinaryPathGenerator {
   generate(): string[];
 }
-export interface IExecutablePath {
-  binary: IBinaryPathGenerator;
+export interface IExecutableBinaryPath {
+  binaryPathGenerator: IBinaryPathGenerator;
   get(): Promise<string>;
 }
 

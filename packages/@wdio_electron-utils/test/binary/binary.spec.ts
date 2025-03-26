@@ -1,29 +1,29 @@
 import { normalize } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ABinaryPathGenerator, ExecutablePath } from '../../src/binary/binary';
-import { selectExecutablePath } from '../../src/binary/selectExecutablePath';
+import { ABinaryPathGenerator, ExecutableBinaryPath } from '../../src/binary/binary';
+import { selectExecutable } from '../../src/binary/selectExecutable';
 
 import type { AppBuildInfo } from '@wdio/electron-types';
 import type { SupportedPlatform } from '../../src/types';
 
-vi.mock('../../src/binary/selectExecutablePath', () => {
+vi.mock('../../src/binary/selectExecutable', () => {
   return {
-    selectExecutablePath: vi.fn(),
+    selectExecutable: vi.fn(),
   };
 });
 
-describe('ExecutablePath', () => {
+describe('ExecutableBinaryPath', () => {
   it('should return the path of executable', async () => {
-    vi.mocked(selectExecutablePath).mockResolvedValue('/path/to/executable1');
+    vi.mocked(selectExecutable).mockResolvedValue('/path/to/executable1');
     const mockBinaryPathGenerator = {
       generate: vi.fn().mockReturnValue(['/path/to/executable1', '/path/to/executable2']),
     };
-    const testTargetClass = new ExecutablePath(mockBinaryPathGenerator);
+    const testTargetClass = new ExecutableBinaryPath(mockBinaryPathGenerator);
     const result = await testTargetClass.get();
 
     expect(mockBinaryPathGenerator.generate).toHaveBeenCalledTimes(1);
-    expect(selectExecutablePath).toHaveBeenCalledWith(['/path/to/executable1', '/path/to/executable2']);
+    expect(selectExecutable).toHaveBeenCalledWith(['/path/to/executable1', '/path/to/executable2']);
     expect(result).toBe('/path/to/executable1');
   });
 });
@@ -33,7 +33,7 @@ describe('ABinaryPathGenerator', () => {
     protected getOutDir(): string[] {
       return ['/path/to/dir1', '/path/to/dir2'];
     }
-    protected selectExecutablePathName(): string {
+    protected getBinaryName(): string {
       return 'my-app';
     }
   }

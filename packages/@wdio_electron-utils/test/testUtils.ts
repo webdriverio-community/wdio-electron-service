@@ -5,7 +5,7 @@ import { BuilderBinaryOptions, ForgeBinaryOptions } from '../src/types';
 import { ForgeBinaryPathGenerator } from '../src/binary/forge';
 import { BuilderBinaryPathGenerator } from '../src/binary/builder';
 import { AppBuildInfo } from '@wdio/electron-types';
-import { ExecutablePath } from '../src/binary/binary';
+import { ExecutableBinaryPath } from '../src/binary/binary';
 
 export async function getFixturePackageJson(moduleType: string, fixtureName: string) {
   const packageJsonPath = path.resolve(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName, 'package.json');
@@ -61,6 +61,7 @@ export function testBinaryPath(options: TestBinaryPathOptions) {
   testFn(`${title}`, async () => {
     const currentProcess = { platform, arch } as NodeJS.Process;
     mockBinaryPath(binaryPath);
+
     const options = {
       packageJsonPath: pkgJSONPath,
       appBuildInfo: {
@@ -72,10 +73,12 @@ export function testBinaryPath(options: TestBinaryPathOptions) {
       electronVersion: '29.3.1',
       platform: currentProcess.platform,
     } as unknown;
+
     const targetClass = isForge
       ? new ForgeBinaryPathGenerator(options as ForgeBinaryOptions)
       : new BuilderBinaryPathGenerator(options as BuilderBinaryOptions);
-    const definer = new ExecutablePath(targetClass);
+
+    const definer = new ExecutableBinaryPath(targetClass);
 
     const result = await definer.get();
 

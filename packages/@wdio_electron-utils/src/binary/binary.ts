@@ -1,7 +1,7 @@
 import path from 'node:path';
-import { selectExecutablePath } from './selectExecutablePath';
+import { selectExecutable } from './selectExecutable';
 
-import type { CommonBinaryOptions, IBinaryPathGenerator, IExecutablePath, SupportedPlatform } from '../types.js';
+import type { CommonBinaryOptions, IBinaryPathGenerator, IExecutableBinaryPath, SupportedPlatform } from '../types.js';
 
 export abstract class ABinaryPathGenerator implements IBinaryPathGenerator {
   platform: SupportedPlatform;
@@ -17,11 +17,11 @@ export abstract class ABinaryPathGenerator implements IBinaryPathGenerator {
   }
   generate(): string[] {
     const outDirs = this.getOutDir();
-    const executableName = this.selectExecutablePathName();
+    const binaryName = this.getBinaryName();
     const binaryPathMap = {
-      darwin: () => path.join(`${this.appName}.app`, 'Contents', 'MacOS', executableName),
-      linux: () => executableName,
-      win32: () => `${executableName}.exe`,
+      darwin: () => path.join(`${this.appName}.app`, 'Contents', 'MacOS', binaryName),
+      linux: () => binaryName,
+      win32: () => `${binaryName}.exe`,
     };
     const electronBinaryPath = binaryPathMap[this.platform]();
 
@@ -29,18 +29,18 @@ export abstract class ABinaryPathGenerator implements IBinaryPathGenerator {
     return binaryPaths;
   }
   protected abstract getOutDir(): string[];
-  protected abstract selectExecutablePathName(): string;
+  protected abstract getBinaryName(): string;
 }
 
-export class ExecutablePath implements IExecutablePath {
-  binary: IBinaryPathGenerator;
+export class ExecutableBinaryPath implements IExecutableBinaryPath {
+  binaryPathGenerator: IBinaryPathGenerator;
 
-  constructor(binary: IBinaryPathGenerator) {
-    this.binary = binary;
+  constructor(binaryPathGenerator: IBinaryPathGenerator) {
+    this.binaryPathGenerator = binaryPathGenerator;
   }
 
   async get(): Promise<string> {
-    const executables = this.binary.generate();
-    return selectExecutablePath(executables);
+    const binaryPaths = this.binaryPathGenerator.generate();
+    return selectExecutable(binaryPaths);
   }
 }

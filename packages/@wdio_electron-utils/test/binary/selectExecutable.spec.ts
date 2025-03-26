@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { mockBinaryPath } from '../testUtils';
 import log from '../../src/log';
-import { selectExecutablePath } from '../../src/binary/selectExecutablePath';
+import { selectExecutable } from '../../src/binary/selectExecutable';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
@@ -20,7 +20,7 @@ vi.mock('../../src/log');
 vi.mock('../../src/binary/binary', () => {
   return {
     ABinaryPathGenerator: vi.fn(),
-    ExecutablePath: vi.fn(),
+    ExecutableBinaryPath: vi.fn(),
   };
 });
 
@@ -38,7 +38,7 @@ vi.mock('../../src/binary/builder', () => {
   };
 });
 
-describe('selectExecutablePath', () => {
+describe('selectExecutable', () => {
   it('should select first app binary when multiple app one was detected', async () => {
     const executableBinaryPaths = [
       '/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app',
@@ -46,7 +46,7 @@ describe('selectExecutablePath', () => {
     ];
     mockBinaryPath(executableBinaryPaths);
 
-    const result = await selectExecutablePath(executableBinaryPaths);
+    const result = await selectExecutable(executableBinaryPaths);
 
     expect(result).toBe(normalize('/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app'));
     expect(log.info).toHaveBeenLastCalledWith(
@@ -63,7 +63,7 @@ describe('selectExecutablePath', () => {
     };
     mockBinaryPath('/path/to/dummy');
 
-    await expect(() => selectExecutablePath.call(binaryMock, ['/path/to/dist'], 'my-app')).rejects.toThrowError(
+    await expect(() => selectExecutable.call(binaryMock, ['/path/to/dist'], 'my-app')).rejects.toThrowError(
       'No executable binary found, checked:',
     );
   });

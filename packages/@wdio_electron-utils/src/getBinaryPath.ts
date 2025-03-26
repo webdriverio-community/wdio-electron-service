@@ -1,5 +1,5 @@
 import { SUPPORTED_PLATFORM } from './constants';
-import { ExecutablePath } from './binary/binary';
+import { ExecutableBinaryPath } from './binary/binary';
 import { ForgeBinaryPathGenerator, isForgeInfo } from './binary/forge';
 import { BuilderBinaryPathGenerator, isBuilderInfo } from './binary/builder';
 
@@ -31,7 +31,7 @@ export async function getBinaryPath(
     appBuildInfo,
   });
 
-  const executablePath = new ExecutablePath(pathDefiner);
+  const executablePath = new ExecutableBinaryPath(pathDefiner);
 
   return executablePath.get();
 }

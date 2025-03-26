@@ -32,7 +32,7 @@ vi.mock('../src/log', () => {
 vi.mock('../src/binary/binary', () => {
   return {
     ABinaryPathGenerator: vi.fn(),
-    ExecutablePath: vi.fn(() => {
+    ExecutableBinaryPath: vi.fn(() => {
       return {
         get: vi.fn(),
       };
