@@ -6,6 +6,8 @@ import { getFixturePackageJson } from '../testUtils';
 import { getConfig } from '../../src/config/builder';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
 
+vi.mock('../../src/log');
+
 const expectedCandidates = [
   'electron-builder.yml',
   'electron-builder.config.yml',
