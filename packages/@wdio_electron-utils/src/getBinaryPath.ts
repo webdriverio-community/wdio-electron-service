@@ -24,19 +24,19 @@ export async function getBinaryPath(
     throw new Error(`Unsupported platform: ${p.platform}`);
   }
 
-  const pathDefiner = getPathDefiner({
+  const pathGenerator = getPathGenerator({
     platform: p.platform,
     packageJsonPath,
     electronVersion,
     appBuildInfo,
   });
 
-  const executablePath = new ExecutableBinaryPath(pathDefiner);
+  const executablePath = new ExecutableBinaryPath(pathGenerator);
 
   return executablePath.get();
 }
 
-function getPathDefiner(options: CommonBinaryOptions): IBinaryPathGenerator {
+function getPathGenerator(options: CommonBinaryOptions): IBinaryPathGenerator {
   if (isForgeInfo(options)) {
     return new ForgeBinaryPathGenerator(options);
   }
