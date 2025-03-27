@@ -6,7 +6,7 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
 import * as yaml from 'yaml';
-import { checkbox, confirm } from '@inquirer/prompts';
+import { checkbox, confirm, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import ora from 'ora';
 
@@ -20,10 +20,19 @@ interface PackageInfo {
   updateType: 'patch' | 'minor' | 'major' | 'unknown';
 }
 
+interface WorkspaceConfig {
+  packages: string[];
+  catalogs: {
+    [key: string]: {
+      [key: string]: string;
+    };
+  };
+}
+
 // Check if dry run mode is enabled
 const isDryRun = process.argv.includes('--dry-run') || process.argv.includes('--dryRun');
 
-async function readWorkspaceYaml(): Promise<{ catalog: Record<string, string>; packages: string[] }> {
+async function readWorkspaceYaml(): Promise<WorkspaceConfig> {
   const workspaceYamlPath = path.join(process.cwd(), 'pnpm-workspace.yaml');
   const yamlContent = await fs.readFile(workspaceYamlPath, 'utf8');
   return yaml.parse(yamlContent);
@@ -72,6 +81,13 @@ function getUpdateColor(updateType: 'patch' | 'minor' | 'major' | 'unknown'): (t
   }
 }
 
+/**
+ * Check if a version string is a non-semver tag
+ */
+function isNonSemverTag(version: string): boolean {
+  return ['latest', 'next', 'beta', 'alpha', 'nightly'].includes(version.toLowerCase());
+}
+
 async function getLatestVersions(packages: Record<string, string>): Promise<PackageInfo[]> {
   console.log(chalk.blue('Fetching latest versions for packages...'));
 
@@ -82,11 +98,24 @@ async function getLatestVersions(packages: Record<string, string>): Promise<Pack
     spinner.text = `Checking ${chalk.cyan(name)}`;
 
     try {
+      // Skip non-semver tags
+      if (isNonSemverTag(currentVersion)) {
+        console.log(chalk.dim(`  Skipping ${name}: using non-semver tag "${currentVersion}"`));
+        packageInfos.push({
+          name,
+          currentVersion,
+          latestVersion: currentVersion,
+          isUpToDate: true,
+          updateType: 'unknown',
+        });
+        continue;
+      }
+
       // Clean the version to remove prefixes like ^, ~, etc.
       const cleanVersion = currentVersion.replace(/^\^|~/, '');
 
-      // Use npm view to get the latest version
-      const { stdout } = await execAsync(`npm view ${name} version`);
+      // Use pnpm view to get the latest version
+      const { stdout } = await execAsync(`pnpm view ${name} version`);
       const latestVersion = stdout.trim();
       const updateType = getUpdateType(cleanVersion, latestVersion);
 
@@ -166,9 +195,10 @@ async function promptPackagesToUpdate(packageInfos: PackageInfo[]): Promise<stri
 }
 
 async function updateWorkspaceYaml(
-  workspaceYaml: { catalog: Record<string, string>; packages: string[] },
+  workspaceYaml: WorkspaceConfig,
   packageInfos: PackageInfo[],
   packagesToUpdate: string[],
+  selectedCatalog: string,
 ): Promise<void> {
   if (isDryRun) {
     console.log(chalk.yellow('DRY RUN: The following changes would be made to pnpm-workspace.yaml:'));
@@ -177,10 +207,20 @@ async function updateWorkspaceYaml(
     for (const packageName of packagesToUpdate) {
       const pkg = packageInfos.find((p) => p.name === packageName);
       if (pkg) {
+        // Skip if using a non-semver tag
+        if (isNonSemverTag(workspaceYaml.catalogs[selectedCatalog][packageName])) {
+          console.log(
+            chalk.dim(
+              `  Skipping ${packageName}: using non-semver tag "${workspaceYaml.catalogs[selectedCatalog][packageName]}"`,
+            ),
+          );
+          continue;
+        }
+
         // Preserve the version prefix (^, ~, etc.)
-        const prefix = workspaceYaml.catalog[packageName].startsWith('^')
+        const prefix = workspaceYaml.catalogs[selectedCatalog][packageName].startsWith('^')
           ? '^'
-          : workspaceYaml.catalog[packageName].startsWith('~')
+          : workspaceYaml.catalogs[selectedCatalog][packageName].startsWith('~')
             ? '~'
             : '';
 
@@ -188,7 +228,7 @@ async function updateWorkspaceYaml(
         const updateBadge = pkg.updateType !== 'unknown' ? ` [${updateColor(pkg.updateType)}]` : '';
 
         console.log(
-          `  ${packageName}${updateBadge}: ${chalk.dim(workspaceYaml.catalog[packageName])} → ${updateColor(`${prefix}${pkg.latestVersion}`)}`,
+          `  ${packageName}${updateBadge}: ${chalk.dim(workspaceYaml.catalogs[selectedCatalog][packageName])} → ${updateColor(`${prefix}${pkg.latestVersion}`)}`,
         );
       }
     }
@@ -201,13 +241,23 @@ async function updateWorkspaceYaml(
   for (const packageName of packagesToUpdate) {
     const pkg = packageInfos.find((p) => p.name === packageName);
     if (pkg) {
+      // Skip if using a non-semver tag
+      if (isNonSemverTag(workspaceYaml.catalogs[selectedCatalog][packageName])) {
+        console.log(
+          chalk.dim(
+            `  Skipping ${packageName}: using non-semver tag "${workspaceYaml.catalogs[selectedCatalog][packageName]}"`,
+          ),
+        );
+        continue;
+      }
+
       // Preserve the version prefix (^, ~, etc.)
-      const prefix = workspaceYaml.catalog[packageName].startsWith('^')
+      const prefix = workspaceYaml.catalogs[selectedCatalog][packageName].startsWith('^')
         ? '^'
-        : workspaceYaml.catalog[packageName].startsWith('~')
+        : workspaceYaml.catalogs[selectedCatalog][packageName].startsWith('~')
           ? '~'
           : '';
-      workspaceYaml.catalog[packageName] = `${prefix}${pkg.latestVersion}`;
+      workspaceYaml.catalogs[selectedCatalog][packageName] = `${prefix}${pkg.latestVersion}`;
     }
   }
 
@@ -238,6 +288,18 @@ async function runPnpmInstall(): Promise<void> {
   }
 }
 
+async function selectCatalog(catalogs: Record<string, Record<string, string>>): Promise<string> {
+  const choices = Object.keys(catalogs).map((catalog) => ({
+    value: catalog,
+    name: catalog,
+  }));
+
+  return await select({
+    message: 'Select catalog to update:',
+    choices,
+  });
+}
+
 async function main() {
   try {
     if (isDryRun) {
@@ -247,8 +309,11 @@ async function main() {
     // Read the workspace YAML file
     const workspaceYaml = await readWorkspaceYaml();
 
-    // Get the latest versions for all packages in the catalog
-    const packageInfos = await getLatestVersions(workspaceYaml.catalog);
+    // Select which catalog to update
+    const selectedCatalog = await selectCatalog(workspaceYaml.catalogs);
+
+    // Get the latest versions for all packages in the selected catalog
+    const packageInfos = await getLatestVersions(workspaceYaml.catalogs[selectedCatalog]);
 
     // Prompt the user to select packages to update
     const packagesToUpdate = await promptPackagesToUpdate(packageInfos);
@@ -277,8 +342,8 @@ async function main() {
       `${chalk.green(`${updateCounts.patch} patch`)}`;
 
     const confirmMessage = isDryRun
-      ? `Preview updates for ${packagesToUpdate.length} packages (${updateSummary})?`
-      : `Update ${packagesToUpdate.length} packages (${updateSummary})?`;
+      ? `Preview updates for ${packagesToUpdate.length} packages in ${chalk.cyan(selectedCatalog)} catalog (${updateSummary})?`
+      : `Update ${packagesToUpdate.length} packages in ${chalk.cyan(selectedCatalog)} catalog (${updateSummary})?`;
 
     const shouldProceed = await confirm({
       message: confirmMessage,
@@ -291,7 +356,7 @@ async function main() {
     }
 
     // Update the workspace YAML file with the new versions
-    await updateWorkspaceYaml(workspaceYaml, packageInfos, packagesToUpdate);
+    await updateWorkspaceYaml(workspaceYaml, packageInfos, packagesToUpdate, selectedCatalog);
 
     // Run pnpm install to apply the updates
     await runPnpmInstall();
