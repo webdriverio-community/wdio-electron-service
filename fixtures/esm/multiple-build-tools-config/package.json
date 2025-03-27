@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {},
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "electron-builder": "^24.6.4",
+    "@electron-forge/cli": "^6.4.2"
+  },
   "config": {
     "forge": {
       "packagerConfig": {

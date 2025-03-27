@@ -9,6 +9,78 @@ To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to inst
 [Husky](https://typicode.github.io/husky/) is used for git commit hooks in combination with [`lint-staged`](https://github.com/lint-staged/lint-staged).
 [Turborepo](https://turbo.build) is used to handle builds and testing.
 
+## Dependency Management
+
+The project uses a catalog system to manage dependencies across all packages. There are three catalogs:
+
+1. **`default`**: Production-ready configuration using stable versions
+
+   - Example: `electron: "catalog:default"` (resolves to version ^32.0.1)
+   - Provides a reliable, well-tested baseline
+
+2. **`next`**: Forward-looking configuration with latest versions
+
+   - Example: `electron-nightly: "catalog:next"` (latest nightly builds)
+   - Validates compatibility with upcoming changes
+
+3. **`minimum`**: Lowest supported versions
+   - Example: `electron: "catalog:minimum"` (version ^28.0.0)
+   - Ensures backward compatibility
+
+### Switching Catalogs
+
+To switch all packages to use a specific catalog:
+
+```bash
+# Switch to default catalog (stable versions)
+pnpm catalog:default
+
+# Switch to next catalog (latest/nightly versions)
+pnpm catalog:next
+
+# Switch to minimum catalog (lowest supported versions)
+pnpm catalog:minimum
+```
+
+### Updating Catalog Versions
+
+To update the versions in a catalog:
+
+```bash
+# Update a specific catalog
+pnpm catalog:update
+
+# Preview changes without applying them
+pnpm catalog:update:dry
+
+# Update all catalogs and other dependencies
+pnpm update:all
+```
+
+You can also specify the catalog directly using shortcuts:
+
+```bash
+pnpm catalog:update --default  # Update default catalog
+pnpm catalog:update --next     # Update next catalog
+pnpm catalog:update --minimum  # Update minimum catalog
+```
+
+The update process will:
+
+1. Show available updates for all packages in the selected catalog
+2. Allow you to select which packages to update
+3. Update the versions in the workspace file
+4. Run `pnpm install` to apply the changes
+
+For the `next` catalog specifically, the update process will:
+
+- Fetch the latest electron-nightly version from npm
+- Set other packages to use the most appropriate tag:
+  - Checks all available tags (next, beta, alpha, latest)
+  - Compares full semantic versions to find the highest version across all tags
+  - Prioritizes cutting-edge tags in order: next > beta > alpha > latest
+- Remove the electron dependency since only electron-nightly is used in this catalog
+
 ## Rebuilding on file changes
 
 During development, it is helpful to rebuild files as they change, with respect to all packages. To do this, run the dev script in a new terminal:
@@ -63,8 +135,16 @@ pnpm test:dev
 Dependencies can be updated interactively via:
 
 ```bash
-pnpm update:all
+pnpm update:interactive
 ```
+
+and
+
+```bash
+pnpm update:interactive:dry
+```
+
+for a dry run.
 
 ## Updating E2E Task Graphs
 
