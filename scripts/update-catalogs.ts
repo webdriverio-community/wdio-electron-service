@@ -243,6 +243,22 @@ async function updateWorkspaceYaml(
 
   const spinner = ora('Updating workspace configuration...').start();
 
+  // Read the original file content
+  const workspaceYamlPath = path.join(process.cwd(), 'pnpm-workspace.yaml');
+  const originalContent = await fs.readFile(workspaceYamlPath, 'utf8');
+
+  // Clean up any existing quotes in the catalogs
+  for (const catalog of Object.values(workspaceYaml.catalogs)) {
+    for (const [name, version] of Object.entries(catalog)) {
+      if (name.endsWith('"')) {
+        const cleanName = name.replace(/['"]/g, '');
+        catalog[cleanName] = version;
+        delete catalog[name];
+      }
+    }
+  }
+
+  // Update only the catalogs section
   for (const packageName of packagesToUpdate) {
     const pkg = packageInfos.find((p) => p.name === packageName);
     if (pkg) {
@@ -266,8 +282,29 @@ async function updateWorkspaceYaml(
     }
   }
 
-  const workspaceYamlPath = path.join(process.cwd(), 'pnpm-workspace.yaml');
-  await fs.writeFile(workspaceYamlPath, yaml.stringify(workspaceYaml));
+  // Stringify only the catalogs section
+  const catalogsToWrite = { catalogs: {} };
+  for (const [catalog, deps] of Object.entries(workspaceYaml.catalogs)) {
+    catalogsToWrite.catalogs[catalog] = {};
+    for (const [name, version] of Object.entries(deps)) {
+      // Clean the name but don't pre-quote it
+      const cleanName = name.replace(/['"]/g, '');
+      catalogsToWrite.catalogs[catalog][cleanName] = version;
+    }
+  }
+
+  const catalogsStr = yaml
+    .stringify(catalogsToWrite, {
+      indent: 2,
+      collectionStyle: 'block',
+      indentSeq: false,
+      lineWidth: 0,
+    })
+    .replace(/"(@[^"]+)":/g, "'$1':");
+
+  // Replace the catalogs section in the original content
+  const updatedContent = originalContent.replace(/catalogs:[\s\S]*$/, catalogsStr);
+  await fs.writeFile(workspaceYamlPath, updatedContent);
 
   spinner.succeed('Updated pnpm-workspace.yaml with new versions.');
 }
