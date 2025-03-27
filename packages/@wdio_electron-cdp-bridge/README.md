@@ -1,9 +1,9 @@
 # WDIO CDP Bridge
 
-<a href="https://www.npmjs.com/package/@wdio/cdpーbridge" alt="NPM Version">
-  <img src="https://img.shields.io/npm/v/@wdio/cdpーbridge" /></a>
-<a href="https://www.npmjs.com/package/@wdio/cdpーbridge" alt="NPM Downloads">
-  <img src="https://img.shields.io/npm/dw/@wdio/cdpーbridge" /></a>
+<a href="https://www.npmjs.com/package/@wdio/cdp-bridge" alt="NPM Version">
+  <img src="https://img.shields.io/npm/v/@wdio/cdp-bridge" /></a>
+<a href="https://www.npmjs.com/package/@wdio/cdp-bridge" alt="NPM Downloads">
+  <img src="https://img.shields.io/npm/dw/@wdio/cdp-bridge" /></a>
 
 <br />
 
