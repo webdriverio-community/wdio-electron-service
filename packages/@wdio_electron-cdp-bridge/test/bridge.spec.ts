@@ -63,14 +63,14 @@ const executeEventCallback = (calls: any[][], eventName: string, ...args: any[])
 
 describe('CdpBridge', () => {
   describe('connect', () => {
-    it('should not throw the error when connect normally', async () => {
+    it('should connect successfully without errors', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       expect(() => client.connect()).not.toThrowError();
       expect(() => client.connect()).not.toThrowError(); // nothing will happen when multiple call
     });
 
-    it('should happen the warning when detect multi debugger', async () => {
+    it('should warn when multiple debuggers are detected', async () => {
       debuggerList = [
         { webSocketDebuggerUrl: 'ws://localhost:123/uuid' },
         { webSocketDebuggerUrl: 'ws://localhost:123/uuid' },
@@ -81,7 +81,7 @@ describe('CdpBridge', () => {
       expect(log.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     });
 
-    it('should throw the error when detect no debugger', async () => {
+    it('should throw error when no debugger is detected', async () => {
       debuggerList = [];
       const client = new CdpBridge();
       await expect(() => client.connect()).rejects.toThrowError(ERROR_MESSAGE.DEBUGGER_NOT_FOUND);
@@ -89,7 +89,7 @@ describe('CdpBridge', () => {
   });
 
   describe('send', () => {
-    it('should send the message and receive the response', async () => {
+    it('should send message and receive response successfully', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -105,7 +105,7 @@ describe('CdpBridge', () => {
       expect(() => executeEventCallback(mockOn.mock.calls, 'message', message)).not.toThrowError();
     });
 
-    it('should receive the event message', async () => {
+    it('should handle event messages correctly', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -133,7 +133,7 @@ describe('CdpBridge', () => {
       });
     });
 
-    it('should rejected when the response has `error` object', async () => {
+    it('should reject when response contains error object', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -151,7 +151,7 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError('Test error message');
     });
 
-    it('should rejected when the response does not have JSON data', async () => {
+    it('should reject when response is not valid JSON', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -161,7 +161,7 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.ERROR_PARSE_JSON);
     });
 
-    it('should rejected when request timeout', async () => {
+    it('should reject when request times out', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge({ timeout: 10 });
       await client.connect();
@@ -169,14 +169,14 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.TIMEOUT_CONNECTION);
     });
 
-    it('should rejected when call send method before connect', async () => {
+    it('should reject when send is called before connect', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.send('Runtime.enable');
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.NOT_CONNECTED);
     });
 
-    it('should rejected when some error which is related protocol happen', async () => {
+    it('should reject when protocol-related error occurs', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -189,7 +189,7 @@ describe('CdpBridge', () => {
   });
 
   describe('close', () => {
-    it('should resolved when disconnected', async () => {
+    it('should disconnect successfully', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -197,28 +197,30 @@ describe('CdpBridge', () => {
       executeEventCallback(mockOnce.mock.calls, 'close'); // emulate close event
       await expect(result).resolves.not.toThrowError();
     });
-    it('should resolved when call `close` before `connect`', async () => {
+
+    it('should handle close before connect gracefully', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.close();
       await expect(result).resolves.not.toThrowError();
     });
   });
+
   describe('on', () => {
-    it('should return ready state', async () => {
+    it('should return correct ready state after connect', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
       expect(client.state).toBe(1);
     });
 
-    it('should return undefined when before connect', async () => {
+    it('should return undefined state before connect', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       expect(client.state).toBe(undefined);
     });
 
-    it('should resolved when call `close` before `connect`', async () => {
+    it('should handle close before connect gracefully', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.close();
