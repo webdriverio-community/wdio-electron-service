@@ -7,7 +7,6 @@ export interface IBinaryPathGenerator {
   generate(): string[];
 }
 export interface IExecutableBinaryPath {
-  binaryPathGenerator: IBinaryPathGenerator;
   get(): Promise<string>;
 }
 

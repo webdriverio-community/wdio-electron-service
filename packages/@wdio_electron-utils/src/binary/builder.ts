@@ -6,17 +6,18 @@ import type { BuilderBuildInfo, BuilderArch } from '@wdio/electron-types';
 import type { BuilderBinaryOptions, CommonBinaryOptions } from '../types';
 
 export class BuilderBinaryPathGenerator extends ABinaryPathGenerator {
-  appBuildInfo: BuilderBuildInfo;
+  #appBuildInfo: BuilderBuildInfo;
   constructor(options: BuilderBinaryOptions) {
     super(options);
-    this.appBuildInfo = options.appBuildInfo;
+    this.#appBuildInfo = options.appBuildInfo;
   }
 
   getBinaryName(): string {
-    return this.appBuildInfo.appName;
+    return this.#appBuildInfo.appName;
   }
+
   getOutDir() {
-    const builderOutDirName = this.appBuildInfo.config?.directories?.output || 'dist';
+    const builderOutDirName = this.#appBuildInfo.config?.directories?.output || 'dist';
     const builderOutDirMap = (arch: BuilderArch) => ({
       darwin: path.join(builderOutDirName, arch === 'x64' ? 'mac' : `mac-${arch}`),
       linux: path.join(builderOutDirName, 'linux-unpacked'),
