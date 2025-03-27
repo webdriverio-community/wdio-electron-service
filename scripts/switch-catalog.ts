@@ -19,6 +19,20 @@ const workspaceFile = path.join(rootDir, 'pnpm-workspace.yaml');
 const VALID_CATALOGS = ['default', 'next', 'minimum'] as const;
 type CatalogName = (typeof VALID_CATALOGS)[number];
 
+// Function to sort dependencies alphabetically
+function sortDependencies(deps: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!deps) return undefined;
+  return Object.keys(deps)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = deps[key];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+}
+
 // Read workspace YAML to get catalog dependencies and package paths
 const workspaceContent = fs.readFileSync(workspaceFile, 'utf8');
 const workspaceLines = workspaceContent.split('\n');
@@ -155,6 +169,10 @@ try {
     }
 
     if (changed) {
+      // Sort dependencies alphabetically
+      packageJson.dependencies = sortDependencies(packageJson.dependencies);
+      packageJson.devDependencies = sortDependencies(packageJson.devDependencies);
+
       // Write the updated package.json
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
       console.log(`✓ Updated ${packagePath} to use catalog:${catalogName}`);
