@@ -32,6 +32,11 @@ interface WorkspaceConfig {
 // Check if dry run mode is enabled
 const isDryRun = process.argv.includes('--dry-run') || process.argv.includes('--dryRun');
 
+// Check for shortcut catalog selection
+const shortcutCatalog = process.argv
+  .find((arg) => ['--default', '--next', '--minimum'].includes(arg))
+  ?.replace('--', '');
+
 async function readWorkspaceYaml(): Promise<WorkspaceConfig> {
   const workspaceYamlPath = path.join(process.cwd(), 'pnpm-workspace.yaml');
   const yamlContent = await fs.readFile(workspaceYamlPath, 'utf8');
@@ -289,6 +294,20 @@ async function runPnpmInstall(): Promise<void> {
 }
 
 async function selectCatalog(catalogs: Record<string, Record<string, string>>): Promise<string> {
+  // If a shortcut was provided, use it
+  if (shortcutCatalog) {
+    if (!catalogs[shortcutCatalog]) {
+      console.error(
+        chalk.red(
+          `Error: Invalid catalog "${shortcutCatalog}". Valid catalogs are: ${Object.keys(catalogs).join(', ')}`,
+        ),
+      );
+      process.exit(1);
+    }
+    return shortcutCatalog;
+  }
+
+  // Otherwise, prompt for selection
   const choices = Object.keys(catalogs).map((catalog) => ({
     value: catalog,
     name: catalog,
