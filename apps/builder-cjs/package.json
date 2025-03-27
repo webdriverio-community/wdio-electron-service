@@ -22,11 +22,11 @@
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
+    "electron": "catalog:default",
     "electron-builder": "^25.1.8",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
-    "webdriverio": "catalog:default",
-    "electron": "catalog:default"
+    "webdriverio": "catalog:default"
   },
   "build": {
     "asar": true,
