@@ -19,3 +19,8 @@ export const MULTIPLE_BUILD_TOOL_WARNING = {
     'Detected both Forge and Builder configurations, the Forge configuration will be used to determine build information',
   SUGGESTION: 'You can override this by specifying the `appBinaryPath` option in your capabilities.',
 };
+export const SUPPORTED_PLATFORM = {
+  darwin: 'darwin',
+  linux: 'linux',
+  win32: 'win32',
+} as const;

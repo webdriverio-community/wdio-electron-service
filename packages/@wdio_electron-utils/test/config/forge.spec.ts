@@ -1,8 +1,10 @@
-import { expect, it, describe } from 'vitest';
+import { expect, it, describe, vi } from 'vitest';
 
 import { getFixturePackageJson } from '../testUtils';
 import { getConfig } from '../../src/config/forge';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
+
+vi.mock('../../src/log');
 
 describe('getConfig', () => {
   describe.each(['esm', 'cjs'])('%s', (type) => {
