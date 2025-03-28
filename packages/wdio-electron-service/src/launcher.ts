@@ -8,9 +8,15 @@ import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electr
 import type { Services, Options, Capabilities } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
-import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
+import {
+  getChromeOptions,
+  getChromedriverOptions,
+  getConvertedElectronCapabilities,
+  getElectronCapabilities,
+} from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
+import getPort from 'get-port';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -119,7 +125,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
          */
         cap[CUSTOM_CAPABILITY_NAME] = cap[CUSTOM_CAPABILITY_NAME] || {};
 
-        log.debug('setting capability', cap);
+        log.debug('Setting capability at onPrepare', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
@@ -127,4 +133,39 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
+
+  async onWorkerStart(_cid: string, capabilities: WebdriverIO.Capabilities) {
+    try {
+      const capsList = Array.isArray(capabilities) ? (capabilities as WebdriverIO.Capabilities[]) : [capabilities];
+      const caps = capsList.flatMap((cap) => getConvertedElectronCapabilities(cap) as WebdriverIO.Capabilities);
+
+      const portList = await getDebuggerPorts(caps.length);
+
+      await Promise.all(
+        caps.map(async (cap, index) => {
+          setInspectArg(cap, portList[index]);
+        }),
+      );
+      log.debug('Setting capability at onWorkerStart', caps);
+    } catch (error) {
+      const msg = `Failed setting up Electron session: ${(error as Error).stack}`;
+      log.error(msg);
+      throw new SevereServiceError(msg);
+    }
+  }
 }
+
+const getDebuggerPorts = async (quantity: number): Promise<number[]> => {
+  return Promise.all(Array.from({ length: quantity }, () => getPort()));
+};
+
+const setInspectArg = (cap: WebdriverIO.Capabilities, debuggerPort: number) => {
+  if (!('goog:chromeOptions' in cap)) {
+    cap['goog:chromeOptions'] = { args: [] };
+  }
+  const chromeOptions = cap['goog:chromeOptions']!;
+  if (!('args' in chromeOptions)) {
+    chromeOptions.args = [];
+  }
+  chromeOptions.args!.push(`--inspect=localhost:${debuggerPort}`);
+};

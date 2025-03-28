@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from '../src/capabilities.js';
+import {
+  getChromeOptions,
+  getChromedriverOptions,
+  getConvertedElectronCapabilities,
+  getElectronCapabilities,
+} from '../src/capabilities.js';
 
 import type { Capabilities } from '@wdio/types';
 
@@ -122,6 +127,62 @@ describe('Capabilities Utilities', () => {
         const caps = getElectronCapabilities(cap);
         expect(caps).toStrictEqual([]);
       });
+    });
+  });
+});
+
+function removeProperty(obj: unknown, keyToRemove: string): unknown {
+  if (typeof obj === 'object' && obj !== null) {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([key]) => key !== keyToRemove)
+        .map(([key, value]) => [key, removeProperty(value, keyToRemove)]),
+    );
+  }
+  return obj;
+}
+
+describe('getConvertedElectronCapabilities', () => {
+  const expectedCap = {
+    'browserName': 'chrome',
+    'wdio:chromedriverOptions': {
+      binary: '/path/to/chromdriver',
+    },
+    'wdio:electronServiceOptions': {},
+  };
+  describe.each<[string, RequestedCapabilities, Array<typeof expectedCap>]>([
+    ['Standard capabilities', expectedCap as Capabilities.RequestedStandaloneCapabilities, [expectedCap]],
+    [
+      'W3C specific capabilities',
+      {
+        alwaysMatch: expectedCap,
+      } as Capabilities.W3CCapabilities,
+      [expectedCap],
+    ],
+    [
+      'Multiremote capabilities',
+      {
+        instanceA: {
+          capabilities: expectedCap,
+        },
+        instanceB: {
+          capabilities: {
+            alwaysMatch: expectedCap,
+          },
+        },
+      } as Capabilities.RequestedMultiremoteCapabilities,
+      [expectedCap, expectedCap],
+    ],
+  ])('%s', (_title, inputCap, expectedCaps) => {
+    it('should return capabilities when input electron capabilities', () => {
+      const caps = getConvertedElectronCapabilities(inputCap);
+      expect(caps).toStrictEqual(expectedCaps);
+    });
+
+    it('should not return capabilities when not input electron capabilities', () => {
+      removeProperty(inputCap, 'wdio:electronServiceOptions');
+      const caps = getElectronCapabilities(inputCap);
+      expect(caps).toStrictEqual([]);
     });
   });
 });
