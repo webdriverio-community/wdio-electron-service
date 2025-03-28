@@ -24,7 +24,7 @@ export async function getBinaryPath(
     throw new Error(`Unsupported platform: ${p.platform}`);
   }
 
-  const pathGenerator = getPathGenerator({
+  const pathGenerator = createBinaryPathGenerator({
     platform: p.platform,
     packageJsonPath,
     electronVersion,
@@ -36,7 +36,7 @@ export async function getBinaryPath(
   return executablePath.get();
 }
 
-function getPathGenerator(options: CommonBinaryOptions): IBinaryPathGenerator {
+function createBinaryPathGenerator(options: CommonBinaryOptions): IBinaryPathGenerator {
   if (isForgeInfo(options)) {
     return new ForgeBinaryPathGenerator(options);
   }
