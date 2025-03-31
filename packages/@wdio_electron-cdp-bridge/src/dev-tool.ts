@@ -23,6 +23,8 @@ type VersionReturnValue = {
 
 type WaitOptions = Parameters<typeof waitPort>[0];
 
+const BRIDGE_RETRY_INTERVAL = 100;
+
 export class DevTool {
   #options: Required<DevToolOptions>;
   #isPortOpened = false;
@@ -62,6 +64,7 @@ export class DevTool {
         const waitOptions: WaitOptions = {
           ...this.#options,
           output: 'silent',
+          interval: BRIDGE_RETRY_INTERVAL,
         };
         waitPort(waitOptions)
           .then(() => {
