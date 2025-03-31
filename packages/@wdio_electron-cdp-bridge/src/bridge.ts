@@ -80,6 +80,7 @@ export class CdpBridge extends EventEmitter {
         maxPayload: 256 * 1024 * 1024, // Extend 256Mib
         perMessageDeflate: false,
         followRedirects: true,
+        handshakeTimeout: this.options.timeout,
       });
 
       this.#promises.set(CONNECT_PROMISE_ID, { resolve, reject });
