@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import log from '../log.js';
+import log from './log.js';
 
 export async function selectExecutable(binaryPaths: string[]): Promise<string> {
   // for each path, check if it exists and is executable

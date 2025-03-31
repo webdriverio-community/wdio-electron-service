@@ -2,7 +2,7 @@ import { expect, it, vi, describe } from 'vitest';
 
 import { getFixturePackageJson } from './testUtils';
 import log from '../src/log';
-import { getAppBuildInfo } from '../src/getAppBuildInfo';
+import { getAppBuildInfo } from '../src/appBuildInfo';
 import { getConfig as getBuilderConfig } from '../src/config/builder';
 import { getConfig as getForgeConfig } from '../src/config/forge';
 
@@ -13,14 +13,7 @@ import {
   MULTIPLE_BUILD_TOOL_WARNING,
 } from '../src/constants';
 
-vi.mock('../src/log', () => {
-  return {
-    default: {
-      info: vi.fn(),
-      warn: vi.fn(),
-    },
-  };
-});
+vi.mock('../src/log');
 
 vi.mock('../src/config/builder', () => {
   return {
