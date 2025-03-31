@@ -2,7 +2,7 @@ import http, { type ClientRequest, type RequestOptions } from 'node:http';
 import waitPort from 'wait-port';
 
 import log from '@wdio/electron-utils/log';
-import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants';
+import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants.js';
 
 import type { WdioCdpBridge } from './types';
 

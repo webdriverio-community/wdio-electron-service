@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 
 import log from '@wdio/electron-utils/log';
 
-import { CdpBridge } from '../src/bridge';
-import { ERROR_MESSAGE } from '../src/constants';
+import { CdpBridge } from '../src/bridge.js';
+import { ERROR_MESSAGE } from '../src/constants.js';
 
 vi.mock('@wdio/electron-utils/log', () => ({
   default: {

@@ -3,10 +3,10 @@ import EventEmitter from 'node:events';
 import WebSocket from 'ws';
 
 import log from '@wdio/electron-utils/log';
-import { DevTool } from './dev-tool';
-import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants';
+import { DevTool } from './dev-tool.js';
+import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants.js';
 
-import type { DevToolOptions } from './dev-tool';
+import type { DevToolOptions } from './dev-tool.js';
 import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 
 type Methods = keyof ProtocolMapping.Commands;

@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import nock from 'nock';
 import waitPort from 'wait-port';
 
-import { DevTool } from '../src/dev-tool';
-import { ERROR_MESSAGE } from '../src/constants';
+import { DevTool } from '../src/dev-tool.js';
+import { ERROR_MESSAGE } from '../src/constants.js';
 
 vi.mock('wait-port', () => ({
   default: vi.fn().mockResolvedValue(undefined),
