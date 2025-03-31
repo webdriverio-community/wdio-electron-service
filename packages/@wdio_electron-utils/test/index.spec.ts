@@ -1,6 +1,6 @@
 import { expect, describe, it, vi } from 'vitest';
 
-import * as index from '../src/index';
+import * as index from '../src/index.js';
 
 vi.mock('../src/getAppBuildInfo', () => {
   return {

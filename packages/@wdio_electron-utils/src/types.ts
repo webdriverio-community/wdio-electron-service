@@ -1,5 +1,5 @@
 import type { AppBuildInfo, BuilderBuildInfo, ForgeBuildInfo } from '@wdio/electron-types';
-import type { SUPPORTED_BUILD_TOOL, SUPPORTED_PLATFORM } from './constants';
+import type { SUPPORTED_BUILD_TOOL, SUPPORTED_PLATFORM } from './constants.js';
 
 export type SupportedPlatform = keyof typeof SUPPORTED_PLATFORM;
 

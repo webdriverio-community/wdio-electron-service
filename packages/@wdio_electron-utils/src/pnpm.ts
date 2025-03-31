@@ -1,8 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import log from './log';
-import { PNPM_CATALOG_PREFIX, PNPM_WORKSPACE_YAML } from './constants';
+import log from './log.js';
+import { PNPM_CATALOG_PREFIX, PNPM_WORKSPACE_YAML } from './constants.js';
 
 type PnpmWorkspace = {
   catalog?: { [key: string]: string };

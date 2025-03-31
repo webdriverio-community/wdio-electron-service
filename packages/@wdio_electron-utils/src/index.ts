@@ -1,3 +1,3 @@
-export { getElectronVersion } from './electronVersion';
-export { getAppBuildInfo } from './appBuildInfo';
-export { getBinaryPath } from './binaryPath';
+export { getElectronVersion } from './electronVersion.js';
+export { getAppBuildInfo } from './appBuildInfo.js';
+export { getBinaryPath } from './binaryPath.js';

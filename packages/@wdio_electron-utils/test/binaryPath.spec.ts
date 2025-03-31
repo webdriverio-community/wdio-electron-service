@@ -4,8 +4,8 @@ import { normalize } from 'node:path';
 import { expect, it, vi, describe, beforeEach } from 'vitest';
 import { AppBuildInfo } from '@wdio/electron-types';
 
-import log from '../src/log';
-import { getBinaryPath } from '../src/binaryPath';
+import log from '../src/log.js';
+import { getBinaryPath } from '../src/binaryPath.js';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();

@@ -23,7 +23,7 @@ function getForgeDistDir(
 ): string[] {
   const archs = allOfficialArchsForPlatformAndVersion(platform, electronVersion);
   const forgeOutDir = config?.outDir || 'out';
-  return archs.map((arch) => path.join(forgeOutDir, `${appName}-${platform}-${arch}`));
+  return archs.map((arch: string) => path.join(forgeOutDir, `${appName}-${platform}-${arch}`));
 }
 
 function getBuilderDistDir(config: BuilderBuildInfo['config'], platform: SupportedPlatform): string[] {

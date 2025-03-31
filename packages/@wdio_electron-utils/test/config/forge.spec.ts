@@ -1,8 +1,8 @@
 import { expect, it, describe, vi } from 'vitest';
 
-import { getFixturePackageJson } from '../testUtils';
-import { getConfig } from '../../src/config/forge';
-import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
+import { getFixturePackageJson } from '../testUtils.js';
+import { getConfig } from '../../src/config/forge.js';
+import { APP_NAME_DETECTION_ERROR } from '../../src/constants.js';
 
 vi.mock('../../src/log');
 
