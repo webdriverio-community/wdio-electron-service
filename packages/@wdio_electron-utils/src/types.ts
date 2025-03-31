@@ -1,7 +1,9 @@
 import type { AppBuildInfo, BuilderBuildInfo, ForgeBuildInfo } from '@wdio/electron-types';
-import type { SUPPORTED_PLATFORM } from './constants';
+import type { SUPPORTED_BUILD_TOOL, SUPPORTED_PLATFORM } from './constants';
 
 export type SupportedPlatform = keyof typeof SUPPORTED_PLATFORM;
+
+export type SupportedBuildTool = keyof typeof SUPPORTED_BUILD_TOOL;
 
 export interface IBinaryPathGenerator {
   generate(): string[];

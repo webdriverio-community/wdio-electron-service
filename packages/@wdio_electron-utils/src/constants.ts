@@ -24,3 +24,8 @@ export const SUPPORTED_PLATFORM = {
   linux: 'linux',
   win32: 'win32',
 } as const;
+
+export const SUPPORTED_BUILD_TOOL = {
+  forge: 'forge',
+  builder: 'builder',
+} as const;
