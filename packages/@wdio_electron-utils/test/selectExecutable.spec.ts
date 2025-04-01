@@ -4,6 +4,9 @@ import { mockBinaryPath } from './testUtils.js';
 import log from '../src/log.js';
 import { selectExecutable } from '../src/selectExecutable.js';
 
+/**
+ * Mock the file system promises module to control file access checks
+ */
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
   return {
@@ -16,6 +19,9 @@ vi.mock('node:fs/promises', async (importActual) => {
 
 vi.mock('../src/log');
 
+/**
+ * Mock the binary path generator classes and utilities
+ */
 vi.mock('../../src/binary/binary', () => {
   return {
     ABinaryPathGenerator: vi.fn(),
@@ -38,7 +44,7 @@ vi.mock('../../src/binary/builder', () => {
 });
 
 describe('selectExecutable', () => {
-  it('should select first app binary when multiple app one was detected', async () => {
+  it('should select first executable when multiple binaries are detected', async () => {
     const executableBinaryPaths = [
       '/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app',
       '/path/to/dist/mac-ia32/my-app.app/Contents/MacOS/my-app',
@@ -53,7 +59,7 @@ describe('selectExecutable', () => {
     );
   });
 
-  it('should throw an error when no executable binary found', async () => {
+  it('should throw error when no executable binary is found', async () => {
     mockBinaryPath('/path/to/dummy');
 
     await expect(() => selectExecutable(['/path/to/dist'])).rejects.toThrowError(

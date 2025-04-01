@@ -22,13 +22,22 @@ vi.mock('../src/log');
 const pkgJSONPath = '/path/to/package.json';
 const winProcess = { platform: 'win32', arch: 'x64' } as NodeJS.Process;
 
-// Current mocked process for tests
+// Mock the current process for testing different platforms and architectures
 let currentProcess = { ...winProcess };
 
+/**
+ * Updates the mocked process with specified platform and architecture
+ * @param platform - The operating system platform (e.g., 'win32', 'darwin', 'linux')
+ * @param arch - The CPU architecture (e.g., 'x64', 'arm64')
+ */
 function mockProcess(platform: string, arch: string) {
   currentProcess = { platform, arch } as NodeJS.Process;
 }
 
+/**
+ * Mocks the file system access to simulate executable binary paths
+ * @param expectedPath - The expected binary path(s) that should be accessible
+ */
 function mockBinaryPath(expectedPath: string | string[]) {
   const target = Array.isArray(expectedPath) ? expectedPath.map((p) => normalize(p)) : [normalize(expectedPath)];
   vi.mocked(fs.access).mockImplementation(async (path, _mode?) => {
@@ -40,6 +49,11 @@ function mockBinaryPath(expectedPath: string | string[]) {
   });
 }
 
+/**
+ * Generates a mock AppBuildInfo object for testing
+ * @param isForge - Whether the app is built with Electron Forge
+ * @param isBuilder - Whether the app is built with electron-builder
+ */
 function generateAppBuildInfo(isForge: boolean, isBuilder: boolean) {
   return {
     appName: 'my-app',
@@ -51,7 +65,7 @@ function generateAppBuildInfo(isForge: boolean, isBuilder: boolean) {
 
 type TestBinaryPathOptions = {
   platform: string;
-  arch: string; // use test title only
+  arch: string;
   binaryPath: string;
   isForge: boolean;
   configObj: {
@@ -64,20 +78,22 @@ type TestBinaryPathOptions = {
   skip?: boolean;
 };
 
+/**
+ * Helper function to create parameterized tests for binary path resolution
+ */
 function testBinaryPath(options: TestBinaryPathOptions) {
   const { platform, arch, binaryPath, isForge, configObj, testName, skip } = options;
-  const buildType = isForge ? 'Forge' : 'builder';
+  const buildType = isForge ? 'Forge' : 'Builder';
   const hasCustomOutDir = configObj.outDir || (configObj.directories && configObj.directories.output);
   const pkgJSONPath = '/path/to/package.json';
 
-  // Create test title based on config properties
+  // Create descriptive test title based on configuration
   const title =
     testName ||
     (hasCustomOutDir
-      ? `should return the expected app path for a ${buildType} setup with custom output directory`
-      : `should return the expected path for a ${buildType} setup on ${platform}-${arch}`);
+      ? `should resolve binary path for ${buildType} build with custom output directory on ${platform}-${arch}`
+      : `should resolve binary path for ${buildType} build on ${platform}-${arch}`);
 
-  // Use skip for known problematic tests
   const testFn = skip ? it.skip : it;
 
   testFn(`${title}`, async () => {
@@ -104,10 +120,16 @@ function testBinaryPath(options: TestBinaryPathOptions) {
   });
 }
 
+/**
+ * Helper function to create tests specifically for Electron Forge builds
+ */
 function testForgeBinaryPath(options: Omit<TestBinaryPathOptions, 'isForge'>) {
   testBinaryPath(Object.assign(options, { isForge: true }));
 }
 
+/**
+ * Helper function to create tests specifically for electron-builder builds
+ */
 function testBuilderBinaryPath(options: Omit<TestBinaryPathOptions, 'isForge'>) {
   testBinaryPath(Object.assign(options, { isForge: false }));
 }
@@ -117,7 +139,7 @@ describe('getBinaryPath', () => {
     vi.mocked(log.info).mockClear();
   });
 
-  it('should throw an error when unsupported platform is specified', async () => {
+  it('should throw error for unsupported platform', async () => {
     mockProcess('not-supported', 'x86');
     mockBinaryPath('/path/to');
 
@@ -126,7 +148,7 @@ describe('getBinaryPath', () => {
     ).rejects.toThrowError('Unsupported platform: not-supported');
   });
 
-  it('should throw an error when unsupported build tool neither Forge nor Builder', async () => {
+  it('should throw error for unsupported build tool configuration', async () => {
     mockProcess('linux', 'arm64');
     mockBinaryPath('/path/to');
 
@@ -135,8 +157,7 @@ describe('getBinaryPath', () => {
     ).rejects.toThrowError('Configurations that are neither Forge nor Builder are not supported.');
   });
 
-  describe('Forge', () => {
-    // Replace individual tests with parameterized version
+  describe('Electron Forge builds', () => {
     testForgeBinaryPath({
       platform: 'win32',
       arch: 'x64',
@@ -151,7 +172,6 @@ describe('getBinaryPath', () => {
       configObj: { packagerConfig: { name: 'my-app' }, outDir: 'custom-outdir' },
     });
 
-    // Continue with the rest of the binary path tests
     testForgeBinaryPath({
       platform: 'darwin',
       arch: 'arm64',
@@ -174,9 +194,9 @@ describe('getBinaryPath', () => {
     });
   });
 
-  describe('Builder', () => {
+  describe('electron-builder builds', () => {
+    // Test all supported macOS architectures
     testBuilderBinaryPath({
-      //['arm64', 'armv7l', 'ia32', 'universal', 'x64']
       platform: 'darwin',
       arch: 'arm64',
       binaryPath: '/path/to/dist/mac-arm64/my-app.app/Contents/MacOS/my-app',
@@ -211,8 +231,7 @@ describe('getBinaryPath', () => {
       configObj: { productName: 'my-app' },
     });
 
-    // For the darwin with custom output directory test we need to mock the correct path
-    // The error shows the paths being checked, e.g., /path/to/dist/mac-universal/mac/my-app.app/Contents/MacOS/my-app
+    // Test custom output directory configuration
     testBuilderBinaryPath({
       platform: 'darwin',
       arch: 'arm64',
@@ -220,7 +239,7 @@ describe('getBinaryPath', () => {
       configObj: { productName: 'my-app', directories: { output: 'dist/custom' } },
     });
 
-    // For the linux tests we need to mock the correct paths
+    // Test Linux builds (note: all Linux architectures use the same output path)
     testBuilderBinaryPath({
       platform: 'linux',
       arch: 'x64',
@@ -228,9 +247,6 @@ describe('getBinaryPath', () => {
       configObj: { productName: 'my-app' },
     });
 
-    // For linux arm64, we need to use the same 'linux-unpacked' path because
-    // the getBinaryPath function creates the same path for all Linux architectures
-    // when using the builder
     testBuilderBinaryPath({
       platform: 'linux',
       arch: 'arm64',
