@@ -4,7 +4,9 @@ import { SUPPORTED_PLATFORM, SUPPORTED_BUILD_TOOL } from './constants.js';
 import { selectExecutable } from './selectExecutable.js';
 
 import type { AppBuildInfo, ForgeBuildInfo, BuilderBuildInfo, BuilderArch } from '@wdio/electron-types';
-import type { SupportedPlatform, SupportedBuildTool } from './types.js';
+
+type SupportedPlatform = keyof typeof SUPPORTED_PLATFORM;
+type SupportedBuildTool = keyof typeof SUPPORTED_BUILD_TOOL;
 
 interface BinaryOptions {
   buildTool: SupportedBuildTool;
