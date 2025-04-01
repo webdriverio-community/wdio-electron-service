@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { readConfig } from './read';
+import { readConfig } from './read.js';
 import log from '../log.js';
 import { APP_NAME_DETECTION_ERROR } from '../constants.js';
 

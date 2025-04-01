@@ -7,8 +7,8 @@ import {
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from './constants.js';
-import { getConfig as getBuilderConfig } from './config/builder';
-import { getConfig as getForgeConfig } from './config/forge';
+import { getConfig as getBuilderConfig } from './config/builder.js';
+import { getConfig as getForgeConfig } from './config/forge.js';
 
 import type { AppBuildInfo } from '@wdio/electron-types';
 

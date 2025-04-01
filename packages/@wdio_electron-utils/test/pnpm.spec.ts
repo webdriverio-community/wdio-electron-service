@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { expect, it, vi, describe } from 'vitest';
-import { findPnpmCatalogVersion } from '../src/pnpm';
-import { PKG_NAME_ELECTRON, PNPM_WORKSPACE_YAML } from '../src/constants';
+import { findPnpmCatalogVersion } from '../src/pnpm.js';
+import { PKG_NAME_ELECTRON, PNPM_WORKSPACE_YAML } from '../src/constants.js';
 
 function getPnpmFixtureDirPath(subPath?: string[]) {
   const fixtureDir = path.resolve(process.cwd(), '..', '..', 'fixtures', 'pnpm');
