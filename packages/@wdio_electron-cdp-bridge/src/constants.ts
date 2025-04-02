@@ -1,6 +1,8 @@
 export const REQUEST_TIMEOUT = 10000;
 export const DEFAULT_HOSTNAME = 'localhost';
 export const DEFAULT_PORT = 9229;
+export const DEFAULT_MAX_RETRY_COUNT = 3;
+export const DEFAULT_RETRY_INTERVAL = 100;
 
 export const ERROR_MESSAGE = {
   TIMEOUT_CONNECTION: 'Timeout exceeded when wait for the response:',

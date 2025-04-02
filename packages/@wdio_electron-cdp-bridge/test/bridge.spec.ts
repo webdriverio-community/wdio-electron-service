@@ -1,9 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 
 import log from '@wdio/electron-utils/log';
 
 import { CdpBridge } from '../src/bridge.js';
+import { DevTool } from '../src/dev-tool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
+
+import type { WdioCdpBridge } from '../src/types.js';
 
 vi.mock('@wdio/electron-utils/log', () => ({
   default: {
@@ -38,6 +41,7 @@ vi.mock('ws', async (importOriginal) => {
       /** The connection is closed. */
       static CLOSED = 3;
       readyState = 1;
+      cons = vi.fn();
       send = vi.fn();
       close = vi.fn();
       on = mockOn;
@@ -49,9 +53,7 @@ vi.mock('ws', async (importOriginal) => {
 let debuggerList: { webSocketDebuggerUrl: string }[] | undefined = undefined;
 vi.mock('../src/dev-tool', () => {
   return {
-    DevTool: vi.fn().mockImplementation(() => ({
-      list: vi.fn(async () => debuggerList),
-    })),
+    DevTool: vi.fn(),
   };
 });
 
@@ -62,12 +64,41 @@ const executeEventCallback = (calls: any[][], eventName: string, ...args: any[])
 };
 
 describe('CdpBridge', () => {
+  beforeEach(() => {
+    vi.mocked(DevTool).mockImplementation(
+      () =>
+        ({
+          list: vi.fn(async () => debuggerList),
+        }) as unknown as DevTool,
+    );
+  });
+
   describe('connect', () => {
     it('should connect successfully without errors', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
-      expect(() => client.connect()).not.toThrowError();
-      expect(() => client.connect()).not.toThrowError(); // nothing will happen when multiple call
+      await expect(client.connect()).resolves.toBeUndefined();
+      await expect(client.connect()).resolves.toBeUndefined();
+    });
+
+    it('should connect successfully without errors after retry', async () => {
+      let retry: number = 0;
+      vi.mocked(DevTool).mockImplementation(() => {
+        retry++;
+        if (retry < 3) {
+          throw Error('Dummy Error');
+        }
+        return {
+          list: vi.fn(async () => [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }] as WdioCdpBridge.DebuggerList),
+        } as unknown as DevTool;
+      });
+      const client = new CdpBridge({ waitInterval: 10 });
+
+      await expect(client.connect()).resolves.toBeUndefined();
+      expect(log.warn).toHaveBeenCalledWith('Connection attempt 1 failed: Dummy Error');
+      expect(log.warn).toHaveBeenCalledWith('Retry 1/3 to connect after 10ms...');
+      expect(log.warn).toHaveBeenCalledWith('Connection attempt 2 failed: Dummy Error');
+      expect(log.warn).toHaveBeenCalledWith('Retry 2/3 to connect after 10ms...');
     });
 
     it('should warn when multiple debuggers are detected', async () => {
@@ -76,14 +107,14 @@ describe('CdpBridge', () => {
         { webSocketDebuggerUrl: 'ws://localhost:123/uuid' },
       ];
       const client = new CdpBridge();
-      await expect(() => client.connect()).not.toThrowError();
+      await expect(client.connect()).resolves.toBeUndefined();
       expect(log.warn).toHaveBeenCalledTimes(1);
       expect(log.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     });
 
     it('should throw error when no debugger is detected', async () => {
       debuggerList = [];
-      const client = new CdpBridge();
+      const client = new CdpBridge({ waitInterval: 5 });
       await expect(() => client.connect()).rejects.toThrowError(ERROR_MESSAGE.DEBUGGER_NOT_FOUND);
     });
   });

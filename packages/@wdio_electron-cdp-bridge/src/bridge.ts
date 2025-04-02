@@ -3,10 +3,16 @@ import EventEmitter from 'node:events';
 import WebSocket from 'ws';
 
 import log from '@wdio/electron-utils/log';
-import { DevTool } from './dev-tool.js';
-import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants.js';
+import { DevTool, type DevToolOptions } from './dev-tool.js';
+import {
+  DEFAULT_HOSTNAME,
+  DEFAULT_MAX_RETRY_COUNT,
+  DEFAULT_PORT,
+  DEFAULT_RETRY_INTERVAL,
+  ERROR_MESSAGE,
+  REQUEST_TIMEOUT,
+} from './constants.js';
 
-import type { DevToolOptions } from './dev-tool.js';
 import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 
 type Methods = keyof ProtocolMapping.Commands;
@@ -40,7 +46,10 @@ type MethodReturnValue = {
   };
 };
 
-export type CdpBridgeOptions = DevToolOptions;
+export type CdpBridgeOptions = DevToolOptions & {
+  waitInterval?: number;
+  connectionRetryCount?: number;
+};
 
 const CONNECT_PROMISE_ID = 0;
 
@@ -49,7 +58,7 @@ export class CdpBridge extends EventEmitter {
   #wsUrl: string | undefined = undefined;
   #ws: WebSocket | null = null;
   #promises = new Map<number, PromiseHandlers>();
-  #commandId = 1;
+  #commandId = CONNECT_PROMISE_ID + 1;
 
   constructor(options?: CdpBridgeOptions) {
     super();
@@ -58,12 +67,38 @@ export class CdpBridge extends EventEmitter {
         host: DEFAULT_HOSTNAME,
         port: DEFAULT_PORT,
         timeout: REQUEST_TIMEOUT,
+        waitInterval: DEFAULT_RETRY_INTERVAL,
+        connectionRetryCount: DEFAULT_MAX_RETRY_COUNT,
       },
       options,
     );
   }
 
   async connect(): Promise<void> {
+    let retries = 0;
+    const maxRetryCount = this.options.connectionRetryCount;
+    const waitInterval = this.options.waitInterval;
+
+    while (retries <= maxRetryCount) {
+      try {
+        await this.#connect();
+        return;
+      } catch (error) {
+        const lastError = error as Error;
+        log.warn(`Connection attempt ${retries + 1} failed: ${lastError.message}`);
+
+        if (retries >= maxRetryCount) {
+          log.error(`Failed to connect after ${retries + 1} attempts`);
+          throw lastError;
+        }
+
+        retries++;
+        log.warn(`Retry ${retries}/${maxRetryCount} to connect after ${waitInterval}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, waitInterval));
+      }
+    }
+  }
+  async #connect(): Promise<void> {
     this.#wsUrl = await this.#getWsUrl();
     return new Promise((resolve, reject) => {
       if (!this.#wsUrl) {

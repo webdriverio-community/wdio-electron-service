@@ -122,6 +122,8 @@ Constructor options:
 | `host` |string|localhost| Hostname of the debugger |
 | `port` |number |9229| Port number of the debugger |
 | `timeout` |number|10000| Timeout for connection (ms) |
+| `waitInterval` |number|100| Default interval for retrying to connect (ms) |
+| `connectionRetryCount` |number|3| Maximum count of request retries to the debugger endpoint |
 
 #### `connect()`
 
