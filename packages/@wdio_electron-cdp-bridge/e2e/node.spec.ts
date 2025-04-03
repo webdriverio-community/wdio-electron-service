@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
-import getPort from 'get-port';
 
+import getPort from 'get-port';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { CdpBridge } from '../src/bridge';
+
+import { CdpBridge } from '../src/bridge.js';
 
 const port = await getPort();
 
@@ -32,8 +33,7 @@ describe('E2E test for CdpBridge', () => {
   });
 
   it('should receive the event', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let params: any;
+    let params: unknown;
     client.on('Runtime.executionContextCreated', (event) => {
       params = event;
     });
