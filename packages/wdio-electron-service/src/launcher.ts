@@ -134,6 +134,17 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
     });
   }
 
+  /**
+   * Assigns unique debugging ports to each Electron instance to prevent port conflicts
+   * when running multiple Electron instances concurrently.
+   *
+   * This method runs at the beginning of each worker process and:
+   * 1. Dynamically finds available ports using get-port
+   * 2. Adds the --inspect flag with the assigned port to each Electron instance
+   * 3. Ensures each Electron instance has a unique debugging port
+   *
+   * This allows for reliable parallel debugging of multiple Electron instances.
+   */
   async onWorkerStart(_cid: string, capabilities: WebdriverIO.Capabilities) {
     try {
       const capsList = Array.isArray(capabilities) ? (capabilities as WebdriverIO.Capabilities[]) : [capabilities];
@@ -148,17 +159,31 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       );
       log.debug('Setting capability at onWorkerStart', caps);
     } catch (error) {
-      const msg = `Failed setting up Electron session: ${(error as Error).stack}`;
+      const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+      const msg = `Failed to assign debugging ports to Electron instances: ${errorMessage}`;
       log.error(msg);
       throw new SevereServiceError(msg);
     }
   }
 }
 
+/**
+ * Dynamically allocates available ports for Electron debugger instances
+ *
+ * @param quantity Number of ports needed (one per Electron instance)
+ * @returns Array of available port numbers
+ */
 const getDebuggerPorts = async (quantity: number): Promise<number[]> => {
   return Promise.all(Array.from({ length: quantity }, () => getPort()));
 };
 
+/**
+ * Configures an Electron capability with the necessary debugging arguments
+ * by adding the --inspect flag with the assigned port to chrome options
+ *
+ * @param cap WebdriverIO capability to modify
+ * @param debuggerPort Port number to use for the Node inspector
+ */
 const setInspectArg = (cap: WebdriverIO.Capabilities, debuggerPort: number) => {
   if (!('goog:chromeOptions' in cap)) {
     cap['goog:chromeOptions'] = { args: [] };
