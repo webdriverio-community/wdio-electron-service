@@ -1,6 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 const isTest = process.env.TEST === 'true';
 const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
+// TODO: Start: This section should be removed at V9
+const isIpcBridgeEnabled = Boolean(process.env.ENABLE_IPC_BRIDGE);
+
+if (isIpcBridgeEnabled) {
+  require('wdio-electron-service/main');
+}
+// TODO: End: This section should be removed at V9
 
 const appPath = app.getAppPath();
 const resourcePaths = {

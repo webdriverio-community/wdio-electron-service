@@ -21,6 +21,7 @@ import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
+import { ipcBridgeCheck } from './ipc.js'; //TODO: should be removed at V9
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
   await browser.waitUntil(async () => {
@@ -133,6 +134,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
         await waitUntilWindowAvailable(mrInstance);
         await mrCdpBridge.connect();
         await copyOriginalApi(mrInstance);
+        await ipcBridgeCheck(mrInstance); //TODO: should be removed at V9
       }
     } else {
       const puppeteer = await browser.getPuppeteer();
@@ -140,6 +142,7 @@ export default class ElectronWorkerService implements Services.ServiceInstance {
       this.#browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(browser);
+      await ipcBridgeCheck(browser); //TODO: should be removed at V9
       await copyOriginalApi(this.#browser);
     }
   }
