@@ -22,6 +22,32 @@
         }
       },
       "./dist/cjs/index.js"
+    ],
+    "./main": [
+      {
+        "import": {
+          "types": "./dist/esm/main.d.ts",
+          "default": "./dist/esm/main.js"
+        },
+        "require": {
+          "types": "./dist/cjs/main.d.ts",
+          "default": "./dist/cjs/main.js"
+        }
+      },
+      "./dist/cjs/main.js"
+    ],
+    "./preload": [
+      {
+        "import": {
+          "types": "./dist/esm/preload.d.ts",
+          "default": "./dist/esm/preload.js"
+        },
+        "require": {
+          "types": "./dist/cjs/preload.d.ts",
+          "default": "./dist/cjs/preload.js"
+        }
+      },
+      "./dist/cjs/preload.js"
     ]
   },
   "engines": {
