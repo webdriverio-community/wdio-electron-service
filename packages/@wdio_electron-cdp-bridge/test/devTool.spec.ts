@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import nock from 'nock';
 import waitPort from 'wait-port';
 
-import { DevTool } from '../src/dev-tool.js';
+import { DevTool } from '../src/devTool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
 
 vi.mock('wait-port', () => ({
@@ -20,7 +20,7 @@ describe('DevTool', () => {
       protocolVersion: 'v1.1',
     };
 
-    it('should return version information successfully', async () => {
+    it('should retrieve version information with default configuration', async () => {
       nock('http://localhost:9229')
         .get('/json/version')
         .reply(
@@ -35,7 +35,7 @@ describe('DevTool', () => {
       expect(data).toStrictEqual(expected);
     });
 
-    it('should return version information with custom host and port', async () => {
+    it('should retrieve version information with custom host and port', async () => {
       nock('http://somehost:50000')
         .get('/json/version')
         .reply(
@@ -53,24 +53,24 @@ describe('DevTool', () => {
       expect(data).toStrictEqual(expected);
     });
 
-    it('should throw error when receiving invalid JSON data', async () => {
+    it('should throw an error when receiving invalid JSON response', async () => {
       nock('http://localhost:9229').get('/json/version').reply(200, 'invalid data');
       const devtool = new DevTool();
       await expect(() => devtool.version()).rejects.toThrowError();
     });
 
-    it('should throw error when receiving non-200 status code', async () => {
+    it('should throw an error when receiving non-200 HTTP status code', async () => {
       nock('http://localhost:9229').get('/json/version').reply(400, 'invalid data');
       const devtool = new DevTool();
       await expect(() => devtool.version()).rejects.toThrowError();
     });
 
-    it('should throw error when server is not running', async () => {
+    it('should throw an error when debugger server is not running', async () => {
       const devtool = new DevTool();
       await expect(() => devtool.version()).rejects.toThrowError();
     });
 
-    it('should throw error when request times out', async () => {
+    it('should throw a timeout error when request exceeds timeout limit', async () => {
       nock('http://localhost:9229').get('/json/version').delay(500).reply(200, JSON.stringify(expected));
       const devtool = new DevTool({ timeout: 100 });
       await expect(() => devtool.version()).rejects.toThrowError(ERROR_MESSAGE.TIMEOUT_CONNECTION);
@@ -78,7 +78,7 @@ describe('DevTool', () => {
   });
 
   describe('waitPort', () => {
-    it('should throw error when port wait times out', async () => {
+    it('should throw a timeout error when port waiting exceeds timeout', async () => {
       nock('http://localhost:9229').get('/json/version').reply(200, JSON.stringify({}));
       (waitPort as Mock).mockRejectedValue(undefined);
       const devtool = new DevTool();
@@ -87,7 +87,7 @@ describe('DevTool', () => {
       expect(waitPort).toHaveBeenCalled();
     });
 
-    it('should call waitPort only once for multiple requests', async () => {
+    it('should only call waitPort once for multiple consecutive requests', async () => {
       nock('http://localhost:9229')
         .get('/json/version')
         .reply(200, JSON.stringify({}))
@@ -103,7 +103,7 @@ describe('DevTool', () => {
   });
 
   describe('list', () => {
-    it('should return debugger information successfully', async () => {
+    it('should retrieve debugger target information successfully', async () => {
       const expected = {
         description: 'node.js instance',
         devtoolsFrontendUrl:

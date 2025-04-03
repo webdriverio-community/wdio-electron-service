@@ -3,7 +3,7 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
 import log from '@wdio/electron-utils/log';
 
 import { CdpBridge } from '../src/bridge.js';
-import { DevTool } from '../src/dev-tool.js';
+import { DevTool } from '../src/devTool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
 
 import type { WdioCdpBridge } from '../src/types.js';
@@ -51,7 +51,7 @@ vi.mock('ws', async (importOriginal) => {
 });
 
 let debuggerList: { webSocketDebuggerUrl: string }[] | undefined = undefined;
-vi.mock('../src/dev-tool', () => {
+vi.mock('../src/devTool', () => {
   return {
     DevTool: vi.fn(),
   };
@@ -74,14 +74,14 @@ describe('CdpBridge', () => {
   });
 
   describe('connect', () => {
-    it('should connect successfully without errors', async () => {
+    it('should establish a connection successfully on first attempt', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await expect(client.connect()).resolves.toBeUndefined();
       await expect(client.connect()).resolves.toBeUndefined();
     });
 
-    it('should connect successfully without errors after retry', async () => {
+    it('should establish a connection successfully after retrying', async () => {
       let retry: number = 0;
       vi.mocked(DevTool).mockImplementation(() => {
         retry++;
@@ -101,7 +101,7 @@ describe('CdpBridge', () => {
       expect(log.warn).toHaveBeenCalledWith('Retry 2/3 to connect after 10ms...');
     });
 
-    it('should warn when multiple debuggers are detected', async () => {
+    it('should log a warning when multiple debugger instances are detected', async () => {
       debuggerList = [
         { webSocketDebuggerUrl: 'ws://localhost:123/uuid' },
         { webSocketDebuggerUrl: 'ws://localhost:123/uuid' },
@@ -112,7 +112,7 @@ describe('CdpBridge', () => {
       expect(log.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     });
 
-    it('should throw error when no debugger is detected', async () => {
+    it('should throw an error when no debugger instances are found', async () => {
       debuggerList = [];
       const client = new CdpBridge({ waitInterval: 5 });
       await expect(() => client.connect()).rejects.toThrowError(ERROR_MESSAGE.DEBUGGER_NOT_FOUND);
@@ -120,7 +120,7 @@ describe('CdpBridge', () => {
   });
 
   describe('send', () => {
-    it('should send message and receive response successfully', async () => {
+    it('should successfully send a message and receive the response', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -136,7 +136,7 @@ describe('CdpBridge', () => {
       expect(() => executeEventCallback(mockOn.mock.calls, 'message', message)).not.toThrowError();
     });
 
-    it('should handle event messages correctly', async () => {
+    it('should properly handle CDP event messages', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -164,7 +164,7 @@ describe('CdpBridge', () => {
       });
     });
 
-    it('should reject when response contains error object', async () => {
+    it('should reject the promise when response contains an error object', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -182,7 +182,7 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError('Test error message');
     });
 
-    it('should reject when response is not valid JSON', async () => {
+    it('should reject the promise when response contains invalid JSON', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -192,7 +192,7 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.ERROR_PARSE_JSON);
     });
 
-    it('should reject when request times out', async () => {
+    it('should reject the promise when request times out', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge({ timeout: 10 });
       await client.connect();
@@ -200,14 +200,14 @@ describe('CdpBridge', () => {
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.TIMEOUT_CONNECTION);
     });
 
-    it('should reject when send is called before connect', async () => {
+    it('should reject the promise when send is called before connect', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.send('Runtime.enable');
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.NOT_CONNECTED);
     });
 
-    it('should reject when protocol-related error occurs', async () => {
+    it('should reject the promise when a protocol-related error occurs', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -220,7 +220,7 @@ describe('CdpBridge', () => {
   });
 
   describe('close', () => {
-    it('should disconnect successfully', async () => {
+    it('should close the connection successfully', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
@@ -229,7 +229,7 @@ describe('CdpBridge', () => {
       await expect(result).resolves.not.toThrowError();
     });
 
-    it('should handle close before connect gracefully', async () => {
+    it('should handle calling close before connect without errors', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.close();
@@ -237,21 +237,21 @@ describe('CdpBridge', () => {
     });
   });
 
-  describe('on', () => {
-    it('should return correct ready state after connect', async () => {
+  describe('state', () => {
+    it('should return the correct WebSocket ready state after connecting', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       await client.connect();
       expect(client.state).toBe(1);
     });
 
-    it('should return undefined state before connect', async () => {
+    it('should return undefined state when not connected', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       expect(client.state).toBe(undefined);
     });
 
-    it('should handle close before connect gracefully', async () => {
+    it('should handle close operations gracefully before connection', async () => {
       debuggerList = [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }];
       const client = new CdpBridge();
       const result = client.close();

@@ -1,3 +1,3 @@
-export * from './dev-tool.js';
+export * from './devTool.js';
 export * from './bridge.js';
 export * from './types.js';

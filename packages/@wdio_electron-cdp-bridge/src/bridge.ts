@@ -1,9 +1,9 @@
 import EventEmitter from 'node:events';
 
 import WebSocket from 'ws';
-
 import log from '@wdio/electron-utils/log';
-import { DevTool, type DevToolOptions } from './dev-tool.js';
+
+import { DevTool, type DevToolOptions } from './devTool.js';
 import {
   DEFAULT_HOSTNAME,
   DEFAULT_MAX_RETRY_COUNT,
