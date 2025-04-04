@@ -1,4 +1,3 @@
-// TODO: This file should be remove at V9
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 const ipcRendererInvokeMock = vi.fn();
@@ -20,8 +19,8 @@ describe('Preload Script', () => {
   });
 
   it('should call invoke with the expected params', async () => {
-    await window.wdioElectron.execute();
+    await window.wdioElectron.execute('look', ['some', 'args']);
     const ipcChannelName = 'wdio-electron.execute';
-    expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName);
+    expect(ipcRendererInvokeMock).toHaveBeenCalledWith(ipcChannelName, 'look', ['some', 'args']);
   });
 });
