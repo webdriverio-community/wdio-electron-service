@@ -16,10 +16,15 @@ export class ServiceConfig {
 
   constructor(globalOptions: ElectronServiceGlobalOptions = {}) {
     this.#globalOptions = globalOptions;
+
+    const { useCdpBridge } = globalOptions;
+    if (typeof useCdpBridge === 'boolean' && !useCdpBridge) {
+      this.#useCdpBridge = useCdpBridge;
+    }
   }
 
   protected init(capabilities: WebdriverIO.Capabilities) {
-    const { clearMocks, resetMocks, restoreMocks, useCdpBridge } = Object.assign(
+    const { clearMocks, resetMocks, restoreMocks } = Object.assign(
       {},
       this.#globalOptions,
       capabilities[CUSTOM_CAPABILITY_NAME],
@@ -28,10 +33,6 @@ export class ServiceConfig {
     this.#clearMocks = clearMocks ?? false;
     this.#resetMocks = resetMocks ?? false;
     this.#restoreMocks = restoreMocks ?? false;
-
-    if (typeof useCdpBridge === 'boolean' && !useCdpBridge) {
-      this.#useCdpBridge = useCdpBridge;
-    }
   }
 
   get browser(): WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser | undefined {

@@ -28,6 +28,7 @@ export async function before(
   capabilities: WebdriverIO.Capabilities,
   instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
 ): Promise<void> {
+  this.init(capabilities);
   const browser = instance as WebdriverIO.Browser;
   this.browser = browser;
   const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge(capabilities);
@@ -131,50 +132,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
-    this.init(capabilities);
-    const browser = instance as WebdriverIO.Browser;
-    this.browser = browser;
-    if (!this.browser.isMultiremote) {
-      this.cdpBridge = new ElectronCdpBridge(getDebuggerEndpoint(capabilities));
-      await this.cdpBridge.connect();
-    }
-    /**
-     * Add electron API to browser object
-     */
-    this.browser.electron = getElectronAPI.call(this);
-
-    if (this.browser.isMultiremote) {
-      const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
-      for (const instance of mrBrowser.instances) {
-        const mrInstance = mrBrowser.getInstance(instance);
-        const caps =
-          (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
-          (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
-
-        if (!caps[CUSTOM_CAPABILITY_NAME]) {
-          continue;
-        }
-
-        log.debug('Adding Electron API to browser object instance named: ', instance);
-        const mrCdpBridge = new ElectronCdpBridge(getDebuggerEndpoint(caps));
-        mrInstance.electron = getElectronAPI.call(this, mrInstance, mrCdpBridge);
-
-        const mrPuppeteer = await mrInstance.getPuppeteer();
-        mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
-
-        // wait until an Electron BrowserWindow is available
-        await waitUntilWindowAvailable(mrInstance);
-        await mrCdpBridge.connect();
-        await copyOriginalApi(mrInstance);
-      }
-    } else {
-      const puppeteer = await browser.getPuppeteer();
-      this.puppeteerBrowser = puppeteer;
-      this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
-      // wait until an Electron BrowserWindow is available
-      await waitUntilWindowAvailable(browser);
-      await copyOriginalApi(this.browser);
-    }
+    await before.call(this, capabilities, instance);
   }
 
   async beforeTest() {

@@ -66,12 +66,12 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
-    this.init(capabilities);
     if (this.useCdpBridge) {
       await ipcBridgeCheck(instance);
       await before.call(this, capabilities, instance);
       return;
     }
+    this.init(capabilities);
     this.browser = instance as WebdriverIO.Browser;
 
     /**

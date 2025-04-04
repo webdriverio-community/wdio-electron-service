@@ -45,7 +45,6 @@ export async function ipcBridgeCheck(browser: WebdriverIO.Browser | WebdriverIO.
     console.log();
   }
 }
-/* v8 ignore stop */
 
 export function ipcBridgeWarning() {
   // for the log file
@@ -64,3 +63,4 @@ export function ipcBridgeWarning() {
   console.log(colourise(LINE05));
   console.log();
 }
+/* v8 ignore stop */
