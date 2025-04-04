@@ -1,3 +1,4 @@
+// TODO: This file should be remove at V9
 import electron, { app, ipcMain } from 'electron';
 import copy from 'fast-copy';
 
