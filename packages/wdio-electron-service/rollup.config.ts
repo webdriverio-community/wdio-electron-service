@@ -38,7 +38,7 @@ const configEsm: RollupOptions = {
       },
       {
         packageName: 'fast-copy',
-        targetFile: 'src/service.ts',
+        targetFile: 'src/serviceCdp.ts',
         bundleRegExp: /export.*$/m,
         importName: '{ default: copy }',
         bundleReplace: (importName: string) => `const ${importName} = { default: index };`,
