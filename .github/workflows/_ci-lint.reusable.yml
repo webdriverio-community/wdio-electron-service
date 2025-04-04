@@ -8,8 +8,8 @@ on:
     inputs:
       cache_key:
         description: 'Cache key to use for downloading artifacts'
-        type: string
         required: false
+        type: string
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -20,6 +20,7 @@ jobs:
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -32,6 +33,18 @@ jobs:
         uses: ./.github/workflows/actions/setup-workspace
         with:
           node-version: '20'
+
+      # Cache ESLint and Prettier results
+      - name: 📦 Cache Linting Results
+        uses: actions/cache@v3
+        with:
+          path: |
+            .eslintcache
+            node_modules/.cache/prettier
+          key: linting-${{ runner.os }}-${{ hashFiles('eslint.config.js', '.prettierrc*', 'package.json') }}-${{ github.ref_name }}
+          restore-keys: |
+            linting-${{ runner.os }}-${{ hashFiles('eslint.config.js', '.prettierrc*', 'package.json') }}-
+            linting-${{ runner.os }}-
 
       # Download the pre-built packages from the build job
       # This ensures all tests use the same build artifacts
@@ -47,5 +60,7 @@ jobs:
       # Run ESLint and other code quality checks
       # This ensures code follows project standards and best practices
       - name: 🔍 Run Code Quality Checks
-        run: pnpm run lint
+        run: |
+          pnpm run lint
+          pnpm run format:check
         shell: bash
