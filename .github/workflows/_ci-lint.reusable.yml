@@ -20,7 +20,7 @@ jobs:
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -57,10 +57,12 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
-      # Run ESLint and other code quality checks
-      # This ensures code follows project standards and best practices
-      - name: 🔍 Run Code Quality Checks
-        run: |
-          pnpm run lint
-          pnpm run format:check
+      # Run Linting checks
+      - name: 🔍 Run Linting
+        run: pnpm run lint
+        shell: bash
+
+      # Run Formatting checks
+      - name: 🔍 Run Format Check
+        run: pnpm run format:check
         shell: bash
