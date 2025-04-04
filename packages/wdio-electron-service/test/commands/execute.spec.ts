@@ -1,43 +1,24 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 import { execute } from '../../src/commands/execute.js';
-import { ElectronCdpBridge } from '../../src/debugger.js';
-import mockStore from '../../src/mockStore.js';
-
-import type { ElectronMock } from '@wdio/electron-types';
-
-vi.mock('../../src/mockStore.js', () => {
-  const mockStore = {
-    getMocks: vi.fn().mockReturnValue([]),
-  };
-  return {
-    default: mockStore,
-  };
-});
 
 describe('execute Command', () => {
   beforeEach(async () => {
-    globalThis.browser = {} as WebdriverIO.Browser;
-    globalThis.mrBrowser = {
-      isMultiremote: true,
-      instances: ['browserA', 'browserB'],
-      getInstance: vi.fn().mockReturnValue({
-        electron: {
-          execute: vi.fn(),
-        },
-      } as unknown as WebdriverIO.Browser),
-    } as unknown as WebdriverIO.MultiRemoteBrowser;
-    vi.clearAllMocks();
+    globalThis.browser = {
+      electron: {
+        bridgeActive: true,
+      },
+      execute: vi.fn((fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
+        typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
+      ),
+    };
+    globalThis.wdioElectron = {
+      execute: vi.fn(),
+    };
   });
-  const client = {
-    contextId: 9999,
-    connect: vi.fn(),
-    on: vi.fn(),
-    send: vi.fn().mockResolvedValue({ result: { result: { value: 6 } } }),
-  } as unknown as ElectronCdpBridge;
 
   it('should throw an error when called with a script argument of the wrong type', async () => {
-    await expect(() => execute(globalThis.browser, client, {} as string)).rejects.toThrowError(
+    await expect(() => execute(globalThis.browser, {} as string)).rejects.toThrowError(
       new Error('Expecting script to be type of "string" or "function"'),
     );
   });
@@ -50,70 +31,32 @@ describe('execute Command', () => {
   });
 
   it('should throw an error when the browser is not initialised', async () => {
-    await expect(() =>
-      execute(undefined as unknown as typeof globalThis.browser, client, '() => 1 + 2 + 3'),
-    ).rejects.toThrowError(new Error('WDIO browser is not yet initialised'));
+    await expect(() => execute(undefined, '() => 1 + 2 + 3')).rejects.toThrowError(
+      new Error('WDIO browser is not yet initialised'),
+    );
+  });
+
+  it('should throw an error when the context bridge is not available', async () => {
+    globalThis.browser.electron.bridgeActive = false;
+    await expect(() => execute(globalThis.browser, () => 1 + 2 + 3)).rejects.toThrowError(
+      new Error(
+        'Electron context bridge not available! ' +
+          'Did you import the service hook scripts into your application via e.g. ' +
+          "`import('wdio-electron-service/main')` and `import('wdio-electron-service/preload')`?\n\n" +
+          'Find more information at https://webdriver.io/docs/desktop-testing/electron#api-configuration',
+      ),
+    );
   });
 
   it('should execute a function', async () => {
-    await execute(globalThis.browser, client, (_electron, a, b, c) => a + b + c, 1, 2, 3);
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
-      arguments: [{ value: 1 }, { value: 2 }, { value: 3 }],
-      awaitPromise: true,
-      executionContextId: 9999,
-      functionDeclaration: '(a, b, c) => a + b + c',
-      returnByValue: true,
-    });
+    await execute(globalThis.browser, (a, b, c) => a + b + c, 1, 2, 3);
+    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '(a, b, c) => a + b + c', 1, 2, 3);
+    expect(globalThis.wdioElectron.execute).toHaveBeenCalledWith('(a, b, c) => a + b + c', [1, 2, 3]);
   });
 
   it('should execute a stringified function', async () => {
-    await execute(globalThis.browser, client, '(electron) => 1 + 2 + 3');
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
-      arguments: [],
-      awaitPromise: true,
-      executionContextId: 9999,
-      functionDeclaration: '() => 1 + 2 + 3',
-      returnByValue: true,
-    });
-  });
-
-  it('should execute a function when multi remote browser', async () => {
-    const mockElectron = globalThis.mrBrowser.getInstance();
-    await execute(globalThis.mrBrowser, client, (_electron, a, b, c) => a + b + c, 1, 2, 3);
-
-    expect(mockElectron.electron.execute).toHaveBeenCalledTimes(2); // Because mrBrowser has 2 browser instance
-  });
-
-  it('should execute a function declaration', async () => {
-    await execute(
-      globalThis.browser,
-      client,
-      function test(_electron, a: number, b: number, c: number) {
-        return a + b + c;
-      },
-      1,
-      2,
-      3,
-    );
-
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
-      arguments: [{ value: 1 }, { value: 2 }, { value: 3 }],
-      awaitPromise: true,
-      executionContextId: 9999,
-      functionDeclaration: `function test(a, b, c) {\n        return a + b + c;\n      }`,
-      returnByValue: true,
-    });
-  });
-
-  it('should throw error when pass not function definition', async () => {
-    await expect(() => execute(globalThis.browser, client, 'const a = 1')).rejects.toThrowError();
-  });
-
-  it('should call `mock.update()` when mockStore has some mocks', async () => {
-    const updateMock = vi.fn();
-    vi.mocked(mockStore.getMocks).mockReturnValue([['dummy', { update: updateMock } as unknown as ElectronMock]]);
-    await execute(globalThis.browser, client, (_electron, a, b, c) => a + b + c, 1, 2, 3);
-
-    expect(updateMock).toHaveBeenCalledTimes(1);
+    await execute(globalThis.browser, '() => 1 + 2 + 3');
+    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
+    expect(globalThis.wdioElectron.execute).toHaveBeenCalledWith('() => 1 + 2 + 3', []);
   });
 });
