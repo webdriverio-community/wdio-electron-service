@@ -3,10 +3,27 @@
   "ui": "tui",
   "tasks": {
     "//#format:check": {
-      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}"]
+      "dependsOn": [],
+      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
+      "outputs": ["node_modules/.cache/prettier"]
+    },
+    "//#format": {
+      "dependsOn": [],
+      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
+      "outputs": ["node_modules/.cache/prettier"]
     },
     "//#lint": {
-      "inputs": ["**/*.{j,mj,cj,t}s"]
+      "dependsOn": [],
+      "inputs": ["**/*.{j,mj,cj,t}s", "eslint.config.js", "package.json"],
+      "outputs": [".eslintcache"]
+    },
+    "//#lint:fix": {
+      "dependsOn": [],
+      "inputs": ["**/*.{j,mj,cj,t}s", "eslint.config.js", "package.json"],
+      "outputs": [".eslintcache"]
+    },
+    "//#clear:cache": {
+      "cache": false
     },
     "@repo/e2e#init-e2es": {
       "dependsOn": ["wdio-electron-service#build"]
