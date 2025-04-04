@@ -1,17 +1,24 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
+import getPort from 'get-port';
 import { SevereServiceError } from 'webdriverio';
+import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import log from '@wdio/electron-utils/log';
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
-import type { Services, Options, Capabilities } from '@wdio/types';
-import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
-import { getChromeOptions, getChromedriverOptions, getElectronCapabilities } from './capabilities.js';
+import {
+  getChromeOptions,
+  getChromedriverOptions,
+  getConvertedElectronCapabilities,
+  getElectronCapabilities,
+} from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { ipcBridgeWarning } from './ipc.js';
+
+import type { Services, Options, Capabilities } from '@wdio/types';
+import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -124,7 +131,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
          */
         cap[CUSTOM_CAPABILITY_NAME] = cap[CUSTOM_CAPABILITY_NAME] || {};
 
-        log.debug('setting capability', cap);
+        log.debug('Setting capability at onPrepare', cap);
       }),
     ).catch((err) => {
       const msg = `Failed setting up Electron session: ${err.stack}`;
@@ -132,4 +139,64 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       throw new SevereServiceError(msg);
     });
   }
+
+  /**
+   * Assigns unique debugging ports to each Electron instance to prevent port conflicts
+   * when running multiple Electron instances concurrently.
+   *
+   * This method runs at the beginning of each worker process and:
+   * 1. Dynamically finds available ports using get-port
+   * 2. Adds the --inspect flag with the assigned port to each Electron instance
+   * 3. Ensures each Electron instance has a unique debugging port
+   *
+   * This allows for reliable parallel debugging of multiple Electron instances.
+   */
+  async onWorkerStart(_cid: string, capabilities: WebdriverIO.Capabilities) {
+    try {
+      const capsList = Array.isArray(capabilities) ? (capabilities as WebdriverIO.Capabilities[]) : [capabilities];
+      const caps = capsList.flatMap((cap) => getConvertedElectronCapabilities(cap) as WebdriverIO.Capabilities);
+
+      const portList = await getDebuggerPorts(caps.length);
+
+      await Promise.all(
+        caps.map(async (cap, index) => {
+          setInspectArg(cap, portList[index]);
+        }),
+      );
+      log.debug('Setting capability at onWorkerStart', caps);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+      const msg = `Failed to assign debugging ports to Electron instances: ${errorMessage}`;
+      log.error(msg);
+      throw new SevereServiceError(msg);
+    }
+  }
 }
+
+/**
+ * Dynamically allocates available ports for Electron debugger instances
+ *
+ * @param quantity Number of ports needed (one per Electron instance)
+ * @returns Array of available port numbers
+ */
+const getDebuggerPorts = async (quantity: number): Promise<number[]> => {
+  return Promise.all(Array.from({ length: quantity }, () => getPort()));
+};
+
+/**
+ * Configures an Electron capability with the necessary debugging arguments
+ * by adding the --inspect flag with the assigned port to chrome options
+ *
+ * @param cap WebdriverIO capability to modify
+ * @param debuggerPort Port number to use for the Node inspector
+ */
+const setInspectArg = (cap: WebdriverIO.Capabilities, debuggerPort: number) => {
+  if (!('goog:chromeOptions' in cap)) {
+    cap['goog:chromeOptions'] = { args: [] };
+  }
+  const chromeOptions = cap['goog:chromeOptions']!;
+  if (!('args' in chromeOptions)) {
+    chromeOptions.args = [];
+  }
+  chromeOptions.args!.push(`--inspect=localhost:${debuggerPort}`);
+};

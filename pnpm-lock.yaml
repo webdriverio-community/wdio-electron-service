@@ -670,6 +670,9 @@ importers:
       fast-copy:
         specifier: ^3.0.2
         version: 3.0.2
+      get-port:
+        specifier: ^7.1.0
+        version: 7.1.0
       puppeteer-core:
         specifier: ^22.15.0
         version: 22.15.0
@@ -2757,6 +2760,9 @@ packages:
 
   devtools-protocol@0.0.1312386:
     resolution: {integrity: sha512-DPnhUXvmvKT2dFA/j7B+riVLUt9Q6RKJlcppojL5CoRywJJKLDYnRlw0gTFKfgDPHP5E04UoB71SxoJlVZy8FA==}
+
+  devtools-protocol@0.0.1419694:
+    resolution: {integrity: sha512-z1RQ1PwV9/XAIYSRnyLxjnj7MZhEqY/SUYgFrPRa1o4DAI0XIcNHxc82SQ7F7+gZPo6NlIgUtn7cdDYxsuwmFg==}
 
   diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
@@ -8175,6 +8181,8 @@ snapshots:
     optional: true
 
   devtools-protocol@0.0.1312386: {}
+
+  devtools-protocol@0.0.1419694: {}
 
   diff-sequences@29.6.3: {}
 
