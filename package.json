@@ -24,15 +24,16 @@
     "ci-windows:units": "turbo run lint format:check test:unit",
     "ci:e2e:clean": "turbo run clean --filter=example*",
     "ci:e2e:logs": "turbo run logs --filter=@repo/e2e",
-    "clean": "turbo run clean && rm -rf node_modules || shx rm -rf node_modules",
+    "clean": "turbo run clean && pnpm clean:cache && pnpm dlx shx rm -rf node_modules",
+    "clean:cache": "turbo run clear:cache --force && pnpm dlx shx rm -rf .eslintcache node_modules/.cache/prettier",
     "dev": "turbo run dev",
-    "format": "prettier --write \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
-    "format:check": "prettier --check \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
+    "format": "prettier --write --cache \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
+    "format:check": "prettier --check --cache \"**/*.{j,t}s\" \"**/*.{yml,md,json}\"",
     "graph": "pnpm graph:e2e && pnpm graph:e2e:mac-universal",
     "graph:e2e": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph.png test:e2e:forge-cjs test:e2e:forge-esm test:e2e:builder-cjs test:e2e:builder-esm test:e2e:no-binary-cjs test:e2e:no-binary-esm",
     "graph:e2e:mac-universal": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph-mac-universal.png test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm",
-    "lint": "cross-env eslint \"**/*.{j,mj,cj,t}s\"",
-    "lint:fix": "cross-env eslint \"**/*.{j,mj,cj,t}s\" --fix",
+    "lint": "cross-env eslint --cache \"**/*.{j,mj,cj,t}s\"",
+    "lint:fix": "cross-env eslint --cache --fix \"**/*.{j,mj,cj,t}s\"",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
     "typecheck": "turbo run typecheck",
@@ -78,11 +79,11 @@
   },
   "lint-staged": {
     "**/*.{j,t}s": [
-      "eslint --fix",
-      "prettier --write"
+      "eslint --fix --cache",
+      "prettier --write --cache"
     ],
     "**/*.{yml,md,json}": [
-      "prettier --write"
+      "prettier --write --cache"
     ]
   },
   "pnpm": {

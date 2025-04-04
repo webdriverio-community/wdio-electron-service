@@ -127,3 +127,9 @@ packages/wdio-electron-service/src/cjs/preload.ts
 # Turbo files
 .turbo
 
+# Turborepo cache
+.turbo
+
+# Tool caches
+.eslintcache
+# Prettier cache is in node_modules/.cache/prettier

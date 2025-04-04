@@ -30,7 +30,7 @@
     "exec:multiremote": "xvfb-maybe wdio run ./wdio.multiremote.conf.ts",
     "exec:standalone": "xvfb-maybe tsx ./test/standalone/api.spec.ts",
     "exec:window": "cross-env ENABLE_SPLASH_WINDOW=true pnpm run exec:main && pnpm run exec:multiremote",
-    "exec:standalone:local": "cd .. && pnpm build && cd - && shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
+    "exec:standalone:local": "cd .. && pnpm build && cd - && pnpm dlx shx rm -rf ./node_modules && pnpm i && pnpm test:standalone"
   },
   "dependencies": {
     "@wdio/cli": "catalog:default",

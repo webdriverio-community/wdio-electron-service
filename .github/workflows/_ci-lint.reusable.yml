@@ -8,8 +8,8 @@ on:
     inputs:
       cache_key:
         description: 'Cache key to use for downloading artifacts'
-        type: string
         required: false
+        type: string
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -20,6 +20,7 @@ jobs:
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # Standard checkout with SSH key for private repositories
       - name: 👷 Checkout Repository
@@ -33,6 +34,18 @@ jobs:
         with:
           node-version: '20'
 
+      # Cache ESLint and Prettier results
+      - name: 📦 Cache Linting Results
+        uses: actions/cache@v3
+        with:
+          path: |
+            .eslintcache
+            node_modules/.cache/prettier
+          key: linting-${{ runner.os }}-${{ hashFiles('eslint.config.js', '.prettierrc*', 'package.json') }}-${{ github.ref_name }}
+          restore-keys: |
+            linting-${{ runner.os }}-${{ hashFiles('eslint.config.js', '.prettierrc*', 'package.json') }}-
+            linting-${{ runner.os }}-
+
       # Download the pre-built packages from the build job
       # This ensures all tests use the same build artifacts
       - name: 📦 Download Build Artifacts
@@ -44,8 +57,12 @@ jobs:
           cache_key_prefix: wdio-electron-build
           exact_cache_key: ${{ inputs.cache_key || github.run_id && format('{0}-{1}-{2}-{3}{4}', 'Linux', 'wdio-electron-build', 'wdio-electron-service', github.run_id, github.run_attempt > 1 && format('-rerun{0}', github.run_attempt) || '') || '' }}
 
-      # Run ESLint and other code quality checks
-      # This ensures code follows project standards and best practices
-      - name: 🔍 Run Code Quality Checks
+      # Run Linting checks
+      - name: 🔍 Run Linting
         run: pnpm run lint
+        shell: bash
+
+      # Run Formatting checks
+      - name: 🔍 Run Format Check
+        run: pnpm run format:check
         shell: bash
