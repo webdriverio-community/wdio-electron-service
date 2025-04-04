@@ -181,7 +181,10 @@ export interface ElectronServiceOptions {
 export type ElectronServiceGlobalOptions = Pick<
   ElectronServiceOptions,
   'clearMocks' | 'resetMocks' | 'restoreMocks'
-> & { rootDir?: string };
+> & {
+  rootDir?: string;
+  useCdpBridge?: boolean;
+};
 
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
@@ -220,7 +223,7 @@ export type ExecuteOpts = {
 };
 
 export type WdioElectronWindowObj = {
-  execute: () => boolean;
+  execute: (script: string, args?: unknown[]) => unknown;
 };
 
 enum ElectronMockResultType {
