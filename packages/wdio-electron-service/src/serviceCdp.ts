@@ -30,7 +30,7 @@ export async function before(
 ): Promise<void> {
   const browser = instance as WebdriverIO.Browser;
   this.browser = browser;
-  const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge(capabilities);
+  const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge.call(this, capabilities);
 
   /**
    * Add electron API to browser object
@@ -71,10 +71,21 @@ export async function before(
   }
 }
 
-async function initCdpBridge(capabilities: WebdriverIO.Capabilities) {
-  const cdpBridge = new ElectronCdpBridge(getDebuggerEndpoint(capabilities));
+async function initCdpBridge(this: ServiceConfig, capabilities: WebdriverIO.Capabilities) {
+  const options = getCdpOptions.call(this, capabilities);
+  const cdpBridge = new ElectronCdpBridge(options);
   await cdpBridge.connect();
   return cdpBridge;
+}
+
+function getCdpOptions(this: ServiceConfig, capabilities: WebdriverIO.Capabilities) {
+  const globalOptions = this.globalOptions;
+  const options = getDebuggerEndpoint(capabilities);
+  return Object.assign({}, options, {
+    ...(globalOptions.cdpConnectionTimeout && { timeout: globalOptions.cdpConnectionTimeout }),
+    ...(globalOptions.cdpConnectionWaitInterval && { waitInterval: globalOptions.cdpConnectionWaitInterval }),
+    ...(globalOptions.cdpConnectionRetryCount && { connectionRetryCount: globalOptions.cdpConnectionRetryCount }),
+  });
 }
 
 const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>

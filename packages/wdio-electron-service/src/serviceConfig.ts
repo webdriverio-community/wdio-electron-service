@@ -34,6 +34,10 @@ export class ServiceConfig {
     }
   }
 
+  get globalOptions(): ElectronServiceGlobalOptions {
+    return this.#globalOptions;
+  }
+
   get browser(): WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser | undefined {
     return this.#browser;
   }

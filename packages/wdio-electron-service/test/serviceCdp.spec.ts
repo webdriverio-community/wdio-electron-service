@@ -9,6 +9,7 @@ import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
 import mockStore from '../src/mockStore.js';
 import type ElectronWorkerService from '../src/serviceCdp.js';
 import { ensureActiveWindowFocus } from '../src/window.js';
+import { ElectronCdpBridge } from '../src/bridge.js';
 
 vi.mock('../src/window.js');
 vi.mock('../src/commands/executeCdp', () => {
@@ -63,10 +64,6 @@ describe('Electron Worker Service', () => {
     it('should add electron commands to the browser object', async () => {
       instance = new WorkerService();
 
-      window.wdioElectron = {
-        execute: vi.fn(),
-      };
-
       const browser = {
         waitUntil: vi.fn().mockImplementation(async (condition) => {
           await condition();
@@ -87,6 +84,48 @@ describe('Electron Worker Service', () => {
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+    });
+    it('should call contractor for the CDP Bridge with options', async () => {
+      instance = new WorkerService({
+        cdpConnectionRetryCount: 1,
+        cdpConnectionTimeout: 100,
+        cdpConnectionWaitInterval: 200,
+      });
+
+      const browser = {
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {}, // Let the service initialize this
+      } as unknown as WebdriverIO.Browser;
+
+      await instance.before({}, [], browser);
+      expect(ElectronCdpBridge).toHaveBeenCalledWith({
+        connectionRetryCount: 1,
+        timeout: 100,
+        waitInterval: 200,
+      });
+    });
+    it('should call contractor for the CDP Bridge with no options', async () => {
+      instance = new WorkerService();
+
+      const browser = {
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {}, // Let the service initialize this
+      } as unknown as WebdriverIO.Browser;
+
+      await instance.before({}, [], browser);
+      expect(ElectronCdpBridge).toHaveBeenCalledWith({});
     });
 
     describe('when multiremote', () => {
@@ -171,7 +210,7 @@ describe('Electron Worker Service', () => {
   });
 
   describe('copyOriginalApi', () => {
-    it('aa', async () => {
+    it('should copy original api', async () => {
       instance = new WorkerService();
       const browser = {
         waitUntil: vi.fn().mockImplementation(async (condition) => {
