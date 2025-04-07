@@ -29,6 +29,8 @@ export class ElectronCdpBridge extends CdpBridge {
   }
 
   async connect(): Promise<void> {
+    log.debug('CdpBridge options:', this.options);
+
     await super.connect();
 
     const contextHandler = this.#getContextIdHandler();
@@ -38,22 +40,8 @@ export class ElectronCdpBridge extends CdpBridge {
 
     this.#contextId = await contextHandler;
 
-    const scripts = [
-      // Add __name to the global object to work around issue with function serialization
-      // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-      // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-      // https://github.com/privatenumber/tsx/issues/113
-      `globalThis.__name = globalThis.__name ?? ((func) => func);`,
-      // Add electron to the global object
-      `globalThis.electron = require('electron');`,
-    ];
-    // add because windows
-    if (os.type().match('Windows')) {
-      scripts.push(`globalThis.process = require('node:process');`);
-    }
-
     await this.send('Runtime.evaluate', {
-      expression: scripts.join('\n'),
+      expression: getInitializeScript(),
       includeCommandLineAPI: true,
       replMode: true,
       contextId: this.#contextId,
@@ -75,4 +63,22 @@ export class ElectronCdpBridge extends CdpBridge {
       }, this.options.timeout);
     });
   }
+}
+
+function getInitializeScript() {
+  const scripts = [
+    // Add __name to the global object to work around issue with function serialization
+    // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
+    // https://github.com/webdriverio-community/wdio-electron-service/issues/756
+    // https://github.com/privatenumber/tsx/issues/113
+    `globalThis.__name = globalThis.__name ?? ((func) => func);`,
+    // Add electron to the global object
+    `globalThis.electron = require('electron');`,
+  ];
+
+  // add because windows is not exposed the process object to global scope
+  if (os.type().match('Windows')) {
+    scripts.push(`globalThis.process = require('node:process');`);
+  }
+  return scripts.join('\n');
 }
