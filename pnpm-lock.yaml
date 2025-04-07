@@ -127,10 +127,6 @@ importers:
         version: 2.7.0
 
   apps/builder-cjs:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@types/node':
         specifier: ^22.13.14
@@ -164,10 +160,6 @@ importers:
         version: 9.12.1(puppeteer-core@22.15.0)
 
   apps/builder-esm:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3
@@ -213,10 +205,6 @@ importers:
         version: 9.12.1(puppeteer-core@22.15.0)
 
   apps/forge-cjs:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.8.0
@@ -262,10 +250,6 @@ importers:
         version: 9.12.1(puppeteer-core@22.15.0)
 
   apps/forge-esm:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@electron-forge/cli':
         specifier: ^7.8.0
@@ -311,10 +295,6 @@ importers:
         version: 9.12.1(puppeteer-core@22.15.0)
 
   apps/no-binary-cjs:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3
@@ -357,10 +337,6 @@ importers:
         version: 9.12.1(puppeteer-core@22.15.0)
 
   apps/no-binary-esm:
-    dependencies:
-      wdio-electron-service:
-        specifier: workspace:*
-        version: link:../../packages/wdio-electron-service
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3
