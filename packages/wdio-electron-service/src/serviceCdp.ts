@@ -88,11 +88,12 @@ function getCdpOptions(this: ServiceConfig, capabilities: WebdriverIO.Capabiliti
   });
 }
 
-const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
+export const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) => {
   await browser.waitUntil(async () => {
     const numWindows = (await browser.getWindowHandles()).length;
     return numWindows > 0;
   });
+};
 
 const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
   await browser.electron.execute<void, [ExecuteOpts]>(

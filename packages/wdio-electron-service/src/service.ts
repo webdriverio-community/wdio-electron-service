@@ -13,14 +13,8 @@ import { resetAllMocks } from './commands/resetAllMocks.js';
 import { restoreAllMocks } from './commands/restoreAllMocks.js';
 import { mockAll } from './commands/mockAll.js';
 import { ServiceConfig } from './serviceConfig.js';
-import { before } from './serviceCdp.js';
+import { before, waitUntilWindowAvailable } from './serviceCdp.js';
 import { ipcBridgeCheck } from './ipc.js';
-
-const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) =>
-  await browser.waitUntil(async () => {
-    const numWindows = (await browser.getWindowHandles()).length;
-    return numWindows > 0;
-  });
 
 const isBridgeActive = async (browser: WebdriverIO.Browser) =>
   await browser.execute(function executeWithinElectron() {
