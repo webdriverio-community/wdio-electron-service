@@ -1,7 +1,7 @@
 import log from '@wdio/electron-utils/log';
 
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { getActiveWindowHandle } from './window.js';
+import { getActiveWindowHandle, getPuppeteer } from './window.js';
 import * as commands from './commands/index.js';
 import { execute } from './commands/executeCdp.js';
 import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
@@ -40,7 +40,7 @@ export async function before(
       const mrCdpBridge = await initCdpBridge(this.cdpOptions, caps);
       mrInstance.electron = getElectronAPI.call(this, mrInstance, mrCdpBridge);
 
-      const mrPuppeteer = await mrInstance.getPuppeteer();
+      const mrPuppeteer = await getPuppeteer(mrInstance);
       mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
 
       // wait until an Electron BrowserWindow is available
@@ -48,8 +48,7 @@ export async function before(
       await copyOriginalApi(mrInstance);
     }
   } else {
-    const puppeteer = await this.browser.getPuppeteer();
-    this.puppeteerBrowser = puppeteer;
+    const puppeteer = await getPuppeteer(this.browser);
     this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
     // wait until an Electron BrowserWindow is available
     await waitUntilWindowAvailable(this.browser);

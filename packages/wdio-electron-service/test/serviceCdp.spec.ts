@@ -10,6 +10,7 @@ vi.mock('@wdio/electron-utils/log');
 vi.mock('../src/window.js', () => {
   return {
     getActiveWindowHandle: vi.fn(),
+    getPuppeteer: vi.fn(),
   };
 });
 

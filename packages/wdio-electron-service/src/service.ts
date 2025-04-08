@@ -4,7 +4,7 @@ import type { Capabilities, Services } from '@wdio/types';
 
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { ensureActiveWindowFocus, getActiveWindowHandle } from './window.js';
+import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
 import * as commands from './commands/index.js';
 import { execute } from './commands/execute.js';
 import { ServiceConfig } from './serviceConfig.js';
@@ -53,7 +53,6 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     };
     return Object.assign({}, api) as unknown as BrowserExtension['electron'];
   }
-
   async before(
     capabilities: WebdriverIO.Capabilities,
     _specs: string[],
@@ -94,7 +93,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
         log.debug('Adding Electron API to browser object instance named: ', instance);
         mrInstance.electron = this.#getElectronAPI(mrInstance);
 
-        const mrPuppeteer = await mrInstance.getPuppeteer();
+        const mrPuppeteer = await getPuppeteer(mrInstance);
         mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
         mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
 
@@ -106,8 +105,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
         await waitUntilWindowAvailable(mrInstance);
       }
     } else {
-      const puppeteer = await this.browser.getPuppeteer();
-      this.puppeteerBrowser = puppeteer;
+      const puppeteer = await getPuppeteer(this.browser);
       this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(this.browser);
@@ -131,7 +129,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     if (!this.browser || excludeCommands.includes(commandName) || isInternalCommand(args)) {
       return;
     }
-    await ensureActiveWindowFocus(this.browser, commandName, this.puppeteerBrowser);
+    await ensureActiveWindowFocus(this.browser, commandName);
   }
 
   async afterCommand(commandName: string, args: unknown[]) {
@@ -166,5 +164,9 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
+  }
+
+  after() {
+    clearPuppeteerSessions();
   }
 }

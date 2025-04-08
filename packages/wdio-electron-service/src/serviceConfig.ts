@@ -1,6 +1,5 @@
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
-import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 import type { ElectronServiceGlobalOptions } from '@wdio/electron-types';
 import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
 
@@ -11,7 +10,6 @@ export abstract class ServiceConfig {
   #resetMocks = false;
   #restoreMocks = false;
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
-  #puppeteerBrowser?: PuppeteerBrowser;
   #useCdpBridge = true;
 
   constructor(globalOptions: ElectronServiceGlobalOptions = {}, capabilities: WebdriverIO.Capabilities) {
@@ -48,14 +46,6 @@ export abstract class ServiceConfig {
 
   set browser(browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
     this.#browser = browser;
-  }
-
-  protected get puppeteerBrowser(): PuppeteerBrowser | undefined {
-    return this.#puppeteerBrowser;
-  }
-
-  protected set puppeteerBrowser(puppeteerBrowser: PuppeteerBrowser) {
-    this.#puppeteerBrowser = puppeteerBrowser;
   }
 
   protected get cdpOptions(): CdpBridgeOptions {

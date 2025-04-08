@@ -5,13 +5,15 @@ import { mockProcessProperty } from './helpers.js';
 import * as commands from '../src/commands/index.js';
 import mockStore from '../src/mockStore.js';
 import ElectronWorkerService from '../src/service.js';
-import { ensureActiveWindowFocus } from '../src/window.js';
+import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
 import { waitUntilWindowAvailable } from '../src/serviceCdp.js';
 
 vi.mock('../src/window.js', () => {
   return {
     getActiveWindowHandle: vi.fn(),
     ensureActiveWindowFocus: vi.fn(),
+    getPuppeteer: vi.fn(),
+    clearPuppeteerSessions: vi.fn(),
   };
 });
 
@@ -68,6 +70,7 @@ describe('Electron Worker Service', () => {
       vi.clearAllMocks();
 
       browser = {
+        sessionId: 'dummyId',
         waitUntil: vi.fn().mockImplementation(async (condition) => {
           await condition();
         }),
@@ -186,7 +189,7 @@ describe('Electron Worker Service', () => {
       await instance.before({}, [], browser);
       await instance.beforeCommand('dummyCommand', []);
 
-      expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand', undefined);
+      expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand');
     });
 
     it('should not call `ensureActiveWindowFocus` for excluded commands', async () => {
@@ -245,6 +248,15 @@ describe('Electron Worker Service', () => {
 
       expect(mocks[0][1].update).toHaveBeenCalled();
       expect(mocks[1][1].update).toHaveBeenCalled();
+    });
+  });
+
+  describe('after()', () => {
+    it('should call clearPuppeteerSessions', async () => {
+      instance = new ElectronWorkerService({}, {});
+      instance.after();
+
+      expect(clearPuppeteerSessions).toHaveBeenCalled();
     });
   });
 });
