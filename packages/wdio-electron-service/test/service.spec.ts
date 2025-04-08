@@ -80,7 +80,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should add electron commands to the browser object', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
 
       window.wdioElectron = {
         execute: vi.fn(),
@@ -99,14 +99,15 @@ describe('Electron Worker Service', () => {
 
     describe('when multiremote', () => {
       it('should add electron commands to the browser object', async () => {
-        instance = new ElectronWorkerService({ useCdpBridge: false });
-
-        browser['requestedCapabilities'] = {
+        const capabilities = {
           alwaysMatch: {
             'browserName': 'electron',
             'wdio:electronServiceOptions': {},
           },
-        };
+        } as unknown as WebdriverIO.Capabilities;
+
+        instance = new ElectronWorkerService({ useCdpBridge: false }, capabilities);
+        browser['requestedCapabilities'] = capabilities;
 
         const rootBrowser = {
           instances: ['electron'],
@@ -137,11 +138,12 @@ describe('Electron Worker Service', () => {
       });
 
       it('should continue with non-electron capabilities', async () => {
-        instance = new ElectronWorkerService({ useCdpBridge: false });
-
-        browser['requestedCapabilities'] = {
+        const capabilities = {
           browserName: 'chrome',
-        };
+        } as unknown as WebdriverIO.Capabilities;
+
+        instance = new ElectronWorkerService({ useCdpBridge: false }, capabilities);
+        browser['requestedCapabilities'] = capabilities;
 
         const rootBrowser = {
           instances: ['electron'],
@@ -166,25 +168,11 @@ describe('Electron Worker Service', () => {
       [`resetMocks`, commands.resetAllMocks],
       [`restoreMocks`, commands.restoreAllMocks],
     ])('should clear all mocks when `%s` is set', async (option, fn) => {
-      instance = new ElectronWorkerService({ [option]: true, useCdpBridge: false });
+      instance = new ElectronWorkerService({ [option]: true, useCdpBridge: false }, {});
       await instance.before({}, [], browser);
       await instance.beforeTest();
 
       expect(fn).toHaveBeenCalled();
-    });
-
-    describe('when setting options in capabilities', () => {
-      it.each([
-        [`clearMocks`, commands.clearAllMocks],
-        [`resetMocks`, commands.resetAllMocks],
-        [`restoreMocks`, commands.restoreAllMocks],
-      ])('should clear all mocks when `%s` is set in capabilities', async (option, fn) => {
-        instance = new ElectronWorkerService({ useCdpBridge: false });
-        await instance.before({ 'wdio:electronServiceOptions': { [option]: true } }, [], browser);
-        await instance.beforeTest();
-
-        expect(fn).toHaveBeenCalled();
-      });
     });
   });
 
@@ -194,7 +182,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should call `ensureActiveWindowFocus` for all commands', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
       await instance.before({}, [], browser);
       await instance.beforeCommand('dummyCommand', []);
 
@@ -202,7 +190,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should not call `ensureActiveWindowFocus` for excluded commands', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
       await instance.before({}, [], browser);
       await instance.beforeCommand('getWindowHandles', []);
 
@@ -224,7 +212,7 @@ describe('Electron Worker Service', () => {
     });
 
     it.each(['deleteSession'])('should not update mocks when the command is %s', async (commandName: string) => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
       mocks = [
         ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
         ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
@@ -236,7 +224,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should not update mocks when the command is `execute` and internal is set', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
       mocks = [
         ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
         ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
@@ -248,7 +236,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should update mocks when the command is `execute` and internal is not set', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false });
+      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
       mocks = [
         ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
         ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],

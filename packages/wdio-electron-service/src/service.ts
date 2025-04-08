@@ -32,8 +32,12 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {
-  constructor(globalOptions: ElectronServiceGlobalOptions = {}) {
-    super(globalOptions);
+  constructor(
+    globalOptions: ElectronServiceGlobalOptions = {},
+    capabilities: WebdriverIO.Capabilities,
+    _config?: unknown,
+  ) {
+    super(globalOptions, capabilities);
   }
 
   #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
@@ -62,7 +66,6 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
       return;
     }
     log.debug('Using IPC bridge');
-    this.init(capabilities);
     this.browser = instance as WebdriverIO.Browser;
 
     /**

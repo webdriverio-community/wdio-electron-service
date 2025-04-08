@@ -7,25 +7,25 @@ import { execute } from './commands/executeCdp.js';
 import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
 import { ServiceConfig } from './serviceConfig.js';
 
-import type { AbstractFn, BrowserExtension, ElectronInterface, ElectronType, ExecuteOpts } from '@wdio/electron-types';
 import type { Capabilities } from '@wdio/types';
+import type { AbstractFn, BrowserExtension, ElectronInterface, ElectronType, ExecuteOpts } from '@wdio/electron-types';
+import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
 
 export async function before(
   this: ServiceConfig,
   capabilities: WebdriverIO.Capabilities,
   instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
 ): Promise<void> {
-  this.init(capabilities);
   this.browser = instance as WebdriverIO.Browser;
-  const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge.call(this, capabilities);
+  const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge(this.cdpOptions, capabilities);
 
   /**
    * Add electron API to browser object
    */
   this.browser.electron = getElectronAPI.call(this, this.browser, cdpBridge);
 
-  if (this.browser.isMultiremote) {
-    const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
+  if (isMultiremote(instance)) {
+    const mrBrowser = instance;
     for (const instance of mrBrowser.instances) {
       const mrInstance = mrBrowser.getInstance(instance);
       const caps =
@@ -37,7 +37,7 @@ export async function before(
       }
 
       log.debug('Adding Electron API to browser object instance named: ', instance);
-      const mrCdpBridge = await initCdpBridge.call(this, caps);
+      const mrCdpBridge = await initCdpBridge(this.cdpOptions, caps);
       mrInstance.electron = getElectronAPI.call(this, mrInstance, mrCdpBridge);
 
       const mrPuppeteer = await mrInstance.getPuppeteer();
@@ -45,7 +45,6 @@ export async function before(
 
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(mrInstance);
-      await mrCdpBridge.connect();
       await copyOriginalApi(mrInstance);
     }
   } else {
@@ -58,21 +57,18 @@ export async function before(
   }
 }
 
-async function initCdpBridge(this: ServiceConfig, capabilities: WebdriverIO.Capabilities) {
-  const options = getCdpOptions.call(this, capabilities);
+function isMultiremote(
+  browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
+): browser is WebdriverIO.MultiRemoteBrowser {
+  return browser.isMultiremote;
+}
+
+async function initCdpBridge(cdpOptions: CdpBridgeOptions, capabilities: WebdriverIO.Capabilities) {
+  const options = Object.assign({}, cdpOptions, getDebuggerEndpoint(capabilities));
+
   const cdpBridge = new ElectronCdpBridge(options);
   await cdpBridge.connect();
   return cdpBridge;
-}
-
-function getCdpOptions(this: ServiceConfig, capabilities: WebdriverIO.Capabilities) {
-  const globalOptions = this.globalOptions;
-  const options = getDebuggerEndpoint(capabilities);
-  return Object.assign({}, options, {
-    ...(globalOptions.cdpConnectionTimeout && { timeout: globalOptions.cdpConnectionTimeout }),
-    ...(globalOptions.cdpConnectionWaitInterval && { waitInterval: globalOptions.cdpConnectionWaitInterval }),
-    ...(globalOptions.cdpConnectionRetryCount && { connectionRetryCount: globalOptions.cdpConnectionRetryCount }),
-  });
 }
 
 export const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) => {

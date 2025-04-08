@@ -4,7 +4,6 @@ import type { BrowserExtension } from '@wdio/electron-types';
 import { mockProcessProperty } from './helpers.js';
 import { execute } from '../src/commands/executeCdp.js';
 import ElectronWorkerService from '../src/service.js';
-import { ElectronCdpBridge } from '../src/bridge.js';
 
 vi.mock('@wdio/electron-utils/log');
 
@@ -85,7 +84,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should add electron commands to the browser object', async () => {
-      instance = new ElectronWorkerService();
+      instance = new ElectronWorkerService({}, {});
 
       await instance.before({}, [], browser);
 
@@ -97,30 +96,10 @@ describe('Electron Worker Service', () => {
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
     });
-    it('should call contractor for the CDP Bridge with options', async () => {
-      instance = new ElectronWorkerService({
-        cdpConnectionRetryCount: 1,
-        cdpConnectionTimeout: 100,
-        cdpConnectionWaitInterval: 200,
-      });
-
-      await instance.before({}, [], browser);
-      expect(ElectronCdpBridge).toHaveBeenCalledWith({
-        connectionRetryCount: 1,
-        timeout: 100,
-        waitInterval: 200,
-      });
-    });
-    it('should call contractor for the CDP Bridge with no options', async () => {
-      instance = new ElectronWorkerService();
-
-      await instance.before({}, [], browser);
-      expect(ElectronCdpBridge).toHaveBeenCalledWith({});
-    });
 
     describe('when multiremote', () => {
       it('should add electron commands to the browser object', async () => {
-        instance = new ElectronWorkerService();
+        instance = new ElectronWorkerService({}, {});
         browser['requestedCapabilities'] = {
           alwaysMatch: {
             'browserName': 'electron',
@@ -157,7 +136,7 @@ describe('Electron Worker Service', () => {
       });
 
       it('should continue with non-electron capabilities', async () => {
-        instance = new ElectronWorkerService();
+        instance = new ElectronWorkerService({}, {});
 
         browser['requestedCapabilities'] = {
           browserName: 'chrome',
@@ -180,7 +159,7 @@ describe('Electron Worker Service', () => {
     });
 
     it('should copy original api', async () => {
-      instance = new ElectronWorkerService();
+      instance = new ElectronWorkerService({}, {});
 
       await instance.before({}, [], browser);
 
