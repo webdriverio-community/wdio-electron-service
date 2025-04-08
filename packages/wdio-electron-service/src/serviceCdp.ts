@@ -2,13 +2,8 @@ import log from '@wdio/electron-utils/log';
 
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { getActiveWindowHandle } from './window.js';
+import * as commands from './commands/index.js';
 import { execute } from './commands/executeCdp.js';
-import { mock } from './commands/mock.js';
-import { clearAllMocks } from './commands/clearAllMocks.js';
-import { isMockFunction } from './commands/isMockFunction.js';
-import { resetAllMocks } from './commands/resetAllMocks.js';
-import { restoreAllMocks } from './commands/restoreAllMocks.js';
-import { mockAll } from './commands/mockAll.js';
 import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
 import { ServiceConfig } from './serviceConfig.js';
 
@@ -107,14 +102,14 @@ const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
 
 function getElectronAPI(this: ServiceConfig, browser: WebdriverIO.Browser, cdpBridge?: ElectronCdpBridge) {
   const api = {
-    clearAllMocks: clearAllMocks.bind(this),
+    clearAllMocks: commands.clearAllMocks.bind(this),
     execute: (script: string | AbstractFn, ...args: unknown[]) =>
       execute.apply(this, [browser, cdpBridge, script, ...args]),
-    isMockFunction: isMockFunction.bind(this),
-    mock: mock.bind(this),
-    mockAll: mockAll.bind(this),
-    resetAllMocks: resetAllMocks.bind(this),
-    restoreAllMocks: restoreAllMocks.bind(this),
+    isMockFunction: commands.isMockFunction.bind(this),
+    mock: commands.mock.bind(this),
+    mockAll: commands.mockAll.bind(this),
+    resetAllMocks: commands.resetAllMocks.bind(this),
+    restoreAllMocks: commands.restoreAllMocks.bind(this),
   };
   return Object.assign({}, api) as unknown as BrowserExtension['electron'];
 }

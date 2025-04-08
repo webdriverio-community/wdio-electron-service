@@ -44,8 +44,14 @@ describe('execute Command', () => {
 
   it('should throw an error when called without a script argument', async () => {
     // @ts-expect-error no script argument
-    await expect(() => execute(globalThis.browser)).rejects.toThrowError(
+    await expect(() => execute(globalThis.browser, {})).rejects.toThrowError(
       new Error('Expecting script to be type of "string" or "function"'),
+    );
+  });
+
+  it('should throw an error when called without client', async () => {
+    await expect(() => execute(globalThis.browser, undefined, '() => {}')).rejects.toThrowError(
+      new Error('CDP Bridge is not yet initialised'),
     );
   });
 
