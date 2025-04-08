@@ -24,12 +24,20 @@ const colourise = (str: string) => {
   }
 };
 
-export async function ipcBridgeCheck(browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
-  const isActive = await browser.execute(function executeWithinElectron() {
+async function isActive(browser: WebdriverIO.Browser) {
+  return await browser.execute(function executeWithinElectron() {
     return window.wdioElectron !== undefined;
   });
+}
 
-  if (isActive) {
+export async function ipcBridgeCheck(browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser) {
+  const result = browser.isMultiremote
+    ? (
+        await Promise.all(browser.instances.map(async (mrBrowser) => await isActive(browser.getInstance(mrBrowser))))
+      ).filter((result) => result).length > 0
+    : await isActive(browser);
+
+  if (result) {
     // for the log file
     log.warn(LINE00);
     log.warn(LINE01);
@@ -45,7 +53,6 @@ export async function ipcBridgeCheck(browser: WebdriverIO.Browser | WebdriverIO.
     console.log();
   }
 }
-/* v8 ignore stop */
 
 export function ipcBridgeWarning() {
   // for the log file
@@ -64,3 +71,4 @@ export function ipcBridgeWarning() {
   console.log(colourise(LINE05));
   console.log();
 }
+/* v8 ignore stop */
