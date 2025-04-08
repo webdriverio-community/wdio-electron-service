@@ -37,14 +37,7 @@ vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<stri
   };
 });
 
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+vi.mock('@wdio/electron-utils/log');
 
 vi.mock('get-port', async () => {
   return {

@@ -4,15 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 import { CdpBridge } from '@wdio/cdp-bridge';
 
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-    trace: vi.fn(),
-  },
-}));
+vi.mock('@wdio/electron-utils/log');
 
 describe('getDebuggerEndpoint', () => {
   it('should return the endpoint information of the node debugger', () => {

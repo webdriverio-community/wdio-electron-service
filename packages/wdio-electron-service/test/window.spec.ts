@@ -2,12 +2,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { getActiveWindowHandle, ensureActiveWindowFocus } from '../src/window.js';
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
-    trace: vi.fn(),
-    debug: vi.fn(),
-  },
-}));
+vi.mock('@wdio/electron-utils/log');
 
 describe('Window Management', () => {
   describe('getActiveWindowHandle()', () => {
