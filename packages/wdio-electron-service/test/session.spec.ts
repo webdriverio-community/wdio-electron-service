@@ -38,24 +38,24 @@ describe('Session Management', () => {
       expect(session).toStrictEqual(browserMock);
     });
 
-  it('should call onPrepare with the expected parameters', async () => {
-    const expectedCaps = {
-      'browserName': 'electron',
-      'browserVersion': '99.9.9',
-      'wdio:electronServiceOptions': {
-        appBinaryPath: '/path/to/binary',
-      },
-      'goog:chromeOptions': {
-        args: ['--disable-dev-shm-usage', '--disable-gpu', '--headless'],
-      },
-      'wdio:chromedriverOptions': {
-        binary: '/path/to/chromedriver',
-      },
-    };
-    await init([expectedCaps]);
-    expect(onPrepareMock).toHaveBeenCalledWith({}, [expectedCaps]);
-    expect(onWorkerStartMock).toHaveBeenCalledWith('', [expectedCaps]);
-  });
+    it('should call onPrepare with the expected parameters', async () => {
+      const expectedCaps = {
+        'browserName': 'electron',
+        'browserVersion': '99.9.9',
+        'wdio:electronServiceOptions': {
+          appBinaryPath: '/path/to/binary',
+        },
+        'goog:chromeOptions': {
+          args: ['--disable-dev-shm-usage', '--disable-gpu', '--headless'],
+        },
+        'wdio:chromedriverOptions': {
+          binary: '/path/to/chromedriver',
+        },
+      };
+      await init([expectedCaps]);
+      expect(onPrepareMock).toHaveBeenCalledWith({}, [expectedCaps]);
+      expect(onWorkerStartMock).toHaveBeenCalledWith('', [expectedCaps]);
+    });
 
     it('should call onPrepare with the expected parameters when a rootDir is specified', async () => {
       await init([{ 'browserName': 'electron', 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }], {
