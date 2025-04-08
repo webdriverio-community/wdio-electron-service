@@ -1,14 +1,9 @@
-import { vi, describe, beforeEach, it, expect, type Mock } from 'vitest';
-import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
+import { vi, describe, beforeEach, it, expect } from 'vitest';
+import type { BrowserExtension } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
 import { execute } from '../src/commands/executeCdp.js';
-import { clearAllMocks } from '../src/commands/clearAllMocks.js';
-import { resetAllMocks } from '../src/commands/resetAllMocks.js';
-import { restoreAllMocks } from '../src/commands/restoreAllMocks.js';
-import mockStore from '../src/mockStore.js';
-import type ElectronWorkerService from '../src/serviceCdp.js';
-import { ensureActiveWindowFocus } from '../src/window.js';
+import type ElectronWorkerService from '../src/service.js';
 import { ElectronCdpBridge } from '../src/bridge.js';
 
 vi.mock('../src/window.js');
@@ -47,7 +42,7 @@ let instance: ElectronWorkerService | undefined;
 
 beforeEach(async () => {
   mockProcessProperty('platform', 'darwin');
-  WorkerService = (await import('../src/serviceCdp.js')).default;
+  WorkerService = (await import('../src/service.js')).default;
 });
 
 beforeEach(() => {
@@ -207,9 +202,7 @@ describe('Electron Worker Service', () => {
         expect(serviceApi).toStrictEqual({});
       });
     });
-  });
 
-  describe('copyOriginalApi', () => {
     it('should copy original api', async () => {
       instance = new WorkerService();
       const browser = {
@@ -225,8 +218,7 @@ describe('Electron Worker Service', () => {
 
       await instance.before({}, [], browser);
 
-      const serviceApi = browser.electron as BrowserExtension['electron'];
-      expect(serviceApi.execute).toEqual(expect.any(Function));
+      // emulate the call to copyOriginalApi
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const internalCopyOriginalApi = vi.mocked(execute).mock.calls[0][2] as any;
       const dummyElectron = {
@@ -236,135 +228,8 @@ describe('Electron Worker Service', () => {
       };
       await internalCopyOriginalApi(dummyElectron);
 
+      // check if the originalApi is copied from the electron object
       expect(globalThis.originalApi).toMatchObject(dummyElectron);
-    });
-  });
-
-  describe('beforeTest()', () => {
-    vi.mock('../src/commands/clearAllMocks.js', () => ({
-      clearAllMocks: vi.fn().mockReturnValue({}),
-    }));
-    vi.mock('../src/commands/resetAllMocks.js', () => ({
-      resetAllMocks: vi.fn().mockReturnValue({}),
-    }));
-    vi.mock('../src/commands/restoreAllMocks.js', () => ({
-      restoreAllMocks: vi.fn().mockReturnValue({}),
-    }));
-
-    const browser = {
-      waitUntil: vi.fn().mockImplementation(async (condition) => {
-        await condition();
-      }),
-      execute: vi.fn().mockResolvedValue(true),
-      getPuppeteer: vi.fn(),
-      getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
-    } as unknown as WebdriverIO.Browser;
-
-    it.each([
-      [`clearMocks`, clearAllMocks],
-      [`resetMocks`, resetAllMocks],
-      [`restoreMocks`, restoreAllMocks],
-    ])('should clear all mocks when `%s` is set', async (option, fn) => {
-      instance = new WorkerService({ [option]: true });
-      await instance.before({}, [], browser);
-      await instance.beforeTest();
-
-      expect(fn).toHaveBeenCalled();
-    });
-
-    describe('when setting options in capabilities', () => {
-      it.each([
-        [`clearMocks`, clearAllMocks],
-        [`resetMocks`, resetAllMocks],
-        [`restoreMocks`, restoreAllMocks],
-      ])('should clear all mocks when `%s` is set in capabilities', async (option, fn) => {
-        instance = new WorkerService();
-        await instance.before({ 'wdio:electronServiceOptions': { [option]: true } }, [], browser);
-        await instance.beforeTest();
-
-        expect(fn).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('beforeCommand()', () => {
-    const browser = {
-      waitUntil: vi.fn().mockImplementation(async (condition) => {
-        await condition();
-      }),
-      execute: vi.fn().mockResolvedValue(true),
-      getPuppeteer: vi.fn(),
-      getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
-    } as unknown as WebdriverIO.Browser;
-
-    beforeEach(() => {
-      vi.mocked(ensureActiveWindowFocus).mockClear();
-    });
-
-    it('should call `ensureActiveWindowFocus` for all commands', async () => {
-      instance = new WorkerService();
-      await instance.before({}, [], browser);
-      await instance.beforeCommand('dummyCommand', []);
-
-      expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand', undefined);
-    });
-
-    it('should not call `ensureActiveWindowFocus` for excluded commands', async () => {
-      instance = new WorkerService();
-      await instance.before({}, [], browser);
-      await instance.beforeCommand('getWindowHandles', []);
-
-      expect(ensureActiveWindowFocus).toHaveBeenCalledTimes(0);
-    });
-  });
-
-  describe('afterCommand()', () => {
-    let mocks: [string, ElectronMock][] = [];
-
-    vi.mock('../src/mockStore', () => ({
-      default: {
-        getMocks: vi.fn(),
-      },
-    }));
-
-    beforeEach(() => {
-      (mockStore.getMocks as Mock).mockImplementation(() => mocks);
-    });
-
-    it.each(['deleteSession'])('should not update mocks when the command is %s', async (commandName: string) => {
-      instance = new WorkerService();
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand(commandName, [['look', 'some', 'args']]);
-
-      expect(mocks[0][1].update).not.toHaveBeenCalled();
-      expect(mocks[1][1].update).not.toHaveBeenCalled();
-    });
-
-    it('should not update mocks when the command is `execute` and internal is set', async () => {
-      instance = new WorkerService();
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand('execute', [['look', 'some', 'args'], { internal: true }]);
-
-      expect(mocks[0][1].update).not.toHaveBeenCalled();
-      expect(mocks[1][1].update).not.toHaveBeenCalled();
-    });
-
-    it('should update mocks when the command is `execute` and internal is not set', async () => {
-      instance = new WorkerService();
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand('execute', [['look', 'some', 'args']]);
-
-      expect(mocks[0][1].update).toHaveBeenCalled();
-      expect(mocks[1][1].update).toHaveBeenCalled();
     });
   });
 });

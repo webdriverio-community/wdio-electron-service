@@ -40,7 +40,12 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   const functionDeclaration = removeFirstArg(script.toString());
   const argsArray = args.map((arg) => ({ value: arg }));
 
-  log.trace('Script for the execute', functionDeclaration);
+  const scriptLength = Buffer.byteLength(functionDeclaration, 'utf-8');
+  if (scriptLength > 500) {
+    log.debug('Script for the execute:', `${functionDeclaration.split('\n')[0]} ... [${scriptLength} bytes]`);
+  } else {
+    log.debug('Script for the execute:', functionDeclaration);
+  }
 
   const result = await cdpBridge.send('Runtime.callFunctionOn', {
     functionDeclaration,
@@ -49,7 +54,7 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     returnByValue: true,
     executionContextId: cdpBridge.contextId,
   });
-  log.trace('Return of the script', result);
+  log.debug('Return of the script:', result.result.value);
 
   await syncMockStatus(args);
 
