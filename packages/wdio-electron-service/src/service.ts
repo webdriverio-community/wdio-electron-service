@@ -5,13 +5,8 @@ import type { Capabilities, Services } from '@wdio/types';
 import mockStore from './mockStore.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { ensureActiveWindowFocus, getActiveWindowHandle } from './window.js';
+import * as commands from './commands/index.js';
 import { execute } from './commands/execute.js';
-import { mock } from './commands/mock.js';
-import { clearAllMocks } from './commands/clearAllMocks.js';
-import { isMockFunction } from './commands/isMockFunction.js';
-import { resetAllMocks } from './commands/resetAllMocks.js';
-import { restoreAllMocks } from './commands/restoreAllMocks.js';
-import { mockAll } from './commands/mockAll.js';
 import { ServiceConfig } from './serviceConfig.js';
 import { before, waitUntilWindowAvailable } from './serviceCdp.js';
 import { ipcBridgeCheck } from './ipc.js';
@@ -44,13 +39,13 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
   #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
     const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
     const api = {
-      clearAllMocks: clearAllMocks.bind(this),
+      clearAllMocks: commands.clearAllMocks.bind(this),
       execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
-      isMockFunction: isMockFunction.bind(this),
-      mock: mock.bind(this),
-      mockAll: mockAll.bind(this),
-      resetAllMocks: resetAllMocks.bind(this),
-      restoreAllMocks: restoreAllMocks.bind(this),
+      isMockFunction: commands.isMockFunction.bind(this),
+      mock: commands.mock.bind(this),
+      mockAll: commands.mockAll.bind(this),
+      resetAllMocks: commands.resetAllMocks.bind(this),
+      restoreAllMocks: commands.restoreAllMocks.bind(this),
     };
     return Object.assign({}, api) as unknown as BrowserExtension['electron'];
   }
@@ -60,12 +55,14 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
-    this.init(capabilities);
     if (this.useCdpBridge) {
+      log.debug('Using CDP bridge');
       await ipcBridgeCheck(instance);
       await before.call(this, capabilities, instance);
       return;
     }
+    log.debug('Using IPC bridge');
+    this.init(capabilities);
     this.browser = instance as WebdriverIO.Browser;
 
     /**
@@ -116,13 +113,13 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
   async beforeTest() {
     if (this.clearMocks) {
-      await clearAllMocks();
+      await commands.clearAllMocks();
     }
     if (this.resetMocks) {
-      await resetAllMocks();
+      await commands.resetAllMocks();
     }
     if (this.restoreMocks) {
-      await restoreAllMocks();
+      await commands.restoreAllMocks();
     }
   }
 
