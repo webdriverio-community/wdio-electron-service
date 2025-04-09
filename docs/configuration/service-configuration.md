@@ -121,15 +121,15 @@ Calls .mockRestore() on all mocked APIs before each test. This will restore the 
 
 Type: `boolean`
 
-### `cdpConnectionTimeout`:
+### `cdpBridgeTimeout`:
 
 Timeout for any request using CdpBridge to a node debugger.
 
-### `cdpConnectionWaitInterval`:
+### `cdpBridgeWaitInterval`:
 
 Interval in milliseconds to wait between attempts to connect to the node debugger.
 
-### `cdpConnectionRetryCount`:
+### `cdpBridgeRetryCount`:
 
 Number of attempts to connect to the node debugger before giving up.
 

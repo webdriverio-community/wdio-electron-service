@@ -30,9 +30,9 @@ export abstract class ServiceConfig {
     }
 
     this.#cdpOptions = {
-      ...(globalOptions.cdpConnectionTimeout && { timeout: globalOptions.cdpConnectionTimeout }),
-      ...(globalOptions.cdpConnectionWaitInterval && { waitInterval: globalOptions.cdpConnectionWaitInterval }),
-      ...(globalOptions.cdpConnectionRetryCount && { connectionRetryCount: globalOptions.cdpConnectionRetryCount }),
+      ...(globalOptions.cdpBridgeTimeout && { timeout: globalOptions.cdpBridgeTimeout }),
+      ...(globalOptions.cdpBridgeWaitInterval && { waitInterval: globalOptions.cdpBridgeWaitInterval }),
+      ...(globalOptions.cdpBridgeRetryCount && { connectionRetryCount: globalOptions.cdpBridgeRetryCount }),
     };
   }
 

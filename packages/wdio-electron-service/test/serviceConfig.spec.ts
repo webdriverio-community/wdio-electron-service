@@ -33,9 +33,9 @@ describe('ServiceConfig', () => {
     });
 
     it.each([
-      ['cdpConnectionTimeout', 'timeout', 10],
-      ['cdpConnectionWaitInterval', 'waitInterval', 20],
-      ['cdpConnectionRetryCount', 'connectionRetryCount', 30],
+      ['cdpBridgeTimeout', 'timeout', 10],
+      ['cdpBridgeWaitInterval', 'waitInterval', 20],
+      ['cdpBridgeRetryCount', 'connectionRetryCount', 30],
     ] as const)('should set the value only when set in the globalOptions - %s', (option, internalOption, expected) => {
       const globalOptions = {
         [option]: expected,

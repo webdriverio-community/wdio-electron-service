@@ -190,15 +190,15 @@ export type ElectronServiceGlobalOptions = Pick<
   /**
    * Timeout for any request using CdpBridge to a node debugger.
    */
-  cdpConnectionTimeout?: number;
+  cdpBridgeTimeout?: number;
   /**
    * Interval in milliseconds to wait between attempts to connect to the node debugger.
    */
-  cdpConnectionWaitInterval?: number;
+  cdpBridgeWaitInterval?: number;
   /**
    * Number of attempts to connect to the node debugger before giving up.
    */
-  cdpConnectionRetryCount?: number;
+  cdpBridgeRetryCount?: number;
 };
 
 export type ApiCommand = { name: string; bridgeProp: string };
