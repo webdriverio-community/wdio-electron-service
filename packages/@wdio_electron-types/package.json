@@ -31,7 +31,7 @@
     "build": "rollup --config rollup.config.ts --configPlugin typescript"
   },
   "dependencies": {
-    "@vitest/spy": "^3.0.9"
+    "@vitest/spy": "^3.1.4"
   },
   "devDependencies": {
     "@electron-forge/shared-types": "^7.8.0",
