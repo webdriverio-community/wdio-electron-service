@@ -86,45 +86,33 @@ jobs:
           fi
 
       - name: 🏷️ Create Release and Tags
-        # Uses turbo-version to bump versions and create git tags
+        # Uses package-versioner to bump versions and create git tags
         run: |
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             # Get the current version
             CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
             echo "Current version: $CURRENT_VERSION"
 
-            # Run turbo-version to calculate the next version
-            # This will update package.json files but won't create git tags or push anything
-            echo "Running turbo-version to calculate the next version..."
-            pnpm turbo-version -b ${{ inputs.release_version }}
-
-            # Get the new version that was calculated
-            NEW_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
+            # Run package-versioner in dry-run mode to calculate the next version
+            echo "Running package-versioner to calculate the next version..."
+            NEW_VERSION=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json | jq -r '.updates[0].newVersion')
             echo "Next version would be: $NEW_VERSION"
 
-            # Show what files were changed
-            echo "Files that would be modified:"
-            git diff --name-only
-
-            # Show the actual changes
-            echo "Changes that would be made:"
-            git diff --color
-
-            echo "DRY RUN: Would create release and tags with command: pnpm turbo-version -b ${{ inputs.release_version }}"
+            # Show what would change
+            echo "DRY RUN: Would create release and tags with command: pnpm dlx package-versioner --bump ${{ inputs.release_version }}"
             echo "DRY RUN: Would bump version from $CURRENT_VERSION to $NEW_VERSION"
             echo "DRY RUN: Would create git tag v$NEW_VERSION"
 
-            # Store the new version for later use
-            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-            # Reset changes made by turbo-version since this is a dry run
-            git reset --hard HEAD
+            # Reset any changes that might have been made
+            git reset --hard
           else
-            pnpm turbo-version -b ${{ inputs.release_version }}
-            # Store the new version for later use
-            NEW_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
-            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+            # Run package-versioner to calculate the next version
+            echo "Running package-versioner to calculate the next version..."
+            NEW_VERSION=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --json | jq -r '.updates[0].newVersion')
           fi
+
+          # Store the new version for later use
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: 📢 Publish to NPM
         shell: bash
