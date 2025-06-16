@@ -1,3 +1,20 @@
+# [8.1.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.2...v8.1.0) (2025-04-03)
+
+### Bug Fixes
+
+- add \_\_filename ([74ab242](https://github.com/webdriverio-community/wdio-electron-service/commit/74ab24237f0adec631482c1b41bc43b09557dc54))
+- support the windows sep ([a21db16](https://github.com/webdriverio-community/wdio-electron-service/commit/a21db160534ac6d062477792597fb81a4e5b4dce))
+- use correct named catalog paths ([5f34e83](https://github.com/webdriverio-community/wdio-electron-service/commit/5f34e8324e61f7a4947e312aa0a19d89170af3af))
+
+### Features
+
+- monorepo support - traverse dir tree to find workspace file ([6dd0eed](https://github.com/webdriverio-community/wdio-electron-service/commit/6dd0eed5621bd3ae0b2c5b7aadce4be1be57b424))
+- support PNPM catalogs ([f60c956](https://github.com/webdriverio-community/wdio-electron-service/commit/f60c956ce78972b318f5c4435940a22c3735cb3f))
+
+### Reverts
+
+- Revert "chore: update deps" ([611f514](https://github.com/webdriverio-community/wdio-electron-service/commit/611f5141f1018ccbfc777f8862496df40ed7bf8b))
+
 ## [8.0.2](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.1...v8.0.2) (2025-03-12)
 
 ## [8.0.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0...v8.0.1) (2025-03-05)

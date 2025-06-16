@@ -1,7 +1,7 @@
 import { expect, it, vi, describe } from 'vitest';
 
-import { getElectronVersion } from '../src/getElectronVersion';
-import { findPnpmCatalogVersion } from '../src/pnpm';
+import { getElectronVersion } from '../src/electronVersion.js';
+import { findPnpmCatalogVersion } from '../src/pnpm.js';
 
 import type { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 

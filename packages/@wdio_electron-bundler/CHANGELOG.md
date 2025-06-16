@@ -1,3 +1,9 @@
+# [8.1.0](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.2...v8.1.0) (2025-04-03)
+
+### Reverts
+
+- Revert "chore: update deps" ([611f514](https://github.com/webdriverio-community/wdio-electron-service/commit/611f5141f1018ccbfc777f8862496df40ed7bf8b))
+
 ## [8.0.2](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.1...v8.0.2) (2025-03-12)
 
 ## [8.0.1](https://github.com/webdriverio-community/wdio-electron-service/compare/v8.0.0...v8.0.1) (2025-03-05)

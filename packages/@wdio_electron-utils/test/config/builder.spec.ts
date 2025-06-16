@@ -2,9 +2,11 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
 
-import { getFixturePackageJson } from '../testUtils';
-import { getConfig } from '../../src/config/builder';
-import { APP_NAME_DETECTION_ERROR } from '../../src/constants';
+import { getFixturePackageJson } from '../testUtils.js';
+import { getConfig } from '../../src/config/builder.js';
+import { APP_NAME_DETECTION_ERROR } from '../../src/constants.js';
+
+vi.mock('../../src/log');
 
 const expectedCandidates = [
   'electron-builder.yml',
