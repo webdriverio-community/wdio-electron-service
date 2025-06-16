@@ -95,6 +95,7 @@ jobs:
 
             # Run package-versioner in dry-run mode to calculate the next version
             echo "Running package-versioner to calculate the next version..."
+            echo "DRY RUN: Would run command: pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json"
             NEW_VERSION=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json | jq -r '.updates[0].newVersion')
             echo "Next version would be: $NEW_VERSION"
 
