@@ -1,11 +1,10 @@
 # Accessing Electron APIs
 
-This service provides access to the main process of Electron.
-You can do this simply using `browser.electron.execute` method at test suites.
+The service provides access to Electron APIs from the main process. You can do this simply by using the `browser.electron.execute` method in your test suites (see below for an example).
 
-## Importing main and preload scripts provided by this service
+## Importing main and preload scripts
 
-If you are using an older version of the service, you will have imported the following scripts in your apps before testing.
+If you are using an older version of the service, in order to access the APIs you will have imported the following scripts in your apps before testing:
 
 - `wdio-electron-service/main` (in the main script)
 - `wdio-electron-service/preload` (in the preload script)
