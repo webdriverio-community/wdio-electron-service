@@ -14,15 +14,15 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
   },
   "devDependencies": {
-    "@types/node": "^22.13.14",
+    "@types/node": "^24.0.3",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
     "electron-builder": "^26.0.12",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
     "webdriverio": "catalog:default"
   },
   "build": {
