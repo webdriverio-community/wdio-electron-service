@@ -7,22 +7,22 @@ settings:
 catalogs:
   default:
     '@wdio/cli':
-      specifier: ^9.12.1
+      specifier: ^9.15.0
       version: 9.15.0
     '@wdio/globals':
-      specifier: ^9.12.1
+      specifier: ^9.15.0
       version: 9.15.0
     '@wdio/local-runner':
-      specifier: ^9.12.1
+      specifier: ^9.15.0
       version: 9.15.0
     '@wdio/mocha-framework':
-      specifier: ^9.12.1
+      specifier: ^9.15.0
       version: 9.15.0
     electron:
-      specifier: ^35.1.2
-      version: 35.5.1
+      specifier: ^36.4.0
+      version: 36.4.0
     webdriverio:
-      specifier: ^9.12.1
+      specifier: ^9.15.0
       version: 9.15.0
 
 importers:
@@ -60,8 +60,8 @@ importers:
         specifier: ^8.34.0
         version: 8.34.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       '@vitest/eslint-plugin':
-        specifier: ^1.2.5
-        version: 1.2.5(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.2.3(@types/debug@4.1.12)(@types/node@24.0.3)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))
+        specifier: ^1.2.7
+        version: 1.2.7(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.2.3(@types/debug@4.1.12)(@types/node@24.0.3)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
@@ -145,7 +145,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       electron-builder:
         specifier: ^26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -187,7 +187,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       electron-builder:
         specifier: ^26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -235,7 +235,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       rollup:
         specifier: ^4.43.0
         version: 4.43.0
@@ -280,7 +280,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       rollup:
         specifier: ^4.43.0
         version: 4.43.0
@@ -322,7 +322,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       rollup:
         specifier: ^4.43.0
         version: 4.43.0
@@ -364,7 +364,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       rollup:
         specifier: ^4.43.0
         version: 4.43.0
@@ -397,7 +397,7 @@ importers:
         version: 9.15.0
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
@@ -545,7 +545,7 @@ importers:
         version: 26.0.11
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -688,7 +688,7 @@ importers:
         version: 26.0.11
       electron:
         specifier: catalog:default
-        version: 35.5.1
+        version: 36.4.0
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0
@@ -1933,8 +1933,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.2.5':
-    resolution: {integrity: sha512-cfmXz++mkqYpssrKymd7KJumxaZBsfFji2y22QV04kDYKRbiaZ+s4WZL/bzAkcefVKj4KkFctVALHdDZhFhHGg==}
+  '@vitest/eslint-plugin@1.2.7':
+    resolution: {integrity: sha512-7WHcGZo6uXsE4SsSnpGDqKyGrd6NfOMM52WKoHSpTRZLbjMuDyHfA5P7m8yrr73tpqYjsiAdSjSerOnx8uEhpA==}
     peerDependencies:
       eslint: '>= 8.57.0'
       typescript: '>= 5.0.0'
@@ -2825,8 +2825,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@35.5.1:
-    resolution: {integrity: sha512-kkbGXz56safvXcxqAZyMS2nJGYK9NFG/iKOJsAO5e0HPH8y3EnV4Fi87tvbfFpeLiaruFS+eN0YFy6f1StpSgQ==}
+  electron@36.4.0:
+    resolution: {integrity: sha512-LLOOZEuW5oqvnjC7HBQhIqjIIJAZCIFjQxltQGLfEC7XFsBoZgQ3u3iFj+Kzw68Xj97u1n57Jdt7P98qLvUibQ==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -7067,7 +7067,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.2.5(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.2.3(@types/debug@4.1.12)(@types/node@24.0.3)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))':
+  '@vitest/eslint-plugin@1.2.7(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.2.3(@types/debug@4.1.12)(@types/node@24.0.3)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))':
     dependencies:
       '@typescript-eslint/utils': 8.34.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       eslint: 9.29.0(jiti@2.4.2)
@@ -8220,7 +8220,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@35.5.1:
+  electron@36.4.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 22.15.32
