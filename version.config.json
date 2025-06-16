@@ -1,18 +1,17 @@
 {
-  "tagPrefix": "v",
+  "versionPrefix": "v",
   "preset": "angular",
-  "baseBranch": "main",
-  "synced": true,
-  "updateInternalDependencies": false,
-  "commitMessage": "release v${version} [skip-ci]",
-  "skip": [
-    "@repo/e2e",
-    "example-builder-cjs",
-    "example-builder-esm",
-    "example-forge-cjs",
-    "example-forge-esm",
-    "example-no-binary-cjs",
-    "example-no-binary-esm"
-  ],
-  "prereleaseIdentifier": "next"
+  "commitMessage": "release ${version} [skip-ci]",
+  "monorepo": {
+    "synced": true,
+    "skip": [
+      "@repo/e2e",
+      "example-builder-cjs",
+      "example-builder-esm",
+      "example-forge-cjs",
+      "example-forge-esm",
+      "example-no-binary-cjs",
+      "example-no-binary-esm"
+    ]
+  }
 }

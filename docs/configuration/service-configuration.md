@@ -121,6 +121,18 @@ Calls .mockRestore() on all mocked APIs before each test. This will restore the 
 
 Type: `boolean`
 
+### `cdpBridgeTimeout`:
+
+Timeout for any request using CdpBridge to the node debugger.
+
+### `cdpBridgeWaitInterval`:
+
+Interval in milliseconds to wait between attempts to connect to the node debugger.
+
+### `cdpBridgeRetryCount`:
+
+Number of attempts to connect to the node debugger before giving up.
+
 ## Automatic detection of App binary
 
 The service will automatically determine the path to the Electron binary of your app based on the configuration of supported build tools.

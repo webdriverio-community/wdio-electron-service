@@ -1,6 +1,8 @@
 import log from '@wdio/electron-utils/log';
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
+const puppeteerSessionManager = new Map<string, PuppeteerBrowser>();
+
 export const getActiveWindowHandle = async (puppeteerBrowser: PuppeteerBrowser, currentHandle?: string) => {
   log.trace('Getting active window handle');
 
@@ -48,18 +50,37 @@ const switchToActiveWindow = async (browser: WebdriverIO.Browser, puppeteerBrows
 export const ensureActiveWindowFocus = async (
   browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   commandName: string,
-  puppeteerBrowser?: PuppeteerBrowser,
 ) => {
   log.trace(`Ensuring active window focus before command: ${commandName}`);
   if (browser.isMultiremote) {
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
       const mrInstance = mrBrowser.getInstance(instance);
-      const mrPuppeteer = await mrInstance.getPuppeteer();
+      const mrPuppeteer = await getPuppeteer(mrInstance);
       await switchToActiveWindow(mrInstance, mrPuppeteer);
     }
   } else {
-    await switchToActiveWindow(browser, puppeteerBrowser!);
+    const puppeteer = await getPuppeteer(browser);
+    await switchToActiveWindow(browser, puppeteer);
   }
   log.trace(`Window focus check completed for command: ${commandName}`);
 };
+
+export async function getPuppeteer(browser: WebdriverIO.Browser): Promise<PuppeteerBrowser> {
+  const sessionId = browser.sessionId;
+  const puppeteer = puppeteerSessionManager.get(sessionId);
+  if (puppeteer) {
+    log.trace(`Use cached puppeteer browser.`);
+    return puppeteer;
+  } else {
+    log.trace(`Get puppeteer browser.`);
+    const puppeteer = await browser.getPuppeteer();
+    puppeteerSessionManager.set(sessionId, puppeteer);
+    return puppeteer;
+  }
+}
+
+export function clearPuppeteerSessions() {
+  log.trace(`Remove all puppeteer sessions`);
+  puppeteerSessionManager.clear();
+}

@@ -1,16 +1,67 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { getActiveWindowHandle, ensureActiveWindowFocus } from '../src/window.js';
+import log from '@wdio/electron-utils/log';
+
+import { getActiveWindowHandle, ensureActiveWindowFocus, clearPuppeteerSessions, getPuppeteer } from '../src/window.js';
+
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
-    trace: vi.fn(),
-    debug: vi.fn(),
-  },
-}));
+vi.mock('@wdio/electron-utils/log');
 
 describe('Window Management', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearPuppeteerSessions();
+  });
+
+  const getBrowser = (sessionId: string, newWindow = 'window1', current = 'currentWindow') => {
+    const puppeteerBrowser = {
+      targets: vi.fn().mockReturnValue([
+        {
+          type: vi.fn().mockReturnValue('page'),
+          _targetId: newWindow,
+        },
+      ]),
+    };
+
+    const switchToWindowMock = vi.fn();
+    const browser = {
+      sessionId,
+      isMultiremote: false,
+      electron: {
+        windowHandle: current,
+        execute: vi.fn(),
+      },
+      getPuppeteer: vi.fn().mockResolvedValue(puppeteerBrowser),
+      switchToWindow: switchToWindowMock,
+    } as unknown as WebdriverIO.Browser;
+    return { browser, switchToWindowMock };
+  };
+
+  describe('getPuppeteer()', () => {
+    it('should return puppeteer browser from the WDIO browser', async () => {
+      const { browser } = getBrowser('browser1');
+      await getPuppeteer(browser);
+      expect(browser.getPuppeteer).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return puppeteer browser from the cache', async () => {
+      const { browser } = getBrowser('browser1');
+      await getPuppeteer(browser);
+      await getPuppeteer(browser);
+      expect(browser.getPuppeteer).toHaveBeenCalledTimes(1);
+      expect(log.trace).toHaveBeenCalledWith('Use cached puppeteer browser.');
+    });
+  });
+
   describe('getActiveWindowHandle()', () => {
+    it('should return undefined when no puppeteer browser are inputted', async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const handle = await getActiveWindowHandle(undefined);
+      expect(handle).toBe(undefined);
+      expect(log.trace).toHaveBeenCalledWith('Puppeteer is not initialized.');
+    });
+
     describe('when no window', () => {
       it('should return undefined when no windows are available', async () => {
         const puppeteerBrowser = {
@@ -78,81 +129,25 @@ describe('Window Management', () => {
   });
 
   describe('ensureActiveWindowFocus()', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
     it('should switch focus to the new window when it becomes active', async () => {
-      const switchToWindowMock = vi.fn();
-      const browser = {
-        isMultiremote: false,
-        electron: {
-          windowHandle: 'currentWindow',
-        },
-        switchToWindow: switchToWindowMock,
-      } as unknown as WebdriverIO.Browser;
-      const puppeteerBrowser = {
-        targets: vi.fn().mockReturnValue([
-          {
-            type: vi.fn().mockReturnValue('page'),
-            _targetId: 'window-1',
-          },
-        ]),
-      } as unknown as PuppeteerBrowser;
-      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, 'dummyCommand', puppeteerBrowser);
+      const { browser, switchToWindowMock } = getBrowser('browser1');
+
+      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, 'dummyCommand');
       expect(switchToWindowMock).toHaveBeenCalled();
-      expect(browser.electron.windowHandle).toBe('window-1');
+      expect(browser.electron.windowHandle).toBe('window1');
     });
 
     it('should maintain focus when staying on same window', async () => {
-      const switchToWindowMock = vi.fn();
-      const browser = {
-        isMultiremote: false,
-        electron: {
-          windowHandle: 'currentWindow',
-        },
-        switchToWindow: switchToWindowMock,
-      } as unknown as WebdriverIO.Browser;
-      const puppeteerBrowser = {
-        targets: vi.fn().mockReturnValue([
-          {
-            type: vi.fn().mockReturnValue('page'),
-            _targetId: 'currentWindow',
-          },
-        ]),
-      } as unknown as PuppeteerBrowser;
-      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, 'dummyCommand', puppeteerBrowser);
+      const { browser, switchToWindowMock } = getBrowser('browser1', 'currentWindow');
+      await ensureActiveWindowFocus(browser as unknown as WebdriverIO.Browser, 'dummyCommand');
       expect(switchToWindowMock).not.toHaveBeenCalled();
       expect(browser.electron.windowHandle).toBe('currentWindow');
     });
 
     describe('MultiRemote', () => {
-      const getBrowser = (newWindow = 'window1', current = 'currentWindow') => {
-        const puppeteerBrowser = {
-          targets: vi.fn().mockReturnValue([
-            {
-              type: vi.fn().mockReturnValue('page'),
-              _targetId: newWindow,
-            },
-          ]),
-        };
-
-        const switchToWindowMock = vi.fn();
-        const browser = {
-          isMultiremote: false,
-          electron: {
-            windowHandle: current,
-            execute: vi.fn(),
-          },
-          getPuppeteer: vi.fn().mockResolvedValue(puppeteerBrowser),
-          switchToWindow: switchToWindowMock,
-        } as unknown as WebdriverIO.Browser;
-        return { browser, switchToWindowMock };
-      };
-
       it('should switch focus to new windows in all browser instances', async () => {
-        const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser();
-        const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser();
+        const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser('browser1');
+        const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser('browser2');
         const mrBrowser = {
           isMultiremote: true,
           instances: ['browser1', 'browser2'],
@@ -168,8 +163,8 @@ describe('Window Management', () => {
       });
 
       it('should maintain focus when windows remain unchanged', async () => {
-        const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser('currentWindow');
-        const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser('currentWindow');
+        const { browser: browser1, switchToWindowMock: switchToWindowMock1 } = getBrowser('browser1', 'currentWindow');
+        const { browser: browser2, switchToWindowMock: switchToWindowMock2 } = getBrowser('browser2', 'currentWindow');
         const browser = {
           isMultiremote: true,
           instances: ['browser1', 'browser2'],

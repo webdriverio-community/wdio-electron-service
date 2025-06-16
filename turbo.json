@@ -93,6 +93,15 @@
       "cache": false,
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
+    "@wdio/cdp-bridge#build": {
+      "dependsOn": ["@wdio/electron-utils#build", "test:unit", "typecheck"],
+      "outputs": ["dist/**"]
+    },
+    "@wdio/cdp-bridge#release": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
+    },
     "clean": {
       "cache": false
     },
@@ -151,7 +160,7 @@
       "dependsOn": ["^build"]
     },
     "wdio-electron-service#build": {
-      "dependsOn": ["@wdio/electron-utils#build", "test:unit", "typecheck"],
+      "dependsOn": ["@wdio/cdp-bridge#build", "test:unit", "typecheck"],
       "outputs": ["dist/**"]
     },
     "wdio-electron-service#release": {
