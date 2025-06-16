@@ -1,3 +1,4 @@
+// TODO: This file should be remove at V9
 import { contextBridge, ipcRenderer } from 'electron';
 import { Channel } from './constants.js';
 

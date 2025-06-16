@@ -1,12 +1,11 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
+import getPort from 'get-port';
 import { SevereServiceError } from 'webdriverio';
+import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
 import log from '@wdio/electron-utils/log';
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
-import type { Services, Options, Capabilities } from '@wdio/types';
-import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
 import {
   getChromeOptions,
@@ -16,7 +15,10 @@ import {
 } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
 import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import getPort from 'get-port';
+import { ipcBridgeWarning } from './ipc.js';
+
+import type { Services, Options, Capabilities } from '@wdio/types';
+import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -25,6 +27,10 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
   constructor(globalOptions: ElectronServiceGlobalOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = globalOptions.rootDir || config.rootDir || process.cwd();
+
+    if (typeof globalOptions.useCdpBridge === 'boolean' && !globalOptions.useCdpBridge) {
+      ipcBridgeWarning();
+    }
   }
 
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {

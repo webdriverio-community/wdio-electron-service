@@ -11,7 +11,8 @@ describe('execute Command', () => {
       execute: vi.fn((fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
         typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
       ),
-    };
+    } as unknown as WebdriverIO.Browser;
+
     globalThis.wdioElectron = {
       execute: vi.fn(),
     };
@@ -31,6 +32,7 @@ describe('execute Command', () => {
   });
 
   it('should throw an error when the browser is not initialised', async () => {
+    // @ts-expect-error no browser argument
     await expect(() => execute(undefined, '() => 1 + 2 + 3')).rejects.toThrowError(
       new Error('WDIO browser is not yet initialised'),
     );

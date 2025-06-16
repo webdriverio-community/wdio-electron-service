@@ -181,7 +181,25 @@ export interface ElectronServiceOptions {
 export type ElectronServiceGlobalOptions = Pick<
   ElectronServiceOptions,
   'clearMocks' | 'resetMocks' | 'restoreMocks'
-> & { rootDir?: string };
+> & {
+  rootDir?: string;
+  /**
+   * Whether to use the CDP bridge or the IPC bridge. The CDP bridge is the default and recommended option.
+   */
+  useCdpBridge?: boolean;
+  /**
+   * Timeout for any request using CdpBridge to a node debugger.
+   */
+  cdpBridgeTimeout?: number;
+  /**
+   * Interval in milliseconds to wait between attempts to connect to the node debugger.
+   */
+  cdpBridgeWaitInterval?: number;
+  /**
+   * Number of attempts to connect to the node debugger before giving up.
+   */
+  cdpBridgeRetryCount?: number;
+};
 
 export type ApiCommand = { name: string; bridgeProp: string };
 export type WebdriverClientFunc = (this: WebdriverIO.Browser, ...args: unknown[]) => Promise<unknown>;
