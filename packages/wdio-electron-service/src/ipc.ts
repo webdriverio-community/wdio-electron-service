@@ -7,14 +7,14 @@ const reset = '\u001b[0m';
 
 const LINE00 = '* WARNING -------------------------------------------------------------------- *';
 const LINE01 = '| You can remove importing main/preload scripts provided by this service.      |';
-const LINE02 = '| Because the wdio-electron-service is no longer required the IPC-Bridge.      |';
-const LINE03 = '| Those scripts will be completely removed at the next release.                |';
+const LINE02 = '| Because the wdio-electron-service no longer requires the IPC-Bridge.         |';
+const LINE03 = '| Those scripts will be completely removed with v9.                            |';
 const LINE05 = '* ---------------------------------------------------------------------------- *';
 
 const LINE11 = '| The IPC-Bridge is deprecated.                                                |';
-const LINE12 = '| Please consider migrating the new bridge called `CDP-Bridge`                 |';
-const LINE13 = '| by changing the value of the `useCdpBridge` to `true` or remove this param.  |';
-const LINE14 = '| The old one and related functionality will be removed at the next release.   |';
+const LINE12 = '| Please consider migrating to the `CDP-Bridge`                                |';
+const LINE13 = '| by changing the value of `useCdpBridge` to `true` or removing it.            |';
+const LINE14 = '| The legacy IPC-Bridge and related functionality will be removed with v9.     |';
 
 const colourise = (str: string) => {
   if (str === LINE00 || str === LINE05) {

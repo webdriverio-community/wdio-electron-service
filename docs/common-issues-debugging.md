@@ -12,7 +12,7 @@ This is utilising the [`debug`](https://github.com/debug-js/debug) logging packa
 
 ### Error: ContextBridge not available for invocation of "app" API
 
-- _Note: This issue is applies to the version ~v8 and v9 with the global options `useCdpBridge=false`_ \*
+_Note: This issue only applies to the legacy IPC Bridge (`< v8.2.0` OR `>= v8.2.0` with `useCDPBridge=false`)_
 
 When using Electron Forge or Electron Packager with Asar, it is possible that the `wdio-electron-service` module is not included in your generated app.asar.
 You can solve this, by either running the packager with the `prune: false` option or the `--no-prune` flag, or by moving "wdio-electron-service" from `devDependencies` to `dependencies`.

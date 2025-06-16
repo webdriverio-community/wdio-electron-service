@@ -123,7 +123,7 @@ Type: `boolean`
 
 ### `cdpBridgeTimeout`:
 
-Timeout for any request using CdpBridge to a node debugger.
+Timeout for any request using CdpBridge to the node debugger.
 
 ### `cdpBridgeWaitInterval`:
 
