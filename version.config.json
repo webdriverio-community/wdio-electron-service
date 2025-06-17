@@ -4,13 +4,6 @@
   "preset": "angular",
   "commitMessage": "release ${version} [skip-ci]",
   "synced": true,
-  "skip": [
-    "@repo/e2e",
-    "example-builder-cjs",
-    "example-builder-esm",
-    "example-forge-cjs",
-    "example-forge-esm",
-    "example-no-binary-cjs",
-    "example-no-binary-esm"
-  ]
+  "mainPackage": "wdio-electron-service",
+  "packages": ["packages/*"]
 }
