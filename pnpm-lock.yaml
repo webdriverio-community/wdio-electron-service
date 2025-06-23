@@ -99,8 +99,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0
       package-versioner:
-        specifier: ^0.7.1
-        version: 0.7.1(conventional-commits-parser@6.2.0)
+        specifier: ^0.8.1
+        version: 0.8.1(conventional-commits-parser@6.2.0)
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -4180,8 +4180,8 @@ packages:
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
-  package-versioner@0.7.1:
-    resolution: {integrity: sha512-/O0wobfy+neIfOzjS06QDa9YdeiFcgYk3IpUezjR1t72JHUbWzHBheW6j/GxgEmjHIw9bbuZfAv4Fj13GSL2QQ==}
+  package-versioner@0.8.1:
+    resolution: {integrity: sha512-1HLt9v0DzBm2oKnPZhdk7KKYyfzfWmajMMvsVMqZLgrRq1cnB1KYOAt2oolBuffYHRypZoQ+bCRDZLrjTZjfzw==}
     hasBin: true
 
   pako@1.0.11:
@@ -9422,7 +9422,7 @@ snapshots:
 
   package-json-from-dist@1.0.1: {}
 
-  package-versioner@0.7.1(conventional-commits-parser@6.2.0):
+  package-versioner@0.8.1(conventional-commits-parser@6.2.0):
     dependencies:
       '@manypkg/get-packages': 3.0.0
       chalk: 5.4.1
