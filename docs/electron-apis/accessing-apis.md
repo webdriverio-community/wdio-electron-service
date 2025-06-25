@@ -1,17 +1,6 @@
 # Accessing Electron APIs
 
-The service provides access to Electron APIs from the main process. You can do this simply by using the `browser.electron.execute` method in your test suites (see below for an example).
-
-## Importing main and preload scripts
-
-If you are using an older version of the service, in order to access the APIs you will have imported the following scripts in your apps before testing:
-
-- `wdio-electron-service/main` (in the main script)
-- `wdio-electron-service/preload` (in the preload script)
-
-You can now remove these imports because the IPC bridge is now deprecated.
-
-The `wdio-electron-service/main` and `wdio-electron-service/preload` scripts will be completely removed in `wdio-electron-service@v9`.
+The service provides access to Electron APIs from the main process using the Chrome DevTools Protocol (CDP). You can access these APIs by using the `browser.electron.execute` method in your test suites.
 
 ## Execute Scripts
 
@@ -39,3 +28,14 @@ await browser.electron.execute(
 ![Execute Demo](../../.github/assets/execute-demo.png 'Execute Demo')
 
 **Note:** The first argument of the function will be always the default export of the `electron` package that contains the [Electron API](https://www.electronjs.org/docs/latest/api/app).
+
+## How It Works
+
+The service uses the Chrome DevTools Protocol (CDP) to communicate with your Electron application's main process. This provides a reliable and efficient way to:
+
+- Execute JavaScript code in the main process context
+- Access all Electron APIs
+- Mock Electron APIs for testing
+- Handle multiple windows and processes
+
+No additional setup or imports are required in your Electron application - the service automatically connects to your app when it starts.
