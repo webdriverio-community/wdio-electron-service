@@ -19,10 +19,6 @@ export interface ElectronServiceAPI {
    */
   windowHandle?: string;
   /**
-   * Whether the Electron bridge is active.
-   */
-  bridgeActive: boolean;
-  /**
    * Mock a function from the Electron API.
    *
    * @param apiName name of the API to mock
@@ -183,10 +179,6 @@ export type ElectronServiceGlobalOptions = Pick<
   'clearMocks' | 'resetMocks' | 'restoreMocks'
 > & {
   rootDir?: string;
-  /**
-   * Whether to use the CDP bridge or the IPC bridge. The CDP bridge is the default and recommended option.
-   */
-  useCdpBridge?: boolean;
   /**
    * Timeout for any request using CdpBridge to a node debugger.
    */

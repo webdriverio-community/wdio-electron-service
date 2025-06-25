@@ -22,39 +22,13 @@
         }
       },
       "./dist/cjs/index.js"
-    ],
-    "./main": [
-      {
-        "import": {
-          "types": "./dist/esm/main.d.ts",
-          "default": "./dist/esm/main.js"
-        },
-        "require": {
-          "types": "./dist/cjs/main.d.ts",
-          "default": "./dist/cjs/main.js"
-        }
-      },
-      "./dist/cjs/main.js"
-    ],
-    "./preload": [
-      {
-        "import": {
-          "types": "./dist/esm/preload.d.ts",
-          "default": "./dist/esm/preload.js"
-        },
-        "require": {
-          "types": "./dist/cjs/preload.d.ts",
-          "default": "./dist/cjs/preload.js"
-        }
-      },
-      "./dist/cjs/preload.js"
     ]
   },
   "engines": {
     "node": ">=18 || >=20"
   },
   "scripts": {
-    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml ./src/cjs/preload.ts ./src/cjs/main.ts",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "rollup --config rollup.config.ts --configPlugin typescript",
@@ -118,8 +92,6 @@
     "vitest": "^3.2.3"
   },
   "files": [
-    "dist",
-    "main",
-    "preload"
+    "dist"
   ]
 }

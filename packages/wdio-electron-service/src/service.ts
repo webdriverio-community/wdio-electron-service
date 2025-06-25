@@ -1,33 +1,12 @@
 import log from '@wdio/electron-utils/log';
-import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
-import type { Capabilities, Services } from '@wdio/types';
+import type { ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
+import type { Services } from '@wdio/types';
 
 import mockStore from './mockStore.js';
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
+import { clearPuppeteerSessions, ensureActiveWindowFocus } from './window.js';
 import * as commands from './commands/index.js';
-import { execute } from './commands/execute.js';
 import { ServiceConfig } from './serviceConfig.js';
-import { before, waitUntilWindowAvailable } from './serviceCdp.js';
-import { ipcBridgeCheck } from './ipc.js';
-
-const isBridgeActive = async (browser: WebdriverIO.Browser) =>
-  await browser.execute(function executeWithinElectron() {
-    return window.wdioElectron !== undefined;
-  });
-
-const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
-  // Add __name to the global object to work around issue with function serialization
-  // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-  // https://github.com/privatenumber/tsx/issues/113
-  await browser.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-  await browser.electron.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-};
+import { before } from './serviceCdp.js';
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
@@ -40,76 +19,13 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     super(globalOptions, capabilities);
   }
 
-  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
-    const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
-    const api = {
-      clearAllMocks: commands.clearAllMocks.bind(this),
-      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
-      isMockFunction: commands.isMockFunction.bind(this),
-      mock: commands.mock.bind(this),
-      mockAll: commands.mockAll.bind(this),
-      resetAllMocks: commands.resetAllMocks.bind(this),
-      restoreAllMocks: commands.restoreAllMocks.bind(this),
-    };
-    return Object.assign({}, api) as unknown as BrowserExtension['electron'];
-  }
   async before(
     capabilities: WebdriverIO.Capabilities,
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
-    if (this.useCdpBridge) {
-      log.debug('Using CDP bridge');
-      await ipcBridgeCheck(instance);
-      await before.call(this, capabilities, instance);
-      return;
-    }
-    log.debug('Using IPC bridge');
-    this.browser = instance as WebdriverIO.Browser;
-
-    /**
-     * Add electron API to browser object
-     */
-    this.browser.electron = this.#getElectronAPI();
-
-    this.browser.electron.bridgeActive = await isBridgeActive(this.browser);
-
-    if (this.browser.electron.bridgeActive) {
-      await initSerializationWorkaround(this.browser);
-    }
-
-    if (this.browser.isMultiremote) {
-      const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
-      for (const instance of mrBrowser.instances) {
-        const mrInstance = mrBrowser.getInstance(instance);
-        const caps =
-          (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
-          (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
-
-        if (!caps[CUSTOM_CAPABILITY_NAME]) {
-          continue;
-        }
-
-        log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
-
-        const mrPuppeteer = await getPuppeteer(mrInstance);
-        mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
-        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
-
-        if (mrInstance.electron.bridgeActive) {
-          await initSerializationWorkaround(mrInstance);
-        }
-
-        // wait until an Electron BrowserWindow is available
-        await waitUntilWindowAvailable(mrInstance);
-      }
-    } else {
-      const puppeteer = await getPuppeteer(this.browser);
-      this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
-      // wait until an Electron BrowserWindow is available
-      await waitUntilWindowAvailable(this.browser);
-    }
+    log.debug('Using CDP bridge');
+    await before.call(this, capabilities, instance);
   }
 
   async beforeTest() {
