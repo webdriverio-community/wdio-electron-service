@@ -47,7 +47,9 @@ vi.mock('../src/bridge', () => {
 vi.mock('../src/serviceCdp', () => {
   return {
     waitUntilWindowAvailable: vi.fn(),
-    before: vi.fn(),
+    before: vi.fn().mockImplementation(function (this: any, _capabilities: any, instance: any) {
+      this.browser = instance;
+    }),
   };
 });
 
