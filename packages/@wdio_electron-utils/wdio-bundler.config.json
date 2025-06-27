@@ -1,0 +1,12 @@
+{
+  "transformations": [
+    {
+      "type": "codeReplace",
+      "options": {
+        "id": "src/log.ts",
+        "searchValue": "var logger = require('@wdio/logger');",
+        "replaceValue": "import logger from '@wdio/logger';"
+      }
+    }
+  ]
+}

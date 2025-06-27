@@ -43,7 +43,7 @@
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./src/cjs/*.ts",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "dev": "pnpm run build --watch",
-    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "tsx ../../scripts/build-package.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
