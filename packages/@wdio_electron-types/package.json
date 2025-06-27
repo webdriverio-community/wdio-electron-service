@@ -28,7 +28,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "dev": "pnpm run build --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "rollup --config rollup.config.ts --configPlugin typescript"
+    "build": "tsx ../../scripts/build-package.ts"
   },
   "dependencies": {
     "@vitest/spy": "^3.2.3"
