@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@electron/packager": "^18.3.6",
-    "@wdio/logger": "^9.15.0",
+    "@wdio/logger": "catalog:default",
     "debug": "^4.4.1",
     "find-versions": "^6.0.0",
     "json5": "^2.2.3",
