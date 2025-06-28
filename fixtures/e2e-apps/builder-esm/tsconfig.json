@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../../@types"],
+    "outDir": "dist"
+  },
+  "include": ["src/*.ts", "src/preload.cts"],
+  "exclude": ["node_modules"]
+}

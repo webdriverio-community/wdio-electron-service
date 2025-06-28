@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.cjs.json",
+  "compilerOptions": {
+    "types": [],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../../@types"],
+    "outDir": "dist"
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}

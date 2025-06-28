@@ -10,7 +10,7 @@ import importX from 'eslint-plugin-import-x';
 export default [
   // Ignored dirs
   {
-    ignores: ['**/dist/**/*', '@types/**/*', 'e2e/test/js/*'],
+    ignores: ['**/dist/**/*', '@types/**/*', 'e2e/test/js/*', 'fixtures/config-formats/invalid-syntax.ts'],
   },
   // All files
   {
@@ -41,7 +41,7 @@ export default [
   // Node & Electron main process files and scripts
   {
     files: ['**/*.{js,mjs,ts}'],
-    ignores: ['apps/**/src/preload.ts', 'apps/**/src/util.ts'],
+    ignores: ['fixtures/e2e-apps/**/src/preload.ts', 'fixtures/e2e-apps/**/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -53,7 +53,7 @@ export default [
   },
   // Electron renderer process files
   {
-    files: ['apps/**/src/preload.ts', 'apps/**/src/util.ts'],
+    files: ['fixtures/e2e-apps/**/src/preload.ts', 'fixtures/e2e-apps/**/src/util.ts'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -144,17 +144,17 @@ export default [
   },
   // CJS example app files
   {
-    files: ['apps/*-cjs/**/*.{js,mjs}'], // already disabled for TS files
+    files: ['fixtures/e2e-apps/*-cjs/**/*.{js,mjs}'], // already disabled for TS files
     rules: {
       'import-x/named': 'off',
     },
   },
   // Example app TS files
   {
-    files: ['apps/builder-cjs/**/*.ts'],
+    files: ['fixtures/e2e-apps/builder-cjs/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'apps/builder-cjs/tsconfig.eslint.json',
+        project: 'fixtures/e2e-apps/builder-cjs/tsconfig.eslint.json',
       },
     },
     rules: {
@@ -162,37 +162,18 @@ export default [
     },
   },
   {
-    files: ['apps/builder-esm/**/*.ts'],
+    files: ['fixtures/e2e-apps/builder-esm/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'apps/builder-esm/tsconfig.eslint.json',
+        project: 'fixtures/e2e-apps/builder-esm/tsconfig.eslint.json',
       },
     },
   },
   {
-    files: ['apps/forge-cjs/**/*.ts'],
+    files: ['fixtures/e2e-apps/forge-cjs/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'apps/forge-cjs/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
-  {
-    files: ['apps/forge-esm/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'apps/forge-esm/tsconfig.eslint.json',
-      },
-    },
-  },
-  {
-    files: ['apps/no-binary-cjs/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'apps/no-binary-cjs/tsconfig.eslint.json',
+        project: 'fixtures/e2e-apps/forge-cjs/tsconfig.eslint.json',
       },
     },
     rules: {
@@ -200,10 +181,29 @@ export default [
     },
   },
   {
-    files: ['apps/no-binary-esm/**/*.ts'],
+    files: ['fixtures/e2e-apps/forge-esm/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: 'apps/no-binary-esm/tsconfig.eslint.json',
+        project: 'fixtures/e2e-apps/forge-esm/tsconfig.eslint.json',
+      },
+    },
+  },
+  {
+    files: ['fixtures/e2e-apps/no-binary-cjs/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'fixtures/e2e-apps/no-binary-cjs/tsconfig.eslint.json',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['fixtures/e2e-apps/no-binary-esm/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'fixtures/e2e-apps/no-binary-esm/tsconfig.eslint.json',
       },
     },
   },
