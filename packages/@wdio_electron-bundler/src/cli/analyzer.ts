@@ -56,13 +56,18 @@ export class PackageAnalyzer {
   /**
    * Build all plugin specifications for a configuration
    */
-  buildPluginSpecs(config: BundlerConfig, packageInfo: PackageInfo, format: 'esm' | 'cjs'): PluginSpec[] {
+  buildPluginSpecs(
+    config: BundlerConfig,
+    packageInfo: PackageInfo,
+    packageRoot: string,
+    format: 'esm' | 'cjs',
+  ): PluginSpec[] {
     this.logger.extraVerbose(`🔌 Building plugin specs for ${format}...`);
 
     const plugins: PluginSpec[] = [];
 
     // Core plugins (always included)
-    plugins.push(this.createTypescriptPlugin(packageInfo.outDir[format]));
+    plugins.push(this.createTypescriptPlugin(packageInfo.outDir[format], packageRoot));
     plugins.push(this.createNodeExternalsPlugin(config, format));
 
     // Add nodeResolve only when needed (for dependency injection)
@@ -222,13 +227,28 @@ export class PackageAnalyzer {
   /**
    * Create TypeScript plugin specification
    */
-  private createTypescriptPlugin(outDir: string): PluginSpec {
+  private createTypescriptPlugin(outDir: string, packageRoot: string): PluginSpec {
+    // Check if tsconfig.json exists to determine if we should add declaration options
+    const tsconfigPath = resolve(packageRoot, 'tsconfig.json');
+    const hasTsconfig = existsSync(tsconfigPath);
+
+    // Only add declaration options if tsconfig.json exists to avoid TypeScript plugin issues
+    const compilerOptions = hasTsconfig
+      ? `{
+    outDir: '${outDir}',
+    declaration: true,
+    declarationMap: true,
+  }`
+      : `{
+    outDir: '${outDir}',
+  }`;
+
+    const additionalOptions = hasTsconfig ? '' : ',\n  tsconfig: false';
+
     return {
       name: 'typescript',
       call: `typescript({
-  compilerOptions: {
-    outDir: '${outDir}',
-  },
+  compilerOptions: ${compilerOptions}${additionalOptions},
 })`,
       import: {
         from: '@rollup/plugin-typescript',
@@ -335,19 +355,22 @@ export class PackageAnalyzer {
       options,
       (key, value) => {
         if (typeof value === 'function') {
-          return value.toString();
+          return `__FUNCTION__${value.toString()}__FUNCTION__`;
         }
         if (value instanceof RegExp) {
-          return value.toString();
+          return `__REGEXP__${value.toString()}__REGEXP__`;
         }
         return value;
       },
       2,
-    );
+    )
+      .replace(/"__FUNCTION__(.*?)__FUNCTION__"/g, '$1')
+      .replace(/"__REGEXP__(.*?)__REGEXP__"/g, '$1');
 
     return {
       name: 'inject-dependency',
       call: `injectDependencyPlugin(${optionsStr})`,
+      options: options, // Store the actual options for programmatic use
       import: {
         from: '@wdio/electron-bundler',
         named: ['injectDependencyPlugin'],
@@ -364,16 +387,17 @@ export class PackageAnalyzer {
       options,
       (key, value) => {
         if (value instanceof RegExp) {
-          return value.toString();
+          return `__REGEXP__${value.toString()}__REGEXP__`;
         }
         return value;
       },
       2,
-    );
+    ).replace(/"__REGEXP__(.*?)__REGEXP__"/g, '$1');
 
     return {
       name: 'code-replace',
       call: `codeReplacePlugin(${optionsStr})`,
+      options: options, // Store the actual options for programmatic use
       import: {
         from: '@wdio/electron-bundler',
         named: ['codeReplacePlugin'],

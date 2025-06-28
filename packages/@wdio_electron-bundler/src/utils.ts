@@ -128,16 +128,34 @@ export async function injectDependency(
     );
 
     if (injectedContents === bundledContents) {
-      throw new Error(`Failed to generate injected contents`);
+      this.warn(`No replacements made for bundleRegExp in ${injectPrams.packageName}. Using bundled contents as-is.`);
+      // Don't throw error, just use the bundled contents as-is
     }
 
     // Replace instances of the dynamic import in the template with the bundled contents
-    const renderedContent = templateContent.replace(
-      `const ${injectPrams.importName} = await import('${injectPrams.packageName}');`,
-      injectedContents,
-    );
+    const searchPattern = `const ${injectPrams.importName} = await import('${injectPrams.packageName}');`;
+    const renderedContent = templateContent.replace(searchPattern, injectedContents);
+
     if (renderedContent === templateContent) {
+      console.log(`[DEBUG] Failed to find pattern: "${searchPattern}"`);
+      console.log(`[DEBUG] Template content around line 44:`, templateContent.split('\n').slice(40, 50).join('\n'));
       throw new Error(`Failed to inject contents of "${injectPrams.packageName}"`);
+    }
+
+    console.log(`[DEBUG] Successfully replaced pattern in ${injectPrams.targetFile}`);
+    console.log(`[DEBUG] Injected content preview:`, injectedContents.substring(0, 200) + '...');
+
+    // Check for import/export statements in the injected content
+    const hasImport = injectedContents.includes('import ');
+    const hasExport = injectedContents.includes('export ');
+    console.log(`[DEBUG] Contains import statements: ${hasImport}`);
+    console.log(`[DEBUG] Contains export statements: ${hasExport}`);
+
+    if (hasExport && injectPrams.packageName === '@vitest/spy') {
+      // Show the export statements for debugging
+      const lines = injectedContents.split('\n');
+      const exportLines = lines.filter((line) => line.includes('export')).slice(0, 5);
+      console.log(`[DEBUG] Export statements found:`, exportLines);
     }
 
     this.info(`Successfully bundled and injected "${injectPrams.packageName}" into ${injectPrams.targetFile}`);

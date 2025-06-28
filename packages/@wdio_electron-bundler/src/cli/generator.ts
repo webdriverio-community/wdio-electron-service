@@ -31,10 +31,10 @@ export class ConfigGenerator {
     this.logger.extraDetail(`Package: ${packageInfo.name}@${packageInfo.version}`);
 
     // Generate ESM config
-    const esmConfig = this.generateFormatConfig(config, packageInfo, 'esm');
+    const esmConfig = this.generateFormatConfig(config, packageInfo, packagePath, 'esm');
 
     // Generate CJS config (if enabled)
-    const cjsConfig = config.cjs ? this.generateFormatConfig(config, packageInfo, 'cjs') : null;
+    const cjsConfig = config.cjs ? this.generateFormatConfig(config, packageInfo, packagePath, 'cjs') : null;
 
     // Collect all imports
     const allPlugins = [...esmConfig.plugins, ...(cjsConfig?.plugins || [])];
@@ -53,11 +53,16 @@ export class ConfigGenerator {
   /**
    * Generate configuration for a specific format
    */
-  private generateFormatConfig(config: BundlerConfig, packageInfo: PackageInfo, format: 'esm' | 'cjs'): ConfigSpec {
+  private generateFormatConfig(
+    config: BundlerConfig,
+    packageInfo: PackageInfo,
+    packagePath: string,
+    format: 'esm' | 'cjs',
+  ): ConfigSpec {
     this.logger.extraVerbose(`🔧 Generating ${format.toUpperCase()} config...`);
 
     // Build plugins for this format
-    const plugins = this.packageAnalyzer.buildPluginSpecs(config, packageInfo, format);
+    const plugins = this.packageAnalyzer.buildPluginSpecs(config, packageInfo, packagePath, format);
 
     // Build output configuration
     const output = this.buildOutput(packageInfo, format);

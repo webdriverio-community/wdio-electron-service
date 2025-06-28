@@ -183,45 +183,58 @@ export class ConfigLoader {
     const { spawn } = await import('node:child_process');
 
     try {
-      // Get the bundler package path to add to module resolution
-      const bundlerModulesPath = resolve(import.meta.url.replace('file://', ''), '..', '..', '..', 'node_modules');
-
-      // Use tsx to run the TypeScript file and output JSON
+      // Use tsx to execute the TypeScript file and serialize the config preserving functions/regex
       const tsxScript = `
 import config from '${filePath}';
-console.log(JSON.stringify(config, null, 2));
+import { writeFileSync } from 'fs';
+
+// Serialize config preserving functions and regex
+const serialize = (obj) => {
+  if (typeof obj === 'function') {
+    return { __type: 'function', __value: obj.toString() };
+  }
+  if (obj instanceof RegExp) {
+    return { __type: 'regexp', __value: obj.toString() };
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(serialize);
+  }
+  if (obj && typeof obj === 'object') {
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = serialize(value);
+    }
+    return result;
+  }
+  return obj;
+};
+
+const serializedConfig = serialize(config);
+writeFileSync('${filePath}.temp.json', JSON.stringify(serializedConfig, null, 2));
       `;
 
       const tempScript = `${filePath}.temp.mjs`;
-      const { writeFileSync, unlinkSync } = await import('node:fs');
+      const tempJson = `${filePath}.temp.json`;
+      const { writeFileSync, unlinkSync, readFileSync } = await import('node:fs');
 
       writeFileSync(tempScript, tsxScript);
 
       try {
-        const result = await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+        // Execute tsx to generate the JSON file
+        await new Promise<void>((resolve, reject) => {
           const child = spawn('npx', ['tsx', tempScript], {
             stdio: ['pipe', 'pipe', 'pipe'],
             cwd: this.cwd,
-            env: {
-              ...process.env,
-              NODE_PATH: `${bundlerModulesPath}:${process.env.NODE_PATH || ''}`,
-            },
           });
 
-          let stdout = '';
           let stderr = '';
-
-          child.stdout?.on('data', (data) => {
-            stdout += data.toString();
-          });
-
           child.stderr?.on('data', (data) => {
             stderr += data.toString();
           });
 
           child.on('close', (code) => {
             if (code === 0) {
-              resolve({ stdout, stderr });
+              resolve();
             } else {
               reject(new Error(`tsx failed with code ${code}: ${stderr}`));
             }
@@ -230,13 +243,50 @@ console.log(JSON.stringify(config, null, 2));
           child.on('error', reject);
         });
 
-        unlinkSync(tempScript);
+        // Read and deserialize the JSON
+        const serializedConfig = JSON.parse(readFileSync(tempJson, 'utf-8'));
 
-        const config = JSON.parse(result.stdout.trim());
+        // Deserialize functions and regex
+        const deserialize = (obj: any): any => {
+          if (obj && typeof obj === 'object' && obj.__type) {
+            if (obj.__type === 'function') {
+              // Convert string back to function
+              return new Function('return ' + obj.__value)();
+            }
+            if (obj.__type === 'regexp') {
+              // Convert string back to regex
+              const match = obj.__value.match(/^\/(.*)\/([gimuy]*)$/);
+              return match ? new RegExp(match[1], match[2]) : new RegExp(obj.__value);
+            }
+          }
+          if (Array.isArray(obj)) {
+            return obj.map(deserialize);
+          }
+          if (obj && typeof obj === 'object') {
+            const result: any = {};
+            for (const [key, value] of Object.entries(obj)) {
+              result[key] = deserialize(value);
+            }
+            return result;
+          }
+          return obj;
+        };
+
+        const config = deserialize(serializedConfig);
+
+        // Cleanup temp files
+        unlinkSync(tempScript);
+        unlinkSync(tempJson);
+
         return config;
       } catch (error) {
         try {
           unlinkSync(tempScript);
+        } catch {
+          // Ignore cleanup errors
+        }
+        try {
+          unlinkSync(tempJson);
         } catch {
           // Ignore cleanup errors
         }

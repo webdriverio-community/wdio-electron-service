@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import { rollup } from 'rollup';
 import type { RollupOptions, OutputOptions } from 'rollup';
 import { Logger } from './logger.js';
@@ -86,26 +87,53 @@ export class RollupExecutor {
       if (pluginSpec.name === 'typescript') {
         // Import TypeScript compiler from our bundler's node_modules
         const typescript = await import('typescript');
-        plugins.push(
-          typescriptPlugin({
-            compilerOptions: {
-              target: 'ES2020',
-              module: 'ESNext',
-              moduleResolution: 'Node',
-              allowSyntheticDefaultImports: true,
-              esModuleInterop: true,
-              skipLibCheck: true,
-              noEmitOnError: false,
-            },
-            typescript: typescript.default, // Pass the TypeScript compiler explicitly
-            include: ['**/*.ts', '**/*.tsx'],
-            exclude: ['node_modules', '**/*.d.ts'],
-          }),
-        );
+
+        // Check if tsconfig.json exists to determine if we should add declaration options
+        const tsconfigPath = resolve(targetCwd, 'tsconfig.json');
+        const hasTsconfig = existsSync(tsconfigPath);
+
+        // Only add declaration options if tsconfig.json exists to avoid TypeScript plugin issues
+        const compilerOptions: any = {
+          target: 'ES2020',
+          module: 'ESNext',
+          moduleResolution: 'Node',
+          allowSyntheticDefaultImports: true,
+          esModuleInterop: true,
+          skipLibCheck: true,
+          noEmitOnError: false,
+          outDir: resolve(targetCwd, configSpec.output.dir),
+        };
+
+        if (hasTsconfig) {
+          compilerOptions.declaration = true;
+          compilerOptions.declarationMap = true;
+        }
+
+        const typescriptOptions: any = {
+          compilerOptions,
+          typescript: typescript.default, // Pass the TypeScript compiler explicitly
+          include: ['**/*.ts', '**/*.tsx'],
+          exclude: ['node_modules', '**/*.d.ts'],
+        };
+
+        // If no tsconfig.json exists, disable tsconfig to avoid TypeScript plugin issues
+        if (!hasTsconfig) {
+          typescriptOptions.tsconfig = false;
+        }
+
+        plugins.push(typescriptPlugin(typescriptOptions));
       } else if (pluginSpec.name === 'node-externals') {
         plugins.push(nodeExternals(pluginSpec.options || {}));
       } else if (pluginSpec.name === 'node-resolve') {
         plugins.push(nodeResolve());
+      } else if (pluginSpec.name === 'inject-dependency') {
+        // Import the inject dependency plugin from our bundler
+        const { injectDependencyPlugin } = await import('../plugins.js');
+        plugins.push(injectDependencyPlugin(pluginSpec.options));
+      } else if (pluginSpec.name === 'code-replace') {
+        // Import the code replace plugin from our bundler
+        const { codeReplacePlugin } = await import('../plugins.js');
+        plugins.push(codeReplacePlugin(pluginSpec.options));
       } else if (pluginSpec.name === 'warn-to-error') {
         plugins.push({
           name: 'warn-to-error',
