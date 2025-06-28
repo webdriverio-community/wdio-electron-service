@@ -29,7 +29,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
     "dev": "pnpm run build --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "tsx ../../scripts/build-package.ts",
     "test:unit": "vitest --coverage --watch=false",
     "test:e2e": "cross-env RUN_E2E=1 pnpm exec vitest --run --coverage=false",
     "test:dev": "vitest --coverage",
@@ -41,15 +41,16 @@
     "ws": "^8.18.2"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.7",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^3.2.3",
+    "@vitest/coverage-v8": "^3.2.4",
     "@wdio/electron-bundler": "workspace:*",
-    "devtools-protocol": "^0.0.1473885",
+    "devtools-protocol": "^0.0.1479623",
     "get-port": "^7.1.0",
     "nock": "^14.0.5",
+    "tslib": "^2.8.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/*"

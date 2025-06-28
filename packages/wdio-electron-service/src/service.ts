@@ -1,4 +1,4 @@
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 import type { ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
 import type { Services } from '@wdio/types';
 

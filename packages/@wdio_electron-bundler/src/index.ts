@@ -4,6 +4,7 @@ import { getInputConfig, getPackageJson, getOutDirs } from './utils';
 export { nodeExternals } from 'rollup-plugin-node-externals';
 export { nodeResolve } from '@rollup/plugin-node-resolve';
 export * from './plugins';
+export type { BundlerConfig, BundlerFormatConfig, Transformation } from './cli/types.js';
 
 export const typescript = (options: RollupTypescriptOptions = {}) => {
   let exclude: string[] = [];

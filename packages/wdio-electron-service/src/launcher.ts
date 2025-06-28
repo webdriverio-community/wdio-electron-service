@@ -4,8 +4,7 @@ import path from 'node:path';
 import getPort from 'get-port';
 import { SevereServiceError } from 'webdriverio';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
-import log from '@wdio/electron-utils/log';
-import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import { log, getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
 
 import {
   getChromeOptions,

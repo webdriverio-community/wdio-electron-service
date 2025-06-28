@@ -1,5 +1,5 @@
 import { remote } from 'webdriverio';
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 import type { Options } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
 

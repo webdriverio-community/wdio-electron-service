@@ -14,10 +14,20 @@ process.env.TEST = 'true';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageJsonPath = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'package.json');
+const packageJsonPath = path.join(__dirname, '..', '..', '..', 'fixtures', 'e2e-apps', exampleDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })) as NormalizedPackageJson;
 const pkg = { packageJson, path: packageJsonPath };
-const appEntryPoint = path.join(__dirname, '..', '..', '..', 'apps', exampleDir, 'dist', 'main.bundle.js');
+const appEntryPoint = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'fixtures',
+  'e2e-apps',
+  exampleDir,
+  'dist',
+  'main.bundle.js',
+);
 const electronVersion = await getElectronVersion(pkg);
 
 const logDir = path.join(__dirname, '..', '..', `wdio-logs-${exampleDir}`);

@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 
 import WebSocket from 'ws';
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 
 import { DevTool, type DevToolOptions } from './devTool.js';
 import {

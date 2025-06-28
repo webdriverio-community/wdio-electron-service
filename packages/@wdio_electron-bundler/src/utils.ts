@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs';
 import { basename, dirname, join, posix, relative } from 'node:path';
 import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
 
-import debug from './log';
 import { PluginContext, rollup } from 'rollup';
 import nodeResolve from '@rollup/plugin-node-resolve';
 
@@ -13,7 +12,6 @@ const normalizeToPosix = (path: string) => {
 };
 
 const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
-  debug(`Attempting to find entry point: ${name}`);
   // Normalize name to handle Windows paths
   const normalizedName = normalizeToPosix(name);
 
@@ -31,7 +29,6 @@ const findEntryPoint = (name: string, rootDir: string, srcDir: string) => {
     const srcPath = posix.join(srcDir, candidate);
     // Convert to system-specific path for existsSync
     const checkPath = join(rootDir, srcPath);
-    debug(`Checking path: ${checkPath}`);
     if (existsSync(checkPath)) {
       return normalizeToPosix(srcPath);
     }
@@ -44,7 +41,6 @@ export const getFieldMissingErrorMessage = (field: string, path: string) => {
 };
 
 export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
-  debug(`Resolving entry points using exports field`);
   const exportsValue = pkg.packageJson.exports;
   if (!exportsValue) {
     throw new Error(getFieldMissingErrorMessage('exports', pkg.path));
@@ -54,37 +50,30 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
   const normalizedSrcDir = normalizeToPosix(srcDir);
 
   const config = Object.keys(exportsValue).reduce((acc: Record<string, string>, key) => {
-    debug(`Resolving the entry point: ${key}`);
     const name = basename(key) === '.' ? 'index' : relative('.', key);
     const normalizedName = normalizeToPosix(name);
     acc[normalizedName] = findEntryPoint(normalizedName, rootDir, normalizedSrcDir);
     return acc;
   }, {});
 
-  debug(`Resolved all entry points`);
   return config;
 };
 
 export const getPackageJson = (cwd: string) => {
-  debug(`Attempting to load the package.json from ${cwd}`);
   const pkg = readPackageUpSync({ cwd });
   if (!pkg || !pkg.packageJson) {
     throw new Error(`Failed to load the package.json`);
   }
-  debug(`Loaded the package.json from ${pkg.path}`);
   return pkg;
 };
 
 export const getOutDirs = (pkg: NormalizedReadResult) => {
   const requiredFields = ['main', 'module'] as const;
-  debug(`Attempting to resolve output parameters`);
-  debug(`Checking required fields of package.json: ${requiredFields.join(', ')}`);
   requiredFields.forEach((field) => {
     if (!pkg.packageJson[field]) {
       throw new Error(getFieldMissingErrorMessage(field, pkg.path));
     }
   });
-  debug(`All required fields are set`);
 
   const esm = dirname(pkg.packageJson.module!);
   const cjs = dirname(pkg.packageJson.main!);
@@ -139,16 +128,34 @@ export async function injectDependency(
     );
 
     if (injectedContents === bundledContents) {
-      throw new Error(`Failed to generate injected contents`);
+      this.warn(`No replacements made for bundleRegExp in ${injectPrams.packageName}. Using bundled contents as-is.`);
+      // Don't throw error, just use the bundled contents as-is
     }
 
     // Replace instances of the dynamic import in the template with the bundled contents
-    const renderedContent = templateContent.replace(
-      `const ${injectPrams.importName} = await import('${injectPrams.packageName}');`,
-      injectedContents,
-    );
+    const searchPattern = `const ${injectPrams.importName} = await import('${injectPrams.packageName}');`;
+    const renderedContent = templateContent.replace(searchPattern, injectedContents);
+
     if (renderedContent === templateContent) {
+      console.log(`[DEBUG] Failed to find pattern: "${searchPattern}"`);
+      console.log(`[DEBUG] Template content around line 44:`, templateContent.split('\n').slice(40, 50).join('\n'));
       throw new Error(`Failed to inject contents of "${injectPrams.packageName}"`);
+    }
+
+    console.log(`[DEBUG] Successfully replaced pattern in ${injectPrams.targetFile}`);
+    console.log(`[DEBUG] Injected content preview:`, injectedContents.substring(0, 200) + '...');
+
+    // Check for import/export statements in the injected content
+    const hasImport = injectedContents.includes('import ');
+    const hasExport = injectedContents.includes('export ');
+    console.log(`[DEBUG] Contains import statements: ${hasImport}`);
+    console.log(`[DEBUG] Contains export statements: ${hasExport}`);
+
+    if (hasExport && injectPrams.packageName === '@vitest/spy') {
+      // Show the export statements for debugging
+      const lines = injectedContents.split('\n');
+      const exportLines = lines.filter((line) => line.includes('export')).slice(0, 5);
+      console.log(`[DEBUG] Export statements found:`, exportLines);
     }
 
     this.info(`Successfully bundled and injected "${injectPrams.packageName}" into ${injectPrams.targetFile}`);

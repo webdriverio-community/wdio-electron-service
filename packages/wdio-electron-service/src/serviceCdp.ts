@@ -1,4 +1,4 @@
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { getActiveWindowHandle, getPuppeteer } from './window.js';

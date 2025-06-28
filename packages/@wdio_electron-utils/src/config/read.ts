@@ -1,8 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
+import { pathToFileURL } from 'node:url';
 
 export async function readConfig(configFile: string, projectDir: string) {
   const configFilePath = path.join(projectDir, configFile);
@@ -19,9 +17,25 @@ export async function readConfig(configFile: string, projectDir: string) {
   let result: unknown;
 
   if (extRegex.js.test(ext)) {
-    const { tsImport } = await import('tsx/esm/api');
     const configFilePathUrl = pathToFileURL(configFilePath).toString();
-    const readResult = (await tsImport(configFilePathUrl, __filename)).default;
+    let imported: any;
+
+    // Use tsx for TypeScript files, native import for JavaScript files
+    if (ext.includes('ts')) {
+      // For TypeScript files (.ts, .cts, .mts), use tsx to handle transpilation
+      const tsxApi = (await import('tsx/esm/api' as any)) as any;
+      imported = await tsxApi.tsImport(configFilePathUrl, import.meta.url);
+    } else {
+      // For JavaScript files, use native dynamic import
+      imported = await import(configFilePathUrl);
+    }
+
+    // Handle different export patterns
+    let readResult = imported.default;
+    if (!readResult && typeof imported === 'object') {
+      // For CJS files that use module.exports, the entire export might be the config
+      readResult = imported;
+    }
 
     if (typeof readResult === 'function') {
       result = readResult();

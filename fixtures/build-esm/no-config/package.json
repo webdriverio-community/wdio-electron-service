@@ -1,0 +1,20 @@
+{
+  "name": "fixture-bundler-esm_no-config",
+  "version": "1.0.0",
+  "description": "ESM package using bundler defaults (no config)",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "wdio-bundler build"
+  },
+  "dependencies": {
+    "electron": "^29.4.1"
+  }
+}

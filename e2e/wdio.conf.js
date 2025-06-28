@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const exampleDir = process.env.EXAMPLE_DIR || 'forge-esm';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const appDir = path.join(__dirname, '..', 'apps', exampleDir);
+const appDir = path.join(__dirname, '..', 'fixtures', 'e2e-apps', exampleDir);
 const packageJsonPath = path.join(appDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
 

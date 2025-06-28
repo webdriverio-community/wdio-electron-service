@@ -48,23 +48,23 @@ const forgeConfig = {
 } as const;
 
 describe('getAppBuildInfo()', () => {
-  describe.each(['esm', 'cjs'])('%s', (type) => {
+  describe('package scenarios', () => {
     it('should throw an error when builder is detected but has no config', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILDER_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should throw an error when forge is detected but has no config', async () => {
-      const pkg = await getFixturePackageJson(type, 'forge-dependency-js-config');
+      const pkg = await getFixturePackageJson('config-formats', 'forge-dependency-js-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(FORGE_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should return builder config', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
 
       const result = await getAppBuildInfo(pkg);
@@ -73,7 +73,7 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should return forge config', async () => {
-      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'forge-dependency-inline-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
       const result = await getAppBuildInfo(pkg);
 
@@ -81,7 +81,7 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should return forge config when multiple builder tool was detected', async () => {
-      const pkg = await getFixturePackageJson(type, 'multiple-build-tools-config');
+      const pkg = await getFixturePackageJson('package-scenarios', 'multiple-build-tools-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
       const result = await getAppBuildInfo(pkg);
@@ -93,7 +93,7 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should throw an error when no build tools are found', async () => {
-      const pkg = await getFixturePackageJson(type, 'no-build-tool');
+      const pkg = await getFixturePackageJson('package-scenarios', 'no-build-tool');
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILD_TOOL_DETECTION_ERROR);
     });

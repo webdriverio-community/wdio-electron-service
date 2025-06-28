@@ -1,8 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "types": [],
-    "typeRoots": ["./node_modules", "./node_modules/@types", "../../node_modules/@types", "../../@types"],
+    "typeRoots": ["./node_modules", "./node_modules/@types", "../../../@types"],
     "outDir": "dist"
   },
   "exclude": ["node_modules"],
