@@ -181,11 +181,16 @@ export class ConfigLoader {
    */
   private async loadFromTypeScript(filePath: string): Promise<Partial<BundlerConfig>> {
     const { spawn } = await import('node:child_process');
+    const { pathToFileURL } = await import('node:url');
 
     try {
+      // Convert file path to file URL for cross-platform compatibility
+      const fileUrl = pathToFileURL(filePath).href;
+      const tempJsonPath = filePath + '.temp.json';
+
       // Use tsx to execute the TypeScript file and serialize the config preserving functions/regex
       const tsxScript = `
-import config from '${filePath}';
+import config from '${fileUrl}';
 import { writeFileSync } from 'fs';
 
 // Serialize config preserving functions and regex
@@ -210,11 +215,11 @@ const serialize = (obj) => {
 };
 
 const serializedConfig = serialize(config);
-writeFileSync('${filePath}.temp.json', JSON.stringify(serializedConfig, null, 2));
+writeFileSync('${tempJsonPath.replace(/\\/g, '\\\\')}', JSON.stringify(serializedConfig, null, 2));
       `;
 
       const tempScript = `${filePath}.temp.mjs`;
-      const tempJson = `${filePath}.temp.json`;
+      const tempJson = tempJsonPath;
       const { writeFileSync, unlinkSync, readFileSync } = await import('node:fs');
 
       writeFileSync(tempScript, tsxScript);
@@ -222,9 +227,10 @@ writeFileSync('${filePath}.temp.json', JSON.stringify(serializedConfig, null, 2)
       try {
         // Execute tsx to generate the JSON file
         await new Promise<void>((resolve, reject) => {
-          const child = spawn('npx', ['tsx', tempScript], {
+          const child = spawn('pnpx', ['tsx', tempScript], {
             stdio: ['pipe', 'pipe', 'pipe'],
             cwd: this.cwd,
+            shell: true, // Use shell to resolve pnpx on Windows
           });
 
           let stderr = '';
