@@ -1,7 +1,7 @@
 import { print, parse } from 'recast';
 import * as babelParser from '@babel/parser';
 import { ExecuteOpts } from '@wdio/electron-types';
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 import { ElectronCdpBridge } from '../bridge';
 
 import mockStore from '../mockStore.js';

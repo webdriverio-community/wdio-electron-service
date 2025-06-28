@@ -1,5 +1,5 @@
 import os from 'node:os';
-import log from '@wdio/electron-utils/log';
+import { log } from '@wdio/electron-utils';
 import { CdpBridge } from '@wdio/cdp-bridge';
 import { SevereServiceError } from 'webdriverio';
 
