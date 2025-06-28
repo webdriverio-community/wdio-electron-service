@@ -1,6 +1,6 @@
 import { log } from '@wdio/electron-utils';
-import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
-import type { Capabilities, Services } from '@wdio/types';
+import type { ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
+import type { Services } from '@wdio/types';
 
 import mockStore from './mockStore.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from './window.js';
