@@ -15,8 +15,8 @@ let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;
 let options: ElectronServiceOptions;
 
-function getFixtureDir(moduleType: string, fixtureName: string) {
-  return path.join(process.cwd(), '..', '..', 'fixtures', moduleType, fixtureName);
+function getFixtureDir(fixtureType: string, fixtureName: string) {
+  return path.join(process.cwd(), '..', '..', 'fixtures', fixtureType, fixtureName);
 }
 
 vi.mock('node:fs/promises', () => ({
@@ -103,14 +103,14 @@ describe('Electron Launch Service', () => {
       );
     });
 
-    describe.each([['esm'], ['cjs']])('%s', (type) => {
+    describe('package scenarios', () => {
       it('should throw an error when the local Electron version is older than v26 and Chromedriver is not configured manually', async () => {
         instance = new LaunchService(
           options,
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'old-electron'),
+            rootDir: getFixtureDir('package-scenarios', 'old-electron'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -129,7 +129,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'old-electron'),
+            rootDir: getFixtureDir('package-scenarios', 'old-electron'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -164,7 +164,7 @@ describe('Electron Launch Service', () => {
           options,
           [] as never,
           {
-            rootDir: getFixtureDir(type, 'no-build-tool'),
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
             services: [['electron', options]],
           } as Options.Testrunner,
         );
@@ -189,7 +189,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'no-build-tool'),
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -215,7 +215,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'forge-dependency-inline-config'),
+            rootDir: getFixtureDir('config-formats', 'forge-dependency-inline-config'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -245,7 +245,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'builder-dependency-inline-config'),
+            rootDir: getFixtureDir('config-formats', 'builder-dependency-inline-config'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -315,7 +315,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'electron-in-dependencies'),
+            rootDir: getFixtureDir('package-scenarios', 'electron-in-dependencies'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -343,7 +343,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: path.join(getFixtureDir(type, 'electron-in-dependencies'), 'subpackage', 'subdir'),
+            rootDir: path.join(getFixtureDir('package-scenarios', 'electron-in-dependencies'), 'subpackage', 'subdir'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -371,7 +371,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'electron-in-dev-dependencies'),
+            rootDir: getFixtureDir('package-scenarios', 'electron-in-dev-dependencies'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -399,7 +399,11 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: path.join(getFixtureDir(type, 'electron-in-dev-dependencies'), 'subpackage', 'subdir'),
+            rootDir: path.join(
+              getFixtureDir('package-scenarios', 'electron-in-dev-dependencies'),
+              'subpackage',
+              'subdir',
+            ),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -427,7 +431,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'no-electron'),
+            rootDir: getFixtureDir('package-scenarios', 'no-electron'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -491,7 +495,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'forge-dependency-inline-config'),
+            rootDir: getFixtureDir('config-formats', 'forge-dependency-inline-config'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -527,7 +531,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'builder-dependency-inline-config'),
+            rootDir: getFixtureDir('config-formats', 'builder-dependency-inline-config'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -558,7 +562,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'no-build-tool'),
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
@@ -573,7 +577,7 @@ describe('Electron Launch Service', () => {
           'browserVersion': '116.0.5845.190',
           'goog:chromeOptions': {
             args: ['--app=path/to/main.bundle.js'],
-            binary: path.join(getFixtureDir(type, 'no-build-tool'), 'node_modules', '.bin', 'electron'),
+            binary: path.join(getFixtureDir('package-scenarios', 'no-build-tool'), 'node_modules', '.bin', 'electron'),
             windowTypes: ['app', 'webview'],
           },
           'wdio:electronServiceOptions': {},
@@ -587,7 +591,7 @@ describe('Electron Launch Service', () => {
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'no-electron'),
+            rootDir: getFixtureDir('package-scenarios', 'no-electron'),
           } as Options.Testrunner,
         );
         const capabilities: WebdriverIO.Capabilities[] = [
