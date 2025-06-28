@@ -133,3 +133,6 @@ packages/wdio-electron-service/src/cjs/preload.ts
 # Tool caches
 .eslintcache
 # Prettier cache is in node_modules/.cache/prettier
+
+# fixture build files
+fixtures/**/rollup.config.js
