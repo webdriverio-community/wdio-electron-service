@@ -5,7 +5,8 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
     "types": ["node", "electron-to-chromium", "vitest/jsdom"],
     "typeRoots": ["./node_modules", "./node_modules/@types", "../../@types"]
   }
