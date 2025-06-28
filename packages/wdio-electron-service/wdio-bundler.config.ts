@@ -16,7 +16,7 @@ const config: BundlerConfig = {
       type: 'injectDependency',
       options: {
         packageName: 'fast-copy',
-        targetFile: 'src/serviceCdp.ts',
+        targetFile: 'src/service.ts',
         bundleRegExp: /export.*$/m,
         importName: '{ default: copy }',
         bundleReplace: (importName) => `const ${importName} = { default: index };`,

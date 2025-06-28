@@ -1,12 +1,14 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
-import type { ElectronMock } from '@wdio/electron-types';
+import type { ElectronMock, BrowserExtension } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
 import * as commands from '../src/commands/index.js';
 import mockStore from '../src/mockStore.js';
-import ElectronWorkerService from '../src/service.js';
+import ElectronWorkerService, { waitUntilWindowAvailable } from '../src/service.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
-import { waitUntilWindowAvailable } from '../src/serviceCdp.js';
+import { execute } from '../src/commands/executeCdp.js';
+
+vi.mock('@wdio/electron-utils/log');
 
 vi.mock('../src/window.js', () => {
   return {
@@ -41,15 +43,31 @@ vi.mock('../src/commands/executeCdp', () => {
 });
 
 vi.mock('../src/bridge', () => {
-  return {};
+  const ElectronCdpBridge = vi.fn();
+  ElectronCdpBridge.prototype.connect = vi.fn();
+  ElectronCdpBridge.prototype.send = vi.fn();
+  ElectronCdpBridge.prototype.on = vi.fn();
+  return {
+    getDebuggerEndpoint: vi.fn(),
+    ElectronCdpBridge,
+  };
 });
 
-vi.mock('../src/serviceCdp', () => {
+vi.mock('../src/mockStore', () => {
   return {
+    default: {
+      getMocks: vi.fn().mockReturnValue([]),
+      setMock: vi.fn(),
+    },
+  };
+});
+
+// Mock waitUntilWindowAvailable function specifically
+vi.mock('../src/service', async () => {
+  const actual = await vi.importActual('../src/service.js');
+  return {
+    ...actual,
     waitUntilWindowAvailable: vi.fn(),
-    before: vi.fn().mockImplementation(function (this: any, _capabilities: any, instance: any) {
-      this.browser = instance;
-    }),
   };
 });
 
@@ -68,6 +86,7 @@ beforeEach(() => {
 
 describe('Electron Worker Service', () => {
   let browser: WebdriverIO.Browser;
+
   describe('before()', () => {
     beforeEach(() => {
       vi.clearAllMocks();
@@ -81,7 +100,7 @@ describe('Electron Worker Service', () => {
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
         getPuppeteer: vi.fn(),
-        electron: {},
+        electron: {}, // Let the service initialize this
       } as unknown as WebdriverIO.Browser;
     });
 
@@ -93,9 +112,117 @@ describe('Electron Worker Service', () => {
 
       expect(beforeSpy).toHaveBeenCalled();
     });
+
+    it('should add electron commands to the browser object', async () => {
+      instance = new ElectronWorkerService({}, {});
+
+      await instance.before({}, [], browser);
+
+      const serviceApi = browser.electron as BrowserExtension['electron'];
+      expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.execute).toEqual(expect.any(Function));
+      expect(serviceApi.mock).toEqual(expect.any(Function));
+      expect(serviceApi.mockAll).toEqual(expect.any(Function));
+      expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+    });
+
+    it('should copy original api', async () => {
+      instance = new ElectronWorkerService({}, {});
+
+      await instance.before({}, [], browser);
+
+      // emulate the call to copyOriginalApi
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const internalCopyOriginalApi = vi.mocked(execute).mock.calls[0][2] as any;
+      const dummyElectron = {
+        dialog: {
+          showOpenDialog: vi.fn(),
+        },
+      };
+      await internalCopyOriginalApi(dummyElectron);
+
+      // check if the originalApi is copied from the electron object
+      expect(globalThis.originalApi).toMatchObject(dummyElectron);
+    });
+
+    describe('when multiremote', () => {
+      it('should add electron commands to the browser object', async () => {
+        instance = new ElectronWorkerService({}, {});
+        browser['requestedCapabilities'] = {
+          alwaysMatch: {
+            'browserName': 'electron',
+            'wdio:electronServiceOptions': {},
+          },
+        };
+
+        const rootBrowser = {
+          instances: ['electron'],
+          getInstance: (name: string) => (name === 'electron' ? browser : undefined),
+          execute: vi.fn().mockResolvedValue(true),
+          isMultiremote: true,
+        } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+        await instance.before({}, [], rootBrowser);
+
+        // expect electron is set to root browser
+        const rootServiceApi = rootBrowser.electron;
+        expect(rootServiceApi.clearAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.execute).toEqual(expect.any(Function));
+        expect(rootServiceApi.mock).toEqual(expect.any(Function));
+        expect(rootServiceApi.mockAll).toEqual(expect.any(Function));
+        expect(rootServiceApi.resetAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+        // expect electron is set to electron browser
+        const serviceApi = browser.electron;
+        expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
+        expect(serviceApi.execute).toEqual(expect.any(Function));
+        expect(serviceApi.mock).toEqual(expect.any(Function));
+        expect(serviceApi.mockAll).toEqual(expect.any(Function));
+        expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
+        expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+      });
+
+      it('should continue with non-electron capabilities', async () => {
+        instance = new ElectronWorkerService({}, {});
+
+        browser['requestedCapabilities'] = {
+          browserName: 'chrome',
+        };
+
+        const rootBrowser = {
+          instances: ['electron'],
+          getInstance: (name: string) => (name === 'electron' ? browser : undefined),
+          execute: vi.fn().mockResolvedValue(true),
+          isMultiremote: true,
+        } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+        await instance.before({}, [], rootBrowser);
+
+        // expect electron is not set to electron browser
+        const serviceApi = browser.electron;
+
+        expect(serviceApi).toStrictEqual({});
+      });
+    });
   });
 
   describe('beforeTest()', () => {
+    beforeEach(() => {
+      browser = {
+        sessionId: 'dummyId',
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {},
+      } as unknown as WebdriverIO.Browser;
+    });
+
     it.each([
       [`clearMocks`, commands.clearAllMocks],
       [`resetMocks`, commands.resetAllMocks],
@@ -112,6 +239,18 @@ describe('Electron Worker Service', () => {
   describe('beforeCommand()', () => {
     beforeEach(() => {
       vi.mocked(ensureActiveWindowFocus).mockClear();
+
+      browser = {
+        sessionId: 'dummyId',
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {},
+      } as unknown as WebdriverIO.Browser;
     });
 
     it('should call `ensureActiveWindowFocus` for all commands', async () => {
@@ -140,13 +279,27 @@ describe('Electron Worker Service', () => {
   });
 
   describe('afterCommand()', () => {
+    beforeEach(() => {
+      browser = {
+        sessionId: 'dummyId',
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {},
+      } as unknown as WebdriverIO.Browser;
+    });
+
     it('should call mock.update for mocks when command is user action command', async () => {
       const mockInstance = {
         update: vi.fn(),
         getMockName: vi.fn().mockReturnValue('test-mock'),
       } as unknown as ElectronMock;
 
-      mockStore.setMock(mockInstance);
+      vi.mocked(mockStore.getMocks).mockReturnValue([['test-id', mockInstance]]);
 
       instance = new ElectronWorkerService({}, {});
       await instance.before({}, [], browser);
@@ -161,7 +314,7 @@ describe('Electron Worker Service', () => {
         getMockName: vi.fn().mockReturnValue('test-mock'),
       } as unknown as ElectronMock;
 
-      mockStore.setMock(mockInstance);
+      vi.mocked(mockStore.getMocks).mockReturnValue([['test-id', mockInstance]]);
 
       instance = new ElectronWorkerService({}, {});
       await instance.before({}, [], browser);
@@ -176,7 +329,7 @@ describe('Electron Worker Service', () => {
         getMockName: vi.fn().mockReturnValue('test-mock'),
       } as unknown as ElectronMock;
 
-      mockStore.setMock(mockInstance);
+      vi.mocked(mockStore.getMocks).mockReturnValue([['test-id', mockInstance]]);
 
       instance = new ElectronWorkerService({}, {});
       await instance.before({}, [], browser);
@@ -189,6 +342,18 @@ describe('Electron Worker Service', () => {
   describe('after()', () => {
     it('should call clearPuppeteerSessions', async () => {
       instance = new ElectronWorkerService({}, {});
+      browser = {
+        sessionId: 'dummyId',
+        waitUntil: vi.fn().mockImplementation(async (condition) => {
+          await condition();
+        }),
+        execute: vi.fn().mockImplementation((fn) => fn()),
+        getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
+        switchToWindow: vi.fn(),
+        getPuppeteer: vi.fn(),
+        electron: {},
+      } as unknown as WebdriverIO.Browser;
+
       await instance.before({}, [], browser);
       await instance.after();
 
