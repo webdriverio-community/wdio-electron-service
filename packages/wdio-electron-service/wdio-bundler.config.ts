@@ -7,9 +7,9 @@ const config: BundlerConfig = {
       options: {
         packageName: '@vitest/spy',
         targetFile: 'src/mock.ts',
-        bundleRegExp: /export/,
+        bundleRegExp: /export\s*\{\s*([^}]+)\s*\}\s*;/,
         importName: 'spy',
-        bundleReplace: (importName) => `const ${importName} =`,
+        bundleReplace: (importName) => `const ${importName} = { $1 };`,
       },
     },
     {
