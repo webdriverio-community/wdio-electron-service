@@ -133,7 +133,7 @@ Read the [development doc](./docs/development.md) if you are interested in contr
 
 ## Example Integrations
 
-Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./apps/) and [E2Es](./e2e/) directories in this repository.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./fixtures/e2e-apps/) and [E2Es](./e2e/) directories in this repository.
 
 ## Support
 
