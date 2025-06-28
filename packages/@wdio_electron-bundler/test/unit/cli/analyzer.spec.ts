@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { normalize } from 'node:path';
 import { PackageAnalyzer } from '../../../src/cli/analyzer.js';
 import { Logger } from '../../../src/cli/logger.js';
 import type { BundlerConfig, PackageInfo } from '../../../src/cli/types.js';
@@ -59,8 +60,9 @@ describe('PackageAnalyzer', () => {
       const packageRoot = '/test/package';
 
       mockExistsSync.mockImplementation((path: string) => {
-        if (path.endsWith('package.json')) return true;
-        if (path.endsWith('src/index.ts')) return true;
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
         return false;
       });
 
@@ -82,9 +84,7 @@ describe('PackageAnalyzer', () => {
     it('should throw error when package.json does not exist', async () => {
       mockExistsSync.mockReturnValue(false);
 
-      await expect(analyzer.analyzePackage('/test/package')).rejects.toThrow(
-        'package.json not found at /test/package/package.json',
-      );
+      await expect(analyzer.analyzePackage('/test/package')).rejects.toThrow('package.json not found at');
     });
 
     it('should throw error when package.json has no name', async () => {
@@ -115,9 +115,10 @@ describe('PackageAnalyzer', () => {
       };
 
       mockExistsSync.mockImplementation((path: string) => {
-        if (path.endsWith('package.json')) return true;
-        if (path.endsWith('src/index.ts')) return true;
-        if (path.endsWith('src/utils.ts')) return true;
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
+        if (normalizedPath.endsWith(normalize('src/utils.ts'))) return true;
         return false;
       });
 
@@ -133,8 +134,9 @@ describe('PackageAnalyzer', () => {
 
     it('should handle different file extensions', async () => {
       mockExistsSync.mockImplementation((path: string) => {
-        if (path.endsWith('package.json')) return true;
-        if (path.endsWith('src/index.mts')) return true; // .mts instead of .ts
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.mts'))) return true; // .mts instead of .ts
         return false;
       });
 
@@ -147,8 +149,9 @@ describe('PackageAnalyzer', () => {
 
     it('should handle index files in subdirectories', async () => {
       mockExistsSync.mockImplementation((path: string) => {
-        if (path.endsWith('package.json')) return true;
-        if (path.endsWith('src/index/index.ts')) return true;
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index/index.ts'))) return true;
         return false;
       });
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { normalize } from 'node:path';
 import { RollupExecutor } from '../../../src/cli/executor.js';
 import { Logger } from '../../../src/cli/logger.js';
 
@@ -199,7 +200,7 @@ describe('RollupExecutor', () => {
 
       expect(mockRollup).toHaveBeenCalledWith(
         expect.objectContaining({
-          input: '/test/package/src/index.ts', // Should be resolved as string
+          input: expect.stringContaining(normalize('src/index.ts')), // Should be resolved as string
         }),
       );
     });
