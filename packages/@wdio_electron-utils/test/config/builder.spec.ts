@@ -34,7 +34,7 @@ const expectedCandidates = [
 ];
 
 describe('getConfig', () => {
-  describe.each(['esm', 'cjs'])('%s', (type) => {
+  describe('config formats', () => {
     it.each([
       ['CJS config', 'builder-dependency-cjs-config'],
       ['CTS config', 'builder-dependency-cts-config'],
@@ -49,7 +49,7 @@ describe('getConfig', () => {
       ['YAML(.yaml) config', 'builder-dependency-yaml-config'],
       ['YAML(.yml) config', 'builder-dependency-yml-config'],
     ])('%s', async (_title, scenario) => {
-      const pkg = await getFixturePackageJson(type, scenario);
+      const pkg = await getFixturePackageJson('config-formats', scenario);
       const config = await getConfig(pkg);
       expect(config).toStrictEqual({
         appName: scenario,
@@ -63,7 +63,7 @@ describe('getConfig', () => {
 
     it('should return undefined if no config file is found', async () => {
       const spy = vi.spyOn(fs, 'access');
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-no-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-no-config');
       const config = await getConfig(pkg);
       const checkedFiles = spy.mock.calls.map(([file]) => path.basename(file.toString()));
 
@@ -72,14 +72,14 @@ describe('getConfig', () => {
     });
 
     it('should return the expected config when productName is set in the package.json', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-inline-config');
       const config = await getConfig(pkg);
 
       expect(config?.appName).toBe('builder-dependency-inline-config-product-name');
     });
 
     it('should return the expected config when productName is set in the builderConfig', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-inline-config');
       delete pkg.packageJson.productName;
       const config = await getConfig(pkg);
 
@@ -87,16 +87,16 @@ describe('getConfig', () => {
     });
 
     it('should return the expected config when name is set in the package.json', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-inline-config');
       delete pkg.packageJson.productName;
       delete pkg.packageJson.build.productName;
       const config = await getConfig(pkg);
 
-      expect(config?.appName).toBe(`fixture-${type}_builder-dependency-inline-config`);
+      expect(config?.appName).toBe('fixture-config-formats_builder-dependency-inline-config');
     });
 
     it('should throw the error when could not detect the appName', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-inline-config');
       delete pkg.packageJson.productName;
       delete pkg.packageJson.build.productName;
       delete pkg.packageJson.name;

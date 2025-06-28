@@ -6,7 +6,7 @@ import { findPnpmCatalogVersion } from '../src/pnpm.js';
 import { PKG_NAME_ELECTRON, PNPM_WORKSPACE_YAML } from '../src/constants.js';
 
 function getPnpmFixtureDirPath(subPath?: string[]) {
-  const fixtureDir = path.resolve(process.cwd(), '..', '..', 'fixtures', 'pnpm');
+  const fixtureDir = path.resolve(process.cwd(), '..', '..', 'fixtures', 'package-scenarios', 'pnpm-workspace');
   if (subPath) {
     return path.join(fixtureDir, ...subPath);
   }
