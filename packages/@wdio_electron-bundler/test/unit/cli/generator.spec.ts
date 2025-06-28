@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfigGenerator } from '../../../src/cli/generator.js';
 import { Logger } from '../../../src/cli/logger.js';
 import type { BundlerConfig } from '../../../src/cli/types.js';
+import { normalize } from 'node:path';
 
 // Mock fs modules and PackageAnalyzer
 vi.mock('node:fs', () => ({
@@ -34,9 +35,11 @@ describe('ConfigGenerator', () => {
     vi.clearAllMocks();
 
     // Setup basic mocks for package analysis
+    // Use normalize to handle cross-platform path separators
     mockExistsSync.mockImplementation((path: string) => {
-      if (path.endsWith('package.json')) return true;
-      if (path.endsWith('src/index.ts')) return true;
+      const normalizedPath = normalize(path);
+      if (normalizedPath.endsWith('package.json')) return true;
+      if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
       return false;
     });
 
