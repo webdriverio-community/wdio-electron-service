@@ -84,11 +84,22 @@ export class RollupExecutor {
     // Add plugins based on our config spec
     for (const pluginSpec of configSpec.plugins) {
       if (pluginSpec.name === 'typescript') {
+        // Import TypeScript compiler from our bundler's node_modules
+        const typescript = await import('typescript');
         plugins.push(
           typescriptPlugin({
             compilerOptions: {
-              outDir: resolve(targetCwd, configSpec.output.dir),
+              target: 'ES2020',
+              module: 'ESNext',
+              moduleResolution: 'Node',
+              allowSyntheticDefaultImports: true,
+              esModuleInterop: true,
+              skipLibCheck: true,
+              noEmitOnError: false,
             },
+            typescript: typescript.default, // Pass the TypeScript compiler explicitly
+            include: ['**/*.ts', '**/*.tsx'],
+            exclude: ['node_modules', '**/*.d.ts'],
           }),
         );
       } else if (pluginSpec.name === 'node-externals') {

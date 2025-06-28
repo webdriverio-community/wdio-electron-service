@@ -3,8 +3,9 @@
   "compilerOptions": {
     "noEmit": true,
     "baseUrl": ".",
-    "outDir": "../dist"
+    "outDir": "../dist",
+    "types": ["vitest/globals"]
   },
-  "include": ["./*.ts", "./*.spec.ts"],
+  "include": ["./**/*.ts", "./**/*.spec.ts"],
   "exclude": []
 }

@@ -14,7 +14,7 @@ import {
   warnToErrorPlugin,
   MODULE_TYPE,
   type SourceCodeType,
-} from '../src/plugins';
+} from '../../src/plugins.js';
 
 type Transform = (this: TransformPluginContext, code: string, id: string) => Promise<void>;
 type RenderChunk = (this: PluginContext, code: string, chunk: RenderedChunk) => Promise<void>;
@@ -23,8 +23,8 @@ type GenerateBundle = (this: PluginContext, options: NormalizedOutputOptions) =>
 
 type OnLog = (this: MinimalPluginContext, level: LogLevel, log: RollupLog) => void;
 
-vi.mock('../src/utils', async () => {
-  const actualUtils = await vi.importActual<typeof import('../src/utils')>('../src/utils');
+vi.mock('../../src/utils', async () => {
+  const actualUtils = await vi.importActual<typeof import('../../src/utils')>('../../src/utils');
   let counter = 0;
   return {
     ...actualUtils,
@@ -36,10 +36,14 @@ vi.mock('../src/utils', async () => {
 
 describe('Rollup Plugins', () => {
   describe('emitPackageJsonPlugin()', () => {
-    const context = {
-      debug: vi.fn(),
-      emitFile: vi.fn(),
-    } as unknown as PluginContext;
+    let context: PluginContext;
+
+    beforeEach(() => {
+      context = {
+        debug: vi.fn(),
+        emitFile: vi.fn(),
+      } as unknown as PluginContext;
+    });
 
     it.each([
       [MODULE_TYPE.ESM, 'module'],
@@ -67,10 +71,14 @@ describe('Rollup Plugins', () => {
   });
 
   describe('warnToErrorPlugin()', () => {
-    const context = {
-      warn: vi.fn(),
-      error: vi.fn(),
-    } as unknown as PluginContext;
+    let context: PluginContext;
+
+    beforeEach(() => {
+      context = {
+        warn: vi.fn(),
+        error: vi.fn(),
+      } as unknown as PluginContext;
+    });
 
     it('should escalate warnings to errors', async () => {
       const plugin = warnToErrorPlugin();
@@ -81,11 +89,15 @@ describe('Rollup Plugins', () => {
   });
 
   describe('injectDependencyPlugin()', () => {
-    const context = {
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-    } as unknown as TransformPluginContext;
+    let context: TransformPluginContext;
+
+    beforeEach(() => {
+      context = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      } as unknown as TransformPluginContext;
+    });
 
     it('should successfully inject dependencies', async () => {
       const plugin = injectDependencyPlugin([
@@ -139,10 +151,14 @@ describe('Rollup Plugins', () => {
   });
 
   describe('codeReplacePlugin()', () => {
-    const context = {
-      info: vi.fn(),
-      warn: vi.fn(),
-    } as unknown as PluginContext;
+    let context: PluginContext;
+
+    beforeEach(() => {
+      context = {
+        info: vi.fn(),
+        warn: vi.fn(),
+      } as unknown as PluginContext;
+    });
 
     it('should successfully replace multiple code patterns', async () => {
       const plugin = codeReplacePlugin([

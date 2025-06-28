@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
-import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../src/utils';
-import { getFixturePackagePath } from './utils';
+import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../../src/utils.js';
+import { getFixturePackagePath } from '../helpers/fixture-utils.js';
 import { PluginContext } from 'rollup';
 import { existsSync, PathLike } from 'node:fs';
 
@@ -28,7 +28,7 @@ describe('Utility Functions', () => {
         );
       });
 
-      const pkgJsonPath = getFixturePackagePath('esm', 'build-test-esm');
+      const pkgJsonPath = getFixturePackagePath('build-esm', 'build-test-esm');
       const exports = {
         '.': './dist/loader.js',
         './mod1': './dist/mod1.js',
@@ -301,7 +301,7 @@ describe('Utility Functions', () => {
     });
 
     it('should successfully inject dependency code', async () => {
-      const fixture = getFixturePackagePath('esm', 'build-success-esm');
+      const fixture = getFixturePackagePath('build-esm', 'build-test-esm');
       const cwd = dirname(fixture);
       const context = {
         resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
@@ -343,7 +343,7 @@ describe('Utility Functions', () => {
     });
 
     it('should error when injected contents cannot be generated', async () => {
-      const fixture = getFixturePackagePath('esm', 'build-success-esm');
+      const fixture = getFixturePackagePath('build-esm', 'build-test-esm');
       const cwd = dirname(fixture);
       const context = {
         resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),
@@ -365,7 +365,7 @@ describe('Utility Functions', () => {
     });
 
     it('should error when rendered content cannot be generated', async () => {
-      const fixture = getFixturePackagePath('esm', 'build-success-esm');
+      const fixture = getFixturePackagePath('build-esm', 'build-test-esm');
       const cwd = dirname(fixture);
       const context = {
         resolve: vi.fn().mockResolvedValue({ id: `${cwd}/src/test.js` }),

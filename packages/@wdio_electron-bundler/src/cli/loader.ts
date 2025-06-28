@@ -183,6 +183,9 @@ export class ConfigLoader {
     const { spawn } = await import('node:child_process');
 
     try {
+      // Get the bundler package path to add to module resolution
+      const bundlerModulesPath = resolve(import.meta.url.replace('file://', ''), '..', '..', '..', 'node_modules');
+
       // Use tsx to run the TypeScript file and output JSON
       const tsxScript = `
 import config from '${filePath}';
@@ -199,6 +202,10 @@ console.log(JSON.stringify(config, null, 2));
           const child = spawn('npx', ['tsx', tempScript], {
             stdio: ['pipe', 'pipe', 'pipe'],
             cwd: this.cwd,
+            env: {
+              ...process.env,
+              NODE_PATH: `${bundlerModulesPath}:${process.env.NODE_PATH || ''}`,
+            },
           });
 
           let stdout = '';
@@ -216,27 +223,24 @@ console.log(JSON.stringify(config, null, 2));
             if (code === 0) {
               resolve({ stdout, stderr });
             } else {
-              reject(new Error(`tsx exited with code ${code}: ${stderr}`));
+              reject(new Error(`tsx failed with code ${code}: ${stderr}`));
             }
           });
 
           child.on('error', reject);
         });
 
+        unlinkSync(tempScript);
+
         const config = JSON.parse(result.stdout.trim());
-
-        if (typeof config !== 'object' || config === null) {
-          throw new Error('Config file must export an object');
-        }
-
         return config;
-      } finally {
-        // Clean up temp file
+      } catch (error) {
         try {
           unlinkSync(tempScript);
         } catch {
           // Ignore cleanup errors
         }
+        throw error;
       }
     } catch (error) {
       throw new Error(`Failed to load TypeScript config: ${(error as Error).message}`);

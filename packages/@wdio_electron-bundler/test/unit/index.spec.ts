@@ -1,13 +1,13 @@
 import { dirname } from 'node:path';
 
-import { readPackageJson, typescript } from '../src/index';
-import { getFixturePackagePath } from './utils';
+import { readPackageJson, typescript } from '../../src/index.js';
+import { getFixturePackagePath } from '../helpers/fixture-utils.js';
 import typescriptPlugin from '@rollup/plugin-typescript';
 
 describe('Bundler Utilities', () => {
   describe('readPackageJson()', () => {
     it('should return input configuration and output directories', () => {
-      const fixture = getFixturePackagePath('esm', 'build-test-esm');
+      const fixture = getFixturePackagePath('build-esm', 'build-test-esm');
       const cwd = dirname(fixture);
       const result = readPackageJson(cwd);
 

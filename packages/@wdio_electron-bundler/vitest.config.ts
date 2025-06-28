@@ -9,11 +9,19 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.ts'],
       exclude: [
-        'test/**',
-        'dist/**',
-        'src/cli.ts', // CLI entry point, tested via integration
+        // CLI entry point, tested via integration
+        'src/cli.ts',
+        // Type-only files
+        'src/cli/types.ts',
       ],
+      thresholds: {
+        statements: 70,
+        branches: 65,
+        functions: 75,
+        lines: 70,
+      },
     },
     testTimeout: 30000, // 30 seconds for integration tests
     setupFiles: [],
