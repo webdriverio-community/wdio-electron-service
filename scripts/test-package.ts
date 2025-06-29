@@ -416,11 +416,27 @@ async function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMainModule = (() => {
+  try {
+    // Convert process.argv[1] to URL format for comparison
+    const scriptPath = normalize(process.argv[1]);
+    const scriptUrl = `file:///${scriptPath.replace(/\\/g, '/')}`;
+
+    console.log(`🔍 Debug: Script path: ${scriptPath}`);
+    console.log(`🔍 Debug: Script URL: ${scriptUrl}`);
+    console.log(`🔍 Debug: import.meta.url: ${import.meta.url}`);
+    console.log(`🔍 Debug: URLs match: ${import.meta.url === scriptUrl}`);
+
+    return import.meta.url === scriptUrl;
+  } catch (error) {
+    console.error(`🔍 Debug: Error in main module detection:`, error);
+    // Fallback: check if the filename matches
+    return __filename === process.argv[1] || __filename === normalize(process.argv[1]);
+  }
+})();
+
+if (isMainModule) {
   console.log('🔍 Debug: Script running as main module');
-  console.log(`🔍 Debug: import.meta.url: ${import.meta.url}`);
-  console.log(`🔍 Debug: process.argv[1]: ${process.argv[1]}`);
-  console.log(`🔍 Debug: Comparison: ${import.meta.url} === file://${process.argv[1]}`);
 
   main().catch((error) => {
     console.error('❌ Unhandled error in main:');
@@ -429,6 +445,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 } else {
   console.log('🔍 Debug: Script NOT running as main module');
-  console.log(`🔍 Debug: import.meta.url: ${import.meta.url}`);
-  console.log(`🔍 Debug: process.argv[1]: ${process.argv[1]}`);
 }
