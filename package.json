@@ -40,7 +40,7 @@
     "test": "turbo run test:unit test:integration test:package",
     "test:unit": "turbo run test:unit",
     "test:integration": "turbo run test:integration",
-    "test:package": "tsx ./scripts/test-package.ts",
+    "test:package": "pnpm dlx cross-env DEBUG=wdio-electron-service tsx ./scripts/test-package.ts",
     "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal",
     "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr"
