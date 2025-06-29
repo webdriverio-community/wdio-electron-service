@@ -57,10 +57,16 @@ function getPlatformBinaryPath(outDir: string, binaryName: string, platform: Sup
 }
 
 function getBinaryName(options: BinaryOptions): string {
-  const { buildTool, appName, config } = options;
+  const { buildTool, platform, config, appName } = options;
+
+  if (buildTool === SUPPORTED_BUILD_TOOL.builder && platform === 'linux') {
+    // linux binary names are converted to kebab-case
+    return appName.toLowerCase().replace(/ /g, '-');
+  }
   if (buildTool === SUPPORTED_BUILD_TOOL.forge) {
     return (config as ForgeBuildInfo['config']).packagerConfig?.executableName || appName;
   }
+
   return appName;
 }
 
