@@ -24,7 +24,7 @@ describe('Forge App Example', () => {
 
   it('should display the main heading with forge branding', async () => {
     const heading = await $('h1');
-    await expect(heading).toHaveText('📦 Forge App');
+    await expect(heading).toHaveText('🔨 Forge App');
   });
 
   it('should get app version via Electron API', async () => {
