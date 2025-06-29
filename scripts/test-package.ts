@@ -12,14 +12,14 @@
 
 import { execSync } from 'node:child_process';
 import { cpSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '..');
-const serviceDir = join(rootDir, 'packages', 'wdio-electron-service');
+const rootDir = normalize(join(__dirname, '..'));
+const serviceDir = normalize(join(rootDir, 'packages', 'wdio-electron-service'));
 
 interface TestOptions {
   example?: string;
@@ -34,9 +34,10 @@ function execCommand(command: string, cwd: string, description: string) {
   log(`${description}...`);
   try {
     execSync(command, {
-      cwd,
+      cwd: normalize(cwd),
       stdio: 'inherit',
       encoding: 'utf-8',
+      shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/sh',
     });
     log(`✅ ${description} completed`);
   } catch (error) {
@@ -55,8 +56,8 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
   execCommand('pnpm build', rootDir, 'Building all packages');
 
   // Pack the dependencies first
-  const utilsDir = join(rootDir, 'packages', '@wdio_electron-utils');
-  const typesDir = join(rootDir, 'packages', '@wdio_electron-types');
+  const utilsDir = normalize(join(rootDir, 'packages', '@wdio_electron-utils'));
+  const typesDir = normalize(join(rootDir, 'packages', '@wdio_electron-types'));
 
   execCommand('pnpm pack', utilsDir, 'Packing @wdio/electron-utils');
   execCommand('pnpm pack', typesDir, 'Packing @wdio/electron-types');
@@ -71,7 +72,7 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
     if (!tgzFile) {
       throw new Error(`Could not find ${prefix} .tgz file in ${dir}`);
     }
-    return join(dir, tgzFile);
+    return normalize(join(dir, tgzFile));
   };
 
   const servicePath = findTgzFile(serviceDir, 'wdio-electron-service-');
@@ -90,7 +91,7 @@ async function testExample(
   examplePath: string,
   packages: { servicePath: string; utilsPath: string; typesPath: string },
 ) {
-  const exampleName = examplePath.split('/').pop();
+  const exampleName = examplePath.split(/[/\\]/).pop();
   log(`Testing example: ${exampleName}`);
 
   if (!existsSync(examplePath)) {
@@ -98,8 +99,8 @@ async function testExample(
   }
 
   // Create isolated test environment to avoid pnpm hoisting issues
-  const tempDir = join(tmpdir(), `wdio-electron-test-${Date.now()}`);
-  const isolatedExamplePath = join(tempDir, exampleName);
+  const tempDir = normalize(join(tmpdir(), `wdio-electron-test-${Date.now()}`));
+  const isolatedExamplePath = normalize(join(tempDir, exampleName));
 
   try {
     log(`Creating isolated test environment at ${tempDir}`);
@@ -133,23 +134,41 @@ async function testExample(
       `Installing local packages for ${exampleName}`,
     );
 
-    // Debug: Check what's actually installed
-    execCommand('ls -la node_modules/@wdio/', isolatedExamplePath, `Checking @wdio packages in isolated environment`);
-    execCommand(
-      'ls -la node_modules/wdio-electron-service/',
-      isolatedExamplePath,
-      `Checking service in isolated environment`,
-    );
+    // Debug: Check installed packages using Node.js fs instead of ls
+    const checkInstalledPackages = (dir: string, description: string) => {
+      if (existsSync(dir)) {
+        const files = readdirSync(dir, { withFileTypes: true });
+        log(`${description}:`);
+        files.forEach((file) => {
+          log(`   ${file.name}${file.isDirectory() ? '/' : ''}`);
+        });
+      } else {
+        log(`${description}: Directory not found`);
+      }
+    };
+
+    const wdioDir = join(isolatedExamplePath, 'node_modules', '@wdio');
+    const serviceInstallDir = join(isolatedExamplePath, 'node_modules', 'wdio-electron-service');
+
+    checkInstalledPackages(wdioDir, 'Checking @wdio packages in isolated environment');
+    checkInstalledPackages(serviceInstallDir, 'Checking service in isolated environment');
 
     // Build the app if needed (for examples that require built binaries)
     if (packageJson.scripts.build && (exampleName.includes('builder') || exampleName.includes('forge'))) {
       execCommand('pnpm build', isolatedExamplePath, `Building ${exampleName} app`);
     }
 
-    // Run tests
-    execCommand('pnpm test', isolatedExamplePath, `Running tests for ${exampleName}`);
+    // Run tests with increased verbosity on Windows to help debug issues
+    const testCommand = process.platform === 'win32' ? 'pnpm test --verbose' : 'pnpm test';
+    execCommand(testCommand, isolatedExamplePath, `Running tests for ${exampleName}`);
 
     log(`✅ ${exampleName} tests passed!`);
+  } catch (error) {
+    // Log more details about the error on Windows
+    if (process.platform === 'win32') {
+      console.error('Detailed error:', error);
+    }
+    throw error;
   } finally {
     // Clean up isolated environment
     if (existsSync(tempDir)) {
@@ -177,11 +196,11 @@ async function main() {
         if (!tgzFile) {
           throw new Error(`No ${prefix} .tgz file found. Run without --skip-build first.`);
         }
-        return join(dir, tgzFile);
+        return normalize(join(dir, tgzFile));
       };
 
-      const utilsDir = join(rootDir, 'packages', '@wdio_electron-utils');
-      const typesDir = join(rootDir, 'packages', '@wdio_electron-types');
+      const utilsDir = normalize(join(rootDir, 'packages', '@wdio_electron-utils'));
+      const typesDir = normalize(join(rootDir, 'packages', '@wdio_electron-types'));
 
       packages = {
         servicePath: findTgzFile(serviceDir, 'wdio-electron-service-'),
@@ -197,7 +216,7 @@ async function main() {
     }
 
     // Find examples to test
-    const examplesDir = join(rootDir, 'fixtures', 'package-tests');
+    const examplesDir = normalize(join(rootDir, 'fixtures', 'package-tests'));
     const examples = readdirSync(examplesDir, { withFileTypes: true })
       .filter((dirent) => dirent.isDirectory())
       .map((dirent) => dirent.name)
@@ -218,7 +237,7 @@ async function main() {
 
     // Test each example
     for (const example of examplesToTest) {
-      const examplePath = join(examplesDir, example);
+      const examplePath = normalize(join(examplesDir, example));
 
       // Skip if it's just a placeholder (no package.json)
       if (!existsSync(join(examplePath, 'package.json'))) {
