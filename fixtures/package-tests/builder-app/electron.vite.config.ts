@@ -21,5 +21,6 @@ export default defineConfig({
     build: {
       outDir: 'dist/renderer',
     },
+    resolve: { preserveSymlinks: true },
   },
 });
