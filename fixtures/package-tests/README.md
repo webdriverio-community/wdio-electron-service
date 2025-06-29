@@ -81,7 +81,4 @@ pnpm build
 
 # Run the tests
 pnpm test
-
-# Run tests in headless mode
-pnpm test:headless
 ```
