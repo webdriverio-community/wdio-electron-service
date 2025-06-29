@@ -28,14 +28,14 @@
     "node": ">=18 || >=20"
   },
   "scripts": {
+    "build": "tsx ../../scripts/build-package.ts",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf *.tgz ./node_modules pnpm-lock.yaml",
     "clean:dist": "pnpm dlx shx rm -rf ./dist",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "tsx ../../scripts/build-package.ts",
+    "pack": "pnpm pack",
     "test:unit": "vitest --coverage --watch=false",
     "test:dev": "vitest --coverage",
     "test": "pnpm test:unit",
-    "dev": "pnpm run build --watch"
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "keywords": [
     "webdriverio",
