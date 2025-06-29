@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 import type { Options } from '@wdio/types';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -10,7 +11,12 @@ export const config: Options.Testrunner = {
   maxInstances: 1,
   capabilities: [
     {
-      browserName: 'electron',
+      'browserName': 'electron',
+      'goog:chromeOptions': {
+        args: [
+          `--user-data-dir=${path.join(tmpdir(), `wdio-electron-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`)}`,
+        ],
+      },
     },
   ],
   logLevel: 'info',
