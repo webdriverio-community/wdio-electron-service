@@ -56,6 +56,8 @@ jobs:
     name: Package [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
+      # Continue with other tests even if one fails
+      fail-fast: false
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
