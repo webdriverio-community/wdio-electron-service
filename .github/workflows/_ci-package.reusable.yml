@@ -75,3 +75,11 @@ jobs:
       - name: 🧪 Execute Package Tests
         run: pnpm run test:package
         shell: bash
+
+      # Provide an interactive debugging session on failure
+      # This allows manual investigation of the environment
+      - name: 🐛 Debug Build on Failure
+        uses: stateful/vscode-server-action@v1.1.0
+        if: failure()
+        with:
+          timeout: '180000'
