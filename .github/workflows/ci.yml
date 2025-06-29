@@ -54,7 +54,7 @@ jobs:
   # Run package tests after unit tests to ensure the package is built correctly
   package-matrix:
     name: Package [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
-    needs: [build, lint, unit-matrix]
+    needs: [build, lint]
     strategy:
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
