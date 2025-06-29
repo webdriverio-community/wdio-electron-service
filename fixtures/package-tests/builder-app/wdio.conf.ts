@@ -13,9 +13,7 @@ export const config: Options.Testrunner = {
     {
       'browserName': 'electron',
       'goog:chromeOptions': {
-        args: [
-          `--user-data-dir=${path.join(tmpdir(), `wdio-electron-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`)}`,
-        ],
+        args: ['--no-sandbox'],
       },
     },
   ],
