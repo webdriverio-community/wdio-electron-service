@@ -40,6 +40,7 @@
     "test": "turbo run test:unit test:integration",
     "test:unit": "turbo run test:unit",
     "test:integration": "turbo run test:integration",
+    "test:package": "tsx ./scripts/test-package.ts",
     "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr",
     "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal"
@@ -95,5 +96,5 @@
       "geckodriver"
     ]
   },
-  "packageManager": "pnpm@10.3.0+sha512.ee592eda8815a8a293c206bb0917c4bb0ff274c50def7cbc17be05ec641fc2d1b02490ce660061356bd0d126a4d7eb2ec8830e6959fb8a447571c631d5a2442d"
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }

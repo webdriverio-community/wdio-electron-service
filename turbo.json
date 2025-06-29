@@ -147,6 +147,9 @@
       "outputs": ["out/**"]
     },
     "logs": {},
+    "pack": {
+      "dependsOn": ["^build"]
+    },
     "typecheck": {
       "dependsOn": ["^build"]
     },
