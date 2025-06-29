@@ -201,23 +201,23 @@ async function testExample(
 
   // Create isolated test environment to avoid pnpm hoisting issues
   const tempDir = normalize(join(tmpdir(), `wdio-electron-test-${Date.now()}`));
-  const isolatedExamplePath = normalize(join(tempDir, exampleName));
+  const exampleDir = normalize(join(tempDir, exampleName));
 
   console.log(`🔍 Debug: Temp directory: ${tempDir}`);
-  console.log(`🔍 Debug: Isolated example path: ${isolatedExamplePath}`);
+  console.log(`🔍 Debug: Isolated example path: ${exampleDir}`);
 
   try {
     log(`Creating isolated test environment at ${tempDir}`);
     mkdirSync(tempDir, { recursive: true });
-    cpSync(examplePath, isolatedExamplePath, { recursive: true });
+    cpSync(examplePath, exampleDir, { recursive: true });
 
     // Create .pnpmrc to prevent hoisting and ensure proper resolution
-    const pnpmrcPath = join(isolatedExamplePath, '.pnpmrc');
+    const pnpmrcPath = join(exampleDir, '.pnpmrc');
     writeFileSync(pnpmrcPath, 'hoist=false\nnode-linker=isolated\n');
     console.log(`🔍 Debug: Created .pnpmrc at ${pnpmrcPath}`);
 
     // Add pnpm overrides to package.json to force local package versions
-    const packageJsonPath = join(isolatedExamplePath, 'package.json');
+    const packageJsonPath = join(exampleDir, 'package.json');
     console.log(`🔍 Debug: Reading package.json from ${packageJsonPath}`);
 
     if (!existsSync(packageJsonPath)) {
@@ -239,11 +239,11 @@ async function testExample(
     writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     // Install all dependencies with pnpm
-    execCommand('pnpm install', isolatedExamplePath, `Installing dependencies for ${exampleName}`);
+    execCommand('pnpm install', exampleDir, `Installing dependencies for ${exampleName}`);
 
     // Install local packages
     const addCommand = `pnpm add ${packages.typesPath} ${packages.utilsPath} ${packages.servicePath}`;
-    execCommand(addCommand, isolatedExamplePath, `Installing local packages for ${exampleName}`);
+    execCommand(addCommand, exampleDir, `Installing local packages for ${exampleName}`);
 
     // Debug: Check installed packages using Node.js fs instead of ls
     const checkInstalledPackages = (dir: string, description: string) => {
@@ -260,8 +260,8 @@ async function testExample(
       }
     };
 
-    const wdioDir = join(isolatedExamplePath, 'node_modules', '@wdio');
-    const serviceInstallDir = join(isolatedExamplePath, 'node_modules', 'wdio-electron-service');
+    const wdioDir = join(exampleDir, 'node_modules', '@wdio');
+    const serviceInstallDir = join(exampleDir, 'node_modules', 'wdio-electron-service');
 
     checkInstalledPackages(wdioDir, 'Checking @wdio packages in isolated environment');
     checkInstalledPackages(serviceInstallDir, 'Checking service in isolated environment');
@@ -272,7 +272,7 @@ async function testExample(
       packageJson.scripts.build &&
       (exampleName.includes('builder') || exampleName.includes('forge'))
     ) {
-      execCommand('pnpm build', isolatedExamplePath, `Building ${exampleName} app`);
+      execCommand('pnpm build', exampleDir, `Building ${exampleName} app`);
     } else {
       console.log(`🔍 Debug: Skipping build for ${exampleName}`);
       if (packageJson.scripts) {
@@ -284,7 +284,7 @@ async function testExample(
 
     // Run tests with increased verbosity on Windows to help debug issues
     const testCommand = process.platform === 'win32' ? 'pnpm test --verbose' : 'pnpm test';
-    execCommand(testCommand, isolatedExamplePath, `Running tests for ${exampleName}`);
+    execCommand(testCommand, exampleDir, `Running tests for ${exampleName}`);
 
     log(`✅ ${exampleName} tests passed!`);
   } catch (error) {
@@ -416,11 +416,21 @@ async function main() {
   }
 }
 
+// Fix main module detection for Windows
 const isMainModule = (() => {
   try {
     // Convert process.argv[1] to URL format for comparison
     const scriptPath = normalize(process.argv[1]);
-    const scriptUrl = `file:///${scriptPath.replace(/\\/g, '/')}`;
+
+    // Handle different platforms for URL construction
+    let scriptUrl: string;
+    if (process.platform === 'win32') {
+      // On Windows: file:///C:/path/to/file
+      scriptUrl = `file:///${scriptPath.replace(/\\/g, '/')}`;
+    } else {
+      // On Unix: file:///path/to/file (no extra slash needed)
+      scriptUrl = `file://${scriptPath}`;
+    }
 
     console.log(`🔍 Debug: Script path: ${scriptPath}`);
     console.log(`🔍 Debug: Script URL: ${scriptUrl}`);
