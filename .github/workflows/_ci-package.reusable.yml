@@ -1,5 +1,5 @@
-name: Unit
-description: 'Runs unit and integration tests across different operating systems'
+name: Package
+description: 'Runs package tests across different operating systems'
 
 on:
   workflow_call:
@@ -27,9 +27,9 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
-  # This job runs unit tests on multiple Node.js versions and operating systems
-  unit:
-    name: Unit and Integration Tests
+  # This job runs package tests on multiple Node.js versions and operating systems
+  package:
+    name: Package Tests
     runs-on: ${{ inputs.os }}
     steps:
       # Standard checkout with SSH key for private repositories
@@ -71,8 +71,7 @@ jobs:
             echo "::warning::No dist directories found, build extraction may have failed"
           fi
 
-      # Run unit and integration tests using Turbo
-      # The --only flag ensures we only run tests for the packages that have changed
-      - name: 🧪 Execute Unit and Integration Tests
-        run: pnpm run test:unit test:integration --only
+      # Run package tests using Turbo
+      - name: 🧪 Execute Package Tests
+        run: pnpm run test:package
         shell: bash
