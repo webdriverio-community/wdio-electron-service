@@ -71,8 +71,8 @@ jobs:
             echo "::warning::No dist directories found, build extraction may have failed"
           fi
 
-      # Run unit tests using Turbo
+      # Run unit, integration and package tests using Turbo
       # The --only flag ensures we only run tests for the packages that have changed
-      - name: 🧪 Execute Unit Tests
-        run: pnpm run test:unit --only
+      - name: 🧪 Execute Unit, Integration and Package Tests
+        run: pnpm run test:unit test:integration test:package --only
         shell: bash
