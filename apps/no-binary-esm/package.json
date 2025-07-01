@@ -13,14 +13,14 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.5",
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.0.3",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
-    "rollup": "^4.43.0",
+    "rollup": "^4.44.1",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "webdriverio": "catalog:default"

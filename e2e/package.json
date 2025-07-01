@@ -46,13 +46,13 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.3",
-    "@vitest/spy": "^3.2.3",
+    "@vitest/spy": "^3.2.4",
     "@wdio/electron-types": "workspace:*",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.43.0",
+    "rollup": "^4.44.1",
     "typescript": "^5.8.3"
   },
   "version": "8.1.1"
