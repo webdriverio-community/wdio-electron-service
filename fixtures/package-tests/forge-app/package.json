@@ -10,7 +10,7 @@
     "build": "electron-vite build && electron-forge make",
     "preview": "electron-vite preview",
     "start": "electron .",
-    "test": "wdio run wdio.conf.ts",
+    "test": "cross-env DEBUG=wdio-electron-service xvfb-maybe wdio run wdio.conf.ts",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
@@ -21,14 +21,18 @@
     "@electron-forge/maker-zip": "^7.8.1",
     "@types/node": "^24.0.7",
     "@wdio/cli": "^9.16.2",
+    "@wdio/electron-types": "8.2.1",
+    "@wdio/electron-utils": "8.2.1",
     "@wdio/globals": "^9.16.2",
     "@wdio/local-runner": "^9.16.2",
     "@wdio/mocha-framework": "^9.16.2",
     "@wdio/spec-reporter": "^9.16.2",
+    "cross-env": "^7.0.3",
     "electron": "^37.1.0",
     "electron-vite": "beta",
     "typescript": "^5.8.3",
-    "wdio-electron-service": "latest"
+    "wdio-electron-service": "latest",
+    "xvfb-maybe": "^0.2.1"
   },
   "keywords": [
     "electron",
@@ -42,8 +46,10 @@
   "license": "MIT",
   "config": {
     "forge": {
+      "outDir": "dist-electron",
       "packagerConfig": {
-        "name": "Forge App Example"
+        "name": "Forge App Example",
+        "executableName": "forge-app-example"
       },
       "makers": [
         {
@@ -68,5 +74,11 @@
         }
       ]
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "electron-winstaller"
+    ]
   }
 }

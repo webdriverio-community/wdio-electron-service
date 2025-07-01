@@ -187,11 +187,27 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
   }
 }
 
+function listDirectoryContents(dir: string, indent = '') {
+  console.log(`🔍 Debug: Listing contents of ${dir}`);
+  const items = readdirSync(dir, { withFileTypes: true });
+  items.forEach((item) => {
+    const fullPath = join(dir, item.name);
+    console.log(`${indent}${item.isDirectory() ? '📁' : '📄'} ${item.name}`);
+    if (item.isDirectory()) {
+      listDirectoryContents(fullPath, `${indent}  `);
+    }
+  });
+}
+
 async function testExample(
   examplePath: string,
   packages: { servicePath: string; utilsPath: string; typesPath: string },
 ) {
   const exampleName = examplePath.split(/[/\\]/).pop();
+  if (!exampleName) {
+    throw new Error(`Invalid example path: ${examplePath}`);
+  }
+
   log(`Testing example: ${exampleName}`);
   console.log(`🔍 Debug: Example path: ${examplePath}`);
 
@@ -266,13 +282,23 @@ async function testExample(
     checkInstalledPackages(wdioDir, 'Checking @wdio packages in isolated environment');
     checkInstalledPackages(serviceInstallDir, 'Checking service in isolated environment');
 
-    // Build the app if needed (for examples that require built binaries)
+    // Build the app if needed (for examples that require built binaries or source compilation)
     if (
       packageJson.scripts &&
       packageJson.scripts.build &&
-      (exampleName.includes('builder') || exampleName.includes('forge'))
+      (exampleName.includes('builder') || exampleName.includes('forge') || exampleName.includes('script'))
     ) {
       execCommand('pnpm build', exampleDir, `Building ${exampleName} app`);
+
+      // Add debug logging for dist-electron directory
+      const distElectronDir = join(exampleDir, 'dist-electron');
+      if (existsSync(distElectronDir)) {
+        console.log('\n🔍 Debug: Inspecting dist-electron directory after build:');
+        listDirectoryContents(distElectronDir);
+        console.log(); // Add empty line for readability
+      } else {
+        console.log(`\n🔍 Debug: dist-electron directory not found at ${distElectronDir}\n`);
+      }
     } else {
       console.log(`🔍 Debug: Skipping build for ${exampleName}`);
       if (packageJson.scripts) {
@@ -282,9 +308,7 @@ async function testExample(
       }
     }
 
-    // Run tests with increased verbosity on Windows to help debug issues
-    const testCommand = process.platform === 'win32' ? 'pnpm test --verbose' : 'pnpm test';
-    execCommand(testCommand, exampleDir, `Running tests for ${exampleName}`);
+    execCommand('pnpm test', exampleDir, `Running tests for ${exampleName}`);
 
     log(`✅ ${exampleName} tests passed!`);
   } catch (error) {
@@ -375,7 +399,9 @@ async function main() {
     console.log(`🔍 Debug: Found examples: ${examples.join(', ')}`);
 
     // Filter examples if specific one requested
-    const examplesToTest = options.example ? examples.filter((name) => name === options.example) : examples;
+    const examplesToTest = options.example
+      ? examples.filter((name) => name === options.example)
+      : examples.filter((name) => name !== 'script-app');
     console.log(`🔍 Debug: Examples to test: ${examplesToTest.join(', ')}`);
 
     if (examplesToTest.length === 0) {

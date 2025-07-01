@@ -4,16 +4,12 @@ export default defineConfig({
   main: {
     build: {
       outDir: 'dist/main',
-      rollupOptions: {
-        external: ['electron'],
-      },
     },
   },
   preload: {
     build: {
       outDir: 'dist/preload',
       rollupOptions: {
-        external: ['electron'],
         output: {
           format: 'cjs',
         },
@@ -25,5 +21,6 @@ export default defineConfig({
     build: {
       outDir: 'dist/renderer',
     },
+    resolve: { preserveSymlinks: true },
   },
 });

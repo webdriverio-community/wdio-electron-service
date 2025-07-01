@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import fs from 'node:fs/promises';
 
 import { mockBinaryPath } from './testUtils.js';
 import log from '../src/log.js';
@@ -60,7 +61,10 @@ describe('selectExecutable', () => {
   });
 
   it('should throw error when no executable binary is found', async () => {
-    mockBinaryPath('/path/to/dummy');
+    // Create a proper ENOENT error for the mock
+    const enoentError = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException;
+    enoentError.code = 'ENOENT';
+    vi.mocked(fs.access).mockRejectedValue(enoentError);
 
     await expect(() => selectExecutable(['/path/to/dist'])).rejects.toThrowError(
       'No executable binary found, checked:',

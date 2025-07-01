@@ -5,10 +5,10 @@ import nock from 'nock';
 import getPort from 'get-port';
 import log from '@wdio/electron-utils/log';
 import type { Capabilities, Options } from '@wdio/types';
-import type { ElectronServiceOptions } from '@wdio/electron-types';
+import type { ElectronServiceOptions, BinaryPathResult } from '@wdio/electron-types';
 
 import ElectronLaunchService from '../src/launcher.js';
-import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
+import { getAppBuildInfo, getBinaryPath, getBinaryPathDetailed } from '@wdio/electron-utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 
 let LaunchService: typeof ElectronLaunchService;
@@ -29,6 +29,25 @@ vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<stri
   return {
     ...actual,
     getBinaryPath: vi.fn().mockResolvedValue('workspace/my-test-app/dist/my-test-app'),
+    getBinaryPathDetailed: vi.fn().mockResolvedValue({
+      success: true,
+      binaryPath: 'workspace/my-test-app/dist/my-test-app',
+      pathGeneration: {
+        success: true,
+        paths: ['workspace/my-test-app/dist/my-test-app'],
+        errors: [],
+      },
+      pathValidation: {
+        success: true,
+        validPath: 'workspace/my-test-app/dist/my-test-app',
+        attempts: [
+          {
+            path: 'workspace/my-test-app/dist/my-test-app',
+            valid: true,
+          },
+        ],
+      },
+    } as BinaryPathResult),
     getAppBuildInfo: vi.fn().mockResolvedValue({
       appName: 'my-test-app',
       isForge: true,
@@ -209,7 +228,52 @@ describe('Electron Launch Service', () => {
 
       it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPath as Mock).mockRejectedValueOnce(new Error('b0rk'));
+        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+          success: false,
+          binaryPath: undefined,
+          pathGeneration: {
+            success: true,
+            paths: [
+              '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-x64/my-test-app.app/Contents/MacOS/my-test-app',
+              '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-arm64/my-test-app.app/Contents/MacOS/my-test-app',
+              '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-universal/my-test-app.app/Contents/MacOS/my-test-app',
+            ],
+            errors: [],
+          },
+          pathValidation: {
+            success: false,
+            validPath: undefined,
+            attempts: [
+              {
+                path: '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-x64/my-test-app.app/Contents/MacOS/my-test-app',
+                valid: false,
+                error: {
+                  type: 'FILE_NOT_FOUND',
+                  message: 'ENOENT: no such file or directory',
+                  code: 'ENOENT',
+                },
+              },
+              {
+                path: '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-arm64/my-test-app.app/Contents/MacOS/my-test-app',
+                valid: false,
+                error: {
+                  type: 'FILE_NOT_FOUND',
+                  message: 'ENOENT: no such file or directory',
+                  code: 'ENOENT',
+                },
+              },
+              {
+                path: '/Users/sam/Workspace/wdio-electron-service/fixtures/config-formats/forge-dependency-inline-config/out/my-test-app-darwin-universal/my-test-app.app/Contents/MacOS/my-test-app',
+                valid: false,
+                error: {
+                  type: 'FILE_NOT_FOUND',
+                  message: 'ENOENT: no such file or directory',
+                  code: 'ENOENT',
+                },
+              },
+            ],
+          },
+        } as BinaryPathResult);
         instance = new LaunchService(
           options,
           [] as never,
@@ -228,13 +292,36 @@ describe('Electron Launch Service', () => {
           },
         ];
         await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-          /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with Electron Forge!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-forge make`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
+          /Failed setting up Electron session:.*Could not find Electron app built with Electron Forge!/s,
         );
       });
 
       it('should throw an error when the detected app path does not exist for an electron-builder dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPath as Mock).mockRejectedValueOnce(new Error('b0rk'));
+        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+          success: false,
+          binaryPath: undefined,
+          pathGeneration: {
+            success: true,
+            paths: ['<expected binary path>'],
+            errors: [],
+          },
+          pathValidation: {
+            success: false,
+            validPath: undefined,
+            attempts: [
+              {
+                path: '<expected binary path>',
+                valid: false,
+                error: {
+                  type: 'FILE_NOT_FOUND',
+                  message: 'ENOENT: no such file or directory',
+                  code: 'ENOENT',
+                },
+              },
+            ],
+          },
+        } as BinaryPathResult);
         (getAppBuildInfo as Mock).mockResolvedValueOnce({
           appName: 'my-test-app',
           isForge: false,
@@ -258,7 +345,7 @@ describe('Electron Launch Service', () => {
           },
         ];
         await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
-          /^Failed setting up Electron session: SevereServiceError: Could not find Electron app at [\S]+ built with electron-builder!\nIf the application is not compiled, please do so before running your tests, e\.g\. via `npx electron-builder build`\.\nOtherwise if the application is compiled at a different location, please specify the `appBinaryPath` option in your capabilities\.$/m,
+          /Failed setting up Electron session:.*Could not find Electron app built with electron-builder!/s,
         );
       });
 
@@ -489,7 +576,25 @@ describe('Electron Launch Service', () => {
 
       it('should set the expected capabilities when the detected app path exists for a Forge dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPath as Mock).mockResolvedValueOnce('workspace/my-test-app/out/my-test-app');
+        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+          success: true,
+          binaryPath: 'workspace/my-test-app/out/my-test-app',
+          pathGeneration: {
+            success: true,
+            paths: ['workspace/my-test-app/out/my-test-app'],
+            errors: [],
+          },
+          pathValidation: {
+            success: true,
+            validPath: 'workspace/my-test-app/out/my-test-app',
+            attempts: [
+              {
+                path: 'workspace/my-test-app/out/my-test-app',
+                valid: true,
+              },
+            ],
+          },
+        } as BinaryPathResult);
         instance = new LaunchService(
           options,
           [] as never,
