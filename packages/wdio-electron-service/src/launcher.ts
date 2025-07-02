@@ -3,7 +3,7 @@ import path from 'node:path';
 import getPort from 'get-port';
 import { SevereServiceError } from 'webdriverio';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
-import { log, getAppBuildInfo, getBinaryPathDetailed, getElectronVersion } from '@wdio/electron-utils';
+import { log, getAppBuildInfo, getElectronVersion, getBinaryPath } from '@wdio/electron-utils';
 
 import {
   getChromeOptions,
@@ -20,6 +20,7 @@ import type {
   ElectronServiceGlobalOptions,
   AppBuildInfo,
   BinaryPathResult,
+  PathGenerationError,
 } from '@wdio/electron-types';
 
 /**
@@ -149,16 +150,18 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             const appBuildInfo = await getAppBuildInfo(pkg);
 
             try {
-              // Use the new detailed binary path function for better error handling
-              const binaryResult = await getBinaryPathDetailed(pkg.path, appBuildInfo, electronVersion);
+              // Use the detailed binary path function for better error handling
+              const binaryResult = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
               if (binaryResult.success) {
                 appBinaryPath = binaryResult.binaryPath!;
                 log.info(`Detected app binary at ${appBinaryPath}`);
 
                 // Log any warnings from path generation
-                const warnings = binaryResult.pathGeneration.errors.filter((e) => e.type === 'CONFIG_WARNING');
-                warnings.forEach((warning) => log.warn(warning.message));
+                const warnings = binaryResult.pathGeneration.errors.filter(
+                  (e: PathGenerationError) => e.type === 'CONFIG_WARNING',
+                );
+                warnings.forEach((warning: PathGenerationError) => log.warn(warning.message));
               } else {
                 // Generate comprehensive error message based on what failed
                 const errorMessage = generateBinaryPathErrorMessage(binaryResult, appBuildInfo);

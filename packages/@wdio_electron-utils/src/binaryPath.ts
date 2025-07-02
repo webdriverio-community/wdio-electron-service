@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
 import { SUPPORTED_PLATFORM, SUPPORTED_BUILD_TOOL } from './constants.js';
-import { selectExecutable, validateBinaryPaths } from './selectExecutable.js';
+import { validateBinaryPaths } from './selectExecutable.js';
 
 import type {
   AppBuildInfo,
@@ -245,10 +245,15 @@ export function generateBinaryPaths(
 }
 
 /**
- * Get the binary path using the new two-phase approach
+ * Determine the path to the Electron application binary using a two-phase approach
  * Returns detailed information about both path generation and validation
+ * @param packageJsonPath path to the nearest package.json
+ * @param appBuildInfo build information about the Electron application
+ * @param electronVersion version of Electron to use
+ * @param p process object (used for testing purposes)
+ * @returns detailed result with binary path and diagnostic information
  */
-export async function getBinaryPathDetailed(
+export async function getBinaryPath(
   packageJsonPath: string,
   appBuildInfo: AppBuildInfo,
   electronVersion?: string,
@@ -280,44 +285,6 @@ export async function getBinaryPathDetailed(
     pathGeneration,
     pathValidation,
   };
-}
-
-/**
- * Determine the path to the Electron application binary
- * @param packageJsonPath path to the nearest package.json
- * @param appBuildInfo build information about the Electron application
- * @param electronVersion version of Electron to use
- * @param p process object (used for testing purposes)
- * @returns path to the Electron app binary
- * @deprecated Use getBinaryPathDetailed for better error handling
- */
-export async function getBinaryPath(
-  packageJsonPath: string,
-  appBuildInfo: AppBuildInfo,
-  electronVersion?: string,
-  p = process,
-) {
-  if (!isSupportedPlatform(p.platform)) {
-    throw new Error(`Unsupported platform: ${p.platform}`);
-  }
-  if (!appBuildInfo.isForge && !appBuildInfo.isBuilder) {
-    throw new Error('Configurations that are neither Forge nor Builder are not supported.');
-  }
-
-  const options: BinaryOptions = {
-    buildTool: appBuildInfo.isForge ? SUPPORTED_BUILD_TOOL.forge : SUPPORTED_BUILD_TOOL.builder,
-    platform: p.platform,
-    appName: appBuildInfo.appName,
-    config: appBuildInfo.config,
-    electronVersion,
-    projectDir: path.dirname(packageJsonPath),
-  };
-
-  const outDirs = getOutDir(options);
-  const binaryName = getBinaryName(options);
-  const binaryPaths = outDirs.map((dir) => getPlatformBinaryPath(dir, binaryName, options.platform, options));
-
-  return selectExecutable(binaryPaths);
 }
 
 function isSupportedPlatform(p: NodeJS.Platform): p is SupportedPlatform {
