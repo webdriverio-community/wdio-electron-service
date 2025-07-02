@@ -12,9 +12,6 @@ export const config: Options.Testrunner = {
   capabilities: [
     {
       'browserName': 'electron',
-      'goog:chromeOptions': {
-        args: ['--no-sandbox'],
-      },
       'wdio:electronServiceOptions': {
         appEntryPoint: './out/main/index.js',
       },
