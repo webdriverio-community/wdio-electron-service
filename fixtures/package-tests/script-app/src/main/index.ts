@@ -2,11 +2,15 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
 
 function createWindow(): BrowserWindow {
+  // Use app.getAppPath() to get the absolute path to the app directory
+  // This is more reliable than __dirname in different environments
+  const appPath = app.getAppPath();
+
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 700,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload: join(appPath, 'out', 'preload', 'index.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
     },
@@ -21,7 +25,7 @@ function createWindow(): BrowserWindow {
   if (process.env.ELECTRON_RENDERER_URL) {
     mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(join(appPath, 'out', 'renderer', 'index.html'));
   }
 
   return mainWindow;
