@@ -120,8 +120,17 @@ jobs:
         env:
           RELEASE_BRANCH: ${{ inputs.branch_type }}
         run: |
-          # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
-          test "${RELEASE_BRANCH}" == "feature" && TAG="next" || test "${RELEASE_BRANCH}" == "maintenance" && TAG="lts" || TAG="latest"
+          # Determine npm tag based on release type and branch
+          if [[ "${{ inputs.release_version }}" == *"pre"* ]]; then
+            # Pre-releases always use 'next' tag
+            TAG="next"
+          elif [[ "${RELEASE_BRANCH}" == "main" ]]; then
+            # Regular releases from main use 'latest' tag
+            TAG="latest"
+          else
+            # LTS releases use 'lts' tag
+            TAG="lts"
+          fi
 
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             # Get package names that would be published
