@@ -4,6 +4,7 @@
   "description": "Simple Electron app example using wdio-electron-service",
   "main": "out/main/index.js",
   "type": "module",
+  "private": true,
   "scripts": {
     "clean": "pnpx shx rm -rf out node_modules",
     "dev": "electron-vite dev",
