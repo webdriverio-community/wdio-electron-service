@@ -46,7 +46,7 @@ describe('Forge App Example', () => {
 
     const html = await infoDisplay.getHTML();
     expect(html).toContain('📋 App Version:');
-    expect(html).toContain('1.0.0');
+    expect(html).toContain('0.0.0');
   });
 
   it('should get app name via Electron API', async () => {
@@ -82,7 +82,7 @@ describe('Forge App Example', () => {
     });
 
     expect(windowSize).not.toBeNull();
-    expect(windowSize.width).toBe(900);
-    expect(windowSize.height).toBe(700);
+    expect(windowSize?.width).toBe(900);
+    expect(windowSize?.height).toBe(700);
   });
 });

@@ -90,7 +90,7 @@ describe('Script App Example', () => {
     });
 
     expect(windowSize).not.toBeNull();
-    expect(windowSize.width).toBe(900);
-    expect(windowSize.height).toBe(700);
+    expect(windowSize?.width).toBe(900);
+    expect(windowSize?.height).toBe(700);
   });
 });
