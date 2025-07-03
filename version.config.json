@@ -6,5 +6,6 @@
   "synced": true,
   "mainPackage": "wdio-electron-service",
   "packages": ["packages/*"],
-  "prereleaseIdentifier": "next"
+  "prereleaseIdentifier": "next",
+  "skip": ["e2e", "fixtures/**/*"]
 }
