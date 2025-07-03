@@ -98,8 +98,8 @@ function getPlatformBinaryPath(
         const appDisplayName = forgeConfig.packagerConfig?.name || binaryName;
         appBundleName = `${appDisplayName}.app`;
       } else {
-        // For electron-builder: use productName for .app bundle, executableName for binary
-        appBundleName = `${binaryName}.app`;
+        // For electron-builder: use executableName for .app bundle
+        appBundleName = `${executableName}.app`;
       }
 
       return path.join(appBundleName, 'Contents', 'MacOS', executableName);
