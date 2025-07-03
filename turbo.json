@@ -22,7 +22,7 @@
       "inputs": ["**/*.{j,mj,cj,t}s", "eslint.config.js", "package.json"],
       "outputs": [".eslintcache"]
     },
-
+    "//#test:package": {},
     "@repo/e2e#init-e2es": {
       "dependsOn": ["wdio-electron-service#build"]
     },
@@ -147,6 +147,9 @@
       "outputs": ["out/**"]
     },
     "logs": {},
+    "pack": {
+      "dependsOn": ["^build"]
+    },
     "typecheck": {
       "dependsOn": ["^build"]
     },

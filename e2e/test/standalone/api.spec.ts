@@ -19,7 +19,12 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf
 const pkg = { packageJson, path: packageJsonPath };
 const electronVersion = await getElectronVersion(pkg);
 const appBuildInfo = await getAppBuildInfo(pkg);
-const appBinaryPath = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
+const appBinaryPathResult = await getBinaryPath(packageJsonPath, appBuildInfo, electronVersion);
+if (!appBinaryPathResult.success) {
+  throw new Error(
+    `Failed to get binary path: ${appBinaryPathResult.pathGeneration.errors.map((e) => e.message).join(', ')}`,
+  );
+}
 
 const logDir = path.join(__dirname, '..', '..', `wdio-logs-${exampleDir}`);
 shelljs.mkdir('-p', logDir);
@@ -29,7 +34,7 @@ const browser = await startWdioSession([
   {
     'browserName': 'electron',
     'wdio:electronServiceOptions': {
-      appBinaryPath,
+      appBinaryPath: appBinaryPathResult.binaryPath,
       appArgs: ['foo', 'bar=baz'],
     },
   },

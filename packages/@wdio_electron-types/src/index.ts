@@ -225,6 +225,62 @@ export type BuilderBuildInfo = {
 
 export type AppBuildInfo = ForgeBuildInfo | BuilderBuildInfo;
 
+// Binary Path Result Types
+export type PathGenerationErrorType =
+  | 'CONFIG_MISSING'
+  | 'CONFIG_INVALID'
+  | 'CONFIG_WARNING'
+  | 'MULTIPLE_BUILD_TOOLS'
+  | 'NO_BUILD_TOOL'
+  | 'UNSUPPORTED_PLATFORM';
+
+export type PathValidationErrorType =
+  | 'FILE_NOT_FOUND'
+  | 'NOT_EXECUTABLE'
+  | 'PERMISSION_DENIED'
+  | 'IS_DIRECTORY'
+  | 'ACCESS_ERROR';
+
+export interface PathGenerationError {
+  type: PathGenerationErrorType;
+  message: string;
+  buildTool?: string;
+  details?: string;
+}
+
+export interface PathValidationError {
+  type: PathValidationErrorType;
+  message: string;
+  code?: string;
+  permissions?: string;
+  details?: string;
+}
+
+export interface PathValidationAttempt {
+  path: string;
+  valid: boolean;
+  error?: PathValidationError;
+}
+
+export interface PathGenerationResult {
+  success: boolean;
+  paths: string[];
+  errors: PathGenerationError[];
+}
+
+export interface PathValidationResult {
+  success: boolean;
+  validPath?: string;
+  attempts: PathValidationAttempt[];
+}
+
+export interface BinaryPathResult {
+  success: boolean;
+  binaryPath?: string;
+  pathGeneration: PathGenerationResult;
+  pathValidation: PathValidationResult;
+}
+
 export type ExecuteOpts = {
   internal?: boolean;
 };

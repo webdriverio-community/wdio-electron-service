@@ -10,7 +10,13 @@ import importX from 'eslint-plugin-import-x';
 export default [
   // Ignored dirs
   {
-    ignores: ['**/dist/**/*', '@types/**/*', 'e2e/test/js/*', 'fixtures/config-formats/invalid-syntax.ts'],
+    ignores: [
+      '**/dist/**/*',
+      '@types/**/*',
+      'e2e/test/js/*',
+      'fixtures/config-formats/invalid-syntax.ts',
+      'fixtures/package-tests/**/*',
+    ],
   },
   // All files
   {

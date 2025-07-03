@@ -1,0 +1,84 @@
+{
+  "name": "forge-app-example",
+  "version": "1.0.0",
+  "description": "Electron Forge app example using wdio-electron-service",
+  "main": "dist/main/index.js",
+  "type": "module",
+  "scripts": {
+    "clean": "pnpx shx rm -rf dist dist-electron node_modules",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build && electron-forge make",
+    "preview": "electron-vite preview",
+    "start": "electron .",
+    "test": "cross-env DEBUG=wdio-electron-service xvfb-maybe wdio run wdio.conf.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@types/node": "^24.0.7",
+    "@wdio/cli": "^9.16.2",
+    "@wdio/electron-types": "8.2.1",
+    "@wdio/electron-utils": "8.2.1",
+    "@wdio/globals": "^9.16.2",
+    "@wdio/local-runner": "^9.16.2",
+    "@wdio/mocha-framework": "^9.16.2",
+    "@wdio/spec-reporter": "^9.16.2",
+    "cross-env": "^7.0.3",
+    "electron": "^37.1.0",
+    "electron-vite": "beta",
+    "typescript": "^5.8.3",
+    "wdio-electron-service": "latest",
+    "xvfb-maybe": "^0.2.1"
+  },
+  "keywords": [
+    "electron",
+    "forge",
+    "electron-vite",
+    "webdriverio",
+    "testing",
+    "example"
+  ],
+  "author": "WebDriverIO Community",
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "outDir": "dist-electron",
+      "packagerConfig": {
+        "name": "Forge App Example",
+        "executableName": "forge-app-example"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "forge_app_example"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "electron-winstaller"
+    ]
+  }
+}

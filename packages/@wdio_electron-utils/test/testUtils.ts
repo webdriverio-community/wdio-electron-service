@@ -14,10 +14,13 @@ export async function getFixturePackageJson(fixtureType: string, fixtureName: st
 export function mockBinaryPath(expectedPath: string | string[]) {
   const target = Array.isArray(expectedPath) ? expectedPath.map((p) => normalize(p)) : [normalize(expectedPath)];
   vi.mocked(fs.access).mockImplementation(async (path, _mode?) => {
-    if (target.includes(normalize(path.toString()))) {
+    const normalizedPath = normalize(path.toString());
+    if (target.some((t) => t === normalizedPath)) {
       return Promise.resolve();
     } else {
-      return Promise.reject('Not executable');
+      const enoentError = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException;
+      enoentError.code = 'ENOENT';
+      return Promise.reject(enoentError);
     }
   });
 }

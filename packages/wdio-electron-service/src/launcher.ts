@@ -1,10 +1,9 @@
-import util from 'node:util';
 import path from 'node:path';
 
 import getPort from 'get-port';
 import { SevereServiceError } from 'webdriverio';
 import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
-import { log, getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import { log, getAppBuildInfo, getElectronVersion, getBinaryPath } from '@wdio/electron-utils';
 
 import {
   getChromeOptions,
@@ -13,10 +12,80 @@ import {
   getElectronCapabilities,
 } from './capabilities.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
 import type { Services, Options, Capabilities } from '@wdio/types';
-import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
+import type {
+  ElectronServiceCapabilities,
+  ElectronServiceGlobalOptions,
+  AppBuildInfo,
+  BinaryPathResult,
+  PathGenerationError,
+} from '@wdio/electron-types';
+
+/**
+ * Generate a comprehensive error message based on the binary path detection result
+ */
+function generateBinaryPathErrorMessage(result: BinaryPathResult, appBuildInfo: AppBuildInfo): string {
+  const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
+  const suggestedCompileCommand = `npx ${appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'}`;
+
+  // Path generation failed
+  if (!result.pathGeneration.success) {
+    const generationErrors = result.pathGeneration.errors;
+    const primaryError = generationErrors[0];
+
+    switch (primaryError?.type) {
+      case 'UNSUPPORTED_PLATFORM':
+        return `Unsupported platform: ${process.platform}. This service only supports Windows, macOS, and Linux.`;
+
+      case 'NO_BUILD_TOOL':
+        return 'No supported build tool configuration found. Please configure either Electron Forge or electron-builder in your package.json.';
+
+      case 'CONFIG_INVALID':
+        return `Invalid ${buildToolName} configuration: ${primaryError.message}. Please check your build tool configuration.`;
+
+      case 'CONFIG_MISSING':
+        return `Missing ${buildToolName} configuration. Please ensure your build tool is properly configured in package.json.`;
+
+      default:
+        return `Failed to determine binary paths: ${primaryError?.message || 'Unknown error'}`;
+    }
+  }
+
+  // Path generation succeeded but validation failed
+  if (!result.pathValidation.success) {
+    const attempts = result.pathValidation.attempts;
+
+    let errorDetails = `Checked ${attempts.length} possible location(s):`;
+
+    for (const attempt of attempts) {
+      errorDetails += `\n  - ${attempt.path}`;
+      if (attempt.error) {
+        switch (attempt.error.type) {
+          case 'FILE_NOT_FOUND':
+            errorDetails += ' (file not found)';
+            break;
+          case 'NOT_EXECUTABLE':
+            errorDetails += ' (not executable)';
+            break;
+          case 'PERMISSION_DENIED':
+            errorDetails += ' (permission denied)';
+            break;
+          case 'IS_DIRECTORY':
+            errorDetails += ' (is a directory)';
+            break;
+          default:
+            errorDetails += ` (${attempt.error.message})`;
+        }
+      }
+    }
+
+    return `Could not find Electron app built with ${buildToolName}!\n\n${errorDetails}\n\nIf the application is not compiled, please do so before running your tests:\n  ${suggestedCompileCommand}\n\nOtherwise if the application is compiled at a different location, please specify the \`appBinaryPath\` option in your capabilities.`;
+  }
+
+  return 'Unknown error occurred while detecting binary path.';
+}
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -81,15 +150,35 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             const appBuildInfo = await getAppBuildInfo(pkg);
 
             try {
-              appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
+              // Use the detailed binary path function for better error handling
+              const binaryResult = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-              log.info(`Detected app binary at ${appBinaryPath}`);
-            } catch (_e) {
-              const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
-              const suggestedCompileCommand = `npx ${
-                appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
-              }`;
-              throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
+              if (binaryResult.success) {
+                appBinaryPath = binaryResult.binaryPath!;
+                log.info(`Detected app binary at ${appBinaryPath}`);
+
+                // Log any warnings from path generation
+                const warnings = binaryResult.pathGeneration.errors.filter(
+                  (e: PathGenerationError) => e.type === 'CONFIG_WARNING',
+                );
+                warnings.forEach((warning: PathGenerationError) => log.warn(warning.message));
+              } else {
+                // Generate comprehensive error message based on what failed
+                const errorMessage = generateBinaryPathErrorMessage(binaryResult, appBuildInfo);
+                throw new Error(errorMessage);
+              }
+            } catch (e) {
+              // Fallback to original error handling for backward compatibility
+              if (e instanceof Error && !e.message.includes('Could not find Electron app')) {
+                const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
+                const suggestedCompileCommand = `npx ${
+                  appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
+                }`;
+                throw new Error(
+                  `Could not find Electron app built with ${buildToolName}!\nIf the application is not compiled, please do so before running your tests, e.g. via \`${suggestedCompileCommand}\`.`,
+                );
+              }
+              throw e;
             }
           } catch (e) {
             log.error(e);
