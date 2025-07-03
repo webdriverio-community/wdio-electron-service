@@ -8,7 +8,7 @@ import type { Capabilities, Options } from '@wdio/types';
 import type { ElectronServiceOptions, BinaryPathResult } from '@wdio/electron-types';
 
 import ElectronLaunchService from '../src/launcher.js';
-import { getAppBuildInfo, getBinaryPath, getBinaryPathDetailed } from '@wdio/electron-utils';
+import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 
 let LaunchService: typeof ElectronLaunchService;
@@ -28,8 +28,7 @@ vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<stri
   const actual = await importOriginal();
   return {
     ...actual,
-    getBinaryPath: vi.fn().mockResolvedValue('workspace/my-test-app/dist/my-test-app'),
-    getBinaryPathDetailed: vi.fn().mockResolvedValue({
+    getBinaryPath: vi.fn().mockResolvedValue({
       success: true,
       binaryPath: 'workspace/my-test-app/dist/my-test-app',
       pathGeneration: {
@@ -228,7 +227,7 @@ describe('Electron Launch Service', () => {
 
       it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+        (getBinaryPath as Mock).mockResolvedValueOnce({
           success: false,
           binaryPath: undefined,
           pathGeneration: {
@@ -298,7 +297,7 @@ describe('Electron Launch Service', () => {
 
       it('should throw an error when the detected app path does not exist for an electron-builder dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+        (getBinaryPath as Mock).mockResolvedValueOnce({
           success: false,
           binaryPath: undefined,
           pathGeneration: {
@@ -576,7 +575,7 @@ describe('Electron Launch Service', () => {
 
       it('should set the expected capabilities when the detected app path exists for a Forge dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPathDetailed as Mock).mockResolvedValueOnce({
+        (getBinaryPath as Mock).mockResolvedValueOnce({
           success: true,
           binaryPath: 'workspace/my-test-app/out/my-test-app',
           pathGeneration: {
@@ -625,7 +624,25 @@ describe('Electron Launch Service', () => {
 
       it('should set the expected capabilities when the detected app path exists for an electron-builder dependency', async () => {
         delete options.appBinaryPath;
-        (getBinaryPath as Mock).mockResolvedValueOnce('workspace/my-test-app/dist/my-test-app');
+        (getBinaryPath as Mock).mockResolvedValueOnce({
+          success: true,
+          binaryPath: 'workspace/my-test-app/dist/my-test-app',
+          pathGeneration: {
+            success: true,
+            paths: ['workspace/my-test-app/dist/my-test-app'],
+            errors: [],
+          },
+          pathValidation: {
+            success: true,
+            validPath: 'workspace/my-test-app/dist/my-test-app',
+            attempts: [
+              {
+                path: 'workspace/my-test-app/dist/my-test-app',
+                valid: true,
+              },
+            ],
+          },
+        } as BinaryPathResult);
         (getAppBuildInfo as Mock).mockResolvedValueOnce({
           appName: 'my-test-app',
           isForge: false,

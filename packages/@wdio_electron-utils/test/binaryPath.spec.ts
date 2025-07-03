@@ -5,7 +5,7 @@ import { expect, it, vi, describe, beforeEach } from 'vitest';
 import { AppBuildInfo } from '@wdio/electron-types';
 
 import log from '../src/log.js';
-import { getBinaryPath, getBinaryPathDetailed } from '../src/binaryPath.js';
+import { getBinaryPath } from '../src/binaryPath.js';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
@@ -121,8 +121,12 @@ function testBinaryPath(options: TestBinaryPathOptions) {
       currentProcess,
     );
 
+    // Verify the result is successful
+    expect(result.success).toBe(true);
+    expect(result.binaryPath).toBeDefined();
+
     // Normalize path separators for cross-platform compatibility
-    const normalizedActual = result.replace(/\\/g, '/');
+    const normalizedActual = result.binaryPath!.replace(/\\/g, '/');
     const normalizedExpected = binaryPath.replace(/\\/g, '/');
 
     expect(normalizedActual).toBe(normalizedExpected);
@@ -148,22 +152,34 @@ describe('getBinaryPath', () => {
     vi.mocked(log.info).mockClear();
   });
 
-  it('should throw error for unsupported platform', async () => {
+  it('should return error result for unsupported platform', async () => {
     mockProcess('not-supported', 'x86');
     mockBinaryPath('/path/to');
 
-    await expect(() =>
-      getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, true), '29.3.1', currentProcess),
-    ).rejects.toThrowError('Unsupported platform: not-supported');
+    const result = await getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, true), '29.3.1', currentProcess);
+
+    expect(result.success).toBe(false);
+    expect(result.binaryPath).toBeUndefined();
+    expect(result.pathGeneration.success).toBe(false);
+    expect(result.pathGeneration.errors).toContainEqual({
+      type: 'UNSUPPORTED_PLATFORM',
+      message: 'Unsupported platform: not-supported',
+    });
   });
 
-  it('should throw error for unsupported build tool configuration', async () => {
+  it('should return error result for unsupported build tool configuration', async () => {
     mockProcess('linux', 'arm64');
     mockBinaryPath('/path/to');
 
-    await expect(() =>
-      getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, false), '29.3.1', currentProcess),
-    ).rejects.toThrowError('Configurations that are neither Forge nor Builder are not supported.');
+    const result = await getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, false), '29.3.1', currentProcess);
+
+    expect(result.success).toBe(false);
+    expect(result.binaryPath).toBeUndefined();
+    expect(result.pathGeneration.success).toBe(false);
+    expect(result.pathGeneration.errors).toContainEqual({
+      type: 'NO_BUILD_TOOL',
+      message: 'Configurations that are neither Forge nor Builder are not supported.',
+    });
   });
 
   describe('Electron Forge builds', () => {
@@ -300,140 +316,5 @@ describe('getBinaryPath', () => {
         executableName: 'builder-app-example',
       } as any,
     });
-  });
-});
-
-describe('getBinaryPathDetailed', () => {
-  beforeEach(() => {
-    vi.mocked(log.info).mockClear();
-  });
-
-  it('should return detailed success result when binary is found', async () => {
-    const expectedPath = '/path/to/out/my-app-linux-x64/my-app';
-    const currentProcess = { platform: 'linux' } as NodeJS.Process;
-    mockBinaryPath(expectedPath);
-
-    const result = await getBinaryPathDetailed(
-      pkgJSONPath,
-      {
-        appName: 'my-app',
-        isForge: true,
-        isBuilder: false,
-        config: { packagerConfig: { name: 'my-app' } },
-      } as AppBuildInfo,
-      '29.3.1',
-      currentProcess,
-    );
-
-    // Normalize path separators for cross-platform compatibility
-    const normalizedActual = result.binaryPath?.replace(/\\/g, '/');
-    const normalizedExpected = expectedPath.replace(/\\/g, '/');
-
-    expect(result.success).toBe(true);
-    expect(normalizedActual).toBe(normalizedExpected);
-    expect(result.pathGeneration.success).toBe(true);
-    expect(result.pathGeneration.paths.map((p) => p.replace(/\\/g, '/'))).toContain(normalizedExpected);
-    expect(result.pathValidation.success).toBe(true);
-    expect(result.pathValidation.validPath?.replace(/\\/g, '/')).toBe(normalizedExpected);
-    expect(result.pathValidation.attempts).toHaveLength(result.pathGeneration.paths.length);
-  });
-
-  it('should return detailed error result for unsupported platform', async () => {
-    const currentProcess = { platform: 'unsupported' } as unknown as NodeJS.Process;
-
-    const result = await getBinaryPathDetailed(
-      pkgJSONPath,
-      {
-        appName: 'my-app',
-        isForge: true,
-        isBuilder: false,
-        config: {},
-      } as AppBuildInfo,
-      '29.3.1',
-      currentProcess,
-    );
-
-    expect(result.success).toBe(false);
-    expect(result.binaryPath).toBeUndefined();
-    expect(result.pathGeneration.success).toBe(false);
-    expect(result.pathGeneration.errors).toHaveLength(1);
-    expect(result.pathGeneration.errors[0].type).toBe('UNSUPPORTED_PLATFORM');
-    expect(result.pathValidation.success).toBe(false);
-    expect(result.pathValidation.attempts).toHaveLength(0);
-  });
-
-  it('should return detailed error result when no binary found', async () => {
-    const currentProcess = { platform: 'linux' } as NodeJS.Process;
-    // Mock file system to reject all access attempts with ENOENT error
-    const enoentError = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException;
-    enoentError.code = 'ENOENT';
-    vi.mocked(fs.access).mockRejectedValue(enoentError);
-
-    const result = await getBinaryPathDetailed(
-      pkgJSONPath,
-      {
-        appName: 'my-app',
-        isForge: true,
-        isBuilder: false,
-        config: { packagerConfig: { name: 'my-app' } },
-      } as AppBuildInfo,
-      '29.3.1',
-      currentProcess,
-    );
-
-    expect(result.success).toBe(false);
-    expect(result.binaryPath).toBeUndefined();
-    expect(result.pathGeneration.success).toBe(true);
-    expect(result.pathGeneration.paths.length).toBeGreaterThan(0);
-    expect(result.pathValidation.success).toBe(false);
-    expect(result.pathValidation.validPath).toBeUndefined();
-    expect(result.pathValidation.attempts.length).toBeGreaterThan(0);
-    expect(result.pathValidation.attempts[0].valid).toBe(false);
-    expect(result.pathValidation.attempts[0].error?.type).toBe('FILE_NOT_FOUND');
-  });
-
-  it('should include configuration warnings in path generation', async () => {
-    const expectedPath = '/path/to/dist/linux-unpacked/my-app';
-    const currentProcess = { platform: 'linux' } as NodeJS.Process;
-    mockBinaryPath(expectedPath);
-
-    const result = await getBinaryPathDetailed(
-      pkgJSONPath,
-      {
-        appName: 'my-app',
-        isForge: false,
-        isBuilder: true,
-        config: {}, // No directories.output specified
-      } as AppBuildInfo,
-      '29.3.1',
-      currentProcess,
-    );
-
-    expect(result.success).toBe(true);
-    expect(result.pathGeneration.success).toBe(true);
-    expect(result.pathGeneration.errors).toHaveLength(1);
-    expect(result.pathGeneration.errors[0].type).toBe('CONFIG_WARNING');
-    expect(result.pathGeneration.errors[0].message).toContain('default output directory');
-  });
-
-  it('should return detailed error for unsupported build tool', async () => {
-    const currentProcess = { platform: 'linux' } as NodeJS.Process;
-
-    const result = await getBinaryPathDetailed(
-      pkgJSONPath,
-      {
-        appName: 'my-app',
-        isForge: false,
-        isBuilder: false,
-        config: {},
-      } as unknown as AppBuildInfo,
-      '29.3.1',
-      currentProcess,
-    );
-
-    expect(result.success).toBe(false);
-    expect(result.pathGeneration.success).toBe(false);
-    expect(result.pathGeneration.errors[0].type).toBe('NO_BUILD_TOOL');
-    expect(result.pathValidation.success).toBe(false);
   });
 });
