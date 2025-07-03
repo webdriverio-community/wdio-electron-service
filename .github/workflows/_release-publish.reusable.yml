@@ -121,7 +121,7 @@ jobs:
           RELEASE_BRANCH: ${{ inputs.branch_type }}
         run: |
           # Use 'latest' tag for main branch releases, 'lts' for LTS branch releases
-          test "${RELEASE_BRANCH}" == "main" && TAG="latest" || TAG="lts"
+          test "${RELEASE_BRANCH}" == "feature" && TAG="next" || test "${RELEASE_BRANCH}" == "maintenance" && TAG="lts" || TAG="latest"
 
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             # Get package names that would be published
