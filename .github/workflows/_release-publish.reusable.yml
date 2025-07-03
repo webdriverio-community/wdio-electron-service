@@ -88,6 +88,7 @@ jobs:
       - name: 🏷️ Create Release and Tags
         # Uses package-versioner to bump versions and create git tags
         run: |
+          set -e
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             # Get the current version
             CURRENT_VERSION=$(jq -r '.version' packages/wdio-electron-service/package.json)
@@ -96,8 +97,15 @@ jobs:
             # Run package-versioner in dry-run mode to calculate the next version
             echo "Running package-versioner to calculate the next version..."
             echo "DRY RUN: Would run command: pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json"
-            NEW_VERSION=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json | jq -r '.updates[0].newVersion')
+            RAW_OUTPUT=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --dry-run --json)
+            echo "package-versioner output: $RAW_OUTPUT"
+            NEW_VERSION=$(echo "$RAW_OUTPUT" | jq -r '.updates[0].newVersion')
             echo "Next version would be: $NEW_VERSION"
+
+            if [ -z "$NEW_VERSION" ] || [ "$NEW_VERSION" == "null" ]; then
+              echo "::error::Failed to determine new version from package-versioner output (dry run)"
+              exit 1
+            fi
 
             # Show what would change
             echo "DRY RUN: Would create release and tags with command: pnpm dlx package-versioner --bump ${{ inputs.release_version }}"
@@ -109,7 +117,15 @@ jobs:
           else
             # Run package-versioner to calculate the next version
             echo "Running package-versioner to calculate the next version..."
-            NEW_VERSION=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --json | jq -r '.updates[0].newVersion')
+            RAW_OUTPUT=$(pnpm dlx package-versioner --bump ${{ inputs.release_version }} --json)
+            echo "package-versioner output: $RAW_OUTPUT"
+            NEW_VERSION=$(echo "$RAW_OUTPUT" | jq -r '.updates[0].newVersion')
+            echo "New version: $NEW_VERSION"
+
+            if [ -z "$NEW_VERSION" ] || [ "$NEW_VERSION" == "null" ]; then
+              echo "::error::Failed to determine new version from package-versioner output"
+              exit 1
+            fi
           fi
 
           # Store the new version for later use
