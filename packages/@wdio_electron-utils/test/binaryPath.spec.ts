@@ -299,7 +299,7 @@ describe('getBinaryPath', () => {
     testBuilderBinaryPath({
       platform: 'darwin',
       arch: 'arm64',
-      binaryPath: '/path/to/dist/mac-arm64/Builder App Example.app/Contents/MacOS/builder-app-example',
+      binaryPath: '/path/to/dist/mac-arm64/builder-app-example.app/Contents/MacOS/builder-app-example',
       configObj: {
         productName: 'Builder App Example',
         executableName: 'builder-app-example',
