@@ -15,14 +15,14 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^24.0.7",
+    "@types/node": "^24.0.10",
     "@wdio/cli": "^9.16.2",
     "@wdio/globals": "^9.16.2",
     "@wdio/local-runner": "^9.16.2",
     "@wdio/mocha-framework": "^9.16.2",
     "@wdio/spec-reporter": "^9.16.2",
     "cross-env": "^7.0.3",
-    "electron": "^37.1.0",
+    "electron": "^37.2.0",
     "electron-vite": "beta",
     "typescript": "^5.8.3",
     "wdio-electron-service": "latest",

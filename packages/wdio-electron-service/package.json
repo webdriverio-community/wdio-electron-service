@@ -58,7 +58,7 @@
     }
   },
   "dependencies": {
-    "@babel/parser": "^7.27.7",
+    "@babel/parser": "^7.28.0",
     "@vitest/spy": "^3.2.4",
     "@wdio/cdp-bridge": "workspace:*",
     "@wdio/electron-types": "workspace:*",
@@ -67,7 +67,7 @@
     "@wdio/logger": "catalog:default",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.1",
-    "electron-to-chromium": "^1.5.177",
+    "electron-to-chromium": "^1.5.179",
     "fast-copy": "^3.0.2",
     "get-port": "^7.1.0",
     "puppeteer-core": "^22.15.0",
@@ -79,7 +79,7 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.8.1",
     "@types/debug": "^4.1.12",
-    "@types/node": "^24.0.7",
+    "@types/node": "^24.0.10",
     "@vitest/coverage-v8": "^3.2.4",
     "@wdio/electron-bundler": "workspace:*",
     "@wdio/types": "catalog:default",
