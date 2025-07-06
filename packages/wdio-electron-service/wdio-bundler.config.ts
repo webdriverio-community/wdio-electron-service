@@ -1,5 +1,16 @@
 import type { BundlerConfig } from '@wdio/electron-bundler';
 
+const INTERNALS = ['@wdio/electron-utils', '@wdio/electron-cdp-bridge'];
+
+const getExternal = (exclude: string[]) => (id: string) => {
+  // Bundle only the internal packages and fast-copy
+  if (exclude.some((pkg) => id === pkg || id.startsWith(pkg + '/'))) {
+    return false;
+  }
+  // Externalize everything else (including dependencies of internal packages)
+  return /node_modules/.test(id) || /^[^./]/.test(id);
+};
+
 const config: BundlerConfig = {
   transformations: [
     {
@@ -24,14 +35,10 @@ const config: BundlerConfig = {
     },
   ],
   cjs: {
-    nodeExternals: {
-      exclude: ['fast-copy', '@wdio/electron-utils', '@wdio/electron-cdp-bridge'],
-    },
+    external: getExternal(['fast-copy', ...INTERNALS]),
   },
   esm: {
-    nodeExternals: {
-      exclude: ['@wdio/electron-utils', '@wdio/electron-cdp-bridge'],
-    },
+    external: getExternal(INTERNALS),
   },
 };
 
