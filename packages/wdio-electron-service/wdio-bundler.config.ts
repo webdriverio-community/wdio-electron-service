@@ -25,7 +25,12 @@ const config: BundlerConfig = {
   ],
   cjs: {
     nodeExternals: {
-      exclude: 'fast-copy',
+      exclude: ['fast-copy', '@wdio/electron-utils', '@wdio/electron-cdp-bridge'],
+    },
+  },
+  esm: {
+    nodeExternals: {
+      exclude: ['@wdio/electron-utils', '@wdio/electron-cdp-bridge'],
     },
   },
 };
