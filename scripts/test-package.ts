@@ -258,9 +258,7 @@ async function main() {
       .filter((name) => !name.startsWith('.'));
 
     // Filter examples if specific one requested
-    const examplesToTest = options.example
-      ? examples.filter((name) => name === options.example)
-      : examples.filter((name) => name !== 'script-app');
+    const examplesToTest = options.example ? examples.filter((name) => name === options.example) : examples;
 
     if (examplesToTest.length === 0) {
       if (options.example) {
