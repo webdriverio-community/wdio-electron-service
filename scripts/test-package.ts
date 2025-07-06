@@ -1,13 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * Script to test the wdio-electron-service package in the example apps
- * Usage: node scripts/test-package.ts [--example=<example-name>] [--skip-build]
+ * Usage: pnpx tsx scripts/test-package.ts [--example=<example-name>] [--skip-build]
  *
  * Examples:
- * node scripts/test-package.ts
- * node scripts/test-package.ts --example=builder-app
- * node scripts/test-package.ts --example=forge-app --skip-build
- * node scripts/test-package.ts --example=script-app
+ * pnpx tsx scripts/test-package.ts
+ * pnpx tsx scripts/test-package.ts --example=builder-app
+ * pnpx tsx scripts/test-package.ts --example=forge-app --skip-build
+ * pnpx tsx scripts/test-package.ts --example=script-app
  */
 
 import { execSync } from 'node:child_process';
@@ -258,9 +258,7 @@ async function main() {
       .filter((name) => !name.startsWith('.'));
 
     // Filter examples if specific one requested
-    const examplesToTest = options.example
-      ? examples.filter((name) => name === options.example)
-      : examples.filter((name) => name !== 'script-app');
+    const examplesToTest = options.example ? examples.filter((name) => name === options.example) : examples;
 
     if (examplesToTest.length === 0) {
       if (options.example) {
