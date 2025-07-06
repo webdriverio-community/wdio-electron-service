@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Script to switch catalog dependencies for all packages in the workspace
- * Usage: node scripts/switch-catalog.ts [default|next|minimum]
+ * Usage: pnpx tsx scripts/switch-catalog.ts [default|next|minimum]
  */
 
 import fs from 'node:fs';
