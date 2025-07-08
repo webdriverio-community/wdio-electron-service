@@ -105,8 +105,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0
       package-versioner:
-        specifier: ^0.8.3
-        version: 0.8.3(conventional-commits-parser@6.2.0)
+        specifier: ^0.8.5
+        version: 0.8.5(conventional-commits-parser@6.2.0)
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -4533,8 +4533,8 @@ packages:
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
-  package-versioner@0.8.3:
-    resolution: {integrity: sha512-UNNvLpIrqaNxsMPD15BejTTTFTUMNiL3oDagd7AlyLWDYNdLI65da9nqZ8YGw2Bf0MeWd+5LQmdkuTUDiZGjBw==}
+  package-versioner@0.8.5:
+    resolution: {integrity: sha512-Mx8ObW3X/NBTN7PktuqP25BJSRwqMP30i8pzQDMZdTI3TJqs71fQlMHBDz7ZhJ9Rb8etBIoJlVtDZulaDBe6Ag==}
     hasBin: true
 
   pako@1.0.11:
@@ -10081,7 +10081,7 @@ snapshots:
 
   package-json-from-dist@1.0.1: {}
 
-  package-versioner@0.8.3(conventional-commits-parser@6.2.0):
+  package-versioner@0.8.5(conventional-commits-parser@6.2.0):
     dependencies:
       '@manypkg/get-packages': 3.0.0
       '@types/micromatch': 4.0.9
