@@ -707,18 +707,69 @@ describe('Electron Launch Service', () => {
         });
       });
 
-      it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
+      it('should use readPackageUp result for electron binary path with appEntryPoint instead of rootDir', async () => {
+        // Mock readPackageUp before importing the module
+        const mockPackage = {
+          packageJson: {
+            dependencies: { electron: '^26.0.0' },
+            devDependencies: {},
+            name: 'test-package',
+            version: '1.0.0',
+          },
+          path: '/different/path/to/package.json',
+        };
+
+        vi.doMock('read-package-up', () => ({
+          readPackageUp: vi.fn().mockResolvedValue(mockPackage),
+        }));
+
+        // Clear module cache to ensure our mock is used
+        vi.resetModules();
+
+        // Now import the module after setting up the mock
+        const { default: LaunchService } = await import('../src/launcher.js');
+
+        delete options.appBinaryPath;
+        options.appEntryPoint = 'path/to/main.bundle.js';
+
+        // Create instance with a different rootDir to ensure we don't use it
         instance = new LaunchService(
           options,
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir('package-scenarios', 'no-electron'),
+            rootDir: '/completely/different/root/dir',
           } as Options.Testrunner,
         );
+
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+
+        await instance?.onPrepare({} as never, capabilities);
+
+        // Verify that binary path uses the directory from readPackageUp result, not rootDir
+        expect(capabilities[0]['goog:chromeOptions']?.binary).toBe(
+          path.join(
+            '/different/path/to',
+            'node_modules',
+            '.bin',
+            process.platform === 'win32' ? 'electron.CMD' : 'electron',
+          ),
+        );
+
+        vi.resetModules();
+        vi.clearAllMocks();
+      });
+
+      it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
         const capabilities: WebdriverIO.Capabilities[] = [
           {
             'browserName': 'electron',
+            'browserVersion': '26.2.2',
             'wdio:chromedriverOptions': {
               binary: '/path/to/chromedriver',
             },
@@ -727,6 +778,7 @@ describe('Electron Launch Service', () => {
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
           'browserName': 'chrome',
+          'browserVersion': '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
