@@ -36,6 +36,24 @@ describe('Capabilities Utilities', () => {
       });
     });
 
+    it('should deduplicate arguments when the same flag exists in both existing and app args', () => {
+      const options = {
+        appArgs: ['--no-sandbox', 'foo=bar'],
+        appBinaryPath: '/path/to/apps',
+      };
+      const cap = {
+        'goog:chromeOptions': {
+          windowTypes: ['app'],
+          args: ['--no-sandbox', '--disable-web-security'],
+        },
+      };
+      expect(getChromeOptions(options, cap)).toStrictEqual({
+        args: ['--no-sandbox', '--disable-web-security', 'foo=bar'],
+        binary: '/path/to/apps',
+        windowTypes: ['app'],
+      });
+    });
+
     it('should return default values when app arguments are not provided', () => {
       const options = {
         appBinaryPath: '/path/to/apps',
