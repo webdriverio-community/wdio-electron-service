@@ -247,7 +247,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           setInspectArg(cap, portList[index]);
         }),
       );
-      log.debug('Setting capability at onWorkerStart', caps);
+      log.debug('Setting capability at onWorkerStart', JSON.stringify(caps));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
       const msg = `Failed to assign debugging ports to Electron instances: ${errorMessage}`;
