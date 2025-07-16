@@ -2,6 +2,7 @@ import { $ } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import semver from 'semver';
 
 describe('Script App Example', () => {
   before(async () => {
@@ -51,8 +52,14 @@ describe('Script App Example', () => {
 
     // In the script app, the app version is the electron version
     const packageJson = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8'));
-    const electronVersion = packageJson.devDependencies.electron.replace('^', '');
-    expect(html).toContain(electronVersion);
+    const electronVersion = packageJson.devDependencies.electron;
+    const versionMatch = html.match(/App Version:\s*(\d+\.\d+\.\d+)/);
+    expect(versionMatch).not.toBeNull();
+
+    if (versionMatch) {
+      const actualVersion = versionMatch[1];
+      expect(semver.satisfies(actualVersion, electronVersion)).toBe(true);
+    }
   });
 
   it('should get app name via Electron API', async () => {
