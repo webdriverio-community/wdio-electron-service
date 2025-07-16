@@ -176,7 +176,7 @@ export interface ElectronServiceOptions {
 
 export type ElectronServiceGlobalOptions = Pick<
   ElectronServiceOptions,
-  'clearMocks' | 'resetMocks' | 'restoreMocks' | 'debug'
+  'clearMocks' | 'resetMocks' | 'restoreMocks'
 > & {
   rootDir?: string;
   /**
