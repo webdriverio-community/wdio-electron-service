@@ -996,7 +996,7 @@ describe('Electron Launch Service', () => {
 
     describe('Standard', () => {
       it('should apply `--inspect` to the args of `goog:chromeOptions`', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         const capabilities = baseCapability;
         const expectedCaps = structuredClone(capabilities);
         expectedCaps['goog:chromeOptions'].args.push('--inspect=localhost:50000');
@@ -1006,7 +1006,7 @@ describe('Electron Launch Service', () => {
       });
 
       it('should apply `--inspect` if `goog:chromeOptions` is not set to capability', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         const capabilities = {
           'browserName': 'chrome',
           'browserVersion': '116.0.5845.190',
@@ -1023,7 +1023,7 @@ describe('Electron Launch Service', () => {
       });
 
       it('should apply `--inspect` if `args` is not set to `goog:chromeOptions`', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         const capabilities = {
           'browserName': 'chrome',
           'browserVersion': '116.0.5845.190',
@@ -1046,15 +1046,15 @@ describe('Electron Launch Service', () => {
       });
 
       it('should throw error when error occurred', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         (getPort as Mock).mockRejectedValue('Some error');
-        await expect(() => instance?.onWorkerStart('0', baseCapability)).rejects.toThrow();
+        await expect(() => instance?.onWorkerStart('0', baseCapability)).rejects.toThrowError();
       });
     });
 
     describe('W3C-specific', () => {
       it('should apply `--inspect` to the args of `goog:chromeOptions`', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         const capabilities = [
           {
             firstMatch: [],
@@ -1081,7 +1081,7 @@ describe('Electron Launch Service', () => {
 
     describe('Multiremote', async () => {
       it('should apply `--inspect` to the args of `goog:chromeOptions` for the electron', async () => {
-        instance = new ElectronLaunchService({ debug: true }, {}, {});
+        instance = new ElectronLaunchService({}, {}, {});
         const capabilities = {
           firefox: {
             capabilities: {

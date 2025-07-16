@@ -236,10 +236,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
    * This allows for reliable parallel debugging of multiple Electron instances.
    */
   async onWorkerStart(_cid: string, capabilities: WebdriverIO.Capabilities) {
-    if (!this.#globalOptions.debug) {
-      return;
-    }
-
     try {
       const capsList = Array.isArray(capabilities) ? (capabilities as WebdriverIO.Capabilities[]) : [capabilities];
       const caps = capsList.flatMap((cap) => getConvertedElectronCapabilities(cap) as WebdriverIO.Capabilities);
