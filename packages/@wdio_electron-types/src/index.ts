@@ -172,6 +172,19 @@ export interface ElectronServiceOptions {
    * Calls .mockRestore() on all mocked APIs before each test. This will restore the original API function, the mock will be removed.
    */
   restoreMocks?: boolean;
+  /**
+   * Whether to enable the debug mode.
+   *
+   * When enabled, the service will:
+   * - Dynamically find available ports using get-port
+   * - Add the --inspect flag with the assigned port to each Electron instance
+   * - Ensure each Electron instance has a unique debugging port
+   *
+   * This allows for reliable parallel debugging of multiple Electron instances.
+   *
+   * @default false
+   */
+  debug?: boolean;
 }
 
 export type ElectronServiceGlobalOptions = Pick<
