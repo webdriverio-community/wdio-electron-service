@@ -43,6 +43,15 @@
     "test:package": "pnpm dlx cross-env DEBUG=wdio-electron-service tsx ./scripts/test-package.ts",
     "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal",
+    "e2e": "turbo run test --filter=@repo/e2e --only",
+    "e2e:builder": "turbo run test:builder --filter=@repo/e2e --only",
+    "e2e:forge": "turbo run test:forge --filter=@repo/e2e --only",
+    "e2e:no-binary": "turbo run test:no-binary --filter=@repo/e2e --only",
+    "e2e:cjs": "turbo run test:cjs --filter=@repo/e2e --only",
+    "e2e:esm": "turbo run test:esm --filter=@repo/e2e --only",
+    "e2e:window": "turbo run test:window --filter=@repo/e2e --only",
+    "e2e:multiremote": "turbo run test:multiremote --filter=@repo/e2e --only",
+    "e2e:standalone": "turbo run test:standalone --filter=@repo/e2e --only",
     "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr"
   },
   "devDependencies": {

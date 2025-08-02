@@ -136,3 +136,6 @@ packages/wdio-electron-service/src/cjs/preload.ts
 
 # fixture build files
 fixtures/**/rollup.config.js
+
+# E2E build files
+dist-electron
