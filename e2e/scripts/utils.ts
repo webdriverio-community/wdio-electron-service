@@ -73,14 +73,18 @@ export async function execWithEnv(
       }, timeout);
     }
 
-    // Capture stdout
+    // Capture stdout and stream to console
     childProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
+      const output = data.toString();
+      stdout += output;
+      process.stdout.write(output);
     });
 
-    // Capture stderr
+    // Capture stderr and stream to console
     childProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
+      const output = data.toString();
+      stderr += output;
+      process.stderr.write(output);
     });
 
     // Handle process completion

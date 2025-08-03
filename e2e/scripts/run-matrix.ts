@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { join } from 'path';
+import { join } from 'node:path';
 import pLimit from 'p-limit';
 import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
 import { killElectronProcesses, execWithEnv, formatDuration } from './utils.js';
@@ -85,35 +85,63 @@ function filterVariants(variants: TestVariant[], envContext: EnvironmentContext)
   }
 
   console.log('🎯 Environment filters detected - filtering test variants');
+  console.log('🔍 Debug: Environment filter values:');
+  console.log(`  process.env.PLATFORM: "${process.env.PLATFORM}"`);
+  console.log(`  process.env.MODULE_TYPE: "${process.env.MODULE_TYPE}"`);
+  console.log(`  process.env.TEST_TYPE: "${process.env.TEST_TYPE}"`);
+  console.log(`  process.env.BINARY: "${process.env.BINARY}"`);
+  console.log(`  envContext.platform: "${envContext.platform}"`);
+  console.log(`  envContext.moduleType: "${envContext.moduleType}"`);
+  console.log(`  envContext.testType: "${envContext.testType}"`);
+  console.log(`  envContext.isBinary: ${envContext.isBinary}`);
+  console.log(`  envContext.isMacUniversal: ${envContext.isMacUniversal}`);
 
-  return variants.filter((variant) => {
+  const filtered = variants.filter((variant) => {
+    console.log(`🔍 Debug: Checking variant ${getTestName(variant)}`);
+    console.log(`  variant.platform: "${variant.platform}" vs env: "${envContext.platform}"`);
+    console.log(`  variant.moduleType: "${variant.moduleType}" vs env: "${envContext.moduleType}"`);
+    console.log(`  variant.testType: "${variant.testType}" vs env: "${envContext.testType}"`);
+    console.log(`  variant.binary: ${variant.binary} vs env: ${envContext.isBinary}`);
+
     // Platform filter - only apply if explicitly set
     if (process.env.PLATFORM && variant.platform !== envContext.platform) {
+      console.log(`  ❌ Filtered out: platform mismatch`);
       return false;
     }
 
     // Module type filter - only apply if explicitly set
     if (process.env.MODULE_TYPE && variant.moduleType !== envContext.moduleType) {
+      console.log(`  ❌ Filtered out: module type mismatch`);
       return false;
     }
 
     // Test type filter - only apply if explicitly set
     if (process.env.TEST_TYPE && variant.testType !== envContext.testType) {
+      console.log(`  ❌ Filtered out: test type mismatch`);
       return false;
     }
 
     // Binary filter - only apply if explicitly set
     if (process.env.BINARY && variant.binary !== envContext.isBinary) {
+      console.log(`  ❌ Filtered out: binary mismatch`);
       return false;
     }
 
     // Mac Universal mode - include both CJS and ESM for builder/forge binary tests
     if (envContext.isMacUniversal) {
-      return ['builder', 'forge'].includes(variant.platform) && variant.binary;
+      const matches = ['builder', 'forge'].includes(variant.platform) && variant.binary;
+      if (!matches) {
+        console.log(`  ❌ Filtered out: Mac Universal mode requires builder/forge + binary`);
+      }
+      return matches;
     }
 
+    console.log(`  ✅ Variant passes filters`);
     return true;
   });
+
+  console.log(`🔍 Debug: Filtered ${variants.length} variants down to ${filtered.length}`);
+  return filtered;
 }
 
 /**
@@ -135,9 +163,16 @@ async function runTest(
 
     const appPath = join(process.cwd(), '..', 'fixtures', 'e2e-apps', appDirName);
 
+    console.log(`🔍 Debug: Test paths for ${testName}`);
+    console.log(`  Current working directory: ${process.cwd()}`);
+    console.log(`  App directory name: ${appDirName}`);
+    console.log(`  Full app path: ${appPath}`);
+    console.log(`  Platform: ${process.platform}`);
+
     // Ensure app is built
     const buildSuccess = await buildManager.ensureAppBuilt(appPath);
     if (!buildSuccess) {
+      console.error(`❌ Build failed for app: ${appPath}`);
       throw new Error(`Failed to build app: ${appPath}`);
     }
 
@@ -203,15 +238,23 @@ async function runTest(
  */
 async function runTests(): Promise<void> {
   const startTime = Date.now();
+  console.log(`🔍 Debug: Starting test execution at ${new Date().toISOString()}`);
+  console.log(`🔍 Debug: Node.js version: ${process.version}`);
+  console.log(`🔍 Debug: Platform: ${process.platform} ${process.arch}`);
+  console.log(`🔍 Debug: Process arguments: ${process.argv.join(' ')}`);
 
   try {
+    console.log(`🔍 Debug: Parsing environment context...`);
     // Parse environment and validate
     const envContext = createEnvironmentContext();
     console.log(`🎯 Test Environment: ${envContext.toString()}`);
+    console.log(`🔍 Debug: Environment context created successfully`);
 
+    console.log(`🔍 Debug: Killing leftover Electron processes...`);
     // Kill any leftover Electron processes
     await killElectronProcesses();
 
+    console.log(`🔍 Debug: Setting up build manager...`);
     // Set up build manager
     const buildManager = new BuildManager();
 
@@ -220,8 +263,12 @@ async function runTests(): Promise<void> {
     console.log(`🚀 Running tests with concurrency: ${concurrency}`);
     const limit = pLimit(concurrency);
 
+    console.log(`🔍 Debug: Generating test variants...`);
     // Generate and filter test variants
     const allVariants = generateTestVariants();
+    console.log(`🔍 Debug: Generated ${allVariants.length} total variants`);
+
+    console.log(`🔍 Debug: Filtering test variants...`);
     const filteredVariants = filterVariants(allVariants, envContext);
 
     console.log(`📊 Generated ${allVariants.length} possible test variants`);
@@ -262,14 +309,19 @@ async function runTests(): Promise<void> {
       statusBar.updateStatus(status);
     }, 500);
 
+    console.log(`🔍 Debug: Starting test execution with ${filteredVariants.length} variants...`);
     // Run all tests with controlled concurrency
     const results: TestResult[] = await Promise.all(
-      filteredVariants.map((variant) =>
+      filteredVariants.map((variant, index) =>
         limit(async () => {
           const testName = getTestName(variant);
+          console.log(`🔍 Debug: Starting variant ${index + 1}/${filteredVariants.length}: ${testName}`);
           statusTracker.startTest(testName);
 
           const result = await runTest(variant, buildManager, envContext);
+          console.log(
+            `🔍 Debug: Completed variant ${index + 1}/${filteredVariants.length}: ${testName} - ${result.success ? 'SUCCESS' : 'FAILED'}`,
+          );
 
           statusTracker.completeTest(testName, result);
           return result;
@@ -277,30 +329,44 @@ async function runTests(): Promise<void> {
       ),
     );
 
+    console.log(`🔍 Debug: All test variants completed. Processing results...`);
+
     // Clean up status updates
     if (statusUpdateInterval) {
       clearInterval(statusUpdateInterval);
     }
 
+    console.log(`🔍 Debug: Printing final summary...`);
     // Print final summary
     statusBar.printFinalSummary(results, startTime);
 
+    console.log(`🔍 Debug: Analyzing test results...`);
     // Check if all tests passed
     const failed = results.filter((r) => !r.success && !r.skipped).length;
     const passed = results.filter((r) => r.success && !r.skipped).length;
+    const skipped = results.filter((r) => r.skipped).length;
+
+    console.log(`🔍 Debug: Test results breakdown: ${passed} passed, ${failed} failed, ${skipped} skipped`);
 
     if (failed > 0) {
       console.error(`\n❌ ${failed} test(s) failed out of ${results.length}`);
+      console.log(`🔍 Debug: Exiting with code 1 due to test failures`);
       process.exit(1);
     } else {
       console.log(`\n✅ All ${passed} tests passed successfully!`);
+      console.log(`🔍 Debug: All tests passed, exiting with code 0`);
     }
   } catch (error) {
     console.error(`\n❌ Error running tests: ${error}`);
+    console.log(`🔍 Debug: Caught error in main test runner:`, error);
+    console.log(`🔍 Debug: Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+    console.log(`🔍 Debug: Exiting with code 1 due to unhandled error`);
     process.exit(1);
   } finally {
+    console.log(`🔍 Debug: Cleaning up in finally block...`);
     // Cleanup
     await killElectronProcesses();
+    console.log(`🔍 Debug: Cleanup completed`);
   }
 }
 
@@ -376,7 +442,7 @@ USAGE:
 
 FILTERING OPTIONS:
   --platform=<platform>     Run tests for specific platform(s): builder, forge, no-binary
-  --module-type=<type>      Run tests for specific module type(s): cjs, esm  
+  --module-type=<type>      Run tests for specific module type(s): cjs, esm
   --test-type=<type>        Run tests for specific test type(s): standard, window, multiremote, standalone
   --binary=<true|false>     Run binary or no-binary tests
   --mac-universal=<true>    Run Mac Universal build tests (builder/forge only)
@@ -391,7 +457,7 @@ EXAMPLES:
   # Run full test matrix (all combinations)
   tsx scripts/run-matrix.ts
 
-  # Run only builder tests  
+  # Run only builder tests
   tsx scripts/run-matrix.ts --platform=builder
 
   # Run only ESM tests
@@ -424,10 +490,15 @@ async function main(): Promise<void> {
   await runTests();
 }
 
+console.log('🔍 Debug: Starting test execution at', new Date().toISOString());
+console.log('🔍 Debug: Node.js version:', process.version);
+console.log('🔍 Debug: Platform:', process.platform, process.arch);
+console.log('🔍 Debug: Process arguments:', process.argv.join(' '));
+console.log('🔍 Debug: import.meta.url:', import.meta.url);
+console.log('🔍 Debug: import.meta.url(expected):', `file://${process.argv[1]}`);
+
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error('❌ Unhandled error:', error);
-    process.exit(1);
-  });
-}
+main().catch((error) => {
+  console.error('❌ Unhandled error:', error);
+  process.exit(1);
+});

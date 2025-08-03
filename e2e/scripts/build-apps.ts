@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
-import { join } from 'path';
-import { execSync } from 'child_process';
+import { join, dirname } from 'node:path';
+import { execSync } from 'node:child_process';
 import { createEnvironmentContext } from '../config/envSchema.js';
 import { dirExists, fileExists, execWithEnv, formatDuration } from './utils.js';
 
@@ -16,17 +16,43 @@ export class BuildManager {
    * Ensure an app is built (builds only if needed)
    */
   async ensureAppBuilt(appPath: string): Promise<boolean> {
+    console.log(`🔍 Debug: Checking if app needs building: ${appPath}`);
+    console.log(`  Platform: ${process.platform}`);
+    console.log(`  Already built apps: ${Array.from(this.builtApps).join(', ') || 'none'}`);
+
     if (this.builtApps.has(appPath)) {
       console.log(`✅ App already built: ${appPath}`);
       return true;
     }
 
+    console.log(`🔍 Debug: Checking app directory existence: ${appPath}`);
     if (!dirExists(appPath)) {
+      console.error(`❌ App directory does not exist: ${appPath}`);
+      console.log(`🔍 Debug: Current working directory: ${process.cwd()}`);
+      console.log(`🔍 Debug: Listing parent directory contents...`);
+      try {
+        const parentDir = dirname(appPath);
+        const fs = await import('fs');
+        const contents = fs.readdirSync(parentDir);
+        console.log(`  Parent directory (${parentDir}) contents: ${contents.join(', ')}`);
+      } catch (error) {
+        console.log(`  Failed to list parent directory: ${error}`);
+      }
       throw new Error(`App directory does not exist: ${appPath}`);
     }
 
     const packageJsonPath = join(appPath, 'package.json');
+    console.log(`🔍 Debug: Checking package.json: ${packageJsonPath}`);
     if (!fileExists(packageJsonPath)) {
+      console.error(`❌ package.json not found in: ${appPath}`);
+      console.log(`🔍 Debug: Listing app directory contents...`);
+      try {
+        const fs = await import('fs');
+        const contents = fs.readdirSync(appPath);
+        console.log(`  App directory contents: ${contents.join(', ')}`);
+      } catch (error) {
+        console.log(`  Failed to list app directory: ${error}`);
+      }
       throw new Error(`package.json not found in: ${appPath}`);
     }
 
@@ -132,17 +158,34 @@ export class BuildManager {
    * Run a command in a specific directory
    */
   private async runCommand(command: string, cwd: string): Promise<void> {
-    console.log(`  Running: ${command} (in ${cwd.split('/').pop()})`);
+    const cwdName = process.platform === 'win32' ? cwd.split('\\').pop() : cwd.split('/').pop();
+    console.log(`  Running: ${command} (in ${cwdName})`);
+    console.log(`🔍 Debug: Command execution details:`);
+    console.log(`    Full working directory: ${cwd}`);
+    console.log(`    Platform: ${process.platform}`);
+    console.log(`    Command: ${command}`);
 
     try {
       const result = await execWithEnv(command, {}, { cwd, timeout: 180000 }); // 3 minutes
 
+      console.log(`🔍 Debug: Command completed with exit code: ${result.code}`);
+      if (result.stdout) {
+        console.log(`🔍 Debug: Command stdout length: ${result.stdout.length} chars`);
+      }
+      if (result.stderr) {
+        console.log(`🔍 Debug: Command stderr length: ${result.stderr.length} chars`);
+      }
+
       if (result.code !== 0) {
+        console.error(`❌ Command failed with code ${result.code}`);
+        console.error(`❌ Command stderr: ${result.stderr}`);
+        console.error(`❌ Command stdout: ${result.stdout}`);
         throw new Error(`Command failed with code ${result.code}: ${result.stderr}`);
       }
     } catch (error) {
-      console.error(`Failed to run command: ${command}`);
-      console.error(`Working directory: ${cwd}`);
+      console.error(`❌ Failed to run command: ${command}`);
+      console.error(`❌ Working directory: ${cwd}`);
+      console.error(`❌ Error details:`, error);
       throw error;
     }
   }
