@@ -236,10 +236,6 @@ async function runTests(): Promise<void> {
     console.log(`🎯 Test Environment: ${envContext.toString()}`);
     console.log(`🔍 Debug: Environment context created successfully`);
 
-    console.log(`🔍 Debug: Killing leftover Electron processes...`);
-    // Kill any leftover Electron processes
-    await killElectronProcesses();
-
     console.log(`🔍 Debug: Setting up build manager...`);
     // Set up build manager
     const buildManager = new BuildManager();
