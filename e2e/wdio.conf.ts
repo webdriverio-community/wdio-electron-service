@@ -1,16 +1,15 @@
-import { join, dirname } from 'path';
-import { existsSync, readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+import { join, dirname } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-// ES module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 import type { WdioElectronConfig } from '@wdio/electron-types';
 import type { NormalizedPackageJson } from 'read-package-up';
-// Import will be used in beforeSession hook for binary mode
-// import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@wdio/electron-utils';
+
 import { createEnvironmentContext } from './config/envSchema.js';
 import { fileExists, safeJsonParse } from './scripts/utils.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Configuration context for WDIO
@@ -24,7 +23,7 @@ interface ConfigContext {
 }
 
 /**
- * Get configuration context - match reference implementation
+ * Get configuration context
  */
 async function getConfigContext(): Promise<ConfigContext> {
   console.log('🔍 Creating WDIO configuration context...');
@@ -33,7 +32,7 @@ async function getConfigContext(): Promise<ConfigContext> {
   const envContext = createEnvironmentContext();
   console.log(`Environment: ${envContext.toString()}`);
 
-  // Determine app directory - match reference implementation pattern
+  // Determine app directory
   const projectRoot = join(process.cwd(), '..');
   const appPath = envContext.env.APP_DIR || join(projectRoot, 'fixtures', 'e2e-apps', envContext.appDirName);
   console.log(`App path: ${appPath}`);
@@ -65,7 +64,7 @@ async function getConfigContext(): Promise<ConfigContext> {
   if (envContext.isNoBinary) {
     console.log('🔍 Setting up no-binary test with entry point');
 
-    // Try multiple possible entry points - match reference implementation
+    // Try multiple possible entry points
     const possibleEntryPoints = [
       join(appPath, 'main.js'),
       join(appPath, 'dist', 'main.js'),
@@ -87,7 +86,7 @@ async function getConfigContext(): Promise<ConfigContext> {
     console.log('🔍 Setting up binary test with app binary path');
 
     try {
-      // Import async utilities and resolve binary path directly - like reference
+      // Import async utilities and resolve binary path directly
       const { getBinaryPath, getAppBuildInfo, getElectronVersion } = await import('@wdio/electron-utils');
 
       const pkg = { packageJson, path: packageJsonPath };
@@ -113,7 +112,6 @@ async function getConfigContext(): Promise<ConfigContext> {
   };
 }
 
-// Use top-level await like reference implementation
 const context = await getConfigContext();
 const { envContext, appEntryPoint, appBinaryPath } = context;
 
@@ -136,7 +134,27 @@ switch (envContext.testType) {
 }
 
 // Configure capabilities
-let capabilities: any;
+type ElectronCapability = {
+  'browserName': 'electron';
+  'wdio:electronServiceOptions': {
+    appEntryPoint?: string;
+    appBinaryPath?: string;
+    appArgs: string[];
+  };
+};
+
+type MultiremoteCapabilities = {
+  browserA: {
+    capabilities: ElectronCapability;
+  };
+  browserB: {
+    capabilities: ElectronCapability;
+  };
+};
+
+type StandardCapabilities = ElectronCapability[];
+
+let capabilities: MultiremoteCapabilities | StandardCapabilities;
 if (envContext.isMultiremote) {
   // Multiremote configuration
   capabilities = {
@@ -175,7 +193,7 @@ if (envContext.isMultiremote) {
 // Create log directory
 const logDir = join(__dirname, 'logs', `${envContext.testType}-${envContext.appDirName}`);
 
-// Export the configuration object directly - like reference implementation
+// Export the configuration object directly
 export const config: WdioElectronConfig = {
   runner: 'local',
   specs,
@@ -199,18 +217,4 @@ export const config: WdioElectronConfig = {
   },
 
   outputDir: logDir,
-
-  // Hooks - simplified like reference implementation
-  beforeSession: async function () {
-    console.log(`🔍 Starting ${envContext.isNoBinary ? 'no-binary' : 'binary'} ${envContext.testType} test`);
-    console.log(`Module type: ${envContext.moduleType}`);
-  },
-
-  before: async () => {
-    console.log(`🧪 Test session starting for: ${envContext.toString()}`);
-  },
-
-  after: async () => {
-    console.log(`✅ Test session completed for: ${envContext.toString()}`);
-  },
 };
