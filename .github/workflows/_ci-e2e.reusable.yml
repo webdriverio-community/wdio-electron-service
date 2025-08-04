@@ -50,6 +50,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ${{ inputs.os }}
+    timeout-minutes: 60
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false

@@ -160,32 +160,62 @@ export class BuildManager {
   private async runCommand(command: string, cwd: string): Promise<void> {
     const cwdName = process.platform === 'win32' ? cwd.split('\\').pop() : cwd.split('/').pop();
     console.log(`  Running: ${command} (in ${cwdName})`);
-    console.log(`🔍 Debug: Command execution details:`);
-    console.log(`    Full working directory: ${cwd}`);
-    console.log(`    Platform: ${process.platform}`);
-    console.log(`    Command: ${command}`);
+    
+    // Add CI environment debugging
+    console.log(`🔍 Debug: CI Environment Info:`);
+    console.log(`    CI: ${process.env.CI || 'false'}`);
+    console.log(`    GITHUB_ACTIONS: ${process.env.GITHUB_ACTIONS || 'false'}`);
+    console.log(`    RUNNER_OS: ${process.env.RUNNER_OS || 'unknown'}`);
+    console.log(`    Memory usage: ${JSON.stringify(process.memoryUsage())}`);
+    console.log(`    Platform: ${process.platform} ${process.arch}`);
+    console.log(`    Node version: ${process.version}`);
+    console.log(`    Working directory: ${cwd}`);
+    console.log(`    Free disk space check...`);
+    
+    try {
+      // Check disk space on Unix systems
+      if (process.platform !== 'win32') {
+        const { execSync } = await import('child_process');
+        try {
+          const dfOutput = execSync('df -h .', { cwd, encoding: 'utf8' });
+          console.log(`    Disk space: ${dfOutput.split('\n')[1]}`);
+        } catch (e) {
+          console.log(`    Could not check disk space: ${e}`);
+        }
+      }
+    } catch (e) {
+      console.log(`    Disk space check failed: ${e}`);
+    }
+
+    const startTime = Date.now();
+    console.log(`🔍 Debug: Starting command at ${new Date().toISOString()}`);
 
     try {
       const result = await execWithEnv(command, {}, { cwd, timeout: 180000 }); // 3 minutes
+      const duration = Date.now() - startTime;
 
-      console.log(`🔍 Debug: Command completed with exit code: ${result.code}`);
+      console.log(`🔍 Debug: Command completed in ${duration}ms with exit code: ${result.code}`);
+      
       if (result.stdout) {
-        console.log(`🔍 Debug: Command stdout length: ${result.stdout.length} chars`);
+        console.log(`🔍 Debug: Command stdout (${result.stdout.length} chars): ${result.stdout.slice(0, 500)}${result.stdout.length > 500 ? '...' : ''}`);
       }
       if (result.stderr) {
-        console.log(`🔍 Debug: Command stderr length: ${result.stderr.length} chars`);
+        console.log(`🔍 Debug: Command stderr (${result.stderr.length} chars): ${result.stderr.slice(0, 500)}${result.stderr.length > 500 ? '...' : ''}`);
       }
 
       if (result.code !== 0) {
-        console.error(`❌ Command failed with code ${result.code}`);
-        console.error(`❌ Command stderr: ${result.stderr}`);
-        console.error(`❌ Command stdout: ${result.stdout}`);
+        console.error(`❌ Command failed with code ${result.code} after ${duration}ms`);
+        console.error(`❌ Full stderr: ${result.stderr}`);
+        console.error(`❌ Full stdout: ${result.stdout}`);
         throw new Error(`Command failed with code ${result.code}: ${result.stderr}`);
       }
     } catch (error) {
-      console.error(`❌ Failed to run command: ${command}`);
+      const duration = Date.now() - startTime;
+      console.error(`❌ Command failed after ${duration}ms: ${command}`);
       console.error(`❌ Working directory: ${cwd}`);
-      console.error(`❌ Error details:`, error);
+      console.error(`❌ Error type: ${error instanceof Error ? error.constructor.name : typeof error}`);
+      console.error(`❌ Error message: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`❌ Error stack: ${error instanceof Error ? error.stack : 'No stack trace'}`);
       throw error;
     }
   }

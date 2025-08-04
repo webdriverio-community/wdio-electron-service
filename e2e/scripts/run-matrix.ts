@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
 import { join } from 'node:path';
+import { loadavg } from 'node:os';
 import pLimit from 'p-limit';
 import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
 import { killElectronProcesses, execWithEnv, formatDuration } from './utils.js';
@@ -97,46 +98,31 @@ function filterVariants(variants: TestVariant[], envContext: EnvironmentContext)
   console.log(`  envContext.isMacUniversal: ${envContext.isMacUniversal}`);
 
   const filtered = variants.filter((variant) => {
-    console.log(`🔍 Debug: Checking variant ${getTestName(variant)}`);
-    console.log(`  variant.platform: "${variant.platform}" vs env: "${envContext.platform}"`);
-    console.log(`  variant.moduleType: "${variant.moduleType}" vs env: "${envContext.moduleType}"`);
-    console.log(`  variant.testType: "${variant.testType}" vs env: "${envContext.testType}"`);
-    console.log(`  variant.binary: ${variant.binary} vs env: ${envContext.isBinary}`);
-
     // Platform filter - only apply if explicitly set
     if (process.env.PLATFORM && variant.platform !== envContext.platform) {
-      console.log(`  ❌ Filtered out: platform mismatch`);
       return false;
     }
 
     // Module type filter - only apply if explicitly set
     if (process.env.MODULE_TYPE && variant.moduleType !== envContext.moduleType) {
-      console.log(`  ❌ Filtered out: module type mismatch`);
       return false;
     }
 
     // Test type filter - only apply if explicitly set
     if (process.env.TEST_TYPE && variant.testType !== envContext.testType) {
-      console.log(`  ❌ Filtered out: test type mismatch`);
       return false;
     }
 
     // Binary filter - only apply if explicitly set
     if (process.env.BINARY && variant.binary !== envContext.isBinary) {
-      console.log(`  ❌ Filtered out: binary mismatch`);
       return false;
     }
 
     // Mac Universal mode - include both CJS and ESM for builder/forge binary tests
     if (envContext.isMacUniversal) {
-      const matches = ['builder', 'forge'].includes(variant.platform) && variant.binary;
-      if (!matches) {
-        console.log(`  ❌ Filtered out: Mac Universal mode requires builder/forge + binary`);
-      }
-      return matches;
+      return ['builder', 'forge'].includes(variant.platform) && variant.binary;
     }
 
-    console.log(`  ✅ Variant passes filters`);
     return true;
   });
 
@@ -310,17 +296,27 @@ async function runTests(): Promise<void> {
     }, 500);
 
     console.log(`🔍 Debug: Starting test execution with ${filteredVariants.length} variants...`);
+    console.log(`🔍 Debug: System resources before test execution:`);
+    console.log(`    Memory usage: ${JSON.stringify(process.memoryUsage())}`);
+    console.log(`    Uptime: ${process.uptime()}s`);
+    console.log(`    Load average: ${process.platform !== 'win32' ? JSON.stringify(loadavg()) : 'N/A (Windows)'}`);
+
     // Run all tests with controlled concurrency
     const results: TestResult[] = await Promise.all(
       filteredVariants.map((variant, index) =>
         limit(async () => {
           const testName = getTestName(variant);
-          console.log(`🔍 Debug: Starting variant ${index + 1}/${filteredVariants.length}: ${testName}`);
+          console.log(
+            `🔍 Debug: Starting variant ${index + 1}/${filteredVariants.length}: ${testName} at ${new Date().toISOString()}`,
+          );
           statusTracker.startTest(testName);
 
+          const variantStartTime = Date.now();
           const result = await runTest(variant, buildManager, envContext);
+          const variantDuration = Date.now() - variantStartTime;
+
           console.log(
-            `🔍 Debug: Completed variant ${index + 1}/${filteredVariants.length}: ${testName} - ${result.success ? 'SUCCESS' : 'FAILED'}`,
+            `🔍 Debug: Completed variant ${index + 1}/${filteredVariants.length}: ${testName} - ${result.success ? 'SUCCESS' : 'FAILED'} in ${variantDuration}ms`,
           );
 
           statusTracker.completeTest(testName, result);
