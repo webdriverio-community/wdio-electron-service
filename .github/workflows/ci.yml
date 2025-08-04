@@ -100,14 +100,10 @@ jobs:
         # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # Optimization: Linux runs both ESM and CJS together using wildcard
-          # This reduces the number of jobs while still testing all combinations
-          - os: 'ubuntu-latest'
-            type: 'esm'
-          - os: 'ubuntu-latest'
-            type: 'cjs'
-          # Optimization: Windows and macOS run ESM and CJS separately for better resource management
+          # Optimization: All platforms run ESM and CJS separately for consistent resource management
           # This prevents individual jobs from running too many test variants simultaneously
+          - os: 'ubuntu-latest'
+            type: '*'
           - os: 'windows-latest'
             type: '*'
           - os: 'macos-latest'
