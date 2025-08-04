@@ -90,6 +90,8 @@ jobs:
     strategy:
       # Continue with E2E tests even if other jobs fail
       fail-fast: false
+      # Limit concurrent jobs to prevent resource exhaustion
+      max-parallel: 4
       matrix:
         # Test across all major operating systems
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -98,31 +100,17 @@ jobs:
         # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # Optimization: Linux/Mac run both ESM and CJS together using wildcard
+          # Optimization: Linux runs both ESM and CJS together using wildcard
           # This reduces the number of jobs while still testing all combinations
           - os: 'ubuntu-latest'
             type: 'esm'
           - os: 'ubuntu-latest'
             type: 'cjs'
-          - os: 'macos-latest'
-            type: 'esm'
-          - os: 'macos-latest'
-            type: 'cjs'
-          # Optimization: Reduce macOS jobs due to GitHub Actions concurrency limits
-          # macOS runners are limited, so we combine tests to reduce parallel jobs
-          - os: 'macos-latest'
-            scenario: 'forge'
-          - os: 'macos-latest'
-            scenario: 'no-binary'
-          # Optimization: Windows runs ESM and CJS separately for better parallelization
-          # Windows is slower, so running separately helps identify issues faster
+          # Optimization: Windows and macOS run ESM and CJS separately for better resource management
+          # This prevents individual jobs from running too many test variants simultaneously
           - os: 'windows-latest'
             type: '*'
-        include:
-          # Special case: Combined test for macOS to reduce total jobs
-          # This runs both forge and no-binary tests in a single job
           - os: 'macos-latest'
-            scenario: 'no-binary, forge'
             type: '*'
     uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
@@ -142,6 +130,8 @@ jobs:
     strategy:
       # Continue with E2E tests even if other jobs fail
       fail-fast: false
+      # Limit concurrent macOS jobs to prevent resource exhaustion
+      max-parallel: 2
       matrix:
         # Test both application scenarios
         scenario: ['forge', 'builder']
