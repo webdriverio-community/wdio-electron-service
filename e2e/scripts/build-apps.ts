@@ -160,7 +160,7 @@ export class BuildManager {
   private async runCommand(command: string, cwd: string): Promise<void> {
     const cwdName = process.platform === 'win32' ? cwd.split('\\').pop() : cwd.split('/').pop();
     console.log(`  Running: ${command} (in ${cwdName})`);
-    
+
     // Add CI environment debugging
     console.log(`🔍 Debug: CI Environment Info:`);
     console.log(`    CI: ${process.env.CI || 'false'}`);
@@ -171,7 +171,7 @@ export class BuildManager {
     console.log(`    Node version: ${process.version}`);
     console.log(`    Working directory: ${cwd}`);
     console.log(`    Free disk space check...`);
-    
+
     try {
       // Check disk space on Unix systems
       if (process.platform !== 'win32') {
@@ -195,12 +195,16 @@ export class BuildManager {
       const duration = Date.now() - startTime;
 
       console.log(`🔍 Debug: Command completed in ${duration}ms with exit code: ${result.code}`);
-      
+
       if (result.stdout) {
-        console.log(`🔍 Debug: Command stdout (${result.stdout.length} chars): ${result.stdout.slice(0, 500)}${result.stdout.length > 500 ? '...' : ''}`);
+        console.log(
+          `🔍 Debug: Command stdout (${result.stdout.length} chars): ${result.stdout.slice(0, 500)}${result.stdout.length > 500 ? '...' : ''}`,
+        );
       }
       if (result.stderr) {
-        console.log(`🔍 Debug: Command stderr (${result.stderr.length} chars): ${result.stderr.slice(0, 500)}${result.stderr.length > 500 ? '...' : ''}`);
+        console.log(
+          `🔍 Debug: Command stderr (${result.stderr.length} chars): ${result.stderr.slice(0, 500)}${result.stderr.length > 500 ? '...' : ''}`,
+        );
       }
 
       if (result.code !== 0) {
