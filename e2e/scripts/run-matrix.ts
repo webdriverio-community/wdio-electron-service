@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { loadavg } from 'node:os';
 import pLimit from 'p-limit';
 import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
-import { killElectronProcesses, execWithEnv, formatDuration } from './utils.js';
+import { execWithEnv, formatDuration } from './utils.js';
 import { StatusBar, TestStatusTracker, TestResult } from './statusBar.js';
 import BuildManager from './build-apps.js';
 
@@ -357,7 +357,7 @@ async function runTests(): Promise<void> {
   } finally {
     console.log(`🔍 Debug: Cleaning up in finally block...`);
     // Cleanup
-    await killElectronProcesses();
+    // await killElectronProcesses();
     console.log(`🔍 Debug: Cleanup completed`);
   }
 }
