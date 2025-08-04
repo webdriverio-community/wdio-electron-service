@@ -10,7 +10,8 @@
     "//#format": {
       "dependsOn": [],
       "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
-      "outputs": ["node_modules/.cache/prettier"]
+      "outputs": ["node_modules/.cache/prettier"],
+      "cache": false
     },
     "//#lint": {
       "dependsOn": [],
