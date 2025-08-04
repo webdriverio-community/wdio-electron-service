@@ -50,7 +50,6 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ${{ inputs.os }}
-    timeout-minutes: 60
     strategy:
       # Continue with other tests even if one fails
       fail-fast: false
@@ -108,60 +107,11 @@ jobs:
             };
             return generateBuildFilter('${{ inputs.scenario }}', '${{ inputs.type }}');
 
-      # Show system information before building
-      - name: 🔍 System Information Before Build
-        shell: bash
-        run: |
-          echo "::group::System Information"
-          echo "Runner OS: ${{ runner.os }}"
-          echo "Runner Name: $RUNNER_NAME"
-          echo "GitHub Job: $GITHUB_JOB"
-          echo "Node.js version: $(node --version)"
-          echo "PNPM version: $(pnpm --version)"
-          echo "Current time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "Working directory: $(pwd)"
-          echo "Available disk space:"
-          df -h
-          echo "Memory information:"
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            free -h
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            vm_stat
-          fi
-          echo "Load average:"
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            uptime
-          fi
-          echo "Running processes (top 10):"
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            tasklist | head -10 2>/dev/null || echo "Could not get process list"
-          else
-            ps aux 2>/dev/null | head -10 2>/dev/null || echo "Could not get process list"
-          fi
-          echo "::endgroup::"
-
       # Build the test applications using Turbo with the generated filter
       # This builds only the necessary test apps for the current test configuration
       - name: 🏗️ Build Test Applications
         shell: bash
-        run: |
-          echo "::group::Build Command Info"
-          echo "Build command: ${{ inputs.build-command }}"
-          echo "Build filter: ${{ steps.gen-build.outputs.result }}"
-          echo "Full command: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel"
-          echo "Starting build at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "::endgroup::"
-
-          # Run the actual build command
-          pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
-
-          echo "::group::Build Completion Info"
-          echo "Build completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "System state after build:"
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            uptime
-          fi
-          echo "::endgroup::"
+        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
 
       # Dynamically generate the test commands to run
       # This handles both single and multiple scenarios, and ESM/CJS/both
@@ -184,117 +134,17 @@ jobs:
             };
             return generateTestCommand('${{ inputs.scenario }}', '${{ inputs.type }}');
 
-      # Show system information before testing
-      - name: 🔍 System Information Before Tests
-        shell: bash
-        run: |
-          echo "::group::Pre-Test System State"
-          echo "Current time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "Test commands to run: ${{ steps.gen-test.outputs.result }}"
-          echo "System load and memory:"
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            free -h
-            echo "Load average: $(cat /proc/loadavg)"
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            vm_stat | head -5
-            uptime
-          fi
-          echo "Electron processes (should be none):"
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            pgrep -f [Ee]lectron || echo "No Electron processes found"
-          fi
-          echo "::endgroup::"
-
       # Run the E2E tests using Turbo with the generated test commands
       # First initializes the E2E environment, then runs the specific tests
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: |
-          echo "::group::E2E Test Execution"
-          echo "Starting E2E tests at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "Commands: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only"
-          echo "::endgroup::"
-
-          # Set up error handling
-          set -e
-
-          # Run the tests directly without timeout wrapping to avoid subprocess interference
-          echo "Running E2E tests without timeout command to prevent subprocess issues"
-
-          pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only || {
-            exit_code=$?
-            echo "::error::E2E tests failed with exit code: $exit_code"
-            echo "::group::Post-Failure System State"
-            echo "Failure time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            if [[ "${{ runner.os }}" == "Linux" ]]; then
-              uptime || true
-              free -h || true
-            elif [[ "${{ runner.os }}" == "macOS" ]]; then
-              uptime || true
-              vm_stat | head -5 || true
-            fi
-            echo "Remaining Electron processes:"
-            if [[ "${{ runner.os }}" != "Windows" ]]; then
-              pgrep -f [Ee]lectron || echo "No Electron processes found"
-            fi
-            echo "::endgroup::"
-            exit $exit_code
-          }
-
-          echo "::group::E2E Test Completion"
-          echo "E2E tests completed successfully at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            uptime
-          fi
-          echo "::endgroup::"
+        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
 
       # Show comprehensive debug information on failure
       - name: 🐛 Debug Information on Failure
         shell: bash
         if: failure()
-        run: |
-          echo "::group::Failure Debug Information"
-          echo "Failure occurred at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "GitHub Job: $GITHUB_JOB"
-          echo "Runner OS: ${{ runner.os }}"
-          echo "Scenario: ${{ inputs.scenario }}"
-          echo "Type: ${{ inputs.type }}"
-          echo "Build Command: ${{ inputs.build-command }}"
-
-          echo "System state at failure:"
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            free -h || true
-            echo "Load average: $(cat /proc/loadavg 2>/dev/null || echo 'unavailable')"
-            echo "Disk usage:" && df -h || true
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            vm_stat | head -5 || true
-            uptime || true
-            echo "Disk usage:" && df -h || true
-          fi
-
-          echo "Running processes:"
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            tasklist | head -15 2>/dev/null || echo "Could not get process list"
-          else
-            ps aux 2>/dev/null | head -15 2>/dev/null || echo "Could not get process list"
-          fi
-
-          echo "Electron processes:"
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            pgrep -f [Ee]lectron || echo "No Electron processes found"
-          fi
-
-          echo "Network connections:"
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            ss -tulpn | head -10 || true
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            netstat -an | head -10 || true
-          fi
-          echo "::endgroup::"
-
-          echo "::group::Test Logs"
-          pnpm run ci:e2e:logs || echo "Could not retrieve test logs"
-          echo "::endgroup::"
+        run: pnpm run ci:e2e:logs
 
       # Upload logs as artifacts on failure for later analysis
       # This helps debug issues without cluttering the GitHub Actions console
