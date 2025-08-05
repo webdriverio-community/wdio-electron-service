@@ -14,7 +14,7 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.2.0",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
@@ -22,7 +22,7 @@
     "electron": "catalog:default",
     "electron-builder": "^26.0.12",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "webdriverio": "catalog:default"
   },
   "build": {
