@@ -79,6 +79,75 @@ export async function execWithEnv(
 }
 
 /**
+ * Execute WDIO command with retry logic for xvfb failures on Linux
+ */
+export async function execWdio(
+  command: string,
+  env: Record<string, string> = {},
+  options: { cwd?: string; timeout?: number } = {},
+  maxRetries: number = 3,
+): Promise<{ stdout: string; stderr: string; code: number }> {
+  let lastError: { stdout: string; stderr: string; code: number } | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt === 1) {
+        console.log(`🚀 Running WDIO command: ${command}`);
+      } else {
+        console.log(`🔄 Retry attempt ${attempt}/${maxRetries}: ${command}`);
+      }
+
+      const result = await execWithEnv(command, env, options);
+
+      // Check for xvfb failure on Linux
+      if (
+        result.code !== 0 &&
+        process.platform === 'linux' &&
+        (result.stderr.includes('xvfb-run: error: Xvfb failed to start') ||
+          result.stderr.includes('Xvfb failed to start'))
+      ) {
+        console.log(`❌ Attempt ${attempt}/${maxRetries} failed with xvfb error`);
+        console.log(`🔍 Error: ${result.stderr}`);
+
+        if (attempt < maxRetries) {
+          const delay = attempt * 1000; // Progressive delay: 1s, 2s, 3s
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          lastError = result;
+          continue;
+        }
+      }
+
+      // Success or non-xvfb error
+      if (result.code === 0) {
+        if (attempt > 1) {
+          console.log(`✅ Success on attempt ${attempt}/${maxRetries}`);
+        }
+        return result;
+      } else {
+        // Non-xvfb error, don't retry
+        return result;
+      }
+    } catch (error) {
+      console.log(`❌ Attempt ${attempt}/${maxRetries} failed with error: ${error}`);
+
+      if (attempt < maxRetries) {
+        const delay = attempt * 1000;
+        console.log(`⏳ Waiting ${delay}ms before retry...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  // All retries exhausted
+  console.log(`❌ All ${maxRetries} attempts failed`);
+  return lastError || { stdout: '', stderr: 'All retries exhausted', code: 1 };
+}
+
+/**
  * Check if a file exists and is readable
  */
 export function fileExists(filePath: string): boolean {

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { loadavg } from 'node:os';
 import pLimit from 'p-limit';
 import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
-import { execWithEnv, formatDuration } from '../lib/utils.js';
+import { execWdio, formatDuration } from '../lib/utils.js';
 import { StatusBar, TestStatusTracker, TestResult } from '../lib/statusBar.js';
 import BuildManager from './build-apps.js';
 
@@ -179,8 +179,8 @@ async function runTest(
 
     console.log(`  Environment: ${JSON.stringify(testEnv, null, 2)}`);
 
-    // Run the test
-    const result = await execWithEnv('pnpm wdio run wdio.conf.ts', testEnv, {
+    // Run the test - execWdio automatically retries xvfb failures on Linux
+    const result = await execWdio('pnpm wdio run wdio.conf.ts', testEnv, {
       cwd: process.cwd(),
       timeout: 300000, // 5 minutes
     });
