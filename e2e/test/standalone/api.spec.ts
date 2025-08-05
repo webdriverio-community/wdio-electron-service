@@ -44,33 +44,12 @@ if (isBinary) {
   };
 } else {
   // No-binary mode - use appEntryPoint
-  // First try main.bundle.js (used by forge and no-binary apps)
-  const bundlePath = path.join(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    'fixtures',
-    'e2e-apps',
-    exampleDir,
-    'dist',
-    'main.bundle.js',
-  );
-  // Fallback to main.js (used by builder apps)
-  const mainJsPath = path.join(__dirname, '..', '..', '..', 'fixtures', 'e2e-apps', exampleDir, 'dist', 'main.js');
+  // All E2E apps now standardized to use dist/main.js
+  const appEntryPoint = path.join(__dirname, '..', '..', '..', 'fixtures', 'e2e-apps', exampleDir, 'dist', 'main.js');
+  console.log('Using app entry point:', appEntryPoint);
 
-  let appEntryPoint: string;
-
-  if (fs.existsSync(bundlePath)) {
-    appEntryPoint = bundlePath;
-    console.log('Using appEntryPoint (bundle):', appEntryPoint);
-  } else if (fs.existsSync(mainJsPath)) {
-    appEntryPoint = mainJsPath;
-    console.log('Using appEntryPoint (main.js):', appEntryPoint);
-  } else {
-    throw new Error(
-      `Could not find a valid entry point for ${exampleDir}. Checked:\n` + `  - ${bundlePath}\n` + `  - ${mainJsPath}`,
-    );
+  if (!fs.existsSync(appEntryPoint)) {
+    throw new Error(`App entry point not found: ${appEntryPoint}. Make sure the app is built.`);
   }
 
   sessionOptions = {

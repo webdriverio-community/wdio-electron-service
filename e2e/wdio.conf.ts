@@ -64,23 +64,11 @@ async function getConfigContext(): Promise<ConfigContext> {
   if (envContext.isNoBinary) {
     console.log('🔍 Setting up no-binary test with entry point');
 
-    // Try multiple possible entry points
-    const possibleEntryPoints = [
-      join(appPath, 'main.js'),
-      join(appPath, 'dist', 'main.js'),
-      join(appPath, 'dist', 'main.bundle.js'),
-    ];
+    appEntryPoint = join(appPath, 'dist', 'main.js');
+    console.log(`Using app entry point: ${appEntryPoint}`);
 
-    for (const entryPoint of possibleEntryPoints) {
-      if (fileExists(entryPoint)) {
-        appEntryPoint = entryPoint;
-        console.log(`Found entry point: ${entryPoint}`);
-        break;
-      }
-    }
-
-    if (!appEntryPoint) {
-      throw new Error(`No valid entry point found. Checked: ${possibleEntryPoints.join(', ')}`);
+    if (!fileExists(appEntryPoint)) {
+      throw new Error(`App entry point not found: ${appEntryPoint}. Make sure the app is built.`);
     }
   } else {
     console.log('🔍 Setting up binary test with app binary path');

@@ -1,11 +1,11 @@
 {
   "name": "example-no-binary-cjs",
   "version": "0.0.0",
-  "main": "dist/main.bundle.js",
+  "main": "dist/main.js",
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "tsc && rollup -c rollup.config.mjs && cp ./src/index.html ./dist && cp ./src/splash.html ./dist",
+    "build": "tsc && rollup -c rollup.config.mjs && pnpx shx cp dist/main.bundle.js dist/main.js && pnpx shx cp ./src/index.html ./dist && pnpx shx cp ./src/splash.html ./dist",
     "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
     "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
   },
