@@ -122,12 +122,9 @@ jobs:
         # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # Optimization: Forge tests run ESM and CJS together to reduce jobs
+          # Optimization: Both forge and builder tests run ESM and CJS separately for better error isolation
           - scenario: 'forge'
-            type: 'esm'
-          - scenario: 'forge'
-            type: 'cjs'
-          # Optimization: Builder tests run ESM and CJS separately for better error isolation
+            type: '*'
           - scenario: 'builder'
             type: '*'
     uses: ./.github/workflows/_ci-e2e.reusable.yml
