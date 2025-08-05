@@ -354,11 +354,6 @@ async function runTests(): Promise<void> {
     console.log(`🔍 Debug: Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
     console.log(`🔍 Debug: Exiting with code 1 due to unhandled error`);
     process.exit(1);
-  } finally {
-    console.log(`🔍 Debug: Cleaning up in finally block...`);
-    // Cleanup
-    // await killElectronProcesses();
-    console.log(`🔍 Debug: Cleanup completed`);
   }
 }
 

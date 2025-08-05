@@ -1,39 +1,5 @@
-import { execSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import * as fs from 'node:fs';
-
-/**
- * Kill all running Electron processes
- * Improved version with better cross-platform support
- */
-export async function killElectronProcesses(): Promise<void> {
-  console.log('🔪 Killing any remaining Electron processes...');
-  try {
-    if (process.platform === 'win32') {
-      // On Windows, use taskkill with /F to force kill
-      execSync('taskkill /F /IM electron.exe /T', { stdio: 'ignore' });
-    } else {
-      // On Unix-like systems, try multiple approaches to ensure all processes are killed
-      const patterns = ['electron', 'Electron', 'node.*electron'];
-
-      // On macOS, also include app bundles
-      if (process.platform === 'darwin') {
-        patterns.push('example-.*\\.app');
-      }
-
-      for (const pattern of patterns) {
-        try {
-          execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
-        } catch (_) {
-          // Ignore errors, as they likely mean no processes were found
-        }
-      }
-    }
-    console.log('✅ Electron processes killed');
-  } catch (_error) {
-    // Ignore errors as they likely mean no processes were found
-    console.log('ℹ️ No Electron processes found to kill');
-  }
-}
 
 /**
  * Execute a command with environment variables and capture output
