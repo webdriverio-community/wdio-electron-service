@@ -44,7 +44,6 @@ if (isBinary) {
   };
 } else {
   // No-binary mode - use appEntryPoint
-  // All E2E apps now standardized to use dist/main.js
   const appEntryPoint = path.join(__dirname, '..', '..', '..', 'fixtures', 'e2e-apps', exampleDir, 'dist', 'main.js');
   console.log('Using app entry point:', appEntryPoint);
 
