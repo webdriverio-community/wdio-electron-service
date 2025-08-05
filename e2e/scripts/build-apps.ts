@@ -3,11 +3,10 @@
 import { join, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { createEnvironmentContext } from '../config/envSchema.js';
-import { dirExists, fileExists, execWithEnv, formatDuration } from './utils.js';
+import { dirExists, fileExists, execWithEnv, formatDuration } from '../lib/utils.js';
 
 /**
- * Build manager for in-place app building
- * Much simpler than isolation approach - just builds apps where they are
+ * Manager for E2E app building
  */
 export class BuildManager {
   private builtApps = new Set<string>();
@@ -281,12 +280,10 @@ async function main() {
   }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
-  });
-}
+// Run the build process
+main().catch((error) => {
+  console.error('Unhandled error:', error);
+  process.exit(1);
+});
 
 export default BuildManager;

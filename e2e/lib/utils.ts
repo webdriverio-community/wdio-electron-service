@@ -12,9 +12,9 @@ export async function execWithEnv(
   return new Promise((resolve, reject) => {
     const { cwd = process.cwd(), timeout = 120000 } = options;
 
-    // For Linux and WDIO commands, wrap with xvfb-maybe for virtual display support
+    // For Linux, wrap with xvfb-maybe for virtual display support
     let finalCommand = command;
-    if (process.platform === 'linux' && command.includes('wdio run')) {
+    if (process.platform === 'linux') {
       finalCommand = `xvfb-maybe ${command}`;
       console.log(`🔍 Linux detected: wrapping WDIO command with xvfb-maybe: ${finalCommand}`);
     }

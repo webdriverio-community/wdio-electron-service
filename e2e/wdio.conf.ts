@@ -6,7 +6,7 @@ import type { WdioElectronConfig } from '@wdio/electron-types';
 import type { NormalizedPackageJson } from 'read-package-up';
 
 import { createEnvironmentContext } from './config/envSchema.js';
-import { fileExists, safeJsonParse } from './scripts/utils.js';
+import { fileExists, safeJsonParse } from './lib/utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -194,15 +194,12 @@ export const config: WdioElectronConfig = {
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
   connectionRetryCount: 3,
-
   services: ['electron'],
-
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
   },
-
   outputDir: logDir,
 };

@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { loadavg } from 'node:os';
 import pLimit from 'p-limit';
 import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
-import { execWithEnv, formatDuration } from './utils.js';
-import { StatusBar, TestStatusTracker, TestResult } from './statusBar.js';
+import { execWithEnv, formatDuration } from '../lib/utils.js';
+import { StatusBar, TestStatusTracker, TestResult } from '../lib/statusBar.js';
 import BuildManager from './build-apps.js';
 
 /**
@@ -481,10 +481,8 @@ console.log('🔍 Debug: Starting test execution at', new Date().toISOString());
 console.log('🔍 Debug: Node.js version:', process.version);
 console.log('🔍 Debug: Platform:', process.platform, process.arch);
 console.log('🔍 Debug: Process arguments:', process.argv.join(' '));
-console.log('🔍 Debug: import.meta.url:', import.meta.url);
-console.log('🔍 Debug: import.meta.url(expected):', `file://${process.argv[1]}`);
 
-// Run if called directly
+// Run the tests
 main().catch((error) => {
   console.error('❌ Unhandled error:', error);
   process.exit(1);
