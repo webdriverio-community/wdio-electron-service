@@ -2,6 +2,7 @@
 
 import { join, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
+import { readFileSync, readdirSync } from 'node:fs';
 import { createEnvironmentContext } from '../config/envSchema.js';
 import { dirExists, fileExists, execWithEnv, formatDuration } from '../lib/utils.js';
 
@@ -19,9 +20,26 @@ export class BuildManager {
     console.log(`  Platform: ${process.platform}`);
     console.log(`  Already built apps: ${Array.from(this.builtApps).join(', ') || 'none'}`);
 
-    if (this.builtApps.has(appPath)) {
-      console.log(`✅ App already built: ${appPath}`);
+    // Check for force rebuild environment variable
+    const forceRebuild = process.env.FORCE_REBUILD === 'true' || process.env.FORCE_BUILD === 'true';
+    if (forceRebuild) {
+      console.log(`🔄 FORCE_REBUILD=true detected, will rebuild regardless of existing artifacts`);
+    }
+
+    if (this.builtApps.has(appPath) && !forceRebuild) {
+      console.log(`✅ App already built in this session: ${appPath}`);
       return true;
+    }
+
+    // Check if valid build artifacts already exist (unless forcing rebuild)
+    if (!forceRebuild && this.hasValidBuildArtifacts(appPath)) {
+      console.log(`✅ Valid build artifacts found, skipping build: ${appPath}`);
+      this.builtApps.add(appPath);
+      return true;
+    }
+
+    if (forceRebuild && this.hasValidBuildArtifacts(appPath)) {
+      console.log(`🔄 Valid build artifacts found, but forcing rebuild due to FORCE_REBUILD=true`);
     }
 
     console.log(`🔍 Debug: Checking app directory existence: ${appPath}`);
@@ -59,7 +77,7 @@ export class BuildManager {
     const startTime = Date.now();
 
     try {
-      // Clean any existing build artifacts first
+      // Only clean if we don't have valid artifacts (this is a forced rebuild)
       const distPath = join(appPath, 'dist');
       if (dirExists(distPath)) {
         console.log(`  Cleaning existing dist directory: ${distPath}`);
@@ -142,15 +160,60 @@ export class BuildManager {
       return false;
     }
 
+    return !this.hasValidBuildArtifacts(appPath);
+  }
+
+  /**
+   * Check if app has valid build artifacts
+   */
+  private hasValidBuildArtifacts(appPath: string): boolean {
     // Check if dist directory exists and has content
     const distPath = join(appPath, 'dist');
     if (!dirExists(distPath)) {
-      return true;
+      console.log(`🔍 Debug: No dist directory found at ${distPath}`);
+      return false;
     }
 
-    // For now, assume any app without a recorded build needs building
-    // In the future, we could check timestamps, etc.
-    return true;
+    try {
+      const distContents = readdirSync(distPath);
+      if (distContents.length === 0) {
+        console.log(`🔍 Debug: Dist directory is empty at ${distPath}`);
+        return false;
+      }
+
+      // Check for essential build artifacts
+      const hasMainJs = distContents.includes('main.js');
+
+      if (!hasMainJs) {
+        console.log(`🔍 Debug: Missing main.js in ${distPath}`);
+        return false;
+      }
+
+      // For forge apps, also check for out directory with packaged app
+      const packageJsonPath = join(appPath, 'package.json');
+      if (fileExists(packageJsonPath)) {
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+        if (packageJson.name && packageJson.name.includes('forge')) {
+          const outPath = join(appPath, 'out');
+          if (!dirExists(outPath)) {
+            console.log(`🔍 Debug: Forge app missing out directory at ${outPath}`);
+            return false;
+          }
+
+          const outContents = readdirSync(outPath);
+          if (outContents.length === 0) {
+            console.log(`🔍 Debug: Forge app out directory is empty at ${outPath}`);
+            return false;
+          }
+        }
+      }
+
+      console.log(`✅ Valid build artifacts found at ${appPath}`);
+      return true;
+    } catch (error) {
+      console.log(`🔍 Debug: Error checking build artifacts at ${appPath}:`, error);
+      return false;
+    }
   }
 
   /**
@@ -262,9 +325,51 @@ async function main() {
   const buildManager = new BuildManager();
 
   try {
+    if (args.includes('--help') || args.includes('-h')) {
+      console.log(`
+🔨 E2E Build Manager
+
+USAGE:
+  tsx scripts/build-apps.ts [options]
+
+OPTIONS:
+  --clean              Clean all app build artifacts (dist, out directories)
+  --all                Build all E2E test apps
+  --force, --rebuild   Force rebuild even if valid artifacts exist
+  --help, -h          Show this help message
+
+ENVIRONMENT VARIABLES:
+  FORCE_REBUILD=true   Force rebuild (same as --force)
+  FORCE_BUILD=true     Force rebuild (alias for FORCE_REBUILD)
+  PLATFORM=<platform>  Target platform (builder, forge, no-binary)
+  MODULE_TYPE=<type>   Module type (cjs, esm)
+
+EXAMPLES:
+  # Build apps for current environment (respects existing artifacts)
+  tsx scripts/build-apps.ts
+
+  # Force rebuild regardless of existing artifacts
+  tsx scripts/build-apps.ts --force
+  FORCE_REBUILD=true tsx scripts/build-apps.ts
+
+  # Clean all build artifacts
+  tsx scripts/build-apps.ts --clean
+
+  # Build all apps
+  tsx scripts/build-apps.ts --all
+`);
+      return;
+    }
+
     if (args.includes('--clean')) {
       await buildManager.cleanApps();
       return;
+    }
+
+    // Handle force rebuild flag
+    if (args.includes('--force') || args.includes('--rebuild')) {
+      process.env.FORCE_REBUILD = 'true';
+      console.log('🔄 Force rebuild enabled via command line argument');
     }
 
     if (args.includes('--all')) {
