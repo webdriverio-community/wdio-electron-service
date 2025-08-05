@@ -116,6 +116,8 @@ jobs:
     name: E2E [macOS-U] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build]
     strategy:
+      # Limit concurrent jobs to prevent resource exhaustion on macOS runners
+      max-parallel: 2
       matrix:
         # Test both application scenarios
         scenario: ['forge', 'builder']
