@@ -1,4 +1,3 @@
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Options } from '@wdio/types';
 
