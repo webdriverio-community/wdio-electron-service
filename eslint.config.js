@@ -10,6 +10,7 @@ export default [
       '@types/**/*',
       'fixtures/config-formats/invalid-syntax.ts',
       'fixtures/package-tests/**/*',
+      '**/coverage/**/*',
     ],
   },
   // Example E2E TS files - WebdriverIO specific rules
