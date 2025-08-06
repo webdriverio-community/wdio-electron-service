@@ -23,7 +23,7 @@ export async function readConfig(configFile: string, projectDir: string) {
     // Use tsx for TypeScript files, native import for JavaScript files
     if (ext.includes('ts')) {
       // For TypeScript files (.ts, .cts, .mts), use tsx to handle transpilation
-      const tsxApi = (await import('tsx/esm/api')) as {
+      const tsxApi = (await import('tsx/esm/api')) as unknown as {
         tsImport: (url: string, parentURL: string) => Promise<Record<string, unknown>>;
       };
       imported = await tsxApi.tsImport(configFilePathUrl, import.meta.url);

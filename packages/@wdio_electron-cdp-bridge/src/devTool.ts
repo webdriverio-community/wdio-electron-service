@@ -3,7 +3,7 @@ import { log } from '@wdio/electron-utils';
 import waitPort from 'wait-port';
 import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants.js';
 
-import type { WdioCdpBridge } from './types';
+import type { DebuggerList, Version } from './types.js';
 
 export type DevToolOptions = {
   host?: string;
@@ -42,12 +42,12 @@ export class DevTool {
   }
 
   list() {
-    return this.#executeRequest<WdioCdpBridge.DebuggerList>({
+    return this.#executeRequest<DebuggerList>({
       path: '/json',
     });
   }
 
-  async version(): Promise<WdioCdpBridge.Version> {
+  async version(): Promise<Version> {
     const result = await this.#executeRequest<VersionReturnValue>({
       path: '/json/version',
     });

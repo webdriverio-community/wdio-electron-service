@@ -53,7 +53,6 @@ describe('Window Management', () => {
 
   describe('getActiveWindowHandle()', () => {
     it('should return undefined when no puppeteer browser are inputted', async () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       const handle = await getActiveWindowHandle(undefined);
       expect(handle).toBe(undefined);

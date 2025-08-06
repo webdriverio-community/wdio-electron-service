@@ -80,16 +80,14 @@ describe('ElectronCdpBridge', () => {
         .mock.instances.slice(-1)[0]) as unknown as ElectronCdpBridge;
 
       const [_method, callback] = vi.mocked(mockedInstance.on).mock.calls.slice(-1)[0];
-      callback(
-        {
-          context: {
-            id: expectedContextId,
-            auxData: {
-              isDefault: true,
-            },
+      callback({
+        context: {
+          id: expectedContextId,
+          auxData: {
+            isDefault: true,
           },
-        } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-      );
+        },
+      } as any);
       await promise;
       return mockedInstance;
     };

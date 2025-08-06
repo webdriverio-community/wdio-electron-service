@@ -799,6 +799,7 @@ declare global {
     wdioElectron: WdioElectronWindowObj;
   }
 
+  // biome-ignore lint/style/noNamespace: This is a legitimate use of namespace for global augmentation
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface Element extends ElementBase {}

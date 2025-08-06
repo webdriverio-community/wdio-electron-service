@@ -1,18 +1,14 @@
-import type { ElectronMock, ExecuteOpts } from "@wdio/electron-types";
-import { mock } from "./mock.js";
+import type { ElectronMock, ExecuteOpts } from '@wdio/electron-types';
+import { mock } from './mock.js';
 
 export async function mockAll(apiName: string) {
-  const apiFnNames = await browser.electron.execute<
-    string,
-    [string, ExecuteOpts]
-  >(
-    (electron, apiName) =>
-      Object.keys(electron[apiName as keyof typeof electron]).toString(),
+  const apiFnNames = await browser.electron.execute<string, [string, ExecuteOpts]>(
+    (electron, apiName) => Object.keys(electron[apiName as keyof typeof electron]).toString(),
     apiName,
-    { internal: true }
+    { internal: true },
   );
   const mockedApis: Record<string, ElectronMock> = {};
-  const funcNames = apiFnNames.split(",");
+  const funcNames = apiFnNames.split(',');
   for (const funcName of funcNames) {
     mockedApis[funcName] = () => undefined;
   }

@@ -5,7 +5,7 @@ import { CdpBridge } from '../src/bridge.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
 import { DevTool } from '../src/devTool.js';
 
-import type { WdioCdpBridge } from '../src/types.js';
+import type { DebuggerList } from '../src/types.js';
 
 vi.mock('@wdio/electron-utils/log', () => ({
   default: {
@@ -56,7 +56,6 @@ vi.mock('../src/devTool', () => {
   };
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const executeEventCallback = (calls: any[][], eventName: string, ...args: any[]) => {
   const callback = calls.filter(([event]) => event === eventName)[0][1];
   callback(...args);
@@ -88,7 +87,7 @@ describe('CdpBridge', () => {
           throw Error('Dummy Error');
         }
         return {
-          list: vi.fn(async () => [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }] as WdioCdpBridge.DebuggerList),
+          list: vi.fn(async () => [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }] as DebuggerList),
         } as unknown as DevTool;
       });
       const client = new CdpBridge({ waitInterval: 10 });
