@@ -1,17 +1,17 @@
+import { spawn } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { spawn } from 'node:child_process';
+import { PackageAnalyzer } from './analyzer.js';
+import type { Logger } from './logger.js';
 import type {
   BundlerConfig,
-  PackageInfo,
-  OutputSpec,
   ConfigSpec,
   GeneratedRollupConfig,
   ImportSpec,
   InlinePluginSpec,
+  OutputSpec,
+  PackageInfo,
 } from './types.js';
-import { Logger } from './logger.js';
-import { PackageAnalyzer } from './analyzer.js';
 
 export class ConfigGenerator {
   private packageAnalyzer: PackageAnalyzer;
@@ -199,7 +199,7 @@ export class ConfigGenerator {
       lines.push('export default [esmConfig, cjsConfig];');
     }
 
-    return lines.join('\n') + '\n';
+    return `${lines.join('\n')}\n`;
   }
 
   /**
@@ -295,7 +295,7 @@ export class ConfigGenerator {
   /**
    * Format output configuration
    */
-  private formatOutput(output: any): string {
+  private formatOutput(output: OutputSpec): string {
     const lines: string[] = [];
     lines.push('{');
     lines.push(`  format: '${output.format}',`);

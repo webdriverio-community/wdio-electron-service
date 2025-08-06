@@ -1,27 +1,24 @@
 import path from 'node:path';
-
+import type {
+  AppBuildInfo,
+  BinaryPathResult,
+  ElectronServiceCapabilities,
+  ElectronServiceGlobalOptions,
+  PathGenerationError,
+} from '@wdio/electron-types';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion, log } from '@wdio/electron-utils';
+import type { Capabilities, Options, Services } from '@wdio/types';
 import getPort from 'get-port';
+import { type NormalizedReadResult, readPackageUp } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
-import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
-import { log, getAppBuildInfo, getElectronVersion, getBinaryPath } from '@wdio/electron-utils';
-
 import {
-  getChromeOptions,
   getChromedriverOptions,
+  getChromeOptions,
   getConvertedElectronCapabilities,
   getElectronCapabilities,
 } from './capabilities.js';
-import { getChromiumVersion } from './versions.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-
-import type { Services, Options, Capabilities } from '@wdio/types';
-import type {
-  ElectronServiceCapabilities,
-  ElectronServiceGlobalOptions,
-  AppBuildInfo,
-  BinaryPathResult,
-  PathGenerationError,
-} from '@wdio/electron-types';
+import { getChromiumVersion } from './versions.js';
 
 /**
  * Generate a comprehensive error message based on the binary path detection result
@@ -154,8 +151,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
               // Use the detailed binary path function for better error handling
               const binaryResult = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-              if (binaryResult.success) {
-                appBinaryPath = binaryResult.binaryPath!;
+              if (binaryResult.success && binaryResult.binaryPath) {
+                appBinaryPath = binaryResult.binaryPath;
                 log.info(`Detected app binary at ${appBinaryPath}`);
 
                 // Log any warnings from path generation
@@ -278,9 +275,14 @@ const setInspectArg = (cap: WebdriverIO.Capabilities, debuggerPort: number) => {
   if (!('goog:chromeOptions' in cap)) {
     cap['goog:chromeOptions'] = { args: [] };
   }
-  const chromeOptions = cap['goog:chromeOptions']!;
+  const chromeOptions = cap['goog:chromeOptions'];
+  if (!chromeOptions) {
+    return;
+  }
   if (!('args' in chromeOptions)) {
     chromeOptions.args = [];
   }
-  chromeOptions.args!.push(`--inspect=localhost:${debuggerPort}`);
+  if (Array.isArray(chromeOptions.args)) {
+    chromeOptions.args.push(`--inspect=localhost:${debuggerPort}`);
+  }
 };

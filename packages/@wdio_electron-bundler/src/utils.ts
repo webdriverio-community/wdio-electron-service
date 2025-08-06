@@ -1,9 +1,8 @@
 import { existsSync } from 'node:fs';
 import { basename, dirname, join, posix, relative } from 'node:path';
-import { readPackageUpSync, type NormalizedReadResult } from 'read-package-up';
-
-import { PluginContext, rollup } from 'rollup';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import { type NormalizedReadResult, readPackageUpSync } from 'read-package-up';
+import { type PluginContext, rollup } from 'rollup';
 
 const normalizeToPosix = (path: string) => {
   // Handle both forward and backslashes
@@ -75,8 +74,8 @@ export const getOutDirs = (pkg: NormalizedReadResult) => {
     }
   });
 
-  const esm = dirname(pkg.packageJson.module!);
-  const cjs = dirname(pkg.packageJson.main!);
+  const esm = dirname(pkg.packageJson.module as string);
+  const cjs = dirname(pkg.packageJson.main as string);
 
   return { esm, cjs };
 };
@@ -143,7 +142,7 @@ export async function injectDependency(
     }
 
     console.log(`[DEBUG] Successfully replaced pattern in ${injectPrams.targetFile}`);
-    console.log(`[DEBUG] Injected content preview:`, injectedContents.substring(0, 200) + '...');
+    console.log(`[DEBUG] Injected content preview:`, `${injectedContents.substring(0, 200)}...`);
 
     // Check for import/export statements in the injected content
     const hasImport = injectedContents.includes('import ');

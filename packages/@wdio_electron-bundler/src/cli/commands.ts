@@ -1,9 +1,9 @@
 import { resolve } from 'node:path';
-import type { BuildOptions } from './types.js';
-import { Logger } from './logger.js';
-import { ConfigLoader } from './loader.js';
-import { ConfigGenerator } from './generator.js';
 import { RollupExecutor } from './executor.js';
+import { ConfigGenerator } from './generator.js';
+import { ConfigLoader } from './loader.js';
+import { Logger } from './logger.js';
+import type { BuildOptions } from './types.js';
 
 export async function buildCommand(options: BuildOptions): Promise<void> {
   const logger = Logger.create(options.verbose, options.extraVerbose);

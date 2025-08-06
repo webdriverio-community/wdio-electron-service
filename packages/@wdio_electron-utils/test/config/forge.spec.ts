@@ -1,8 +1,7 @@
-import { expect, it, describe, vi } from 'vitest';
-
-import { getFixturePackageJson } from '../testUtils.js';
+import { describe, expect, it, vi } from 'vitest';
 import { getConfig } from '../../src/config/forge.js';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants.js';
+import { getFixturePackageJson } from '../testUtils.js';
 
 vi.mock('../../src/log');
 
@@ -14,7 +13,7 @@ describe('getConfig', () => {
       ['Linked-JS config', 'forge-dependency-linked-js-config'],
     ])('%s', async (_title, scenario) => {
       const pkg = await getFixturePackageJson('config-formats', scenario);
-      const config = await getConfig(pkg!);
+      const config = await getConfig(pkg);
       expect(config).toStrictEqual({
         appName: scenario,
         config: {

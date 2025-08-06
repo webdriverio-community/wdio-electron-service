@@ -1,4 +1,4 @@
-import { fn as vitestFn, type Mock } from '@vitest/spy';
+import { type Mock, fn as vitestFn } from '@vitest/spy';
 import type {
   AbstractFn,
   ElectronApiFn,

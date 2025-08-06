@@ -1,7 +1,6 @@
 import http, { type ClientRequest, type RequestOptions } from 'node:http';
-import waitPort from 'wait-port';
-
 import { log } from '@wdio/electron-utils';
+import waitPort from 'wait-port';
 import { DEFAULT_HOSTNAME, DEFAULT_PORT, ERROR_MESSAGE, REQUEST_TIMEOUT } from './constants.js';
 
 import type { WdioCdpBridge } from './types';
@@ -17,7 +16,7 @@ type DevToolRequestOptions = RequestOptions & {
 };
 
 type VersionReturnValue = {
-  'Browser': string;
+  Browser: string;
   'Protocol-Version': string;
 };
 
@@ -54,7 +53,7 @@ export class DevTool {
     });
     log.info(result);
     return {
-      browser: result['Browser'],
+      browser: result.Browser,
       protocolVersion: result['Protocol-Version'],
     };
   }
@@ -131,8 +130,7 @@ export class DevTool {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  #timeoutHandler(reject: (reason?: any) => void, request: ClientRequest) {
+  #timeoutHandler(reject: (reason?: Error) => void, request: ClientRequest) {
     request.destroy();
     const message = `${ERROR_MESSAGE.TIMEOUT_CONNECTION} ${getReqInfo(request)}`;
     log.trace(message);

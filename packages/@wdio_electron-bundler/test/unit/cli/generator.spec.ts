@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { normalize } from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfigGenerator } from '../../../src/cli/generator.js';
 import { Logger } from '../../../src/cli/logger.js';
 import type { BundlerConfig } from '../../../src/cli/types.js';
-import { normalize } from 'node:path';
 
 // Mock fs modules and PackageAnalyzer
 vi.mock('node:fs', () => ({

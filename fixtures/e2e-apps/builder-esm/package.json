@@ -35,15 +35,11 @@
     "appId": "com.example-builder-esm.demo",
     "copyright": "goosewobbler",
     "productName": "example-builder-esm",
-    "files": [
-      "./dist/*"
-    ],
+    "files": ["./dist/*"],
     "linux": {
       "executableName": "example-builder-esm",
       "category": "Utility",
-      "target": [
-        "AppImage"
-      ]
+      "target": ["AppImage"]
     }
   }
 }

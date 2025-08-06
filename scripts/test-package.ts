@@ -11,10 +11,10 @@
  */
 
 import { execSync } from 'node:child_process';
-import { cpSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tmpdir } from 'node:os';
 
 // Add global error handlers to catch silent failures
 process.on('uncaughtException', (error) => {
@@ -298,7 +298,8 @@ async function main() {
 const isMainModule = (() => {
   try {
     const scriptPath = normalize(process.argv[1]);
-    let scriptUrl = process.platform === 'win32' ? `file:///${scriptPath.replace(/\\/g, '/')}` : `file://${scriptPath}`;
+    const scriptUrl =
+      process.platform === 'win32' ? `file:///${scriptPath.replace(/\\/g, '/')}` : `file://${scriptPath}`;
     return import.meta.url === scriptUrl;
   } catch (_error) {
     return __filename === process.argv[1] || __filename === normalize(process.argv[1]);

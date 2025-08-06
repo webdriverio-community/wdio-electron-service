@@ -1,9 +1,17 @@
-import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { OutputOptions, RollupOptions } from 'rollup';
 import { rollup } from 'rollup';
-import type { RollupOptions, OutputOptions } from 'rollup';
-import { Logger } from './logger.js';
-import type { GeneratedRollupConfig } from './types.js';
+import type { CodeReplacePluginOption } from '../plugins.js';
+import type { InjectDependencyPluginOptions } from '../utils.js';
+import type { Logger } from './logger.js';
+import type {
+  CompilerOptions,
+  ConfigSpec,
+  GeneratedRollupConfig,
+  RollupLogMessage,
+  TypeScriptPluginOptions,
+} from './types.js';
 
 export class RollupExecutor {
   constructor(private logger: Logger) {}
@@ -35,7 +43,7 @@ export class RollupExecutor {
   /**
    * Build a single rollup configuration (ESM or CJS)
    */
-  private async buildSingleConfig(configSpec: any, targetCwd: string, verbose: boolean): Promise<void> {
+  private async buildSingleConfig(configSpec: ConfigSpec, targetCwd: string, verbose: boolean): Promise<void> {
     const { format } = configSpec;
     this.logger.detail(`📦 Building ${format.toUpperCase()} bundle...`);
 
@@ -63,7 +71,7 @@ export class RollupExecutor {
   /**
    * Convert our config spec to actual rollup configuration
    */
-  private async createRollupConfig(configSpec: any, targetCwd: string): Promise<RollupOptions> {
+  private async createRollupConfig(configSpec: ConfigSpec, targetCwd: string): Promise<RollupOptions> {
     const typescriptPlugin = (await import('@rollup/plugin-typescript')).default;
     const { nodeExternals } = await import('rollup-plugin-node-externals');
     const { nodeResolve } = await import('@rollup/plugin-node-resolve');
@@ -80,7 +88,7 @@ export class RollupExecutor {
           );
 
     // Build plugins array
-    const plugins: any[] = [];
+    const plugins: unknown[] = [];
 
     // Add plugins based on our config spec
     for (const pluginSpec of configSpec.plugins) {
@@ -93,7 +101,7 @@ export class RollupExecutor {
         const hasTsconfig = existsSync(tsconfigPath);
 
         // Only add declaration options if tsconfig.json exists to avoid TypeScript plugin issues
-        const compilerOptions: any = {
+        const compilerOptions: CompilerOptions = {
           target: 'ES2020',
           module: 'ESNext',
           moduleResolution: 'Node',
@@ -109,7 +117,7 @@ export class RollupExecutor {
           compilerOptions.declarationMap = true;
         }
 
-        const typescriptOptions: any = {
+        const typescriptOptions: TypeScriptPluginOptions = {
           compilerOptions,
           typescript: typescript.default, // Pass the TypeScript compiler explicitly
           include: ['**/*.ts', '**/*.tsx'],
@@ -121,25 +129,28 @@ export class RollupExecutor {
           typescriptOptions.tsconfig = false;
         }
 
-        plugins.push(typescriptPlugin(typescriptOptions));
+        plugins.push(typescriptPlugin(typescriptOptions as Parameters<typeof typescriptPlugin>[0]));
       } else if (pluginSpec.name === 'node-externals') {
-        plugins.push(nodeExternals(pluginSpec.options || {}));
+        plugins.push(nodeExternals((pluginSpec.options || {}) as Parameters<typeof nodeExternals>[0]));
       } else if (pluginSpec.name === 'node-resolve') {
         plugins.push(nodeResolve());
       } else if (pluginSpec.name === 'inject-dependency') {
         // Import the inject dependency plugin from our bundler
         const { injectDependencyPlugin } = await import('../plugins.js');
-        plugins.push(injectDependencyPlugin(pluginSpec.options));
+        plugins.push(
+          injectDependencyPlugin(pluginSpec.options as InjectDependencyPluginOptions | InjectDependencyPluginOptions[]),
+        );
       } else if (pluginSpec.name === 'code-replace') {
         // Import the code replace plugin from our bundler
         const { codeReplacePlugin } = await import('../plugins.js');
-        plugins.push(codeReplacePlugin(pluginSpec.options));
+        plugins.push(codeReplacePlugin(pluginSpec.options as CodeReplacePluginOption | CodeReplacePluginOption[]));
       } else if (pluginSpec.name === 'warn-to-error') {
         plugins.push({
           name: 'warn-to-error',
-          onLog(level: string, log: any) {
+          onLog(level: string, log: RollupLogMessage) {
             if (level === 'warn') {
-              this.error(log);
+              // Type assertion for the rollup plugin context
+              (this as { error: (message: RollupLogMessage) => never }).error(log);
             }
           },
         });
@@ -155,11 +166,11 @@ export class RollupExecutor {
         exports: 'named', // Always use named exports to avoid mixed export warnings
         dynamicImportInCjs: configSpec.output.dynamicImportInCjs,
         plugins:
-          configSpec.output.plugins?.map((plugin: any) => ({
+          configSpec.output.plugins?.map((plugin) => ({
             name: plugin.name,
-            generateBundle(this: any) {
-              this.emitFile({
-                type: 'asset',
+            generateBundle() {
+              (this as { emitFile: (options: { type: 'asset'; fileName: string; source: string }) => void }).emitFile({
+                type: 'asset' as const,
                 fileName: 'package.json',
                 source:
                   plugin.name === 'emit-package-json'
@@ -171,7 +182,7 @@ export class RollupExecutor {
             },
           })) || [],
       },
-      plugins,
+      plugins: plugins as RollupOptions['plugins'],
     };
   }
 }

@@ -1,12 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import type { Capabilities } from '@wdio/types';
+import { describe, expect, it } from 'vitest';
 import {
-  getChromeOptions,
   getChromedriverOptions,
+  getChromeOptions,
   getConvertedElectronCapabilities,
   getElectronCapabilities,
 } from '../src/capabilities.js';
-
-import type { Capabilities } from '@wdio/types';
 
 type RequestedCapabilities =
   | Capabilities.RequestedStandaloneCapabilities
@@ -162,7 +161,7 @@ function removeProperty(obj: unknown, keyToRemove: string): unknown {
 
 describe('getConvertedElectronCapabilities', () => {
   const expectedCap = {
-    'browserName': 'chrome',
+    browserName: 'chrome',
     'wdio:chromedriverOptions': {
       binary: '/path/to/chromdriver',
     },

@@ -1,22 +1,21 @@
-import { log } from '@wdio/electron-utils';
+import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
 import type {
-  ElectronServiceGlobalOptions,
-  ExecuteOpts,
   AbstractFn,
   BrowserExtension,
   ElectronInterface,
+  ElectronServiceGlobalOptions,
   ElectronType,
+  ExecuteOpts,
 } from '@wdio/electron-types';
-import type { Services, Capabilities } from '@wdio/types';
-import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
-
-import mockStore from './mockStore.js';
-import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
-import * as commands from './commands/index.js';
+import { log } from '@wdio/electron-utils';
+import type { Capabilities, Services } from '@wdio/types';
+import { ElectronCdpBridge, getDebuggerEndpoint } from './bridge.js';
 import { execute } from './commands/executeCdp.js';
-import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
-import { ServiceConfig } from './serviceConfig.js';
+import * as commands from './commands/index.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import mockStore from './mockStore.js';
+import { ServiceConfig } from './serviceConfig.js';
+import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 

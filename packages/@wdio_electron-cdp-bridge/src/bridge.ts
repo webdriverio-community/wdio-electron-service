@@ -1,9 +1,7 @@
 import EventEmitter from 'node:events';
-
-import WebSocket from 'ws';
 import { log } from '@wdio/electron-utils';
-
-import { DevTool, type DevToolOptions } from './devTool.js';
+import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
+import WebSocket from 'ws';
 import {
   DEFAULT_HOSTNAME,
   DEFAULT_MAX_RETRY_COUNT,
@@ -12,8 +10,7 @@ import {
   ERROR_MESSAGE,
   REQUEST_TIMEOUT,
 } from './constants.js';
-
-import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
+import { DevTool, type DevToolOptions } from './devTool.js';
 
 type Methods = keyof ProtocolMapping.Commands;
 
@@ -26,7 +23,8 @@ type MethodReturn<T extends Methods> = ProtocolMapping.Commands[T]['returnType']
 type SendParams<T extends Methods> = MethodPrams<T> extends [] ? [] : [MethodPrams<T>[number]];
 
 type PromiseHandlers = {
-  resolve: (value?: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: resolve callback needs flexible type
+  resolve: (value?: any) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -132,11 +130,13 @@ export class CdpBridge extends EventEmitter {
   }
 
   send<T extends Methods>(method: T, ...params: SendParams<T>): Promise<MethodReturn<T>> {
+    const messageId = this.#commandId + 1;
     const message = {
-      id: this.#commandId++,
+      id: messageId,
       method: method,
       params: params[0] || {},
     };
+    this.#commandId = messageId;
     log.trace(`[${message.id}] Trying to send the method: ${method}`);
     return new Promise((resolve, reject) => {
       if (!this.#ws || this.#ws.readyState !== WebSocket.OPEN) {

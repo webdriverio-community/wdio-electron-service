@@ -1,13 +1,14 @@
 #!/usr/bin/env node
+
 /**
  * Script to switch catalog dependencies for all packages in the workspace
  * Usage: pnpx tsx scripts/switch-catalog.ts [default|next|minimum]
  */
 
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
 
 // Get the root directory
 const __filename = fileURLToPath(import.meta.url);
@@ -153,7 +154,7 @@ try {
       if (packageJson.devDependencies?.['electron-nightly']) {
         // When switching from next to any other catalog, remove electron-nightly and add electron
         delete packageJson.devDependencies['electron-nightly'];
-        packageJson.devDependencies['electron'] = `catalog:${catalogName}`;
+        packageJson.devDependencies.electron = `catalog:${catalogName}`;
         console.log(`  Replaced electron-nightly with electron in ${packagePath}`);
         changed = true;
       }
@@ -162,7 +163,7 @@ try {
       if (packageJson.dependencies?.['electron-nightly']) {
         // When switching from next to any other catalog, remove electron-nightly and add electron
         delete packageJson.dependencies['electron-nightly'];
-        packageJson.dependencies['electron'] = `catalog:${catalogName}`;
+        packageJson.dependencies.electron = `catalog:${catalogName}`;
         console.log(`  Replaced electron-nightly with electron in ${packagePath}`);
         changed = true;
       }
@@ -174,7 +175,7 @@ try {
       packageJson.devDependencies = sortDependencies(packageJson.devDependencies);
 
       // Write the updated package.json
-      fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
+      fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
       console.log(`✓ Updated ${packagePath} to use catalog:${catalogName}`);
     } else {
       console.log(`- No changes needed for ${packagePath}`);

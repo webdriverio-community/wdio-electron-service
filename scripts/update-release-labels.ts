@@ -16,9 +16,9 @@
  *   BATCH_MODE - Set to 'true' to update all items without individual confirmation
  */
 
-import { Octokit } from '@octokit/rest';
-import { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
 import { confirm } from '@inquirer/prompts';
+import { Octokit } from '@octokit/rest';
+import type { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
 
 // Configuration
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -82,8 +82,9 @@ const TRACK_LABELS = {
   MAINTENANCE: 'track:maintenance',
 };
 
-type Issue =
-  GetResponseDataTypeFromEndpointMethod<Octokit['rest']['issues']['listForRepo']> extends (infer U)[] ? U : never;
+type Issue = GetResponseDataTypeFromEndpointMethod<Octokit['rest']['issues']['listForRepo']> extends (infer U)[]
+  ? U
+  : never;
 
 /**
  * Find all open issues and PRs with the 'release:future' label
@@ -94,7 +95,7 @@ async function findItemsToUpdate(): Promise<Issue[]> {
   const perPage = 100;
 
   // Build the label query
-  let labels = [LABELS.FUTURE];
+  const labels = [LABELS.FUTURE];
 
   // Add track filter based on the specified track
   switch (trackValue) {

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { normalize } from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PackageAnalyzer } from '../../../src/cli/analyzer.js';
 import { Logger } from '../../../src/cli/logger.js';
 import type { BundlerConfig, PackageInfo } from '../../../src/cli/types.js';

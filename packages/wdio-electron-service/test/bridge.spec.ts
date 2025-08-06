@@ -1,8 +1,7 @@
 import os from 'node:os';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 import { CdpBridge } from '@wdio/cdp-bridge';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 
 vi.mock('@wdio/electron-utils/log');
 
@@ -11,7 +10,7 @@ describe('getDebuggerEndpoint', () => {
     const host = 'localhost';
     const port = 50000;
     const result = getDebuggerEndpoint({
-      ['goog:chromeOptions']: {
+      'goog:chromeOptions': {
         args: ['foo=bar', `--inspect=${host}:${port}`],
       },
     });
@@ -24,7 +23,7 @@ describe('getDebuggerEndpoint', () => {
   it('should throw the error when `--inspect` is not set', () => {
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar'],
         },
       }),
@@ -36,7 +35,7 @@ describe('getDebuggerEndpoint', () => {
     const port = 'xxx';
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar', `--inspect=${host}:${port}`],
         },
       }),
@@ -48,7 +47,7 @@ describe('getDebuggerEndpoint', () => {
     const port = 'xxx';
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar', `--inspect=${host}:${port}`],
         },
       }),

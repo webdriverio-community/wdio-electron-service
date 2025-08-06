@@ -1,5 +1,5 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export async function readConfig(configFile: string, projectDir: string) {
@@ -18,16 +18,18 @@ export async function readConfig(configFile: string, projectDir: string) {
 
   if (extRegex.js.test(ext)) {
     const configFilePathUrl = pathToFileURL(configFilePath).toString();
-    let imported: any;
+    let imported: Record<string, unknown>;
 
     // Use tsx for TypeScript files, native import for JavaScript files
     if (ext.includes('ts')) {
       // For TypeScript files (.ts, .cts, .mts), use tsx to handle transpilation
-      const tsxApi = (await import('tsx/esm/api' as any)) as any;
+      const tsxApi = (await import('tsx/esm/api')) as {
+        tsImport: (url: string, parentURL: string) => Promise<Record<string, unknown>>;
+      };
       imported = await tsxApi.tsImport(configFilePathUrl, import.meta.url);
     } else {
       // For JavaScript files, use native dynamic import
-      imported = await import(configFilePathUrl);
+      imported = (await import(configFilePathUrl)) as Record<string, unknown>;
     }
 
     // Handle different export patterns

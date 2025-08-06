@@ -1,5 +1,5 @@
-import debug from 'debug';
 import logger, { type Logger } from '@wdio/logger';
+import debug from 'debug';
 
 const d = debug('wdio-electron-service');
 const l = logger('electron-service');

@@ -4,7 +4,7 @@ const INTERNALS = ['@wdio/electron-utils', '@wdio/electron-cdp-bridge'];
 
 const getExternal = (exclude: string[]) => (id: string) => {
   // Bundle only the internal packages and fast-copy
-  if (exclude.some((pkg) => id === pkg || id.startsWith(pkg + '/'))) {
+  if (exclude.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))) {
     return false;
   }
   // Externalize everything else (including dependencies of internal packages)

@@ -1,4 +1,4 @@
-import { expect, $, $$ } from '@wdio/globals';
+import { $, $$, expect } from '@wdio/globals';
 
 describe('DOM', () => {
   describe('using $', () => {

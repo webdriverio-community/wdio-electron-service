@@ -1,5 +1,5 @@
-import { nodeExternals, typescript, readPackageJson } from './src/index.js';
-import type { RollupOptions, Plugin, LogLevel, RollupLog } from 'rollup';
+import type { LogLevel, Plugin, RollupLog, RollupOptions } from 'rollup';
+import { nodeExternals, readPackageJson, typescript } from './src/index.js';
 
 const pkgInfo = readPackageJson();
 

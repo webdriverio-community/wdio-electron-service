@@ -29,14 +29,7 @@
     "wdio-electron-service": "latest",
     "xvfb-maybe": "^0.2.1"
   },
-  "keywords": [
-    "electron",
-    "builder",
-    "electron-vite",
-    "webdriverio",
-    "testing",
-    "example"
-  ],
+  "keywords": ["electron", "builder", "electron-vite", "webdriverio", "testing", "example"],
   "author": "WebDriverIO Community",
   "license": "MIT",
   "build": {
@@ -46,19 +39,13 @@
     "directories": {
       "output": "dist-electron"
     },
-    "files": [
-      "dist/**/*",
-      "package.json"
-    ],
+    "files": ["dist/**/*", "package.json"],
     "mac": {
       "category": "public.app-category.utilities",
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         }
       ]
     },
@@ -70,9 +57,6 @@
     }
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron",
-      "esbuild"
-    ]
+    "onlyBuiltDependencies": ["electron", "esbuild"]
   }
 }

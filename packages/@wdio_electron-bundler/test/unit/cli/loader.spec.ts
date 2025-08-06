@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfigLoader } from '../../../src/cli/loader.js';
 import { Logger } from '../../../src/cli/logger.js';

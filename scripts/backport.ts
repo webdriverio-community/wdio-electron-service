@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import 'dotenv/config';
-import { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
+import fs from 'node:fs';
+import path from 'node:path';
+import { input, select } from '@inquirer/prompts';
 import { Octokit } from '@octokit/rest';
+import type { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
 import shell from 'shelljs';
-import { select, input } from '@inquirer/prompts';
-import fs from 'fs';
-import path from 'path';
 
 // Dynamically determine versions from package.json
 const determineVersions = async () => {
@@ -112,8 +112,9 @@ const QUESTIONS = {
     ],
   },
 };
-type PullRequest =
-  GetResponseDataTypeFromEndpointMethod<Octokit['rest']['pulls']['list']> extends (infer U)[] ? U : never;
+type PullRequest = GetResponseDataTypeFromEndpointMethod<Octokit['rest']['pulls']['list']> extends (infer U)[]
+  ? U
+  : never;
 type BackportResult = { exit: boolean; isError: boolean };
 
 console.log(`Welcome to the backport script for ${maintenanceLTSVersion}! 🚀`);
@@ -183,7 +184,7 @@ const answerHandler = (answer: string, question: string): BackportResult | undef
 const backport = async (pr: PullRequest): Promise<BackportResult> => {
   console.log(
     [
-      `\n` + '='.repeat(80),
+      `\n${'='.repeat(80)}`,
       `PR: #${pr.number} - ${pr.title}`,
       `Author: ${pr.user?.login || 'unknown user'}`,
       `URL: ${pr.html_url}`,

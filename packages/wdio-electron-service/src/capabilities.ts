@@ -1,6 +1,5 @@
-import type { Capabilities } from '@wdio/types';
-
 import type { ElectronServiceOptions } from '@wdio/electron-types';
+import type { Capabilities } from '@wdio/types';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
 export function getChromeOptions(options: ElectronServiceOptions, cap: WebdriverIO.Capabilities) {

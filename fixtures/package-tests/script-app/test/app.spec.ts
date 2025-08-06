@@ -1,8 +1,8 @@
-import { $ } from '@wdio/globals';
-import { browser } from 'wdio-electron-service';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { $ } from '@wdio/globals';
 import semver from 'semver';
+import { browser } from 'wdio-electron-service';
 
 describe('Script App Example', () => {
   before(async () => {

@@ -1,17 +1,15 @@
-import { expect, it, vi, describe } from 'vitest';
-
-import { getFixturePackageJson } from './testUtils.js';
-import log from '../src/log.js';
+import { describe, expect, it, vi } from 'vitest';
 import { getAppBuildInfo } from '../src/appBuildInfo.js';
 import { getConfig as getBuilderConfig } from '../src/config/builder.js';
 import { getConfig as getForgeConfig } from '../src/config/forge.js';
-
 import {
   BUILD_TOOL_DETECTION_ERROR,
   BUILDER_CONFIG_NOT_FOUND_ERROR,
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from '../src/constants.js';
+import log from '../src/log.js';
+import { getFixturePackageJson } from './testUtils.js';
 
 vi.mock('../src/log');
 

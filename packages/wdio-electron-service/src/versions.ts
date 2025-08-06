@@ -1,7 +1,6 @@
+import { log } from '@wdio/electron-utils';
 import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
-
-import { log } from '@wdio/electron-utils';
 
 const electronChromiumVersionMap: { [K: string]: string } = {};
 

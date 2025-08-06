@@ -30,15 +30,11 @@
     "appId": "com.example-builder-cjs.demo",
     "copyright": "goosewobbler",
     "productName": "example-builder-cjs",
-    "files": [
-      "./dist/*"
-    ],
+    "files": ["./dist/*"],
     "linux": {
       "executableName": "example-builder-cjs",
       "category": "Utility",
-      "target": [
-        "AppImage"
-      ]
+      "target": ["AppImage"]
     }
   }
 }

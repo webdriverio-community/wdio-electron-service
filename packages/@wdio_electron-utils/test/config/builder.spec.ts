@@ -1,10 +1,9 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-
-import { getFixturePackageJson } from '../testUtils.js';
 import { getConfig } from '../../src/config/builder.js';
 import { APP_NAME_DETECTION_ERROR } from '../../src/constants.js';
+import { getFixturePackageJson } from '../testUtils.js';
 
 vi.mock('../../src/log');
 

@@ -1,6 +1,6 @@
-import { expect, $ } from '@wdio/globals';
-import { browser } from 'wdio-electron-service';
 import type { Mock } from '@vitest/spy';
+import { $, expect } from '@wdio/globals';
+import { browser } from 'wdio-electron-service';
 
 // Check if we're running in no-binary mode
 const isBinary = process.env.BINARY !== 'false';
@@ -314,7 +314,11 @@ describe('Electron APIs', () => {
       });
 
       it('should return false when provided with a function', async () => {
-        expect(browser.electron.isMockFunction(() => {})).toBe(false);
+        expect(
+          browser.electron.isMockFunction(() => {
+            // no-op
+          }),
+        ).toBe(false);
       });
 
       it('should return false when provided with a vitest mock', async () => {
@@ -781,7 +785,9 @@ describe('Electron APIs', () => {
           );
           expect(mockGetFileIcon.mock.lastCall).toStrictEqual(['/path/to/another/icon', { size: 'small' }]);
           await browser.electron.execute((electron) =>
-            electron.app.getFileIcon('/path/to/a/massive/icon', { size: 'large' }),
+            electron.app.getFileIcon('/path/to/a/massive/icon', {
+              size: 'large',
+            }),
           );
           expect(mockGetFileIcon.mock.lastCall).toStrictEqual(['/path/to/a/massive/icon', { size: 'large' }]);
         });

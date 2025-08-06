@@ -1,9 +1,8 @@
-import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import nock from 'nock';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import waitPort from 'wait-port';
-
-import { DevTool } from '../src/devTool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
+import { DevTool } from '../src/devTool.js';
 
 vi.mock('wait-port', () => ({
   default: vi.fn().mockResolvedValue(undefined),
@@ -26,7 +25,7 @@ describe('DevTool', () => {
         .reply(
           200,
           JSON.stringify({
-            'Browser': 'Node',
+            Browser: 'Node',
             'Protocol-Version': 'v1.1',
           }),
         );
@@ -41,7 +40,7 @@ describe('DevTool', () => {
         .reply(
           200,
           JSON.stringify({
-            'Browser': 'Node',
+            Browser: 'Node',
             'Protocol-Version': 'v1.1',
           }),
         );

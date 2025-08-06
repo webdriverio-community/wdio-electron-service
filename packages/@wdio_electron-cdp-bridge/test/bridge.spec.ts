@@ -1,10 +1,9 @@
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-
 import log from '@wdio/electron-utils/log';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CdpBridge } from '../src/bridge.js';
-import { DevTool } from '../src/devTool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
+import { DevTool } from '../src/devTool.js';
 
 import type { WdioCdpBridge } from '../src/types.js';
 
@@ -50,7 +49,7 @@ vi.mock('ws', async (importOriginal) => {
   };
 });
 
-let debuggerList: { webSocketDebuggerUrl: string }[] | undefined = undefined;
+let debuggerList: { webSocketDebuggerUrl: string }[] | undefined;
 vi.mock('../src/devTool', () => {
   return {
     DevTool: vi.fn(),
@@ -141,7 +140,7 @@ describe('CdpBridge', () => {
       const client = new CdpBridge();
       await client.connect();
       client.send('Runtime.enable');
-      let param;
+      let param: any;
       client.on('Runtime.executionContextCreated', (_param) => {
         param = _param;
       });

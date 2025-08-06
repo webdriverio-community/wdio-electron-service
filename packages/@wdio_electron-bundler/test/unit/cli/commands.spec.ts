@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildCommand } from '../../../src/cli/commands.js';
-import { Logger } from '../../../src/cli/logger.js';
-import { ConfigLoader } from '../../../src/cli/loader.js';
-import { ConfigGenerator } from '../../../src/cli/generator.js';
 import { RollupExecutor } from '../../../src/cli/executor.js';
+import { ConfigGenerator } from '../../../src/cli/generator.js';
+import { ConfigLoader } from '../../../src/cli/loader.js';
+import { Logger } from '../../../src/cli/logger.js';
 import type { BuildOptions } from '../../../src/cli/types.js';
 
 // Mock all dependencies

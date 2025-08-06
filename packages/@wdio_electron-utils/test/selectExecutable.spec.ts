@@ -1,9 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs/promises';
-
-import { mockBinaryPath } from './testUtils.js';
+import { describe, expect, it, vi } from 'vitest';
 import log from '../src/log.js';
 import { selectExecutable } from '../src/selectExecutable.js';
+import { mockBinaryPath } from './testUtils.js';
 
 /**
  * Mock the file system promises module to control file access checks
