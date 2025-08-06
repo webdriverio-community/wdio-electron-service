@@ -1,13 +1,13 @@
 {
   "name": "example-forge-esm",
   "version": "0.0.0",
-  "main": "dist/main.bundle.js",
+  "main": "dist/main.js",
   "module": "dist/main.bundle.js",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:package",
-    "build:bundle": "tsc && rollup -c rollup.config.js",
+    "build:bundle": "tsc && rollup -c rollup.config.js && pnpx shx cp dist/main.bundle.js dist/main.js",
     "build:package": "cp ./src/*.html ./dist && electron-forge package",
     "build:package:mac-universal": "cp ./src/*.html ./dist && electron-forge package --platform=darwin --arch=universal",
     "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",

@@ -32,6 +32,19 @@ export interface BundlerConfig {
 }
 
 /**
+ * Package.json structure
+ */
+export interface PackageJson {
+  name: string;
+  version: string;
+  exports?: Record<string, string | Record<string, string>>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
+
+/**
  * Package information extracted from package.json
  */
 export interface PackageInfo {

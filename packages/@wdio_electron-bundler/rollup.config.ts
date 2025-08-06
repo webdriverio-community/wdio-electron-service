@@ -1,5 +1,5 @@
 import { nodeExternals, typescript, readPackageJson } from './src/index.js';
-import type { RollupOptions } from 'rollup';
+import type { RollupOptions, Plugin, LogLevel, RollupLog } from 'rollup';
 
 const pkgInfo = readPackageJson();
 
@@ -9,9 +9,9 @@ const input = {
   cli: 'src/cli.ts',
 };
 
-const warnToErrorPlugin = () => ({
+const warnToErrorPlugin = (): Plugin => ({
   name: 'warn-to-error',
-  onLog(this: any, level: string, log: any) {
+  onLog(level: LogLevel, log: RollupLog) {
     if (level === 'warn') {
       this.error(log);
     }

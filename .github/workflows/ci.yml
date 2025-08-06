@@ -37,8 +37,6 @@ jobs:
     name: Unit [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
-      # Continue with other tests even if one fails
-      fail-fast: false
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -54,8 +52,6 @@ jobs:
     name: Package [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
-      # Continue with other tests even if one fails
-      fail-fast: false
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -66,13 +62,11 @@ jobs:
       artifact_size: ${{ needs.build.outputs.artifact_size }}
       cache_key: ${{ needs.build.outputs.cache_key }}
 
-  # Run build tests outside of the Linux.
+  # Run build tests outside of the main Linux build job.
   build-matrix:
     name: Build [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
-      # Continue with other tests even if one fails
-      fail-fast: false
       matrix:
         os: ['windows-latest', 'macos-latest']
     uses: ./.github/workflows/_ci-build.reusable.yml
@@ -96,31 +90,13 @@ jobs:
         # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # Optimization: Linux/Mac run both ESM and CJS together using wildcard
-          # This reduces the number of jobs while still testing all combinations
+          # Optimization: All platforms run ESM and CJS separately for consistent resource management
+          # This prevents individual jobs from running too many test variants simultaneously
           - os: 'ubuntu-latest'
-            type: 'esm'
-          - os: 'ubuntu-latest'
-            type: 'cjs'
-          - os: 'macos-latest'
-            type: 'esm'
-          - os: 'macos-latest'
-            type: 'cjs'
-          # Optimization: Reduce macOS jobs due to GitHub Actions concurrency limits
-          # macOS runners are limited, so we combine tests to reduce parallel jobs
-          - os: 'macos-latest'
-            scenario: 'forge'
-          - os: 'macos-latest'
-            scenario: 'no-binary'
-          # Optimization: Windows runs ESM and CJS separately for better parallelization
-          # Windows is slower, so running separately helps identify issues faster
+            type: '*'
           - os: 'windows-latest'
             type: '*'
-        include:
-          # Special case: Combined test for macOS to reduce total jobs
-          # This runs both forge and no-binary tests in a single job
           - os: 'macos-latest'
-            scenario: 'no-binary, forge'
             type: '*'
     uses: ./.github/workflows/_ci-e2e.reusable.yml
     with:
@@ -144,12 +120,9 @@ jobs:
         # Test both module types and wildcard for combined tests
         type: ['esm', 'cjs', '*']
         exclude:
-          # Optimization: Forge tests run ESM and CJS together to reduce jobs
+          # Optimization: Both forge and builder tests run ESM and CJS separately for better error isolation
           - scenario: 'forge'
-            type: 'esm'
-          - scenario: 'forge'
-            type: 'cjs'
-          # Optimization: Builder tests run ESM and CJS separately for better error isolation
+            type: '*'
           - scenario: 'builder'
             type: '*'
     uses: ./.github/workflows/_ci-e2e.reusable.yml

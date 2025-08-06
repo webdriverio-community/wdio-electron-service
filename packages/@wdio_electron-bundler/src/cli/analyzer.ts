@@ -1,7 +1,15 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
-import type { PackageInfo, BundlerConfig, PluginSpec, ImportSpec, InlinePluginSpec, Transformation } from './types.js';
+import type {
+  PackageInfo,
+  PackageJson,
+  BundlerConfig,
+  PluginSpec,
+  ImportSpec,
+  InlinePluginSpec,
+  Transformation,
+} from './types.js';
 import { Logger } from './logger.js';
 
 export class PackageAnalyzer {
@@ -144,10 +152,10 @@ export class PackageAnalyzer {
   /**
    * Load and parse package.json
    */
-  private async loadPackageJson(packageJsonPath: string): Promise<any> {
+  private async loadPackageJson(packageJsonPath: string): Promise<PackageJson> {
     try {
       const content = await readFile(packageJsonPath, 'utf-8');
-      return JSON.parse(content);
+      return JSON.parse(content) as PackageJson;
     } catch (error) {
       throw new Error(`Failed to load package.json: ${(error as Error).message}`);
     }
@@ -156,7 +164,7 @@ export class PackageAnalyzer {
   /**
    * Extract entry points from package.json exports field
    */
-  private extractEntryPoints(packageJson: any, packageRoot: string): Record<string, string> {
+  private extractEntryPoints(packageJson: PackageJson, packageRoot: string): Record<string, string> {
     const exports = packageJson.exports;
     if (!exports) {
       throw new Error('package.json must have an "exports" field');
