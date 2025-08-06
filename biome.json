@@ -3,7 +3,7 @@
   "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!fixtures/config-formats/invalid-syntax.ts", "!**/coverage", "!**/dist"]
+    "includes": ["**", "!fixtures/config-formats/invalid-syntax.ts", "!**/coverage", "!**/dist", "!.turbo"]
   },
   "formatter": {
     "enabled": true,
