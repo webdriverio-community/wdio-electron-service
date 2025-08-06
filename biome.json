@@ -3,7 +3,7 @@
   "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!fixtures/config-formats/invalid-syntax.ts", "!**/coverage"]
+    "includes": ["**", "!fixtures/config-formats/invalid-syntax.ts", "!**/coverage", "!**/dist"]
   },
   "formatter": {
     "enabled": true,
@@ -21,14 +21,8 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": true, "style": { "useBlockStatements": "off" } },
-    "includes": [
-      "**",
-      "!**/dist/**/*",
-      "!@types/**/*",
-      "!fixtures/config-formats/invalid-syntax.ts",
-      "!fixtures/package-tests/**/*"
-    ]
+    "includes": ["**"],
+    "rules": { "recommended": true, "style": { "useBlockStatements": "off" } }
   },
   "javascript": {
     "formatter": {
