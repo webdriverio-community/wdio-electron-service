@@ -1,11 +1,6 @@
-import eslint from '@eslint/js';
-import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import vitest from '@vitest/eslint-plugin';
-import prettier from 'eslint-config-prettier';
 import * as wdio from 'eslint-plugin-wdio';
-import globals from 'globals';
-import importX from 'eslint-plugin-import-x';
 
 export default [
   // Ignored dirs
@@ -13,210 +8,19 @@ export default [
     ignores: [
       '**/dist/**/*',
       '@types/**/*',
-      'e2e/test/js/*',
       'fixtures/config-formats/invalid-syntax.ts',
       'fixtures/package-tests/**/*',
     ],
   },
-  // All files
-  {
-    files: ['**/*.{js,mjs,ts}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      globals: {
-        ...globals.es2023,
-      },
-      parserOptions: {
-        ...importX.configs.recommended.parserOptions,
-        ecmaVersion: 2023,
-      },
-    },
-    plugins: {
-      'import-x': importX,
-    },
-    rules: {
-      ...eslint.configs.recommended.rules,
-      ...importX.flatConfigs.recommended.rules,
-      'import-x/no-named-as-default': 'off',
-      'import-x/no-unresolved': 'off',
-    },
-    settings: {
-      'import-x/ignore': [/@rollup.*/, /shelljs/],
-    },
-  },
-  // Node & Electron main process files and scripts
-  {
-    files: ['**/*.{js,mjs,ts}'],
-    ignores: ['fixtures/e2e-apps/**/src/preload.ts', 'fixtures/e2e-apps/**/src/util.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
-    settings: {
-      ...importX.flatConfigs.electron.settings,
-    },
-  },
-  // Electron renderer process files
-  {
-    files: ['fixtures/e2e-apps/**/src/preload.ts', 'fixtures/e2e-apps/**/src/util.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
-    },
-    settings: {
-      ...importX.flatConfigs.electron.settings,
-    },
-  },
-  // TS files
-  {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaFeatures: { modules: true },
-        ecmaVersion: 'latest',
-        project: './tsconfig.base.json',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': ts,
-      'import-x': importX,
-    },
-    settings: {
-      ...importX.configs.typescript.settings,
-    },
-    rules: {
-      ...ts.configs['eslint-recommended'].rules,
-      ...ts.configs.recommended.rules,
-      ...importX.flatConfigs.typescript.rules,
-      'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
-      'no-redeclare': 'off', // redundant - TS will fail to compile with duplicate declarations
-      '@typescript-eslint/no-empty-interface': [
-        'error',
-        {
-          allowSingleExtends: true,
-        },
-      ],
-      '@typescript-eslint/no-empty-object-type': [
-        'error',
-        {
-          allowInterfaces: 'with-single-extends',
-        },
-      ],
-      '@typescript-eslint/no-namespace': [
-        'error',
-        {
-          allowDeclarations: true,
-        },
-      ],
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          args: 'after-used',
-          ignoreRestSiblings: true,
-          argsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-      '@typescript-eslint/no-explicit-any': ['warn'],
-    },
-  },
-  // Package TS files
-  {
-    files: ['packages/*/src/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'packages/*/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      'import-x/no-extraneous-dependencies': ['error', { devDependencies: false }],
-    },
-  },
-  // Package CJS TS files
-  {
-    files: ['packages/**/src/cjs/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'packages/*/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      'import-x/no-extraneous-dependencies': 'off',
-    },
-  },
-  // CJS example app files
-  {
-    files: ['fixtures/e2e-apps/*-cjs/**/*.{js,mjs}'], // already disabled for TS files
-    rules: {
-      'import-x/named': 'off',
-    },
-  },
-  // Example app TS files
-  {
-    files: ['fixtures/e2e-apps/builder-cjs/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/builder-cjs/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
-  {
-    files: ['fixtures/e2e-apps/builder-esm/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/builder-esm/tsconfig.eslint.json',
-      },
-    },
-  },
-  {
-    files: ['fixtures/e2e-apps/forge-cjs/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/forge-cjs/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
-  {
-    files: ['fixtures/e2e-apps/forge-esm/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/forge-esm/tsconfig.eslint.json',
-      },
-    },
-  },
-  {
-    files: ['fixtures/e2e-apps/no-binary-cjs/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/no-binary-cjs/tsconfig.eslint.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
-  {
-    files: ['fixtures/e2e-apps/no-binary-esm/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: 'fixtures/e2e-apps/no-binary-esm/tsconfig.eslint.json',
-      },
-    },
-  },
-  // Example E2E TS files
+  // Example E2E TS files - WebdriverIO specific rules
   {
     files: ['e2e/**/*.spec.ts'],
     languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        project: './tsconfig.base.json',
+      },
       globals: {
         ...wdio.configs['flat/recommended'].globals,
       },
@@ -226,12 +30,18 @@ export default [
     },
     rules: {
       ...wdio.configs['flat/recommended'].rules,
-      '@typescript-eslint/no-var-requires': 'off',
     },
   },
-  // Test files
+  // Test files - Vitest specific rules
   {
     files: ['packages/**/test/**/*.spec.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        project: 'packages/*/tsconfig.eslint.json',
+      },
+    },
     plugins: {
       vitest,
     },
@@ -239,6 +49,4 @@ export default [
       ...vitest.configs.recommended.rules,
     },
   },
-  // ensure all rules work with prettier
-  prettier,
 ];
