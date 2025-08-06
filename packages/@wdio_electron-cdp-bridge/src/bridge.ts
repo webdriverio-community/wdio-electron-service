@@ -56,7 +56,7 @@ export class CdpBridge extends EventEmitter {
   #wsUrl: string | undefined = undefined;
   #ws: WebSocket | null = null;
   #promises = new Map<number, PromiseHandlers>();
-  #commandId = CONNECT_PROMISE_ID + 1;
+  #commandId = CONNECT_PROMISE_ID;
 
   constructor(options?: CdpBridgeOptions) {
     super();
@@ -130,13 +130,13 @@ export class CdpBridge extends EventEmitter {
   }
 
   send<T extends Methods>(method: T, ...params: SendParams<T>): Promise<MethodReturn<T>> {
-    const messageId = this.#commandId + 1;
+    this.#commandId = this.#commandId + 1;
+    const messageId = this.#commandId;
     const message = {
       id: messageId,
       method: method,
       params: params[0] || {},
     };
-    this.#commandId = messageId;
     log.trace(`[${message.id}] Trying to send the method: ${method}`);
     return new Promise((resolve, reject) => {
       if (!this.#ws || this.#ws.readyState !== WebSocket.OPEN) {
