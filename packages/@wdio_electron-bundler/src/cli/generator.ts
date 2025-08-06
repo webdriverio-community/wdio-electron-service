@@ -98,8 +98,8 @@ export class ConfigGenerator {
 
     const configContent = this.generateConfigContent(config);
 
-    // Format the content with prettier first
-    const formattedContent = await this.formatContentWithPrettier(configContent);
+    // Format the content with biome first
+    const formattedContent = await this.formatContentWithBiome(configContent);
 
     if (dryRun) {
       this.logger.section('📄 Generated config (dry run):');
@@ -121,14 +121,14 @@ export class ConfigGenerator {
   }
 
   /**
-   * Format content string with prettier in memory
+   * Format content string with biome in memory
    */
-  private async formatContentWithPrettier(content: string): Promise<string> {
+  private async formatContentWithBiome(content: string): Promise<string> {
     try {
-      this.logger.extraVerbose('🎨 Formatting with prettier...');
+      this.logger.extraVerbose('🎨 Formatting with biome...');
 
       return await new Promise<string>((resolve, _reject) => {
-        const child = spawn('pnpx', ['prettier', '--parser', 'babel', '--stdin-filepath', 'rollup.config.js'], {
+        const child = spawn('pnpx', ['@biomejs/biome', 'format', '--stdin-file-path=rollup.config.js'], {
           stdio: 'pipe',
           shell: true,
         });
@@ -146,22 +146,22 @@ export class ConfigGenerator {
 
         child.on('close', (code) => {
           if (code === 0) {
-            this.logger.extraDetail('✅ Formatted with prettier');
+            this.logger.extraDetail('✅ Formatted with biome');
             resolve(stdout);
           } else {
-            this.logger.warning('⚠️ Prettier formatting failed, using unformatted content');
-            this.logger.extraDetail(`Prettier error: ${stderr}`);
+            this.logger.warning('⚠️ Biome formatting failed, using unformatted content');
+            this.logger.extraDetail(`Biome error: ${stderr}`);
             resolve(content); // Return original content if formatting fails
           }
         });
 
         child.on('error', (error) => {
-          this.logger.warning('⚠️ Could not run prettier, using unformatted content');
+          this.logger.warning('⚠️ Could not run biome, using unformatted content');
           this.logger.extraDetail(`Error: ${error.message}`);
-          resolve(content); // Return original content if prettier not available
+          resolve(content); // Return original content if biome not available
         });
 
-        // Send content to prettier stdin
+        // Send content to biome stdin
         child.stdin?.write(content);
         child.stdin?.end();
       });
