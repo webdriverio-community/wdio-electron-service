@@ -18,59 +18,15 @@ export async function readConfig(configFile: string, projectDir: string) {
 
   if (extRegex.js.test(ext)) {
     const configFilePathUrl = pathToFileURL(configFilePath).toString();
-    let imported: Record<string, unknown>;
+    let imported: Record<string, unknown> | undefined;
 
-    // Use tsx for TypeScript files, native import for JavaScript files
+    // Handle TypeScript files with improved logic
     if (ext.includes('ts')) {
-      try {
-        // For TypeScript files (.ts, .cts, .mts), use tsx to handle transpilation
-        // @ts-ignore - tsx/esm/api is a runtime import
-        const tsxApi = (await import('tsx/esm/api')) as unknown as {
-          tsImport: (url: string, parentURL: string) => Promise<Record<string, unknown>>;
-        };
-        if (ext === '.cts') {
-          // Use ts-node for CTS files as it's designed for CommonJS TypeScript
-          try {
-            // @ts-ignore - ts-node is a dependency
-            const tsNode = await import('ts-node');
+      imported = await handleTypeScriptFile(configFilePath, configFilePathUrl, ext);
+    }
 
-            // Register ts-node for .cts files with CommonJS configuration
-            const service = tsNode.register({
-              transpileOnly: true,
-              compilerOptions: {
-                module: 'CommonJS',
-                target: 'ES2020',
-                moduleResolution: 'node',
-                esModuleInterop: true,
-                allowSyntheticDefaultImports: true,
-              },
-            });
-
-            try {
-              const { createRequire } = await import('node:module');
-              const require = createRequire(import.meta.url);
-              // Clear require cache to ensure fresh load
-              delete require.cache[configFilePath];
-              imported = require(configFilePath);
-            } finally {
-              // Unregister ts-node
-              service.enabled(false);
-            }
-          } catch (_tsNodeError) {
-            // If ts-node fails, fall back to tsx
-            imported = await tsxApi.tsImport(configFilePathUrl, import.meta.url);
-          }
-        } else {
-          // For .ts and .mts files, use tsx to handle transpilation
-          imported = await tsxApi.tsImport(configFilePathUrl, import.meta.url);
-        }
-      } catch (_error) {
-        // If tsx fails, fall back to native import which might work for simpler cases
-        // TypeScript processing failed, falling back to native import
-        imported = (await import(configFilePathUrl)) as Record<string, unknown>;
-      }
-    } else {
-      // For JavaScript files, use native dynamic import
+    // Fallback to native dynamic import for JavaScript files or failed TypeScript imports
+    if (!imported) {
       imported = (await import(configFilePathUrl)) as Record<string, unknown>;
     }
 
@@ -107,4 +63,79 @@ export async function readConfig(configFile: string, projectDir: string) {
     }
   }
   return { result, configFile };
+}
+
+/**
+ * Handle TypeScript file imports with appropriate strategies based on file type
+ */
+async function handleTypeScriptFile(
+  configFilePath: string,
+  configFilePathUrl: string,
+  ext: string,
+): Promise<Record<string, unknown> | undefined> {
+  // For .ts and .mts files, try tsx first
+  if (ext === '.ts' || ext === '.mts') {
+    try {
+      // @ts-ignore - tsx/esm/api is a runtime import
+      const tsxApi = (await import('tsx/esm/api')) as unknown as {
+        tsImport: (url: string, parentURL: string) => Promise<Record<string, unknown>>;
+      };
+      return await tsxApi.tsImport(configFilePathUrl, import.meta.url);
+    } catch (_error) {
+      // If tsx fails, return undefined to trigger fallback to native import
+      return undefined;
+    }
+  }
+
+  // For .cts files, try to strip types and convert to JS
+  if (ext === '.cts') {
+    try {
+      return await handleCTSFile(configFilePath);
+    } catch (_error) {
+      // If CTS handling fails, return undefined to trigger fallback
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Handle CommonJS TypeScript (.cts) files by stripping types with esbuild
+ */
+async function handleCTSFile(configFilePath: string): Promise<Record<string, unknown>> {
+  // @ts-ignore - esbuild is a runtime import
+  const esbuild = await import('esbuild');
+  const { readFileSync, writeFileSync, unlinkSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+
+  const sourceCode = readFileSync(configFilePath, 'utf8');
+  const tempJsFile = path.join(tmpdir(), `temp-${Date.now()}.js`);
+
+  try {
+    // Use esbuild to transpile CTS to JS
+    const result = await esbuild.transform(sourceCode, {
+      loader: 'ts',
+      target: 'node18',
+      format: 'cjs',
+      sourcefile: configFilePath,
+    });
+
+    // Write the transpiled JS to a temp file
+    writeFileSync(tempJsFile, result.code);
+
+    // Import the temp JS file
+    const { createRequire } = await import('node:module');
+    const require = createRequire(import.meta.url);
+    const imported = require(tempJsFile);
+
+    return imported;
+  } finally {
+    // Clean up temp file
+    try {
+      unlinkSync(tempJsFile);
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
 }
