@@ -4,13 +4,12 @@
   "tasks": {
     "//#format:check": {
       "dependsOn": [],
-      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
-      "outputs": ["node_modules/.cache/prettier"]
+      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", "package.json"],
+      "cache": false
     },
     "//#format": {
       "dependsOn": [],
       "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
-      "outputs": ["node_modules/.cache/prettier"],
       "cache": false
     },
     "//#lint": {
