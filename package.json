@@ -55,7 +55,7 @@
     "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.4",
+    "@biomejs/biome": "2.1.4",
     "@inquirer/prompts": "^7.8.0",
     "@octokit/rest": "^22.0.0",
     "@octokit/types": "^14.1.0",
