@@ -17,7 +17,7 @@ export const EnvSchema = z.object({
   ENABLE_SPLASH_WINDOW: z.enum(['true', 'false']).optional(),
 
   // Test execution
-  CONCURRENCY: z.string().regex(/^\d+$/).transform(Number).default('1'),
+  CONCURRENCY: z.string().regex(/^\d+$/).transform(Number).default(1),
   WDIO_VERBOSE: z.enum(['true', 'false']).optional(),
   WDIO_MATRIX_DEBUG: z.enum(['true', 'false']).optional(),
 
