@@ -37,6 +37,7 @@ export interface BundlerConfig {
 export interface PackageJson {
   name: string;
   version: string;
+  type?: 'module' | 'commonjs';
   main?: string;
   module?: string;
   exports?: Record<string, string | Record<string, string>>;
@@ -52,6 +53,7 @@ export interface PackageJson {
 export interface PackageInfo {
   name: string;
   version: string;
+  type: 'module' | 'commonjs';
   input: Record<string, string>;
   outDir: {
     esm: string;

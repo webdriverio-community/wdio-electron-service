@@ -177,26 +177,39 @@ export class ConfigGenerator {
    */
   private generateConfigContent(config: GeneratedRollupConfig): string {
     const lines: string[] = [];
+    const isCommonJs = config.packageInfo.type === 'commonjs';
 
     // Add enhanced file header
     lines.push(...this.generateHeader(config));
 
-    // Add imports
+    // Add imports/requires
     if (config.imports.length > 0) {
-      lines.push(...this.generateImports(config.imports));
+      if (isCommonJs) {
+        lines.push(...this.generateRequires(config.imports));
+      } else {
+        lines.push(...this.generateImports(config.imports));
+      }
       lines.push('');
     }
 
     // Add configurations
     lines.push(...this.generateConfigurations(config.configs));
 
-    // Add export
+    // Add export/module.exports
     if (config.configs.length === 1) {
       lines.push('');
-      lines.push('export default config;');
+      if (isCommonJs) {
+        lines.push('module.exports = config;');
+      } else {
+        lines.push('export default config;');
+      }
     } else {
       lines.push('');
-      lines.push('export default [esmConfig, cjsConfig];');
+      if (isCommonJs) {
+        lines.push('module.exports = [esmConfig, cjsConfig];');
+      } else {
+        lines.push('export default [esmConfig, cjsConfig];');
+      }
     }
 
     return `${lines.join('\n')}\n`;
@@ -241,6 +254,32 @@ export class ConfigGenerator {
 
         return `import ${parts.join(', ')} from '${imp.from}';`;
       });
+  }
+
+  /**
+   * Generate CommonJS require statements
+   */
+  private generateRequires(imports: ImportSpec[]): string[] {
+    return imports
+      .filter((imp) => imp.from) // Skip empty imports
+      .map((imp) => {
+        if (imp.default && imp.named && imp.named.length > 0) {
+          // Both default and named imports
+          const namedImports = `{ ${imp.named.join(', ')} }`;
+          return `const ${imp.default} = require('${imp.from}');
+const ${namedImports} = ${imp.default};`;
+        } else if (imp.default) {
+          // Only default import
+          return `const ${imp.default} = require('${imp.from}');`;
+        } else if (imp.named && imp.named.length > 0) {
+          // Only named imports
+          const namedImports = `{ ${imp.named.join(', ')} }`;
+          return `const ${namedImports} = require('${imp.from}');`;
+        }
+
+        return '';
+      })
+      .filter(Boolean);
   }
 
   /**

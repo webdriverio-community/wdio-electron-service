@@ -54,6 +54,7 @@ export class PackageAnalyzer {
     return {
       name,
       version: packageJson.version || '0.0.0',
+      type: packageJson.type || 'commonjs',
       input,
       outDir,
       dependencies,
