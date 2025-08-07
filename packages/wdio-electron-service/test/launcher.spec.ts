@@ -1,14 +1,12 @@
 import path from 'node:path';
-
-import { describe, beforeEach, afterEach, it, expect, vi, type Mock } from 'vitest';
-import nock from 'nock';
-import getPort from 'get-port';
+import type { BinaryPathResult, ElectronServiceOptions } from '@wdio/electron-types';
+import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import log from '@wdio/electron-utils/log';
 import type { Capabilities, Options } from '@wdio/types';
-import type { ElectronServiceOptions, BinaryPathResult } from '@wdio/electron-types';
-
+import getPort from 'get-port';
+import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import ElectronLaunchService from '../src/launcher.js';
-import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
 
 let LaunchService: typeof ElectronLaunchService;
@@ -152,7 +150,7 @@ describe('Electron Launch Service', () => {
         );
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
+            browserName: 'electron',
             'wdio:chromedriverOptions': {
               binary: '/path/to/chromedriver',
             },
@@ -160,8 +158,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '114.0.5735.45',
+          browserName: 'chrome',
+          browserVersion: '114.0.5735.45',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -188,8 +186,8 @@ describe('Electron Launch Service', () => {
         );
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:electronServiceOptions': {
               appArgs: ['some', 'args'],
             },
@@ -212,8 +210,8 @@ describe('Electron Launch Service', () => {
         );
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:electronServiceOptions': {
               appArgs: ['some', 'args'],
             },
@@ -283,8 +281,8 @@ describe('Electron Launch Service', () => {
         );
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:electronServiceOptions': {
               appArgs: ['some', 'args'],
             },
@@ -336,8 +334,8 @@ describe('Electron Launch Service', () => {
         );
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:electronServiceOptions': {
               appArgs: ['some', 'args'],
             },
@@ -351,8 +349,8 @@ describe('Electron Launch Service', () => {
       it('should override global options with capabilities', async () => {
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:electronServiceOptions': {
               appBinaryPath: 'workspace/my-other-test-app/dist/my-other-test-app',
             },
@@ -360,8 +358,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-other-test-app/dist/my-other-test-app',
@@ -383,8 +381,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': 'some-version',
+          browserName: 'chrome',
+          browserVersion: 'some-version',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -411,8 +409,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.82',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.82',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -439,8 +437,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.82',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.82',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -467,8 +465,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.82',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.82',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -499,8 +497,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.82',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.82',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -539,8 +537,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -561,8 +559,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: ['--no-sandbox'],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -610,8 +608,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/out/my-test-app',
@@ -664,8 +662,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -695,8 +693,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: ['--app=path/to/main.bundle.js'],
             binary: path.join(getFixtureDir('package-scenarios', 'no-build-tool'), 'node_modules', '.bin', 'electron'),
@@ -768,8 +766,8 @@ describe('Electron Launch Service', () => {
       it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
         const capabilities: WebdriverIO.Capabilities[] = [
           {
-            'browserName': 'electron',
-            'browserVersion': '26.2.2',
+            browserName: 'electron',
+            browserVersion: '26.2.2',
             'wdio:chromedriverOptions': {
               binary: '/path/to/chromedriver',
             },
@@ -777,8 +775,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
@@ -806,8 +804,8 @@ describe('Electron Launch Service', () => {
         expect(capabilities[0]).toEqual({
           firstMatch: [],
           alwaysMatch: {
-            'browserName': 'chrome',
-            'browserVersion': '116.0.5845.190',
+            browserName: 'chrome',
+            browserVersion: '116.0.5845.190',
             'goog:chromeOptions': {
               args: [],
               binary: 'workspace/my-test-app/dist/my-test-app',
@@ -856,8 +854,8 @@ describe('Electron Launch Service', () => {
           },
           myElectronProject: {
             capabilities: {
-              'browserName': 'chrome',
-              'browserVersion': '128.0.6613.36',
+              browserName: 'chrome',
+              browserVersion: '128.0.6613.36',
               'goog:chromeOptions': {
                 args: [],
                 binary: 'workspace/my-test-app/dist/my-test-app',
@@ -876,8 +874,8 @@ describe('Electron Launch Service', () => {
             capabilities: {
               firstMatch: [],
               alwaysMatch: {
-                'browserName': 'chrome',
-                'browserVersion': '116.0.5845.190',
+                browserName: 'chrome',
+                browserVersion: '116.0.5845.190',
                 'goog:chromeOptions': {
                   args: [],
                   binary: 'workspace/my-test-app/dist/my-test-app',
@@ -933,8 +931,8 @@ describe('Electron Launch Service', () => {
             },
             myElectronProject: {
               capabilities: {
-                'browserName': 'chrome',
-                'browserVersion': '128.0.6613.36',
+                browserName: 'chrome',
+                browserVersion: '128.0.6613.36',
                 'goog:chromeOptions': {
                   args: [],
                   binary: 'workspace/my-test-app/dist/my-test-app',
@@ -955,8 +953,8 @@ describe('Electron Launch Service', () => {
               capabilities: {
                 firstMatch: [],
                 alwaysMatch: {
-                  'browserName': 'chrome',
-                  'browserVersion': '116.0.5845.190',
+                  browserName: 'chrome',
+                  browserVersion: '116.0.5845.190',
                   'goog:chromeOptions': {
                     args: [],
                     binary: 'workspace/my-test-app/dist/my-test-app',
@@ -983,8 +981,8 @@ describe('Electron Launch Service', () => {
     });
 
     const baseCapability = {
-      'browserName': 'chrome',
-      'browserVersion': '116.0.5845.190',
+      browserName: 'chrome',
+      browserVersion: '116.0.5845.190',
       'goog:chromeOptions': {
         args: ['foo=bar'],
         binary: 'workspace/my-test-app/out/my-test-app',
@@ -1008,13 +1006,13 @@ describe('Electron Launch Service', () => {
       it('should apply `--inspect` if `goog:chromeOptions` is not set to capability', async () => {
         instance = new ElectronLaunchService({}, {}, {});
         const capabilities = {
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'wdio:electronServiceOptions': {},
           'wdio:enforceWebDriverClassic': true,
         };
         const expectedCaps = Object.assign({}, capabilities, {
-          ['goog:chromeOptions']: {
+          'goog:chromeOptions': {
             args: ['--inspect=localhost:50000'],
           },
         });
@@ -1025,8 +1023,8 @@ describe('Electron Launch Service', () => {
       it('should apply `--inspect` if `args` is not set to `goog:chromeOptions`', async () => {
         instance = new ElectronLaunchService({}, {}, {});
         const capabilities = {
-          'browserName': 'chrome',
-          'browserVersion': '116.0.5845.190',
+          browserName: 'chrome',
+          browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
             binary: 'workspace/my-test-app/out/my-test-app',
             windowTypes: ['app', 'webview'],
@@ -1035,7 +1033,7 @@ describe('Electron Launch Service', () => {
           'wdio:enforceWebDriverClassic': true,
         };
         const expectedCaps = Object.assign({}, capabilities, {
-          ['goog:chromeOptions']: {
+          'goog:chromeOptions': {
             args: ['--inspect=localhost:50000'],
             binary: 'workspace/my-test-app/out/my-test-app',
             windowTypes: ['app', 'webview'],
@@ -1059,8 +1057,8 @@ describe('Electron Launch Service', () => {
           {
             firstMatch: [],
             alwaysMatch: {
-              'browserName': 'chrome',
-              'browserVersion': '116.0.5845.190',
+              browserName: 'chrome',
+              browserVersion: '116.0.5845.190',
               'goog:chromeOptions': {
                 args: ['foo=bar'],
                 binary: 'workspace/my-test-app/dist/my-test-app',

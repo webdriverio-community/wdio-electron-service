@@ -1,11 +1,9 @@
 import path from 'node:path';
-
-import { readConfig } from './read.js';
-import log from '../log.js';
-import { APP_NAME_DETECTION_ERROR } from '../constants.js';
-
+import type { BuilderBuildInfo, BuilderConfig } from '@wdio/electron-types';
 import type { NormalizedReadResult } from 'read-package-up';
-import type { BuilderConfig, BuilderBuildInfo } from '@wdio/electron-types';
+import { APP_NAME_DETECTION_ERROR } from '../constants.js';
+import log from '../log.js';
+import { readConfig } from './read.js';
 
 export async function getConfig(pkg: NormalizedReadResult): Promise<BuilderBuildInfo | undefined> {
   const rootDir = path.dirname(pkg.path);

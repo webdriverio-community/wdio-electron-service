@@ -1,9 +1,7 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import log from '@wdio/electron-utils/log';
-
-import { getActiveWindowHandle, ensureActiveWindowFocus, clearPuppeteerSessions, getPuppeteer } from '../src/window.js';
-
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from '../src/window.js';
 
 vi.mock('@wdio/electron-utils/log');
 
@@ -55,7 +53,6 @@ describe('Window Management', () => {
 
   describe('getActiveWindowHandle()', () => {
     it('should return undefined when no puppeteer browser are inputted', async () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       const handle = await getActiveWindowHandle(undefined);
       expect(handle).toBe(undefined);

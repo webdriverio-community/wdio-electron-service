@@ -1,9 +1,7 @@
-import { expect, it, vi, describe } from 'vitest';
-
+import type { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
+import { describe, expect, it, vi } from 'vitest';
 import { getElectronVersion } from '../src/electronVersion.js';
 import { findPnpmCatalogVersion } from '../src/pnpm.js';
-
-import type { NormalizedPackageJson, NormalizedReadResult } from 'read-package-up';
 
 vi.mock('../src/pnpm', async () => {
   return {
@@ -52,7 +50,7 @@ describe('getElectronVersion()', () => {
   it('should prioritize electron over electron-nightly when both are set package.json dependencies', async () => {
     const pkg = {
       packageJson: createPackageJson('dependencies', {
-        'electron': '25.0.1',
+        electron: '25.0.1',
         'electron-nightly': '33.0.0-nightly.20240621',
       }),
       path: '/path/to/package.json',
@@ -111,7 +109,7 @@ describe('getElectronVersion()', () => {
 
     const pkg = {
       packageJson: createPackageJson('dependencies', {
-        'electron': 'catalog:',
+        electron: 'catalog:',
         'electron-nightly': 'catalog:',
       }),
       path: '/path/to/package.json',

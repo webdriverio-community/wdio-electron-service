@@ -1,7 +1,7 @@
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
 
 import type { ElectronServiceGlobalOptions } from '@wdio/electron-types';
-import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
 export abstract class ServiceConfig {
   #globalOptions: ElectronServiceGlobalOptions;

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import nock from 'nock';
+import { describe, expect, it } from 'vitest';
 
 import { getChromiumVersion } from '../src/versions.js';
 

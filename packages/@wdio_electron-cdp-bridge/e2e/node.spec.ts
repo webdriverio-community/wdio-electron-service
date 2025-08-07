@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import getPort from 'get-port';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { CdpBridge } from '../src/bridge.js';
 

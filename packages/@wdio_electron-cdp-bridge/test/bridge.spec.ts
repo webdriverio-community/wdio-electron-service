@@ -1,12 +1,11 @@
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-
 import log from '@wdio/electron-utils/log';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CdpBridge } from '../src/bridge.js';
-import { DevTool } from '../src/devTool.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
+import { DevTool } from '../src/devTool.js';
 
-import type { WdioCdpBridge } from '../src/types.js';
+import type { DebuggerList } from '../src/types.js';
 
 vi.mock('@wdio/electron-utils/log', () => ({
   default: {
@@ -18,14 +17,8 @@ vi.mock('@wdio/electron-utils/log', () => ({
   },
 }));
 
-const mockOn = vi.fn().mockImplementation((state, callback) => {
-  if (state === 'on') {
-    callback();
-  } else if (state === 'open') {
-    callback();
-  }
-});
-const mockOnce = vi.fn();
+let mockWebSocketInstance: any;
+
 vi.mock('ws', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ws')>();
 
@@ -40,31 +33,81 @@ vi.mock('ws', async (importOriginal) => {
       static CLOSING = 2;
       /** The connection is closed. */
       static CLOSED = 3;
+
       readyState = 1;
-      cons = vi.fn();
+      #eventHandlers = new Map();
+      #onceHandlers = new Map();
+
       send = vi.fn();
       close = vi.fn();
-      on = mockOn;
-      once = mockOnce;
+
+      constructor() {
+        mockWebSocketInstance = this;
+        // Simulate successful connection immediately
+        // Use nextTick to ensure handlers are registered first
+        process.nextTick(() => {
+          this.#emit('open');
+        });
+      }
+
+      on = vi.fn((event: string, callback: (...args: unknown[]) => void) => {
+        if (!this.#eventHandlers.has(event)) {
+          this.#eventHandlers.set(event, []);
+        }
+        this.#eventHandlers.get(event).push(callback);
+      });
+
+      once = vi.fn((event: string, callback: (...args: unknown[]) => void) => {
+        if (!this.#onceHandlers.has(event)) {
+          this.#onceHandlers.set(event, []);
+        }
+        this.#onceHandlers.get(event).push(callback);
+      });
+
+      #emit(event: string, ...args: any[]) {
+        // Handle regular event handlers
+        if (this.#eventHandlers.has(event)) {
+          this.#eventHandlers.get(event).forEach((callback: (...args: unknown[]) => void) => {
+            callback(...args);
+          });
+        }
+
+        // Handle once handlers
+        if (this.#onceHandlers.has(event)) {
+          const handlers = this.#onceHandlers.get(event);
+          handlers.forEach((callback: (...args: unknown[]) => void) => {
+            callback(...args);
+          });
+          this.#onceHandlers.set(event, []); // Clear once handlers after execution
+        }
+      }
+
+      // Method to trigger events from tests
+      triggerEvent = (event: string, ...args: unknown[]) => {
+        this.#emit(event, ...args);
+      };
     },
   };
 });
 
-let debuggerList: { webSocketDebuggerUrl: string }[] | undefined = undefined;
+let debuggerList: { webSocketDebuggerUrl: string }[] | undefined;
 vi.mock('../src/devTool', () => {
   return {
     DevTool: vi.fn(),
   };
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const executeEventCallback = (calls: any[][], eventName: string, ...args: any[]) => {
-  const callback = calls.filter(([event]) => event === eventName)[0][1];
-  callback(...args);
+const triggerWebSocketEvent = (eventName: string, ...args: unknown[]) => {
+  if (mockWebSocketInstance?.triggerEvent) {
+    mockWebSocketInstance.triggerEvent(eventName, ...args);
+  }
 };
 
 describe('CdpBridge', () => {
   beforeEach(() => {
+    // Reset WebSocket instance
+    mockWebSocketInstance = null;
+
     vi.mocked(DevTool).mockImplementation(
       () =>
         ({
@@ -89,7 +132,7 @@ describe('CdpBridge', () => {
           throw Error('Dummy Error');
         }
         return {
-          list: vi.fn(async () => [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }] as WdioCdpBridge.DebuggerList),
+          list: vi.fn(async () => [{ webSocketDebuggerUrl: 'ws://localhost:123/uuid' }] as DebuggerList),
         } as unknown as DevTool;
       });
       const client = new CdpBridge({ waitInterval: 10 });
@@ -130,10 +173,12 @@ describe('CdpBridge', () => {
         result: { result: undefined },
       });
 
-      executeEventCallback(mockOn.mock.calls, 'message', message);
+      // Wait a tick to ensure promise is registered before triggering the message
+      await new Promise((resolve) => process.nextTick(resolve));
+      triggerWebSocketEvent('message', message);
       expect(await result).toStrictEqual({});
       // nothing is happen when same id is received
-      expect(() => executeEventCallback(mockOn.mock.calls, 'message', message)).not.toThrowError();
+      expect(() => triggerWebSocketEvent('message', message)).not.toThrowError();
     });
 
     it('should properly handle CDP event messages', async () => {
@@ -141,13 +186,12 @@ describe('CdpBridge', () => {
       const client = new CdpBridge();
       await client.connect();
       client.send('Runtime.enable');
-      let param;
+      let param: any;
       client.on('Runtime.executionContextCreated', (_param) => {
         param = _param;
       });
 
-      executeEventCallback(
-        mockOn.mock.calls,
+      triggerWebSocketEvent(
         'message',
         Buffer.from(
           JSON.stringify({
@@ -169,8 +213,9 @@ describe('CdpBridge', () => {
       const client = new CdpBridge();
       await client.connect();
       const result = client.send('Runtime.enable');
-      executeEventCallback(
-        mockOn.mock.calls,
+      // Wait a tick to ensure promise is registered before triggering the message
+      await new Promise((resolve) => process.nextTick(resolve));
+      triggerWebSocketEvent(
         'message',
         Buffer.from(
           JSON.stringify({
@@ -187,8 +232,8 @@ describe('CdpBridge', () => {
       const client = new CdpBridge();
       await client.connect();
       const result = client.send('Runtime.enable');
-      executeEventCallback(mockOn.mock.calls, 'message', 'not formatted with JSON');
-      executeEventCallback(mockOn.mock.calls, 'close'); // emulate close event
+      triggerWebSocketEvent('message', 'not formatted with JSON');
+      triggerWebSocketEvent('close'); // emulate close event
       await expect(() => result).rejects.toThrowError(ERROR_MESSAGE.ERROR_PARSE_JSON);
     });
 
@@ -213,8 +258,8 @@ describe('CdpBridge', () => {
       await client.connect();
       const result = client.send('Runtime.enable');
       const errorMessage = 'Some error happen.';
-      executeEventCallback(mockOn.mock.calls, 'error', new Error(errorMessage));
-      executeEventCallback(mockOn.mock.calls, 'close'); // emulate close event
+      triggerWebSocketEvent('error', new Error(errorMessage));
+      triggerWebSocketEvent('close'); // emulate close event
       await expect(() => result).rejects.toThrowError(`${ERROR_MESSAGE.ERROR_INTERNAL} ${errorMessage}`);
     });
   });
@@ -225,7 +270,7 @@ describe('CdpBridge', () => {
       const client = new CdpBridge();
       await client.connect();
       const result = client.close();
-      executeEventCallback(mockOnce.mock.calls, 'close'); // emulate close event
+      triggerWebSocketEvent('close'); // emulate close event
       await expect(result).resolves.not.toThrowError();
     });
 

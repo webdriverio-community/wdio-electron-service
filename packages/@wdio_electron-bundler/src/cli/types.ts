@@ -15,7 +15,7 @@ export interface BuildOptions extends BaseOptions {
 // Bundler configuration interfaces
 export interface Transformation {
   type: 'injectDependency' | 'codeReplace';
-  options: Record<string, any>;
+  options: Record<string, unknown>;
 }
 
 export interface BundlerFormatConfig extends Partial<RollupOptions> {
@@ -37,6 +37,8 @@ export interface BundlerConfig {
 export interface PackageJson {
   name: string;
   version: string;
+  main?: string;
+  module?: string;
   exports?: Record<string, string | Record<string, string>>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
@@ -75,7 +77,7 @@ export interface ImportSpec {
 export interface PluginSpec {
   name: string;
   call: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown> | Record<string, unknown>[];
   import: ImportSpec;
   inline?: boolean;
 }
@@ -96,6 +98,7 @@ export interface OutputSpec {
   dir: string;
   sourcemap: boolean;
   plugins: InlinePluginSpec[];
+  dynamicImportInCjs?: boolean;
 }
 
 /**
@@ -115,4 +118,55 @@ export interface GeneratedRollupConfig {
   imports: ImportSpec[];
   configs: ConfigSpec[];
   packageInfo: PackageInfo;
+}
+
+/**
+ * TypeScript compiler options interface
+ */
+export interface CompilerOptions {
+  target?: string;
+  module?: string;
+  moduleResolution?: string;
+  allowSyntheticDefaultImports?: boolean;
+  esModuleInterop?: boolean;
+  skipLibCheck?: boolean;
+  noEmitOnError?: boolean;
+  outDir?: string;
+  declaration?: boolean;
+  declarationMap?: boolean;
+}
+
+/**
+ * TypeScript plugin options
+ */
+export interface TypeScriptPluginOptions {
+  compilerOptions: CompilerOptions;
+  typescript?: unknown;
+  include?: string[];
+  exclude?: string[];
+  tsconfig?: false | string;
+}
+
+/**
+ * Rollup log object interface
+ */
+export interface RollupLogMessage {
+  code?: string;
+  message: string;
+  loc?: {
+    file?: string;
+    line: number;
+    column: number;
+  };
+  frame?: string;
+  toString(): string;
+}
+
+/**
+ * Serialized object for config loading
+ */
+export interface SerializedObject {
+  __type?: 'function' | 'regexp';
+  __value?: string;
+  [key: string]: unknown;
 }

@@ -1,9 +1,9 @@
-import type * as Electron from 'electron';
 import type { OfficialArch } from '@electron/packager';
 import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
-import { fn as vitestFn, type Mock } from '@vitest/spy';
+import type { Mock, fn as vitestFn } from '@vitest/spy';
 import type { Capabilities, Options } from '@wdio/types';
 import type { ArchType } from 'builder-util';
+import type * as Electron from 'electron';
 import type { PackageJson } from 'read-package-up';
 
 import type { ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio';
@@ -202,6 +202,7 @@ export type ElectronInterface = keyof ElectronType;
 export type BuilderConfig = {
   productName?: string;
   directories?: { output?: string };
+  executableName?: string;
 };
 
 export type ForgeConfig = ElectronForgeConfig;
@@ -798,6 +799,7 @@ declare global {
     wdioElectron: WdioElectronWindowObj;
   }
 
+  // biome-ignore lint/style/noNamespace: This is a legitimate use of namespace for global augmentation
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface Element extends ElementBase {}

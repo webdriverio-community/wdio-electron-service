@@ -1,5 +1,5 @@
-import path, { normalize } from 'node:path';
 import fs from 'node:fs/promises';
+import path, { normalize } from 'node:path';
 import { vi } from 'vitest';
 
 export async function getFixturePackageJson(fixtureType: string, fixtureName: string) {

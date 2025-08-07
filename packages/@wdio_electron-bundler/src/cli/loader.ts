@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { BundlerConfig } from './types.js';
-import { Logger } from './logger.js';
+import type { Logger } from './logger.js';
+import type { BundlerConfig, SerializedObject } from './types.js';
 
 export interface ConfigSource {
   path: string;
@@ -78,7 +78,7 @@ export class ConfigLoader {
     if (existsSync(packageJsonPath)) {
       try {
         const content = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        const hasBundlerField = !!(content as any)['wdio-bundler'];
+        const hasBundlerField = !!(content as Record<string, unknown>)['wdio-bundler'];
         sources.push({
           path: `${packageJsonPath} (bundler field)`,
           type: 'package.json',
@@ -186,7 +186,7 @@ export class ConfigLoader {
     try {
       // Convert file path to file URL for cross-platform compatibility
       const fileUrl = pathToFileURL(filePath).href;
-      const tempJsonPath = filePath + '.temp.json';
+      const tempJsonPath = `${filePath}.temp.json`;
 
       // Use tsx to execute the TypeScript file and serialize the config preserving functions/regex
       const tsxScript = `
@@ -253,23 +253,24 @@ writeFileSync('${tempJsonPath.replace(/\\/g, '\\\\')}', JSON.stringify(serialize
         const serializedConfig = JSON.parse(readFileSync(tempJson, 'utf-8'));
 
         // Deserialize functions and regex
-        const deserialize = (obj: any): any => {
-          if (obj && typeof obj === 'object' && obj.__type) {
-            if (obj.__type === 'function') {
+        const deserialize = (obj: SerializedObject | unknown): unknown => {
+          if (obj && typeof obj === 'object' && (obj as SerializedObject).__type) {
+            const serializedObj = obj as SerializedObject;
+            if (serializedObj.__type === 'function' && serializedObj.__value) {
               // Convert string back to function
-              return new Function('return ' + obj.__value)();
+              return new Function(`return ${serializedObj.__value}`)();
             }
-            if (obj.__type === 'regexp') {
+            if (serializedObj.__type === 'regexp' && serializedObj.__value) {
               // Convert string back to regex
-              const match = obj.__value.match(/^\/(.*)\/([gimuy]*)$/);
-              return match ? new RegExp(match[1], match[2]) : new RegExp(obj.__value);
+              const match = serializedObj.__value.match(/^\/(.*)\/([gimuy]*)$/);
+              return match ? new RegExp(match[1], match[2]) : new RegExp(serializedObj.__value);
             }
           }
           if (Array.isArray(obj)) {
             return obj.map(deserialize);
           }
           if (obj && typeof obj === 'object') {
-            const result: any = {};
+            const result: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(obj)) {
               result[key] = deserialize(value);
             }
@@ -278,7 +279,7 @@ writeFileSync('${tempJsonPath.replace(/\\/g, '\\\\')}', JSON.stringify(serialize
           return obj;
         };
 
-        const config = deserialize(serializedConfig);
+        const config = deserialize(serializedConfig) as Partial<BundlerConfig>;
 
         // Cleanup temp files
         unlinkSync(tempScript);

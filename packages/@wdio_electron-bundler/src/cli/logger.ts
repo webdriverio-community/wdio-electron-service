@@ -72,7 +72,7 @@ export class Logger {
   // Code/JSON output with syntax highlighting
   code(content: string, language?: string): void {
     if (this.level === 'extra-verbose') {
-      console.log('\n```' + (language || ''));
+      console.log(`\n\`\`\`${language || ''}`);
       console.log(content);
       console.log('```\n');
     }

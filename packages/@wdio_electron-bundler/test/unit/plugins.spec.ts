@@ -1,19 +1,19 @@
 import type {
+  LogLevel,
+  MinimalPluginContext,
   NormalizedOutputOptions,
   PluginContext,
-  MinimalPluginContext,
-  LogLevel,
+  RenderedChunk,
   RollupLog,
   TransformPluginContext,
-  RenderedChunk,
 } from 'rollup';
 import {
   codeReplacePlugin,
   emitPackageJsonPlugin,
   injectDependencyPlugin,
-  warnToErrorPlugin,
   MODULE_TYPE,
   type SourceCodeType,
+  warnToErrorPlugin,
 } from '../../src/plugins.js';
 
 type Transform = (this: TransformPluginContext, code: string, id: string) => Promise<void>;
@@ -51,7 +51,7 @@ describe('Rollup Plugins', () => {
     ])('should emit package.json with correct type for %s format', async (format, moduleType) => {
       const plugin = emitPackageJsonPlugin('test-pkg', format);
 
-      await (plugin.generateBundle! as unknown as GenerateBundle).call(context, {
+      await (plugin.generateBundle as unknown as GenerateBundle).call(context, {
         dir: 'dist',
       } as NormalizedOutputOptions);
 
@@ -82,7 +82,9 @@ describe('Rollup Plugins', () => {
 
     it('should escalate warnings to errors', async () => {
       const plugin = warnToErrorPlugin();
-      (plugin.onLog! as unknown as OnLog).call(context, 'warn', { message: 'message' });
+      (plugin.onLog as unknown as OnLog).call(context, 'warn', {
+        message: 'message',
+      });
       expect(context.warn).toHaveBeenCalledTimes(1);
       expect(context.error).toHaveBeenCalledTimes(1);
     });
@@ -122,14 +124,20 @@ describe('Rollup Plugins', () => {
         `const a = 1`,
         '/path/to/src/mock.ts',
       );
-      expect(result1).toStrictEqual({ code: 'const a = 1\nconst spy = 1', map: null });
+      expect(result1).toStrictEqual({
+        code: 'const a = 1\nconst spy = 1',
+        map: null,
+      });
 
       const result2 = await (plugin.transform as unknown as Transform).call(
         context,
         `const a = 1`,
         '/path/to/src/src/service.ts',
       );
-      expect(result2).toStrictEqual({ code: 'const a = 1\nconst { default: copy } = 2', map: null });
+      expect(result2).toStrictEqual({
+        code: 'const a = 1\nconst { default: copy } = 2',
+        map: null,
+      });
     });
 
     it('should return null when input id is not injection target', async () => {

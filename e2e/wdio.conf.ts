@@ -1,5 +1,5 @@
-import { join, dirname } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { WdioElectronConfig } from '@wdio/electron-types';
@@ -115,7 +115,6 @@ switch (envContext.testType) {
   case 'standalone':
     specs = ['./test/standalone/api.spec.ts'];
     break;
-  case 'standard':
   default:
     specs = ['./test/api.spec.ts', './test/application.spec.ts', './test/dom.spec.ts', './test/interaction.spec.ts'];
     break;
@@ -123,7 +122,7 @@ switch (envContext.testType) {
 
 // Configure capabilities
 type ElectronCapability = {
-  'browserName': 'electron';
+  browserName: 'electron';
   'wdio:electronServiceOptions': {
     appEntryPoint?: string;
     appBinaryPath?: string;
@@ -148,7 +147,7 @@ if (envContext.isMultiremote) {
   capabilities = {
     browserA: {
       capabilities: {
-        'browserName': 'electron',
+        browserName: 'electron',
         'wdio:electronServiceOptions': {
           ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
           appArgs: ['--foo', '--bar=baz', '--browser=A'],
@@ -157,7 +156,7 @@ if (envContext.isMultiremote) {
     },
     browserB: {
       capabilities: {
-        'browserName': 'electron',
+        browserName: 'electron',
         'wdio:electronServiceOptions': {
           ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
           appArgs: ['--foo', '--bar=baz', '--browser=B'],
@@ -169,7 +168,7 @@ if (envContext.isMultiremote) {
   // Standard configuration
   capabilities = [
     {
-      'browserName': 'electron',
+      browserName: 'electron',
       'wdio:electronServiceOptions': {
         ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
         appArgs: ['foo', 'bar=baz'],

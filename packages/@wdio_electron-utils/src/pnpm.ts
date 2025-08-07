@@ -1,8 +1,7 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
-
-import log from './log.js';
+import path from 'node:path';
 import { PNPM_CATALOG_PREFIX, PNPM_WORKSPACE_YAML } from './constants.js';
+import log from './log.js';
 
 type PnpmWorkspace = {
   catalog?: { [key: string]: string };
@@ -24,8 +23,8 @@ export async function findPnpmCatalogVersion(pkgName: string, pkgVersion: string
   try {
     // Traverse up the directory tree to find pnpm-workspace.yaml
     let currentDir = projectDir;
-    let workspaceYamlPath;
-    let yamlContent;
+    let workspaceYamlPath: string | undefined;
+    let yamlContent: string | undefined;
     if (!pnpmWorkspace || _projectDir !== projectDir) {
       _projectDir = projectDir;
       while (currentDir !== path.parse(currentDir).root) {

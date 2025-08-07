@@ -1,6 +1,6 @@
-import { browser } from 'wdio-electron-service';
-import { multiremotebrowser, expect } from '@wdio/globals';
+import { expect, multiremotebrowser } from '@wdio/globals';
 import type * as Electron from 'electron';
+import { browser } from 'wdio-electron-service';
 
 // Helper function to get the expected app name from globalThis
 const getExpectedAppName = (): string => {

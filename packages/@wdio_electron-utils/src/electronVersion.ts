@@ -1,10 +1,8 @@
 import { dirname } from 'node:path';
 import findVersions from 'find-versions';
-
-import { findPnpmCatalogVersion } from './pnpm.js';
-import { PKG_NAME_ELECTRON, PNPM_CATALOG_PREFIX } from './constants.js';
-
 import type { NormalizedReadResult } from 'read-package-up';
+import { PKG_NAME_ELECTRON, PNPM_CATALOG_PREFIX } from './constants.js';
+import { findPnpmCatalogVersion } from './pnpm.js';
 
 export async function getElectronVersion(pkg: NormalizedReadResult) {
   const projectDir = dirname(pkg.path);

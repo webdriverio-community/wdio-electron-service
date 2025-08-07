@@ -217,12 +217,12 @@ export async function retry<T>(
         break; // Don't delay on the last attempt
       }
 
-      const delayMs = initialDelay * Math.pow(backoff, i);
+      const delayMs = initialDelay * backoff ** i;
       await delay(delayMs);
     }
   }
 
-  throw lastError!;
+  throw lastError;
 }
 
 /**

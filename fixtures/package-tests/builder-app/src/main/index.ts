@@ -1,5 +1,5 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
 import { join } from 'node:path';
+import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
 
 function createWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({

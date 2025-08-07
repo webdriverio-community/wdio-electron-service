@@ -1,4 +1,4 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { execute } from '../../src/commands/execute.js';
 

@@ -1,18 +1,17 @@
 import path from 'node:path';
 import { allOfficialArchsForPlatformAndVersion } from '@electron/packager';
-import { SUPPORTED_PLATFORM, SUPPORTED_BUILD_TOOL } from './constants.js';
-import { validateBinaryPaths } from './selectExecutable.js';
-
 import type {
   AppBuildInfo,
-  ForgeBuildInfo,
-  BuilderBuildInfo,
-  BuilderArch,
   BinaryPathResult,
-  PathGenerationResult,
+  BuilderArch,
+  BuilderBuildInfo,
+  ForgeBuildInfo,
   PathGenerationError,
+  PathGenerationResult,
   PathValidationResult,
 } from '@wdio/electron-types';
+import { SUPPORTED_BUILD_TOOL, SUPPORTED_PLATFORM } from './constants.js';
+import { validateBinaryPaths } from './selectExecutable.js';
 
 type SupportedPlatform = keyof typeof SUPPORTED_PLATFORM;
 type SupportedBuildTool = keyof typeof SUPPORTED_BUILD_TOOL;
@@ -80,9 +79,12 @@ function getPlatformBinaryPath(
   platform: SupportedPlatform,
   options: BinaryOptions,
 ): string {
-  const getExecutableName = () => {
-    if (options.buildTool === SUPPORTED_BUILD_TOOL.builder && (options.config as any).executableName) {
-      return (options.config as any).executableName;
+  const getExecutableName = (): string => {
+    if (
+      options.buildTool === SUPPORTED_BUILD_TOOL.builder &&
+      (options.config as BuilderBuildInfo['config']).executableName
+    ) {
+      return (options.config as BuilderBuildInfo['config']).executableName || binaryName;
     }
     return binaryName;
   };

@@ -30,18 +30,10 @@
     "wdio-electron-service": "latest",
     "xvfb-maybe": "^0.2.1"
   },
-  "keywords": [
-    "electron",
-    "electron-vite",
-    "webdriverio",
-    "testing",
-    "example"
-  ],
+  "keywords": ["electron", "electron-vite", "webdriverio", "testing", "example"],
   "author": "WebDriverIO Community",
   "license": "MIT",
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron"
-    ]
+    "onlyBuiltDependencies": ["electron"]
   }
 }

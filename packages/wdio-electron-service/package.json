@@ -37,14 +37,7 @@
     "test": "pnpm test:unit",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "keywords": [
-    "webdriverio",
-    "wdio",
-    "wdio-service",
-    "electron",
-    "chromedriver",
-    "tests"
-  ],
+  "keywords": ["webdriverio", "wdio", "wdio-service", "electron", "chromedriver", "tests"],
   "peerDependencies": {
     "electron": "*",
     "webdriverio": ">9.0.0"
@@ -92,7 +85,5 @@
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

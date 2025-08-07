@@ -1,7 +1,7 @@
 import { normalize } from 'node:path';
-import { injectDependency, type InjectDependencyPluginOptions } from './utils';
 import type { NormalizedPackageJson } from 'read-package-up';
 import type { Plugin } from 'rollup';
+import { type InjectDependencyPluginOptions, injectDependency } from './utils';
 
 export const MODULE_TYPE = {
   CJS: 'cjs',
@@ -130,4 +130,4 @@ export const codeReplacePlugin = (options: CodeReplacePluginOption | CodeReplace
   };
 };
 
-export { type InjectDependencyPluginOptions };
+export type { InjectDependencyPluginOptions };

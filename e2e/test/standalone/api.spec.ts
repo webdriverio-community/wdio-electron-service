@@ -1,13 +1,12 @@
-import path from 'node:path';
-import url from 'node:url';
 import fs from 'node:fs';
+import path from 'node:path';
 import process from 'node:process';
-
-import { startWdioSession } from 'wdio-electron-service';
-import { getBinaryPath, getAppBuildInfo, getElectronVersion } from '@wdio/electron-utils';
+import url from 'node:url';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import type * as Electron from 'electron';
 
 import type { NormalizedPackageJson } from 'read-package-up';
-import type * as Electron from 'electron';
+import { startWdioSession } from 'wdio-electron-service';
 
 // Get the directory name once at the top
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -26,7 +25,7 @@ const pkg = { packageJson, path: packageJsonPath };
 const electronVersion = await getElectronVersion(pkg);
 
 // Set up the session options based on binary/no-binary mode
-let sessionOptions;
+let sessionOptions: any;
 if (isBinary) {
   // Binary mode - use appBinaryPath
   const appBuildInfo = await getAppBuildInfo(pkg);
@@ -36,7 +35,7 @@ if (isBinary) {
   const appBinaryPath = typeof binaryResult === 'string' ? binaryResult : binaryResult.binaryPath;
 
   sessionOptions = {
-    'browserName': 'electron',
+    browserName: 'electron',
     'wdio:electronServiceOptions': {
       appBinaryPath,
       appArgs: ['foo', 'bar=baz'],
@@ -52,7 +51,7 @@ if (isBinary) {
   }
 
   sessionOptions = {
-    'browserName': 'electron',
+    browserName: 'electron',
     'wdio:electronServiceOptions': {
       appEntryPoint,
       appArgs: ['foo', 'bar=baz'],

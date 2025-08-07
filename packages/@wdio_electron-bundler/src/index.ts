@@ -1,10 +1,10 @@
 import typescriptPlugin, { type RollupTypescriptOptions } from '@rollup/plugin-typescript';
-import { getInputConfig, getPackageJson, getOutDirs } from './utils';
+import { getInputConfig, getOutDirs, getPackageJson } from './utils';
 
-export { nodeExternals } from 'rollup-plugin-node-externals';
 export { nodeResolve } from '@rollup/plugin-node-resolve';
-export * from './plugins';
+export { nodeExternals } from 'rollup-plugin-node-externals';
 export type { BundlerConfig, BundlerFormatConfig, Transformation } from './cli/types.js';
+export * from './plugins';
 
 export const typescript = (options: RollupTypescriptOptions = {}) => {
   let exclude: string[] = [];

@@ -1,14 +1,13 @@
 #!/usr/bin/env tsx
 
+import { exec } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-
-import * as yaml from 'yaml';
 import { checkbox, confirm, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import ora from 'ora';
+import * as yaml from 'yaml';
 
 const execAsync = promisify(exec);
 

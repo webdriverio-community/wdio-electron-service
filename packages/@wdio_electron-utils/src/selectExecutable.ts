@@ -1,8 +1,7 @@
-import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
-
+import fs from 'node:fs/promises';
+import type { PathValidationAttempt, PathValidationError, PathValidationResult } from '@wdio/electron-types';
 import log from './log.js';
-import type { PathValidationResult, PathValidationAttempt, PathValidationError } from '@wdio/electron-types';
 
 function getValidationError(error: Error, path: string): PathValidationError {
   const nodeError = error as NodeJS.ErrnoException;
@@ -98,10 +97,10 @@ export async function validateBinaryPaths(binaryPaths: string[]): Promise<PathVa
 export async function selectExecutable(binaryPaths: string[]): Promise<string> {
   const result = await validateBinaryPaths(binaryPaths);
 
-  if (!result.success) {
+  if (!result.success || !result.validPath) {
     const pathsList = binaryPaths.join(', \n');
     throw new Error(`No executable binary found, checked: \n${pathsList}`);
   }
 
-  return result.validPath!;
+  return result.validPath;
 }

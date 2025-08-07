@@ -220,7 +220,7 @@ export class StatusBar {
 
     // Print table header
     console.log('| Status | Test                                | Duration | Error Summary');
-    console.log('|' + '─'.repeat(118) + '|');
+    console.log(`|${'─'.repeat(118)}|`);
 
     // Sort results: failures first, then passes, then skipped
     const sortedResults = [...results].sort((a, b) => {
@@ -235,7 +235,7 @@ export class StatusBar {
     for (const result of sortedResults) {
       const status = result.skipped ? '⏭️ SKIP' : result.success ? '✅ PASS' : '❌ FAIL';
       const duration = formatDuration(result.duration);
-      const error = result.error ? result.error.slice(0, 50) + '...' : '';
+      const error = result.error ? `${result.error.slice(0, 50)}...` : '';
 
       const testName = result.name.padEnd(35).slice(0, 35);
       const durationStr = duration.padEnd(8);
@@ -285,10 +285,16 @@ export class StatusBar {
  * Test status tracker
  */
 export class TestStatusTracker {
-  private tests = new Map<string, { status: 'pending' | 'running' | 'completed' | 'skipped'; result?: TestResult }>();
+  private tests = new Map<
+    string,
+    {
+      status: 'pending' | 'running' | 'completed' | 'skipped';
+      result?: TestResult;
+    }
+  >();
   private startTime = Date.now();
 
-  constructor(private testNames: string[]) {
+  constructor(testNames: string[]) {
     // Initialize all tests as pending
     testNames.forEach((name) => {
       this.tests.set(name, { status: 'pending' });

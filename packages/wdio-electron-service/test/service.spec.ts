@@ -1,12 +1,11 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
-import type { ElectronMock, BrowserExtension } from '@wdio/electron-types';
-
-import { mockProcessProperty } from './helpers.js';
+import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { execute } from '../src/commands/executeCdp.js';
 import * as commands from '../src/commands/index.js';
 import mockStore from '../src/mockStore.js';
 import ElectronWorkerService, { waitUntilWindowAvailable } from '../src/service.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
-import { execute } from '../src/commands/executeCdp.js';
+import { mockProcessProperty } from './helpers.js';
 
 vi.mock('@wdio/electron-utils/log');
 
@@ -133,7 +132,6 @@ describe('Electron Worker Service', () => {
       await instance.before({}, [], browser);
 
       // emulate the call to copyOriginalApi
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const internalCopyOriginalApi = vi.mocked(execute).mock.calls[0][2] as any;
       const dummyElectron = {
         dialog: {
@@ -149,9 +147,9 @@ describe('Electron Worker Service', () => {
     describe('when multiremote', () => {
       it('should add electron commands to the browser object', async () => {
         instance = new ElectronWorkerService({}, {});
-        browser['requestedCapabilities'] = {
+        browser.requestedCapabilities = {
           alwaysMatch: {
-            'browserName': 'electron',
+            browserName: 'electron',
             'wdio:electronServiceOptions': {},
           },
         };
@@ -187,7 +185,7 @@ describe('Electron Worker Service', () => {
       it('should continue with non-electron capabilities', async () => {
         instance = new ElectronWorkerService({}, {});
 
-        browser['requestedCapabilities'] = {
+        browser.requestedCapabilities = {
           browserName: 'chrome',
         };
 

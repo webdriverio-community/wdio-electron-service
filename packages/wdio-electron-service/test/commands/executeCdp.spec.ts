@@ -1,10 +1,8 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
-
-import { execute } from '../../src/commands/executeCdp.js';
-import { ElectronCdpBridge } from '../../src/bridge.js';
-import mockStore from '../../src/mockStore.js';
-
 import type { ElectronMock } from '@wdio/electron-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ElectronCdpBridge } from '../../src/bridge.js';
+import { execute } from '../../src/commands/executeCdp.js';
+import mockStore from '../../src/mockStore.js';
 
 vi.mock('../../src/mockStore.js', () => {
   const mockStore = {

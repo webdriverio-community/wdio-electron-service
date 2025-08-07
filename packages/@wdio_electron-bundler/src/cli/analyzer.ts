@@ -1,16 +1,17 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
+import type { Logger } from './logger.js';
 import type {
-  PackageInfo,
-  PackageJson,
   BundlerConfig,
-  PluginSpec,
+  BundlerFormatConfig,
   ImportSpec,
   InlinePluginSpec,
+  PackageInfo,
+  PackageJson,
+  PluginSpec,
   Transformation,
 } from './types.js';
-import { Logger } from './logger.js';
 
 export class PackageAnalyzer {
   constructor(private logger: Logger) {}
@@ -111,7 +112,10 @@ export class PackageAnalyzer {
       const key = plugin.import.from;
       if (importMap.has(key)) {
         // Merge imports from the same package
-        const existing = importMap.get(key)!;
+        const existing = importMap.get(key);
+        if (!existing) {
+          throw new Error(`Import map missing key: ${key}`);
+        }
         if (plugin.import.default && !existing.default) {
           existing.default = plugin.import.default;
         }
@@ -131,7 +135,7 @@ export class PackageAnalyzer {
   /**
    * Create emit package.json inline plugin
    */
-  createEmitPackageJsonPlugin(packageName: string, format: 'esm' | 'cjs'): InlinePluginSpec {
+  createEmitPackageJsonPlugin(_packageName: string, format: 'esm' | 'cjs'): InlinePluginSpec {
     const packageContent = format === 'esm' ? '{ "type": "module" }' : '{ "type": "commonjs" }';
 
     return {
@@ -218,7 +222,7 @@ export class PackageAnalyzer {
   /**
    * Extract output directories from main/module fields
    */
-  private extractOutputDirectories(packageJson: any): { esm: string; cjs: string } {
+  private extractOutputDirectories(packageJson: PackageJson): { esm: string; cjs: string } {
     const main = packageJson.main;
     const module = packageJson.module;
 
@@ -271,15 +275,15 @@ export class PackageAnalyzer {
   private createNodeExternalsPlugin(config: BundlerConfig, format: 'esm' | 'cjs'): PluginSpec {
     // Check if there are any specific externals config for this format
     const formatConfig = config[format];
-    const nodeExternalsConfig = (formatConfig as any)?.nodeExternals;
+    const nodeExternalsConfig = (formatConfig as Partial<BundlerFormatConfig>)?.nodeExternals;
 
     let call = 'nodeExternals()';
-    let options: Record<string, any> | undefined = undefined;
+    let options: Record<string, unknown> | undefined;
 
     if (nodeExternalsConfig && Object.keys(nodeExternalsConfig).length > 0) {
       const configStr = JSON.stringify(nodeExternalsConfig, null, 2)
         .split('\n')
-        .map((line, index) => (index === 0 ? line : '  ' + line))
+        .map((line, index) => (index === 0 ? line : `  ${line}`))
         .join('\n');
       call = `nodeExternals(${configStr})`;
       options = nodeExternalsConfig;
@@ -361,7 +365,7 @@ export class PackageAnalyzer {
     const options = transformations.map((t) => t.options);
     const optionsStr = JSON.stringify(
       options,
-      (key, value) => {
+      (_key, value) => {
         if (typeof value === 'function') {
           return `__FUNCTION__${value.toString()}__FUNCTION__`;
         }
@@ -378,7 +382,7 @@ export class PackageAnalyzer {
     return {
       name: 'inject-dependency',
       call: `injectDependencyPlugin(${optionsStr})`,
-      options: options, // Store the actual options for programmatic use
+      options, // Store the actual options for programmatic use
       import: {
         from: '@wdio/electron-bundler',
         named: ['injectDependencyPlugin'],
@@ -393,7 +397,7 @@ export class PackageAnalyzer {
     const options = transformations.map((t) => t.options);
     const optionsStr = JSON.stringify(
       options,
-      (key, value) => {
+      (_key, value) => {
         if (value instanceof RegExp) {
           return `__REGEXP__${value.toString()}__REGEXP__`;
         }
@@ -405,7 +409,7 @@ export class PackageAnalyzer {
     return {
       name: 'code-replace',
       call: `codeReplacePlugin(${optionsStr})`,
-      options: options, // Store the actual options for programmatic use
+      options, // Store the actual options for programmatic use
       import: {
         from: '@wdio/electron-bundler',
         named: ['codeReplacePlugin'],

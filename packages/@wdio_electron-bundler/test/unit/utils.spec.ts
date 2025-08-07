@@ -1,8 +1,8 @@
+import { existsSync, type PathLike } from 'node:fs';
 import { dirname } from 'node:path';
-import { getInputConfig, getOutDirs, injectDependency, type InjectDependencyPluginOptions } from '../../src/utils.js';
+import type { PluginContext } from 'rollup';
+import { getInputConfig, getOutDirs, type InjectDependencyPluginOptions, injectDependency } from '../../src/utils.js';
 import { getFixturePackagePath } from '../helpers/fixture-utils.js';
-import { PluginContext } from 'rollup';
-import { existsSync, PathLike } from 'node:fs';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(),
@@ -90,11 +90,11 @@ describe('Utility Functions', () => {
           'src',
         ),
       ).toEqual({
-        'index': 'src/index.ts',
-        'mod1': 'src/mod1.ts',
-        'mod2': 'src/mod2/index.ts',
-        'mod3': 'src/mod3.mts',
-        'mod4': 'src/mod4/index.mts',
+        index: 'src/index.ts',
+        mod1: 'src/mod1.ts',
+        mod2: 'src/mod2/index.ts',
+        mod3: 'src/mod3.mts',
+        mod4: 'src/mod4/index.mts',
         'mod5/api': 'src/mod5/api.cts',
         'mod6/api': 'src/mod6/api/index.cts',
       });

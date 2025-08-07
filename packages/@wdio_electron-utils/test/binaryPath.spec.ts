@@ -1,11 +1,9 @@
 import fs from 'node:fs/promises';
 import { normalize } from 'node:path';
-
-import { expect, it, vi, describe, beforeEach } from 'vitest';
-import { AppBuildInfo } from '@wdio/electron-types';
-
-import log from '../src/log.js';
+import type { AppBuildInfo } from '@wdio/electron-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getBinaryPath } from '../src/binaryPath.js';
+import log from '../src/log.js';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
@@ -84,7 +82,7 @@ type TestBinaryPathOptions = {
 function testBinaryPath(options: TestBinaryPathOptions) {
   const { platform, arch, binaryPath, isForge, configObj, testName, skip } = options;
   const buildType = isForge ? 'Forge' : 'Builder';
-  const hasCustomOutDir = configObj.outDir || (configObj.directories && configObj.directories.output);
+  const hasCustomOutDir = configObj.outDir || configObj.directories?.output;
   const pkgJSONPath = '/path/to/package.json';
 
   // Create descriptive test title based on configuration
@@ -126,7 +124,7 @@ function testBinaryPath(options: TestBinaryPathOptions) {
     expect(result.binaryPath).toBeDefined();
 
     // Normalize path separators for cross-platform compatibility
-    const normalizedActual = result.binaryPath!.replace(/\\/g, '/');
+    const normalizedActual = result.binaryPath?.replace(/\\/g, '/');
     const normalizedExpected = binaryPath.replace(/\\/g, '/');
 
     expect(normalizedActual).toBe(normalizedExpected);

@@ -22,9 +22,7 @@ export default {
   transformations: [
     {
       find: /^@\/(.*)$/,
-      replacement: function (match, p1) {
-        return new URL(`./src/${p1}`, import.meta.url).pathname;
-      },
+      replacement: (_match, p1) => new URL(`./src/${p1}`, import.meta.url).pathname,
     },
   ],
 };

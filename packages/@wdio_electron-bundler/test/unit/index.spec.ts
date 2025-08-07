@@ -1,8 +1,7 @@
 import { dirname } from 'node:path';
-
+import typescriptPlugin from '@rollup/plugin-typescript';
 import { readPackageJson, typescript } from '../../src/index.js';
 import { getFixturePackagePath } from '../helpers/fixture-utils.js';
-import typescriptPlugin from '@rollup/plugin-typescript';
 
 describe('Bundler Utilities', () => {
   describe('readPackageJson()', () => {

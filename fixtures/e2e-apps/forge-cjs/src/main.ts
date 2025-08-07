@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+
 const isTest = process.env.TEST === 'true';
 const isSplashEnabled = Boolean(process.env.ENABLE_SPLASH_WINDOW);
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 
-import { join } from 'node:path';
 import { loadavg } from 'node:os';
+import { join } from 'node:path';
 import pLimit from 'p-limit';
-import { createEnvironmentContext, EnvironmentContext } from '../config/envSchema.js';
+import { createEnvironmentContext, type EnvironmentContext } from '../config/envSchema.js';
+import { StatusBar, type TestResult, TestStatusTracker } from '../lib/statusBar.js';
 import { execWdio, formatDuration } from '../lib/utils.js';
-import { StatusBar, TestStatusTracker, TestResult } from '../lib/statusBar.js';
 import BuildManager from './build-apps.js';
 
 /**

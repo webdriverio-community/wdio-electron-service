@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { normalize } from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RollupExecutor } from '../../../src/cli/executor.js';
 import { Logger } from '../../../src/cli/logger.js';
 

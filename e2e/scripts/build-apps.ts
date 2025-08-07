@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 
-import { join, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { createEnvironmentContext } from '../config/envSchema.js';
-import { dirExists, fileExists, execWithEnv, formatDuration } from '../lib/utils.js';
+import { dirExists, execWithEnv, fileExists, formatDuration } from '../lib/utils.js';
 
 /**
  * Manager for E2E app building
@@ -49,7 +49,7 @@ export class BuildManager {
       console.log(`🔍 Debug: Listing parent directory contents...`);
       try {
         const parentDir = dirname(appPath);
-        const fs = await import('fs');
+        const fs = await import('node:fs');
         const contents = fs.readdirSync(parentDir);
         console.log(`  Parent directory (${parentDir}) contents: ${contents.join(', ')}`);
       } catch (error) {
@@ -64,7 +64,7 @@ export class BuildManager {
       console.error(`❌ package.json not found in: ${appPath}`);
       console.log(`🔍 Debug: Listing app directory contents...`);
       try {
-        const fs = await import('fs');
+        const fs = await import('node:fs');
         const contents = fs.readdirSync(appPath);
         console.log(`  App directory contents: ${contents.join(', ')}`);
       } catch (error) {
@@ -193,7 +193,7 @@ export class BuildManager {
       const packageJsonPath = join(appPath, 'package.json');
       if (fileExists(packageJsonPath)) {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson.name && packageJson.name.includes('forge')) {
+        if (packageJson.name?.includes('forge')) {
           const outPath = join(appPath, 'out');
           if (!dirExists(outPath)) {
             console.log(`🔍 Debug: Forge app missing out directory at ${outPath}`);
@@ -237,7 +237,7 @@ export class BuildManager {
     try {
       // Check disk space on Unix systems
       if (process.platform !== 'win32') {
-        const { execSync } = await import('child_process');
+        const { execSync } = await import('node:child_process');
         try {
           const dfOutput = execSync('df -h .', { cwd, encoding: 'utf8' });
           console.log(`    Disk space: ${dfOutput.split('\n')[1]}`);
