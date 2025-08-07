@@ -84,7 +84,7 @@
   },
   "lint-staged": {
     "**/*.{j,t}s": ["biome check --write", "eslint --fix --cache"],
-    "**/*.{yml,md,json}": ["biome format --write"]
+    "**/*.{yml,md,json}": ["biome format --write ."]
   },
   "pnpm": {
     "onlyBuiltDependencies": ["edgedriver", "electron", "esbuild", "geckodriver"]
