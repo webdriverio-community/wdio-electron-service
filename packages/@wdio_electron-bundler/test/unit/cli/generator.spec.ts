@@ -46,6 +46,7 @@ describe('ConfigGenerator', () => {
     const mockPackageJson = {
       name: '@test/package',
       version: '1.0.0',
+      type: 'module',
       main: './dist/cjs/index.js',
       module: './dist/esm/index.js',
       exports: {
@@ -157,6 +158,7 @@ describe('ConfigGenerator', () => {
       packageInfo: {
         name: '@test/package',
         version: '1.0.0',
+        type: 'module' as const,
         input: { index: 'src/index.ts' },
         outDir: { esm: 'dist/esm', cjs: 'dist/cjs' },
         dependencies: [],
@@ -368,6 +370,116 @@ describe('ConfigGenerator', () => {
       const result = await generator.writeConfig(configWithMixedImports, 'rollup.config.js', true);
 
       expect(result).toContain("import typescript, { createProgram } from '@rollup/plugin-typescript'");
+    });
+
+    it('should generate ESM syntax for module type packages', async () => {
+      const esmPackageConfig = {
+        ...mockGeneratedConfig,
+        packageInfo: {
+          ...mockGeneratedConfig.packageInfo,
+          type: 'module' as const,
+        },
+      };
+
+      const result = await generator.writeConfig(esmPackageConfig, 'rollup.config.js', true);
+
+      expect(result).toContain("import typescript from '@rollup/plugin-typescript'");
+      expect(result).toContain('export default');
+      expect(result).not.toContain('const typescript = require');
+      expect(result).not.toContain('module.exports');
+    });
+
+    it('should generate CommonJS syntax for commonjs type packages', async () => {
+      const cjsPackageConfig = {
+        ...mockGeneratedConfig,
+        packageInfo: {
+          ...mockGeneratedConfig.packageInfo,
+          type: 'commonjs' as const,
+        },
+      };
+
+      const result = await generator.writeConfig(cjsPackageConfig, 'rollup.config.js', true);
+
+      expect(result).toContain("const typescript = require('@rollup/plugin-typescript');");
+      expect(result).toContain('module.exports =');
+      expect(result).not.toContain('import typescript from');
+      expect(result).not.toContain('export default');
+    });
+
+    it('should handle mixed default and named imports in CommonJS', async () => {
+      const cjsConfigWithMixedImports = {
+        ...mockGeneratedConfig,
+        imports: [
+          {
+            from: '@rollup/plugin-node-resolve',
+            default: 'nodeResolve',
+            named: ['createFilter'],
+          },
+        ],
+        packageInfo: {
+          ...mockGeneratedConfig.packageInfo,
+          type: 'commonjs' as const,
+        },
+      };
+
+      const result = await generator.writeConfig(cjsConfigWithMixedImports, 'rollup.config.js', true);
+
+      expect(result).toContain("const nodeResolve = require('@rollup/plugin-node-resolve');");
+      expect(result).toContain('const { createFilter } = nodeResolve;');
+      expect(result).toContain('module.exports =');
+    });
+
+    it('should handle named-only imports in CommonJS', async () => {
+      const cjsConfigWithNamedImports = {
+        ...mockGeneratedConfig,
+        imports: [
+          {
+            from: 'rollup-plugin-node-externals',
+            named: ['nodeExternals'],
+          },
+        ],
+        packageInfo: {
+          ...mockGeneratedConfig.packageInfo,
+          type: 'commonjs' as const,
+        },
+      };
+
+      const result = await generator.writeConfig(cjsConfigWithNamedImports, 'rollup.config.js', true);
+
+      expect(result).toContain("const { nodeExternals } = require('rollup-plugin-node-externals');");
+      expect(result).toContain('module.exports =');
+    });
+
+    it('should handle multiple configs with CommonJS syntax', async () => {
+      const cjsMultiConfig = {
+        ...mockGeneratedConfig,
+        configs: [
+          {
+            ...mockGeneratedConfig.configs[0],
+            format: 'esm' as const,
+          },
+          {
+            ...mockGeneratedConfig.configs[0],
+            format: 'cjs' as const,
+            output: {
+              ...mockGeneratedConfig.configs[0].output,
+              format: 'cjs' as const,
+              dir: 'dist/cjs',
+            },
+          },
+        ],
+        packageInfo: {
+          ...mockGeneratedConfig.packageInfo,
+          type: 'commonjs' as const,
+        },
+      };
+
+      const result = await generator.writeConfig(cjsMultiConfig, 'rollup.config.js', true);
+
+      expect(result).toContain('const esmConfig');
+      expect(result).toContain('const cjsConfig');
+      expect(result).toContain('module.exports = [esmConfig, cjsConfig]');
+      expect(result).not.toContain('export default');
     });
   });
 });

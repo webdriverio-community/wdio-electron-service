@@ -73,6 +73,7 @@ describe('PackageAnalyzer', () => {
       expect(result).toEqual({
         name: '@test/package',
         version: '1.0.0',
+        type: 'commonjs',
         input: { index: 'src/index.ts' },
         outDir: { esm: './dist/esm', cjs: './dist/cjs' },
         dependencies: ['dep1'],
@@ -130,6 +131,7 @@ describe('PackageAnalyzer', () => {
         index: 'src/index.ts',
         utils: 'src/utils.ts',
       });
+      expect(result.type).toBe('commonjs');
     });
 
     it('should handle different file extensions', async () => {
@@ -145,6 +147,7 @@ describe('PackageAnalyzer', () => {
       const result = await analyzer.analyzePackage('/test/package');
 
       expect(result.input).toEqual({ index: 'src/index.mts' });
+      expect(result.type).toBe('commonjs');
     });
 
     it('should handle index files in subdirectories', async () => {
@@ -160,6 +163,78 @@ describe('PackageAnalyzer', () => {
       const result = await analyzer.analyzePackage('/test/package');
 
       expect(result.input).toEqual({ index: 'src/index/index.ts' });
+      expect(result.type).toBe('commonjs');
+    });
+
+    it('should detect ESM package type when type is "module"', async () => {
+      const esmPackageJson = {
+        ...mockPackageJson,
+        type: 'module',
+      };
+
+      mockExistsSync.mockImplementation((path: string) => {
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
+        return false;
+      });
+
+      mockReadFile.mockResolvedValue(JSON.stringify(esmPackageJson));
+
+      const result = await analyzer.analyzePackage('/test/package');
+
+      expect(result.type).toBe('module');
+      expect(result.name).toBe('@test/package');
+    });
+
+    it('should detect CJS package type when type is "commonjs"', async () => {
+      const cjsPackageJson = {
+        ...mockPackageJson,
+        type: 'commonjs',
+      };
+
+      mockExistsSync.mockImplementation((path: string) => {
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
+        return false;
+      });
+
+      mockReadFile.mockResolvedValue(JSON.stringify(cjsPackageJson));
+
+      const result = await analyzer.analyzePackage('/test/package');
+
+      expect(result.type).toBe('commonjs');
+      expect(result.name).toBe('@test/package');
+    });
+
+    it('should default to commonjs when type field is missing', async () => {
+      const packageJsonWithoutType = {
+        name: '@test/package',
+        version: '1.0.0',
+        main: './dist/cjs/index.js',
+        module: './dist/esm/index.js',
+        exports: {
+          '.': {
+            import: './dist/esm/index.js',
+            require: './dist/cjs/index.js',
+          },
+        },
+      };
+
+      mockExistsSync.mockImplementation((path: string) => {
+        const normalizedPath = normalize(path);
+        if (normalizedPath.endsWith('package.json')) return true;
+        if (normalizedPath.endsWith(normalize('src/index.ts'))) return true;
+        return false;
+      });
+
+      mockReadFile.mockResolvedValue(JSON.stringify(packageJsonWithoutType));
+
+      const result = await analyzer.analyzePackage('/test/package');
+
+      expect(result.type).toBe('commonjs');
+      expect(result.name).toBe('@test/package');
     });
   });
 
@@ -172,6 +247,7 @@ describe('PackageAnalyzer', () => {
     const mockPackageInfo: PackageInfo = {
       name: '@test/package',
       version: '1.0.0',
+      type: 'commonjs',
       input: { index: 'src/index.ts' },
       outDir: { esm: 'dist/esm', cjs: 'dist/cjs' },
       dependencies: ['dep1'],
@@ -180,7 +256,7 @@ describe('PackageAnalyzer', () => {
     };
 
     it('should build basic plugin specs', () => {
-      const plugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, 'esm');
+      const plugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, '/test/package', 'esm');
 
       expect(plugins).toHaveLength(3); // typescript, nodeExternals, warnToError
       expect(plugins[0].name).toBe('typescript');
@@ -194,7 +270,7 @@ describe('PackageAnalyzer', () => {
         transformations: [{ type: 'injectDependency', options: { from: 'dep1', imports: ['func1'] } }],
       };
 
-      const plugins = analyzer.buildPluginSpecs(configWithTransformations, mockPackageInfo, 'esm');
+      const plugins = analyzer.buildPluginSpecs(configWithTransformations, mockPackageInfo, '/test/package', 'esm');
 
       expect(plugins).toHaveLength(5); // typescript, nodeExternals, nodeResolve, injectDependency, warnToError
       expect(plugins.some((p) => p.name === 'node-resolve')).toBe(true);
@@ -207,14 +283,14 @@ describe('PackageAnalyzer', () => {
         transformations: [{ type: 'codeReplace', options: { from: 'old', to: 'new' } }],
       };
 
-      const plugins = analyzer.buildPluginSpecs(configWithTransformations, mockPackageInfo, 'esm');
+      const plugins = analyzer.buildPluginSpecs(configWithTransformations, mockPackageInfo, '/test/package', 'esm');
 
       expect(plugins.some((p) => p.name === 'code-replace')).toBe(true);
     });
 
     it('should handle nodeExternals options for different formats', () => {
-      const esmPlugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, 'esm');
-      const cjsPlugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, 'cjs');
+      const esmPlugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, '/test/package', 'esm');
+      const cjsPlugins = analyzer.buildPluginSpecs(mockConfig, mockPackageInfo, '/test/package', 'cjs');
 
       const esmNodeExternals = esmPlugins.find((p) => p.name === 'node-externals');
       const cjsNodeExternals = cjsPlugins.find((p) => p.name === 'node-externals');

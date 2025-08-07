@@ -77,6 +77,68 @@ describe('CLI Workflows Integration', () => {
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Config resolution order');
     });
+
+    it('should generate CommonJS syntax config for CJS packages', async () => {
+      const fixturePath = getBundlerFixturePath('cjs', 'simple-ts-config');
+
+      const result = await runBundlerBuild(fixturePath, ['--dry-run']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('const typescript = require');
+      expect(result.stdout).toContain('const nodeExternals = require');
+      expect(result.stdout).toContain('module.exports = [esmConfig, cjsConfig]');
+      expect(result.stdout).not.toContain('import typescript from');
+      expect(result.stdout).not.toContain('export default');
+    });
+
+    it('should generate ESM syntax config for ESM packages', async () => {
+      const fixturePath = getBundlerFixturePath('esm', 'simple-ts-config');
+
+      const result = await runBundlerBuild(fixturePath, ['--dry-run']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('import typescript from');
+      expect(result.stdout).toContain('import nodeExternals from');
+      expect(result.stdout).toContain('export default [esmConfig, cjsConfig]');
+      expect(result.stdout).not.toContain('const typescript = require');
+      expect(result.stdout).not.toContain('module.exports');
+    });
+
+    it('should export CJS config file with proper syntax for CJS packages', async () => {
+      const fixturePath = getBundlerFixturePath('cjs', 'simple-ts-config');
+
+      const result = await runBundlerBuild(fixturePath, ['--export-config']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('Configuration exported');
+
+      // Read the exported config file
+      const configPath = path.join(fixturePath, 'rollup.config.js');
+      const configContent = await fs.readFile(configPath, 'utf-8');
+
+      expect(configContent).toContain('const typescript = require');
+      expect(configContent).toContain('module.exports = [esmConfig, cjsConfig]');
+      expect(configContent).not.toContain('import typescript from');
+      expect(configContent).not.toContain('export default');
+    }, 30000);
+
+    it('should export ESM config file with proper syntax for ESM packages', async () => {
+      const fixturePath = getBundlerFixturePath('esm', 'simple-ts-config');
+
+      const result = await runBundlerBuild(fixturePath, ['--export-config']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('Configuration exported');
+
+      // Read the exported config file
+      const configPath = path.join(fixturePath, 'rollup.config.js');
+      const configContent = await fs.readFile(configPath, 'utf-8');
+
+      expect(configContent).toContain('import typescript from');
+      expect(configContent).toContain('export default [esmConfig, cjsConfig]');
+      expect(configContent).not.toContain('const typescript = require');
+      expect(configContent).not.toContain('module.exports');
+    }, 30000);
   });
 
   describe('error handling', () => {
