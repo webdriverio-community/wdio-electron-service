@@ -48,13 +48,13 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.2.0",
     "@vitest/spy": "^3.2.4",
     "@wdio/electron-types": "workspace:*",
     "cross-env": "^7.0.3",
     "p-limit": "^6.2.0",
     "read-package-up": "^11.0.0",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "zod": "^4.0.15"
   }
 }

@@ -50,7 +50,7 @@
     "test": "pnpm test:unit"
   },
   "dependencies": {
-    "@electron/packager": "^18.3.6",
+    "@electron/packager": "^18.4.0",
     "@wdio/logger": "catalog:default",
     "debug": "^4.4.1",
     "esbuild": "^0.25.8",
@@ -63,12 +63,12 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.2.0",
     "@vitest/coverage-v8": "^3.2.4",
     "@wdio/electron-bundler": "workspace:*",
     "@wdio/electron-types": "workspace:*",
     "shx": "^0.4.0",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
 }

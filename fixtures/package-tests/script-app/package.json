@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.2.0",
     "@types/semver": "^7.7.0",
     "@wdio/cli": "^9.16.2",
     "@wdio/globals": "^9.16.2",
@@ -26,7 +26,7 @@
     "electron": "37.2.6",
     "electron-vite": "beta",
     "semver": "^7.7.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "wdio-electron-service": "latest",
     "xvfb-maybe": "^0.2.1"
   },

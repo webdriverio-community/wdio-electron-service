@@ -41,15 +41,15 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.2.0",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^3.2.4",
     "@wdio/electron-bundler": "workspace:*",
-    "devtools-protocol": "^0.0.1481382",
+    "devtools-protocol": "^0.0.1498010",
     "get-port": "^7.1.0",
-    "nock": "^14.0.8",
+    "nock": "^14.0.9",
     "tslib": "^2.8.1",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
   "files": ["dist/*"]
