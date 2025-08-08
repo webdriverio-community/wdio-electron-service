@@ -3,7 +3,6 @@ import { normalize } from 'node:path';
 import type { AppBuildInfo } from '@wdio/electron-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getBinaryPath } from '../src/binaryPath.js';
-import log from '../src/log.js';
 
 vi.mock('node:fs/promises', async (importActual) => {
   const actual = await importActual<typeof import('node:fs/promises')>();
@@ -15,7 +14,7 @@ vi.mock('node:fs/promises', async (importActual) => {
   };
 });
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 const pkgJSONPath = '/path/to/package.json';
 const winProcess = { platform: 'win32', arch: 'x64' } as NodeJS.Process;
@@ -147,7 +146,7 @@ function testBuilderBinaryPath(options: Omit<TestBinaryPathOptions, 'isForge'>) 
 
 describe('getBinaryPath', () => {
   beforeEach(() => {
-    vi.mocked(log.info).mockClear();
+    vi.clearAllMocks();
   });
 
   it('should return error result for unsupported platform', async () => {

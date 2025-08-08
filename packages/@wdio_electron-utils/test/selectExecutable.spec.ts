@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
-import log from '../src/log.js';
 import { selectExecutable } from '../src/selectExecutable.js';
 import { mockBinaryPath } from './testUtils.js';
 
@@ -17,7 +16,7 @@ vi.mock('node:fs/promises', async (importActual) => {
   };
 });
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 /**
  * Mock the binary path generator classes and utilities
@@ -54,7 +53,9 @@ describe('selectExecutable', () => {
     const result = await selectExecutable(executableBinaryPaths);
 
     expect(result).toBe(executableBinaryPaths[0]);
-    expect(log.info).toHaveBeenLastCalledWith(
+    const { createLogger } = await import('./__mock__/log.js');
+    const mockLogger = createLogger();
+    expect(mockLogger.info).toHaveBeenLastCalledWith(
       expect.stringMatching(/Detected multiple app binaries, using the first one:/),
     );
   });
