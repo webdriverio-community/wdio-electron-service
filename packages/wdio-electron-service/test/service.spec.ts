@@ -7,7 +7,7 @@ import ElectronWorkerService, { waitUntilWindowAvailable } from '../src/service.
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
 import { mockProcessProperty } from './helpers.js';
 
-vi.mock('@wdio/electron-utils');
+vi.mock('@wdio/electron-utils', () => import('./mocks/electron-utils.js'));
 
 vi.mock('../src/window.js', () => {
   return {
