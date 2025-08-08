@@ -1,4 +1,7 @@
-import { log } from '@wdio/electron-utils';
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('service');
+
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 
 const puppeteerSessionManager = new Map<string, PuppeteerBrowser>();

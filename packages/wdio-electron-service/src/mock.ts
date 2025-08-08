@@ -7,7 +7,9 @@ import type {
   ElectronType,
   ExecuteOpts,
 } from '@wdio/electron-types';
-import { log } from '@wdio/electron-utils';
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('mock');
 
 async function restoreElectronFunctionality(apiName: string, funcName: string) {
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(

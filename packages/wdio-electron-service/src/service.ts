@@ -7,7 +7,7 @@ import type {
   ElectronType,
   ExecuteOpts,
 } from '@wdio/electron-types';
-import { log } from '@wdio/electron-utils';
+import { createLogger } from '@wdio/electron-utils';
 import type { Capabilities, Services } from '@wdio/types';
 import { ElectronCdpBridge, getDebuggerEndpoint } from './bridge.js';
 import { execute } from './commands/executeCdp.js';
@@ -17,6 +17,7 @@ import mockStore from './mockStore.js';
 import { ServiceConfig } from './serviceConfig.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
 
+const log = createLogger('service');
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {

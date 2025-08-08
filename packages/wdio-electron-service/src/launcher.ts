@@ -6,7 +6,10 @@ import type {
   ElectronServiceGlobalOptions,
   PathGenerationError,
 } from '@wdio/electron-types';
-import { getAppBuildInfo, getBinaryPath, getElectronVersion, log } from '@wdio/electron-utils';
+import { createLogger, getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+
+const log = createLogger('launcher');
+
 import type { Capabilities, Options, Services } from '@wdio/types';
 import getPort from 'get-port';
 import { type NormalizedReadResult, readPackageUp } from 'read-package-up';
