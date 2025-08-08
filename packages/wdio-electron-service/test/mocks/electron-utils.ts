@@ -19,7 +19,11 @@ export const createLogger = vi.fn((area?: LogArea) => {
   if (!mockLoggers.has(key)) {
     mockLoggers.set(key, createMockLogger());
   }
-  return mockLoggers.get(key)!;
+  const logger = mockLoggers.get(key);
+  if (!logger) {
+    throw new Error(`Mock logger not found for area: ${key}`);
+  }
+  return logger;
 });
 
 // Export getter functions to access specific mock loggers in tests

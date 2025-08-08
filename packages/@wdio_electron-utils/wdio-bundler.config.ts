@@ -6,8 +6,8 @@ const config: BundlerConfig = {
       type: 'codeReplace',
       options: {
         id: 'src/log.ts',
-        searchValue: 'const areaLogger = logger(`electron-service${areaSuffix}`);',
-        replaceValue: 'const areaLogger = (logger.default || logger)(`electron-service${areaSuffix}`);',
+        searchValue: 'const areaLogger = logger(`electron-service$' + '{areaSuffix}`);',
+        replaceValue: 'const areaLogger = (logger.default || logger)(`electron-service$' + '{areaSuffix}`);',
       },
     },
   ],

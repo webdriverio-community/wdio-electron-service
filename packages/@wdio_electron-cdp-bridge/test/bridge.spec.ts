@@ -1,4 +1,3 @@
-import { createLogger } from '@wdio/electron-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CdpBridge } from '../src/bridge.js';
