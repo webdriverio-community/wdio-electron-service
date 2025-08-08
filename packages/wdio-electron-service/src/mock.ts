@@ -47,6 +47,8 @@ export async function createMock(apiName: string, funcName: string) {
   // Properties that should trigger auto-update when accessed
   const autoUpdateProperties = new Set(['calls', 'results', 'lastCall', 'invocationCallOrder']);
 
+  log.debug(`[${apiName}.${funcName}] Installing proxy for mock.mock property`);
+
   // Create a proper Proxy for the mock object that auto-updates on property access
   const mockProxy = new Proxy(originalMock, {
     get(target, prop, receiver) {
