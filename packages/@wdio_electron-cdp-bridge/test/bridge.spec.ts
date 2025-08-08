@@ -1,22 +1,23 @@
+import { createLogger } from '@wdio/electron-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { CdpBridge } from '../src/bridge.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
 import { DevTool } from '../src/devTool.js';
 
 import type { DebuggerList } from '../src/types.js';
 
-const mockLogger = {
-  info: vi.fn(),
-  warn: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
-  trace: vi.fn(),
-};
-
-vi.mock('@wdio/electron-utils', () => ({
-  createLogger: vi.fn(() => mockLogger),
-}));
+vi.mock('@wdio/electron-utils', () => {
+  const mockLogger = {
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    trace: vi.fn(),
+  };
+  return {
+    createLogger: vi.fn(() => mockLogger),
+  };
+});
 
 let mockWebSocketInstance: any;
 
@@ -139,6 +140,7 @@ describe('CdpBridge', () => {
       const client = new CdpBridge({ waitInterval: 10 });
 
       await expect(client.connect()).resolves.toBeUndefined();
+      const mockLogger = vi.mocked(createLogger)();
       expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 1 failed: Dummy Error');
       expect(mockLogger.warn).toHaveBeenCalledWith('Retry 1/3 to connect after 10ms...');
       expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 2 failed: Dummy Error');
@@ -152,6 +154,7 @@ describe('CdpBridge', () => {
       ];
       const client = new CdpBridge();
       await expect(client.connect()).resolves.toBeUndefined();
+      const mockLogger = vi.mocked(createLogger)();
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     });
