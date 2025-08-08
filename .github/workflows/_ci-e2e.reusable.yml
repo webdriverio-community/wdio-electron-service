@@ -138,7 +138,7 @@ jobs:
       # First initializes the E2E environment, then runs the specific tests
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+        run: DEBUG=wdio-electron-service pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
 
       # Show comprehensive debug information on failure
       - name: 🐛 Debug Information on Failure
