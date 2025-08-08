@@ -77,7 +77,7 @@ function showLogs(follow = false): void {
 
         let lastSize = fs.statSync(logPath).size;
 
-        fs.watchFile(logPath, { interval: 1000 }, (curr, prev) => {
+        fs.watchFile(logPath, { interval: 1000 }, (curr, _prev) => {
           if (curr.size > lastSize) {
             // File has grown, read the new content
             const stream = fs.createReadStream(logPath, {
