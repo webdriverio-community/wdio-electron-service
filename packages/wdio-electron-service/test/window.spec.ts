@@ -1,9 +1,9 @@
-import log from '@wdio/electron-utils/log';
+import { createLogger } from '@wdio/electron-utils';
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from '../src/window.js';
 
-vi.mock('@wdio/electron-utils/log');
+vi.mock('@wdio/electron-utils');
 
 describe('Window Management', () => {
   beforeEach(() => {

@@ -3,7 +3,7 @@ import { CdpBridge } from '@wdio/cdp-bridge';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 
-vi.mock('@wdio/electron-utils/log');
+vi.mock('@wdio/electron-utils');
 
 describe('getDebuggerEndpoint', () => {
   it('should return the endpoint information of the node debugger', () => {

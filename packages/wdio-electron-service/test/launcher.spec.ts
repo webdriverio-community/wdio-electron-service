@@ -1,7 +1,6 @@
 import path from 'node:path';
 import type { BinaryPathResult, ElectronServiceOptions } from '@wdio/electron-types';
-import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
-import log from '@wdio/electron-utils/log';
+import { createLogger, getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
 import type { Capabilities, Options } from '@wdio/types';
 import getPort from 'get-port';
 import nock from 'nock';
@@ -26,6 +25,13 @@ vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<stri
   const actual = await importOriginal();
   return {
     ...actual,
+    createLogger: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      trace: vi.fn(),
+    })),
     getBinaryPath: vi.fn().mockResolvedValue({
       success: true,
       binaryPath: 'workspace/my-test-app/dist/my-test-app',
@@ -53,7 +59,7 @@ vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<stri
   };
 });
 
-vi.mock('@wdio/electron-utils/log');
+// Log mock is included in the main @wdio/electron-utils mock above
 
 vi.mock('get-port', async () => {
   return {
