@@ -2,8 +2,10 @@ import path from 'node:path';
 import type { BuilderBuildInfo, BuilderConfig } from '@wdio/electron-types';
 import type { NormalizedReadResult } from 'read-package-up';
 import { APP_NAME_DETECTION_ERROR } from '../constants.js';
-import log from '../log.js';
+import { createLogger } from '../log.js';
 import { readConfig } from './read.js';
+
+const log = createLogger('config');
 
 export async function getConfig(pkg: NormalizedReadResult): Promise<BuilderBuildInfo | undefined> {
   const rootDir = path.dirname(pkg.path);
