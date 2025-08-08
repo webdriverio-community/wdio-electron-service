@@ -30,8 +30,8 @@
     "test:multiremote": "cross-env TEST_TYPE=multiremote tsx scripts/run-matrix.ts",
     "test:standalone": "cross-env TEST_TYPE=standalone tsx scripts/run-matrix.ts",
     "test:mac-universal": "cross-env MAC_UNIVERSAL=true tsx scripts/run-matrix.ts",
-    "logs": "tail -f ./logs/**/*.log 2>/dev/null || echo 'No logs found'",
-    "cat-logs": "find ./logs -name '*.log' -exec cat {} \\; 2>/dev/null || echo 'No logs found'"
+    "logs": "tsx scripts/show-logs.ts",
+    "logs:follow": "tsx scripts/show-logs.ts --follow"
   },
   "dependencies": {
     "@wdio/cli": "catalog:default",

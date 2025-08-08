@@ -154,7 +154,7 @@ jobs:
         with:
           name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
           output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
-          paths: e2e/*/*.log
+          paths: e2e/logs/**/*.log
 
       # Provide an interactive debugging session on failure
       # This allows manual investigation of the environment
