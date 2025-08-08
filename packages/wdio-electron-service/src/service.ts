@@ -125,6 +125,16 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     ];
 
     if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
+      // Mark all mocks as needing update for WebDriverIO v9.17.0 compatibility
+      // The proxy getters will handle the actual updates when properties are accessed
+      // Note: This hook works in WDIO < 9.17.0, but may not be called reliably in v9.17.0+
+      mocks.forEach(([_mockId, mock]) => {
+        if (mock.__markForUpdate) {
+          mock.__markForUpdate();
+        }
+      });
+
+      // Traditional update for WDIO < 9.17.0 compatibility
       await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
     }
   }

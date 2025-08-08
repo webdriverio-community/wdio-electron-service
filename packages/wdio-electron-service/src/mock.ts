@@ -38,6 +38,93 @@ export async function createMock(apiName: string, funcName: string) {
 
   mock.__isElectronMock = true;
 
+  // Auto-update when mock properties are accessed
+  const originalMock = outerMock.mock;
+  let needsUpdate = true;
+  let updatePromise: Promise<void> | null = null;
+
+  // Create a proxy for the mock object that auto-updates on property access
+  const mockProxy = {
+    get calls() {
+      if (needsUpdate && !updatePromise) {
+        needsUpdate = false; // Prevent multiple rapid updates
+        updatePromise = mock
+          .update()
+          .then(() => {
+            updatePromise = null;
+          })
+          .catch(() => {
+            // Reset flag on error so update can be retried
+            needsUpdate = true;
+            updatePromise = null;
+          });
+      }
+      return originalMock.calls;
+    },
+    get results() {
+      if (needsUpdate && !updatePromise) {
+        needsUpdate = false;
+        updatePromise = mock
+          .update()
+          .then(() => {
+            updatePromise = null;
+          })
+          .catch(() => {
+            needsUpdate = true;
+            updatePromise = null;
+          });
+      }
+      return originalMock.results;
+    },
+    get instances() {
+      return originalMock.instances;
+    },
+    get lastCall() {
+      if (needsUpdate && !updatePromise) {
+        needsUpdate = false;
+        updatePromise = mock
+          .update()
+          .then(() => {
+            updatePromise = null;
+          })
+          .catch(() => {
+            needsUpdate = true;
+            updatePromise = null;
+          });
+      }
+      return originalMock.lastCall;
+    },
+    get invocationCallOrder() {
+      if (needsUpdate && !updatePromise) {
+        needsUpdate = false;
+        updatePromise = mock
+          .update()
+          .then(() => {
+            updatePromise = null;
+          })
+          .catch(() => {
+            needsUpdate = true;
+            updatePromise = null;
+          });
+      }
+      return originalMock.invocationCallOrder;
+    },
+  };
+
+  // Replace the mock property with our proxy
+  // Try to replace the mock property, but handle cases where it's not configurable (like in tests)
+  try {
+    // Type assertion needed since TypeScript doesn't know the mock property is deletable at runtime
+    delete (mock as unknown as Record<string, unknown>).mock;
+    Object.defineProperty(mock, 'mock', {
+      get: () => mockProxy,
+      enumerable: true,
+      configurable: true,
+    });
+  } catch (_error) {
+    // b0rked
+  }
+
   // initialise inner (Electron) mock
   await browser.electron.execute<void, [string, string, ExecuteOpts]>(
     async (electron, apiName, funcName) => {
@@ -68,9 +155,9 @@ export async function createMock(apiName: string, funcName: string) {
     );
 
     // re-apply calls from the electron main process mock to the outer one
-    if (mock.mock.calls.length < calls.length) {
+    if (originalMock.calls.length < calls.length) {
       calls.forEach((call: unknown[], index: number) => {
-        if (!mock.mock.calls[index]) {
+        if (!originalMock.calls[index]) {
           mock?.apply(mock, call);
         }
       });
@@ -284,6 +371,11 @@ export async function createMock(apiName: string, funcName: string) {
       callbackFn.toString(),
       { internal: true },
     );
+  };
+
+  // Internal method to mark mock as needing update - used by service hooks
+  mock.__markForUpdate = () => {
+    needsUpdate = true;
   };
 
   return mock;
