@@ -16,18 +16,13 @@ export function createLogger(area?: LogArea): Logger {
   const wrapped: Logger = {
     ...areaLogger,
     debug: (...args: unknown[]) => {
-      if (areaDebug.enabled) {
-        // Only output debug messages from enabled namespaces
-        if (typeof args.at(-1) === 'object') {
-          if (args.length > 1) {
-            areaDebug(args.slice(0, -1));
-          }
-          areaDebug('%O', args.at(-1));
-        } else {
-          areaDebug(args);
+      if (typeof args.at(-1) === 'object') {
+        if (args.length > 1) {
+          areaDebug(args.slice(0, -1));
         }
-        // Also forward to @wdio/logger for unified sinks only if debug is enabled
-        areaLogger.debug(...args);
+        areaDebug('%O', args.at(-1));
+      } else {
+        areaDebug(args);
       }
     },
   };
