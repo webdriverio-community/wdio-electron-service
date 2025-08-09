@@ -66,8 +66,8 @@ describe('ConfigGenerator', () => {
   describe('generateConfig', () => {
     it('should generate basic config for ESM and CJS', async () => {
       const bundlerConfig: BundlerConfig = {
-        esm: { input: 'src/index.ts', output: { dir: 'dist/esm', format: 'es' } },
-        cjs: { input: 'src/index.ts', output: { dir: 'dist/cjs', format: 'cjs' } },
+        esm: {},
+        cjs: {},
       };
 
       const result = await generator.generateConfig(bundlerConfig, '/test/package');
@@ -80,7 +80,7 @@ describe('ConfigGenerator', () => {
 
     it('should generate config with only ESM when CJS is disabled', async () => {
       const bundlerConfig: BundlerConfig = {
-        esm: { input: 'src/index.ts', output: { dir: 'dist/esm', format: 'es' } },
+        esm: {},
         cjs: false,
       };
 
@@ -92,8 +92,8 @@ describe('ConfigGenerator', () => {
 
     it('should include transformations in plugin specs', async () => {
       const bundlerConfig: BundlerConfig = {
-        esm: { input: 'src/index.ts', output: { dir: 'dist/esm', format: 'es' } },
-        cjs: { input: 'src/index.ts', output: { dir: 'dist/cjs', format: 'cjs' } },
+        esm: {},
+        cjs: {},
         transformations: [{ type: 'injectDependency', options: { from: 'dep1', imports: ['func1'] } }],
       };
 
@@ -105,8 +105,8 @@ describe('ConfigGenerator', () => {
 
     it('should collect all imports from plugin specs', async () => {
       const bundlerConfig: BundlerConfig = {
-        esm: { input: 'src/index.ts', output: { dir: 'dist/esm', format: 'es' } },
-        cjs: { input: 'src/index.ts', output: { dir: 'dist/cjs', format: 'cjs' } },
+        esm: {},
+        cjs: {},
       };
 
       const result = await generator.generateConfig(bundlerConfig, '/test/package');
@@ -115,21 +115,22 @@ describe('ConfigGenerator', () => {
       expect(result.imports.some((imp) => imp.from === '@rollup/plugin-typescript')).toBe(true);
     });
 
-    it('should handle custom nodeExternals configuration', async () => {
+    it('should handle custom bundle/external configuration', async () => {
       const bundlerConfig: BundlerConfig = {
         esm: {
-          input: 'src/index.ts',
-          output: { dir: 'dist/esm', format: 'es' },
-          nodeExternals: { exclude: ['custom-dep'] },
+          bundle: ['custom-dep'],
+          external: ['^react$'],
         },
-        cjs: { input: 'src/index.ts', output: { dir: 'dist/cjs', format: 'cjs' } },
+        cjs: {},
       };
 
       const result = await generator.generateConfig(bundlerConfig, '/test/package');
 
       const esmConfig = result.configs.find((c) => c.format === 'esm');
       const nodeExternalsPlugin = esmConfig?.plugins.find((p) => p.name === 'node-externals');
-      expect(nodeExternalsPlugin?.options).toBeDefined();
+      expect(nodeExternalsPlugin).toBeDefined();
+      // Not asserting plugin internals to avoid binding tests to specific rollup plugin API
+      expect(nodeExternalsPlugin?.call).toContain('nodeExternals(');
     });
   });
 
