@@ -73,7 +73,12 @@ function execCommand(command: string, cwd: string, description: string) {
   }
 }
 
-async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: string; typesPath: string }> {
+async function buildAndPackService(): Promise<{
+  servicePath: string;
+  utilsPath: string;
+  typesPath: string;
+  cdpBridgePath: string;
+}> {
   log('Building and packing wdio-electron-service and dependencies...');
 
   try {
@@ -83,6 +88,7 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
     // Pack the dependencies first
     const utilsDir = normalize(join(rootDir, 'packages', '@wdio_electron-utils'));
     const typesDir = normalize(join(rootDir, 'packages', '@wdio_electron-types'));
+    const cdpBridgeDir = normalize(join(rootDir, 'packages', '@wdio_electron-cdp-bridge'));
 
     if (!existsSync(utilsDir)) {
       throw new Error(`Utils directory does not exist: ${utilsDir}`);
@@ -92,8 +98,13 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
       throw new Error(`Types directory does not exist: ${typesDir}`);
     }
 
+    if (!existsSync(cdpBridgeDir)) {
+      throw new Error(`CDP Bridge directory does not exist: ${cdpBridgeDir}`);
+    }
+
     execCommand('pnpm pack', utilsDir, 'Packing @wdio/electron-utils');
     execCommand('pnpm pack', typesDir, 'Packing @wdio/electron-types');
+    execCommand('pnpm pack', cdpBridgeDir, 'Packing @wdio/cdp-bridge');
 
     // Pack the service
     execCommand('pnpm pack', serviceDir, 'Packing wdio-electron-service');
@@ -111,13 +122,15 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
     const servicePath = findTgzFile(serviceDir, 'wdio-electron-service-');
     const utilsPath = findTgzFile(utilsDir, 'wdio-electron-utils-');
     const typesPath = findTgzFile(typesDir, 'wdio-electron-types-');
+    const cdpBridgePath = findTgzFile(cdpBridgeDir, 'wdio-cdp-bridge-');
 
     log(`📦 Packages packed:`);
     log(`   Service: ${servicePath}`);
     log(`   Utils: ${utilsPath}`);
     log(`   Types: ${typesPath}`);
+    log(`   CDP Bridge: ${cdpBridgePath}`);
 
-    return { servicePath, utilsPath, typesPath };
+    return { servicePath, utilsPath, typesPath, cdpBridgePath };
   } catch (error) {
     console.error('❌ Failed in buildAndPackService:');
     if (error instanceof Error) {
@@ -129,7 +142,7 @@ async function buildAndPackService(): Promise<{ servicePath: string; utilsPath: 
 
 async function testExample(
   examplePath: string,
-  packages: { servicePath: string; utilsPath: string; typesPath: string },
+  packages: { servicePath: string; utilsPath: string; typesPath: string; cdpBridgePath: string },
 ) {
   const exampleName = examplePath.split(/[/\\]/).pop();
   if (!exampleName) {
@@ -167,6 +180,7 @@ async function testExample(
       overrides: {
         '@wdio/electron-utils': `file:${packages.utilsPath}`,
         '@wdio/electron-types': `file:${packages.typesPath}`,
+        '@wdio/cdp-bridge': `file:${packages.cdpBridgePath}`,
       },
     };
 
@@ -176,7 +190,7 @@ async function testExample(
     execCommand('pnpm install', exampleDir, `Installing dependencies for ${exampleName}`);
 
     // Install local packages
-    const addCommand = `pnpm add ${packages.typesPath} ${packages.utilsPath} ${packages.servicePath}`;
+    const addCommand = `pnpm add ${packages.typesPath} ${packages.utilsPath} ${packages.cdpBridgePath} ${packages.servicePath}`;
     execCommand(addCommand, exampleDir, `Installing local packages for ${exampleName}`);
 
     // Build the app if needed
@@ -218,7 +232,7 @@ async function main() {
     };
 
     // Build and pack service (unless skipped)
-    let packages: { servicePath: string; utilsPath: string; typesPath: string };
+    let packages: { servicePath: string; utilsPath: string; typesPath: string; cdpBridgePath: string };
     if (options.skipBuild) {
       // Find existing .tgz files
       const findTgzFile = (dir: string, prefix: string): string => {
@@ -232,16 +246,19 @@ async function main() {
 
       const utilsDir = normalize(join(rootDir, 'packages', '@wdio_electron-utils'));
       const typesDir = normalize(join(rootDir, 'packages', '@wdio_electron-types'));
+      const cdpBridgeDir = normalize(join(rootDir, 'packages', '@wdio_electron-cdp-bridge'));
 
       packages = {
         servicePath: findTgzFile(serviceDir, 'wdio-electron-service-'),
         utilsPath: findTgzFile(utilsDir, 'wdio-electron-utils-'),
         typesPath: findTgzFile(typesDir, 'wdio-electron-types-'),
+        cdpBridgePath: findTgzFile(cdpBridgeDir, 'wdio-cdp-bridge-'),
       };
       log(`📦 Using existing packages:`);
       log(`   Service: ${packages.servicePath}`);
       log(`   Utils: ${packages.utilsPath}`);
       log(`   Types: ${packages.typesPath}`);
+      log(`   CDP Bridge: ${packages.cdpBridgePath}`);
     } else {
       packages = await buildAndPackService();
     }
