@@ -21,7 +21,13 @@ async function restoreElectronFunctionality(apiName: string, funcName: string, b
         funcName as keyof ElectronType[ElectronInterface]
       ] as ElectronApiFn;
 
-      (electronApi[funcName as keyof typeof electronApi] as Mock).mockImplementation(originalApiMethod);
+      const target = electronApi[funcName as keyof typeof electronApi] as unknown;
+      if (target && typeof (target as { mockImplementation?: unknown }).mockImplementation === 'function') {
+        (target as Mock).mockImplementation(originalApiMethod);
+      } else {
+        // Fallback: directly restore the original function using Reflect to avoid index signature issues
+        Reflect.set(electronApi as unknown as object, funcName, originalApiMethod as unknown as ElectronApiFn);
+      }
     },
     apiName,
     funcName,
