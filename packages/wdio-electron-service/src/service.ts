@@ -35,6 +35,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
     log.debug('Using CDP bridge');
+    console.log('Using CDP bridge');
 
     this.browser = instance as WebdriverIO.Browser;
     const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge(this.cdpOptions, capabilities);

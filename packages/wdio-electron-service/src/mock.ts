@@ -29,6 +29,8 @@ async function restoreElectronFunctionality(apiName: string, funcName: string) {
 }
 
 export async function createMock(apiName: string, funcName: string) {
+  log.debug(`[${apiName}.${funcName}] createMock called - starting mock creation`);
+  console.log(`[MOCK-DEBUG] createMock called for ${apiName}.${funcName}`);
   const outerMock = vitestFn();
   const outerMockImplementation = outerMock.mockImplementation;
   const outerMockImplementationOnce = outerMock.mockImplementationOnce;
@@ -55,6 +57,7 @@ export async function createMock(apiName: string, funcName: string) {
   const mockProxy = new Proxy(originalMock, {
     get(target, prop, receiver) {
       log.debug(`[${apiName}.${funcName}] Proxy intercepted access to property: ${String(prop)}`);
+      console.log(`[MOCK-DEBUG] Proxy intercepted access to property: ${String(prop)} for ${apiName}.${funcName}`);
 
       // Check if this property should trigger an auto-update
       if (autoUpdateProperties.has(prop as string) && needsUpdate && !updatePromise) {
