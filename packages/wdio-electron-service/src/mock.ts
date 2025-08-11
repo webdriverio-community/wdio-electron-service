@@ -81,6 +81,15 @@ export async function createMock(apiName: string, funcName: string, browserConte
     }
   });
 
+  // Expose the original vitest mock state on the wrapper for matcher compatibility
+  Object.defineProperty(wrapperMock, 'mock', {
+    configurable: false,
+    enumerable: false,
+    get() {
+      return originalMock;
+    },
+  });
+
   // Use provided browser context or fallback to global browser
   const browserToUse = browserContext || browser;
 

@@ -1,8 +1,7 @@
-import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
+import type { BrowserExtension } from '@wdio/electron-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { execute } from '../src/commands/executeCdp.js';
 import * as commands from '../src/commands/index.js';
-import mockStore from '../src/mockStore.js';
 import ElectronWorkerService, { waitUntilWindowAvailable } from '../src/service.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
 import { mockProcessProperty } from './helpers.js';
@@ -99,6 +98,7 @@ describe('Electron Worker Service', () => {
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
         getPuppeteer: vi.fn(),
+        overwriteCommand: vi.fn(),
         electron: {}, // Let the service initialize this
       } as unknown as WebdriverIO.Browser;
     });
@@ -124,6 +124,51 @@ describe('Electron Worker Service', () => {
       expect(serviceApi.mockAll).toEqual(expect.any(Function));
       expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+    });
+
+    it('should install element command overrides with overwriteCommand', async () => {
+      instance = new ElectronWorkerService({}, {});
+
+      await instance.before({}, [], browser);
+
+      const oc = vi.mocked((browser as any).overwriteCommand);
+      const calls = oc.mock.calls;
+      // overwriteCommand signature: (name, wrapper, isElement?)
+      const overridden = calls.map((c) => ({ name: c[0], isElement: c[2] }));
+      expect(overridden).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'click', isElement: true }),
+          expect.objectContaining({ name: 'doubleClick', isElement: true }),
+          expect.objectContaining({ name: 'setValue', isElement: true }),
+          expect.objectContaining({ name: 'clearValue', isElement: true }),
+        ]),
+      );
+    });
+
+    it('should update mocks after overridden element command executes', async () => {
+      instance = new ElectronWorkerService({}, {});
+      await instance.before({}, [], browser);
+
+      // Prepare mock store to return a mock with update()
+      const storeModule = (await import('../src/mockStore.js')) as any;
+      const mockObj = { update: vi.fn().mockResolvedValue(undefined) };
+      storeModule.default.getMocks.mockReturnValueOnce([['id', mockObj]]);
+
+      // Find the override for 'click' and invoke it
+      const oc = vi.mocked((browser as any).overwriteCommand);
+      const clickCall = oc.mock.calls.find((c) => c[0] === 'click');
+      expect(clickCall).toBeDefined();
+      const overrideFn = clickCall?.[1] as unknown as (
+        this: WebdriverIO.Element,
+        original: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) => Promise<unknown>;
+
+      const original = vi.fn().mockResolvedValue('ok');
+      await overrideFn!.call({} as unknown as WebdriverIO.Element, original);
+
+      expect(mockObj.update).toHaveBeenCalledTimes(1);
+      expect(original).toHaveBeenCalled();
     });
 
     it('should copy original api', async () => {
@@ -159,6 +204,7 @@ describe('Electron Worker Service', () => {
           getInstance: (name: string) => (name === 'electron' ? browser : undefined),
           execute: vi.fn().mockResolvedValue(true),
           isMultiremote: true,
+          overwriteCommand: vi.fn(),
         } as unknown as WebdriverIO.MultiRemoteBrowser;
 
         await instance.before({}, [], rootBrowser);
@@ -194,6 +240,7 @@ describe('Electron Worker Service', () => {
           getInstance: (name: string) => (name === 'electron' ? browser : undefined),
           execute: vi.fn().mockResolvedValue(true),
           isMultiremote: true,
+          overwriteCommand: vi.fn(),
         } as unknown as WebdriverIO.MultiRemoteBrowser;
 
         await instance.before({}, [], rootBrowser);
@@ -217,6 +264,7 @@ describe('Electron Worker Service', () => {
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
         getPuppeteer: vi.fn(),
+        overwriteCommand: vi.fn(),
         electron: {},
       } as unknown as WebdriverIO.Browser;
     });
@@ -247,6 +295,7 @@ describe('Electron Worker Service', () => {
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
         getPuppeteer: vi.fn(),
+        overwriteCommand: vi.fn(),
         electron: {},
       } as unknown as WebdriverIO.Browser;
     });
@@ -288,6 +337,7 @@ describe('Electron Worker Service', () => {
         getWindowHandles: vi.fn().mockResolvedValue(['dummy']),
         switchToWindow: vi.fn(),
         getPuppeteer: vi.fn(),
+        overwriteCommand: vi.fn(),
         electron: {},
       } as unknown as WebdriverIO.Browser;
 
