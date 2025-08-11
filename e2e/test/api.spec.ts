@@ -882,6 +882,17 @@ describe('showOpenDialog with complex object', () => {
     const showDialogButton = await $('.show-dialog');
     await showDialogButton.click();
 
+    await browser.waitUntil(
+      async () => {
+        console.log('Mock calls before assertion:', mockShowOpenDialog.mock.calls.length);
+        return mockShowOpenDialog.mock.calls.length > 0;
+      },
+      { timeout: 5000, timeoutMsg: 'Mock was not called within timeout' },
+    );
+
+    // Test if command overrides now work after improved installation timing
+    console.log('Mock calls before assertion:', mockShowOpenDialog.mock.calls.length);
+
     expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
   });
 });
