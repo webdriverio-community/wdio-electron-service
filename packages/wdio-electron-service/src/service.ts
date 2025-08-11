@@ -45,6 +45,11 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
      */
     this.browser.electron = getElectronAPI.call(this, this.browser, cdpBridge);
 
+    // Install command overrides after all browser setup is complete
+    // This must happen after the Electron API is added to the browser object
+    log.debug('Installing command overrides after full browser setup is complete');
+    this.installCommandOverrides();
+
     if (isMultiremote(instance)) {
       const mrBrowser = instance;
       for (const instance of mrBrowser.instances) {
@@ -97,52 +102,75 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     await ensureActiveWindowFocus(this.browser, commandName);
   }
 
-  async afterCommand(commandName: string, args: unknown[]) {
-    // ensure mocks are updated
-    const mocks = mockStore.getMocks();
-
-    // White list of command which will input user actions to electron app.
-    const inputCommands = [
-      'addValue',
-      'clearValue',
-      'click',
-      'doubleClick',
-      'dragAndDrop',
-      'execute',
-      'executeAsync',
-      'moveTo',
-      'scrollIntoView',
-      'selectByAttribute',
-      'selectByIndex',
-      'selectByVisibleText',
-      'setValue',
-      'touchAction',
-      'action',
-      'actions',
-      'emulate',
-      'keys',
-      'scroll',
-      'setWindowSize',
-      'uploadFile',
-    ];
-
-    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
-      // Mark all mocks as needing update for WebDriverIO v9.17.0 compatibility
-      // The proxy getters will handle the actual updates when properties are accessed
-      // Note: This hook works in WDIO < 9.17.0, but may not be called reliably in v9.17.0+
-      mocks.forEach(([_mockId, mock]) => {
-        if (mock.__markForUpdate) {
-          mock.__markForUpdate();
-        }
-      });
-
-      // Traditional update for WDIO < 9.17.0 compatibility
-      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
-    }
-  }
-
   after() {
     clearPuppeteerSessions();
+  }
+
+  /**
+   * Install command overrides to trigger mock updates after DOM interactions
+   */
+  private installCommandOverrides() {
+    if (!this.browser) {
+      return;
+    }
+
+    log.debug('Installing command overrides for mock auto-update');
+
+    // Commands that trigger DOM interactions and need mock updates
+    const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
+
+    commandsToOverride.forEach((commandName) => {
+      // Override both browser-level and element-level commands
+      this.overrideElementCommand(commandName);
+    });
+  }
+
+  /**
+   * Override an element-level command to add mock update after execution
+   */
+  private overrideElementCommand(commandName: string) {
+    if (!this.browser) {
+      return;
+    }
+
+    // Override element commands by attaching to element prototype
+    (this.browser.overwriteCommand as Function)(
+      commandName,
+      async function (
+        this: WebdriverIO.Element,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        // Execute the original command
+        const result = await originalCommand.apply(this, args);
+
+        // Update all mocks after the command completes
+        await updateAllMocks();
+
+        return result;
+      },
+      true,
+    ); // true = attach to element
+  }
+}
+
+/**
+ * Update all existing mocks
+ */
+async function updateAllMocks() {
+  const mocks = mockStore.getMocks();
+  if (mocks.length === 0) {
+    return;
+  }
+
+  try {
+    await Promise.all(
+      mocks.map(async ([_mockId, mock]) => {
+        await mock.update();
+      }),
+    );
+  } catch (error) {
+    log.debug('Mock update batch failed:', error);
   }
 }
 
