@@ -53,78 +53,11 @@ export async function createMock(apiName: string, funcName: string, browserConte
   // Store the original mock property for later auto-update setup
   const originalMock = outerMock.mock;
 
-  // Auto-update state management
-  let needsUpdate = true;
-  let updatePromise: Promise<void> | null = null;
-
-  // Function to trigger auto-update
-  const triggerAutoUpdate = (prop: string | symbol, reason: string) => {
-    if (needsUpdate && !updatePromise) {
-      log.debug(`[${apiName}.${funcName}] Triggering auto-update on ${reason}: ${String(prop)}`);
-      needsUpdate = false; // Prevent multiple rapid updates
-
-      // Start update but don't await it in getter - this would block synchronous property access
-      updatePromise = (async () => {
-        try {
-          log.debug(`[${apiName}.${funcName}] Starting async update for ${reason}: ${String(prop)}`);
-          await mock.update();
-          log.debug(`[${apiName}.${funcName}] Auto-update completed successfully for ${reason}: ${String(prop)}`);
-        } catch (error) {
-          log.debug(`[${apiName}.${funcName}] Auto-update failed for ${reason}: ${String(prop)}`, error);
-          // Reset flag on error so update can be retried
-          needsUpdate = true;
-        } finally {
-          updatePromise = null;
-        }
-      })();
-    } else if (!needsUpdate) {
-      log.debug(`[${apiName}.${funcName}] ${reason} ${String(prop)} accessed but no update needed (recently updated)`);
-    } else if (updatePromise) {
-      log.debug(`[${apiName}.${funcName}] ${reason} ${String(prop)} accessed but update already in progress`);
-    }
-  };
-
   // APPROACH: Wrapper Object Strategy
   // Since we can't modify the Vitest mock's 'mock' property (it's non-configurable),
   // we'll create a wrapper object that provides auto-updating functionality
 
   log.debug(`[${apiName}.${funcName}] Creating auto-updating mock wrapper object`);
-
-  // Create an auto-updating mock data object
-  const autoUpdatingMockData = {
-    get calls() {
-      log.debug(`[${apiName}.${funcName}] mockWrapper.mock.calls getter accessed - triggering auto-update`);
-      triggerAutoUpdate('calls', 'mockWrapper.mock.calls getter access');
-      return originalMock.calls;
-    },
-    get results() {
-      log.debug(`[${apiName}.${funcName}] mockWrapper.mock.results getter accessed - triggering auto-update`);
-      triggerAutoUpdate('results', 'mockWrapper.mock.results getter access');
-      return originalMock.results;
-    },
-    get lastCall() {
-      log.debug(`[${apiName}.${funcName}] mockWrapper.mock.lastCall getter accessed - triggering auto-update`);
-      triggerAutoUpdate('lastCall', 'mockWrapper.mock.lastCall getter access');
-      return originalMock.lastCall;
-    },
-    get invocationCallOrder() {
-      log.debug(
-        `[${apiName}.${funcName}] mockWrapper.mock.invocationCallOrder getter accessed - triggering auto-update`,
-      );
-      triggerAutoUpdate('invocationCallOrder', 'mockWrapper.mock.invocationCallOrder getter access');
-      return originalMock.invocationCallOrder;
-    },
-    // Forward other properties directly from original mock
-    get contexts() {
-      return originalMock.contexts;
-    },
-    get instances() {
-      return originalMock.instances;
-    },
-    get settledResults() {
-      return originalMock.settledResults;
-    },
-  };
 
   // Create a wrapper function that delegates to the original mock function
   // but also provides auto-updating mock data
@@ -146,13 +79,6 @@ export async function createMock(apiName: string, funcName: string, browserConte
         // Skip properties that can't be copied
       }
     }
-  });
-
-  // Override the mock property with our auto-updating version
-  Object.defineProperty(wrapperMock, 'mock', {
-    get: () => autoUpdatingMockData,
-    enumerable: true,
-    configurable: true,
   });
 
   // Use provided browser context or fallback to global browser
@@ -419,12 +345,6 @@ export async function createMock(apiName: string, funcName: string, browserConte
     );
   };
 
-  // Internal method to mark mock as needing update - used by service hooks
-  mock.__markForUpdate = () => {
-    log.debug(`[${apiName}.${funcName}] __markForUpdate called - marking mock as needing update`);
-    needsUpdate = true;
-  };
-
   // Ensure all mock methods are properly bound to the wrapper
   wrapperMock.mockImplementation = mock.mockImplementation.bind(mock);
   wrapperMock.mockImplementationOnce = mock.mockImplementationOnce.bind(mock);
@@ -443,12 +363,6 @@ export async function createMock(apiName: string, funcName: string, browserConte
 
   // Set additional properties
   wrapperMock.__isElectronMock = true;
-
-  // Internal method to mark mock as needing update - used by service hooks
-  wrapperMock.__markForUpdate = () => {
-    log.debug(`[${apiName}.${funcName}] __markForUpdate called - marking mock as needing update`);
-    needsUpdate = true;
-  };
 
   log.debug(`[${apiName}.${funcName}] Auto-updating mock wrapper created successfully`);
 
