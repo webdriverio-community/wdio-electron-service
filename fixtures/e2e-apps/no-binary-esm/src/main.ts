@@ -92,7 +92,9 @@ app.on('ready', () => {
         { name: 'TXT', extensions: ['txt'] },
         { name: 'All Files', extensions: ['*'] },
       ],
+      properties: ['openFile', 'openDirectory'],
     });
     console.log(result);
+    return result;
   });
 });

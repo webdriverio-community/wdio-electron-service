@@ -87,13 +87,16 @@ app.on('ready', () => {
   });
 
   ipcMain.handle('show-open-dialog', async () => {
+    console.log('🔍 MAIN: IPC show-open-dialog handler called');
     const result = await dialog.showOpenDialog(mainWindow, {
       title: 'Select txt',
       filters: [
         { name: 'TXT', extensions: ['txt'] },
         { name: 'All Files', extensions: ['*'] },
       ],
+      properties: ['openFile', 'openDirectory'],
     });
-    console.log(result);
+    console.log('🔍 MAIN: dialog.showOpenDialog completed with result:', result);
+    return result;
   });
 });
