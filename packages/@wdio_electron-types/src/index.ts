@@ -728,12 +728,6 @@ export interface ElectronMockInstance extends Omit<Mock, Override> {
    * @private
    */
   __isElectronMock: boolean;
-  /**
-   * Used internally to mark the mock as needing an update
-   *
-   * @private
-   */
-  __markForUpdate?: () => void;
 }
 
 export interface ElectronMock<TArgs extends unknown[] = unknown[], TReturns = unknown> extends ElectronMockInstance {

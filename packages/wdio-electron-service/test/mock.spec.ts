@@ -90,13 +90,6 @@ describe('Mock API', () => {
       expect(mock.update).toStrictEqual(expect.any(Function));
     });
 
-    it('should create a mock with WebDriverIO v9.17.0 compatibility features', async () => {
-      const mock = await createMock('app', 'getName');
-
-      expect((mock as any).__markForUpdate).toStrictEqual(expect.any(Function));
-      expect(mock.__isElectronMock).toBe(true);
-    });
-
     it('should initialise the inner mock', async () => {
       await createMock('app', 'getName');
       const electron = { app: { getName: () => 'actual name' } as Omit<ElectronType['app'], 'on'> };
@@ -389,20 +382,6 @@ describe('Mock API', () => {
         const executeResults = await processExecuteCalls(electron);
 
         expect(executeResults).toStrictEqual(['temporary name']);
-      });
-    });
-
-    describe('WebDriverIO v9.17.0 compatibility', () => {
-      it('should have a __markForUpdate method for service integration', async () => {
-        const mock = await createMock('app', 'getName');
-
-        // Test that __markForUpdate exists and is callable
-        expect((mock as any).__markForUpdate).toStrictEqual(expect.any(Function));
-
-        // Should not throw when called
-        expect(() => {
-          (mock as any).__markForUpdate();
-        }).not.toThrow();
       });
     });
   });
