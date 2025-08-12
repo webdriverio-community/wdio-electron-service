@@ -84,8 +84,8 @@
     }
   },
   "dependencies": {
-    "@babel/parser": "^7.27.5",
-    "@vitest/spy": "^3.2.3",
+    "@babel/parser": "^7.28.0",
+    "@vitest/spy": "^3.2.4",
     "@wdio/cdp-bridge": "workspace:*",
     "@wdio/electron-types": "workspace:*",
     "@wdio/electron-utils": "workspace:*",
@@ -93,7 +93,7 @@
     "@wdio/logger": "^9.15.0",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.1",
-    "electron-to-chromium": "^1.5.169",
+    "electron-to-chromium": "^1.5.200",
     "fast-copy": "^3.0.2",
     "get-port": "^7.1.0",
     "puppeteer-core": "^22.15.0",
