@@ -38,6 +38,9 @@
       "executableName": "example-builder-cjs",
       "category": "Utility",
       "target": ["AppImage"]
+    },
+    "win": {
+      "target": "dir"
     }
   }
 }

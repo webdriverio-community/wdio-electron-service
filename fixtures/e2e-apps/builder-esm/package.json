@@ -43,6 +43,9 @@
       "executableName": "example-builder-esm",
       "category": "Utility",
       "target": ["AppImage"]
+    },
+    "win": {
+      "target": "dir"
     }
   }
 }

@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "pnpx shx rm -rf dist dist-electron node_modules",
     "dev": "electron-vite dev",
-    "build": "electron-vite build && electron-forge make",
+    "build": "electron-vite build && electron-forge package",
     "preview": "electron-vite preview",
     "start": "electron .",
     "test": "cross-env DEBUG=wdio-electron-service xvfb-maybe wdio run wdio.conf.ts",
