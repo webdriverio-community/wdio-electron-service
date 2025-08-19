@@ -142,9 +142,9 @@ describe('CdpBridge', () => {
       await expect(client.connect()).resolves.toBeUndefined();
       const mockLogger = vi.mocked(createLogger)();
       expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 1 failed: Dummy Error');
-      expect(mockLogger.warn).toHaveBeenCalledWith('Retry 1/3 to connect after 10ms...');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Retry 1/3 in 10ms');
       expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 2 failed: Dummy Error');
-      expect(mockLogger.warn).toHaveBeenCalledWith('Retry 2/3 to connect after 10ms...');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Retry 2/3 in 10ms');
     });
 
     it('should log a warning when multiple debugger instances are detected', async () => {

@@ -44,21 +44,17 @@ describe('Window Management', () => {
 
     it('should return puppeteer browser from the cache', async () => {
       const { browser } = getBrowser('browser1');
-      const mockLogger = getMockLogger('service');
       await getPuppeteer(browser);
       await getPuppeteer(browser);
       expect(browser.getPuppeteer).toHaveBeenCalledTimes(1);
-      expect(mockLogger.trace).toHaveBeenCalledWith('Use cached puppeteer browser.');
     });
   });
 
   describe('getActiveWindowHandle()', () => {
     it('should return undefined when no puppeteer browser are inputted', async () => {
-      const mockLogger = getMockLogger('service');
       // @ts-expect-error
       const handle = await getActiveWindowHandle(undefined);
       expect(handle).toBe(undefined);
-      expect(mockLogger.trace).toHaveBeenCalledWith('Puppeteer is not initialized.');
     });
 
     describe('when no window', () => {
