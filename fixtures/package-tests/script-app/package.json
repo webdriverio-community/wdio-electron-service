@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^24.2.0",
+    "@types/node": "^24.3.0",
     "@types/semver": "^7.7.0",
     "@wdio/cli": "^9.19.1",
     "@wdio/globals": "^9.17.0",
@@ -23,11 +23,11 @@
     "@wdio/mocha-framework": "^9.19.1",
     "@wdio/spec-reporter": "^9.19.1",
     "cross-env": "^10.0.0",
-    "electron": "37.2.6",
+    "electron": "37.3.1",
     "electron-vite": "^4.0.0",
     "semver": "^7.7.2",
     "typescript": "^5.9.2",
-    "wdio-electron-service": "latest"
+    "wdio-electron-service": "link:packages/wdio-electron-service"
   },
   "keywords": ["electron", "electron-vite", "webdriverio", "testing", "example"],
   "author": "WebDriverIO Community",
