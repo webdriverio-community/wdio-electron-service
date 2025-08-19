@@ -9,6 +9,7 @@ const config = {
     ignore: /node_modules/,
     asar: true,
     icon,
+    osxSign: false,
   },
   rebuildConfig: {},
   makers: [],

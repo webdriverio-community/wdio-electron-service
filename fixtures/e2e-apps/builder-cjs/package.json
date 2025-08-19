@@ -31,6 +31,9 @@
     "copyright": "goosewobbler",
     "productName": "example-builder-cjs",
     "files": ["./dist/*"],
+    "mac": {
+      "target": "dir"
+    },
     "linux": {
       "executableName": "example-builder-cjs",
       "category": "Utility",

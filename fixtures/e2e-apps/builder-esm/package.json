@@ -36,6 +36,9 @@
     "copyright": "goosewobbler",
     "productName": "example-builder-esm",
     "files": ["./dist/*"],
+    "mac": {
+      "target": "dir"
+    },
     "linux": {
       "executableName": "example-builder-esm",
       "category": "Utility",

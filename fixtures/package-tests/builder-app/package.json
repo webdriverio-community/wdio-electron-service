@@ -42,12 +42,7 @@
     "files": ["dist/**/*", "package.json"],
     "mac": {
       "category": "public.app-category.utilities",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
-        }
-      ]
+      "target": "dir"
     },
     "win": {
       "target": "nsis"
