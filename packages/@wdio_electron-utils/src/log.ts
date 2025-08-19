@@ -16,6 +16,14 @@ export function createLogger(area?: LogArea): Logger {
   const wrapped: Logger = {
     ...areaLogger,
     debug: (...args: unknown[]) => {
+      // Always forward to @wdio/logger so WDIO runner captures debug logs in outputDir
+      // This ensures logs appear in CI log artifacts, not only in live console
+      try {
+        (areaLogger.debug as unknown as (...a: unknown[]) => void)(...args);
+      } catch {
+        console.log('🔍 DEBUG: Error in debug logger', args);
+      }
+
       if (typeof args.at(-1) === 'object') {
         if (args.length > 1) {
           areaDebug(args.slice(0, -1));

@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -180,6 +181,18 @@ if (envContext.isMultiremote) {
 // Create log directory
 const logDir = join(__dirname, 'logs', `${envContext.testType}-${envContext.appDirName}`);
 
+// Resolve local workspace service path explicitly to avoid picking up a published version in node_modules
+const servicePath = fileURLToPath(new URL('../packages/wdio-electron-service/dist/esm/index.js', import.meta.url));
+
+// Optional hardening: show which service the Node resolver would pick by name
+try {
+  const req = createRequire(import.meta.url);
+  const resolvedByName = req.resolve('wdio-electron-service');
+  console.log(`Service resolves by name to: ${resolvedByName}`);
+} catch (err) {
+  console.log('Service resolves by name to: <not found>', err instanceof Error ? err.message : String(err));
+}
+
 // Export the configuration object directly
 export const config: WdioElectronConfig = {
   runner: 'local',
@@ -193,7 +206,7 @@ export const config: WdioElectronConfig = {
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
   connectionRetryCount: 3,
-  services: ['electron'],
+  services: [[servicePath, {}]],
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {

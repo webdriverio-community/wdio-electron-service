@@ -18,6 +18,10 @@ import { ServiceConfig } from './serviceConfig.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
 
 const log = createLogger('service');
+
+// Log environment variables on module load
+log.debug('Service module loaded');
+log.debug(`DEBUG environment variable: ${process.env.DEBUG}`);
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {
@@ -48,6 +52,8 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     // Install command overrides after all browser setup is complete
     // This must happen after the Electron API is added to the browser object
     log.debug('Installing command overrides after full browser setup is complete');
+    log.debug(`Service browser instance exists: ${!!this.browser}`);
+    log.debug(`Browser overwriteCommand available: ${!!this.browser?.overwriteCommand}`);
     this.installCommandOverrides();
 
     if (isMultiremote(instance)) {
@@ -111,18 +117,24 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
    */
   private installCommandOverrides() {
     if (!this.browser) {
+      log.debug('installCommandOverrides: No browser instance, skipping');
       return;
     }
 
     log.debug('Installing command overrides for mock auto-update');
+    log.debug(`Browser instance type: ${typeof this.browser}`);
+    log.debug(`Browser has overwriteCommand: ${typeof this.browser.overwriteCommand}`);
 
     // Commands that trigger DOM interactions and need mock updates
     const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
 
     commandsToOverride.forEach((commandName) => {
       // Override both browser-level and element-level commands
+      log.debug(`Installing command override for: ${commandName}`);
       this.overrideElementCommand(commandName);
     });
+
+    log.debug('Command overrides installation completed');
   }
 
   /**
@@ -130,27 +142,76 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
    */
   private overrideElementCommand(commandName: string) {
     if (!this.browser) {
+      log.debug(`overrideElementCommand: No browser for command ${commandName}`);
       return;
     }
 
-    // Override element commands by attaching to element prototype
-    (this.browser.overwriteCommand as Function)(
-      commandName,
-      async function (
+    log.debug(`Overriding element command: ${commandName}`);
+    log.debug(`Browser overwriteCommand type: ${typeof this.browser.overwriteCommand}`);
+
+    try {
+      // Test with a simple function first to make sure overriding works
+      const testOverride = async function (
         this: WebdriverIO.Element,
         originalCommand: (...args: unknown[]) => Promise<unknown>,
         ...args: unknown[]
       ) {
+        // Use console.log to ensure these messages appear regardless of debug settings
+        console.log(`🚨 COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+        log.debug(`🚨 COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+        log.debug(`Command args:`, args);
+        log.debug(`Element context:`, typeof this);
+
         // Execute the original command
+        console.log(`Executing original ${commandName} command...`);
+        log.debug(`Executing original ${commandName} command...`);
         const result = await originalCommand.apply(this, args);
+        console.log(`Original command ${commandName} completed`);
+        log.debug(`Original command ${commandName} completed with result:`, typeof result);
 
         // Update all mocks after the command completes
+        console.log(`🎯 Calling updateAllMocks after ${commandName}...`);
+        log.debug(`🎯 Calling updateAllMocks after ${commandName}...`);
         await updateAllMocks();
+        console.log(`✅ updateAllMocks completed after ${commandName}`);
+        log.debug(`✅ updateAllMocks completed after ${commandName}`);
 
         return result;
-      },
-      true,
-    ); // true = attach to element
+      };
+
+      // Override element commands by attaching to element prototype
+      this.browser.overwriteCommand(commandName as any, testOverride, true);
+
+      log.debug(`Successfully overrode element command: ${commandName}`);
+
+      // Also try browser-level override as backup
+      log.debug(`Also installing browser-level override for ${commandName}...`);
+      this.browser.overwriteCommand(
+        commandName as any,
+        async function (
+          this: WebdriverIO.Browser,
+          originalCommand: (...args: unknown[]) => Promise<unknown>,
+          ...args: unknown[]
+        ) {
+          log.debug(`🚨 BROWSER-LEVEL COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+
+          const result = await originalCommand.apply(this, args);
+          log.debug(`Browser-level ${commandName} completed`);
+
+          log.debug(`🎯 Browser-level calling updateAllMocks after ${commandName}...`);
+          await updateAllMocks();
+          log.debug(`✅ Browser-level updateAllMocks completed after ${commandName}`);
+
+          return result;
+        },
+        false,
+      ); // false = browser level
+
+      log.debug(`Successfully overrode browser command: ${commandName}`);
+    } catch (error) {
+      log.debug(`Error overriding command ${commandName}:`, error);
+      log.debug(`Error details:`, error instanceof Error ? error.message : String(error));
+    }
   }
 }
 
@@ -158,17 +219,25 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
  * Update all existing mocks
  */
 async function updateAllMocks() {
+  log.debug('updateAllMocks called');
   const mocks = mockStore.getMocks();
+  log.debug(`Found ${mocks.length} mocks to update`);
+
   if (mocks.length === 0) {
+    log.debug('No mocks to update, returning');
     return;
   }
 
   try {
+    log.debug('Starting mock update batch');
     await Promise.all(
-      mocks.map(async ([_mockId, mock]) => {
+      mocks.map(async ([mockId, mock]) => {
+        log.debug(`Updating mock: ${mockId}`);
         await mock.update();
+        log.debug(`Mock update completed: ${mockId}`);
       }),
     );
+    log.debug('All mock updates completed successfully');
   } catch (error) {
     log.debug('Mock update batch failed:', error);
   }
