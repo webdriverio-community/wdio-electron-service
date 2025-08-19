@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { $ } from '@wdio/globals';
 import { browser } from 'wdio-electron-service';
 
@@ -76,14 +77,14 @@ describe('Builder App Example', () => {
       const windows = electron.BrowserWindow.getAllWindows();
       if (windows.length > 0) {
         const bounds = windows[0].getBounds();
-        return { width: bounds.width, height: bounds.height, platform: process.platform } as const;
+        return { width: bounds.width, height: bounds.height } as const;
       }
       return null;
     });
 
     expect(result).not.toBeNull();
     expect(result?.width).toBe(900);
-    if (result?.platform === 'darwin') {
+    if (process.platform === 'darwin') {
       // Allow minor variance on macOS due to frame metrics and work area fitting
       expect(result.height).toBeGreaterThanOrEqual(680);
       expect(result.height).toBeLessThanOrEqual(720);

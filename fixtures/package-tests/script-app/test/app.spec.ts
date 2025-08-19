@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import process from 'node:process';
 import { $ } from '@wdio/globals';
 import semver from 'semver';
 import { browser } from 'wdio-electron-service';
@@ -98,6 +99,11 @@ describe('Script App Example', () => {
 
     expect(windowSize).not.toBeNull();
     expect(windowSize?.width).toBe(900);
-    expect(windowSize?.height).toBe(700);
+    if (process.platform === 'darwin') {
+      expect(windowSize?.height ?? 0).toBeGreaterThanOrEqual(680);
+      expect(windowSize?.height ?? 0).toBeLessThanOrEqual(720);
+    } else {
+      expect(windowSize?.height).toBe(700);
+    }
   });
 });
