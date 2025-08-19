@@ -8,7 +8,7 @@ import { readConfig } from './read.js';
 const log = createLogger('config');
 
 function forgeBuildInfo(forgeConfig: ForgeConfig, pkg: NormalizedReadResult): ForgeBuildInfo {
-  log.info(`Forge configuration detected: \n${JSON.stringify(forgeConfig)}`);
+  log.debug(`Forge configuration detected: \n${JSON.stringify(forgeConfig)}`);
   const appName: string = pkg.packageJson.productName || forgeConfig?.packagerConfig?.name || pkg.packageJson.name;
 
   if (!appName) {
@@ -37,10 +37,10 @@ export async function getConfig(pkg: NormalizedReadResult): Promise<ForgeBuildIn
     const forgeConfigFileName = isConfigFilePath ? forgePackageJsonConfig : 'forge.config.js';
     const forgeConfigPath = path.join(rootDir, forgeConfigFileName);
     try {
-      log.info(`Reading Forge config file: ${forgeConfigPath}...`);
+      log.debug(`Reading Forge config file: ${forgeConfigPath}...`);
       forgeConfig = (await readConfig(forgeConfigFileName, rootDir)).result as ForgeConfig;
     } catch (_) {
-      log.warn(`Forge config file not found or invalid at ${forgeConfigPath}.`);
+      log.debug(`Forge config file not found or invalid at ${forgeConfigPath}.`);
       return undefined;
     }
   }

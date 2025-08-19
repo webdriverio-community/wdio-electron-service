@@ -14,17 +14,17 @@ export async function getConfig(pkg: NormalizedReadResult): Promise<BuilderBuild
     // if builder config is not found in the package.json, attempt to read `electron-builder.{yaml, yml, json, json5, toml}`
     // see also https://www.electron.build/configuration.html
     try {
-      log.info('Locating builder config file...');
+      log.debug('Locating builder config file...');
       const config = await readBuilderConfig(getBuilderConfigCandidates(), rootDir);
 
       if (!config) {
         throw new Error();
       }
 
-      log.info(`Detected config file: ${config.configFile}`);
+      log.debug(`Detected builder config file: ${config.configFile}`);
       builderConfig = config.result as BuilderConfig;
     } catch (_e) {
-      log.warn('Builder config file not found or invalid.');
+      log.debug('Builder config file not found or invalid.');
       return undefined;
     }
   }
@@ -51,7 +51,7 @@ function getBuilderConfigCandidates(configFileName = 'electron-builder') {
 }
 
 function builderBuildInfo(builderConfig: BuilderConfig, pkg: NormalizedReadResult): BuilderBuildInfo {
-  log.info(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
+  log.debug(`Builder configuration detected: \n${JSON.stringify(builderConfig)}`);
   const appName: string = pkg.packageJson.productName || builderConfig?.productName || pkg.packageJson.name;
 
   if (!appName) {
