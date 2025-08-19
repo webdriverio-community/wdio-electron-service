@@ -36,11 +36,11 @@
   },
   "dependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "debug": "^4.4.1",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.43.0",
-    "rollup-plugin-node-externals": "^8.0.0"
+    "rollup": "^4.46.3",
+    "rollup-plugin-node-externals": "^8.0.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
