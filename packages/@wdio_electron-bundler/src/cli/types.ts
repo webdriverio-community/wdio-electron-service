@@ -1,5 +1,3 @@
-import type { RollupOptions } from 'rollup';
-
 // CLI option interfaces
 export interface BaseOptions {
   cwd: string;
@@ -18,10 +16,11 @@ export interface Transformation {
   options: Record<string, unknown>;
 }
 
-export interface BundlerFormatConfig extends Partial<RollupOptions> {
-  nodeExternals?: {
-    exclude?: string | string[];
-  };
+export interface BundlerFormatConfig {
+  /** Packages to bundle (instead of externalizing) */
+  bundle?: string[];
+  /** Additional packages to force externalize (even if bundling their parent) */
+  external?: string[];
 }
 
 export interface BundlerConfig {

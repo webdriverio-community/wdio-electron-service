@@ -51,8 +51,9 @@ runs:
         echo "rerun_suffix=${RERUN_SUFFIX}" >> $GITHUB_OUTPUT
 
     # Compress the specified directories/files into a .zip file
-    - name: 🗜️ Compress Files
-      id: compress
+    - name: 🗜️ Compress Files (Unix)
+      if: runner.os != 'Windows'
+      id: compress-unix
       shell: bash
       run: |
         # Create output directory
@@ -73,6 +74,59 @@ runs:
 
         # Export artifact size
         echo "size=${FILE_SIZE}" >> $GITHUB_OUTPUT
+
+    # Compress the specified directories/files into a .zip file (Windows)
+    - name: 🗜️ Compress Files (Windows)
+      if: runner.os == 'Windows'
+      id: compress-windows
+      shell: powershell
+      run: |
+        # Create output directory
+        $outputDir = Split-Path -Parent "${{ inputs.output }}"
+        if (![string]::IsNullOrEmpty($outputDir)) {
+          New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+        }
+
+        # Get file count before compression (for validation)
+        $fileCount = (Get-ChildItem -Path "${{ inputs.paths }}" -File -Recurse | Where-Object { $_.FullName -notmatch "node_modules" -and $_.FullName -notmatch "\\\..*\\|/\..*/" }).Count
+
+        # Compress files using PowerShell (excluding node_modules and hidden files)
+        $files = Get-ChildItem -Path "${{ inputs.paths }}" -Recurse | Where-Object { 
+          $_.FullName -notmatch "node_modules" -and 
+          $_.FullName -notmatch "\\\..*\\|/\..*/" -and
+          !$_.PSIsContainer
+        }
+        
+        if ($files.Count -gt 0) {
+          Compress-Archive -Path $files.FullName -DestinationPath "${{ inputs.output }}" -Force
+        } else {
+          # Create empty archive if no files found
+          Compress-Archive -Path @() -DestinationPath "${{ inputs.output }}" -Force
+        }
+
+        # Get archive size for reporting
+        $fileSize = (Get-Item "${{ inputs.output }}").Length
+        $humanSize = if ($fileSize -lt 1KB) { "$fileSize B" } 
+                    elseif ($fileSize -lt 1MB) { "{0:N1} KB" -f ($fileSize / 1KB) }
+                    elseif ($fileSize -lt 1GB) { "{0:N1} MB" -f ($fileSize / 1MB) }
+                    else { "{0:N1} GB" -f ($fileSize / 1GB) }
+
+        # Display a concise summary of the archive
+        Write-Host "::notice::Artifact ${{ inputs.name }}: created $humanSize archive with $fileCount files"
+
+        # Export artifact size
+        "size=$fileSize" >> $env:GITHUB_OUTPUT
+
+    # Set outputs from the appropriate step
+    - name: 🔗 Set Compression Outputs
+      id: compress
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "size=${{ steps.compress-windows.outputs.size }}" >> $GITHUB_OUTPUT
+        else
+          echo "size=${{ steps.compress-unix.outputs.size }}" >> $GITHUB_OUTPUT
+        fi
 
     # Generate cache keys
     - name: 🔑 Generate Cache Keys

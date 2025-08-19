@@ -1,21 +1,23 @@
-import log from '@wdio/electron-utils/log';
+import { createLogger } from '@wdio/electron-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { CdpBridge } from '../src/bridge.js';
 import { ERROR_MESSAGE } from '../src/constants.js';
 import { DevTool } from '../src/devTool.js';
 
 import type { DebuggerList } from '../src/types.js';
 
-vi.mock('@wdio/electron-utils/log', () => ({
-  default: {
+vi.mock('@wdio/electron-utils', () => {
+  const mockLogger = {
     info: vi.fn(),
     warn: vi.fn(),
     debug: vi.fn(),
     error: vi.fn(),
     trace: vi.fn(),
-  },
-}));
+  };
+  return {
+    createLogger: vi.fn(() => mockLogger),
+  };
+});
 
 let mockWebSocketInstance: any;
 
@@ -138,10 +140,11 @@ describe('CdpBridge', () => {
       const client = new CdpBridge({ waitInterval: 10 });
 
       await expect(client.connect()).resolves.toBeUndefined();
-      expect(log.warn).toHaveBeenCalledWith('Connection attempt 1 failed: Dummy Error');
-      expect(log.warn).toHaveBeenCalledWith('Retry 1/3 to connect after 10ms...');
-      expect(log.warn).toHaveBeenCalledWith('Connection attempt 2 failed: Dummy Error');
-      expect(log.warn).toHaveBeenCalledWith('Retry 2/3 to connect after 10ms...');
+      const mockLogger = vi.mocked(createLogger)();
+      expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 1 failed: Dummy Error');
+      expect(mockLogger.warn).toHaveBeenCalledWith('Retry 1/3 to connect after 10ms...');
+      expect(mockLogger.warn).toHaveBeenCalledWith('Connection attempt 2 failed: Dummy Error');
+      expect(mockLogger.warn).toHaveBeenCalledWith('Retry 2/3 to connect after 10ms...');
     });
 
     it('should log a warning when multiple debugger instances are detected', async () => {
@@ -151,8 +154,9 @@ describe('CdpBridge', () => {
       ];
       const client = new CdpBridge();
       await expect(client.connect()).resolves.toBeUndefined();
-      expect(log.warn).toHaveBeenCalledTimes(1);
-      expect(log.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
+      const mockLogger = vi.mocked(createLogger)();
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenLastCalledWith(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     });
 
     it('should throw an error when no debugger instances are found', async () => {

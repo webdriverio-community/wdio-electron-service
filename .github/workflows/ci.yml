@@ -11,7 +11,6 @@ on:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -37,6 +36,7 @@ jobs:
     name: Unit [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
+      fail-fast: false
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -52,6 +52,7 @@ jobs:
     name: Package [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
+      fail-fast: false
       matrix:
         # Test on all major operating systems to ensure cross-platform compatibility
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -67,6 +68,7 @@ jobs:
     name: Build [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}]
     needs: [build, lint]
     strategy:
+      fail-fast: false
       matrix:
         os: ['windows-latest', 'macos-latest']
     uses: ./.github/workflows/_ci-build.reusable.yml
@@ -82,6 +84,7 @@ jobs:
     name: E2E [${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'windows-latest' && 'Windows' || 'macOS' }}] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build]
     strategy:
+      fail-fast: false
       matrix:
         # Test across all major operating systems
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -114,6 +117,7 @@ jobs:
     name: E2E [macOS-U] - ${{ matrix.scenario }}${{ matrix.type != '*' && format(' ({0})', matrix.type) || '' }}
     needs: [build]
     strategy:
+      fail-fast: false
       matrix:
         # Test both application scenarios
         scenario: ['forge', 'builder']

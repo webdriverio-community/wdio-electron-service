@@ -31,10 +31,17 @@
     "copyright": "goosewobbler",
     "productName": "example-builder-cjs",
     "files": ["./dist/*"],
+    "mac": {
+      "target": "dir",
+      "identity": null
+    },
     "linux": {
       "executableName": "example-builder-cjs",
       "category": "Utility",
       "target": ["AppImage"]
+    },
+    "win": {
+      "target": "dir"
     }
   }
 }

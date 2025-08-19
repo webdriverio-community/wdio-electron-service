@@ -180,6 +180,8 @@ if (envContext.isMultiremote) {
 // Create log directory
 const logDir = join(__dirname, 'logs', `${envContext.testType}-${envContext.appDirName}`);
 
+// Using pnpm override to ensure the runner resolves the workspace service by name
+
 // Export the configuration object directly
 export const config: WdioElectronConfig = {
   runner: 'local',

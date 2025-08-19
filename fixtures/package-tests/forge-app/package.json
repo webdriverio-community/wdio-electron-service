@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "pnpx shx rm -rf dist dist-electron node_modules",
     "dev": "electron-vite dev",
-    "build": "electron-vite build && electron-forge make",
+    "build": "electron-vite build && electron-forge package",
     "preview": "electron-vite preview",
     "start": "electron .",
     "test": "cross-env DEBUG=wdio-electron-service xvfb-maybe wdio run wdio.conf.ts",
@@ -30,7 +30,7 @@
     "@wdio/spec-reporter": "^9.16.2",
     "cross-env": "^10.0.0",
     "electron": "37.2.6",
-    "electron-vite": "beta",
+    "electron-vite": "^4.0.0",
     "typescript": "^5.9.2",
     "wdio-electron-service": "latest",
     "xvfb-maybe": "^0.2.1"
@@ -43,7 +43,8 @@
       "outDir": "dist-electron",
       "packagerConfig": {
         "name": "Forge App Example",
-        "executableName": "forge-app-example"
+        "executableName": "forge-app-example",
+        "osxSign": false
       },
       "makers": [
         {

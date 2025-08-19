@@ -2,8 +2,10 @@ import path from 'node:path';
 import type { ForgeBuildInfo, ForgeConfig } from '@wdio/electron-types';
 import type { NormalizedReadResult } from 'read-package-up';
 import { APP_NAME_DETECTION_ERROR } from '../constants.js';
-import log from '../log.js';
+import { createLogger } from '../log.js';
 import { readConfig } from './read.js';
+
+const log = createLogger('config');
 
 function forgeBuildInfo(forgeConfig: ForgeConfig, pkg: NormalizedReadResult): ForgeBuildInfo {
   log.info(`Forge configuration detected: \n${JSON.stringify(forgeConfig)}`);

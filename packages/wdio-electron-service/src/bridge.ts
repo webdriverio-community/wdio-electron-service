@@ -1,6 +1,9 @@
 import os from 'node:os';
 import { CdpBridge } from '@wdio/cdp-bridge';
-import { log } from '@wdio/electron-utils';
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('bridge');
+
 import { SevereServiceError } from 'webdriverio';
 
 export const getDebuggerEndpoint = (capabilities: WebdriverIO.Capabilities) => {

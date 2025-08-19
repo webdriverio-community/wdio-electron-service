@@ -36,10 +36,17 @@
     "copyright": "goosewobbler",
     "productName": "example-builder-esm",
     "files": ["./dist/*"],
+    "mac": {
+      "target": "dir",
+      "identity": null
+    },
     "linux": {
       "executableName": "example-builder-esm",
       "category": "Utility",
       "target": ["AppImage"]
+    },
+    "win": {
+      "target": "dir"
     }
   }
 }

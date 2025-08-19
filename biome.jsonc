@@ -79,8 +79,9 @@
       "includes": ["fixtures/e2e-apps/*-cjs/**/*.ts"],
       "linter": { "rules": { "style": { "noCommonJs": "off" } } }
     },
+    // Unit & Integration tests
     {
-      "includes": ["**/*.spec.ts"],
+      "includes": ["**/*.spec.ts", "**/mocks/*.ts"],
       "linter": {
         "rules": {
           "suspicious": {

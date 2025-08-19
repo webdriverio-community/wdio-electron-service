@@ -34,6 +34,7 @@
     "graph:e2e:mac-universal": "tsx ./scripts/create-task-graph.ts ./.github/assets/e2e-graph-mac-universal.png test:e2e-mac-universal:builder-cjs test:e2e-mac-universal:builder-esm test:e2e-mac-universal:forge-cjs test:e2e-mac-universal:forge-esm",
     "lint": "biome check --formatter-enabled=false --linter-enabled=true . && cross-env eslint --cache \"**/*.{j,mj,cj,t}s\"",
     "lint:fix": "biome check --write --formatter-enabled=false --linter-enabled=true . && cross-env eslint --cache --fix \"**/*.{j,mj,cj,t}s\"",
+    "lint:fix:unsafe": "biome check --write --formatter-enabled=false --linter-enabled=true --unsafe . && cross-env eslint --cache --fix \"**/*.{j,mj,cj,t}s\"",
     "prepare": "husky",
     "release": "turbo run release --filter=wdio-electron-service --filter=@wdio* --only --concurrency=1",
     "typecheck": "turbo run typecheck",
@@ -41,7 +42,7 @@
     "test:unit": "turbo run test:unit",
     "test:integration": "turbo run test:integration",
     "test:package": "pnpm dlx cross-env DEBUG=wdio-electron-service tsx ./scripts/test-package.ts",
-    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm run ci",
+    "test:e2e-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && pnpm build && pnpm run ci",
     "test:e2e-mac-universal-local": "pnpm dlx cross-env DEBUG=wdio-electron-service pnpm clean && pnpm i && turbo run build && test:e2e:mac-universal",
     "e2e": "turbo run test --filter=@repo/e2e --only",
     "e2e:builder": "turbo run test:builder --filter=@repo/e2e --only",
@@ -87,7 +88,10 @@
     "**/*.{yml,md,json}": ["biome format --write ."]
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["edgedriver", "electron", "esbuild", "geckodriver"]
+    "onlyBuiltDependencies": ["edgedriver", "electron", "esbuild", "geckodriver"],
+    "overrides": {
+      "wdio-electron-service": "link:packages/wdio-electron-service"
+    }
   },
   "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184",
   "version": "9.0.0-next.3"

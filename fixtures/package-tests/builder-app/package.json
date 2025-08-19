@@ -24,7 +24,7 @@
     "cross-env": "^10.0.0",
     "electron": "37.2.6",
     "electron-builder": "^26.0.12",
-    "electron-vite": "beta",
+    "electron-vite": "^4.0.0",
     "typescript": "^5.9.2",
     "wdio-electron-service": "latest",
     "xvfb-maybe": "^0.2.1"
@@ -42,15 +42,11 @@
     "files": ["dist/**/*", "package.json"],
     "mac": {
       "category": "public.app-category.utilities",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
-        }
-      ]
+      "target": "dir",
+      "identity": null
     },
     "win": {
-      "target": "nsis"
+      "target": "dir"
     },
     "linux": {
       "target": "AppImage"

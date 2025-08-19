@@ -1,7 +1,9 @@
 import { constants as fsConstants } from 'node:fs';
 import fs from 'node:fs/promises';
 import type { PathValidationAttempt, PathValidationError, PathValidationResult } from '@wdio/electron-types';
-import log from './log.js';
+import { createLogger } from './log.js';
+
+const log = createLogger('utils');
 
 function getValidationError(error: Error, path: string): PathValidationError {
   const nodeError = error as NodeJS.ErrnoException;

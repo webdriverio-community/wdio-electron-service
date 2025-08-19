@@ -8,10 +8,9 @@ import {
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from '../src/constants.js';
-import log from '../src/log.js';
 import { getFixturePackageJson } from './testUtils.js';
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 vi.mock('../src/config/builder', () => {
   return {
@@ -85,9 +84,11 @@ describe('getAppBuildInfo()', () => {
       const result = await getAppBuildInfo(pkg);
 
       expect(result).toStrictEqual(forgeConfig);
-      expect(log.warn).toHaveBeenCalledTimes(2);
-      expect(log.warn).toHaveBeenNthCalledWith(1, MULTIPLE_BUILD_TOOL_WARNING.DESCRIPTION);
-      expect(log.warn).toHaveBeenNthCalledWith(2, MULTIPLE_BUILD_TOOL_WARNING.SUGGESTION);
+      const { createLogger } = await import('./__mock__/log.js');
+      const mockLogger = createLogger();
+      expect(mockLogger.warn).toHaveBeenCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(1, MULTIPLE_BUILD_TOOL_WARNING.DESCRIPTION);
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(2, MULTIPLE_BUILD_TOOL_WARNING.SUGGESTION);
     });
 
     it('should throw an error when no build tools are found', async () => {

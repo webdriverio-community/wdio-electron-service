@@ -1,5 +1,8 @@
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
-import { log } from '@wdio/electron-utils';
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('service');
+
 import type { Options } from '@wdio/types';
 import { remote } from 'webdriverio';
 import ElectronLaunchService from './launcher.js';

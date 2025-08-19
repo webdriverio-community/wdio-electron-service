@@ -8,7 +8,9 @@ import {
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from './constants.js';
-import log from './log.js';
+import { createLogger } from './log.js';
+
+const log = createLogger('config');
 
 /**
  * Determine build information about the Electron application

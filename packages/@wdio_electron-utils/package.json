@@ -21,19 +21,6 @@
         }
       },
       "./dist/cjs/index.js"
-    ],
-    "./log": [
-      {
-        "import": {
-          "types": "./dist/esm/log.d.ts",
-          "default": "./dist/esm/log.js"
-        },
-        "require": {
-          "types": "./dist/cjs/log.d.ts",
-          "default": "./dist/cjs/log.js"
-        }
-      },
-      "./dist/cjs/log.js"
     ]
   },
   "engines": {

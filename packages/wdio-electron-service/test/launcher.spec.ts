@@ -1,13 +1,12 @@
 import path from 'node:path';
 import type { BinaryPathResult, ElectronServiceOptions } from '@wdio/electron-types';
-import { getAppBuildInfo, getBinaryPath } from '@wdio/electron-utils';
-import log from '@wdio/electron-utils/log';
 import type { Capabilities, Options } from '@wdio/types';
 import getPort from 'get-port';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import ElectronLaunchService from '../src/launcher.js';
 import { mockProcessProperty, revertProcessProperty } from './helpers.js';
+import { getAppBuildInfo, getBinaryPath, getElectronVersion, getMockLogger } from './mocks/electron-utils.js';
 
 let LaunchService: typeof ElectronLaunchService;
 let instance: ElectronLaunchService | undefined;
@@ -22,38 +21,43 @@ vi.mock('node:fs/promises', () => ({
     access: vi.fn().mockResolvedValue(undefined),
   },
 }));
-vi.mock('@wdio/electron-utils', async (importOriginal: () => Promise<Record<string, unknown>>) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    getBinaryPath: vi.fn().mockResolvedValue({
+vi.mock('@wdio/electron-utils', async () => {
+  const mockUtilsModule = await import('./mocks/electron-utils.js');
+
+  // Configure the specific mocks needed for launcher tests
+  mockUtilsModule.getBinaryPath.mockResolvedValue({
+    success: true,
+    binaryPath: 'workspace/my-test-app/dist/my-test-app',
+    pathGeneration: {
       success: true,
-      binaryPath: 'workspace/my-test-app/dist/my-test-app',
-      pathGeneration: {
-        success: true,
-        paths: ['workspace/my-test-app/dist/my-test-app'],
-        errors: [],
-      },
-      pathValidation: {
-        success: true,
-        validPath: 'workspace/my-test-app/dist/my-test-app',
-        attempts: [
-          {
-            path: 'workspace/my-test-app/dist/my-test-app',
-            valid: true,
-          },
-        ],
-      },
-    } as BinaryPathResult),
-    getAppBuildInfo: vi.fn().mockResolvedValue({
-      appName: 'my-test-app',
-      isForge: true,
-      config: {},
-    }),
-  };
+      paths: ['workspace/my-test-app/dist/my-test-app'],
+      errors: [],
+    },
+    pathValidation: {
+      success: true,
+      validPath: 'workspace/my-test-app/dist/my-test-app',
+      attempts: [
+        {
+          path: 'workspace/my-test-app/dist/my-test-app',
+          valid: true,
+        },
+      ],
+    },
+  } as BinaryPathResult);
+
+  mockUtilsModule.getAppBuildInfo.mockResolvedValue({
+    appName: 'my-test-app',
+    isForge: true,
+    config: {},
+  });
+
+  // Default getElectronVersion mock - returns a version >= 26 by default
+  mockUtilsModule.getElectronVersion.mockResolvedValue('30.0.0');
+
+  return mockUtilsModule;
 });
 
-vi.mock('@wdio/electron-utils/log');
+// Log mock is included in the main @wdio/electron-utils mock above
 
 vi.mock('get-port', async () => {
   return {
@@ -121,6 +125,9 @@ describe('Electron Launch Service', () => {
 
     describe('package scenarios', () => {
       it('should throw an error when the local Electron version is older than v26 and Chromedriver is not configured manually', async () => {
+        // Mock old electron version for this test
+        (getElectronVersion as Mock).mockResolvedValueOnce('25.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,
@@ -140,6 +147,9 @@ describe('Electron Launch Service', () => {
       });
 
       it('should not throw an error when the local Electron version is older than v26 and Chromedriver is configured manually', async () => {
+        // Mock old electron version for this test
+        (getElectronVersion as Mock).mockResolvedValueOnce('25.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,
@@ -218,7 +228,8 @@ describe('Electron Launch Service', () => {
           },
         ];
         await instance?.onPrepare({} as never, capabilities);
-        expect(log.warn).toHaveBeenLastCalledWith(
+        const mockLogger = getMockLogger('launcher');
+        expect(mockLogger?.warn).toHaveBeenLastCalledWith(
           'Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored',
         );
       });
@@ -394,6 +405,9 @@ describe('Electron Launch Service', () => {
       });
 
       it('should use the Electron version from the local package dependencies when browserVersion is not provided', async () => {
+        // Mock electron version that matches the expected chrome version
+        (getElectronVersion as Mock).mockResolvedValueOnce('26.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,
@@ -422,6 +436,9 @@ describe('Electron Launch Service', () => {
       });
 
       it('should use the Electron version from the nearest package dependencies when browserVersion is not provided', async () => {
+        // Mock electron version that matches the expected chrome version
+        (getElectronVersion as Mock).mockResolvedValueOnce('26.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,
@@ -450,6 +467,9 @@ describe('Electron Launch Service', () => {
       });
 
       it('should use the Electron version from the local package devDependencies when browserVersion is not provided', async () => {
+        // Mock electron version that matches the expected chrome version
+        (getElectronVersion as Mock).mockResolvedValueOnce('26.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,
@@ -478,6 +498,9 @@ describe('Electron Launch Service', () => {
       });
 
       it('should use the Electron version from the nearest package devDependencies when browserVersion is not provided', async () => {
+        // Mock electron version that matches the expected chrome version
+        (getElectronVersion as Mock).mockResolvedValueOnce('26.0.0');
+
         instance = new LaunchService(
           options,
           [] as never,

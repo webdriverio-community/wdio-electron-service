@@ -271,21 +271,64 @@ export class PackageAnalyzer {
   }
 
   /**
+   * Serialize node externals config with RegExp support
+   */
+  private serializeNodeExternalsConfig(config: Record<string, unknown>): string {
+    const serializeValue = (value: unknown): string => {
+      if (value instanceof RegExp) {
+        return value.toString();
+      }
+      if (Array.isArray(value)) {
+        const items = value.map((item) => serializeValue(item)).join(', ');
+        return `[${items}]`;
+      }
+      if (typeof value === 'string') {
+        return JSON.stringify(value);
+      }
+      return JSON.stringify(value);
+    };
+
+    const entries = Object.entries(config).map(([key, value]) => {
+      return `  ${JSON.stringify(key)}: ${serializeValue(value)}`;
+    });
+
+    return `{\n${entries.join(',\n')}\n}`;
+  }
+
+  /**
    * Create node externals plugin specification
    */
   private createNodeExternalsPlugin(config: BundlerConfig, format: 'esm' | 'cjs'): PluginSpec {
-    // Check if there are any specific externals config for this format
     const formatConfig = config[format];
-    const nodeExternalsConfig = (formatConfig as Partial<BundlerFormatConfig>)?.nodeExternals;
+    // Handle case where formatConfig might be boolean (for CJS)
+    const packagesToBundle =
+      (typeof formatConfig === 'object' ? (formatConfig as BundlerFormatConfig)?.bundle : undefined) || [];
+    const packagesToExternalize =
+      (typeof formatConfig === 'object' ? (formatConfig as BundlerFormatConfig)?.external : undefined) || [];
 
     let call = 'nodeExternals()';
     let options: Record<string, unknown> | undefined;
 
-    if (nodeExternalsConfig && Object.keys(nodeExternalsConfig).length > 0) {
-      const configStr = JSON.stringify(nodeExternalsConfig, null, 2)
-        .split('\n')
-        .map((line, index) => (index === 0 ? line : `  ${line}`))
-        .join('\n');
+    if (packagesToBundle.length > 0 || packagesToExternalize.length > 0) {
+      const nodeExternalsConfig: Record<string, unknown> = {};
+
+      if (packagesToBundle.length > 0) {
+        nodeExternalsConfig.exclude = packagesToBundle;
+      }
+
+      if (packagesToExternalize.length > 0) {
+        // Convert string patterns to RegExp objects for node externals
+        const includePatterns = packagesToExternalize.map((pattern) => {
+          if (pattern.startsWith('^') && pattern.endsWith('$')) {
+            return new RegExp(pattern);
+          }
+          return pattern;
+        });
+        nodeExternalsConfig.include = includePatterns;
+      }
+
+      // Custom serialization to handle RegExp objects
+      const configStr = this.serializeNodeExternalsConfig(nodeExternalsConfig);
       call = `nodeExternals(${configStr})`;
       options = nodeExternalsConfig;
     }
