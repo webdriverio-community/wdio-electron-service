@@ -11,16 +11,8 @@ export async function execWithEnv(
 ): Promise<{ stdout: string; stderr: string; code: number }> {
   return new Promise((resolve, reject) => {
     const { cwd = process.cwd(), timeout = 120000 } = options;
-
-    // For Linux, wrap WDIO commands with xvfb-maybe for virtual display support
-    let finalCommand = command;
-    if (process.platform === 'linux' && command.includes('wdio run')) {
-      finalCommand = `xvfb-maybe ${command}`;
-      console.log(`🔍 Linux detected: wrapping WDIO command with xvfb-maybe: ${finalCommand}`);
-    }
-
     // Split command into parts for spawn
-    const parts = finalCommand.split(' ');
+    const parts = command.split(' ');
     const cmd = parts[0];
     const args = parts.slice(1);
 
@@ -103,8 +95,8 @@ export async function execWdio(
       if (
         result.code !== 0 &&
         process.platform === 'linux' &&
-        (result.stderr.includes('xvfb-run: error: Xvfb failed to start') ||
-          result.stderr.includes('Xvfb failed to start'))
+        (result.stderr.includes('Xvfb failed to start') ||
+          result.stderr.includes('Cannot establish any listening sockets'))
       ) {
         console.log(`❌ Attempt ${attempt}/${maxRetries} failed with xvfb error`);
         console.log(`🔍 Error: ${result.stderr}`);
