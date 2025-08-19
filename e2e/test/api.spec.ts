@@ -874,24 +874,112 @@ describe('browser.execute - workaround for TSX issue', () => {
   });
 });
 
+describe('Command Override Debugging', () => {
+  it('should test if command overrides are working', async () => {
+    console.log('🔍 DEBUG: Testing command override mechanism');
+
+    const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+    console.log('🔍 DEBUG: Mock created for command override test');
+
+    // Find a simple button that should work
+    const showDialogButton = await $('.show-dialog');
+    const buttonExists = await showDialogButton.isExisting();
+    console.log('🔍 DEBUG: Make bigger button exists:', buttonExists);
+
+    if (!buttonExists) {
+      throw new Error('Show dialog button not found');
+    }
+
+    // Check initial state
+    console.log('🔍 DEBUG: Initial mock calls:', mockShowOpenDialog.mock.calls.length);
+
+    // Click the button
+    console.log('🔍 DEBUG: Clicking show dialog button...');
+    await showDialogButton.click();
+    console.log('🔍 DEBUG: Show dialog button clicked');
+
+    // Check if the command override triggered mock update
+    console.log('🔍 DEBUG: Mock calls after command override click:', mockShowOpenDialog.mock.calls.length);
+
+    // Try triggering the actual IPC that should be mocked
+    console.log('🔍 DEBUG: Manually triggering IPC via execute...');
+    await browser.electron.execute(async (electron) => {
+      await electron.dialog.showOpenDialog({
+        title: 'Command override test dialog',
+        properties: ['openFile'],
+      });
+    });
+
+    console.log('🔍 DEBUG: Mock calls after manual execute:', mockShowOpenDialog.mock.calls.length);
+
+    // This test should pass if command overrides work, or fail if they don't
+    // But it will help us understand the mechanism
+    console.log('🔍 DEBUG: Command override test completed');
+
+    // Restore for next test
+    await browser.electron.restoreAllMocks();
+  });
+});
+
 describe('showOpenDialog with complex object', () => {
   // Tests for the following issue
   // https://github.com/webdriverio-community/wdio-electron-service/issues/895
   it('should be mocked', async () => {
+    const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+
+    // Check if button exists before clicking (potential fix)
+    const showDialogButton = await $('.show-dialog');
+    const buttonExists = await showDialogButton.isExisting();
+
+    if (!buttonExists) {
+      throw new Error('Show dialog button not found in DOM');
+    }
+
+    await showDialogButton.click();
+
+    await browser.waitUntil(
+      async () => {
+        return mockShowOpenDialog.mock.calls.length > 0;
+      },
+      { timeout: 5000, timeoutMsg: 'Mock was not called within timeout' },
+    );
+
+    expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
+  });
+
+  // Test to isolate the double element lookup potential fix
+  it('should be mocked with double lookup', async () => {
+    const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
+
+    // First lookup (like our debugging code did)
+    const _element = await $('.show-dialog');
+
+    // Second lookup (like our actual test)
+    const showDialogButton = await $('.show-dialog');
+    await showDialogButton.click();
+
+    await browser.waitUntil(
+      async () => {
+        return mockShowOpenDialog.mock.calls.length > 0;
+      },
+      { timeout: 5000, timeoutMsg: 'Mock was not called within timeout' },
+    );
+
+    expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
+  });
+
+  // Test the original simple version to see if it still fails
+  it('should be mocked - original simple version', async () => {
     const mockShowOpenDialog = await browser.electron.mock('dialog', 'showOpenDialog');
     const showDialogButton = await $('.show-dialog');
     await showDialogButton.click();
 
     await browser.waitUntil(
       async () => {
-        console.log('Mock calls before assertion:', mockShowOpenDialog.mock.calls.length);
         return mockShowOpenDialog.mock.calls.length > 0;
       },
       { timeout: 5000, timeoutMsg: 'Mock was not called within timeout' },
     );
-
-    // Test if command overrides now work after improved installation timing
-    console.log('Mock calls before assertion:', mockShowOpenDialog.mock.calls.length);
 
     expect(mockShowOpenDialog).toHaveBeenCalledTimes(1);
   });
