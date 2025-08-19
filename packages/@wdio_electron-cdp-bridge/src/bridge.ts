@@ -94,7 +94,7 @@ export class CdpBridge extends EventEmitter {
         }
 
         retries++;
-        log.warn(`Retry ${retries}/${maxRetryCount} to connect after ${waitInterval}ms...`);
+        log.debug(`Retry ${retries}/${maxRetryCount} in ${waitInterval}ms`);
         await new Promise((resolve) => setTimeout(resolve, waitInterval));
       }
     }
@@ -166,7 +166,7 @@ export class CdpBridge extends EventEmitter {
 
   #setHandlers(ws: WebSocket) {
     ws.on('open', () => {
-      log.debug(`Connected: ${this.#wsUrl}`);
+      log.debug(`Connected to ${this.#wsUrl}`);
       this.#promises.get(CONNECT_PROMISE_ID)?.resolve();
       this.#promises.delete(CONNECT_PROMISE_ID);
     });
@@ -175,13 +175,13 @@ export class CdpBridge extends EventEmitter {
       try {
         this.#messageHandler(rowMessage.toString());
       } catch (error) {
-        log.error('Message handling error.');
+        log.error('Message handling error');
         return await this.#errorHandler(error);
       }
     });
 
     ws.on('error', async (error) => {
-      log.error('WebSocket error.');
+      log.error('WebSocket error');
       return await this.#errorHandler(error);
     });
 
@@ -238,7 +238,7 @@ export class CdpBridge extends EventEmitter {
     } else if (list.length > 1) {
       log.warn(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     }
-    log.debug(`Detected the debugger URL: ${list[0].webSocketDebuggerUrl}`);
+    log.debug(`Detected debugger URL: ${list[0].webSocketDebuggerUrl}`);
     return list[0].webSocketDebuggerUrl;
   }
 
@@ -248,7 +248,7 @@ export class CdpBridge extends EventEmitter {
     }
     return new Promise<void>((resolve) => {
       if (this.#ws && this.#ws.readyState !== WebSocket.CLOSED) {
-        log.trace(`Trying to close: ${this.#wsUrl}`);
+        log.trace(`Closing connection: ${this.#wsUrl}`);
         this.#ws.once('close', () => {
           this.#ws = null;
           resolve();
