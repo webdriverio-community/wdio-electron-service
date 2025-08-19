@@ -3,6 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import url from 'node:url';
 import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
+import { xvfb } from '@wdio/xvfb';
 import type * as Electron from 'electron';
 
 import type { NormalizedPackageJson } from 'read-package-up';
@@ -57,6 +58,12 @@ if (isBinary) {
       appArgs: ['foo', 'bar=baz'],
     },
   };
+}
+
+// Initialize xvfb if running on Linux
+if (process.platform === 'linux') {
+  console.log('🔍 Linux detected: initializing xvfb for standalone tests...');
+  await xvfb.init();
 }
 
 console.log('🔍 Debug: Starting session with options:', JSON.stringify(sessionOptions, null, 2));
