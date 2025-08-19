@@ -37,7 +37,8 @@
     "productName": "example-builder-esm",
     "files": ["./dist/*"],
     "mac": {
-      "target": "dir"
+      "target": "dir",
+      "identity": null
     },
     "linux": {
       "executableName": "example-builder-esm",

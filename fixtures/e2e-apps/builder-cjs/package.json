@@ -32,7 +32,8 @@
     "productName": "example-builder-cjs",
     "files": ["./dist/*"],
     "mac": {
-      "target": "dir"
+      "target": "dir",
+      "identity": null
     },
     "linux": {
       "executableName": "example-builder-cjs",

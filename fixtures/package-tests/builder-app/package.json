@@ -42,7 +42,8 @@
     "files": ["dist/**/*", "package.json"],
     "mac": {
       "category": "public.app-category.utilities",
-      "target": "dir"
+      "target": "dir",
+      "identity": null
     },
     "win": {
       "target": "dir"
