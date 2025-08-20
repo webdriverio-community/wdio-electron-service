@@ -125,11 +125,8 @@ This is because WDIO uses Chrome for Testing to download Chromedriver, which onl
 **[Window Management](./docs/window-management.md)** \
 **[Standalone Mode](./docs/standalone-mode.md)** \
 **[Development](./docs/development.md)** \
-**[Common Issues & Debugging](./docs/common-issues-debugging.md)**
-
-Migration:
-
-- **[v8 → v9](./docs/migration/v8-to-v9.md)**
+**[Common Issues & Debugging](./docs/common-issues-debugging.md)** \
+**[Migration: v8 → v9](./docs/migration/v8-to-v9.md)**
 
 ## Development
 
