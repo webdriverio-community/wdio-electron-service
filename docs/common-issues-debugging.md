@@ -29,7 +29,7 @@ See this [WDIO documentation page](https://webdriver.io/docs/headless-and-xvfb) 
 
 ### Failed to create session. session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
 
-This is another obscure Chromium error which, despite the message, is usually not fixed by providing a unique `--user-data-dir` value.  In the Electron context this usually occurs when the Electron app crashes during or shortly after initialization.  WDIO / ChromeDriver attempts to reconnect, starting a new electron instance, which attempts to use the same user-data-dir path.  Whilst there may be other causes, on Linux this is often fixed with xvfb.
+This is another obscure Chromium error which, despite the message, is usually not fixed by providing a unique `--user-data-dir` value. In the Electron context this usually occurs when the Electron app crashes during or shortly after initialization. WDIO / ChromeDriver attempts to reconnect, starting a new electron instance, which attempts to use the same user-data-dir path. Whilst there may be other causes, on Linux this is often fixed with xvfb.
 
 See this [WDIO documentation page](https://webdriver.io/docs/headless-and-xvfb) for instructions on how to set up xvfb.
 
@@ -41,3 +41,55 @@ Since it is useful for this and other issues, the service automatically adds `--
 
 Another workaround is to run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
 This command requires root privileges; if necessary, run it as the root user or use the `sudo` command.
+
+### TypeError: logger is not a function
+
+This error occurs when importing the `browser` object directly at the top level of test files:
+
+```typescript
+// ❌ This may cause "TypeError: logger is not a function"
+import { browser } from "wdio-electron-service";
+
+describe("My Tests", () => {
+  it("should work", async () => {
+    await browser.electron.execute(/* ... */);
+  });
+});
+```
+
+The service's internal logger and other dependencies aren't fully initialized when the browser object is imported during the test file loading phase, before WebDriverIO services have completed their initialization.
+
+The solution is to use dynamic import within a `before` hook to ensure the service is fully initialized:
+
+```typescript
+// ✅ Correct approach - dynamic import in before hook
+import type { Mock } from "@vitest/spy";
+import { $, expect } from "@wdio/globals";
+import type { browser as WdioBrowser } from "wdio-electron-service";
+
+let browser: typeof WdioBrowser;
+
+describe("My Tests", () => {
+  before(async () => {
+    ({ browser } = await import("wdio-electron-service"));
+  });
+
+  it("should work", async () => {
+    await browser.electron.execute(/* ... */);
+  });
+});
+```
+
+**Note for Service Contributors:** If you're working within the wdio-electron-service repository itself, you can use pnpm overrides to link to the workspace version:
+
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "wdio-electron-service": "workspace:*"
+    }
+  }
+}
+```
+
+This allows direct imports to work reliably within the service's own repository, but this approach only applies when developing the service itself.
