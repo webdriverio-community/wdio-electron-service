@@ -21,6 +21,8 @@ const log = createLogger('service');
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
+type ElementCommands = 'click' | 'doubleClick' | 'setValue' | 'clearValue';
+
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {
   constructor(
     globalOptions: ElectronServiceGlobalOptions = {},
@@ -111,13 +113,15 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
       return;
     }
     const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
-    commandsToOverride.forEach((commandName) => this.overrideElementCommand(commandName));
+    commandsToOverride.forEach((commandName) => {
+      this.overrideElementCommand(commandName as ElementCommands);
+    });
   }
 
   /**
    * Override an element-level command to add mock update after execution
    */
-  private overrideElementCommand(commandName: string) {
+  private overrideElementCommand<T extends ElementCommands>(commandName: T) {
     if (!this.browser) {
       return;
     }
@@ -131,7 +135,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
         await updateAllMocks();
         return result;
       };
-      this.browser.overwriteCommand(commandName as any, testOverride, true);
+      (this.browser as any).overwriteCommand(commandName, testOverride, true);
     } catch {
       // ignore
     }

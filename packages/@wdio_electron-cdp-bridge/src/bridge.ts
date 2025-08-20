@@ -264,7 +264,9 @@ export class CdpBridge extends EventEmitter {
   #rejectAllPromises(error?: Error) {
     const message = error ? `${ERROR_MESSAGE.ERROR_INTERNAL} ${error.message}` : ERROR_MESSAGE.CONNECTION_CLOSED;
     const reason = new Error(message);
-    this.#promises.forEach((handler) => handler.reject(reason));
+    this.#promises.forEach((handler) => {
+      handler.reject(reason);
+    });
     this.#promises.clear();
   }
 }

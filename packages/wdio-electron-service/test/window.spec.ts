@@ -1,7 +1,6 @@
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from '../src/window.js';
-import { getMockLogger } from './mocks/electron-utils.js';
 
 vi.mock('@wdio/electron-utils', () => import('./mocks/electron-utils.js'));
 

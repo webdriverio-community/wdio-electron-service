@@ -180,7 +180,9 @@ export class StatusBar {
     // Currently running tests
     if (inProgress.length > 0) {
       console.log(`${ANSI.fg.cyan}${ANSI.bright}🔄 Currently running:${ANSI.reset}`);
-      inProgress.forEach((test) => console.log(`  • ${test}`));
+      inProgress.forEach((test) => {
+        console.log(`  • ${test}`);
+      });
     } else {
       console.log(`${ANSI.fg.cyan}${ANSI.bright}🔄 Currently running: ${ANSI.reset}No tests currently running`);
     }

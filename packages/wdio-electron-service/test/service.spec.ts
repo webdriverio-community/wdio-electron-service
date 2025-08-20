@@ -134,7 +134,7 @@ describe('Electron Worker Service', () => {
       const oc = vi.mocked((browser as any).overwriteCommand);
       const calls = oc.mock.calls;
       // overwriteCommand signature: (name, wrapper, isElement?)
-      const overridden = calls.map((c) => ({ name: c[0], isElement: c[2] }));
+      const overridden = calls.map((c: unknown[]) => ({ name: c[0], isElement: c[2] }));
       expect(overridden).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: 'click', isElement: true }),
@@ -156,7 +156,7 @@ describe('Electron Worker Service', () => {
 
       // Find the override for 'click' and invoke it
       const oc = vi.mocked((browser as any).overwriteCommand);
-      const clickCall = oc.mock.calls.find((c) => c[0] === 'click');
+      const clickCall = oc.mock.calls.find((c: unknown[]) => c[0] === 'click');
       expect(clickCall).toBeDefined();
       const overrideFn = clickCall?.[1] as unknown as (
         this: WebdriverIO.Element,
@@ -165,7 +165,7 @@ describe('Electron Worker Service', () => {
       ) => Promise<unknown>;
 
       const original = vi.fn().mockResolvedValue('ok');
-      await overrideFn!.call({} as unknown as WebdriverIO.Element, original);
+      await overrideFn?.call({} as unknown as WebdriverIO.Element, original);
 
       expect(mockObj.update).toHaveBeenCalledTimes(1);
       expect(original).toHaveBeenCalled();

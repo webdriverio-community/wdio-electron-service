@@ -122,7 +122,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        if (Number.parseInt(electronVersion.split('.')[0]) < 26 && !cap['wdio:chromedriverOptions']?.binary) {
+        if (Number.parseInt(electronVersion.split('.')[0], 10) < 26 && !cap['wdio:chromedriverOptions']?.binary) {
           const invalidElectronVersionError = new SevereServiceError(
             'Electron version must be 26 or higher for auto-configuration of Chromedriver.  If you want to use an older version of Electron, you must configure Chromedriver manually using the wdio:chromedriverOptions capability',
           );
@@ -162,7 +162,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
                 const warnings = binaryResult.pathGeneration.errors.filter(
                   (e: PathGenerationError) => e.type === 'CONFIG_WARNING',
                 );
-                warnings.forEach((warning: PathGenerationError) => log.warn(warning.message));
+                warnings.forEach((warning: PathGenerationError) => {
+                  log.warn(warning.message);
+                });
               } else {
                 // Generate comprehensive error message based on what failed
                 const errorMessage = generateBinaryPathErrorMessage(binaryResult, appBuildInfo);
