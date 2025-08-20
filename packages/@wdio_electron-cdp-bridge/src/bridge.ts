@@ -1,9 +1,10 @@
 import EventEmitter from 'node:events';
+import { createLogger } from '@wdio/electron-utils';
 
+const log = createLogger('bridge');
+
+import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 import WebSocket from 'ws';
-import log from '@wdio/electron-utils/log';
-
-import { DevTool, type DevToolOptions } from './devTool.js';
 import {
   DEFAULT_HOSTNAME,
   DEFAULT_MAX_RETRY_COUNT,
@@ -12,8 +13,7 @@ import {
   ERROR_MESSAGE,
   REQUEST_TIMEOUT,
 } from './constants.js';
-
-import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
+import { DevTool, type DevToolOptions } from './devTool.js';
 
 type Methods = keyof ProtocolMapping.Commands;
 
@@ -26,7 +26,8 @@ type MethodReturn<T extends Methods> = ProtocolMapping.Commands[T]['returnType']
 type SendParams<T extends Methods> = MethodPrams<T> extends [] ? [] : [MethodPrams<T>[number]];
 
 type PromiseHandlers = {
-  resolve: (value?: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: resolve callback needs flexible type
+  resolve: (value?: any) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -58,7 +59,7 @@ export class CdpBridge extends EventEmitter {
   #wsUrl: string | undefined = undefined;
   #ws: WebSocket | null = null;
   #promises = new Map<number, PromiseHandlers>();
-  #commandId = CONNECT_PROMISE_ID + 1;
+  #commandId = CONNECT_PROMISE_ID;
 
   constructor(options?: CdpBridgeOptions) {
     super();
@@ -93,7 +94,7 @@ export class CdpBridge extends EventEmitter {
         }
 
         retries++;
-        log.warn(`Retry ${retries}/${maxRetryCount} to connect after ${waitInterval}ms...`);
+        log.debug(`Retry ${retries}/${maxRetryCount} in ${waitInterval}ms`);
         await new Promise((resolve) => setTimeout(resolve, waitInterval));
       }
     }
@@ -132,8 +133,10 @@ export class CdpBridge extends EventEmitter {
   }
 
   send<T extends Methods>(method: T, ...params: SendParams<T>): Promise<MethodReturn<T>> {
+    this.#commandId = this.#commandId + 1;
+    const messageId = this.#commandId;
     const message = {
-      id: this.#commandId++,
+      id: messageId,
       method: method,
       params: params[0] || {},
     };
@@ -163,7 +166,7 @@ export class CdpBridge extends EventEmitter {
 
   #setHandlers(ws: WebSocket) {
     ws.on('open', () => {
-      log.debug(`Connected: ${this.#wsUrl}`);
+      log.debug(`Connected to ${this.#wsUrl}`);
       this.#promises.get(CONNECT_PROMISE_ID)?.resolve();
       this.#promises.delete(CONNECT_PROMISE_ID);
     });
@@ -172,13 +175,13 @@ export class CdpBridge extends EventEmitter {
       try {
         this.#messageHandler(rowMessage.toString());
       } catch (error) {
-        log.error('Message handling error.');
+        log.error('Message handling error');
         return await this.#errorHandler(error);
       }
     });
 
     ws.on('error', async (error) => {
-      log.error('WebSocket error.');
+      log.error('WebSocket error');
       return await this.#errorHandler(error);
     });
 
@@ -235,7 +238,7 @@ export class CdpBridge extends EventEmitter {
     } else if (list.length > 1) {
       log.warn(ERROR_MESSAGE.DEBUGGER_FOUND_MULTIPLE);
     }
-    log.debug(`Detected the debugger URL: ${list[0].webSocketDebuggerUrl}`);
+    log.debug(`Detected debugger URL: ${list[0].webSocketDebuggerUrl}`);
     return list[0].webSocketDebuggerUrl;
   }
 
@@ -245,7 +248,7 @@ export class CdpBridge extends EventEmitter {
     }
     return new Promise<void>((resolve) => {
       if (this.#ws && this.#ws.readyState !== WebSocket.CLOSED) {
-        log.trace(`Trying to close: ${this.#wsUrl}`);
+        log.trace(`Closing connection: ${this.#wsUrl}`);
         this.#ws.once('close', () => {
           this.#ws = null;
           resolve();
@@ -261,7 +264,9 @@ export class CdpBridge extends EventEmitter {
   #rejectAllPromises(error?: Error) {
     const message = error ? `${ERROR_MESSAGE.ERROR_INTERNAL} ${error.message}` : ERROR_MESSAGE.CONNECTION_CLOSED;
     const reason = new Error(message);
-    this.#promises.forEach((handler) => handler.reject(reason));
+    this.#promises.forEach((handler) => {
+      handler.reject(reason);
+    });
     this.#promises.clear();
   }
 }

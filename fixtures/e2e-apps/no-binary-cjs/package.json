@@ -1,0 +1,27 @@
+{
+  "name": "example-no-binary-cjs",
+  "version": "0.0.0",
+  "main": "dist/main.js",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc && rollup -c rollup.config.mjs && pnpx shx cp dist/main.bundle.js dist/main.js && pnpx shx cp ./src/index.html ./dist && pnpx shx cp ./src/splash.html ./dist",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules ./wdio-logs",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/node": "^24.3.0",
+    "@wdio/cli": "catalog:default",
+    "@wdio/globals": "catalog:default",
+    "@wdio/local-runner": "catalog:default",
+    "@wdio/mocha-framework": "catalog:default",
+    "electron": "catalog:default",
+    "rollup": "^4.46.3",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "webdriverio": "catalog:default"
+  }
+}

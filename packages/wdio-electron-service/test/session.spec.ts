@@ -1,4 +1,4 @@
-import { describe, it, vi, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { init } from '../src/session.js';
 
@@ -9,7 +9,6 @@ const beforeMock = vi.fn();
 
 vi.mock('../src/service.js', () => ({
   default: class MockElectronWorkerService {
-    constructor() {}
     async before(...args: unknown[]) {
       beforeMock(...args);
     }
@@ -17,7 +16,6 @@ vi.mock('../src/service.js', () => ({
 }));
 vi.mock('../src/launcher.js', () => ({
   default: class MockElectronLaunchService {
-    constructor() {}
     async onPrepare(...args: unknown[]) {
       onPrepareMock(...args);
     }
@@ -26,7 +24,9 @@ vi.mock('../src/launcher.js', () => ({
     }
   },
 }));
-vi.mock('webdriverio', () => ({ remote: async () => Promise.resolve(browserMock) }));
+vi.mock('webdriverio', () => ({
+  remote: async () => Promise.resolve(browserMock),
+}));
 
 describe('Session Management', () => {
   describe('init()', () => {
@@ -40,8 +40,8 @@ describe('Session Management', () => {
 
     it('should call onPrepare with the expected parameters', async () => {
       const expectedCaps = {
-        'browserName': 'electron',
-        'browserVersion': '99.9.9',
+        browserName: 'electron',
+        browserVersion: '99.9.9',
         'wdio:electronServiceOptions': {
           appBinaryPath: '/path/to/binary',
         },
@@ -58,12 +58,20 @@ describe('Session Management', () => {
     });
 
     it('should call onPrepare with the expected parameters when a rootDir is specified', async () => {
-      await init([{ 'browserName': 'electron', 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }], {
-        rootDir: '/path/to/root',
-      });
+      await init(
+        [
+          {
+            browserName: 'electron',
+            'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' },
+          },
+        ],
+        {
+          rootDir: '/path/to/root',
+        },
+      );
       expect(onPrepareMock).toHaveBeenCalledWith({ rootDir: '/path/to/root' }, [
         {
-          'browserName': 'electron',
+          browserName: 'electron',
           'wdio:electronServiceOptions': {
             appBinaryPath: '/path/to/binary',
           },

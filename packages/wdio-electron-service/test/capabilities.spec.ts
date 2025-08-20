@@ -1,12 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import type { Capabilities } from '@wdio/types';
+import { describe, expect, it } from 'vitest';
 import {
-  getChromeOptions,
   getChromedriverOptions,
+  getChromeOptions,
   getConvertedElectronCapabilities,
   getElectronCapabilities,
 } from '../src/capabilities.js';
-
-import type { Capabilities } from '@wdio/types';
 
 type RequestedCapabilities =
   | Capabilities.RequestedStandaloneCapabilities
@@ -31,6 +30,24 @@ describe('Capabilities Utilities', () => {
       };
       expect(getChromeOptions(options, cap)).toStrictEqual({
         args: ['--no-sandbox', 'foo=bar'],
+        binary: '/path/to/apps',
+        windowTypes: ['app'],
+      });
+    });
+
+    it('should deduplicate arguments when the same flag exists in both existing and app args', () => {
+      const options = {
+        appArgs: ['--no-sandbox', 'foo=bar'],
+        appBinaryPath: '/path/to/apps',
+      };
+      const cap = {
+        'goog:chromeOptions': {
+          windowTypes: ['app'],
+          args: ['--no-sandbox', '--disable-web-security'],
+        },
+      };
+      expect(getChromeOptions(options, cap)).toStrictEqual({
+        args: ['--no-sandbox', '--disable-web-security', 'foo=bar'],
         binary: '/path/to/apps',
         windowTypes: ['app'],
       });
@@ -144,7 +161,7 @@ function removeProperty(obj: unknown, keyToRemove: string): unknown {
 
 describe('getConvertedElectronCapabilities', () => {
   const expectedCap = {
-    'browserName': 'chrome',
+    browserName: 'chrome',
     'wdio:chromedriverOptions': {
       binary: '/path/to/chromdriver',
     },

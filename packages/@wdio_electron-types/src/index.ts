@@ -1,9 +1,9 @@
-import type * as Electron from 'electron';
 import type { OfficialArch } from '@electron/packager';
 import type { ForgeConfig as ElectronForgeConfig } from '@electron-forge/shared-types';
-import { fn as vitestFn, type Mock } from '@vitest/spy';
+import type { Mock, fn as vitestFn } from '@vitest/spy';
 import type { Capabilities, Options } from '@wdio/types';
 import type { ArchType } from 'builder-util';
+import type * as Electron from 'electron';
 import type { PackageJson } from 'read-package-up';
 
 import type { ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio';
@@ -18,10 +18,6 @@ export interface ElectronServiceAPI {
    * The window handle of the Electron window.
    */
   windowHandle?: string;
-  /**
-   * Whether the Electron bridge is active.
-   */
-  bridgeActive: boolean;
   /**
    * Mock a function from the Electron API.
    *
@@ -184,10 +180,6 @@ export type ElectronServiceGlobalOptions = Pick<
 > & {
   rootDir?: string;
   /**
-   * Whether to use the CDP bridge or the IPC bridge. The CDP bridge is the default and recommended option.
-   */
-  useCdpBridge?: boolean;
-  /**
    * Timeout for any request using CdpBridge to a node debugger.
    */
   cdpBridgeTimeout?: number;
@@ -210,6 +202,7 @@ export type ElectronInterface = keyof ElectronType;
 export type BuilderConfig = {
   productName?: string;
   directories?: { output?: string };
+  executableName?: string;
 };
 
 export type ForgeConfig = ElectronForgeConfig;
@@ -232,6 +225,62 @@ export type BuilderBuildInfo = {
 };
 
 export type AppBuildInfo = ForgeBuildInfo | BuilderBuildInfo;
+
+// Binary Path Result Types
+export type PathGenerationErrorType =
+  | 'CONFIG_MISSING'
+  | 'CONFIG_INVALID'
+  | 'CONFIG_WARNING'
+  | 'MULTIPLE_BUILD_TOOLS'
+  | 'NO_BUILD_TOOL'
+  | 'UNSUPPORTED_PLATFORM';
+
+export type PathValidationErrorType =
+  | 'FILE_NOT_FOUND'
+  | 'NOT_EXECUTABLE'
+  | 'PERMISSION_DENIED'
+  | 'IS_DIRECTORY'
+  | 'ACCESS_ERROR';
+
+export interface PathGenerationError {
+  type: PathGenerationErrorType;
+  message: string;
+  buildTool?: string;
+  details?: string;
+}
+
+export interface PathValidationError {
+  type: PathValidationErrorType;
+  message: string;
+  code?: string;
+  permissions?: string;
+  details?: string;
+}
+
+export interface PathValidationAttempt {
+  path: string;
+  valid: boolean;
+  error?: PathValidationError;
+}
+
+export interface PathGenerationResult {
+  success: boolean;
+  paths: string[];
+  errors: PathGenerationError[];
+}
+
+export interface PathValidationResult {
+  success: boolean;
+  validPath?: string;
+  attempts: PathValidationAttempt[];
+}
+
+export interface BinaryPathResult {
+  success: boolean;
+  binaryPath?: string;
+  pathGeneration: PathGenerationResult;
+  pathValidation: PathValidationResult;
+}
 
 export type ExecuteOpts = {
   internal?: boolean;
@@ -750,6 +799,7 @@ declare global {
     wdioElectron: WdioElectronWindowObj;
   }
 
+  // biome-ignore lint/style/noNamespace: This is a legitimate use of namespace for global augmentation
   namespace WebdriverIO {
     interface Browser extends BrowserExtension {}
     interface Element extends ElementBase {}

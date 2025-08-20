@@ -1,35 +1,27 @@
-import log from '@wdio/electron-utils/log';
-import type { AbstractFn, BrowserExtension, ElectronServiceGlobalOptions, ExecuteOpts } from '@wdio/electron-types';
+import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
+import type {
+  AbstractFn,
+  BrowserExtension,
+  ElectronInterface,
+  ElectronServiceGlobalOptions,
+  ElectronType,
+  ExecuteOpts,
+} from '@wdio/electron-types';
+import { createLogger } from '@wdio/electron-utils';
 import type { Capabilities, Services } from '@wdio/types';
-
-import mockStore from './mockStore.js';
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
+import { ElectronCdpBridge, getDebuggerEndpoint } from './bridge.js';
+import { execute } from './commands/executeCdp.js';
 import * as commands from './commands/index.js';
-import { execute } from './commands/execute.js';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import mockStore from './mockStore.js';
 import { ServiceConfig } from './serviceConfig.js';
-import { before, waitUntilWindowAvailable } from './serviceCdp.js';
-import { ipcBridgeCheck } from './ipc.js';
+import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
 
-const isBridgeActive = async (browser: WebdriverIO.Browser) =>
-  await browser.execute(function executeWithinElectron() {
-    return window.wdioElectron !== undefined;
-  });
-
-const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
-  // Add __name to the global object to work around issue with function serialization
-  // This enables browser.execute to work with scripts which declare functions (affects TS specs only)
-  // https://github.com/webdriverio-community/wdio-electron-service/issues/756
-  // https://github.com/privatenumber/tsx/issues/113
-  await browser.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-  await browser.electron.execute(() => {
-    globalThis.__name = globalThis.__name ?? ((func: (...args: unknown[]) => unknown) => func);
-  });
-};
+const log = createLogger('service');
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
+
+type ElementCommands = 'click' | 'doubleClick' | 'setValue' | 'clearValue';
 
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {
   constructor(
@@ -40,46 +32,26 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     super(globalOptions, capabilities);
   }
 
-  #getElectronAPI(browserInstance?: WebdriverIO.Browser) {
-    const browser = (browserInstance || this.browser) as WebdriverIO.Browser;
-    const api = {
-      clearAllMocks: commands.clearAllMocks.bind(this),
-      execute: (script: string | AbstractFn, ...args: unknown[]) => execute.apply(this, [browser, script, ...args]),
-      isMockFunction: commands.isMockFunction.bind(this),
-      mock: commands.mock.bind(this),
-      mockAll: commands.mockAll.bind(this),
-      resetAllMocks: commands.resetAllMocks.bind(this),
-      restoreAllMocks: commands.restoreAllMocks.bind(this),
-    };
-    return Object.assign({}, api) as unknown as BrowserExtension['electron'];
-  }
   async before(
     capabilities: WebdriverIO.Capabilities,
     _specs: string[],
     instance: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
   ): Promise<void> {
-    if (this.useCdpBridge) {
-      log.debug('Using CDP bridge');
-      await ipcBridgeCheck(instance);
-      await before.call(this, capabilities, instance);
-      return;
-    }
-    log.debug('Using IPC bridge');
+    log.debug('Initialising CDP bridge...');
+
     this.browser = instance as WebdriverIO.Browser;
+    const cdpBridge = this.browser.isMultiremote ? undefined : await initCdpBridge(this.cdpOptions, capabilities);
 
     /**
      * Add electron API to browser object
      */
-    this.browser.electron = this.#getElectronAPI();
+    this.browser.electron = getElectronAPI.call(this, this.browser, cdpBridge);
 
-    this.browser.electron.bridgeActive = await isBridgeActive(this.browser);
+    // Install element command overrides after Electron API is added to the browser object
+    this.installCommandOverrides();
 
-    if (this.browser.electron.bridgeActive) {
-      await initSerializationWorkaround(this.browser);
-    }
-
-    if (this.browser.isMultiremote) {
-      const mrBrowser = instance as WebdriverIO.MultiRemoteBrowser;
+    if (isMultiremote(instance)) {
+      const mrBrowser = instance;
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
         const caps =
@@ -90,25 +62,22 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
           continue;
         }
 
-        log.debug('Adding Electron API to browser object instance named: ', instance);
-        mrInstance.electron = this.#getElectronAPI(mrInstance);
+        const mrCdpBridge = await initCdpBridge(this.cdpOptions, caps);
+        mrInstance.electron = getElectronAPI.call(this, mrInstance, mrCdpBridge);
 
         const mrPuppeteer = await getPuppeteer(mrInstance);
         mrInstance.electron.windowHandle = await getActiveWindowHandle(mrPuppeteer);
-        mrInstance.electron.bridgeActive = await isBridgeActive(mrInstance);
-
-        if (mrInstance.electron.bridgeActive) {
-          await initSerializationWorkaround(mrInstance);
-        }
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
+        await copyOriginalApi(mrInstance);
       }
     } else {
       const puppeteer = await getPuppeteer(this.browser);
       this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(this.browser);
+      await copyOriginalApi(this.browser);
     }
   }
 
@@ -132,41 +101,124 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     await ensureActiveWindowFocus(this.browser, commandName);
   }
 
-  async afterCommand(commandName: string, args: unknown[]) {
-    // ensure mocks are updated
-    const mocks = mockStore.getMocks();
-
-    // White list of command which will input user actions to electron app.
-    const inputCommands = [
-      'addValue',
-      'clearValue',
-      'click',
-      'doubleClick',
-      'dragAndDrop',
-      'execute',
-      'executeAsync',
-      'moveTo',
-      'scrollIntoView',
-      'selectByAttribute',
-      'selectByIndex',
-      'selectByVisibleText',
-      'setValue',
-      'touchAction',
-      'action',
-      'actions',
-      'emulate',
-      'keys',
-      'scroll',
-      'setWindowSize',
-      'uploadFile',
-    ];
-
-    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
-      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
-    }
-  }
-
   after() {
     clearPuppeteerSessions();
   }
+
+  /**
+   * Install command overrides to trigger mock updates after DOM interactions
+   */
+  private installCommandOverrides() {
+    if (!this.browser) {
+      return;
+    }
+    const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
+    commandsToOverride.forEach((commandName) => {
+      this.overrideElementCommand(commandName as ElementCommands);
+    });
+  }
+
+  /**
+   * Override an element-level command to add mock update after execution
+   */
+  private overrideElementCommand<T extends ElementCommands>(commandName: T) {
+    if (!this.browser) {
+      return;
+    }
+    try {
+      const testOverride = async function (
+        this: WebdriverIO.Element,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        const result = await originalCommand.apply(this, args);
+        await updateAllMocks();
+        return result;
+      };
+      (this.browser as any).overwriteCommand(commandName, testOverride, true);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
+ * Update all existing mocks
+ */
+async function updateAllMocks() {
+  log.debug('updateAllMocks called');
+  const mocks = mockStore.getMocks();
+  log.debug(`Found ${mocks.length} mocks to update`);
+
+  if (mocks.length === 0) {
+    log.debug('No mocks to update, returning');
+    return;
+  }
+
+  try {
+    log.debug('Starting mock update batch');
+    await Promise.all(
+      mocks.map(async ([mockId, mock]) => {
+        log.debug(`Updating mock: ${mockId}`);
+        await mock.update();
+        log.debug(`Mock update completed: ${mockId}`);
+      }),
+    );
+    log.debug('All mock updates completed successfully');
+  } catch (error) {
+    log.debug('Mock update batch failed:', error);
+  }
+}
+
+function isMultiremote(
+  browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
+): browser is WebdriverIO.MultiRemoteBrowser {
+  return browser.isMultiremote;
+}
+
+async function initCdpBridge(cdpOptions: CdpBridgeOptions, capabilities: WebdriverIO.Capabilities) {
+  const options = Object.assign({}, cdpOptions, getDebuggerEndpoint(capabilities));
+
+  const cdpBridge = new ElectronCdpBridge(options);
+  await cdpBridge.connect();
+  return cdpBridge;
+}
+
+export const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) => {
+  await browser.waitUntil(async () => {
+    const numWindows = (await browser.getWindowHandles()).length;
+    return numWindows > 0;
+  });
+};
+
+const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
+  await browser.electron.execute<void, [ExecuteOpts]>(
+    async (electron) => {
+      const { default: copy } = await import('fast-copy');
+      globalThis.originalApi = {} as unknown as Record<ElectronInterface, ElectronType[ElectronInterface]>;
+      for (const api in electron) {
+        const apiName = api as keyof ElectronType;
+        globalThis.originalApi[apiName] = {} as ElectronType[ElectronInterface];
+        for (const apiElement in electron[apiName]) {
+          const apiElementName = apiElement as keyof ElectronType[ElectronInterface];
+          globalThis.originalApi[apiName][apiElementName] = copy(electron[apiName][apiElementName]);
+        }
+      }
+    },
+    { internal: true },
+  );
+};
+
+function getElectronAPI(this: ServiceConfig, browser: WebdriverIO.Browser, cdpBridge?: ElectronCdpBridge) {
+  const api = {
+    clearAllMocks: commands.clearAllMocks.bind(this),
+    execute: (script: string | AbstractFn, ...args: unknown[]) =>
+      execute.apply(this, [browser, cdpBridge, script, ...args]),
+    isMockFunction: commands.isMockFunction.bind(this),
+    mock: commands.mock.bind(this),
+    mockAll: commands.mockAll.bind(this),
+    resetAllMocks: commands.resetAllMocks.bind(this),
+    restoreAllMocks: commands.restoreAllMocks.bind(this),
+  };
+  return Object.assign({}, api) as unknown as BrowserExtension['electron'];
 }

@@ -2,72 +2,36 @@
 
 These are some common issues which others have encountered whilst using the service.
 
-If you need extra insight into what the service is doing you can set the environment var `DEBUG=wdio-electron-service` to enable debug logging, e.g.
+If you need extra insight into what the service is doing you can enable namespaced debug logging via the `DEBUG` environment variable.
+
+- `DEBUG=wdio-electron-service` is equivalent to `DEBUG=wdio-electron-service:*` (enable all service namespaces)
+- You can target specific areas, e.g. `DEBUG=wdio-electron-service:service,mock`
+
+Examples:
 
 ```bash
-$ DEBUG=wdio-electron-service wdio run ./wdio.conf.ts
+# enable all service logs
+DEBUG=wdio-electron-service:* wdio run ./wdio.conf.ts
+
+# enable only core service + mocks
+DEBUG=wdio-electron-service:service,mock wdio run ./wdio.conf.ts
 ```
+
+Logs are also forwarded into WDIO runner logs under your configured `outputDir`.
 
 This is utilising the [`debug`](https://github.com/debug-js/debug) logging package.
-
-### Error: ContextBridge not available for invocation of "app" API
-
-_Note: This issue only applies to the legacy IPC Bridge (`< v8.2.0` OR `>= v8.2.0` with `useCDPBridge=false`)_
-
-When using Electron Forge or Electron Packager with Asar, it is possible that the `wdio-electron-service` module is not included in your generated app.asar.
-You can solve this, by either running the packager with the `prune: false` option or the `--no-prune` flag, or by moving "wdio-electron-service" from `devDependencies` to `dependencies`.
-It is recommend to do the former, for instance by passing an environment variable to the packager:
-
-#### Electron Packager
-
-```bash
-$ npx electron-packager --no-prune
-```
-
-#### Electron Forge
-
-_`package.json`_
-
-```json
-{
-  // ...
-  "scripts": {
-    // ...
-    "package": "TEST=true electron-forge package"
-    // ...
-  }
-  // ...
-}
-```
-
-_`forge.config.js`_
-
-```ts
-module.exports = {
-  // ...
-  packagerConfig: {
-    asar: true,
-    prune: process.env.TEST !== 'true',
-  },
-  // ...
-};
-```
 
 ### DevToolsActivePort file doesn't exist
 
 This is a Chromium error which may appear when using Docker or CI. Most of the "fixes" discussed online are based around passing different combinations of args to Chromium - you can set these via [`appArgs`](./configuration/service-configuration.md#appargs-string), though in most cases using xvfb has proven to be more effective; the service itself uses xvfb when running E2Es on Linux CI.
 
-See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/60) for more details.
+See this [WDIO documentation page](https://webdriver.io/docs/headless-and-xvfb) for instructions on how to set up xvfb.
 
-### Module not found: wdio-electron-service/preload
+### Failed to create session. session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
 
-This is a result of the preload script not being found when trying to access the electron APIs via `execute`.
+This is another obscure Chromium error which, despite the message, is usually not fixed by providing a unique `--user-data-dir` value. In the Electron context this usually occurs when the Electron app crashes during or shortly after initialization. WDIO / ChromeDriver attempts to reconnect, starting a new electron instance, which attempts to use the same user-data-dir path. Whilst there may be other causes, on Linux this is often fixed with xvfb.
 
-You should try disabling `sandbox` mode in your app as mentioned in the [accessing APIs](./electron-apis/accessing-apis.md#additional-steps-for-non-bundled-preload-scripts) documentation.
-
-Alternatively, if you are loading extensions into Electron, you should do that at the end of the "ready" event handler. Otherwise, chromedriver will attach to the first extension's background page.
-
-See this [discussion](https://github.com/webdriverio-community/wdio-electron-service/discussions/667) for more details.
+See this [WDIO documentation page](https://webdriver.io/docs/headless-and-xvfb) for instructions on how to set up xvfb.
 
 ### All versions of Electron fail to open on Ubuntu 24.04+
 
@@ -77,3 +41,55 @@ Since it is useful for this and other issues, the service automatically adds `--
 
 Another workaround is to run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
 This command requires root privileges; if necessary, run it as the root user or use the `sudo` command.
+
+### TypeError: logger is not a function
+
+This error occurs when importing the `browser` object directly at the top level of test files:
+
+```typescript
+// ❌ This may cause "TypeError: logger is not a function"
+import { browser } from "wdio-electron-service";
+
+describe("My Tests", () => {
+  it("should work", async () => {
+    await browser.electron.execute(/* ... */);
+  });
+});
+```
+
+The service's internal logger and other dependencies aren't fully initialized when the browser object is imported during the test file loading phase, before WebDriverIO services have completed their initialization.
+
+The solution is to use dynamic import within a `before` hook to ensure the service is fully initialized:
+
+```typescript
+// ✅ Correct approach - dynamic import in before hook
+import type { Mock } from "@vitest/spy";
+import { $, expect } from "@wdio/globals";
+import type { browser as WdioBrowser } from "wdio-electron-service";
+
+let browser: typeof WdioBrowser;
+
+describe("My Tests", () => {
+  before(async () => {
+    ({ browser } = await import("wdio-electron-service"));
+  });
+
+  it("should work", async () => {
+    await browser.electron.execute(/* ... */);
+  });
+});
+```
+
+**Note for Service Contributors:** If you're working within the wdio-electron-service repository itself, you can use pnpm overrides to link to the workspace version:
+
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "wdio-electron-service": "workspace:*"
+    }
+  }
+}
+```
+
+This allows direct imports to work reliably within the service's own repository, but this approach only applies when developing the service itself.

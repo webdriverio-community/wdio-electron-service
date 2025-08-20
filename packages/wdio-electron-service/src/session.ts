@@ -1,10 +1,12 @@
-import { remote } from 'webdriverio';
-import log from '@wdio/electron-utils/log';
-import type { Options } from '@wdio/types';
 import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
+import { createLogger } from '@wdio/electron-utils';
 
-import ElectronWorkerService from './service.js';
+const log = createLogger('service');
+
+import type { Options } from '@wdio/types';
+import { remote } from 'webdriverio';
 import ElectronLaunchService from './launcher.js';
+import ElectronWorkerService from './service.js';
 
 export async function init(capabilities: ElectronServiceCapabilities, globalOptions?: ElectronServiceGlobalOptions) {
   const testRunnerOpts: Options.Testrunner = globalOptions?.rootDir ? { rootDir: globalOptions.rootDir } : {};

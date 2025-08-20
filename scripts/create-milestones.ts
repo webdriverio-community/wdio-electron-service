@@ -9,9 +9,9 @@
  *   pnpx tsx scripts/create-milestones.ts
  */
 
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Octokit } from '@octokit/rest';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Configuration
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;

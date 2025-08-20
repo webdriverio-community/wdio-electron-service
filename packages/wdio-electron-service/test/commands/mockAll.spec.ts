@@ -1,5 +1,5 @@
 /// <reference types="../../@types/vitest" />
-import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockAll } from '../../src/commands/mockAll.js';
 

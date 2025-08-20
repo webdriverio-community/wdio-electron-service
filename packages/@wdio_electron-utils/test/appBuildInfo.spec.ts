@@ -1,19 +1,16 @@
-import { expect, it, vi, describe } from 'vitest';
-
-import { getFixturePackageJson } from './testUtils.js';
-import log from '../src/log.js';
+import { describe, expect, it, vi } from 'vitest';
 import { getAppBuildInfo } from '../src/appBuildInfo.js';
 import { getConfig as getBuilderConfig } from '../src/config/builder.js';
 import { getConfig as getForgeConfig } from '../src/config/forge.js';
-
 import {
   BUILD_TOOL_DETECTION_ERROR,
   BUILDER_CONFIG_NOT_FOUND_ERROR,
   FORGE_CONFIG_NOT_FOUND_ERROR,
   MULTIPLE_BUILD_TOOL_WARNING,
 } from '../src/constants.js';
+import { getFixturePackageJson } from './testUtils.js';
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 vi.mock('../src/config/builder', () => {
   return {
@@ -48,23 +45,23 @@ const forgeConfig = {
 } as const;
 
 describe('getAppBuildInfo()', () => {
-  describe.each(['esm', 'cjs'])('%s', (type) => {
+  describe('package scenarios', () => {
     it('should throw an error when builder is detected but has no config', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILDER_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should throw an error when forge is detected but has no config', async () => {
-      const pkg = await getFixturePackageJson(type, 'forge-dependency-js-config');
+      const pkg = await getFixturePackageJson('config-formats', 'forge-dependency-js-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(undefined);
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(FORGE_CONFIG_NOT_FOUND_ERROR);
     });
 
     it('should return builder config', async () => {
-      const pkg = await getFixturePackageJson(type, 'builder-dependency-cjs-config');
+      const pkg = await getFixturePackageJson('config-formats', 'builder-dependency-cjs-config');
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
 
       const result = await getAppBuildInfo(pkg);
@@ -73,7 +70,7 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should return forge config', async () => {
-      const pkg = await getFixturePackageJson(type, 'forge-dependency-inline-config');
+      const pkg = await getFixturePackageJson('config-formats', 'forge-dependency-inline-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
       const result = await getAppBuildInfo(pkg);
 
@@ -81,19 +78,21 @@ describe('getAppBuildInfo()', () => {
     });
 
     it('should return forge config when multiple builder tool was detected', async () => {
-      const pkg = await getFixturePackageJson(type, 'multiple-build-tools-config');
+      const pkg = await getFixturePackageJson('package-scenarios', 'multiple-build-tools-config');
       vi.mocked(getForgeConfig).mockResolvedValueOnce(forgeConfig);
       vi.mocked(getBuilderConfig).mockResolvedValueOnce(builderConfig);
       const result = await getAppBuildInfo(pkg);
 
       expect(result).toStrictEqual(forgeConfig);
-      expect(log.warn).toHaveBeenCalledTimes(2);
-      expect(log.warn).toHaveBeenNthCalledWith(1, MULTIPLE_BUILD_TOOL_WARNING.DESCRIPTION);
-      expect(log.warn).toHaveBeenNthCalledWith(2, MULTIPLE_BUILD_TOOL_WARNING.SUGGESTION);
+      const { createLogger } = await import('./__mock__/log.js');
+      const mockLogger = createLogger();
+      expect(mockLogger.warn).toHaveBeenCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(1, MULTIPLE_BUILD_TOOL_WARNING.DESCRIPTION);
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(2, MULTIPLE_BUILD_TOOL_WARNING.SUGGESTION);
     });
 
     it('should throw an error when no build tools are found', async () => {
-      const pkg = await getFixturePackageJson(type, 'no-build-tool');
+      const pkg = await getFixturePackageJson('package-scenarios', 'no-build-tool');
 
       await expect(() => getAppBuildInfo(pkg)).rejects.toThrowError(BUILD_TOOL_DETECTION_ERROR);
     });

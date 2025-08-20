@@ -1,7 +1,9 @@
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('service');
+
 import { compareVersions } from 'compare-versions';
 import { fullVersions } from 'electron-to-chromium';
-
-import log from '@wdio/electron-utils/log';
 
 const electronChromiumVersionMap: { [K: string]: string } = {};
 

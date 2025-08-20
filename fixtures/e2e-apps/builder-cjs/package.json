@@ -1,0 +1,47 @@
+{
+  "name": "example-builder-cjs",
+  "version": "0.0.0",
+  "main": "dist/main.js",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "pnpm build:bundle && pnpm build:package",
+    "build:bundle": "tsc",
+    "build:package": "cp ./src/*.html ./dist && electron-builder -p never",
+    "build:package:mac-universal": "cp ./src/*.html ./dist && electron-builder -p never -m --universal",
+    "build:mac-universal": "pnpm build:bundle && pnpm build:package:mac-universal",
+    "clean": "pnpm clean:dist && pnpm dlx shx rm -rf ./node_modules pnpm-lock.yaml ./wdio-logs",
+    "clean:dist": "pnpm dlx shx rm -rf ./dist && pnpm dlx shx mkdir -p ./dist"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@wdio/cli": "catalog:default",
+    "@wdio/globals": "catalog:default",
+    "@wdio/local-runner": "catalog:default",
+    "@wdio/mocha-framework": "catalog:default",
+    "electron": "catalog:default",
+    "electron-builder": "^26.0.12",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "webdriverio": "catalog:default"
+  },
+  "build": {
+    "asar": true,
+    "appId": "com.example-builder-cjs.demo",
+    "copyright": "goosewobbler",
+    "productName": "example-builder-cjs",
+    "files": ["./dist/*"],
+    "mac": {
+      "target": "dir",
+      "identity": null
+    },
+    "linux": {
+      "executableName": "example-builder-cjs",
+      "category": "Utility",
+      "target": ["AppImage"]
+    },
+    "win": {
+      "target": "dir"
+    }
+  }
+}

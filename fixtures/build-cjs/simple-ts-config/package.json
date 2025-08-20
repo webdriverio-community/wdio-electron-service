@@ -1,0 +1,20 @@
+{
+  "name": "fixture-bundler-cjs_simple-ts-config",
+  "version": "1.0.0",
+  "description": "CJS package with simple TypeScript bundler config",
+  "type": "commonjs",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "wdio-bundler build"
+  },
+  "dependencies": {
+    "electron": "^29.4.1"
+  }
+}

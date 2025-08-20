@@ -1,21 +1,34 @@
-import { nodeExternals, typescript, emitPackageJsonPlugin, readPackageJson, warnToErrorPlugin } from './src/index';
-
-import type { RollupOptions } from 'rollup';
+import type { LogLevel, Plugin, RollupLog, RollupOptions } from 'rollup';
+import { nodeExternals, readPackageJson, typescript } from './src/index.js';
 
 const pkgInfo = readPackageJson();
 
-const configEsm: RollupOptions = {
-  input: pkgInfo.input,
+// Add CLI as a separate entry point
+const input = {
+  ...pkgInfo.input,
+  cli: 'src/cli.ts',
+};
+
+const warnToErrorPlugin = (): Plugin => ({
+  name: 'warn-to-error',
+  onLog(level: LogLevel, log: RollupLog) {
+    if (level === 'warn') {
+      this.error(log);
+    }
+  },
+});
+
+const config: RollupOptions = {
+  input,
   output: {
     format: 'esm',
-    dir: pkgInfo.outDir.esm,
+    dir: './dist',
     sourcemap: true,
-    plugins: [emitPackageJsonPlugin(pkgInfo.pkgName, 'esm')],
   },
   plugins: [
     typescript({
       compilerOptions: {
-        outDir: pkgInfo.outDir.esm,
+        outDir: './dist',
       },
     }),
     nodeExternals(),
@@ -24,26 +37,4 @@ const configEsm: RollupOptions = {
   strictDeprecations: true,
 };
 
-const configCjs: RollupOptions = {
-  input: pkgInfo.input,
-  output: {
-    format: 'cjs',
-    dir: pkgInfo.outDir.cjs,
-    exports: 'named',
-    dynamicImportInCjs: false,
-    sourcemap: true,
-    plugins: [emitPackageJsonPlugin(pkgInfo.pkgName, 'cjs')],
-  },
-  plugins: [
-    typescript({
-      compilerOptions: {
-        outDir: pkgInfo.outDir.cjs,
-      },
-    }),
-    nodeExternals(),
-    warnToErrorPlugin(),
-  ],
-  strictDeprecations: true,
-};
-
-export default [configEsm, configCjs];
+export default config;

@@ -1,0 +1,18 @@
+{
+  "name": "fixture-config-formats_forge-dependency-inline-config",
+  "version": "1.0.0",
+  "description": "Forge found in dependencies with inline configuration in an ESM project",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.2"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "forge-dependency-inline-config"
+      }
+    }
+  }
+}

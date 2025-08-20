@@ -1,10 +1,7 @@
 import fs from 'node:fs/promises';
 import { normalize } from 'node:path';
-
-import { expect, it, vi, describe, beforeEach } from 'vitest';
-import { AppBuildInfo } from '@wdio/electron-types';
-
-import log from '../src/log.js';
+import type { AppBuildInfo } from '@wdio/electron-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getBinaryPath } from '../src/binaryPath.js';
 
 vi.mock('node:fs/promises', async (importActual) => {
@@ -17,7 +14,7 @@ vi.mock('node:fs/promises', async (importActual) => {
   };
 });
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 const pkgJSONPath = '/path/to/package.json';
 const winProcess = { platform: 'win32', arch: 'x64' } as NodeJS.Process;
@@ -84,7 +81,7 @@ type TestBinaryPathOptions = {
 function testBinaryPath(options: TestBinaryPathOptions) {
   const { platform, arch, binaryPath, isForge, configObj, testName, skip } = options;
   const buildType = isForge ? 'Forge' : 'Builder';
-  const hasCustomOutDir = configObj.outDir || (configObj.directories && configObj.directories.output);
+  const hasCustomOutDir = configObj.outDir || configObj.directories?.output;
   const pkgJSONPath = '/path/to/package.json';
 
   // Create descriptive test title based on configuration
@@ -98,12 +95,21 @@ function testBinaryPath(options: TestBinaryPathOptions) {
 
   testFn(`${title}`, async () => {
     const currentProcess = { platform } as NodeJS.Process;
-    mockBinaryPath(binaryPath);
+    // Mock all possible paths for the current platform
+    const allPossiblePaths = [binaryPath];
+    if (platform === 'linux') {
+      // For Linux, also mock the kebab-case version of the path
+      const appName = configObj.packagerConfig?.name || configObj.productName || 'my-app';
+      const kebabCaseName = appName.toLowerCase().replace(/ /g, '-');
+      const kebabCasePath = binaryPath.replace(appName, kebabCaseName);
+      allPossiblePaths.push(kebabCasePath);
+    }
+    mockBinaryPath(allPossiblePaths);
 
     const result = await getBinaryPath(
       pkgJSONPath,
       {
-        appName: 'my-app',
+        appName: configObj.packagerConfig?.name || configObj.productName || 'my-app',
         isForge: isForge,
         isBuilder: !isForge,
         config: configObj,
@@ -112,8 +118,12 @@ function testBinaryPath(options: TestBinaryPathOptions) {
       currentProcess,
     );
 
+    // Verify the result is successful
+    expect(result.success).toBe(true);
+    expect(result.binaryPath).toBeDefined();
+
     // Normalize path separators for cross-platform compatibility
-    const normalizedActual = result.replace(/\\/g, '/');
+    const normalizedActual = result.binaryPath?.replace(/\\/g, '/');
     const normalizedExpected = binaryPath.replace(/\\/g, '/');
 
     expect(normalizedActual).toBe(normalizedExpected);
@@ -136,25 +146,37 @@ function testBuilderBinaryPath(options: Omit<TestBinaryPathOptions, 'isForge'>) 
 
 describe('getBinaryPath', () => {
   beforeEach(() => {
-    vi.mocked(log.info).mockClear();
+    vi.clearAllMocks();
   });
 
-  it('should throw error for unsupported platform', async () => {
+  it('should return error result for unsupported platform', async () => {
     mockProcess('not-supported', 'x86');
     mockBinaryPath('/path/to');
 
-    await expect(() =>
-      getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, true), '29.3.1', currentProcess),
-    ).rejects.toThrowError('Unsupported platform: not-supported');
+    const result = await getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, true), '29.3.1', currentProcess);
+
+    expect(result.success).toBe(false);
+    expect(result.binaryPath).toBeUndefined();
+    expect(result.pathGeneration.success).toBe(false);
+    expect(result.pathGeneration.errors).toContainEqual({
+      type: 'UNSUPPORTED_PLATFORM',
+      message: 'Unsupported platform: not-supported',
+    });
   });
 
-  it('should throw error for unsupported build tool configuration', async () => {
+  it('should return error result for unsupported build tool configuration', async () => {
     mockProcess('linux', 'arm64');
     mockBinaryPath('/path/to');
 
-    await expect(() =>
-      getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, false), '29.3.1', currentProcess),
-    ).rejects.toThrowError('Configurations that are neither Forge nor Builder are not supported.');
+    const result = await getBinaryPath(pkgJSONPath, generateAppBuildInfo(false, false), '29.3.1', currentProcess);
+
+    expect(result.success).toBe(false);
+    expect(result.binaryPath).toBeUndefined();
+    expect(result.pathGeneration.success).toBe(false);
+    expect(result.pathGeneration.errors).toContainEqual({
+      type: 'NO_BUILD_TOOL',
+      message: 'Configurations that are neither Forge nor Builder are not supported.',
+    });
   });
 
   describe('Electron Forge builds', () => {
@@ -191,6 +213,14 @@ describe('getBinaryPath', () => {
       arch: 'x64',
       binaryPath: '/path/to/out/my-app-linux-x64/my-app',
       configObj: { packagerConfig: { name: 'my-app' } },
+    });
+
+    // Test Linux with spaces in name
+    testForgeBinaryPath({
+      platform: 'linux',
+      arch: 'x64',
+      binaryPath: '/path/to/out/builder-app-example-linux-x64/builder-app-example',
+      configObj: { packagerConfig: { name: 'Builder App Example' } },
     });
   });
 
@@ -247,11 +277,41 @@ describe('getBinaryPath', () => {
       configObj: { productName: 'my-app' },
     });
 
+    // Test Linux with spaces in name
+    testBuilderBinaryPath({
+      platform: 'linux',
+      arch: 'x64',
+      binaryPath: '/path/to/dist/linux-unpacked/builder-app-example',
+      configObj: { productName: 'Builder App Example' },
+    });
+
     testBuilderBinaryPath({
       platform: 'linux',
       arch: 'arm64',
       binaryPath: '/path/to/dist/linux-unpacked/my-app',
       configObj: { productName: 'my-app' },
+    });
+
+    // Test macOS with executableName
+    testBuilderBinaryPath({
+      platform: 'darwin',
+      arch: 'arm64',
+      binaryPath: '/path/to/dist/mac-arm64/builder-app-example.app/Contents/MacOS/builder-app-example',
+      configObj: {
+        productName: 'Builder App Example',
+        executableName: 'builder-app-example',
+      } as any,
+    });
+
+    // Test Windows with executableName
+    testBuilderBinaryPath({
+      platform: 'win32',
+      arch: 'x64',
+      binaryPath: '/path/to/dist/win-unpacked/builder-app-example.exe',
+      configObj: {
+        productName: 'Builder App Example',
+        executableName: 'builder-app-example',
+      } as any,
     });
   });
 });

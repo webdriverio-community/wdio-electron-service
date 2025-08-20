@@ -1,24 +1,91 @@
-import util from 'node:util';
 import path from 'node:path';
+import type {
+  AppBuildInfo,
+  BinaryPathResult,
+  ElectronServiceCapabilities,
+  ElectronServiceGlobalOptions,
+  PathGenerationError,
+} from '@wdio/electron-types';
+import { createLogger, getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
 
+const log = createLogger('launcher');
+
+import type { Capabilities, Options, Services } from '@wdio/types';
 import getPort from 'get-port';
+import { type NormalizedReadResult, readPackageUp } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
-import { readPackageUp, type NormalizedReadResult } from 'read-package-up';
-import log from '@wdio/electron-utils/log';
-import { getAppBuildInfo, getBinaryPath, getElectronVersion } from '@wdio/electron-utils';
-
 import {
-  getChromeOptions,
   getChromedriverOptions,
+  getChromeOptions,
   getConvertedElectronCapabilities,
   getElectronCapabilities,
 } from './capabilities.js';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 import { getChromiumVersion } from './versions.js';
-import { APP_NOT_FOUND_ERROR, CUSTOM_CAPABILITY_NAME } from './constants.js';
-import { ipcBridgeWarning } from './ipc.js';
 
-import type { Services, Options, Capabilities } from '@wdio/types';
-import type { ElectronServiceCapabilities, ElectronServiceGlobalOptions } from '@wdio/electron-types';
+/**
+ * Generate a comprehensive error message based on the binary path detection result
+ */
+function generateBinaryPathErrorMessage(result: BinaryPathResult, appBuildInfo: AppBuildInfo): string {
+  const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
+  const suggestedCompileCommand = `npx ${appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'}`;
+
+  // Path generation failed
+  if (!result.pathGeneration.success) {
+    const generationErrors = result.pathGeneration.errors;
+    const primaryError = generationErrors[0];
+
+    switch (primaryError?.type) {
+      case 'UNSUPPORTED_PLATFORM':
+        return `Unsupported platform: ${process.platform}. This service only supports Windows, macOS, and Linux.`;
+
+      case 'NO_BUILD_TOOL':
+        return 'No supported build tool configuration found. Please configure either Electron Forge or electron-builder in your package.json.';
+
+      case 'CONFIG_INVALID':
+        return `Invalid ${buildToolName} configuration: ${primaryError.message}. Please check your build tool configuration.`;
+
+      case 'CONFIG_MISSING':
+        return `Missing ${buildToolName} configuration. Please ensure your build tool is properly configured in package.json.`;
+
+      default:
+        return `Failed to determine binary paths: ${primaryError?.message || 'Unknown error'}`;
+    }
+  }
+
+  // Path generation succeeded but validation failed
+  if (!result.pathValidation.success) {
+    const attempts = result.pathValidation.attempts;
+
+    let errorDetails = `Checked ${attempts.length} possible location(s):`;
+
+    for (const attempt of attempts) {
+      errorDetails += `\n  - ${attempt.path}`;
+      if (attempt.error) {
+        switch (attempt.error.type) {
+          case 'FILE_NOT_FOUND':
+            errorDetails += ' (file not found)';
+            break;
+          case 'NOT_EXECUTABLE':
+            errorDetails += ' (not executable)';
+            break;
+          case 'PERMISSION_DENIED':
+            errorDetails += ' (permission denied)';
+            break;
+          case 'IS_DIRECTORY':
+            errorDetails += ' (is a directory)';
+            break;
+          default:
+            errorDetails += ` (${attempt.error.message})`;
+        }
+      }
+    }
+
+    return `Could not find Electron app built with ${buildToolName}!\n\n${errorDetails}\n\nIf the application is not compiled, please do so before running your tests:\n  ${suggestedCompileCommand}\n\nOtherwise if the application is compiled at a different location, please specify the \`appBinaryPath\` option in your capabilities.`;
+  }
+
+  return 'Unknown error occurred while detecting binary path.';
+}
 
 export default class ElectronLaunchService implements Services.ServiceInstance {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -27,10 +94,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
   constructor(globalOptions: ElectronServiceGlobalOptions, _caps: unknown, config: Options.Testrunner) {
     this.#globalOptions = globalOptions;
     this.#projectRoot = globalOptions.rootDir || config.rootDir || process.cwd();
-
-    if (typeof globalOptions.useCdpBridge === 'boolean' && !globalOptions.useCdpBridge) {
-      ipcBridgeWarning();
-    }
   }
 
   async onPrepare(_config: Options.Testrunner, capabilities: ElectronServiceCapabilities) {
@@ -59,7 +122,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         const chromiumVersion = await getChromiumVersion(electronVersion);
         log.info(`Found Electron v${electronVersion} with Chromedriver v${chromiumVersion}`);
 
-        if (Number.parseInt(electronVersion.split('.')[0]) < 26 && !cap['wdio:chromedriverOptions']?.binary) {
+        if (Number.parseInt(electronVersion.split('.')[0], 10) < 26 && !cap['wdio:chromedriverOptions']?.binary) {
           const invalidElectronVersionError = new SevereServiceError(
             'Electron version must be 26 or higher for auto-configuration of Chromedriver.  If you want to use an older version of Electron, you must configure Chromedriver manually using the wdio:chromedriverOptions capability',
           );
@@ -78,7 +141,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             log.warn('Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored');
           }
           const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-          appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', electronBinary);
+          const packageDir = path.dirname(pkg.path);
+          appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
         } else if (!appBinaryPath) {
@@ -87,15 +151,37 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             const appBuildInfo = await getAppBuildInfo(pkg);
 
             try {
-              appBinaryPath = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
+              // Use the detailed binary path function for better error handling
+              const binaryResult = await getBinaryPath(pkg.path, appBuildInfo, electronVersion);
 
-              log.info(`Detected app binary at ${appBinaryPath}`);
-            } catch (_e) {
-              const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
-              const suggestedCompileCommand = `npx ${
-                appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
-              }`;
-              throw new Error(util.format(APP_NOT_FOUND_ERROR, appBinaryPath, buildToolName, suggestedCompileCommand));
+              if (binaryResult.success && binaryResult.binaryPath) {
+                appBinaryPath = binaryResult.binaryPath;
+                log.info(`Detected app binary at ${appBinaryPath}`);
+
+                // Log any warnings from path generation
+                const warnings = binaryResult.pathGeneration.errors.filter(
+                  (e: PathGenerationError) => e.type === 'CONFIG_WARNING',
+                );
+                warnings.forEach((warning: PathGenerationError) => {
+                  log.warn(warning.message);
+                });
+              } else {
+                // Generate comprehensive error message based on what failed
+                const errorMessage = generateBinaryPathErrorMessage(binaryResult, appBuildInfo);
+                throw new Error(errorMessage);
+              }
+            } catch (e) {
+              // Fallback to original error handling for backward compatibility
+              if (e instanceof Error && !e.message.includes('Could not find Electron app')) {
+                const buildToolName = appBuildInfo.isForge ? 'Electron Forge' : 'electron-builder';
+                const suggestedCompileCommand = `npx ${
+                  appBuildInfo.isForge ? 'electron-forge make' : 'electron-builder build'
+                }`;
+                throw new Error(
+                  `Could not find Electron app built with ${buildToolName}!\nIf the application is not compiled, please do so before running your tests, e.g. via \`${suggestedCompileCommand}\`.`,
+                );
+              }
+              throw e;
             }
           } catch (e) {
             log.error(e);
@@ -163,7 +249,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           setInspectArg(cap, portList[index]);
         }),
       );
-      log.debug('Setting capability at onWorkerStart', caps);
+      log.debug('Setting capability at onWorkerStart', JSON.stringify(caps));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
       const msg = `Failed to assign debugging ports to Electron instances: ${errorMessage}`;
@@ -194,9 +280,14 @@ const setInspectArg = (cap: WebdriverIO.Capabilities, debuggerPort: number) => {
   if (!('goog:chromeOptions' in cap)) {
     cap['goog:chromeOptions'] = { args: [] };
   }
-  const chromeOptions = cap['goog:chromeOptions']!;
+  const chromeOptions = cap['goog:chromeOptions'];
+  if (!chromeOptions) {
+    return;
+  }
   if (!('args' in chromeOptions)) {
     chromeOptions.args = [];
   }
-  chromeOptions.args!.push(`--inspect=localhost:${debuggerPort}`);
+  if (Array.isArray(chromeOptions.args)) {
+    chromeOptions.args.push(`--inspect=localhost:${debuggerPort}`);
+  }
 };

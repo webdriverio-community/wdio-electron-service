@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { ServiceConfig } from '../src/serviceConfig.js';
 
@@ -12,9 +12,6 @@ class MockServiceConfig extends ServiceConfig {
   get restoreMocks() {
     return super.restoreMocks;
   }
-  get useCdpBridge() {
-    return super.useCdpBridge;
-  }
   get cdpOptions() {
     return super.cdpOptions;
   }
@@ -26,7 +23,6 @@ describe('ServiceConfig', () => {
       ['clearMocks', false],
       ['resetMocks', false],
       ['restoreMocks', false],
-      ['useCdpBridge', true],
     ] as const)('should set the default value - %s', (option, expected) => {
       const config = new MockServiceConfig({}, {});
       expect(config[option]).toBe(expected);
@@ -42,11 +38,6 @@ describe('ServiceConfig', () => {
       };
       const config = new MockServiceConfig(globalOptions, {});
       expect(config.cdpOptions).toStrictEqual({ [internalOption]: expected });
-    });
-
-    it('should set useCdpBridge to false when passed as a globalOptions', () => {
-      const config = new MockServiceConfig({ useCdpBridge: false }, {});
-      expect(config.useCdpBridge).toBe(false);
     });
 
     it('should set and return the globalOptions', () => {

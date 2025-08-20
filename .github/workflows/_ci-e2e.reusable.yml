@@ -140,8 +140,8 @@ jobs:
         shell: bash
         run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
 
-      # Show logs on failure to help with debugging
-      - name: 🐛 Show Test Logs on Failure
+      # Show comprehensive debug information on failure
+      - name: 🐛 Debug Information on Failure
         shell: bash
         if: failure()
         run: pnpm run ci:e2e:logs
@@ -154,12 +154,12 @@ jobs:
         with:
           name: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}
           output: e2e-logs-${{ inputs.os }}${{ contains(inputs.build-command, 'mac-universal') && '-u' || '' }}-${{ inputs.scenario }}${{ inputs.type != '*' && format('-{0}',inputs.type) || '' }}.zip
-          paths: e2e/*/*.log
+          paths: e2e/logs/**/*.log
 
       # Provide an interactive debugging session on failure
       # This allows manual investigation of the environment
       - name: 🐛 Debug Build on Failure
-        uses: stateful/vscode-server-action@v1.1.0
+        uses: goosewobbler/vscode-server-action@v1.3.0
         if: failure()
         with:
-          timeout: '180000'
+          timeout: '300000'

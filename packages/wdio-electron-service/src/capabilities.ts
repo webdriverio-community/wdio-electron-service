@@ -1,15 +1,15 @@
-import type { Capabilities } from '@wdio/types';
-
 import type { ElectronServiceOptions } from '@wdio/electron-types';
+import type { Capabilities } from '@wdio/types';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
 export function getChromeOptions(options: ElectronServiceOptions, cap: WebdriverIO.Capabilities) {
   const existingOptions = cap['goog:chromeOptions'] || {};
+  const combinedArgs = [...(existingOptions.args || []), ...(options.appArgs || [])];
   return {
     binary: options.appBinaryPath,
     windowTypes: ['app', 'webview'],
     ...existingOptions,
-    args: [...(existingOptions.args || []), ...(options.appArgs || [])],
+    args: [...new Set(combinedArgs)],
   };
 }
 

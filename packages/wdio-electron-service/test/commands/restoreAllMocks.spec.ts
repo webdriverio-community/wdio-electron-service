@@ -1,4 +1,4 @@
-import { vi, describe, beforeEach, it, expect, Mock, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { restoreAllMocks } from '../../src/commands/restoreAllMocks';
 import mockStore from '../../src/mockStore.js';
@@ -10,10 +10,13 @@ vi.mock('../../src/mockStore.js', () => ({
 }));
 
 describe('restoreAllMocks Command', () => {
-  let mockedGetName, mockedShowOpenDialog;
+  let mockedGetName: any, mockedShowOpenDialog: any;
 
   beforeEach(async () => {
-    mockedGetName = { getMockName: () => 'electron.app.getName', mockRestore: vi.fn() };
+    mockedGetName = {
+      getMockName: () => 'electron.app.getName',
+      mockRestore: vi.fn(),
+    };
     mockedShowOpenDialog = {
       getMockName: () => 'electron.dialog.showOpenDialog',
       mockRestore: vi.fn(),

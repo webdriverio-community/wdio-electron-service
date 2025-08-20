@@ -1,7 +1,7 @@
-import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
 
 import type { ElectronServiceGlobalOptions } from '@wdio/electron-types';
-import type { CdpBridgeOptions } from '@wdio/cdp-bridge';
+import { CUSTOM_CAPABILITY_NAME } from './constants.js';
 
 export abstract class ServiceConfig {
   #globalOptions: ElectronServiceGlobalOptions;
@@ -10,7 +10,6 @@ export abstract class ServiceConfig {
   #resetMocks = false;
   #restoreMocks = false;
   #browser?: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser;
-  #useCdpBridge = true;
 
   constructor(globalOptions: ElectronServiceGlobalOptions = {}, capabilities: WebdriverIO.Capabilities) {
     this.#globalOptions = globalOptions;
@@ -23,11 +22,6 @@ export abstract class ServiceConfig {
     this.#clearMocks = clearMocks ?? false;
     this.#resetMocks = resetMocks ?? false;
     this.#restoreMocks = restoreMocks ?? false;
-
-    const { useCdpBridge } = globalOptions;
-    if (typeof useCdpBridge === 'boolean' && !useCdpBridge) {
-      this.#useCdpBridge = useCdpBridge;
-    }
 
     this.#cdpOptions = {
       ...(globalOptions.cdpBridgeTimeout && { timeout: globalOptions.cdpBridgeTimeout }),
@@ -62,9 +56,5 @@ export abstract class ServiceConfig {
 
   protected get restoreMocks() {
     return this.#restoreMocks;
-  }
-
-  protected get useCdpBridge() {
-    return this.#useCdpBridge;
   }
 }

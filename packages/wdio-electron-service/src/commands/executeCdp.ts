@@ -1,8 +1,11 @@
-import { print, parse } from 'recast';
 import * as babelParser from '@babel/parser';
-import { ExecuteOpts } from '@wdio/electron-types';
-import log from '@wdio/electron-utils/log';
-import { ElectronCdpBridge } from '../bridge';
+import type { ExecuteOpts } from '@wdio/electron-types';
+import { createLogger } from '@wdio/electron-utils';
+
+const log = createLogger('service');
+
+import { parse, print } from 'recast';
+import type { ElectronCdpBridge } from '../bridge';
 
 import mockStore from '../mockStore.js';
 
@@ -40,12 +43,9 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
   const functionDeclaration = removeFirstArg(script.toString());
   const argsArray = args.map((arg) => ({ value: arg }));
 
+  // Minimal debug only
   const scriptLength = Buffer.byteLength(functionDeclaration, 'utf-8');
-  if (scriptLength > 500) {
-    log.debug('Script for the execute:', `${functionDeclaration.split('\n')[0]} ... [${scriptLength} bytes]`);
-  } else {
-    log.debug('Script for the execute:', functionDeclaration);
-  }
+  log.debug('Executing script length:', scriptLength);
 
   const result = await cdpBridge.send('Runtime.callFunctionOn', {
     functionDeclaration,
@@ -54,7 +54,6 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     returnByValue: true,
     executionContextId: cdpBridge.contextId,
   });
-  log.debug('Return of the script:', result.result.value);
 
   await syncMockStatus(args);
 
@@ -69,7 +68,7 @@ const syncMockStatus = async (args: unknown[]) => {
   }
 };
 
-//remove first arg `electron`. electron can be access as global scope.
+// Remove first arg `electron` - Electron can be accessed as global scope.
 const removeFirstArg = (funcStr: string) => {
   // generate ATS
   const ast = parse(funcStr, {

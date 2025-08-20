@@ -1,4 +1,4 @@
-import { vi, describe, beforeEach, it, expect, Mock, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { createMock } from '../../src/mock.js';
 import mockStore from '../../src/mockStore.js';
@@ -13,7 +13,7 @@ vi.mock('../../src/mockStore.js', () => ({
   },
 }));
 
-let mock;
+let mock: any;
 
 beforeEach(async () => {
   mock = (await import('../../src/commands/mock.js')).mock;
@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('mock Command', () => {
-  let mockedGetName;
+  let mockedGetName: any;
 
   beforeEach(async () => {
     mockedGetName = {

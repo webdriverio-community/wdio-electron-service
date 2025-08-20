@@ -1,6 +1,6 @@
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { ElectronServiceMockStore } from '../src/mockStore.js';
 import type { ElectronMock } from '@wdio/electron-types';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ElectronServiceMockStore } from '../src/mockStore.js';
 
 let mockStore: ElectronServiceMockStore;
 

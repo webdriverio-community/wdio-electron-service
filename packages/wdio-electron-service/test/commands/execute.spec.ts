@@ -1,13 +1,11 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { execute } from '../../src/commands/execute.js';
 
 describe('execute Command', () => {
   beforeEach(async () => {
     globalThis.browser = {
-      electron: {
-        bridgeActive: true,
-      },
+      electron: {},
       execute: vi.fn((fn: (script: string, ...args: unknown[]) => unknown, script: string, ...args: unknown[]) =>
         typeof fn === 'string' ? new Function(`return (${fn}).apply(this, arguments)`)() : fn(script, ...args),
       ),
@@ -35,18 +33,6 @@ describe('execute Command', () => {
     // @ts-expect-error no browser argument
     await expect(() => execute(undefined, '() => 1 + 2 + 3')).rejects.toThrowError(
       new Error('WDIO browser is not yet initialised'),
-    );
-  });
-
-  it('should throw an error when the context bridge is not available', async () => {
-    globalThis.browser.electron.bridgeActive = false;
-    await expect(() => execute(globalThis.browser, () => 1 + 2 + 3)).rejects.toThrowError(
-      new Error(
-        'Electron context bridge not available! ' +
-          'Did you import the service hook scripts into your application via e.g. ' +
-          "`import('wdio-electron-service/main')` and `import('wdio-electron-service/preload')`?\n\n" +
-          'Find more information at https://webdriver.io/docs/desktop-testing/electron#api-configuration',
-      ),
     );
   });
 

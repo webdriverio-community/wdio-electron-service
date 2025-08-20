@@ -4,13 +4,13 @@
   "tasks": {
     "//#format:check": {
       "dependsOn": [],
-      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
-      "outputs": ["node_modules/.cache/prettier"]
+      "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", "package.json"],
+      "cache": false
     },
     "//#format": {
       "dependsOn": [],
       "inputs": ["**/*.{j,t}s", "**/*.{yml,md,json}", ".prettierrc*", "package.json"],
-      "outputs": ["node_modules/.cache/prettier"]
+      "cache": false
     },
     "//#lint": {
       "dependsOn": [],
@@ -22,9 +22,7 @@
       "inputs": ["**/*.{j,mj,cj,t}s", "eslint.config.js", "package.json"],
       "outputs": [".eslintcache"]
     },
-    "//#clear:cache": {
-      "cache": false
-    },
+    "//#test:package": {},
     "@repo/e2e#init-e2es": {
       "dependsOn": ["wdio-electron-service#build"]
     },
@@ -67,7 +65,7 @@
       "dependsOn": ["example-builder-esm#build:mac-universal", "@repo/e2e#init-e2es"]
     },
     "@wdio/electron-bundler#build": {
-      "dependsOn": ["test:unit", "typecheck"],
+      "dependsOn": ["typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-bundler#release": {
@@ -76,7 +74,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-types#build": {
-      "dependsOn": ["@wdio/electron-bundler#build", "test:unit", "typecheck"],
+      "dependsOn": ["@wdio/electron-bundler#build", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-types#release": {
@@ -85,7 +83,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/electron-utils#build": {
-      "dependsOn": ["@wdio/electron-types#build", "test:unit", "typecheck"],
+      "dependsOn": ["@wdio/electron-types#build", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/electron-utils#release": {
@@ -94,7 +92,7 @@
       "env": ["GITHUB_TOKEN", "NODE_AUTH_TOKEN"]
     },
     "@wdio/cdp-bridge#build": {
-      "dependsOn": ["@wdio/electron-utils#build", "test:unit", "typecheck"],
+      "dependsOn": ["@wdio/electron-utils#build", "typecheck"],
       "outputs": ["dist/**"]
     },
     "@wdio/cdp-bridge#release": {
@@ -149,6 +147,9 @@
       "outputs": ["out/**"]
     },
     "logs": {},
+    "pack": {
+      "dependsOn": ["^build"]
+    },
     "typecheck": {
       "dependsOn": ["^build"]
     },
@@ -159,8 +160,14 @@
     "test:unit": {
       "dependsOn": ["^build"]
     },
+    "test:integration": {
+      "dependsOn": ["^build"]
+    },
+    "@repo/e2e#build": {
+      "dependsOn": ["wdio-electron-service#build"]
+    },
     "wdio-electron-service#build": {
-      "dependsOn": ["@wdio/cdp-bridge#build", "test:unit", "typecheck"],
+      "dependsOn": ["@wdio/cdp-bridge#build", "typecheck"],
       "outputs": ["dist/**"]
     },
     "wdio-electron-service#release": {

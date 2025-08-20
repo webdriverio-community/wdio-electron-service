@@ -1,17 +1,16 @@
 import os from 'node:os';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 import { CdpBridge } from '@wdio/cdp-bridge';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ElectronCdpBridge, getDebuggerEndpoint } from '../src/bridge.js';
 
-vi.mock('@wdio/electron-utils/log');
+vi.mock('@wdio/electron-utils', () => import('./mocks/electron-utils.js'));
 
 describe('getDebuggerEndpoint', () => {
   it('should return the endpoint information of the node debugger', () => {
     const host = 'localhost';
     const port = 50000;
     const result = getDebuggerEndpoint({
-      ['goog:chromeOptions']: {
+      'goog:chromeOptions': {
         args: ['foo=bar', `--inspect=${host}:${port}`],
       },
     });
@@ -24,7 +23,7 @@ describe('getDebuggerEndpoint', () => {
   it('should throw the error when `--inspect` is not set', () => {
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar'],
         },
       }),
@@ -36,7 +35,7 @@ describe('getDebuggerEndpoint', () => {
     const port = 'xxx';
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar', `--inspect=${host}:${port}`],
         },
       }),
@@ -48,7 +47,7 @@ describe('getDebuggerEndpoint', () => {
     const port = 'xxx';
     expect(() =>
       getDebuggerEndpoint({
-        ['goog:chromeOptions']: {
+        'goog:chromeOptions': {
           args: ['foo=bar', `--inspect=${host}:${port}`],
         },
       }),
@@ -81,16 +80,14 @@ describe('ElectronCdpBridge', () => {
         .mock.instances.slice(-1)[0]) as unknown as ElectronCdpBridge;
 
       const [_method, callback] = vi.mocked(mockedInstance.on).mock.calls.slice(-1)[0];
-      callback(
-        {
-          context: {
-            id: expectedContextId,
-            auxData: {
-              isDefault: true,
-            },
+      callback({
+        context: {
+          id: expectedContextId,
+          auxData: {
+            isDefault: true,
           },
-        } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-      );
+        },
+      } as any);
       await promise;
       return mockedInstance;
     };

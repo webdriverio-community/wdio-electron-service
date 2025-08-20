@@ -1,8 +1,7 @@
+import fs from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
-
-import { mockBinaryPath } from './testUtils.js';
-import log from '../src/log.js';
 import { selectExecutable } from '../src/selectExecutable.js';
+import { mockBinaryPath } from './testUtils.js';
 
 /**
  * Mock the file system promises module to control file access checks
@@ -17,7 +16,7 @@ vi.mock('node:fs/promises', async (importActual) => {
   };
 });
 
-vi.mock('../src/log');
+vi.mock('../src/log.js', () => import('./__mock__/log.js'));
 
 /**
  * Mock the binary path generator classes and utilities
@@ -54,13 +53,18 @@ describe('selectExecutable', () => {
     const result = await selectExecutable(executableBinaryPaths);
 
     expect(result).toBe(executableBinaryPaths[0]);
-    expect(log.info).toHaveBeenLastCalledWith(
+    const { createLogger } = await import('./__mock__/log.js');
+    const mockLogger = createLogger();
+    expect(mockLogger.info).toHaveBeenLastCalledWith(
       expect.stringMatching(/Detected multiple app binaries, using the first one:/),
     );
   });
 
   it('should throw error when no executable binary is found', async () => {
-    mockBinaryPath('/path/to/dummy');
+    // Create a proper ENOENT error for the mock
+    const enoentError = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException;
+    enoentError.code = 'ENOENT';
+    vi.mocked(fs.access).mockRejectedValue(enoentError);
 
     await expect(() => selectExecutable(['/path/to/dist'])).rejects.toThrowError(
       'No executable binary found, checked:',

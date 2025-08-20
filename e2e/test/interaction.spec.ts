@@ -1,6 +1,7 @@
+/// <reference types="mocha" />
 import { expect } from '@wdio/globals';
-import { browser } from 'wdio-electron-service';
 import type { BrowserWindow } from 'electron';
+import { browser } from 'wdio-electron-service';
 
 const waitTextOfElement = async (element: ReturnType<typeof browser.$>, expectedText: string) => {
   // respect configuration for the timeout and interval

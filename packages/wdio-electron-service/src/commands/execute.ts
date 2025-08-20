@@ -14,15 +14,6 @@ export async function execute<ReturnValue, InnerArguments extends unknown[]>(
     throw new Error('WDIO browser is not yet initialised');
   }
 
-  if (!browser.electron.bridgeActive) {
-    const errMessage =
-      'Electron context bridge not available! ' +
-      'Did you import the service hook scripts into your application via e.g. ' +
-      "`import('wdio-electron-service/main')` and `import('wdio-electron-service/preload')`?\n\n" +
-      'Find more information at https://webdriver.io/docs/desktop-testing/electron#api-configuration';
-    throw new Error(errMessage);
-  }
-
   const returnValue = await browser.execute(
     function executeWithinElectron(script: string, ...args) {
       return window.wdioElectron.execute(script, args);
