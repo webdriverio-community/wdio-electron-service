@@ -37,7 +37,7 @@
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
-    "@wdio/xvfb": "^9.19.1",
+    "@wdio/xvfb": "catalog:default",
     "electron": "catalog:default",
     "tsx": "^4.20.4",
     "wdio-electron-service": "link:packages/wdio-electron-service",
