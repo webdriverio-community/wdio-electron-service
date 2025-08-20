@@ -140,11 +140,14 @@ jobs:
           if [[ "${{ inputs.release_version }}" == *"pre"* ]]; then
             # Pre-releases always use 'next' tag
             TAG="next"
+          elif [[ "${{ inputs.release_version }}" == *"major"* ]]; then
+            # Major releases always use 'latest' tag (new stable version)
+            TAG="latest"
           elif [[ "${RELEASE_BRANCH}" == "main" ]]; then
             # Regular releases from main use 'latest' tag
             TAG="latest"
           else
-            # LTS releases use 'lts' tag
+            # LTS/maintenance releases use 'lts' tag
             TAG="lts"
           fi
 
