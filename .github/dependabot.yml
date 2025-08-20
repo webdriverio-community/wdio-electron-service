@@ -41,7 +41,6 @@ updates:
       # For `puppeteer-core`, ignore major updates
       - dependency-name: 'puppeteer-core'
         update-types: ['version-update:semver-major']
-
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
@@ -51,11 +50,10 @@ updates:
     labels:
       - 'area:dependencies'
       - 'track:main'
-
   # For maintenance branch
   - package-ecosystem: npm
     directory: '/'
-    target-branch: v7
+    target-branch: v8.x
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -94,10 +92,9 @@ updates:
       # For `puppeteer-core`, ignore major updates
       - dependency-name: 'puppeteer-core'
         update-types: ['version-update:semver-major']
-
   - package-ecosystem: 'github-actions'
     directory: '/'
-    target-branch: v7
+    target-branch: v8.x
     schedule:
       # Check for updates to GitHub Actions every week
       interval: 'weekly'
