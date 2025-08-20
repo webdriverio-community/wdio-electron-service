@@ -645,8 +645,8 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-bundler
       devtools-protocol:
-        specifier: ^0.0.1503134
-        version: 0.0.1503134
+        specifier: ^0.0.1503754
+        version: 0.0.1503754
       get-port:
         specifier: ^7.1.0
         version: 7.1.0
@@ -3027,8 +3027,8 @@ packages:
   devtools-protocol@0.0.1312386:
     resolution: {integrity: sha512-DPnhUXvmvKT2dFA/j7B+riVLUt9Q6RKJlcppojL5CoRywJJKLDYnRlw0gTFKfgDPHP5E04UoB71SxoJlVZy8FA==}
 
-  devtools-protocol@0.0.1503134:
-    resolution: {integrity: sha512-Spf9aYS/Cf8rYhJdyEzcRv6I6XNcFVqfn5nRa5P6P9jF1jyXSdKLY4NOcV5BtNqgrfQmjdE2ABvaoRAuCX35ow==}
+  devtools-protocol@0.0.1503754:
+    resolution: {integrity: sha512-q9Z4YJfDC2Iqe3SdFUHFPpngqkAiRwV6gcNFevDPmyayT8n/BtGUiq0aGOW3e2G4FNhBrH+0iiFlk4xVKs9+BQ==}
 
   diff@5.2.0:
     resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
@@ -8246,7 +8246,7 @@ snapshots:
 
   devtools-protocol@0.0.1312386: {}
 
-  devtools-protocol@0.0.1503134: {}
+  devtools-protocol@0.0.1503754: {}
 
   diff@5.2.0: {}
 
