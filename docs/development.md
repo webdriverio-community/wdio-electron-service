@@ -112,6 +112,8 @@ Below are the task graphs for the E2Es:
 
 ![Mac Universal E2E Task Graph](../.github/assets/e2e-graph-mac-universal.png 'Mac Universal E2E Task Graph')
 
+Note: The E2E runner logs are saved per run in the configured `outputDir` and include service namespaces (e.g., `wdio-electron-service:service`). Enable debug output for all namespaces by setting `DEBUG=wdio-electron-service:*`.
+
 ## Testing - Units
 
 Unit tests (using [Vitest](https://vitest.dev/)) can be run via:
@@ -152,31 +154,29 @@ Task graphs can be updated by running:
 pnpm graph
 ```
 
-## Formatting
+## Formatting & Linting
 
-The repo uses [Prettier](https://prettier.io) for formatting. It is encouraged to format code on save using, e.g. the [Prettier plugin for VSCode](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode), however it is not a requirement; Husky is configured to run Prettier on git pre-commit hook to ensure consistent formatting across the repo.
+The repo uses [Biome](https://biomejs.dev) for formatting and primary lint checks, alongside ESLint for additional rules.
 
-Prettier can be invoked manually via:
+- Format all files:
 
 ```bash
 pnpm format
 ```
 
-And a formatting check (without updating any files) can be performed via:
+- Check formatting only (no writes):
 
 ```bash
 pnpm format:check
 ```
 
-## Linting
-
-ESLint is used for linting, it can be performed via:
+- Lint (Biome + ESLint):
 
 ```bash
 pnpm lint
 ```
 
-and to apply auto-fix for issues raised:
+- Lint with fixes:
 
 ```bash
 pnpm lint:fix

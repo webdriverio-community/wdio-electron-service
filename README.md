@@ -127,16 +127,20 @@ This is because WDIO uses Chrome for Testing to download Chromedriver, which onl
 **[Development](./docs/development.md)** \
 **[Common Issues & Debugging](./docs/common-issues-debugging.md)**
 
+Migration:
+
+- **[v8 → v9](./docs/migration/v8-to-v9.md)**
+
 ## Development
 
 Read the [development doc](./docs/development.md) if you are interested in contributing.
 
 ## Example Integrations
 
-Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./fixtures/e2e-apps/) and [E2Es](./e2e/) directories in this repository.
+Check out our [Electron boilerplate](https://github.com/webdriverio/electron-boilerplate) project that showcases how to integrate WebdriverIO in an example application. You can also have a look at the [Example Apps](./examples/) and [E2Es](./e2e/) directories in this repository.
 
 ## Support
 
-If you are having issues running WDIO with the service you should check the documented [Common Issues](./docs/common-issues.md) in the first instance, then open a discussion in the [main WDIO forum](https://github.com/webdriverio/webdriverio/discussions).
+If you are having issues running WDIO with the service you should check the documented [Common Issues](./docs/common-issues-debugging.md) in the first instance, then open a discussion in the [main WDIO forum](https://github.com/webdriverio/webdriverio/discussions).
 
 The Electron service discussion forum is much less active than the WDIO one, but if the issue you are experiencing is specific to Electron or using the service then you can open a discussion [here](https://github.com/webdriverio-community/wdio-electron-service/discussions).
