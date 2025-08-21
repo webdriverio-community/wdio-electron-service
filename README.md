@@ -4,8 +4,6 @@
   <img src="https://img.shields.io/npm/v/wdio-electron-service" /></a>
 <a href="https://www.npmjs.com/package/wdio-electron-service/v/lts" alt="NPM LTS Version">
   <img src="https://img.shields.io/npm/v/wdio-electron-service/lts" /></a>
-<a href="https://www.npmjs.com/package/wdio-electron-service/v/next" alt="NPM Next Version">
-  <img src="https://img.shields.io/npm/v/wdio-electron-service/next" /></a>
 <a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Downloads">
   <img src="https://img.shields.io/npm/dw/wdio-electron-service" /></a>
 
@@ -26,7 +24,8 @@ Makes testing Electron applications much easier via:
   - supports [Electron Forge](https://www.electronforge.io/), [Electron Builder](https://www.electron.build/) and unpackaged apps
 - 🧩 access Electron APIs within your tests
 - 🕵️ mocking of Electron APIs via a Vitest-like API
-- 🖥️ headless testing support - automatic Xvfb integration for Linux environments (requires WebdriverIO 9.19.1+)
+- 🖥️ headless testing support
+  - automatic Xvfb integration for Linux environments (requires WebdriverIO 9.19.1+)
 
 ## Installation
 
