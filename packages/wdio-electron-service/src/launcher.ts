@@ -117,6 +117,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     const localElectronVersion = await getElectronVersion(pkg);
 
+    // Track unique binary paths for AppArmor workaround
+    const uniqueBinaryPaths = new Set<string>();
+
     await Promise.all(
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion || '';
@@ -146,9 +149,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
-
-          // Apply AppArmor workaround for script-based apps on Linux
-          applyApparmorWorkaround(appBinaryPath);
         } else if (!appBinaryPath) {
           log.info('No app binary specified, attempting to detect one...');
           try {
@@ -161,9 +161,6 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
               if (binaryResult.success && binaryResult.binaryPath) {
                 appBinaryPath = binaryResult.binaryPath;
                 log.info(`Detected app binary at ${appBinaryPath}`);
-
-                // Apply AppArmor workaround for built apps on Linux
-                applyApparmorWorkaround(appBinaryPath);
 
                 // Log any warnings from path generation
                 const warnings = binaryResult.pathGeneration.errors.filter(
@@ -194,6 +191,11 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             log.error(e);
             throw new SevereServiceError((e as Error).message);
           }
+        }
+
+        // Collect binary path for AppArmor workaround (applied once per unique path after loop)
+        if (appBinaryPath) {
+          uniqueBinaryPaths.add(appBinaryPath);
         }
 
         cap.browserName = 'chrome';
@@ -231,6 +233,11 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       log.error(msg);
       throw new SevereServiceError(msg);
     });
+
+    // Apply AppArmor workaround once per session with all discovered binary paths
+    if (uniqueBinaryPaths.size > 0) {
+      applyApparmorWorkaround(Array.from(uniqueBinaryPaths));
+    }
   }
 
   /**

@@ -53,8 +53,10 @@ function isApparmorRestricted(): boolean {
  * Creates a custom AppArmor profile for Electron applications
  * This is a safer alternative to disabling the kernel restriction entirely
  */
-function createElectronApparmorProfile(electronBinaryPath: string): boolean {
-  log.debug(`Starting AppArmor profile creation for binary: ${electronBinaryPath}`);
+function createElectronApparmorProfile(electronBinaryPaths: string[]): boolean {
+  log.debug(
+    `Starting AppArmor profile creation for ${electronBinaryPaths.length} binaries: ${electronBinaryPaths.join(', ')}`,
+  );
   try {
     const profileName = 'electron-wdio-service';
     const profilePath = `/etc/apparmor.d/${profileName}`;
@@ -62,6 +64,10 @@ function createElectronApparmorProfile(electronBinaryPath: string): boolean {
     log.debug(`Profile path: ${profilePath}`);
 
     // Create the AppArmor profile content
+    const binaryPermissions = electronBinaryPaths
+      .map((path) => `  # Allow access to Electron binary: ${path}\n  ${path} rix,`)
+      .join('\n');
+
     const profileContent = `#include <tunables/global>
 
 ${profileName} {
@@ -71,8 +77,8 @@ ${profileName} {
   #include <abstractions/ssl_certs>
   #include <abstractions/user-tmp>
   
-  # Allow access to the Electron binary
-  ${electronBinaryPath} rix,
+  # Allow access to Electron binaries
+${binaryPermissions}
   
   # Allow user namespace creation (the key fix for Ubuntu 24.04)
   capability sys_admin,
@@ -141,8 +147,7 @@ ${profileName} {
 
 /**
  * Applies the AppArmor workaround for Ubuntu 24.04+ Electron issues
- * This should only be called for script-based Electron apps on Linux systems
- * where AppArmor is restricting unprivileged user namespaces
+ * This should be called once per session with all discovered Electron binaries
  *
  * Compatible with:
  * - Ubuntu 24.04+ (primary target)
@@ -154,9 +159,9 @@ ${profileName} {
  * - Linux without AppArmor (RHEL, Fedora, Arch, etc.)
  * - Systems where AppArmor restriction is already disabled
  */
-export function applyApparmorWorkaround(electronBinaryPath: string): void {
+export function applyApparmorWorkaround(electronBinaryPaths: string[]): void {
   log.debug(`=== AppArmor Workaround Check Started ===`);
-  log.debug(`Target Electron binary: ${electronBinaryPath}`);
+  log.debug(`Target Electron binaries: ${electronBinaryPaths.join(', ')}`);
   log.debug(`Platform: ${process.platform}`);
 
   // Only apply on Linux
@@ -181,7 +186,7 @@ export function applyApparmorWorkaround(electronBinaryPath: string): void {
 
   // Try to create custom AppArmor profile
   log.debug('Attempting to create custom AppArmor profile');
-  const profileCreated = createElectronApparmorProfile(electronBinaryPath);
+  const profileCreated = createElectronApparmorProfile(electronBinaryPaths);
   log.debug(`Profile creation result: ${profileCreated ? 'SUCCESS' : 'FAILED'}`);
 
   if (!profileCreated) {
