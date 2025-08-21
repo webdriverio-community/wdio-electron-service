@@ -236,7 +236,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     // Apply AppArmor workaround once per session with all discovered binary paths
     if (uniqueBinaryPaths.size > 0) {
-      applyApparmorWorkaround(Array.from(uniqueBinaryPaths));
+      applyApparmorWorkaround(Array.from(uniqueBinaryPaths), this.#globalOptions.apparmorAutoInstall);
     }
   }
 

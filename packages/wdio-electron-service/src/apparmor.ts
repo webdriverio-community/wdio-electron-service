@@ -1,5 +1,6 @@
 import { execSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import type { ElectronServiceGlobalOptions } from '@wdio/electron-types';
 import { createLogger } from '@wdio/electron-utils';
 
 const log = createLogger('launcher');
@@ -92,10 +93,35 @@ function isApparmorRestricted(): boolean {
 }
 
 /**
+ * Checks if we can run sudo non-interactively
+ */
+function canUseSudo(): boolean {
+  try {
+    // Test if sudo -n (non-interactive) works
+    const result = spawnSync('sudo', ['-n', 'true'], { encoding: 'utf8' });
+    return result.status === 0;
+  } catch (error) {
+    log.debug(`sudo check failed: ${error instanceof Error ? error.message : String(error)}`);
+    return false;
+  }
+}
+
+/**
+ * Checks if we're running as root
+ */
+function isRoot(): boolean {
+  const uid = process.getuid?.();
+  return uid !== undefined && uid === 0;
+}
+
+/**
  * Creates a custom AppArmor profile for Electron applications
  * This is a safer alternative to disabling the kernel restriction entirely
  */
-function createElectronApparmorProfile(electronBinaryPaths: string[]): boolean {
+function createElectronApparmorProfile(
+  electronBinaryPaths: string[],
+  installMode: ElectronServiceGlobalOptions['apparmorAutoInstall'],
+): boolean {
   log.debug(
     `Starting AppArmor profile creation for ${electronBinaryPaths.length} binaries: ${electronBinaryPaths.join(', ')}`,
   );
@@ -153,27 +179,40 @@ ${binaryPermissions}
 }
 `;
 
-    // Check if we can write to /etc/apparmor.d (requires root)
-    log.debug('Checking write permissions for /etc/apparmor.d directory');
-    try {
-      fs.accessSync('/etc/apparmor.d', fs.constants.W_OK);
-      log.debug('Write permissions confirmed for /etc/apparmor.d');
-    } catch (error) {
-      log.debug(`Permission check failed: ${error instanceof Error ? error.message : String(error)}`);
-      log.warn(
-        'Cannot write AppArmor profile: insufficient permissions. Run with sudo or disable AppArmor restriction manually',
-      );
+    // Determine if we should proceed based on install mode and permissions
+    const hasRootAccess = isRoot();
+    const hasSudoAccess = installMode === 'sudo' && canUseSudo();
+    const shouldProceed =
+      installMode === true ? hasRootAccess : installMode === 'sudo' ? hasRootAccess || hasSudoAccess : false;
+
+    if (!shouldProceed) {
+      if (installMode === false) {
+        log.debug('AppArmor auto-install disabled (apparmorAutoInstall: false)');
+      } else if (installMode === true && !hasRootAccess) {
+        log.debug('AppArmor auto-install enabled but not running as root (apparmorAutoInstall: true)');
+      } else if (installMode === 'sudo' && !hasRootAccess && !hasSudoAccess) {
+        log.debug('AppArmor auto-install with sudo enabled but sudo not available (apparmorAutoInstall: "sudo")');
+      }
       return false;
     }
 
-    // Write the profile
-    log.debug('Writing AppArmor profile content to file system');
-    fs.writeFileSync(profilePath, profileContent);
+    // Check if we can write to /etc/apparmor.d (requires root or sudo)
+    log.debug('Checking write permissions for /etc/apparmor.d directory');
+    const needsSudo = !hasRootAccess && hasSudoAccess;
+
+    // Write the profile (using sudo if needed)
+    log.debug(`Writing AppArmor profile content to file system${needsSudo ? ' using sudo' : ''}`);
+    if (needsSudo) {
+      // Use sudo to write the file
+      execSync(`sudo tee ${profilePath} > /dev/null`, { input: profileContent, encoding: 'utf8' });
+    } else {
+      fs.writeFileSync(profilePath, profileContent);
+    }
     log.debug(`AppArmor profile file created at ${profilePath}`);
 
-    // Load the profile
+    // Load the profile (using sudo if needed)
     log.debug('Loading AppArmor profile using apparmor_parser');
-    const parserCommand = `apparmor_parser -r ${profilePath}`;
+    const parserCommand = needsSudo ? `sudo apparmor_parser -r ${profilePath}` : `apparmor_parser -r ${profilePath}`;
     log.debug(`Running command: ${parserCommand}`);
     execSync(parserCommand, { encoding: 'utf8' });
     log.info('Successfully created and loaded custom AppArmor profile for Electron');
@@ -200,16 +239,28 @@ ${binaryPermissions}
  * - Non-Linux platforms (no-op)
  * - Linux without AppArmor (RHEL, Fedora, Arch, etc.)
  * - Systems where AppArmor restriction is already disabled
+ * - CI environments (respects apparmorAutoInstall configuration)
  */
-export function applyApparmorWorkaround(electronBinaryPaths: string[]): void {
+export function applyApparmorWorkaround(
+  electronBinaryPaths: string[],
+  installMode: ElectronServiceGlobalOptions['apparmorAutoInstall'] = false,
+): void {
   log.debug(`=== AppArmor Workaround Check Started ===`);
   log.debug(`Target Electron binaries: ${electronBinaryPaths.join(', ')}`);
   log.debug(`Platform: ${process.platform}`);
+  log.debug(`Install mode: ${installMode}`);
 
   // Only apply on Linux
   if (process.platform !== 'linux') {
     log.debug('Non-Linux platform detected, skipping AppArmor workaround');
     log.debug(`=== AppArmor Workaround Check Completed (Non-Linux) ===`);
+    return;
+  }
+
+  // Skip if auto-install is disabled
+  if (installMode === false) {
+    log.debug('AppArmor auto-install disabled, skipping workaround');
+    log.debug(`=== AppArmor Workaround Check Completed (Disabled) ===`);
     return;
   }
 
@@ -228,7 +279,7 @@ export function applyApparmorWorkaround(electronBinaryPaths: string[]): void {
 
   // Try to create custom AppArmor profile
   log.debug('Attempting to create custom AppArmor profile');
-  const profileCreated = createElectronApparmorProfile(electronBinaryPaths);
+  const profileCreated = createElectronApparmorProfile(electronBinaryPaths, installMode);
   log.debug(`Profile creation result: ${profileCreated ? 'SUCCESS' : 'FAILED'}`);
 
   if (!profileCreated) {

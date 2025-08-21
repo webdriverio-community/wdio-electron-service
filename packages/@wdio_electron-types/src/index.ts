@@ -191,6 +191,15 @@ export type ElectronServiceGlobalOptions = Pick<
    * Number of attempts to connect to the node debugger before giving up.
    */
   cdpBridgeRetryCount?: number;
+  /**
+   * Control automatic installation of AppArmor profiles on Linux if needed.
+   * When false, the service will warn and continue without installing.
+   * @default false
+   * - false (default): never install; warn and continue without AppArmor profile
+   * - true: install only if running as root (no sudo)
+   * - 'sudo': install if root or via non-interactive sudo (`sudo -n`) if available
+   */
+  apparmorAutoInstall?: boolean | 'sudo';
 };
 
 export type ApiCommand = { name: string; bridgeProp: string };
