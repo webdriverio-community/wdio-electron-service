@@ -119,6 +119,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     // Track unique binary paths for AppArmor workaround
     const uniqueBinaryPaths = new Set<string>();
+    let apparmorAutoInstall: ElectronServiceGlobalOptions['apparmorAutoInstall'] =
+      this.#globalOptions.apparmorAutoInstall;
 
     await Promise.all(
       caps.map(async (cap) => {
@@ -138,7 +140,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           appBinaryPath,
           appEntryPoint,
           appArgs = ['--no-sandbox'],
+          apparmorAutoInstall: capApparmorAutoInstall,
         } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
+
+        // Use capability-level apparmorAutoInstall if provided, otherwise keep the existing value
+        if (capApparmorAutoInstall !== undefined) {
+          apparmorAutoInstall = capApparmorAutoInstall;
+        }
 
         if (appEntryPoint) {
           if (appBinaryPath) {
@@ -236,7 +244,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     // Apply AppArmor workaround once per session with all discovered binary paths
     if (uniqueBinaryPaths.size > 0) {
-      applyApparmorWorkaround(Array.from(uniqueBinaryPaths), this.#globalOptions.apparmorAutoInstall);
+      applyApparmorWorkaround(Array.from(uniqueBinaryPaths), apparmorAutoInstall);
     }
   }
 
