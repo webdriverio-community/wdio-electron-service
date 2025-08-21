@@ -2,7 +2,7 @@ import { execSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createLogger } from '@wdio/electron-utils';
 
-const log = createLogger('apparmor');
+const log = createLogger('launcher');
 
 /**
  * Checks if AppArmor is active and the unprivileged user namespace restriction is enabled
