@@ -138,7 +138,7 @@ function createElectronApparmorProfile(
 
     const profileContent = `#include <tunables/global>
 
-${profileName} {
+profile ${profileName} {
   #include <abstractions/base>
   #include <abstractions/nameservice>
   #include <abstractions/openssl>
