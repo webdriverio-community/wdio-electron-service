@@ -6,6 +6,7 @@ import * as commands from './commands/index.js';
 import { execute } from './commands/executeCdp.js';
 import { getDebuggerEndpoint, ElectronCdpBridge } from './bridge.js';
 import { ServiceConfig } from './serviceConfig.js';
+import mockStore from './mockStore.js';
 
 import type { Capabilities } from '@wdio/types';
 import type { AbstractFn, BrowserExtension, ElectronInterface, ElectronType, ExecuteOpts } from '@wdio/electron-types';
@@ -54,6 +55,13 @@ export async function before(
     await waitUntilWindowAvailable(this.browser);
     await copyOriginalApi(this.browser);
   }
+
+  // Install command overrides after all browser setup is complete
+  // This must happen after the Electron API is added to the browser object
+  log.debug('CDP: Installing command overrides after full browser setup is complete');
+  log.debug(`CDP: Service browser instance exists: ${!!this.browser}`);
+  log.debug(`CDP: Browser overwriteCommand available: ${!!this.browser?.overwriteCommand}`);
+  installCommandOverrides.call(this);
 }
 
 function isMultiremote(
@@ -107,4 +115,134 @@ function getElectronAPI(this: ServiceConfig, browser: WebdriverIO.Browser, cdpBr
     restoreAllMocks: commands.restoreAllMocks.bind(this),
   };
   return Object.assign({}, api) as unknown as BrowserExtension['electron'];
+}
+
+/**
+ * Install command overrides to trigger mock updates after DOM interactions
+ */
+function installCommandOverrides(this: ServiceConfig) {
+  if (!this.browser) {
+    log.debug('CDP: installCommandOverrides: No browser instance, skipping');
+    return;
+  }
+
+  log.debug('CDP: Installing command overrides for mock auto-update');
+  log.debug(`CDP: Browser instance type: ${typeof this.browser}`);
+  log.debug(`CDP: Browser has overwriteCommand: ${typeof this.browser.overwriteCommand}`);
+
+  // Commands that trigger DOM interactions and need mock updates
+  const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
+
+  commandsToOverride.forEach((commandName) => {
+    // Override both browser-level and element-level commands
+    log.debug(`CDP: Installing command override for: ${commandName}`);
+    overrideElementCommand.call(this, commandName);
+  });
+
+  log.debug('CDP: Command overrides installation completed');
+}
+
+/**
+ * Override an element-level command to add mock update after execution
+ */
+function overrideElementCommand(this: ServiceConfig, commandName: string) {
+  if (!this.browser) {
+    log.debug(`CDP: overrideElementCommand: No browser for command ${commandName}`);
+    return;
+  }
+
+  log.debug(`CDP: Overriding element command: ${commandName}`);
+  log.debug(`CDP: Browser overwriteCommand type: ${typeof this.browser.overwriteCommand}`);
+
+  try {
+    // Test with a simple function first to make sure overriding works
+    const testOverride = async function (
+      this: WebdriverIO.Element,
+      originalCommand: (...args: unknown[]) => Promise<unknown>,
+      ...args: unknown[]
+    ) {
+      // Use console.log to ensure these messages appear regardless of debug settings
+      console.log(`🚨 CDP COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+      log.debug(`🚨 CDP COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+      log.debug(`CDP Command args:`, args);
+      log.debug(`CDP Element context:`, typeof this);
+
+      // Execute the original command
+      console.log(`CDP: Executing original ${commandName} command...`);
+      log.debug(`CDP: Executing original ${commandName} command...`);
+      const result = await originalCommand.apply(this, args);
+      console.log(`CDP: Original command ${commandName} completed`);
+      log.debug(`CDP: Original command ${commandName} completed with result:`, typeof result);
+
+      // Update all mocks after the command completes
+      console.log(`🎯 CDP: Calling updateAllMocks after ${commandName}...`);
+      log.debug(`🎯 CDP: Calling updateAllMocks after ${commandName}...`);
+      await updateAllMocks();
+      console.log(`✅ CDP: updateAllMocks completed after ${commandName}`);
+      log.debug(`✅ CDP: updateAllMocks completed after ${commandName}`);
+
+      return result;
+    };
+
+    // Override element commands by attaching to element prototype
+    this.browser.overwriteCommand(commandName as any, testOverride, true);
+
+    log.debug(`CDP: Successfully overrode element command: ${commandName}`);
+
+    // Also try browser-level override as backup
+    log.debug(`CDP: Also installing browser-level override for ${commandName}...`);
+    this.browser.overwriteCommand(
+      commandName as any,
+      async function (
+        this: WebdriverIO.Browser,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        log.debug(`🚨 CDP: BROWSER-LEVEL COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+
+        const result = await originalCommand.apply(this, args);
+        log.debug(`CDP: Browser-level ${commandName} completed`);
+
+        log.debug(`🎯 CDP: Browser-level calling updateAllMocks after ${commandName}...`);
+        await updateAllMocks();
+        log.debug(`✅ CDP: Browser-level updateAllMocks completed after ${commandName}`);
+
+        return result;
+      },
+      false,
+    ); // false = browser level
+
+    log.debug(`CDP: Successfully overrode browser command: ${commandName}`);
+  } catch (error) {
+    log.debug(`CDP: Error overriding command ${commandName}:`, error);
+    log.debug(`CDP: Error details:`, error instanceof Error ? error.message : String(error));
+  }
+}
+
+/**
+ * Update all existing mocks
+ */
+async function updateAllMocks() {
+  log.debug('CDP: updateAllMocks called');
+  const mocks = mockStore.getMocks();
+  log.debug(`CDP: Found ${mocks.length} mocks to update`);
+
+  if (mocks.length === 0) {
+    log.debug('CDP: No mocks to update, returning');
+    return;
+  }
+
+  try {
+    log.debug('CDP: Starting mock update batch');
+    await Promise.all(
+      mocks.map(async ([mockId, mock]) => {
+        log.debug(`CDP: Updating mock: ${mockId}`);
+        await mock.update();
+        log.debug(`CDP: Mock update completed: ${mockId}`);
+      }),
+    );
+    log.debug('CDP: All mock updates completed successfully');
+  } catch (error) {
+    log.debug('CDP: Mock update batch failed:', error);
+  }
 }

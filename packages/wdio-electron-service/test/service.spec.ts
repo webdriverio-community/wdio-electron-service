@@ -1,9 +1,8 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
-import type { BrowserExtension, ElectronMock } from '@wdio/electron-types';
+import type { BrowserExtension } from '@wdio/electron-types';
 
 import { mockProcessProperty } from './helpers.js';
 import * as commands from '../src/commands/index.js';
-import mockStore from '../src/mockStore.js';
 import ElectronWorkerService from '../src/service.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus } from '../src/window.js';
 import { waitUntilWindowAvailable } from '../src/serviceCdp.js';
@@ -201,53 +200,17 @@ describe('Electron Worker Service', () => {
     });
   });
 
-  describe('afterCommand()', () => {
-    let mocks: [string, ElectronMock][] = [];
+  describe('command overrides', () => {
+    it('should install command overrides during setup', async () => {
+      browser.overwriteCommand = vi.fn();
 
-    vi.mock('../src/mockStore', () => ({
-      default: {
-        getMocks: vi.fn(),
-      },
-    }));
-
-    beforeEach(() => {
-      vi.mocked(mockStore.getMocks).mockImplementation(() => mocks);
-    });
-
-    it.each(['deleteSession'])('should not update mocks when the command is %s', async (commandName: string) => {
       instance = new ElectronWorkerService({ useCdpBridge: false }, {});
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand(commandName, [['look', 'some', 'args']]);
+      await instance.before({}, [], browser);
 
-      expect(mocks[0][1].update).not.toHaveBeenCalled();
-      expect(mocks[1][1].update).not.toHaveBeenCalled();
-    });
-
-    it('should not update mocks when the command is `execute` and internal is set', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand('execute', [['look', 'some', 'args'], { internal: true }]);
-
-      expect(mocks[0][1].update).not.toHaveBeenCalled();
-      expect(mocks[1][1].update).not.toHaveBeenCalled();
-    });
-
-    it('should update mocks when the command is `execute` and internal is not set', async () => {
-      instance = new ElectronWorkerService({ useCdpBridge: false }, {});
-      mocks = [
-        ['electron.app.getName', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-        ['electron.app.getVersion', { update: vi.fn().mockResolvedValue({}) } as unknown as ElectronMock],
-      ];
-      await instance.afterCommand('execute', [['look', 'some', 'args']]);
-
-      expect(mocks[0][1].update).toHaveBeenCalled();
-      expect(mocks[1][1].update).toHaveBeenCalled();
+      expect(browser.overwriteCommand).toHaveBeenCalledWith('click', expect.any(Function), true);
+      expect(browser.overwriteCommand).toHaveBeenCalledWith('doubleClick', expect.any(Function), true);
+      expect(browser.overwriteCommand).toHaveBeenCalledWith('setValue', expect.any(Function), true);
+      expect(browser.overwriteCommand).toHaveBeenCalledWith('clearValue', expect.any(Function), true);
     });
   });
 
