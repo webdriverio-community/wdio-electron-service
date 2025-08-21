@@ -31,6 +31,29 @@ const initSerializationWorkaround = async (browser: WebdriverIO.Browser) => {
 
 const isInternalCommand = (args: unknown[]) => Boolean((args.at(-1) as ExecuteOpts)?.internal);
 
+const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
+  await browser.electron.execute<void, [ExecuteOpts]>(
+    async (electron) => {
+      const { default: copy } = await import('fast-copy');
+      globalThis.originalApi = {} as unknown as Record<
+        import('@wdio/electron-types').ElectronInterface,
+        import('@wdio/electron-types').ElectronType[import('@wdio/electron-types').ElectronInterface]
+      >;
+      for (const api in electron) {
+        const apiName = api as keyof import('@wdio/electron-types').ElectronType;
+        globalThis.originalApi[apiName] =
+          {} as import('@wdio/electron-types').ElectronType[import('@wdio/electron-types').ElectronInterface];
+        for (const apiElement in electron[apiName]) {
+          const apiElementName =
+            apiElement as keyof import('@wdio/electron-types').ElectronType[import('@wdio/electron-types').ElectronInterface];
+          globalThis.originalApi[apiName][apiElementName] = copy(electron[apiName][apiElementName]);
+        }
+      }
+    },
+    { internal: true },
+  );
+};
+
 export default class ElectronWorkerService extends ServiceConfig implements Services.ServiceInstance {
   constructor(
     globalOptions: ElectronServiceGlobalOptions = {},
@@ -103,12 +126,14 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
+        await copyOriginalApi(mrInstance);
       }
     } else {
       const puppeteer = await getPuppeteer(this.browser);
       this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(this.browser);
+      await copyOriginalApi(this.browser);
     }
 
     // Install command overrides after all browser setup is complete
