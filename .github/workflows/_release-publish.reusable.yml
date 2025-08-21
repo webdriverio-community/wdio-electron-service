@@ -144,15 +144,15 @@ jobs:
             else
               TAG="next"
             fi
-          elif [[ "${{ inputs.release_version }}" == *"major"* ]]; then
-            # Major releases always use 'latest' tag (new stable version)
-            TAG="latest"
           elif [[ "${RELEASE_BRANCH}" == "main" ]]; then
-            # Regular releases from main use 'latest' tag
+            # Regular releases from main use 'latest' tag (patch, minor, major)
             TAG="latest"
-          else
+          elif [[ "${RELEASE_BRANCH}" == "maintenance" ]]; then
             # LTS/maintenance releases use 'lts' tag
             TAG="lts"
+          else
+            # Feature branch releases (should typically be pre-releases)
+            TAG="next"
           fi
 
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
