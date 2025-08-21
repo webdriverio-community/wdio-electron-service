@@ -182,8 +182,11 @@ describe('apparmor', () => {
 
         expect(mockFs.writeFileSync).toHaveBeenCalledWith(
           '/etc/apparmor.d/electron-wdio-service',
-          expect.stringContaining('/path/to/electron rix,'),
+          expect.stringContaining('profile electron-electron-wdio-service "/path/to/electron" flags=(unconfined)'),
         );
+
+        const profileContent = mockFs.writeFileSync.mock.calls[0][1] as string;
+        expect(profileContent).toContain('userns,');
         expect(mockExecSync).toHaveBeenCalledWith('apparmor_parser -r /etc/apparmor.d/electron-wdio-service', {
           encoding: 'utf8',
         });
@@ -202,8 +205,15 @@ describe('apparmor', () => {
 
         expect(mockExecSync).toHaveBeenCalledWith(
           'sudo tee /etc/apparmor.d/electron-wdio-service > /dev/null',
-          expect.objectContaining({ input: expect.stringContaining('/path/to/electron rix,') }),
+          expect.objectContaining({
+            input: expect.stringContaining(
+              'profile electron-electron-wdio-service "/path/to/electron" flags=(unconfined)',
+            ),
+          }),
         );
+
+        const profileContent = mockExecSync.mock.calls[0][1].input as string;
+        expect(profileContent).toContain('userns,');
         expect(mockExecSync).toHaveBeenCalledWith('sudo apparmor_parser -r /etc/apparmor.d/electron-wdio-service', {
           encoding: 'utf8',
         });
@@ -240,8 +250,13 @@ describe('apparmor', () => {
         applyApparmorWorkaround(binaryPaths, true);
 
         const profileContent = mockFs.writeFileSync.mock.calls[0][1] as string;
-        expect(profileContent).toContain('/path/to/electron1 rix,');
-        expect(profileContent).toContain('/path/to/electron2 rix,');
+        expect(profileContent).toContain(
+          'profile electron1-electron-wdio-service "/path/to/electron1" flags=(unconfined)',
+        );
+        expect(profileContent).toContain(
+          'profile electron2-electron-wdio-service "/path/to/electron2" flags=(unconfined)',
+        );
+        expect(profileContent).toContain('userns,');
       });
 
       it('should handle profile creation failure gracefully', () => {
