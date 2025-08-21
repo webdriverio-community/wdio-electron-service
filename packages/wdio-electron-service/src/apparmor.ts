@@ -186,9 +186,7 @@ ${binaryPermissions}
       installMode === true ? hasRootAccess : installMode === 'sudo' ? hasRootAccess || hasSudoAccess : false;
 
     if (!shouldProceed) {
-      if (installMode === false) {
-        log.debug('AppArmor auto-install disabled (apparmorAutoInstall: false)');
-      } else if (installMode === true && !hasRootAccess) {
+      if (installMode === true && !hasRootAccess) {
         log.debug('AppArmor auto-install enabled but not running as root (apparmorAutoInstall: true)');
       } else if (installMode === 'sudo' && !hasRootAccess && !hasSudoAccess) {
         log.debug('AppArmor auto-install with sudo enabled but sudo not available (apparmorAutoInstall: "sudo")');
