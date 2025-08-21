@@ -131,53 +131,23 @@ function createElectronApparmorProfile(
     log.debug(`Profile name: ${profileName}`);
     log.debug(`Profile path: ${profilePath}`);
 
-    // Create the AppArmor profile content
-    const binaryPermissions = electronBinaryPaths
-      .map((path) => `  # Allow access to Electron binary: ${path}\n  ${path} rix,`)
-      .join('\n');
+    // Create individual profiles for each Electron binary using Ubuntu's recommended approach
+    const profiles = electronBinaryPaths.map((binaryPath) => {
+      const binaryName = binaryPath.split('/').pop() || 'electron';
+      return `# AppArmor profile for Electron binary: ${binaryPath}
+# This profile allows unprivileged user namespaces for Electron on Ubuntu 24.04+
+abi <abi/4.0>,
+include <tunables/global>
 
-    const profileContent = `#include <tunables/global>
+profile ${binaryName}-${profileName} "${binaryPath}" flags=(unconfined) {
+  userns,
+  
+  # Site-specific additions and overrides
+  include if exists <local/${binaryName}-${profileName}>
+}`;
+    });
 
-profile ${profileName} {
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
-  #include <abstractions/openssl>
-  #include <abstractions/ssl_certs>
-  #include <abstractions/user-tmp>
-
-  # Allow access to Electron binaries
-${binaryPermissions}
-
-  # Allow user namespace creation (the key fix for Ubuntu 24.04)
-  capability sys_admin,
-
-  # Allow standard Electron operations
-  /usr/bin/xdg-open rix,
-  /proc/sys/kernel/yama/ptrace_scope r,
-  /sys/devices/system/cpu/online r,
-
-  # Allow access to user data directories
-  owner @{HOME}/.config/** rwk,
-  owner @{HOME}/.cache/** rwk,
-  owner @{PROC}/@{pid}/fd/ r,
-  owner @{PROC}/@{pid}/stat r,
-  owner @{PROC}/@{pid}/statm r,
-
-  # Allow network access
-  network inet stream,
-  network inet6 stream,
-
-  # Allow reading system information
-  /proc/meminfo r,
-  /proc/version r,
-  /sys/devices/system/cpu/** r,
-
-  # Deny some potentially dangerous operations
-  deny @{HOME}/.ssh/** rw,
-  deny /etc/passwd r,
-  deny /etc/shadow r,
-}
-`;
+    const profileContent = profiles.join('\n\n');
 
     // Determine if we should proceed based on install mode and permissions
     const hasRootAccess = isRoot();
