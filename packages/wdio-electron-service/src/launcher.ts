@@ -14,6 +14,7 @@ import type { Capabilities, Options, Services } from '@wdio/types';
 import getPort from 'get-port';
 import { type NormalizedReadResult, readPackageUp } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
+import { applyApparmorWorkaround } from './apparmor.js';
 import {
   getChromedriverOptions,
   getChromeOptions,
@@ -145,6 +146,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
+
+          // Apply AppArmor workaround for script-based apps on Linux
+          applyApparmorWorkaround(appBinaryPath);
         } else if (!appBinaryPath) {
           log.info('No app binary specified, attempting to detect one...');
           try {
