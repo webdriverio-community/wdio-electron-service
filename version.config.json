@@ -5,5 +5,6 @@
   "commitMessage": "release ${version} [skip-ci]",
   "synced": true,
   "mainPackage": "wdio-electron-service",
-  "packages": ["packages/*"]
+  "packages": ["packages/**/*"],
+  "prereleaseIdentifier": "next"
 }
