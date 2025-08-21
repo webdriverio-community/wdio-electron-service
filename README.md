@@ -26,10 +26,13 @@ Makes testing Electron applications much easier via:
   - supports [Electron Forge](https://www.electronforge.io/), [Electron Builder](https://www.electron.build/) and unpackaged apps
 - 🧩 access Electron APIs within your tests
 - 🕵️ mocking of Electron APIs via a Vitest-like API
+- 🖥️ headless testing support - automatic Xvfb integration for Linux environments (requires WebdriverIO 9.19.1+)
 
 ## Installation
 
 You will need to install `WebdriverIO`, instructions can be found [here](https://webdriver.io/docs/gettingstarted).
+
+**Note:** WebdriverIO 9.19.1+ is required for automatic Xvfb support via the `autoXvfb` configuration option. For legacy WDIO versions, you'll need to use external tools like `xvfb-maybe` or manually set up Xvfb for headless testing on Linux. See the [Common Issues & Debugging](./docs/common-issues-debugging.md) section for more details on Xvfb setup.
 
 ## Quick Start
 
@@ -54,10 +57,10 @@ _`wdio.conf.ts`_
 ```ts
 export const config = {
   // ...
-  services: ['electron'],
+  services: ["electron"],
   capabilities: [
     {
-      browserName: 'electron',
+      browserName: "electron",
     },
   ],
   // ...
@@ -77,10 +80,10 @@ export const config = {
   // ...
   capabilities: [
     {
-      'browserName': 'electron',
-      'wdio:electronServiceOptions': {
-        appBinaryPath: './path/to/built/electron/app.exe',
-        appArgs: ['foo', 'bar=baz'],
+      browserName: "electron",
+      "wdio:electronServiceOptions": {
+        appBinaryPath: "./path/to/built/electron/app.exe",
+        appArgs: ["foo", "bar=baz"],
       },
     },
   ],
@@ -99,10 +102,10 @@ export const config = {
   // ...
   capabilities: [
     {
-      'browserName': 'electron',
-      'wdio:electronServiceOptions': {
-        appEntryPoint: './path/to/bundled/electron/main.bundle.js',
-        appArgs: ['foo', 'bar=baz'],
+      browserName: "electron",
+      "wdio:electronServiceOptions": {
+        appEntryPoint: "./path/to/bundled/electron/main.bundle.js",
+        appArgs: ["foo", "bar=baz"],
       },
     },
   ],
