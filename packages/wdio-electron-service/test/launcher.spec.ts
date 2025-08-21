@@ -581,18 +581,44 @@ describe('Electron Launch Service', () => {
         });
       });
 
-      it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
+      it('should use readPackageUp result for electron binary path with appEntryPoint instead of rootDir', async () => {
+        // This test verifies the fix works by ensuring it uses the directory where
+        // package.json is found, rather than always using the rootDir
+        delete options.appBinaryPath;
+        options.appEntryPoint = 'path/to/main.bundle.js';
+
+        // Use the fixture directory so readPackageUp will find a package.json
+        const fixtureDir = getFixtureDir(type, 'no-build-tool');
         instance = new LaunchService(
           options,
           [] as never,
           {
             services: [['electron', options]],
-            rootDir: getFixtureDir(type, 'no-electron'),
+            rootDir: fixtureDir,
           } as Options.Testrunner,
         );
+
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+
+        await instance?.onPrepare({} as never, capabilities);
+
+        // The binary path should be based on where package.json was found
+        // In this case, it should be the fixture directory + node_modules/.bin/electron
+        expect(capabilities[0]['goog:chromeOptions']?.binary).toBe(
+          path.join(fixtureDir, 'node_modules', '.bin', 'electron'),
+        );
+      });
+
+      it('should set the expected capabilities when setting custom chromedriverOptions', async () => {
         const capabilities: WebdriverIO.Capabilities[] = [
           {
             'browserName': 'electron',
+            'browserVersion': '26.2.2',
             'wdio:chromedriverOptions': {
               binary: '/path/to/chromedriver',
             },
@@ -601,6 +627,7 @@ describe('Electron Launch Service', () => {
         await instance?.onPrepare({} as never, capabilities);
         expect(capabilities[0]).toEqual({
           'browserName': 'chrome',
+          'browserVersion': '116.0.5845.190',
           'goog:chromeOptions': {
             args: [],
             binary: 'workspace/my-test-app/dist/my-test-app',
