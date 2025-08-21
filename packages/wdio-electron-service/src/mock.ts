@@ -48,6 +48,46 @@ export async function createMock(apiName: string, funcName: string, browserConte
 
   mock.__isElectronMock = true;
 
+  // Store the original mock property for later auto-update setup
+  const originalMock = outerMock.mock;
+
+  // APPROACH: Wrapper Object Strategy
+  // Since we can't modify the Vitest mock's 'mock' property (it's non-configurable),
+  // we'll create a wrapper object that provides auto-updating functionality
+
+  log.debug(`[${apiName}.${funcName}] Creating auto-updating mock wrapper object`);
+
+  // Create a wrapper function that delegates to the original mock function
+  // but also provides auto-updating mock data
+  const wrapperMock = ((...args: unknown[]) => {
+    // Delegate to the original mock function
+    return (mock as (...args: unknown[]) => unknown)(...args);
+  }) as ElectronMock;
+
+  // Copy all properties and methods from the original mock to the wrapper
+  Object.setPrototypeOf(wrapperMock, Object.getPrototypeOf(mock));
+  Object.getOwnPropertyNames(mock).forEach((key) => {
+    if (key !== 'mock' && key !== 'length' && key !== 'name') {
+      try {
+        const descriptor = Object.getOwnPropertyDescriptor(mock, key);
+        if (descriptor) {
+          Object.defineProperty(wrapperMock, key, descriptor);
+        }
+      } catch (_error) {
+        // Skip properties that can't be copied
+      }
+    }
+  });
+
+  // Expose the original vitest mock state on the wrapper for matcher compatibility
+  Object.defineProperty(wrapperMock, 'mock', {
+    configurable: false,
+    enumerable: false,
+    get() {
+      return originalMock;
+    },
+  });
+
   // Use provided browser context or fallback to global browser
   const browserToUse = browserContext || browser;
   log.debug(`[${apiName}.${funcName}] Using browser context:`, typeof browserToUse);
@@ -82,10 +122,14 @@ export async function createMock(apiName: string, funcName: string, browserConte
       { internal: true },
     );
 
+    log.debug(
+      `[${apiName}.${funcName}] Retrieved ${calls.length} calls from inner mock, outer mock has ${originalMock.calls.length} calls`,
+    );
+
     // re-apply calls from the electron main process mock to the outer one
-    if (mock.mock.calls.length < calls.length) {
+    if (originalMock.calls.length < calls.length) {
       calls.forEach((call: unknown[], index: number) => {
-        if (!mock.mock.calls[index]) {
+        if (!originalMock.calls[index]) {
           mock?.apply(mock, call);
         }
       });
@@ -301,5 +345,27 @@ export async function createMock(apiName: string, funcName: string, browserConte
     );
   };
 
-  return mock;
+  // Ensure all mock methods are properly bound to the wrapper
+  wrapperMock.mockImplementation = mock.mockImplementation.bind(mock);
+  wrapperMock.mockImplementationOnce = mock.mockImplementationOnce.bind(mock);
+  wrapperMock.mockReturnValue = mock.mockReturnValue.bind(mock);
+  wrapperMock.mockReturnValueOnce = mock.mockReturnValueOnce.bind(mock);
+  wrapperMock.mockResolvedValue = mock.mockResolvedValue.bind(mock);
+  wrapperMock.mockResolvedValueOnce = mock.mockResolvedValueOnce.bind(mock);
+  wrapperMock.mockRejectedValue = mock.mockRejectedValue.bind(mock);
+  wrapperMock.mockRejectedValueOnce = mock.mockRejectedValueOnce.bind(mock);
+  wrapperMock.mockClear = mock.mockClear.bind(mock);
+  wrapperMock.mockReset = mock.mockReset.bind(mock);
+  wrapperMock.mockRestore = mock.mockRestore.bind(mock);
+  wrapperMock.mockReturnThis = mock.mockReturnThis.bind(mock);
+  wrapperMock.withImplementation = mock.withImplementation.bind(mock);
+  wrapperMock.update = mock.update.bind(mock);
+
+  // Set additional properties
+  wrapperMock.__isElectronMock = true;
+
+  log.debug(`[${apiName}.${funcName}] Auto-updating mock wrapper created successfully`);
+
+  // Return the wrapper instead of the original mock
+  return wrapperMock;
 }
