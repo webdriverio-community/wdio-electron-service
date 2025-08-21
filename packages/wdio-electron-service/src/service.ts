@@ -114,6 +114,8 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     // Install command overrides after all browser setup is complete
     // This must happen after the Electron API is added to the browser object
     log.debug('Installing command overrides after full browser setup is complete');
+    log.debug(`Service browser instance exists: ${!!this.browser}`);
+    log.debug(`Browser overwriteCommand available: ${!!this.browser?.overwriteCommand}`);
     this.installCommandOverrides();
   }
 
@@ -170,35 +172,45 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     }
 
     log.debug(`Overriding element command: ${commandName}`);
+    log.debug(`Browser overwriteCommand type: ${typeof this.browser.overwriteCommand}`);
 
     try {
+      // Test with a simple function first to make sure overriding works
+      const testOverride = async function (
+        this: WebdriverIO.Element,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        // Use console.log to ensure these messages appear regardless of debug settings
+        console.log(`🚨 COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+        log.debug(`🚨 COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
+        log.debug(`Command args:`, args);
+        log.debug(`Element context:`, typeof this);
+
+        // Execute the original command
+        console.log(`Executing original ${commandName} command...`);
+        log.debug(`Executing original ${commandName} command...`);
+        const result = await originalCommand.apply(this, args);
+        console.log(`Original command ${commandName} completed`);
+        log.debug(`Original command ${commandName} completed with result:`, typeof result);
+
+        // Update all mocks after the command completes
+        console.log(`🎯 Calling updateAllMocks after ${commandName}...`);
+        log.debug(`🎯 Calling updateAllMocks after ${commandName}...`);
+        await updateAllMocks();
+        console.log(`✅ updateAllMocks completed after ${commandName}`);
+        log.debug(`✅ updateAllMocks completed after ${commandName}`);
+
+        return result;
+      };
+
       // Override element commands by attaching to element prototype
-      this.browser.overwriteCommand(
-        commandName as any,
-        async function (
-          this: WebdriverIO.Element,
-          originalCommand: (...args: unknown[]) => Promise<unknown>,
-          ...args: unknown[]
-        ) {
-          log.debug(`Command override triggered for ${commandName}`);
-
-          // Execute the original command
-          const result = await originalCommand.apply(this, args);
-          log.debug(`Original command ${commandName} completed`);
-
-          // Update all mocks after the command completes
-          log.debug(`Calling updateAllMocks after ${commandName}...`);
-          await updateAllMocks();
-          log.debug(`updateAllMocks completed after ${commandName}`);
-
-          return result;
-        },
-        true,
-      ); // true = element level
+      this.browser.overwriteCommand(commandName as any, testOverride, true);
 
       log.debug(`Successfully overrode element command: ${commandName}`);
 
       // Also try browser-level override as backup
+      log.debug(`Also installing browser-level override for ${commandName}...`);
       this.browser.overwriteCommand(
         commandName as any,
         async function (
@@ -206,14 +218,14 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
           originalCommand: (...args: unknown[]) => Promise<unknown>,
           ...args: unknown[]
         ) {
-          log.debug(`Browser-level command override triggered for ${commandName}`);
+          log.debug(`🚨 BROWSER-LEVEL COMMAND OVERRIDE TRIGGERED FOR ${commandName.toUpperCase()} 🚨`);
 
           const result = await originalCommand.apply(this, args);
           log.debug(`Browser-level ${commandName} completed`);
 
-          log.debug(`Browser-level calling updateAllMocks after ${commandName}...`);
+          log.debug(`🎯 Browser-level calling updateAllMocks after ${commandName}...`);
           await updateAllMocks();
-          log.debug(`Browser-level updateAllMocks completed after ${commandName}`);
+          log.debug(`✅ Browser-level updateAllMocks completed after ${commandName}`);
 
           return result;
         },
@@ -223,6 +235,7 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
       log.debug(`Successfully overrode browser command: ${commandName}`);
     } catch (error) {
       log.debug(`Error overriding command ${commandName}:`, error);
+      log.debug(`Error details:`, error instanceof Error ? error.message : String(error));
     }
   }
 
