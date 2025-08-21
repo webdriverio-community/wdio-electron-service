@@ -88,8 +88,8 @@ jobs:
         run: |
           if [ "${BRANCH_TYPE}" == 'feature' ]; then
             # For feature branches, use as-is
-            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x"
-            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}.x" >> $GITHUB_OUTPUT
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}"
+            echo "target_branch=feature/v${FEATURE_MAJOR_VERSION}" >> $GITHUB_OUTPUT
           elif [ "${BRANCH_TYPE}" == 'maintenance' ]; then
             # For maintenance branches, use as-is
             echo "target_branch=v${LTS_MAJOR_VERSION}.x"
@@ -115,7 +115,7 @@ jobs:
           if ! git ls-remote --heads origin "${TARGET_BRANCH}" | grep -q "${TARGET_BRANCH}"; then
             if [ "${BRANCH_TYPE}" == "feature" ]; then
               echo "::error::Feature branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
-              echo "::error::Expected branch naming convention: feature/v{next_major_version} (e.g., feature/v9)"
+              echo "::error::Expected branch naming convention: feature/v{next_major_version} (e.g., feature/v10)"
             elif [ "${BRANCH_TYPE}" == "maintenance" ]; then
               echo "::error::Maintenance branch '${TARGET_BRANCH}' does not exist. Please create this branch first or specify a different branch."
               echo "::error::Expected branch naming convention: v{previous_major_version} (e.g., v8)"
