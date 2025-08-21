@@ -23,7 +23,6 @@ Custom actions in `.github/workflows/actions/`:
 Our CI pipeline uses a single-source-of-truth approach for build artifacts:
 
 - **Linux Build Job**: Generates artifacts used by all downstream jobs
-
   - Creates consistent, reliable build artifacts across all platforms
   - Produces a single cache key that's passed to all dependent jobs
   - Ensures exact same build artifacts are used in all tests
@@ -40,7 +39,6 @@ This approach ensures maximum reliability in artifact sharing while still valida
 Our workflows implement a robust two-tier storage approach for build artifacts:
 
 - **Primary Storage: GitHub Actions Cache**
-
   - 90-day retention (vs. 1-day for standard artifacts)
   - Faster access times for subsequent jobs
   - Deterministic keys based on runner OS, workflow run ID, and content hash
