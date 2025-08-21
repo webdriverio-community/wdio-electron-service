@@ -36,19 +36,19 @@
   },
   "dependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "debug": "^4.4.1",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.43.0",
-    "rollup-plugin-node-externals": "^8.0.0"
+    "rollup": "^4.46.4",
+    "rollup-plugin-node-externals": "^8.0.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@types/node": "^24.0.3",
-    "@vitest/coverage-v8": "^3.2.3",
+    "@types/node": "^24.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "shx": "^0.4.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/*"

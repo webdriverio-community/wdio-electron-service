@@ -38,18 +38,18 @@
   "dependencies": {
     "@wdio/electron-utils": "workspace:*",
     "wait-port": "^1.1.0",
-    "ws": "^8.18.2"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.3.0",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^3.2.3",
+    "@vitest/coverage-v8": "^3.2.4",
     "@wdio/electron-bundler": "workspace:*",
-    "devtools-protocol": "^0.0.1473885",
+    "devtools-protocol": "^0.0.1503754",
     "get-port": "^7.1.0",
-    "nock": "^14.0.5",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "nock": "^14.0.10",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/*"

@@ -15,19 +15,19 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.8.1",
-    "@rollup/plugin-commonjs": "^28.0.5",
+    "@electron-forge/cli": "^7.8.3",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^24.0.3",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/node": "^24.3.0",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
-    "rollup": "^4.43.0",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
+    "rollup": "^4.46.4",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
     "webdriverio": "catalog:default"
   }
 }
