@@ -37,7 +37,6 @@ async function restoreElectronFunctionality(apiName: string, funcName: string, b
 
 export async function createMock(apiName: string, funcName: string, browserContext?: WebdriverIO.Browser) {
   log.debug(`[${apiName}.${funcName}] createMock called - starting mock creation`);
-  console.log(`[MOCK-DEBUG] createMock called for ${apiName}.${funcName}`);
   const outerMock = vitestFn();
   const outerMockImplementation = outerMock.mockImplementation;
   const outerMockImplementationOnce = outerMock.mockImplementationOnce;
