@@ -78,7 +78,8 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             log.warn('Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored');
           }
           const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-          appBinaryPath = path.join(this.#projectRoot, 'node_modules', '.bin', electronBinary);
+          const packageDir = path.dirname(pkg.path);
+          appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
         } else if (!appBinaryPath) {
