@@ -7,6 +7,7 @@ import type {
   ElectronType,
   ExecuteOpts,
 } from '@wdio/electron-types';
+import log from '@wdio/electron-utils/log';
 
 async function restoreElectronFunctionality(apiName: string, funcName: string, browserContext?: WebdriverIO.Browser) {
   const browserToUse = browserContext || browser;
