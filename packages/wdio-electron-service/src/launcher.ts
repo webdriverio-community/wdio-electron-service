@@ -43,7 +43,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
     const caps = capsList.flatMap((cap) => getElectronCapabilities(cap) as WebdriverIO.Capabilities);
     const pkg =
       (await readPackageUp({ cwd: this.#projectRoot })) ||
-      ({ packageJson: { dependencies: {}, devDependencies: {} } } as NormalizedReadResult);
+      ({ packageJson: { dependencies: {}, devDependencies: {} }, path: path.join(this.#projectRoot, 'package.json') } as NormalizedReadResult);
 
     if (!caps.length) {
       const noElectronCapabilityError = new Error('No Electron browser found in capabilities');
@@ -78,7 +78,7 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
             log.warn('Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored');
           }
           const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-          const packageDir = path.dirname(pkg.path);
+          const packageDir = pkg.path ? path.dirname(pkg.path) : this.#projectRoot;
           appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
           appArgs = [`--app=${appEntryPoint}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
