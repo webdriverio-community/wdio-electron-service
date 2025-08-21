@@ -14,12 +14,10 @@ To start with development, use e.g. [NVM](https://github.com/nvm-sh/nvm) to inst
 The project uses a catalog system to manage dependencies across all packages. There are three catalogs:
 
 1. **`default`**: Production-ready configuration using stable versions
-
    - Example: `electron: "catalog:default"` (resolves to version ^32.0.1)
    - Provides a reliable, well-tested baseline
 
 2. **`next`**: Forward-looking configuration with latest versions
-
    - Example: `electron-nightly: "catalog:next"` (latest nightly builds)
    - Validates compatibility with upcoming changes
 

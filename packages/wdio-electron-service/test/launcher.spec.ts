@@ -610,7 +610,7 @@ describe('Electron Launch Service', () => {
         // The binary path should be based on where package.json was found
         // In this case, it should be the fixture directory + node_modules/.bin/electron
         expect(capabilities[0]['goog:chromeOptions']?.binary).toBe(
-          path.join(fixtureDir, 'node_modules', '.bin', 'electron')
+          path.join(fixtureDir, 'node_modules', '.bin', 'electron'),
         );
       });
 
