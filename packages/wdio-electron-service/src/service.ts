@@ -110,6 +110,11 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(this.browser);
     }
+
+    // Install command overrides after all browser setup is complete
+    // This must happen after the Electron API is added to the browser object
+    log.debug('Installing command overrides after full browser setup is complete');
+    this.installCommandOverrides();
   }
 
   async beforeTest() {
@@ -132,41 +137,116 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
     await ensureActiveWindowFocus(this.browser, commandName);
   }
 
-  async afterCommand(commandName: string, args: unknown[]) {
-    // ensure mocks are updated
-    const mocks = mockStore.getMocks();
+  /**
+   * Install command overrides to trigger mock updates after DOM interactions
+   */
+  private installCommandOverrides() {
+    if (!this.browser) {
+      log.debug('installCommandOverrides: No browser instance, skipping');
+      return;
+    }
 
-    // White list of command which will input user actions to electron app.
-    const inputCommands = [
-      'addValue',
-      'clearValue',
-      'click',
-      'doubleClick',
-      'dragAndDrop',
-      'execute',
-      'executeAsync',
-      'moveTo',
-      'scrollIntoView',
-      'selectByAttribute',
-      'selectByIndex',
-      'selectByVisibleText',
-      'setValue',
-      'touchAction',
-      'action',
-      'actions',
-      'emulate',
-      'keys',
-      'scroll',
-      'setWindowSize',
-      'uploadFile',
-    ];
+    log.debug('Installing command overrides for mock auto-update');
 
-    if (inputCommands.includes(commandName) && mocks.length > 0 && !isInternalCommand(args)) {
-      await Promise.all(mocks.map(async ([_mockId, mock]) => await mock.update()));
+    // Commands that trigger DOM interactions and need mock updates
+    const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
+
+    commandsToOverride.forEach((commandName) => {
+      // Override element-level commands
+      log.debug(`Installing command override for: ${commandName}`);
+      this.overrideElementCommand(commandName);
+    });
+
+    log.debug('Command overrides installation completed');
+  }
+
+  /**
+   * Override an element-level command to add mock update after execution
+   */
+  private overrideElementCommand(commandName: string) {
+    if (!this.browser) {
+      log.debug(`overrideElementCommand: No browser for command ${commandName}`);
+      return;
+    }
+
+    log.debug(`Overriding element command: ${commandName}`);
+
+    try {
+      // Override element commands by attaching to element prototype
+      this.browser.overwriteCommand(commandName as any, async function (
+        this: WebdriverIO.Element,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        log.debug(`Command override triggered for ${commandName}`);
+
+        // Execute the original command
+        const result = await originalCommand.apply(this, args);
+        log.debug(`Original command ${commandName} completed`);
+
+        // Update all mocks after the command completes
+        log.debug(`Calling updateAllMocks after ${commandName}...`);
+        await updateAllMocks();
+        log.debug(`updateAllMocks completed after ${commandName}`);
+
+        return result;
+      }, true); // true = element level
+
+      log.debug(`Successfully overrode element command: ${commandName}`);
+
+      // Also try browser-level override as backup
+      this.browser.overwriteCommand(commandName as any, async function (
+        this: WebdriverIO.Browser,
+        originalCommand: (...args: unknown[]) => Promise<unknown>,
+        ...args: unknown[]
+      ) {
+        log.debug(`Browser-level command override triggered for ${commandName}`);
+
+        const result = await originalCommand.apply(this, args);
+        log.debug(`Browser-level ${commandName} completed`);
+
+        log.debug(`Browser-level calling updateAllMocks after ${commandName}...`);
+        await updateAllMocks();
+        log.debug(`Browser-level updateAllMocks completed after ${commandName}`);
+
+        return result;
+      }, false); // false = browser level
+
+      log.debug(`Successfully overrode browser command: ${commandName}`);
+    } catch (error) {
+      log.debug(`Error overriding command ${commandName}:`, error);
     }
   }
 
   after() {
     clearPuppeteerSessions();
+  }
+}
+
+/**
+ * Update all existing mocks
+ */
+async function updateAllMocks() {
+  log.debug('updateAllMocks called');
+  const mocks = mockStore.getMocks();
+  log.debug(`Found ${mocks.length} mocks to update`);
+
+  if (mocks.length === 0) {
+    log.debug('No mocks to update, returning');
+    return;
+  }
+
+  try {
+    log.debug('Starting mock update batch');
+    await Promise.all(
+      mocks.map(async ([mockId, mock]) => {
+        log.debug(`Updating mock: ${mockId}`);
+        await mock.update();
+        log.debug(`Mock update completed: ${mockId}`);
+      }),
+    );
+    log.debug('All mock updates completed successfully');
+  } catch (error) {
+    log.debug('Mock update batch failed:', error);
   }
 }
