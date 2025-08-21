@@ -25,6 +25,9 @@ catalogs:
       specifier: ^9.15.0
       version: 9.15.0
 
+overrides:
+  wdio-electron-service: link:packages/wdio-electron-service
+
 importers:
 
   .:
@@ -402,7 +405,7 @@ importers:
         specifier: ^4.20.3
         version: 4.20.3
       wdio-electron-service:
-        specifier: workspace:*
+        specifier: link:../packages/wdio-electron-service
         version: link:../packages/wdio-electron-service
       webdriverio:
         specifier: catalog:default
