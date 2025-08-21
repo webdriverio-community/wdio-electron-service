@@ -11,41 +11,83 @@ const log = createLogger('launcher');
 function isApparmorRestricted(): boolean {
   log.debug('Starting AppArmor restriction check...');
   try {
-    // Check if AppArmor is active
-    log.debug('Checking if AppArmor service is active using aa-status command');
-    const apparmorStatus = spawnSync('aa-status', { encoding: 'utf8' });
-    if (apparmorStatus.error || apparmorStatus.status !== 0) {
-      log.debug(
-        `AppArmor not found or not active - error: ${apparmorStatus.error?.message}, status: ${apparmorStatus.status}`,
-      );
-      return false;
-    }
-    log.debug('AppArmor service is active, checking restriction setting...');
+    let isApparmorRunning = false;
 
-    // Check if the kernel restriction is enabled
-    const restrictionPath = '/proc/sys/kernel/apparmor_restrict_unprivileged_userns';
-    log.debug(`Checking for restriction file at: ${restrictionPath}`);
-    if (!fs.existsSync(restrictionPath)) {
+    // Method 1: Try aa-status first (best practice when available)
+    log.debug('Method 1: Checking AppArmor status with aa-status command');
+    try {
+      const apparmorStatus = spawnSync('aa-status', { encoding: 'utf8' });
+      if (apparmorStatus.status === 0) {
+        log.debug('aa-status succeeded - AppArmor is running and accessible');
+        isApparmorRunning = true;
+      } else if (apparmorStatus.status === 4) {
+        log.debug('aa-status failed with exit code 4 - AppArmor is running but insufficient privileges');
+        isApparmorRunning = true; // Exit code 4 means AppArmor is present but we lack privileges
+      } else {
+        log.debug(`aa-status failed with exit code ${apparmorStatus.status} - falling back to filesystem check`);
+      }
+    } catch (error) {
       log.debug(
-        'AppArmor unprivileged user namespace restriction file not found - restriction not available on this system',
+        `aa-status command failed: ${error instanceof Error ? error.message : String(error)} - falling back to filesystem check`,
       );
+    }
+
+    // Method 2: Fallback to filesystem check if aa-status wasn't conclusive
+    if (!isApparmorRunning) {
+      log.debug('Method 2: Checking AppArmor status via filesystem');
+      const apparmorProfilesPath = '/sys/kernel/security/apparmor/profiles';
+
+      if (fs.existsSync(apparmorProfilesPath)) {
+        try {
+          const profiles = fs.readFileSync(apparmorProfilesPath, 'utf8').trim();
+          isApparmorRunning = profiles.length > 0;
+          log.debug(
+            `AppArmor profiles file ${isApparmorRunning ? 'has content' : 'is empty'} - AppArmor is ${isApparmorRunning ? 'RUNNING' : 'NOT RUNNING'}`,
+          );
+        } catch (error) {
+          log.debug(
+            'Cannot read AppArmor profiles file - may lack permissions, assuming AppArmor is running',
+            (error as Error).message,
+          );
+          isApparmorRunning = true; // Assume running if we can't read (permission issue)
+        }
+      } else {
+        log.debug('AppArmor profiles file not found - AppArmor is not running');
+      }
+    }
+
+    // If AppArmor is not running, no workaround needed
+    if (!isApparmorRunning) {
+      log.debug('AppArmor not running, no workaround needed');
       return false;
     }
-    log.debug('Restriction file found, reading restriction value...');
+
+    log.debug('AppArmor confirmed as running, checking unprivileged user namespace restriction');
+
+    // Check the specific kernel restriction that breaks Electron
+    const restrictionPath = '/proc/sys/kernel/apparmor_restrict_unprivileged_userns';
+    log.debug(`Checking restriction file: ${restrictionPath}`);
+
+    if (!fs.existsSync(restrictionPath)) {
+      log.debug('Restriction file not found - this could indicate:');
+      log.debug('  - Kernel version < 5.15 (restriction not available)');
+      log.debug('  - AppArmor compiled without userns support');
+      log.debug('  - Other AppArmor configuration preventing Electron');
+      log.debug('Applying workaround as precaution since AppArmor is active');
+      return true; // Apply workaround when AppArmor is active but we can't check the specific restriction
+    }
 
     const restriction = fs.readFileSync(restrictionPath, 'utf8').trim();
     const isRestricted = restriction === '1';
     log.debug(
-      `AppArmor unprivileged user namespace restriction value: '${restriction}' (${isRestricted ? 'enabled' : 'disabled'})`,
+      `Restriction value: '${restriction}' (${isRestricted ? 'ENABLED - workaround needed' : 'DISABLED - no workaround needed'})`,
     );
-    log.debug(
-      `Restriction check result: ${isRestricted ? 'RESTRICTED - workaround needed' : 'NOT RESTRICTED - no workaround needed'}`,
-    );
+
     return isRestricted;
   } catch (error) {
     log.debug(`Error during AppArmor restriction check: ${error instanceof Error ? error.message : String(error)}`);
-    log.debug('Assuming no restriction due to error');
-    return false;
+    log.debug('Applying workaround due to detection uncertainty (better safe than sorry)');
+    return true;
   }
 }
 
@@ -76,34 +118,34 @@ ${profileName} {
   #include <abstractions/openssl>
   #include <abstractions/ssl_certs>
   #include <abstractions/user-tmp>
-  
+
   # Allow access to Electron binaries
 ${binaryPermissions}
-  
+
   # Allow user namespace creation (the key fix for Ubuntu 24.04)
   capability sys_admin,
-  
+
   # Allow standard Electron operations
   /usr/bin/xdg-open rix,
   /proc/sys/kernel/yama/ptrace_scope r,
   /sys/devices/system/cpu/online r,
-  
+
   # Allow access to user data directories
   owner @{HOME}/.config/** rwk,
   owner @{HOME}/.cache/** rwk,
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/stat r,
   owner @{PROC}/@{pid}/statm r,
-  
+
   # Allow network access
   network inet stream,
   network inet6 stream,
-  
+
   # Allow reading system information
   /proc/meminfo r,
   /proc/version r,
   /sys/devices/system/cpu/** r,
-  
+
   # Deny some potentially dangerous operations
   deny @{HOME}/.ssh/** rw,
   deny /etc/passwd r,
