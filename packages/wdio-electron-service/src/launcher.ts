@@ -162,6 +162,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
                 appBinaryPath = binaryResult.binaryPath;
                 log.info(`Detected app binary at ${appBinaryPath}`);
 
+                // Apply AppArmor workaround for built apps on Linux
+                applyApparmorWorkaround(appBinaryPath);
+
                 // Log any warnings from path generation
                 const warnings = binaryResult.pathGeneration.errors.filter(
                   (e: PathGenerationError) => e.type === 'CONFIG_WARNING',
