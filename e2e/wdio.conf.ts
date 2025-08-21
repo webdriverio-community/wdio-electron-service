@@ -151,6 +151,7 @@ if (envContext.isMultiremote) {
         'wdio:electronServiceOptions': {
           ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
           appArgs: ['--foo', '--bar=baz', '--browser=A'],
+          apparmorAutoInstall: 'sudo',
         },
       },
     },
@@ -160,6 +161,7 @@ if (envContext.isMultiremote) {
         'wdio:electronServiceOptions': {
           ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
           appArgs: ['--foo', '--bar=baz', '--browser=B'],
+          apparmorAutoInstall: 'sudo',
         },
       },
     },
@@ -172,6 +174,7 @@ if (envContext.isMultiremote) {
       'wdio:electronServiceOptions': {
         ...(envContext.isNoBinary ? { appEntryPoint } : { appBinaryPath }),
         appArgs: ['foo', 'bar=baz'],
+        apparmorAutoInstall: 'sudo',
       },
     },
   ];

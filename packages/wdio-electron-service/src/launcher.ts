@@ -14,6 +14,7 @@ import type { Capabilities, Options, Services } from '@wdio/types';
 import getPort from 'get-port';
 import { type NormalizedReadResult, readPackageUp } from 'read-package-up';
 import { SevereServiceError } from 'webdriverio';
+import { applyApparmorWorkaround } from './apparmor.js';
 import {
   getChromedriverOptions,
   getChromeOptions,
@@ -116,6 +117,11 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
 
     const localElectronVersion = await getElectronVersion(pkg);
 
+    // Track unique binary paths for AppArmor workaround
+    const uniqueBinaryPaths = new Set<string>();
+    let apparmorAutoInstall: ElectronServiceGlobalOptions['apparmorAutoInstall'] =
+      this.#globalOptions.apparmorAutoInstall;
+
     await Promise.all(
       caps.map(async (cap) => {
         const electronVersion = cap.browserVersion || localElectronVersion || '';
@@ -134,7 +140,13 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           appBinaryPath,
           appEntryPoint,
           appArgs = ['--no-sandbox'],
+          apparmorAutoInstall: capApparmorAutoInstall,
         } = Object.assign({}, this.#globalOptions, cap[CUSTOM_CAPABILITY_NAME]);
+
+        // Use capability-level apparmorAutoInstall if provided, otherwise keep the existing value
+        if (capApparmorAutoInstall !== undefined) {
+          apparmorAutoInstall = capApparmorAutoInstall;
+        }
 
         if (appEntryPoint) {
           if (appBinaryPath) {
@@ -189,6 +201,11 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           }
         }
 
+        // Collect binary path for AppArmor workaround (applied once per unique path after loop)
+        if (appBinaryPath) {
+          uniqueBinaryPaths.add(appBinaryPath);
+        }
+
         cap.browserName = 'chrome';
         cap['goog:chromeOptions'] = getChromeOptions({ appBinaryPath, appArgs }, cap);
 
@@ -224,6 +241,11 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
       log.error(msg);
       throw new SevereServiceError(msg);
     });
+
+    // Apply AppArmor workaround once per session with all discovered binary paths
+    if (uniqueBinaryPaths.size > 0) {
+      applyApparmorWorkaround(Array.from(uniqueBinaryPaths), apparmorAutoInstall);
+    }
   }
 
   /**

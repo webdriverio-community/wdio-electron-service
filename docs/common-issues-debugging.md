@@ -39,12 +39,42 @@ See this [WDIO documentation page](https://webdriver.io/docs/headless-and-xvfb) 
 
 ### All versions of Electron fail to open on Ubuntu 24.04+
 
-See [this issue](https://github.com/electron/electron/issues/41066) for more details. The solution is to set the `appArgs` capability to include `--no-sandbox`.
+See [this issue](https://github.com/electron/electron/issues/41066) for more details. This is caused by AppArmor restrictions on unprivileged user namespaces.
 
-Since it is useful for this and other issues, the service automatically adds `--no-sandbox` to the `appArgs` whenever a custom `appArgs` is not provided. If you need to override this, you can do so by setting the `appArgs` capability to an empty array.
+#### Recommended Solution: Automatic AppArmor Profile
 
-Another workaround is to run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests.
-This command requires root privileges; if necessary, run it as the root user or use the `sudo` command.
+The service can automatically create and install a custom AppArmor profile for your Electron binary. Enable this feature by setting the `apparmorAutoInstall` option:
+
+```ts
+export const config = {
+  // ...
+  services: [
+    [
+      'electron',
+      {
+        apparmorAutoInstall: 'sudo' // or true if running as root
+      }
+    ]
+  ],
+  // OR configure it per capability:
+  capabilities: [
+    {
+      'browserName': 'electron',
+      'wdio:electronServiceOptions': {
+        apparmorAutoInstall: 'sudo'
+      }
+    }
+  ]
+};
+```
+
+- `'sudo'`: Install if root or via non-interactive sudo (`sudo -n`) if available  
+- `true`: Install only if running as root (no sudo)
+- `false` (default): Never install; warn and continue without AppArmor profile
+
+#### Alternative Solution
+
+**Manual AppArmor workaround**: Run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` before running your tests. This command requires root privileges; if necessary, run it as the root user or use the `sudo` command.
 
 ### TypeError: logger is not a function
 

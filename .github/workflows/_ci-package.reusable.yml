@@ -71,13 +71,6 @@ jobs:
             echo "::warning::No dist directories found, build extraction may have failed"
           fi
 
-      # Special workaround for Linux to enable Electron testing
-      - name: 🔧 Apply Linux Kernel Workaround
-        # https://github.com/electron/electron/issues/41066
-        if: ${{ runner.os == 'Linux' }}
-        shell: bash
-        run: sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
-
       # Run package tests using Turbo
       - name: 🧪 Execute Package Tests
         run: pnpm run test:package
