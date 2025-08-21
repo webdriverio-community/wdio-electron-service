@@ -32,9 +32,9 @@ const configEsm: RollupOptions = {
       {
         packageName: '@vitest/spy',
         targetFile: 'src/mock.ts',
-        bundleRegExp: /export/,
+        bundleRegExp: /export\s*\{\s*([^}]+)\s*\}\s*;/,
         importName: 'spy',
-        bundleReplace: (importName: string) => `const ${importName} =`,
+        bundleReplace: (importName: string) => `const ${importName} = { $1 };`,
       },
       {
         packageName: 'fast-copy',
