@@ -173,44 +173,52 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
     try {
       // Override element commands by attaching to element prototype
-      this.browser.overwriteCommand(commandName as any, async function (
-        this: WebdriverIO.Element,
-        originalCommand: (...args: unknown[]) => Promise<unknown>,
-        ...args: unknown[]
-      ) {
-        log.debug(`Command override triggered for ${commandName}`);
+      this.browser.overwriteCommand(
+        commandName as any,
+        async function (
+          this: WebdriverIO.Element,
+          originalCommand: (...args: unknown[]) => Promise<unknown>,
+          ...args: unknown[]
+        ) {
+          log.debug(`Command override triggered for ${commandName}`);
 
-        // Execute the original command
-        const result = await originalCommand.apply(this, args);
-        log.debug(`Original command ${commandName} completed`);
+          // Execute the original command
+          const result = await originalCommand.apply(this, args);
+          log.debug(`Original command ${commandName} completed`);
 
-        // Update all mocks after the command completes
-        log.debug(`Calling updateAllMocks after ${commandName}...`);
-        await updateAllMocks();
-        log.debug(`updateAllMocks completed after ${commandName}`);
+          // Update all mocks after the command completes
+          log.debug(`Calling updateAllMocks after ${commandName}...`);
+          await updateAllMocks();
+          log.debug(`updateAllMocks completed after ${commandName}`);
 
-        return result;
-      }, true); // true = element level
+          return result;
+        },
+        true,
+      ); // true = element level
 
       log.debug(`Successfully overrode element command: ${commandName}`);
 
       // Also try browser-level override as backup
-      this.browser.overwriteCommand(commandName as any, async function (
-        this: WebdriverIO.Browser,
-        originalCommand: (...args: unknown[]) => Promise<unknown>,
-        ...args: unknown[]
-      ) {
-        log.debug(`Browser-level command override triggered for ${commandName}`);
+      this.browser.overwriteCommand(
+        commandName as any,
+        async function (
+          this: WebdriverIO.Browser,
+          originalCommand: (...args: unknown[]) => Promise<unknown>,
+          ...args: unknown[]
+        ) {
+          log.debug(`Browser-level command override triggered for ${commandName}`);
 
-        const result = await originalCommand.apply(this, args);
-        log.debug(`Browser-level ${commandName} completed`);
+          const result = await originalCommand.apply(this, args);
+          log.debug(`Browser-level ${commandName} completed`);
 
-        log.debug(`Browser-level calling updateAllMocks after ${commandName}...`);
-        await updateAllMocks();
-        log.debug(`Browser-level updateAllMocks completed after ${commandName}`);
+          log.debug(`Browser-level calling updateAllMocks after ${commandName}...`);
+          await updateAllMocks();
+          log.debug(`Browser-level updateAllMocks completed after ${commandName}`);
 
-        return result;
-      }, false); // false = browser level
+          return result;
+        },
+        false,
+      ); // false = browser level
 
       log.debug(`Successfully overrode browser command: ${commandName}`);
     } catch (error) {
