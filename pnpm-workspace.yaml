@@ -15,11 +15,11 @@ packages:
 catalogs:
   default:
     electron: ^36.4.0
-    webdriverio: ^9.15.0
-    '@wdio/cli': ^9.15.0
-    '@wdio/globals': ^9.15.0
-    '@wdio/local-runner': ^9.15.0
-    '@wdio/mocha-framework': ^9.15.0
+    webdriverio: ^9.19.1
+    '@wdio/cli': ^9.19.1
+    '@wdio/globals': ^9.17.0
+    '@wdio/local-runner': ^9.19.1
+    '@wdio/mocha-framework': ^9.19.1
   next:
     electron-nightly: 38.0.0-nightly.20250613
     webdriverio: latest
