@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noTsIgnore: Allowing ts-ignore for runtime imports
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
