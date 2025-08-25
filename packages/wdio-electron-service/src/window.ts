@@ -1,3 +1,4 @@
+import type { BrowserExtension } from '@wdio/electron-types';
 import { createLogger } from '@wdio/electron-utils';
 
 const log = createLogger('service');
@@ -34,10 +35,22 @@ export const getActiveWindowHandle = async (puppeteerBrowser: PuppeteerBrowser, 
   return handles[0];
 };
 
-const switchToActiveWindow = async (browser: WebdriverIO.Browser, puppeteerBrowser: PuppeteerBrowser) => {
-  const activeHandle = await getActiveWindowHandle(puppeteerBrowser, browser.electron.windowHandle);
+function hasElectronExtension(
+  browser: WebdriverIO.Browser,
+): browser is WebdriverIO.Browser & { electron: BrowserExtension['electron'] } {
+  return typeof (browser as unknown as Record<string, unknown>).electron !== 'undefined';
+}
 
-  if (activeHandle && activeHandle !== browser.electron.windowHandle) {
+const switchToActiveWindow = async (browser: WebdriverIO.Browser, puppeteerBrowser: PuppeteerBrowser) => {
+  // If this instance doesn't have the electron extension, skip switching
+  if (!hasElectronExtension(browser)) {
+    return;
+  }
+  const currentHandle = browser.electron.windowHandle;
+
+  const activeHandle = await getActiveWindowHandle(puppeteerBrowser, currentHandle);
+
+  if (activeHandle && activeHandle !== currentHandle) {
     log.debug('Switching to new active window');
     await browser.switchToWindow(activeHandle);
     browser.electron.windowHandle = activeHandle;
@@ -53,10 +66,27 @@ export const ensureActiveWindowFocus = async (
     const mrBrowser = browser as WebdriverIO.MultiRemoteBrowser;
     for (const instance of mrBrowser.instances) {
       const mrInstance = mrBrowser.getInstance(instance);
-      const mrPuppeteer = await getPuppeteer(mrInstance);
+      // Skip non-electron instances
+      if (!hasElectronExtension(mrInstance)) {
+        continue;
+      }
+      // Safely get Puppeteer for the instance; skip if unavailable
+      let mrPuppeteer: PuppeteerBrowser | undefined;
+      try {
+        mrPuppeteer = await getPuppeteer(mrInstance);
+      } catch {
+        mrPuppeteer = undefined;
+      }
+      if (!mrPuppeteer) {
+        continue;
+      }
       await switchToActiveWindow(mrInstance, mrPuppeteer);
     }
   } else {
+    // Skip if this is not an electron instance
+    if (!hasElectronExtension(browser)) {
+      return;
+    }
     const puppeteer = await getPuppeteer(browser);
     await switchToActiveWindow(browser, puppeteer);
   }
