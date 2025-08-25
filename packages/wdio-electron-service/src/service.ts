@@ -121,21 +121,24 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
   /**
    * Override an element-level command to add mock update after execution
    */
-  private overrideElementCommand<T extends ElementCommands>(commandName: T) {
+  private overrideElementCommand(commandName: ElementCommands) {
     if (!this.browser) {
       return;
     }
     try {
       const testOverride = async function (
         this: WebdriverIO.Element,
-        originalCommand: (...args: unknown[]) => Promise<unknown>,
-        ...args: unknown[]
-      ) {
-        const result = await originalCommand.apply(this, args);
+        originalCommand: (...args: readonly unknown[]) => Promise<unknown>,
+        ...args: readonly unknown[]
+      ): Promise<unknown> {
+        // Use Reflect.apply to safely call the original command with the correct 'this' context
+        // This avoids TypeScript's strict function signature checking while maintaining runtime safety
+        const result = await Reflect.apply(originalCommand, this, args as unknown[]);
         await updateAllMocks();
         return result;
-      };
-      (this.browser as any).overwriteCommand(commandName, testOverride, true);
+      } as Parameters<typeof this.browser.overwriteCommand>[1];
+
+      this.browser.overwriteCommand(commandName, testOverride, true);
     } catch {
       // ignore
     }
