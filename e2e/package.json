@@ -39,7 +39,7 @@
     "@wdio/mocha-framework": "catalog:default",
     "@wdio/xvfb": "catalog:default",
     "electron": "catalog:default",
-    "tsx": "^4.20.4",
+    "tsx": "^4.20.5",
     "wdio-electron-service": "link:packages/wdio-electron-service",
     "webdriverio": "catalog:default"
   },
@@ -53,6 +53,6 @@
     "p-limit": "^7.1.0",
     "read-package-up": "^11.0.0",
     "typescript": "^5.9.2",
-    "zod": "^4.0.17"
+    "zod": "^4.1.1"
   }
 }
