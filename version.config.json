@@ -3,7 +3,7 @@
   "tagPrefix": "v",
   "preset": "angular",
   "commitMessage": "release ${version} [skip-ci]",
-  "synced": true,
+  "sync": true,
   "mainPackage": "wdio-electron-service",
   "packages": ["packages/**/*"],
   "prereleaseIdentifier": "next"
