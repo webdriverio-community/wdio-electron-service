@@ -39,7 +39,7 @@
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
-    "tsx": "^4.20.4",
+    "tsx": "^4.20.5",
     "wdio-electron-service": "link:packages/wdio-electron-service",
     "webdriverio": "catalog:default",
     "xvfb-maybe": "^0.2.1"
@@ -52,7 +52,7 @@
     "@vitest/spy": "^3.2.4",
     "@wdio/electron-types": "workspace:*",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.46.4",
+    "rollup": "^4.48.1",
     "typescript": "^5.9.2"
   },
   "version": "8.1.1"
