@@ -103,6 +103,13 @@ try {
 
   // Process each package's package.json
   for (const packagePath of WORKSPACE_PACKAGES_ARRAY) {
+    // Skip fixture packages - they should use specific versions, not catalog references
+    // this is to ensure they work reliably in isolated test environments without needing access to the catalog system
+    if (packagePath.startsWith('fixtures/')) {
+      console.log(`- Skipping ${packagePath} (fixture package)`);
+      continue;
+    }
+
     const packageJsonPath = path.join(rootDir, packagePath, 'package.json');
 
     if (!fs.existsSync(packageJsonPath)) {
