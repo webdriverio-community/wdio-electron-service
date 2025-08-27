@@ -4,8 +4,6 @@ import debug from 'debug';
 export type LogArea = 'service' | 'launcher' | 'bridge' | 'mock' | 'bundler' | 'config' | 'utils' | 'e2e';
 
 // Handle CommonJS/ESM compatibility for @wdio/logger default export
-// In ESM: logger is the default export function
-// In CJS: logger is { default: function, SENSITIVE_DATA_REPLACER: string }
 const createWdioLogger = (logger as unknown as { default: typeof logger }).default || logger;
 
 const areaCache = new Map<string, Logger>();
