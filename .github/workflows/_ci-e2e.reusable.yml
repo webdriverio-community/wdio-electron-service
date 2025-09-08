@@ -88,7 +88,7 @@ jobs:
       # This converts the scenario and type inputs into Turbo filter syntax
       - name: 🪄 Generate Build Filter for Test Apps
         id: gen-build
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           result-encoding: string
           script: |
@@ -110,7 +110,7 @@ jobs:
       # This handles both single and multiple scenarios, and ESM/CJS/both
       - name: 🪄 Generate Test Execution Plan
         id: gen-test
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           result-encoding: string
           script: |
