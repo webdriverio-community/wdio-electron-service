@@ -15,12 +15,12 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.8.3",
-    "@electron-forge/maker-deb": "^7.8.3",
-    "@electron-forge/maker-rpm": "^7.8.3",
-    "@electron-forge/maker-squirrel": "^7.8.3",
-    "@electron-forge/maker-zip": "^7.8.3",
-    "@types/node": "^24.3.0",
+    "@electron-forge/cli": "^7.9.0",
+    "@electron-forge/maker-deb": "^7.9.0",
+    "@electron-forge/maker-rpm": "^7.9.0",
+    "@electron-forge/maker-squirrel": "^7.9.0",
+    "@electron-forge/maker-zip": "^7.9.0",
+    "@types/node": "^24.5.2",
     "@wdio/cli": "^9.19.2",
     "@wdio/electron-types": "9.1.1",
     "@wdio/electron-utils": "9.1.1",
@@ -30,7 +30,7 @@
     "@wdio/spec-reporter": "^9.19.2",
     "cross-env": "^10.0.0",
     "electron": "37.3.1",
-    "electron-vite": "^4.0.0",
+    "electron-vite": "^4.0.1",
     "typescript": "^5.9.2",
     "wdio-electron-service": "link:packages/wdio-electron-service"
   },
