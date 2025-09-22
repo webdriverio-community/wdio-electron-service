@@ -15,11 +15,11 @@
     "clean:dist": "pnpm dlx shx rm -rf ./dist ./out && pnpm dlx shx mkdir -p ./dist"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.8.3",
+    "@electron-forge/cli": "^7.9.0",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.5.2",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
