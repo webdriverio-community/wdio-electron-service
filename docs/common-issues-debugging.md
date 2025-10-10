@@ -21,6 +21,39 @@ Logs are also forwarded into WDIO runner logs under your configured `outputDir`.
 
 This is utilising the [`debug`](https://github.com/debug-js/debug) logging package.
 
+### CDP bridge cannot be initialized: EnableNodeCliInspectArguments fuse is disabled
+
+This warning appears when your Electron app has the `EnableNodeCliInspectArguments` fuse explicitly disabled. The CDP (Chrome DevTools Protocol) bridge relies on the `--inspect` flag to connect to Electron's main process, so when this fuse is disabled, the service cannot provide access to the main process APIs.
+
+#### Impact
+
+When this fuse is disabled:
+- ❌ `browser.electron.execute()` - main process API access will not work
+- ❌ `browser.electron.mock()` - mocking main process APIs will not work
+- ✅ Renderer process testing continues to work normally
+
+#### Solution
+
+Enable the fuse in your test builds. If you're disabling this fuse for production (which is good security practice), use conditional configuration:
+
+```typescript
+import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses';
+
+await flipFuses(require('electron'), {
+  version: FuseVersion.V1,
+  [FuseV1Options.EnableNodeCliInspectArguments]: process.env.BUILD_FOR_TESTS === 'true',
+  // ... other fuses
+});
+```
+
+Then build with the environment variable, e.g.:
+```bash
+BUILD_FOR_TESTS=true npm run build  # for testing
+npm run build                       # for production
+```
+
+See: [Electron Fuses Documentation](https://www.electronjs.org/docs/latest/tutorial/fuses#nodecliinspect)
+
 ### DevToolsActivePort file doesn't exist
 
 This is a Chromium error which may appear when using Docker or CI. Most of the "fixes" discussed online are based around passing different combinations of args to Chromium - you can set these via [`appArgs`](./configuration/service-configuration.md#appargs-string), though in most cases using xvfb has proven to be more effective; the service itself uses xvfb when running E2Es on Linux CI.
@@ -68,7 +101,7 @@ export const config = {
 };
 ```
 
-- `'sudo'`: Install if root or via non-interactive sudo (`sudo -n`) if available  
+- `'sudo'`: Install if root or via non-interactive sudo (`sudo -n`) if available
 - `true`: Install only if running as root (no sudo)
 - `false` (default): Never install; warn and continue without AppArmor profile
 
