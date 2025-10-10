@@ -1,7 +1,7 @@
 import logger, { type Logger } from '@wdio/logger';
 import debug from 'debug';
 
-export type LogArea = 'service' | 'launcher' | 'bridge' | 'mock' | 'bundler' | 'config' | 'utils' | 'e2e';
+export type LogArea = 'service' | 'launcher' | 'bridge' | 'mock' | 'bundler' | 'config' | 'utils' | 'e2e' | 'fuses';
 
 // Handle CommonJS/ESM compatibility for @wdio/logger default export
 const createWdioLogger = (logger as unknown as { default: typeof logger }).default || logger;
