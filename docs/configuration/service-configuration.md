@@ -108,30 +108,51 @@ Type: `string`
 Calls .mockClear() on all mocked APIs before each test. This will clear mock history, but not reset its implementation.
 
 Type: `boolean`
+Default: `false`
 
 ### `resetMocks`:
 
 Calls .mockReset() on all mocked APIs before each test. This will clear mock history and reset its implementation to an empty function (will return undefined).
 
 Type: `boolean`
+Default: `false`
 
 ### `restoreMocks`:
 
 Calls .mockRestore() on all mocked APIs before each test. This will restore the original API function, the mock will be removed.
 
 Type: `boolean`
+Default: `false`
+
+### `useCDPBridge`:
+
+Whether to use the CDP (Chrome DevTools Protocol) bridge or the legacy IPC bridge for communication with the Electron main process. The CDP bridge is the default and recommended option.
+
+**Note:** The legacy IPC bridge is deprecated and will be removed in v9.0. It is recommended to use the CDP bridge (default behaviour) unless you have a specific need for the legacy IPC bridge.
+
+Type: `boolean`
+Default: `true`
 
 ### `cdpBridgeTimeout`:
 
-Timeout for any request using CdpBridge to the node debugger.
+Timeout in milliseconds for any request using CdpBridge to the node debugger.
+
+Type: `number`
+Default: `10000` (10 seconds)
 
 ### `cdpBridgeWaitInterval`:
 
 Interval in milliseconds to wait between attempts to connect to the node debugger.
 
+Type: `number`
+Default: `100`
+
 ### `cdpBridgeRetryCount`:
 
 Number of attempts to connect to the node debugger before giving up.
+
+Type: `number`
+Default: `3`
 
 ## Automatic detection of App binary
 
