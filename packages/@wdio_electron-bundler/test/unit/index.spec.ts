@@ -21,6 +21,10 @@ describe('Bundler Utilities', () => {
       default: vi.fn(() => 'mocked-plugin'),
     }));
 
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
     it('should apply default TypeScript configuration', () => {
       const plugin = typescript({
         compilerOptions: {

@@ -76,10 +76,10 @@ describe('RollupExecutor', () => {
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
       expect(logger.section).toHaveBeenCalledExactlyOnceWith('🔨 Executing rollup build...');
-      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('Target directory: /test/package');
-      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('Configurations: 1');
-      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building ESM bundle...');
-      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('✅ Build completed successfully');
+      expect(logger.extraDetail).toHaveBeenNthCalledWith(1, 'Target directory: /test/package');
+      expect(logger.extraDetail).toHaveBeenNthCalledWith(2, 'Configurations: 1');
+      expect(logger.detail).toHaveBeenNthCalledWith(1, '📦 Building ESM bundle...');
+      expect(logger.detail).toHaveBeenNthCalledWith(2, '✅ Build completed successfully');
 
       expect(mockRollup).toHaveBeenCalledTimes(1);
       expect(mockBundle.write).toHaveBeenCalledTimes(1);
@@ -104,9 +104,9 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', true);
 
-      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('Input:'));
-      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('Output dir:'));
-      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('✅ ESM bundle written');
+      expect(logger.extraDetail).toHaveBeenCalledWith(expect.stringContaining('Input:'));
+      expect(logger.extraDetail).toHaveBeenCalledWith(expect.stringContaining('Output dir:'));
+      expect(logger.extraDetail).toHaveBeenCalledWith('✅ ESM bundle written');
     });
 
     it('should close bundle even if write fails', async () => {
@@ -177,8 +177,8 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building ESM bundle...');
-      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building CJS bundle...');
+      expect(logger.detail).toHaveBeenCalledWith('📦 Building ESM bundle...');
+      expect(logger.detail).toHaveBeenCalledWith('📦 Building CJS bundle...');
       expect(mockRollup).toHaveBeenCalledTimes(2);
       expect(mockBundle.write).toHaveBeenCalledTimes(2);
       expect(mockBundle.close).toHaveBeenCalledTimes(2);

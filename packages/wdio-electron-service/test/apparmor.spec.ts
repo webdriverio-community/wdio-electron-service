@@ -132,9 +132,7 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- existsSync is called multiple times to check different files
         expect(mockFs.existsSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles');
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- readFileSync is called multiple times for different files
         expect(mockFs.readFileSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles', 'utf8');
       });
 
@@ -342,7 +340,6 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], 'sudo');
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- spawnSync is called multiple times (aa-status check + sudo check)
         expect(mockSpawnSync).toHaveBeenCalledWith('sudo', ['-n', 'true'], { encoding: 'utf8' });
         expect(mockExecSync).toHaveBeenCalled(); // Should proceed with profile creation
       });

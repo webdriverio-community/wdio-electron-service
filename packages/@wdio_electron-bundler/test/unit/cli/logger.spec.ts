@@ -200,17 +200,17 @@ describe('Logger', () => {
     it('should log code with language for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.code('const x = 1;', 'javascript');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\n```javascript');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('```\n');
+      expect(consoleSpy).toHaveBeenNthCalledWith(1, '\n```javascript');
+      expect(consoleSpy).toHaveBeenNthCalledWith(2, 'const x = 1;');
+      expect(consoleSpy).toHaveBeenNthCalledWith(3, '```\n');
     });
 
     it('should log code without language for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.code('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\n```');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('```\n');
+      expect(consoleSpy).toHaveBeenNthCalledWith(1, '\n```');
+      expect(consoleSpy).toHaveBeenNthCalledWith(2, 'const x = 1;');
+      expect(consoleSpy).toHaveBeenNthCalledWith(3, '```\n');
     });
 
     it.each(['silent', 'normal', 'verbose'] as LogLevel[])('should not log code for %s level', (level) => {
@@ -269,8 +269,8 @@ describe('Logger', () => {
       const result = await promise;
 
       expect(result).toBe('result');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🔄 test operation...');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('✅ test operation completed');
+      expect(consoleSpy).toHaveBeenNthCalledWith(1, '🔄 test operation...');
+      expect(consoleSpy).toHaveBeenNthCalledWith(2, '✅ test operation completed');
     });
 
     it('should log timed operation success with duration for extra-verbose level', async () => {
@@ -282,8 +282,8 @@ describe('Logger', () => {
       const result = await promise;
 
       expect(result).toBe('result');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🔄 test operation...');
-      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('✅ test operation completed (150ms)');
+      expect(consoleSpy).toHaveBeenNthCalledWith(1, '🔄 test operation...');
+      expect(consoleSpy).toHaveBeenNthCalledWith(2, '✅ test operation completed (150ms)');
     });
 
     it('should log timed operation failure', async () => {

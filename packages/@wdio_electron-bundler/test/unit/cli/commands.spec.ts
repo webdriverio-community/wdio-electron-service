@@ -63,6 +63,7 @@ describe('buildCommand', () => {
 
   afterEach(() => {
     processExitSpy.mockRestore();
+    vi.clearAllMocks();
   });
 
   describe('successful builds', () => {
@@ -76,7 +77,7 @@ describe('buildCommand', () => {
       await buildCommand(options);
 
       expect(Logger.create).toHaveBeenCalledExactlyOnceWith(false, false);
-      expect(mockLogger.info).toHaveBeenCalledExactlyOnceWith('🔨 Building project...');
+      expect(mockLogger.info).toHaveBeenCalledWith('🔨 Building project...');
       expect(mockLoader.loadConfig).toHaveBeenCalled();
       expect(mockGenerator.generateConfig).toHaveBeenCalledExactlyOnceWith(
         { packageRoot: '/test/package', esm: {}, cjs: {} },
@@ -179,7 +180,7 @@ describe('buildCommand', () => {
         expect.stringContaining('rollup.config.js'),
         false,
       );
-      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('rollup.config.js'));
+      expect(mockLogger.success).toHaveBeenCalledWith(expect.stringContaining('rollup.config.js'));
     });
 
     it('should export config with custom filename', async () => {
@@ -195,7 +196,7 @@ describe('buildCommand', () => {
         expect.stringContaining('my-rollup.config.js'),
         false,
       );
-      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('my-rollup.config.js'));
+      expect(mockLogger.success).toHaveBeenCalledWith(expect.stringContaining('my-rollup.config.js'));
     });
   });
 
