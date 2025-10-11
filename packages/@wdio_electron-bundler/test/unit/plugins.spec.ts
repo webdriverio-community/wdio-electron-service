@@ -56,7 +56,7 @@ describe('Rollup Plugins', () => {
       } as NormalizedOutputOptions);
 
       expect(context.emitFile).toHaveBeenCalledTimes(1);
-      expect(context.emitFile).toHaveBeenCalledWith({
+      expect(context.emitFile).toHaveBeenCalledExactlyOnceWith({
         type: 'asset',
         fileName: 'package.json',
         source: `{\n  "name": "test-pkg-${format}",\n  "type": "${moduleType}",\n  "private": true\n}`,
@@ -210,7 +210,7 @@ describe('Rollup Plugins', () => {
       );
 
       expect(result).toBeNull();
-      expect(context.warn).toHaveBeenCalledWith('No replacements made for pattern in src/log.ts');
+      expect(context.warn).toHaveBeenCalledExactlyOnceWith('No replacements made for pattern in src/log.ts');
       expect(context.info).not.toHaveBeenCalled();
     });
 

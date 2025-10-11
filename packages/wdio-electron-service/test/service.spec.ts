@@ -311,7 +311,7 @@ describe('Electron Worker Service', () => {
       await instance.before({}, [], browser);
       await instance.beforeCommand('dummyCommand', []);
 
-      expect(ensureActiveWindowFocus).toHaveBeenCalledWith(browser, 'dummyCommand');
+      expect(ensureActiveWindowFocus).toHaveBeenCalledExactlyOnceWith(browser, 'dummyCommand');
     });
 
     it('should not call `ensureActiveWindowFocus` for excluded commands', async () => {

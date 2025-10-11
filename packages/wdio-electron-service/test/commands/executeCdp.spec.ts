@@ -61,7 +61,7 @@ describe('execute Command', () => {
 
   it('should execute a function', async () => {
     await execute(globalThis.browser, client, (_electron, a, b, c) => a + b + c, 1, 2, 3);
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
+    expect(client.send).toHaveBeenCalledExactlyOnceWith('Runtime.callFunctionOn', {
       arguments: [{ value: 1 }, { value: 2 }, { value: 3 }],
       awaitPromise: true,
       executionContextId: 9999,
@@ -72,7 +72,7 @@ describe('execute Command', () => {
 
   it('should execute a stringified function', async () => {
     await execute(globalThis.browser, client, '(electron) => 1 + 2 + 3');
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
+    expect(client.send).toHaveBeenCalledExactlyOnceWith('Runtime.callFunctionOn', {
       arguments: [],
       awaitPromise: true,
       executionContextId: 9999,
@@ -100,7 +100,7 @@ describe('execute Command', () => {
       3,
     );
 
-    expect(client.send).toHaveBeenCalledWith('Runtime.callFunctionOn', {
+    expect(client.send).toHaveBeenCalledExactlyOnceWith('Runtime.callFunctionOn', {
       arguments: [{ value: 1 }, { value: 2 }, { value: 3 }],
       awaitPromise: true,
       executionContextId: 9999,

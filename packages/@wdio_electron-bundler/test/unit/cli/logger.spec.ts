@@ -50,7 +50,7 @@ describe('Logger', () => {
     it.each(['normal', 'verbose', 'extra-verbose'] as LogLevel[])('should log info message for %s level', (level) => {
       const logger = new Logger(level);
       logger.info('test message');
-      expect(consoleSpy).toHaveBeenCalledWith('test message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('test message');
     });
 
     it('should not log info message for silent level', () => {
@@ -64,7 +64,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.success('test success');
-        expect(consoleSpy).toHaveBeenCalledWith('✅ test success');
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('✅ test success');
       },
     );
 
@@ -79,7 +79,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.error('test error');
-        expect(consoleErrorSpy).toHaveBeenCalledWith('❌ test error');
+        expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith('❌ test error');
       },
     );
 
@@ -88,7 +88,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.warning('test warning');
-        expect(consoleSpy).toHaveBeenCalledWith('⚠️  test warning');
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('⚠️  test warning');
       },
     );
 
@@ -103,13 +103,13 @@ describe('Logger', () => {
     it('should log verbose message for verbose level', () => {
       const logger = new Logger('verbose');
       logger.verbose('verbose message');
-      expect(consoleSpy).toHaveBeenCalledWith('verbose message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('verbose message');
     });
 
     it('should log verbose message for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.verbose('verbose message');
-      expect(consoleSpy).toHaveBeenCalledWith('verbose message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('verbose message');
     });
 
     it.each(['silent', 'normal'] as LogLevel[])('should not log verbose message for %s level', (level) => {
@@ -123,7 +123,7 @@ describe('Logger', () => {
     it('should log extra verbose message for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.extraVerbose('extra verbose message');
-      expect(consoleSpy).toHaveBeenCalledWith('extra verbose message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('extra verbose message');
     });
 
     it.each(['silent', 'normal', 'verbose'] as LogLevel[])(
@@ -140,7 +140,7 @@ describe('Logger', () => {
     it.each(['verbose', 'extra-verbose'] as LogLevel[])('should log section for %s level', (level) => {
       const logger = new Logger(level);
       logger.section('Test Section');
-      expect(consoleSpy).toHaveBeenCalledWith('\nTest Section');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\nTest Section');
     });
 
     it.each(['silent', 'normal'] as LogLevel[])('should not log section for %s level', (level) => {
@@ -156,7 +156,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.detail('detail message');
-        expect(consoleSpy).toHaveBeenCalledWith('   detail message');
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('   detail message');
       },
     );
 
@@ -165,7 +165,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.detail('detail message', 2);
-        expect(consoleSpy).toHaveBeenCalledWith('      detail message');
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('      detail message');
       },
     );
 
@@ -180,13 +180,13 @@ describe('Logger', () => {
     it('should log extra detail with default indent for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.extraDetail('extra detail message');
-      expect(consoleSpy).toHaveBeenCalledWith('   • extra detail message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('   • extra detail message');
     });
 
     it('should log extra detail with custom indent for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.extraDetail('extra detail message', 2);
-      expect(consoleSpy).toHaveBeenCalledWith('      • extra detail message');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('      • extra detail message');
     });
 
     it.each(['silent', 'normal', 'verbose'] as LogLevel[])('should not log extra detail for %s level', (level) => {
@@ -200,17 +200,17 @@ describe('Logger', () => {
     it('should log code with language for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.code('const x = 1;', 'javascript');
-      expect(consoleSpy).toHaveBeenCalledWith('\n```javascript');
-      expect(consoleSpy).toHaveBeenCalledWith('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledWith('```\n');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\n```javascript');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('const x = 1;');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('```\n');
     });
 
     it('should log code without language for extra-verbose level', () => {
       const logger = new Logger('extra-verbose');
       logger.code('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledWith('\n```');
-      expect(consoleSpy).toHaveBeenCalledWith('const x = 1;');
-      expect(consoleSpy).toHaveBeenCalledWith('```\n');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\n```');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('const x = 1;');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('```\n');
     });
 
     it.each(['silent', 'normal', 'verbose'] as LogLevel[])('should not log code for %s level', (level) => {
@@ -226,7 +226,7 @@ describe('Logger', () => {
       (level) => {
         const logger = new Logger(level);
         logger.dryRun('would do something');
-        expect(consoleSpy).toHaveBeenCalledWith('🚫 Dry run - would do something');
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🚫 Dry run - would do something');
       },
     );
 
@@ -241,7 +241,7 @@ describe('Logger', () => {
     it.each(['verbose', 'extra-verbose'] as LogLevel[])('should log progress for %s level', (level) => {
       const logger = new Logger(level);
       logger.progress('processing');
-      expect(consoleSpy).toHaveBeenCalledWith('🔄 processing...');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🔄 processing...');
     });
 
     it.each(['silent', 'normal'] as LogLevel[])('should not log progress for %s level', (level) => {
@@ -269,8 +269,8 @@ describe('Logger', () => {
       const result = await promise;
 
       expect(result).toBe('result');
-      expect(consoleSpy).toHaveBeenCalledWith('🔄 test operation...');
-      expect(consoleSpy).toHaveBeenCalledWith('✅ test operation completed');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🔄 test operation...');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('✅ test operation completed');
     });
 
     it('should log timed operation success with duration for extra-verbose level', async () => {
@@ -282,8 +282,8 @@ describe('Logger', () => {
       const result = await promise;
 
       expect(result).toBe('result');
-      expect(consoleSpy).toHaveBeenCalledWith('🔄 test operation...');
-      expect(consoleSpy).toHaveBeenCalledWith('✅ test operation completed (150ms)');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('🔄 test operation...');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('✅ test operation completed (150ms)');
     });
 
     it('should log timed operation failure', async () => {
@@ -295,7 +295,7 @@ describe('Logger', () => {
       vi.advanceTimersByTime(75);
 
       await expect(promise).rejects.toThrow('operation failed');
-      expect(consoleErrorSpy).toHaveBeenCalledWith('❌ test operation failed after 75ms:', error);
+      expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith('❌ test operation failed after 75ms:', error);
     });
 
     it('should not log for normal level', async () => {
@@ -313,7 +313,7 @@ describe('Logger', () => {
     it.each(['normal', 'verbose', 'extra-verbose'] as LogLevel[])('should log summary for %s level', (level) => {
       const logger = new Logger(level);
       logger.summary('operation completed successfully');
-      expect(consoleSpy).toHaveBeenCalledWith('\n💡 operation completed successfully');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('\n💡 operation completed successfully');
     });
 
     it('should not log summary for silent level', () => {

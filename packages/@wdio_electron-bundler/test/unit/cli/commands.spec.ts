@@ -75,15 +75,15 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(Logger.create).toHaveBeenCalledWith(false, false);
-      expect(mockLogger.info).toHaveBeenCalledWith('🔨 Building project...');
+      expect(Logger.create).toHaveBeenCalledExactlyOnceWith(false, false);
+      expect(mockLogger.info).toHaveBeenCalledExactlyOnceWith('🔨 Building project...');
       expect(mockLoader.loadConfig).toHaveBeenCalled();
-      expect(mockGenerator.generateConfig).toHaveBeenCalledWith(
+      expect(mockGenerator.generateConfig).toHaveBeenCalledExactlyOnceWith(
         { packageRoot: '/test/package', esm: {}, cjs: {} },
         '/test/package',
       );
       expect(mockExecutor.executeBuild).toHaveBeenCalled();
-      expect(mockLogger.success).toHaveBeenCalledWith('Build completed successfully!');
+      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith('Build completed successfully!');
     });
 
     it('should handle verbose build', async () => {
@@ -95,8 +95,8 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(Logger.create).toHaveBeenCalledWith(true, false);
-      expect(mockExecutor.executeBuild).toHaveBeenCalledWith(expect.any(Object), '/test/package', true);
+      expect(Logger.create).toHaveBeenCalledExactlyOnceWith(true, false);
+      expect(mockExecutor.executeBuild).toHaveBeenCalledExactlyOnceWith(expect.any(Object), '/test/package', true);
     });
 
     it('should handle extra verbose build', async () => {
@@ -108,7 +108,7 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(Logger.create).toHaveBeenCalledWith(false, true);
+      expect(Logger.create).toHaveBeenCalledExactlyOnceWith(false, true);
     });
 
     it('should use process.cwd() when packageRoot is not set', async () => {
@@ -123,7 +123,7 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(mockGenerator.generateConfig).toHaveBeenCalledWith({ esm: {}, cjs: {} }, process.cwd());
+      expect(mockGenerator.generateConfig).toHaveBeenCalledExactlyOnceWith({ esm: {}, cjs: {} }, process.cwd());
     });
   });
 
@@ -136,8 +136,8 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(mockLogger.info).toHaveBeenCalledWith('🔍 Dry run: Generating configuration preview...');
-      expect(mockGenerator.writeConfig).toHaveBeenCalledWith(expect.any(Object), 'rollup.config.js', true);
+      expect(mockLogger.info).toHaveBeenCalledExactlyOnceWith('🔍 Dry run: Generating configuration preview...');
+      expect(mockGenerator.writeConfig).toHaveBeenCalledExactlyOnceWith(expect.any(Object), 'rollup.config.js', true);
       expect(mockExecutor.executeBuild).not.toHaveBeenCalled();
       expect(mockLogger.success).not.toHaveBeenCalledWith('Build completed successfully!');
     });
@@ -161,7 +161,7 @@ describe('buildCommand', () => {
       );
       // Second call for dry run preview
       expect(mockGenerator.writeConfig).toHaveBeenNthCalledWith(2, expect.any(Object), 'rollup.config.js', true);
-      expect(mockLogger.success).toHaveBeenCalledWith(expect.stringContaining('custom.config.js'));
+      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('custom.config.js'));
     });
   });
 
@@ -174,12 +174,12 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(mockGenerator.writeConfig).toHaveBeenCalledWith(
+      expect(mockGenerator.writeConfig).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
         expect.stringContaining('rollup.config.js'),
         false,
       );
-      expect(mockLogger.success).toHaveBeenCalledWith(expect.stringContaining('rollup.config.js'));
+      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('rollup.config.js'));
     });
 
     it('should export config with custom filename', async () => {
@@ -190,12 +190,12 @@ describe('buildCommand', () => {
 
       await buildCommand(options);
 
-      expect(mockGenerator.writeConfig).toHaveBeenCalledWith(
+      expect(mockGenerator.writeConfig).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
         expect.stringContaining('my-rollup.config.js'),
         false,
       );
-      expect(mockLogger.success).toHaveBeenCalledWith(expect.stringContaining('my-rollup.config.js'));
+      expect(mockLogger.success).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('my-rollup.config.js'));
     });
   });
 
@@ -212,8 +212,8 @@ describe('buildCommand', () => {
         await buildCommand(options);
       }).rejects.toThrow('process.exit called');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Build failed: Config loading failed');
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(mockLogger.error).toHaveBeenCalledExactlyOnceWith('Build failed: Config loading failed');
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it('should handle config generation error', async () => {
@@ -228,8 +228,8 @@ describe('buildCommand', () => {
         await buildCommand(options);
       }).rejects.toThrow('process.exit called');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Build failed: Config generation failed');
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(mockLogger.error).toHaveBeenCalledExactlyOnceWith('Build failed: Config generation failed');
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it('should handle build execution error', async () => {
@@ -244,8 +244,8 @@ describe('buildCommand', () => {
         await buildCommand(options);
       }).rejects.toThrow('process.exit called');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Build failed: Build execution failed');
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(mockLogger.error).toHaveBeenCalledExactlyOnceWith('Build failed: Build execution failed');
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it('should handle config export error', async () => {
@@ -261,8 +261,8 @@ describe('buildCommand', () => {
         await buildCommand(options);
       }).rejects.toThrow('process.exit called');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Build failed: Config export failed');
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(mockLogger.error).toHaveBeenCalledExactlyOnceWith('Build failed: Config export failed');
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
   });
 });

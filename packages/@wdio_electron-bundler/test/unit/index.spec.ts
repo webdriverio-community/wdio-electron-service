@@ -29,7 +29,7 @@ describe('Bundler Utilities', () => {
       });
       expect(plugin).toBe('mocked-plugin');
 
-      expect(typescriptPlugin).toHaveBeenCalledWith({
+      expect(typescriptPlugin).toHaveBeenCalledExactlyOnceWith({
         compilerOptions: {
           outDir: 'path/to/out',
           declaration: true,
@@ -49,7 +49,7 @@ describe('Bundler Utilities', () => {
         },
         exclude,
       });
-      expect(typescriptPlugin).toHaveBeenCalledWith({
+      expect(typescriptPlugin).toHaveBeenCalledExactlyOnceWith({
         compilerOptions: {
           outDir: 'path/to/out',
           declaration: true,

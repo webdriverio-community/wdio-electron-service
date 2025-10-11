@@ -84,7 +84,7 @@ describe('apparmor', () => {
 
       applyApparmorWorkaround(['/path/to/electron'], true);
 
-      expect(mockSpawnSync).toHaveBeenCalledWith('aa-status', { encoding: 'utf8' });
+      expect(mockSpawnSync).toHaveBeenCalledExactlyOnceWith('aa-status', { encoding: 'utf8' });
     });
 
     describe('AppArmor detection', () => {
@@ -100,8 +100,8 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        expect(mockSpawnSync).toHaveBeenCalledWith('aa-status', { encoding: 'utf8' });
-        expect(mockFs.readFileSync).toHaveBeenCalledWith(
+        expect(mockSpawnSync).toHaveBeenCalledExactlyOnceWith('aa-status', { encoding: 'utf8' });
+        expect(mockFs.readFileSync).toHaveBeenCalledExactlyOnceWith(
           '/proc/sys/kernel/apparmor_restrict_unprivileged_userns',
           'utf8',
         );
@@ -115,8 +115,8 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        expect(mockSpawnSync).toHaveBeenCalledWith('aa-status', { encoding: 'utf8' });
-        expect(mockFs.readFileSync).toHaveBeenCalledWith(
+        expect(mockSpawnSync).toHaveBeenCalledExactlyOnceWith('aa-status', { encoding: 'utf8' });
+        expect(mockFs.readFileSync).toHaveBeenCalledExactlyOnceWith(
           '/proc/sys/kernel/apparmor_restrict_unprivileged_userns',
           'utf8',
         );
@@ -132,8 +132,8 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        expect(mockFs.existsSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles');
-        expect(mockFs.readFileSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles', 'utf8');
+        expect(mockFs.existsSync).toHaveBeenCalledExactlyOnceWith('/sys/kernel/security/apparmor/profiles');
+        expect(mockFs.readFileSync).toHaveBeenCalledExactlyOnceWith('/sys/kernel/security/apparmor/profiles', 'utf8');
       });
 
       it('should skip workaround when AppArmor is not running', () => {
@@ -180,16 +180,19 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        expect(mockFs.writeFileSync).toHaveBeenCalledExactlyOnceWith(
           '/etc/apparmor.d/electron-wdio-service',
           expect.stringContaining('profile electron-electron-wdio-service "/path/to/electron" flags=(unconfined)'),
         );
 
         const profileContent = mockFs.writeFileSync.mock.calls[0][1] as string;
         expect(profileContent).toContain('userns,');
-        expect(mockExecSync).toHaveBeenCalledWith('apparmor_parser -r /etc/apparmor.d/electron-wdio-service', {
-          encoding: 'utf8',
-        });
+        expect(mockExecSync).toHaveBeenCalledExactlyOnceWith(
+          'apparmor_parser -r /etc/apparmor.d/electron-wdio-service',
+          {
+            encoding: 'utf8',
+          },
+        );
       });
 
       it('should create profile using sudo when not root but sudo available', () => {
@@ -203,7 +206,7 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], 'sudo');
 
-        expect(mockExecSync).toHaveBeenCalledWith(
+        expect(mockExecSync).toHaveBeenCalledExactlyOnceWith(
           'sudo tee /etc/apparmor.d/electron-wdio-service > /dev/null',
           expect.objectContaining({
             input: expect.stringContaining(
@@ -214,9 +217,12 @@ describe('apparmor', () => {
 
         const profileContent = mockExecSync.mock.calls[0][1].input as string;
         expect(profileContent).toContain('userns,');
-        expect(mockExecSync).toHaveBeenCalledWith('sudo apparmor_parser -r /etc/apparmor.d/electron-wdio-service', {
-          encoding: 'utf8',
-        });
+        expect(mockExecSync).toHaveBeenCalledExactlyOnceWith(
+          'sudo apparmor_parser -r /etc/apparmor.d/electron-wdio-service',
+          {
+            encoding: 'utf8',
+          },
+        );
       });
 
       it('should skip profile creation when not root and installMode is true', () => {
@@ -332,7 +338,7 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], 'sudo');
 
-        expect(mockSpawnSync).toHaveBeenCalledWith('sudo', ['-n', 'true'], { encoding: 'utf8' });
+        expect(mockSpawnSync).toHaveBeenCalledExactlyOnceWith('sudo', ['-n', 'true'], { encoding: 'utf8' });
         expect(mockExecSync).toHaveBeenCalled(); // Should proceed with profile creation
       });
 

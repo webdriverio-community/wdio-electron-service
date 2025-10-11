@@ -75,11 +75,11 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(logger.section).toHaveBeenCalledWith('🔨 Executing rollup build...');
-      expect(logger.extraDetail).toHaveBeenCalledWith('Target directory: /test/package');
-      expect(logger.extraDetail).toHaveBeenCalledWith('Configurations: 1');
-      expect(logger.detail).toHaveBeenCalledWith('📦 Building ESM bundle...');
-      expect(logger.detail).toHaveBeenCalledWith('✅ Build completed successfully');
+      expect(logger.section).toHaveBeenCalledExactlyOnceWith('🔨 Executing rollup build...');
+      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('Target directory: /test/package');
+      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('Configurations: 1');
+      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building ESM bundle...');
+      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('✅ Build completed successfully');
 
       expect(mockRollup).toHaveBeenCalledTimes(1);
       expect(mockBundle.write).toHaveBeenCalledTimes(1);
@@ -104,9 +104,9 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', true);
 
-      expect(logger.extraDetail).toHaveBeenCalledWith(expect.stringContaining('Input:'));
-      expect(logger.extraDetail).toHaveBeenCalledWith(expect.stringContaining('Output dir:'));
-      expect(logger.extraDetail).toHaveBeenCalledWith('✅ ESM bundle written');
+      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('Input:'));
+      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('Output dir:'));
+      expect(logger.extraDetail).toHaveBeenCalledExactlyOnceWith('✅ ESM bundle written');
     });
 
     it('should close bundle even if write fails', async () => {
@@ -177,8 +177,8 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(logger.detail).toHaveBeenCalledWith('📦 Building ESM bundle...');
-      expect(logger.detail).toHaveBeenCalledWith('📦 Building CJS bundle...');
+      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building ESM bundle...');
+      expect(logger.detail).toHaveBeenCalledExactlyOnceWith('📦 Building CJS bundle...');
       expect(mockRollup).toHaveBeenCalledTimes(2);
       expect(mockBundle.write).toHaveBeenCalledTimes(2);
       expect(mockBundle.close).toHaveBeenCalledTimes(2);
@@ -198,7 +198,7 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(mockRollup).toHaveBeenCalledWith(
+      expect(mockRollup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           input: expect.stringContaining(normalize('src/index.ts')), // Should be resolved as string
         }),
@@ -229,7 +229,7 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(mockRollup).toHaveBeenCalledWith(
+      expect(mockRollup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           plugins: expect.arrayContaining([
             expect.objectContaining({ name: 'typescript' }),
@@ -261,7 +261,7 @@ describe('RollupExecutor', () => {
 
       await executor.executeBuild(mockConfig as any, '/test/package', false);
 
-      expect(mockRollup).toHaveBeenCalledWith(
+      expect(mockRollup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           output: expect.objectContaining({
             format: 'cjs',
@@ -305,7 +305,7 @@ describe('RollupExecutor', () => {
         emitFile: vi.fn(),
       };
       outputPlugins[0].generateBundle.call(mockThis);
-      expect(mockThis.emitFile).toHaveBeenCalledWith({
+      expect(mockThis.emitFile).toHaveBeenCalledExactlyOnceWith({
         type: 'asset',
         fileName: 'package.json',
         source: '',

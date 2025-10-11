@@ -53,8 +53,8 @@ describe('Session Management', () => {
         },
       };
       await init([expectedCaps]);
-      expect(onPrepareMock).toHaveBeenCalledWith({}, [expectedCaps]);
-      expect(onWorkerStartMock).toHaveBeenCalledWith('', [expectedCaps]);
+      expect(onPrepareMock).toHaveBeenCalledExactlyOnceWith({}, [expectedCaps]);
+      expect(onWorkerStartMock).toHaveBeenCalledExactlyOnceWith('', [expectedCaps]);
     });
 
     it('should call onPrepare with the expected parameters when a rootDir is specified', async () => {
@@ -69,7 +69,7 @@ describe('Session Management', () => {
           rootDir: '/path/to/root',
         },
       );
-      expect(onPrepareMock).toHaveBeenCalledWith({ rootDir: '/path/to/root' }, [
+      expect(onPrepareMock).toHaveBeenCalledExactlyOnceWith({ rootDir: '/path/to/root' }, [
         {
           browserName: 'electron',
           'wdio:electronServiceOptions': {
@@ -81,7 +81,7 @@ describe('Session Management', () => {
 
     it('should call before with the expected parameters', async () => {
       await init([{ 'wdio:electronServiceOptions': { appBinaryPath: '/path/to/binary' } }]);
-      expect(beforeMock).toHaveBeenCalledWith({}, [], browserMock);
+      expect(beforeMock).toHaveBeenCalledExactlyOnceWith({}, [], browserMock);
     });
   });
 });

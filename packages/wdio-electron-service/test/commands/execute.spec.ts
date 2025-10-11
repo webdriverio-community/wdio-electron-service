@@ -38,13 +38,19 @@ describe('execute Command', () => {
 
   it('should execute a function', async () => {
     await execute(globalThis.browser, (a, b, c) => a + b + c, 1, 2, 3);
-    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '(a, b, c) => a + b + c', 1, 2, 3);
-    expect(globalThis.wdioElectron.execute).toHaveBeenCalledWith('(a, b, c) => a + b + c', [1, 2, 3]);
+    expect(globalThis.browser.execute).toHaveBeenCalledExactlyOnceWith(
+      expect.any(Function),
+      '(a, b, c) => a + b + c',
+      1,
+      2,
+      3,
+    );
+    expect(globalThis.wdioElectron.execute).toHaveBeenCalledExactlyOnceWith('(a, b, c) => a + b + c', [1, 2, 3]);
   });
 
   it('should execute a stringified function', async () => {
     await execute(globalThis.browser, '() => 1 + 2 + 3');
-    expect(globalThis.browser.execute).toHaveBeenCalledWith(expect.any(Function), '() => 1 + 2 + 3');
-    expect(globalThis.wdioElectron.execute).toHaveBeenCalledWith('() => 1 + 2 + 3', []);
+    expect(globalThis.browser.execute).toHaveBeenCalledExactlyOnceWith(expect.any(Function), '() => 1 + 2 + 3');
+    expect(globalThis.wdioElectron.execute).toHaveBeenCalledExactlyOnceWith('() => 1 + 2 + 3', []);
   });
 });

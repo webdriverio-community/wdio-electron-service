@@ -120,7 +120,7 @@ describe('Mock API', () => {
         const returnedMock = mock as unknown as Mock;
 
         expect(returnedMock).toHaveBeenCalledTimes(1);
-        expect(returnedMock).toHaveBeenCalledWith('/path/to/another/icon', { size: 'small' });
+        expect(returnedMock).toHaveBeenCalledExactlyOnceWith('/path/to/another/icon', { size: 'small' });
       });
 
       it('should update according to the empty calls', async () => {

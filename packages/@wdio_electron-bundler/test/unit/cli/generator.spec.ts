@@ -179,7 +179,7 @@ describe('ConfigGenerator', () => {
       const result = await generator.writeConfig(mockGeneratedConfig, 'rollup.config.js', false);
 
       expect(mockMkdir).toHaveBeenCalled();
-      expect(mockWriteFile).toHaveBeenCalledWith(
+      expect(mockWriteFile).toHaveBeenCalledExactlyOnceWith(
         'rollup.config.js',
         expect.stringContaining('export default'),
         'utf-8',
