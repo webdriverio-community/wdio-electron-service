@@ -13,6 +13,7 @@ import { ElectronCdpBridge, getDebuggerEndpoint } from './bridge.js';
 import { execute } from './commands/executeCdp.js';
 import * as commands from './commands/index.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { checkInspectFuse } from './fuses.js';
 import mockStore from './mockStore.js';
 import { ServiceConfig } from './serviceConfig.js';
 import { clearPuppeteerSessions, ensureActiveWindowFocus, getActiveWindowHandle, getPuppeteer } from './window.js';
@@ -179,7 +180,30 @@ function isMultiremote(
   return browser.isMultiremote;
 }
 
-async function initCdpBridge(cdpOptions: CdpBridgeOptions, capabilities: WebdriverIO.Capabilities) {
+async function initCdpBridge(
+  cdpOptions: CdpBridgeOptions,
+  capabilities: WebdriverIO.Capabilities,
+): Promise<ElectronCdpBridge | undefined> {
+  // Check if the Electron binary has the necessary fuse enabled
+  const binaryPath = capabilities['goog:chromeOptions']?.binary;
+  if (binaryPath && typeof binaryPath === 'string') {
+    const fuseCheck = await checkInspectFuse(binaryPath);
+
+    // Fuse is disabled - cannot use CDP bridge
+    if (!fuseCheck.canUseCdpBridge) {
+      log.warn('CDP bridge cannot be initialized: EnableNodeCliInspectArguments fuse is disabled.');
+      log.warn('The browser.electron API for main process access will not be available.');
+      log.warn('To enable the CDP bridge, ensure this fuse is enabled in your test builds.');
+      log.warn('See: https://www.electronjs.org/docs/latest/tutorial/fuses#nodecliinspect');
+      return undefined;
+    }
+
+    // Fuse check encountered an error but we're proceeding anyway
+    if (fuseCheck.error) {
+      log.warn(fuseCheck.error);
+    }
+  }
+
   const options = Object.assign({}, cdpOptions, getDebuggerEndpoint(capabilities));
 
   const cdpBridge = new ElectronCdpBridge(options);

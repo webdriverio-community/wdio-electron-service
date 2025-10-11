@@ -51,6 +51,12 @@ vi.mock('../src/bridge', () => {
   };
 });
 
+vi.mock('../src/fuses', () => {
+  return {
+    checkInspectFuse: vi.fn().mockResolvedValue({ canUseCdpBridge: true }),
+  };
+});
+
 vi.mock('../src/mockStore', () => {
   return {
     default: {

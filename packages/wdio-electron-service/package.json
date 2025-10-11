@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@babel/parser": "^7.28.3",
+    "@electron/fuses": "^2.0.0",
     "@vitest/spy": "^3.2.4",
     "@wdio/cdp-bridge": "workspace:*",
     "@wdio/electron-types": "workspace:*",
