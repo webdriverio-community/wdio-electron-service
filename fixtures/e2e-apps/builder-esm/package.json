@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.2",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.3.0",
     "@wdio/cli": "catalog:default",
@@ -26,8 +26,8 @@
     "electron": "catalog:default",
     "electron-builder": "^26.0.12",
     "rollup": "^4.48.1",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
     "webdriverio": "catalog:default"
   },
   "build": {
