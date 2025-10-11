@@ -28,8 +28,8 @@ catalogs:
       specifier: ^9.20.0
       version: 9.20.0
     electron:
-      specifier: ^38.2.2
-      version: 38.2.2
+      specifier: ^37.3.1
+      version: 37.6.1
     webdriverio:
       specifier: ^9.20.0
       version: 9.20.0
@@ -142,7 +142,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
@@ -203,7 +203,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       electron-builder:
         specifier: ^26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -245,7 +245,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       electron-builder:
         specifier: ^26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -293,7 +293,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       rollup:
         specifier: ^4.52.4
         version: 4.52.4
@@ -338,7 +338,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       rollup:
         specifier: ^4.52.4
         version: 4.52.4
@@ -380,7 +380,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       rollup:
         specifier: ^4.52.4
         version: 4.52.4
@@ -422,7 +422,7 @@ importers:
         version: 9.20.0
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       rollup:
         specifier: ^4.52.4
         version: 4.52.4
@@ -689,7 +689,7 @@ importers:
         version: 26.0.11
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -838,7 +838,7 @@ importers:
         version: 26.0.11
       electron:
         specifier: catalog:default
-        version: 38.2.2
+        version: 37.6.1
       jsdom:
         specifier: ^27.0.0
         version: 27.0.0(postcss@8.5.6)
@@ -3201,6 +3201,11 @@ packages:
   electron-winstaller@5.4.0:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
+
+  electron@37.6.1:
+    resolution: {integrity: sha512-aHtJVNjqf0lk7dlPoc1X+fMBpZtLn+XGvP6IYc3gooTwsD1D/Ic2SBRC9SnIk6LkWTsDaSF9jgH1d9Q7eABy/Q==}
+    engines: {node: '>= 12.20.55'}
+    hasBin: true
 
   electron@38.2.2:
     resolution: {integrity: sha512-OXSaVNXDlonXDjMRsFNQo1j5tzTKwKXh5/m46IjAFccBcZJZMISI+EjSI07oexIuhvKM8AZLuFuihVn4YjWWrA==}
@@ -8856,6 +8861,14 @@ snapshots:
       temp: 0.9.4
     optionalDependencies:
       '@electron/windows-sign': 1.2.2
+    transitivePeerDependencies:
+      - supports-color
+
+  electron@37.6.1:
+    dependencies:
+      '@electron/get': 2.0.3
+      '@types/node': 22.18.9
+      extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
 

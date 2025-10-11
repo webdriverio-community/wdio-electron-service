@@ -17,7 +17,7 @@ packages:
 
 catalogs:
   default:
-    electron: ^38.2.2
+    electron: ^37.3.1
     webdriverio: ^9.20.0
     '@wdio/cli': ^9.20.0
     '@wdio/globals': ^9.17.0
@@ -27,7 +27,7 @@ catalogs:
     '@wdio/logger': ^9.18.0
     '@wdio/xvfb': ^9.20.0
   next:
-    electron-nightly: 40.0.0-nightly.20251010
+    electron-nightly: 39.0.0-nightly.20250825
     webdriverio: latest
     '@wdio/cli': latest
     '@wdio/globals': latest
