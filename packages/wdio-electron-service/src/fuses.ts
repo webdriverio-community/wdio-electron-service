@@ -1,11 +1,10 @@
-import { FuseState, FuseV1Options, FuseVersion, getCurrentFuseWire } from '@electron/fuses';
 import { createLogger } from '@wdio/electron-utils';
 
 const log = createLogger('fuses');
 
 export interface FuseCheckResult {
   canUseCdpBridge: boolean;
-  fuseValue?: FuseState;
+  fuseValue?: number;
   error?: string;
 }
 
@@ -20,6 +19,8 @@ export async function checkInspectFuse(binaryPath: string): Promise<FuseCheckRes
   try {
     log.debug(`Checking EnableNodeCliInspectArguments fuse for: ${binaryPath}`);
 
+    // @ts-expect-error Dynamic import required - @electron/fuses is external at runtime
+    const { getCurrentFuseWire, FuseVersion, FuseV1Options, FuseState } = await import('@electron/fuses');
     const config = await getCurrentFuseWire(binaryPath);
 
     // If we can't read the config (e.g., older Electron version without fuses),
