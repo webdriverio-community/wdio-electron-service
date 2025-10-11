@@ -132,8 +132,10 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], true);
 
-        expect(mockFs.existsSync).toHaveBeenCalledExactlyOnceWith('/sys/kernel/security/apparmor/profiles');
-        expect(mockFs.readFileSync).toHaveBeenCalledExactlyOnceWith('/sys/kernel/security/apparmor/profiles', 'utf8');
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- existsSync is called multiple times to check different files
+        expect(mockFs.existsSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles');
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- readFileSync is called multiple times for different files
+        expect(mockFs.readFileSync).toHaveBeenCalledWith('/sys/kernel/security/apparmor/profiles', 'utf8');
       });
 
       it('should skip workaround when AppArmor is not running', () => {
@@ -206,7 +208,8 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], 'sudo');
 
-        expect(mockExecSync).toHaveBeenCalledExactlyOnceWith(
+        expect(mockExecSync).toHaveBeenNthCalledWith(
+          1,
           'sudo tee /etc/apparmor.d/electron-wdio-service > /dev/null',
           expect.objectContaining({
             input: expect.stringContaining(
@@ -217,7 +220,8 @@ describe('apparmor', () => {
 
         const profileContent = mockExecSync.mock.calls[0][1].input as string;
         expect(profileContent).toContain('userns,');
-        expect(mockExecSync).toHaveBeenCalledExactlyOnceWith(
+        expect(mockExecSync).toHaveBeenNthCalledWith(
+          2,
           'sudo apparmor_parser -r /etc/apparmor.d/electron-wdio-service',
           {
             encoding: 'utf8',
@@ -338,7 +342,8 @@ describe('apparmor', () => {
 
         applyApparmorWorkaround(['/path/to/electron'], 'sudo');
 
-        expect(mockSpawnSync).toHaveBeenCalledExactlyOnceWith('sudo', ['-n', 'true'], { encoding: 'utf8' });
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with -- spawnSync is called multiple times (aa-status check + sudo check)
+        expect(mockSpawnSync).toHaveBeenCalledWith('sudo', ['-n', 'true'], { encoding: 'utf8' });
         expect(mockExecSync).toHaveBeenCalled(); // Should proceed with profile creation
       });
 
