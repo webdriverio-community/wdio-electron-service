@@ -17,17 +17,17 @@ packages:
 
 catalogs:
   default:
-    electron: ^37.3.1
-    webdriverio: ^9.19.2
-    '@wdio/cli': ^9.19.2
+    electron: ^38.2.2
+    webdriverio: ^9.20.0
+    '@wdio/cli': ^9.20.0
     '@wdio/globals': ^9.17.0
-    '@wdio/local-runner': ^9.19.2
-    '@wdio/mocha-framework': ^9.19.2
-    '@wdio/types': ^9.19.2
+    '@wdio/local-runner': ^9.20.0
+    '@wdio/mocha-framework': ^9.20.0
+    '@wdio/types': ^9.20.0
     '@wdio/logger': ^9.18.0
-    '@wdio/xvfb': ^9.19.2
+    '@wdio/xvfb': ^9.20.0
   next:
-    electron-nightly: 39.0.0-nightly.20250825
+    electron-nightly: 40.0.0-nightly.20251010
     webdriverio: latest
     '@wdio/cli': latest
     '@wdio/globals': latest
