@@ -157,9 +157,9 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           const packageDir = path.dirname(pkg.path);
           appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
 
-          // Add unique user-data-dir to avoid conflicts when multiple instances try to launch
-          // This is especially important when using appEntryPoint as the app may already be running
-          const userDataDir = path.join(os.tmpdir(), `wdio-electron-${process.pid}-${Date.now()}`);
+          // Add unique user-data-dir to avoid conflicts when multiple test sessions try to launch
+          // Using process.pid ensures all tests in the same session share the same directory
+          const userDataDir = path.join(os.tmpdir(), `wdio-electron-${process.pid}`);
           appArgs = [`--app=${appEntryPoint}`, `--user-data-dir=${userDataDir}`, ...appArgs];
           log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
         } else if (!appBinaryPath) {
