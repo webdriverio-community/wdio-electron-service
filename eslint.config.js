@@ -48,6 +48,10 @@ export default [
     },
     rules: {
       ...vitest.configs.recommended.rules,
+      // Disabled due to poor implementation - forces toHaveBeenCalledExactlyOnceWith when
+      // either toHaveBeenCalledWith or toHaveBeenCalledOnce are used, should be only when both are used
+      // See: https://github.com/vitest-dev/eslint-plugin-vitest/issues/775
+      'vitest/prefer-called-exactly-once-with': 'off',
     },
   },
 ];
