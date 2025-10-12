@@ -17,15 +17,15 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.2",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.7.2",
     "@wdio/cli": "catalog:default",
     "@wdio/globals": "catalog:default",
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
-    "rollup": "^4.48.1",
+    "rollup": "^4.52.4",
     "tsx": "^4.20.5",
     "typescript": "^5.9.3",
     "webdriverio": "catalog:default"
