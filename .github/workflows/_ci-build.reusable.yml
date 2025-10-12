@@ -26,6 +26,7 @@ on:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
+  TURBO_DAEMON: false
 
 jobs:
   # This job builds all packages in the monorepo

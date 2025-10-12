@@ -41,6 +41,7 @@ on:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
+  TURBO_DAEMON: false
 
 jobs:
   # This job runs E2E tests for a specific combination of:
