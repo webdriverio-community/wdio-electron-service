@@ -41,6 +41,7 @@ on:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
+  TURBO_DAEMON: false
 
 jobs:
   # This job runs E2E tests for a specific combination of:
@@ -104,7 +105,7 @@ jobs:
       # This builds only the necessary test apps for the current test configuration
       - name: 🏗️ Build Test Applications
         shell: bash
-        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel --verbosity=2
 
       # Dynamically generate the test commands to run
       # This handles both single and multiple scenarios, and ESM/CJS/both
@@ -131,7 +132,7 @@ jobs:
       # First initializes the E2E environment, then runs the specific tests
       - name: 🧪 Execute E2E Tests
         shell: bash
-        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only
+        run: pnpm exec turbo run init-e2es ${{ steps.gen-test.outputs.result }} --only --verbosity=2 --log-order=stream
 
       # Show comprehensive debug information on failure
       - name: 🐛 Debug Information on Failure
