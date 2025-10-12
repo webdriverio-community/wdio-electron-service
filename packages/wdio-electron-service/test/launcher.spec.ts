@@ -715,11 +715,17 @@ describe('Electron Launch Service', () => {
           },
         ];
         await instance?.onPrepare({} as never, capabilities);
-        expect(capabilities[0]).toEqual({
+
+        // Extract args and check them individually since user-data-dir contains dynamic values
+        const args = capabilities[0]['goog:chromeOptions']?.args || [];
+        expect(args[0]).toBe('--app=path/to/main.bundle.js');
+        expect(args[1]).toMatch(/^--user-data-dir=/);
+
+        // Check the rest of the capability
+        expect(capabilities[0]).toMatchObject({
           browserName: 'chrome',
           browserVersion: '116.0.5845.190',
           'goog:chromeOptions': {
-            args: ['--app=path/to/main.bundle.js'],
             binary: path.join(getFixtureDir('package-scenarios', 'no-build-tool'), 'node_modules', '.bin', 'electron'),
             windowTypes: ['app', 'webview'],
           },
