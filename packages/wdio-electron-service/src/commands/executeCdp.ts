@@ -70,7 +70,7 @@ const syncMockStatus = async (args: unknown[]) => {
 
 // Remove first arg `electron` - Electron can be accessed as global scope.
 const removeFirstArg = (funcStr: string) => {
-  // generate ATS
+  // generate AST
   const ast = parse(funcStr, {
     parser: {
       parse: (source: string) =>
