@@ -102,9 +102,10 @@ jobs:
 
       # Build the test applications using Turbo with the generated filter
       # This builds only the necessary test apps for the current test configuration
+      # Note: mac-universal builds use --force to bypass cache and avoid cross-runner dependency issues
       - name: 🏗️ Build Test Applications
         shell: bash
-        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel
+        run: pnpm exec turbo run ${{ inputs.build-command }} ${{ steps.gen-build.outputs.result }} --only --parallel${{ contains(inputs.build-command, 'mac-universal') && ' --force' || '' }}
 
       # Dynamically generate the test commands to run
       # This handles both single and multiple scenarios, and ESM/CJS/both
