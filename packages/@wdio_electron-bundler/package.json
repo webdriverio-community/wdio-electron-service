@@ -34,7 +34,7 @@
     "test": "pnpm test:unit && pnpm test:integration"
   },
   "dependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.1.4",
     "commander": "^14.0.1",
     "debug": "^4.4.3",
