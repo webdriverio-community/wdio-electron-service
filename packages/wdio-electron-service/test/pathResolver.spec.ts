@@ -74,7 +74,7 @@ describe('pathResolver', () => {
           pkg: mockPkg,
         });
 
-        expect(result.appBinaryPath).toContain('node_modules/.bin/electron');
+        expect(result.appBinaryPath).toMatch(/node_modules[/\\].bin[/\\]electron/);
         expect(result.appArgs).toEqual(['--app=/path/to/app.js', '--no-sandbox']);
         expect(result.logMessages).toHaveLength(1);
         expect(result.logMessages[0].level).toBe('debug');
@@ -131,7 +131,7 @@ describe('pathResolver', () => {
           pkg: mockPkg,
         });
 
-        expect(result.appBinaryPath).toContain('node_modules/.bin/electron');
+        expect(result.appBinaryPath).toMatch(/node_modules[/\\].bin[/\\]electron/);
         expect(result.appArgs).toEqual(['--app=/path/to/app.js', '--no-sandbox']);
         expect(result.logMessages).toHaveLength(2);
         expect(result.logMessages[0].message).toContain('using appEntryPoint (appBinaryPath ignored)');
@@ -168,7 +168,7 @@ describe('pathResolver', () => {
           pkg: mockPkg,
         });
 
-        expect(result.appBinaryPath).toContain('node_modules/.bin/electron');
+        expect(result.appBinaryPath).toMatch(/node_modules[/\\].bin[/\\]electron/);
         expect(result.appArgs).toEqual(['--app=/path/to/app.js', '--no-sandbox']);
         expect(result.logMessages).toHaveLength(3); // debug for appBinaryPath failure + info message + debug for entry point
         expect(result.logMessages[1].message).toContain('appBinaryPath is invalid and ignored');
