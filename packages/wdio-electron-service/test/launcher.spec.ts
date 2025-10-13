@@ -1,3 +1,4 @@
+import { access } from 'node:fs/promises';
 import path from 'node:path';
 import type { BinaryPathResult, ElectronServiceOptions } from '@wdio/electron-types';
 import type { Capabilities, Options } from '@wdio/types';
@@ -16,11 +17,15 @@ function getFixtureDir(fixtureType: string, fixtureName: string) {
   return path.join(process.cwd(), '..', '..', 'fixtures', fixtureType, fixtureName);
 }
 
-vi.mock('node:fs/promises', () => ({
-  default: {
-    access: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('node:fs/promises', () => {
+  const mockAccessFn = vi.fn().mockResolvedValue(undefined);
+  return {
+    access: mockAccessFn,
+    default: {
+      access: mockAccessFn,
+    },
+  };
+});
 vi.mock('@wdio/electron-utils', async () => {
   const mockUtilsModule = await import('./mocks/electron-utils.js');
 
@@ -97,6 +102,7 @@ beforeEach(async () => {
 afterEach(() => {
   instance = undefined;
   revertProcessProperty('platform');
+  vi.mocked(access).mockReset().mockResolvedValue(undefined);
 });
 
 describe('Electron Launch Service', () => {
@@ -208,7 +214,7 @@ describe('Electron Launch Service', () => {
         );
       });
 
-      it('should warn when appEntryPoint and appBinaryPath are set', async () => {
+      it('should use appEntryPoint when both appEntryPoint and appBinaryPath are set', async () => {
         options.appEntryPoint = './path/to/bundled/electron/main.bundle.js';
         instance = new LaunchService(
           options,
@@ -229,8 +235,8 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         const mockLogger = getMockLogger('launcher');
-        expect(mockLogger?.warn).toHaveBeenLastCalledWith(
-          'Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored',
+        expect(mockLogger?.info).toHaveBeenCalledWith(
+          'Both appEntryPoint and appBinaryPath are set, using appEntryPoint (appBinaryPath ignored)',
         );
       });
 

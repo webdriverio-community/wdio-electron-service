@@ -1,4 +1,3 @@
-import path from 'node:path';
 import type {
   AppBuildInfo,
   BinaryPathResult,
@@ -22,6 +21,7 @@ import {
   getElectronCapabilities,
 } from './capabilities.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { resolveAppPaths } from './pathResolver.js';
 import { getChromiumVersion } from './versions.js';
 
 /**
@@ -148,16 +148,22 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
           apparmorAutoInstall = capApparmorAutoInstall;
         }
 
-        if (appEntryPoint) {
-          if (appBinaryPath) {
-            log.warn('Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored');
+        // Handle path validation and resolution with proper precedence
+        if (appEntryPoint || appBinaryPath) {
+          const result = await resolveAppPaths({ appEntryPoint, appBinaryPath, appArgs, pkg });
+          appBinaryPath = result.appBinaryPath;
+          appArgs = result.appArgs;
+
+          // Emit log messages from path resolution
+          for (const logMessage of result.logMessages) {
+            if (logMessage.args) {
+              log[logMessage.level](logMessage.message, ...logMessage.args);
+            } else {
+              log[logMessage.level](logMessage.message);
+            }
           }
-          const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-          const packageDir = path.dirname(pkg.path);
-          appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
-          appArgs = [`--app=${appEntryPoint}`, ...appArgs];
-          log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
-        } else if (!appBinaryPath) {
+        } else {
+          // Neither provided - use auto-detection
           log.info('No app binary specified, attempting to detect one...');
           try {
             const appBuildInfo = await getAppBuildInfo(pkg);
