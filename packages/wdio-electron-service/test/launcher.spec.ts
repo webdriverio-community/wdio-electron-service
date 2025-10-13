@@ -1,3 +1,4 @@
+import { access } from 'node:fs/promises';
 import path from 'node:path';
 import type { BinaryPathResult, ElectronServiceOptions } from '@wdio/electron-types';
 import type { Capabilities, Options } from '@wdio/types';
@@ -16,11 +17,15 @@ function getFixtureDir(fixtureType: string, fixtureName: string) {
   return path.join(process.cwd(), '..', '..', 'fixtures', fixtureType, fixtureName);
 }
 
-vi.mock('node:fs/promises', () => ({
-  default: {
-    access: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('node:fs/promises', () => {
+  const mockAccessFn = vi.fn().mockResolvedValue(undefined);
+  return {
+    access: mockAccessFn,
+    default: {
+      access: mockAccessFn,
+    },
+  };
+});
 vi.mock('@wdio/electron-utils', async () => {
   const mockUtilsModule = await import('./mocks/electron-utils.js');
 
@@ -97,6 +102,7 @@ beforeEach(async () => {
 afterEach(() => {
   instance = undefined;
   revertProcessProperty('platform');
+  vi.mocked(access).mockReset().mockResolvedValue(undefined);
 });
 
 describe('Electron Launch Service', () => {
@@ -208,7 +214,7 @@ describe('Electron Launch Service', () => {
         );
       });
 
-      it('should warn when appEntryPoint and appBinaryPath are set', async () => {
+      it('should use appEntryPoint when both appEntryPoint and appBinaryPath are set', async () => {
         options.appEntryPoint = './path/to/bundled/electron/main.bundle.js';
         instance = new LaunchService(
           options,
@@ -229,9 +235,110 @@ describe('Electron Launch Service', () => {
         ];
         await instance?.onPrepare({} as never, capabilities);
         const mockLogger = getMockLogger('launcher');
-        expect(mockLogger?.warn).toHaveBeenLastCalledWith(
-          'Both appEntryPoint and appBinaryPath are set, appBinaryPath will be ignored',
+        expect(mockLogger?.info).toHaveBeenCalledWith(
+          'Both appEntryPoint and appBinaryPath are set, using appEntryPoint (appBinaryPath ignored)',
         );
+      });
+
+      it('should throw an error when appEntryPoint does not exist', async () => {
+        vi.mocked(access).mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+
+        delete options.appBinaryPath;
+        options.appEntryPoint = './path/to/nonexistent/main.bundle.js';
+        instance = new LaunchService(
+          options,
+          [] as never,
+          {
+            services: [['electron', options]],
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
+          } as Options.Testrunner,
+        );
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+        await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+          /App entry point not found:.*nonexistent\/main\.bundle\.js/,
+        );
+      });
+
+      it('should throw an error when appBinaryPath does not exist', async () => {
+        vi.mocked(access).mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+
+        options.appBinaryPath = './path/to/nonexistent/app';
+        delete options.appEntryPoint;
+        instance = new LaunchService(
+          options,
+          [] as never,
+          {
+            services: [['electron', options]],
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
+          } as Options.Testrunner,
+        );
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+        await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+          /App binary not found:.*nonexistent\/app/,
+        );
+      });
+
+      it('should throw an error when both appEntryPoint and appBinaryPath do not exist', async () => {
+        vi.mocked(access)
+          .mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
+          .mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+
+        options.appEntryPoint = './path/to/nonexistent/main.bundle.js';
+        options.appBinaryPath = './path/to/nonexistent/app';
+        instance = new LaunchService(
+          options,
+          [] as never,
+          {
+            services: [['electron', options]],
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
+          } as Options.Testrunner,
+        );
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+        await expect(() => instance?.onPrepare({} as never, capabilities)).rejects.toThrow(
+          /Both appEntryPoint and appBinaryPath not found/,
+        );
+      });
+
+      it('should fall back to appBinaryPath when appEntryPoint does not exist but appBinaryPath does', async () => {
+        vi.mocked(access)
+          .mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
+          .mockResolvedValueOnce(undefined);
+
+        options.appEntryPoint = './path/to/nonexistent/main.bundle.js';
+        options.appBinaryPath = 'workspace/my-test-app/dist/my-test-app';
+        instance = new LaunchService(
+          options,
+          [] as never,
+          {
+            services: [['electron', options]],
+            rootDir: getFixtureDir('package-scenarios', 'no-build-tool'),
+          } as Options.Testrunner,
+        );
+        const capabilities: WebdriverIO.Capabilities[] = [
+          {
+            browserName: 'electron',
+            browserVersion: '26.2.2',
+          },
+        ];
+        await instance?.onPrepare({} as never, capabilities);
+        const mockLogger = getMockLogger('launcher');
+        expect(mockLogger?.warn).toHaveBeenCalledWith(expect.stringContaining('appEntryPoint not found'));
+        expect(capabilities[0]['goog:chromeOptions']?.binary).toBe('workspace/my-test-app/dist/my-test-app');
       });
 
       it('should throw an error when the detected app path does not exist for a Forge dependency', async () => {
