@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.3.0",
     "@wdio/cli": "catalog:default",
@@ -19,8 +19,8 @@
     "@wdio/local-runner": "catalog:default",
     "@wdio/mocha-framework": "catalog:default",
     "electron": "catalog:default",
-    "rollup": "^4.46.4",
-    "tsx": "^4.20.4",
+    "rollup": "^4.52.4",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2",
     "webdriverio": "catalog:default"
   }
