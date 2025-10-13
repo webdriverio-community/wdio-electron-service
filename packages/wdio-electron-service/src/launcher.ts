@@ -1,5 +1,3 @@
-import { access } from 'node:fs/promises';
-import path from 'node:path';
 import type {
   AppBuildInfo,
   BinaryPathResult,
@@ -23,39 +21,8 @@ import {
   getElectronCapabilities,
 } from './capabilities.js';
 import { CUSTOM_CAPABILITY_NAME } from './constants.js';
+import { resolveAppPaths } from './pathResolver.js';
 import { getChromiumVersion } from './versions.js';
-
-/**
- * Validate that a file path exists and is accessible
- * @param filePath - The path to validate
- * @param pathType - Description of the path type for error messages (e.g., "App entry point", "App binary")
- * @returns The validated path
- * @throws Error if the file doesn't exist or isn't accessible
- */
-async function validateFilePath(filePath: string, pathType: string): Promise<string> {
-  try {
-    await access(filePath);
-    return filePath;
-  } catch (error) {
-    const errorCode = (error as NodeJS.ErrnoException).code;
-    let errorMessage = `${pathType} not found: ${filePath}\n\n`;
-
-    if (errorCode === 'ENOENT') {
-      errorMessage += `The specified ${pathType.toLowerCase()} does not exist. Please ensure:\n`;
-      errorMessage += `1. The path is correct\n`;
-      errorMessage += `2. The application has been built\n`;
-      errorMessage += `3. The file is accessible from the test directory\n\n`;
-      errorMessage += `Current working directory: ${process.cwd()}`;
-    } else if (errorCode === 'EACCES') {
-      errorMessage += `Permission denied. The file exists but is not accessible.\n`;
-      errorMessage += `Please check file permissions.`;
-    } else {
-      errorMessage += `Unable to access file: ${(error as Error).message}`;
-    }
-
-    throw new Error(errorMessage);
-  }
-}
 
 /**
  * Generate a comprehensive error message based on the binary path detection result
@@ -182,68 +149,19 @@ export default class ElectronLaunchService implements Services.ServiceInstance {
         }
 
         // Handle path validation and resolution with proper precedence
-        if (appEntryPoint && appBinaryPath) {
-          // Both paths provided - validate with fallback logic
-          let appEntryPointValid = false;
-          let appBinaryPathValid = false;
+        if (appEntryPoint || appBinaryPath) {
+          const result = await resolveAppPaths({ appEntryPoint, appBinaryPath, appArgs, pkg });
+          appBinaryPath = result.appBinaryPath;
+          appArgs = result.appArgs;
 
-          try {
-            await validateFilePath(appEntryPoint, 'App entry point');
-            appEntryPointValid = true;
-          } catch (entryPointError) {
-            log.debug(`appEntryPoint validation failed: ${(entryPointError as Error).message}`);
+          // Emit log messages from path resolution
+          for (const logMessage of result.logMessages) {
+            if (logMessage.args) {
+              log[logMessage.level](logMessage.message, ...logMessage.args);
+            } else {
+              log[logMessage.level](logMessage.message);
+            }
           }
-
-          try {
-            await validateFilePath(appBinaryPath, 'App binary');
-            appBinaryPathValid = true;
-          } catch (binaryPathError) {
-            log.debug(`appBinaryPath validation failed: ${(binaryPathError as Error).message}`);
-          }
-
-          if (appEntryPointValid && appBinaryPathValid) {
-            // Both valid - use appEntryPoint as documented
-            log.info('Both appEntryPoint and appBinaryPath are set, using appEntryPoint (appBinaryPath ignored)');
-            const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-            const packageDir = path.dirname(pkg.path);
-            appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
-            appArgs = [`--app=${appEntryPoint}`, ...appArgs];
-            log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
-          } else if (appEntryPointValid) {
-            // Only appEntryPoint valid
-            log.info('Using appEntryPoint (appBinaryPath is invalid and ignored)');
-            const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-            const packageDir = path.dirname(pkg.path);
-            appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
-            appArgs = [`--app=${appEntryPoint}`, ...appArgs];
-            log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
-          } else if (appBinaryPathValid) {
-            // Only appBinaryPath valid - fall back to it
-            log.warn(`appEntryPoint not found (${appEntryPoint}), falling back to appBinaryPath`);
-            // appBinaryPath is already set and validated
-          } else {
-            // Both invalid
-            throw new Error(
-              `Both appEntryPoint and appBinaryPath not found:\n\n` +
-                `- appEntryPoint: ${appEntryPoint} (does not exist)\n` +
-                `- appBinaryPath: ${appBinaryPath} (does not exist)\n\n` +
-                `Please:\n` +
-                `1. Check that the paths are correct\n` +
-                `2. Ensure the application has been built\n` +
-                `3. Or remove these options to enable auto-detection`,
-            );
-          }
-        } else if (appEntryPoint) {
-          // Only appEntryPoint provided - validate it
-          await validateFilePath(appEntryPoint, 'App entry point');
-          const electronBinary = process.platform === 'win32' ? 'electron.CMD' : 'electron';
-          const packageDir = path.dirname(pkg.path);
-          appBinaryPath = path.join(packageDir, 'node_modules', '.bin', electronBinary);
-          appArgs = [`--app=${appEntryPoint}`, ...appArgs];
-          log.debug('App entry point: ', appEntryPoint, appBinaryPath, appArgs);
-        } else if (appBinaryPath) {
-          // Only appBinaryPath provided - validate it
-          await validateFilePath(appBinaryPath, 'App binary');
         } else {
           // Neither provided - use auto-detection
           log.info('No app binary specified, attempting to detect one...');
