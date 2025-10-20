@@ -34,12 +34,12 @@
     "test": "pnpm test:unit && pnpm test:integration"
   },
   "dependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.1.4",
     "commander": "^14.0.1",
     "debug": "^4.4.3",
     "read-package-up": "^11.0.0",
-    "rollup": "^4.52.4",
+    "rollup": "^4.52.5",
     "rollup-plugin-node-externals": "^8.1.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
