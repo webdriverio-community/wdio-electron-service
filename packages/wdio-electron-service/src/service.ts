@@ -60,6 +60,27 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
     if (isMultiremote(instance)) {
       const mrBrowser = instance;
+
+      // Set up electron API for the root multiremote browser
+      // Use the first available instance's CDP bridge, or undefined if none available
+      let rootCdpBridge: ElectronCdpBridge | undefined;
+      for (const instanceName of mrBrowser.instances) {
+        const mrInstance = mrBrowser.getInstance(instanceName);
+        const caps =
+          (mrInstance.requestedCapabilities as Capabilities.W3CCapabilities).alwaysMatch ||
+          (mrInstance.requestedCapabilities as WebdriverIO.Capabilities);
+
+        if (caps[CUSTOM_CAPABILITY_NAME]) {
+          const mrCdpBridge = await initCdpBridge(this.cdpOptions, caps);
+          if (mrCdpBridge && !rootCdpBridge) {
+            rootCdpBridge = mrCdpBridge;
+          }
+          break; // Use the first available CDP bridge for the root
+        }
+      }
+
+      mrBrowser.electron = getElectronAPI.call(this, mrBrowser as unknown as WebdriverIO.Browser, rootCdpBridge);
+
       for (const instance of mrBrowser.instances) {
         const mrInstance = mrBrowser.getInstance(instance);
         const caps =

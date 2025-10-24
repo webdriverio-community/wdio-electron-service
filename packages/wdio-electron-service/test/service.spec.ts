@@ -267,6 +267,38 @@ describe('Electron Worker Service', () => {
         expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
       });
 
+      it('should provide functional electron API on root multiremote browser', async () => {
+        instance = new ElectronWorkerService({}, {});
+        browser.requestedCapabilities = {
+          alwaysMatch: {
+            browserName: 'electron',
+            'wdio:electronServiceOptions': {},
+          },
+        };
+
+        const rootBrowser = {
+          instances: ['electron'],
+          getInstance: (name: string) => (name === 'electron' ? browser : undefined),
+          execute: vi.fn().mockResolvedValue(true),
+          isMultiremote: true,
+          overwriteCommand: vi.fn(),
+        } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+        await instance.before({}, [], rootBrowser);
+
+        // The root browser should have a functional electron API
+        const rootServiceApi = rootBrowser.electron;
+        expect(rootServiceApi.clearAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.execute).toEqual(expect.any(Function));
+        expect(rootServiceApi.mock).toEqual(expect.any(Function));
+        expect(rootServiceApi.mockAll).toEqual(expect.any(Function));
+        expect(rootServiceApi.resetAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+        // Test that the root browser's execute method doesn't throw (it should work)
+        expect(() => rootServiceApi.execute(() => {})).not.toThrow();
+      });
+
       it('should continue with non-electron capabilities', async () => {
         instance = new ElectronWorkerService({}, {});
 
