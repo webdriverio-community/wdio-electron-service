@@ -132,6 +132,39 @@ describe('Electron Worker Service', () => {
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
     });
 
+    it('should provide a stubbed API when CDP bridge is unavailable', async () => {
+      // Mock the CDP bridge initialization to fail
+      const { checkInspectFuse } = await import('../src/fuses.js');
+      vi.mocked(checkInspectFuse).mockResolvedValueOnce({ canUseCdpBridge: false });
+
+      instance = new ElectronWorkerService({}, {});
+
+      // Provide capabilities with a binary path to trigger the fuse check
+      const capabilities = {
+        'goog:chromeOptions': {
+          binary: '/path/to/electron',
+        },
+      };
+
+      await instance.before(capabilities, [], browser);
+
+      const serviceApi = browser.electron as BrowserExtension['electron'];
+      expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.execute).toEqual(expect.any(Function));
+      expect(serviceApi.mock).toEqual(expect.any(Function));
+      expect(serviceApi.mockAll).toEqual(expect.any(Function));
+      expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+      // Test that methods throw appropriate errors
+      expect(() => serviceApi.execute(() => {})).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.clearAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.mock('app', 'getName')).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.mockAll('app')).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.resetAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.restoreAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+    });
+
     it('should install element command overrides with overwriteCommand', async () => {
       instance = new ElectronWorkerService({}, {});
 
@@ -234,6 +267,38 @@ describe('Electron Worker Service', () => {
         expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
       });
 
+      it('should provide functional electron API on root multiremote browser', async () => {
+        instance = new ElectronWorkerService({}, {});
+        browser.requestedCapabilities = {
+          alwaysMatch: {
+            browserName: 'electron',
+            'wdio:electronServiceOptions': {},
+          },
+        };
+
+        const rootBrowser = {
+          instances: ['electron'],
+          getInstance: (name: string) => (name === 'electron' ? browser : undefined),
+          execute: vi.fn().mockResolvedValue(true),
+          isMultiremote: true,
+          overwriteCommand: vi.fn(),
+        } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+        await instance.before({}, [], rootBrowser);
+
+        // The root browser should have a functional electron API
+        const rootServiceApi = rootBrowser.electron;
+        expect(rootServiceApi.clearAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.execute).toEqual(expect.any(Function));
+        expect(rootServiceApi.mock).toEqual(expect.any(Function));
+        expect(rootServiceApi.mockAll).toEqual(expect.any(Function));
+        expect(rootServiceApi.resetAllMocks).toEqual(expect.any(Function));
+        expect(rootServiceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+        // Test that the root browser's execute method doesn't throw (it should work)
+        expect(() => rootServiceApi.execute(() => {})).not.toThrow();
+      });
+
       it('should continue with non-electron capabilities', async () => {
         instance = new ElectronWorkerService({}, {});
 
@@ -255,6 +320,51 @@ describe('Electron Worker Service', () => {
         const serviceApi = browser.electron;
 
         expect(serviceApi).toStrictEqual({});
+      });
+
+      it('should handle CDP bridge unavailability in multiremote instances', async () => {
+        // Mock the CDP bridge initialization to fail for multiremote instances
+        const { checkInspectFuse } = await import('../src/fuses.js');
+        vi.mocked(checkInspectFuse).mockResolvedValue({ canUseCdpBridge: false });
+
+        instance = new ElectronWorkerService({}, {});
+
+        browser.requestedCapabilities = {
+          alwaysMatch: {
+            browserName: 'electron',
+            'wdio:electronServiceOptions': {},
+            'goog:chromeOptions': {
+              binary: '/path/to/electron',
+            },
+          },
+        };
+
+        const rootBrowser = {
+          instances: ['electron'],
+          getInstance: (name: string) => (name === 'electron' ? browser : undefined),
+          execute: vi.fn().mockResolvedValue(true),
+          isMultiremote: true,
+          overwriteCommand: vi.fn(),
+        } as unknown as WebdriverIO.MultiRemoteBrowser;
+
+        await instance.before({}, [], rootBrowser);
+
+        // The multiremote instance should have error-throwing API methods
+        const serviceApi = browser.electron;
+        expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
+        expect(serviceApi.execute).toEqual(expect.any(Function));
+        expect(serviceApi.mock).toEqual(expect.any(Function));
+        expect(serviceApi.mockAll).toEqual(expect.any(Function));
+        expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
+        expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+        // Test that methods throw appropriate errors
+        expect(() => serviceApi.execute(() => {})).toThrow('CDP bridge is not available, API is disabled');
+        expect(() => serviceApi.clearAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+        expect(() => serviceApi.mock('app', 'getName')).toThrow('CDP bridge is not available, API is disabled');
+        expect(() => serviceApi.mockAll('app')).toThrow('CDP bridge is not available, API is disabled');
+        expect(() => serviceApi.resetAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+        expect(() => serviceApi.restoreAllMocks()).toThrow('CDP bridge is not available, API is disabled');
       });
     });
   });
