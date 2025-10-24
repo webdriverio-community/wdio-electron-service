@@ -48,8 +48,13 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
      */
     this.browser.electron = getElectronAPI.call(this, this.browser, cdpBridge);
 
-    // Install element command overrides after Electron API is added to the browser object
-    this.installCommandOverrides();
+    const hasElectronApi =
+      this.browser?.electron && typeof this.browser.electron.execute === 'function' && cdpBridge !== undefined;
+
+    // Install command overrides if the electron API is available
+    if (hasElectronApi) {
+      this.installCommandOverrides();
+    }
 
     if (isMultiremote(instance)) {
       const mrBrowser = instance;
@@ -71,14 +76,18 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
-        await copyOriginalApi(mrInstance);
+        if (hasElectronApi) {
+          await copyOriginalApi(mrInstance);
+        }
       }
     } else {
       const puppeteer = await getPuppeteer(this.browser);
       this.browser.electron.windowHandle = await getActiveWindowHandle(puppeteer);
       // wait until an Electron BrowserWindow is available
       await waitUntilWindowAvailable(this.browser);
-      await copyOriginalApi(this.browser);
+      if (hasElectronApi) {
+        await copyOriginalApi(this.browser);
+      }
     }
   }
 
@@ -110,9 +119,6 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
    * Install command overrides to trigger mock updates after DOM interactions
    */
   private installCommandOverrides() {
-    if (!this.browser) {
-      return;
-    }
     const commandsToOverride = ['click', 'doubleClick', 'setValue', 'clearValue'];
     commandsToOverride.forEach((commandName) => {
       this.overrideElementCommand(commandName as ElementCommands);
@@ -123,9 +129,8 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
    * Override an element-level command to add mock update after execution
    */
   private overrideElementCommand(commandName: ElementCommands) {
-    if (!this.browser) {
-      return;
-    }
+    const browser = this.browser as WebdriverIO.Browser;
+
     try {
       const testOverride = async function (
         this: WebdriverIO.Element,
@@ -137,9 +142,9 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
         const result = await Reflect.apply(originalCommand, this, args as unknown[]);
         await updateAllMocks();
         return result;
-      } as Parameters<typeof this.browser.overwriteCommand>[1];
+      } as Parameters<typeof browser.overwriteCommand>[1];
 
-      this.browser.overwriteCommand(commandName, testOverride, true);
+      browser.overwriteCommand(commandName, testOverride, true);
     } catch {
       // ignore
     }
@@ -184,31 +189,33 @@ async function initCdpBridge(
   cdpOptions: CdpBridgeOptions,
   capabilities: WebdriverIO.Capabilities,
 ): Promise<ElectronCdpBridge | undefined> {
-  // Check if the Electron binary has the necessary fuse enabled
-  const binaryPath = capabilities['goog:chromeOptions']?.binary;
-  if (binaryPath && typeof binaryPath === 'string') {
-    const fuseCheck = await checkInspectFuse(binaryPath);
+  try {
+    // Check if the Electron binary has the necessary fuse enabled
+    const binaryPath = capabilities['goog:chromeOptions']?.binary;
+    if (binaryPath && typeof binaryPath === 'string') {
+      const fuseCheck = await checkInspectFuse(binaryPath);
 
-    // Fuse is disabled - cannot use CDP bridge
-    if (!fuseCheck.canUseCdpBridge) {
-      log.warn('CDP bridge cannot be initialized: EnableNodeCliInspectArguments fuse is disabled.');
-      log.warn('The browser.electron API for main process access will not be available.');
-      log.warn('To enable the CDP bridge, ensure this fuse is enabled in your test builds.');
-      log.warn('See: https://www.electronjs.org/docs/latest/tutorial/fuses#nodecliinspect');
-      return undefined;
+      // Fuse is disabled - cannot use CDP bridge
+      if (!fuseCheck.canUseCdpBridge) {
+        // Don't warn here - this will be handled by the API stub functions
+        return undefined;
+      }
+
+      // Fuse check encountered an error but we're proceeding anyway
+      if (fuseCheck.error) {
+        log.warn(fuseCheck.error);
+      }
     }
 
-    // Fuse check encountered an error but we're proceeding anyway
-    if (fuseCheck.error) {
-      log.warn(fuseCheck.error);
-    }
+    const options = Object.assign({}, cdpOptions, getDebuggerEndpoint(capabilities));
+    const cdpBridge = new ElectronCdpBridge(options);
+    await cdpBridge.connect();
+    return cdpBridge;
+  } catch (error) {
+    // CDP bridge failed for any reason - return undefined
+    log.debug('CDP bridge initialization failed:', error);
+    return undefined;
   }
-
-  const options = Object.assign({}, cdpOptions, getDebuggerEndpoint(capabilities));
-
-  const cdpBridge = new ElectronCdpBridge(options);
-  await cdpBridge.connect();
-  return cdpBridge;
 }
 
 export const waitUntilWindowAvailable = async (browser: WebdriverIO.Browser) => {
@@ -237,6 +244,26 @@ const copyOriginalApi = async (browser: WebdriverIO.Browser) => {
 };
 
 function getElectronAPI(this: ServiceConfig, browser: WebdriverIO.Browser, cdpBridge?: ElectronCdpBridge) {
+  if (!cdpBridge) {
+    const disabledApiFunc = () => {
+      log.warn('CDP bridge is not available, API is disabled');
+      log.warn('This may be due to EnableNodeCliInspectArguments fuse being disabled or other connection issues.');
+      log.warn('To enable the CDP bridge, ensure this fuse is enabled in your test builds.');
+      log.warn('See: https://www.electronjs.org/docs/latest/tutorial/fuses#nodecliinspect');
+      throw new Error('CDP bridge is not available, API is disabled');
+    };
+
+    return {
+      clearAllMocks: disabledApiFunc,
+      execute: disabledApiFunc,
+      isMockFunction: disabledApiFunc,
+      mock: disabledApiFunc,
+      mockAll: disabledApiFunc,
+      resetAllMocks: disabledApiFunc,
+      restoreAllMocks: disabledApiFunc,
+    } as unknown as BrowserExtension['electron'];
+  }
+
   const api = {
     clearAllMocks: commands.clearAllMocks.bind(this),
     execute: (script: string | AbstractFn, ...args: unknown[]) =>

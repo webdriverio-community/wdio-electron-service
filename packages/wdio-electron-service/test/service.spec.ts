@@ -132,6 +132,39 @@ describe('Electron Worker Service', () => {
       expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
     });
 
+    it('should provide a stubbed API when CDP bridge is unavailable', async () => {
+      // Mock the CDP bridge initialization to fail
+      const { checkInspectFuse } = await import('../src/fuses.js');
+      vi.mocked(checkInspectFuse).mockResolvedValueOnce({ canUseCdpBridge: false });
+
+      instance = new ElectronWorkerService({}, {});
+
+      // Provide capabilities with a binary path to trigger the fuse check
+      const capabilities = {
+        'goog:chromeOptions': {
+          binary: '/path/to/electron',
+        },
+      };
+
+      await instance.before(capabilities, [], browser);
+
+      const serviceApi = browser.electron as BrowserExtension['electron'];
+      expect(serviceApi.clearAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.execute).toEqual(expect.any(Function));
+      expect(serviceApi.mock).toEqual(expect.any(Function));
+      expect(serviceApi.mockAll).toEqual(expect.any(Function));
+      expect(serviceApi.resetAllMocks).toEqual(expect.any(Function));
+      expect(serviceApi.restoreAllMocks).toEqual(expect.any(Function));
+
+      // Test that methods throw appropriate errors
+      expect(() => serviceApi.execute(() => {})).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.clearAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.mock('app', 'getName')).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.mockAll('app')).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.resetAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+      expect(() => serviceApi.restoreAllMocks()).toThrow('CDP bridge is not available, API is disabled');
+    });
+
     it('should install element command overrides with overwriteCommand', async () => {
       instance = new ElectronWorkerService({}, {});
 
