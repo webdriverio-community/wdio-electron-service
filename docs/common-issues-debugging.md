@@ -31,6 +31,8 @@ When this fuse is disabled:
 - ❌ `browser.electron.execute()` - main process API access will not work
 - ❌ `browser.electron.mock()` - mocking main process APIs will not work
 - ✅ Renderer process testing continues to work normally
+- ✅ Service initialization continues normally - no crashes or failures
+- ✅ Clear error messages when attempting to use disabled APIs
 
 #### Solution
 
