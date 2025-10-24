@@ -48,8 +48,10 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
      */
     this.browser.electron = getElectronAPI.call(this, this.browser, cdpBridge);
 
-    const hasElectronApi =
-      this.browser?.electron && typeof this.browser.electron.execute === 'function' && cdpBridge !== undefined;
+    const isElectronApiAvailable = (browser: WebdriverIO.Browser, cdpBridge: ElectronCdpBridge | undefined) =>
+      browser?.electron && typeof browser.electron.execute === 'function' && cdpBridge !== undefined;
+
+    const hasElectronApi = isElectronApiAvailable(this.browser, cdpBridge);
 
     // Install command overrides if the electron API is available
     if (hasElectronApi) {
@@ -76,7 +78,10 @@ export default class ElectronWorkerService extends ServiceConfig implements Serv
 
         // wait until an Electron BrowserWindow is available
         await waitUntilWindowAvailable(mrInstance);
-        if (hasElectronApi) {
+
+        // Check if this specific instance has a functional electron API
+        const hasElectronApiForMrInstance = isElectronApiAvailable(mrInstance, mrCdpBridge);
+        if (hasElectronApiForMrInstance) {
           await copyOriginalApi(mrInstance);
         }
       }
