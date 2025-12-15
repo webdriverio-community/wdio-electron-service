@@ -36,7 +36,7 @@ jobs:
 
       # Cache ESLint and Prettier results
       - name: 📦 Cache Linting Results
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .eslintcache
