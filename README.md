@@ -1,6 +1,6 @@
 # WDIO Electron Service
 
-> **⚠️ DEPRECATED**: This package has been moved to the official WebdriverIO organization. Please migrate to [`@wdio/electron-service`](https://github.com/webdriverio/desktop-mobile-testing/tree/main/packages/electron-service) which is the actively maintained successor. See the [migration guide](https://github.com/webdriverio/desktop-mobile-testing/blob/main/packages/electron-service/docs/migration/v9-to-v10.md) for upgrade instructions.
+> **⚠️ DEPRECATED**: This package has been moved to the official WebdriverIO organization. Please migrate to [`@wdio/electron-service`](https://github.com/webdriverio/desktop-mobile/tree/main/packages/electron-service) which is the actively maintained successor. See the [migration guide](https://github.com/webdriverio/desktop-mobile/blob/main/packages/electron-service/docs/migration/v9-to-v10.md) for upgrade instructions.
 
 <a href="https://www.npmjs.com/package/wdio-electron-service" alt="NPM Version">
   <img src="https://img.shields.io/npm/v/wdio-electron-service" /></a>
