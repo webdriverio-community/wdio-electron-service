@@ -57,7 +57,7 @@ jobs:
           fi
 
       - name: 👷 Checkout branch for tagging
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ssh-key: ${{ secrets.deploy_key }}
           # For maintenance releases, we tag directly on the maintenance branch
