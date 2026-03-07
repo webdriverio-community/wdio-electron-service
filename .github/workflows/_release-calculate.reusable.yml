@@ -51,7 +51,7 @@ jobs:
     needs: ['check']
     steps:
       - name: 👷 Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # Always checkout main first to calculate the target branch
           ref: 'main'
