@@ -112,9 +112,8 @@ const QUESTIONS = {
     ],
   },
 };
-type PullRequest = GetResponseDataTypeFromEndpointMethod<Octokit['rest']['pulls']['list']> extends (infer U)[]
-  ? U
-  : never;
+type PullRequest =
+  GetResponseDataTypeFromEndpointMethod<Octokit['rest']['pulls']['list']> extends (infer U)[] ? U : never;
 type BackportResult = { exit: boolean; isError: boolean };
 
 console.log(`Welcome to the backport script for ${maintenanceLTSVersion}! 🚀`);
