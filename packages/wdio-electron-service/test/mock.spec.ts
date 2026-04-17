@@ -258,15 +258,9 @@ describe('Mock API', () => {
         await mock.mockRejectedValueOnce('second mock rejected value');
         await processExecuteCalls(electron);
 
-        await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
-          'first mock rejected value',
-        );
-        await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
-          'second mock rejected value',
-        );
-        await expect(async () => await electron.app.getFileIcon('/path/to/icon')).rejects.toThrow(
-          'default mock rejected value',
-        );
+        await expect(() => electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('first mock rejected value');
+        await expect(() => electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('second mock rejected value');
+        await expect(() => electron.app.getFileIcon('/path/to/icon')).rejects.toThrow('default mock rejected value');
       });
     });
 
