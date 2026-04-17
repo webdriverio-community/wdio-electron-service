@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Test</title>
@@ -43,12 +43,12 @@
         document.querySelector('.keypress-count').innerText += String.fromCharCode(event.keyCode);
       });
       document.querySelector('.make-bigger').addEventListener('click', () => {
-        const biggerClickCount = parseInt(document.querySelector('.bigger').innerText);
+        const biggerClickCount = parseInt(document.querySelector('.bigger').innerText, 10);
         document.querySelector('.bigger').innerText = biggerClickCount + 1;
         window.api.invoke('increase-window-size');
       });
       document.querySelector('.make-smaller').addEventListener('click', () => {
-        const smallerClickCount = parseInt(document.querySelector('.smaller').innerText);
+        const smallerClickCount = parseInt(document.querySelector('.smaller').innerText, 10);
         document.querySelector('.smaller').innerText = smallerClickCount + 1;
         window.api.invoke('decrease-window-size');
       });

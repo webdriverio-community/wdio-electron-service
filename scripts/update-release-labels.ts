@@ -82,9 +82,8 @@ const TRACK_LABELS = {
   MAINTENANCE: 'track:maintenance',
 };
 
-type Issue = GetResponseDataTypeFromEndpointMethod<Octokit['rest']['issues']['listForRepo']> extends (infer U)[]
-  ? U
-  : never;
+type Issue =
+  GetResponseDataTypeFromEndpointMethod<Octokit['rest']['issues']['listForRepo']> extends (infer U)[] ? U : never;
 
 /**
  * Find all open issues and PRs with the 'release:future' label

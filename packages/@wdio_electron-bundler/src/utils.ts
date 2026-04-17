@@ -60,7 +60,7 @@ export const getInputConfig = (pkg: NormalizedReadResult, srcDir: string) => {
 
 export const getPackageJson = (cwd: string) => {
   const pkg = readPackageUpSync({ cwd });
-  if (!pkg || !pkg.packageJson) {
+  if (!pkg?.packageJson) {
     throw new Error(`Failed to load the package.json`);
   }
   return pkg;
