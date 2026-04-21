@@ -35,3 +35,4 @@ jobs:
     secrets:
       github_bot_token: ${{ secrets.GITHUB_TOKEN }}
       deploy_key: ${{ secrets.DEPLOY_KEY }}
+      npm_token: ${{ secrets.NPM_TOKEN }}
