@@ -24,9 +24,6 @@ on:
       github_bot_token:
         description: 'GitHub token for authentication'
         required: true
-      npm_token:
-        description: 'NPM token for publishing packages'
-        required: true
       deploy_key:
         description: 'SSH deploy key for pushing to the repository'
         required: true
@@ -38,6 +35,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       release_tag: ${{ steps.push_tags.outputs.release_tag }}
     steps:
@@ -68,20 +68,16 @@ jobs:
       - name: 🛠️ Setup workspace
         uses: ./.github/workflows/actions/setup-workspace
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 🏗️ Build packages
         uses: ./.github/workflows/actions/build-verify
 
       - name: 📦 Configure NPM registry
-        shell: bash
-        run: |
-          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
-            echo "DRY RUN: Would configure NPM registry for publishing"
-          else
-            echo "//registry.npmjs.org/:_authToken=${{ secrets.npm_token }}" > .npmrc
-            npm whoami
-          fi
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: 🏷️ Create Release and Tags
         # Uses package-versioner to bump versions and create git tags

@@ -34,5 +34,4 @@ jobs:
       dry_run: ${{ inputs.dry_run }}
     secrets:
       github_bot_token: ${{ secrets.GITHUB_TOKEN }}
-      npm_token: ${{ secrets.NPM_TOKEN }}
       deploy_key: ${{ secrets.DEPLOY_KEY }}

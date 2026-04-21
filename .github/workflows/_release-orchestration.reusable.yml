@@ -65,7 +65,6 @@ jobs:
       branch_type: ${{ inputs.branch }}
     secrets:
       github_bot_token: ${{ secrets.github_bot_token }}
-      npm_token: ${{ secrets.npm_token }}
       deploy_key: ${{ secrets.deploy_key }}
 
   # Post-release tasks (includes all branch operations)
