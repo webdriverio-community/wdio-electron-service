@@ -74,12 +74,14 @@ jobs:
         uses: ./.github/workflows/actions/build-verify
 
       - name: 📦 Configure NPM registry
-        uses: npm/login-action@v3
-        with:
-          registry: 'https://registry.npmjs.org/'
-          auth-type: 'legacy'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        shell: bash
+        run: |
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: Would configure NPM registry for publishing"
+          else
+            echo "//registry.npmjs.org/:_authToken=${{ secrets.npm_token }}" > .npmrc
+            npm whoami
+          fi
 
       - name: 🏷️ Create Release and Tags
         # Uses package-versioner to bump versions and create git tags
