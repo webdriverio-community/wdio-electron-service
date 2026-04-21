@@ -645,8 +645,8 @@ importers:
         specifier: workspace:*
         version: link:../@wdio_electron-bundler
       devtools-protocol:
-        specifier: ^0.0.1617013
-        version: 0.0.1617013
+        specifier: ^0.0.1617982
+        version: 0.0.1617982
       get-port:
         specifier: ^7.2.0
         version: 7.2.0
@@ -3934,8 +3934,8 @@ packages:
   devtools-protocol@0.0.1595872:
     resolution: {integrity: sha512-kRfgp8vWVjBu/fbYCiVFiOqsCk3CrMKEo3WbgGT2NXK2dG7vawWPBljixajVgGK9II8rDO9G0oD0zLt3I1daRg==}
 
-  devtools-protocol@0.0.1617013:
-    resolution: {integrity: sha512-OHDEjnL5/cBLuKoSp10+vi06BiqCr1RIV1lRSR2JocwDDBEGrhp+UKkWEIx5y+dy8TwGUWVCv6CkCI12ZcNKEw==}
+  devtools-protocol@0.0.1617982:
+    resolution: {integrity: sha512-DN4tEwx1D6d3OvVjLfh5nBkAlIq08URlNLAuE0XgSZnMQcpXb++6TkmqBOp8wAYOQnxWbATtvxwFYnyM8CT+Ig==}
 
   diff@5.2.2:
     resolution: {integrity: sha512-vtcDfH3TOjP8UekytvnHH1o1P4FcUdt4eQ1Y+Abap1tk/OB2MWQvcwS2ClCd1zuIhc3JKOx6p3kod8Vfys3E+A==}
@@ -7691,7 +7691,7 @@ snapshots:
 
   '@electron/universal@2.0.1':
     dependencies:
-      '@electron/asar': 3.2.18
+      '@electron/asar': 3.4.1
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3(supports-color@8.1.1)
       dir-compare: 4.2.0
@@ -10401,7 +10401,7 @@ snapshots:
 
   devtools-protocol@0.0.1595872: {}
 
-  devtools-protocol@0.0.1617013: {}
+  devtools-protocol@0.0.1617982: {}
 
   diff@5.2.2: {}
 
