@@ -153,7 +153,7 @@ jobs:
       # Provide an interactive debugging session on failure
       # This allows manual investigation of the environment
       - name: 🐛 Debug Build on Failure
-        uses: goosewobbler/vscode-server-action@v1.3.0
+        uses: goosewobbler/vscode-server-action@v1.5.0
         if: failure()
         with:
           timeout: '300000'
