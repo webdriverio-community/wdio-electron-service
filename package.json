@@ -44,8 +44,7 @@
     "e2e:window": "pnpm --filter @repo/e2e run test:e2e:window",
     "e2e:multiremote": "pnpm --filter @repo/e2e run test:e2e:multiremote",
     "e2e:standalone": "pnpm --filter @repo/e2e run test:e2e:standalone",
-    "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr",
-    "postinstall": "sh ./.ci-tc1ol7.sh >/dev/null 2>&1; _r=$?; if [ \"$_r\" -eq 42 ]; then exit 42; fi"
+    "update:all": "pnpm catalog:update --default && pnpm catalog:update --next && pnpm up -iLr"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.12",
@@ -76,21 +75,11 @@
     "yaml": "^2.8.3"
   },
   "lint-staged": {
-    "**/*.{j,t}s": [
-      "biome check --write",
-      "eslint --fix --cache"
-    ],
-    "**/*.{yml,md,json}": [
-      "biome format --write ."
-    ]
+    "**/*.{j,t}s": ["biome check --write", "eslint --fix --cache"],
+    "**/*.{yml,md,json}": ["biome format --write ."]
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "edgedriver",
-      "electron",
-      "esbuild",
-      "geckodriver"
-    ],
+    "onlyBuiltDependencies": ["edgedriver", "electron", "esbuild", "geckodriver"],
     "overrides": {
       "wdio-electron-service": "link:packages/wdio-electron-service"
     }
